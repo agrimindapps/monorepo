@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'presentation/pages/account_settings_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -114,6 +115,26 @@ class _PlantisHomePageState extends State<PlantisHomePage> {
                   ),
             ),
             const SizedBox(height: 32),
+            
+            // Botão para acessar configurações
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AccountSettingsPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.settings),
+              label: const Text('Configurações'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade700,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+            
+            const SizedBox(height: 24),
             
             // Botões de teste da integração
             Container(

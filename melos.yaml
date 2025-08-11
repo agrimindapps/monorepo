@@ -1,0 +1,82 @@
+name: plantis_receituagro_monorepo
+repository: https://github.com/seu-usuario/plantis-receituagro-monorepo
+
+packages:
+  - apps/*
+  - packages/*
+
+command:
+  bootstrap:
+    environment:
+      sdk: ">=3.7.2 <4.0.0"
+      flutter: ">=3.10.0"
+    
+  clean:
+    hooks:
+      pre: |
+        echo "Limpando workspace Plantis & ReceitaAgro..."
+    
+scripts:
+  # Comandos úteis para desenvolvimento
+  analyze:
+    run: flutter analyze
+    description: Executa análise estática em todos os packages
+    
+  format:
+    run: dart format --set-exit-if-changed .
+    description: Formata código em todos os packages
+    
+  test:
+    run: flutter test
+    description: Executa testes em todos os packages
+    
+  # Builds para produção (individual por app)
+  build:plantis:android:
+    run: flutter build appbundle --release
+    description: Build App Bundle para Play Store - Plantis (Plantas Domésticas)
+    packageFilters:
+      scope: "app_plantis"
+      
+  build:plantis:ios:
+    run: flutter build ipa --release
+    description: Build IPA para App Store - Plantis (Plantas Domésticas)
+    packageFilters:
+      scope: "app_plantis"
+      
+  build:receituagro:android:
+    run: flutter build appbundle --release
+    description: Build App Bundle para Play Store - ReceitaAgro (Pragas Agrícolas)
+    packageFilters:
+      scope: "app_receituagro"
+      
+  build:receituagro:ios:
+    run: flutter build ipa --release
+    description: Build IPA para App Store - ReceitaAgro (Pragas Agrícolas)
+    packageFilters:
+      scope: "app_receituagro"
+      
+  # Scripts específicos por app
+  run:plantis:
+    run: flutter run
+    description: Executa app Plantis (Plantas de Apartamento)
+    packageFilters:
+      scope: "app_plantis"
+      
+  run:receituagro:
+    run: flutter run
+    description: Executa app ReceitaAgro (Compêndio de Pragas)
+    packageFilters:
+      scope: "app_receituagro"
+      
+  # Comandos específicos para desenvolvimento
+  icons:plantis:
+    run: flutter packages pub run flutter_launcher_icons:main -f flutter_launcher_icons-plantis.yaml
+    description: Gera ícones para Plantis
+    packageFilters:
+      scope: "app_plantis"
+      
+  icons:receituagro:
+    run: flutter packages pub run flutter_launcher_icons:main -f flutter_launcher_icons-receituagro.yaml
+    description: Gera ícones para ReceitaAgro
+    packageFilters:
+      scope: "app_receituagro"

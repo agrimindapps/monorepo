@@ -21,19 +21,10 @@ class PlantFormPage extends StatefulWidget {
 
 class _PlantFormPageState extends State<PlantFormPage> {
   late PlantFormProvider _provider;
-  late PageController _pageController;
-  int _currentPage = 0;
-  
-  final List<String> _pageTitles = [
-    'Informações Básicas',
-    'Configurações de Cuidado',
-    'Ambiente',
-  ];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     _provider = context.read<PlantFormProvider>();
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -43,12 +34,6 @@ class _PlantFormPageState extends State<PlantFormPage> {
         _provider.initializeForAdd();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -137,144 +122,75 @@ class _PlantFormPageState extends State<PlantFormPage> {
 
           return Column(
             children: [
-              // Progress indicator
-              _buildProgressIndicator(),
-              
-              // Page content
+              // Form content
               Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  children: const [
-                    PlantFormBasicInfo(),
-                    PlantFormCareConfig(),
-                    PlantFormEnvironmentConfig(),
-                  ],
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Informações Básicas
+                      _buildSectionTitle('Informações Básicas'),
+                      const PlantFormBasicInfo(),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Configurações de Cuidado
+                      _buildSectionTitle('Configurações de Cuidado'),
+                      const PlantFormCareConfig(),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Ambiente
+                      _buildSectionTitle('Ambiente'),
+                      const PlantFormEnvironmentConfig(),
+                      
+                      const SizedBox(height: 100), // Espaço para o botão flutuante
+                    ],
+                  ),
                 ),
               ),
-              
-              // Navigation buttons
-              _buildNavigationButtons(context),
             ],
+          );
+        },
+      ),
+      floatingActionButton: Consumer<PlantFormProvider>(
+        builder: (context, provider, child) {
+          return FloatingActionButton.extended(
+            onPressed: provider.isValid && !provider.isSaving 
+                ? () => _savePlant(context)
+                : null,
+            backgroundColor: provider.isValid 
+                ? PlantisColors.primary 
+                : Colors.grey,
+            foregroundColor: Colors.white,
+            icon: provider.isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.check),
+            label: Text(provider.isSaving ? 'Salvando...' : 'Salvar'),
           );
         },
       ),
     );
   }
 
-  Widget _buildProgressIndicator() {
+  Widget _buildSectionTitle(String title) {
     final theme = Theme.of(context);
     
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Text(
-            _pageTitles[_currentPage],
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: List.generate(_pageTitles.length, (index) {
-              final isActive = index <= _currentPage;
-              final isCurrent = index == _currentPage;
-              
-              return Expanded(
-                child: Container(
-                  height: 4,
-                  margin: EdgeInsets.only(
-                    right: index < _pageTitles.length - 1 ? 8 : 0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isActive 
-                        ? (isCurrent ? PlantisColors.primary : PlantisColors.primaryLight)
-                        : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavigationButtons(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            // Previous button
-            if (_currentPage > 0)
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Anterior'),
-                ),
-              )
-            else
-              const Expanded(child: SizedBox.shrink()),
-              
-            const SizedBox(width: 16),
-            
-            // Next/Save button
-            Expanded(
-              child: Consumer<PlantFormProvider>(
-                builder: (context, provider, child) {
-                  final isLastPage = _currentPage == _pageTitles.length - 1;
-                  
-                  return ElevatedButton(
-                    onPressed: provider.isSaving ? null : () {
-                      if (isLastPage) {
-                        _savePlant(context);
-                      } else {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    child: provider.isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(isLastPage ? 'Salvar' : 'Próximo'),
-                  );
-                },
-              ),
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: PlantisColors.primary,
         ),
       ),
     );

@@ -24,6 +24,7 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       species: params.species?.trim(),
       spaceId: params.spaceId,
       imageBase64: params.imageBase64,
+      imageUrls: params.imageUrls ?? [],
       plantingDate: params.plantingDate,
       notes: params.notes?.trim(),
       config: params.config,
@@ -70,6 +71,7 @@ class AddPlantParams {
   final String? species;
   final String? spaceId;
   final String? imageBase64;
+  final List<String>? imageUrls;
   final DateTime? plantingDate;
   final String? notes;
   final PlantConfig? config;
@@ -80,6 +82,7 @@ class AddPlantParams {
     this.species,
     this.spaceId,
     this.imageBase64,
+    this.imageUrls,
     this.plantingDate,
     this.notes,
     this.config,

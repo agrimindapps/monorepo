@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/plants/presentation/providers/plant_details_provider.dart';
@@ -17,6 +16,7 @@ import '../../features/spaces/presentation/pages/space_form_page.dart';
 import '../../features/spaces/presentation/providers/spaces_provider.dart';
 import '../../features/spaces/presentation/providers/space_form_provider.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
+import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../shared/widgets/main_scaffold.dart';
 
@@ -66,16 +66,16 @@ class AppRouter {
         return null;
       },
       routes: [
-        // Auth Routes
+        // Auth Routes - Unified Auth Page
         GoRoute(
           path: login,
           name: 'login',
-          builder: (context, state) => const LoginPage(),
+          builder: (context, state) => const AuthPage(initialTab: 0), // Login tab
         ),
         GoRoute(
           path: register,
           name: 'register',
-          builder: (context, state) => const RegisterPage(),
+          builder: (context, state) => const AuthPage(initialTab: 1), // Register tab
         ),
         
         // Main Shell Route with Bottom Navigation
@@ -162,7 +162,12 @@ class AppRouter {
             GoRoute(
               path: tasks,
               name: 'tasks',
-              builder: (context, state) => const TasksListPage(),
+              builder: (context, state) {
+                return ChangeNotifierProvider(
+                  create: (context) => sl<TasksProvider>(),
+                  child: const TasksListPage(),
+                );
+              },
             ),
             
             // Premium Route

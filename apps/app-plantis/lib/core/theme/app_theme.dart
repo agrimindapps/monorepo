@@ -76,10 +76,10 @@ class PlantisTheme {
     ),
     
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
       color: PlantisColors.surface,
       shadowColor: PlantisColors.shadow,
@@ -194,11 +194,11 @@ class PlantisTheme {
     ),
     
     // Dialog Theme
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: PlantisColors.surface,
       elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
       titleTextStyle: PlantisTypography.headlineSmall.copyWith(
         color: PlantisColors.textPrimary,
@@ -318,10 +318,10 @@ class PlantisTheme {
     ),
     
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
       color: PlantisColors.surfaceDark,
     ),

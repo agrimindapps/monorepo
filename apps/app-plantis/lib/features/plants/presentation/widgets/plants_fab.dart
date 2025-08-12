@@ -90,19 +90,16 @@ class _PlantsFabState extends State<PlantsFab>
           ),
         
         // Botão principal (adicionar planta)
-        FloatingActionButton.extended(
+        FloatingActionButton(
           onPressed: _onAddPlant,
           heroTag: 'add_plant',
           backgroundColor: PlantisColors.primary,
           foregroundColor: Colors.white,
-          elevation: 4,
+          elevation: 6,
           tooltip: 'Adicionar nova planta',
-          icon: const Icon(Icons.add),
-          label: const Text(
-            'Nova Planta',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
+          child: const Icon(
+            Icons.add,
+            size: 28,
           ),
         ),
       ],

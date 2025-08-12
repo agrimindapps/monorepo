@@ -514,17 +514,31 @@ void _initPlants() {
 - Repository pattern com offline-first (Hive + Firebase)
 - Dependency injection configurada
 
-### Fase 5: Sistema de Tarefas (Semana 7-8)
-- [ ] Criar tarefas para plantas
-- [ ] Sistema de notificações
-- [ ] Histórico de cuidados
-- [ ] Dashboard de tarefas
+### Fase 5: Sistema de Tarefas (Semana 7-8) ✅ CONCLUÍDA
+- [x] Criar tarefas para plantas
+- [x] Sistema de notificações
+- [x] Histórico de cuidados
+- [x] Dashboard de tarefas
 
 **Tarefas:**
-1. Implementar TasksProvider
-2. Criar sistema de notificações locais
-3. Desenvolver UI de tarefas
-4. Implementar histórico
+1. ✅ Implementar TasksProvider completo
+2. ✅ Criar sistema de notificações locais com flutter_local_notifications
+3. ✅ Desenvolver UI de tarefas com dashboard e filtros
+4. ✅ Implementar histórico de cuidados realizados
+5. ✅ Criar configurações de notificações granulares
+6. ✅ Agendamento inteligente de lembretes
+
+**Status Atual (11/08/2025):**
+- Clean Architecture completa implementada para tarefas
+- Sistema completo de CRUD de tarefas com 8 tipos diferentes
+- TasksProvider com filtros avançados (Todas, Hoje, Atrasadas, Próximas, Concluídas)
+- Dashboard com estatísticas e barra de progresso dinâmica
+- Sistema de notificações locais com permissões Android/iOS
+- Agendamento automático de lembretes e detecção de atrasos
+- Interface de configurações completa para personalização
+- TaskHistory entity para registro completo de cuidados
+- Integração total com dependency injection
+- UI responsiva com Material Design 3
 
 ### Fase 6: Comentários e Detalhes (Semana 9)
 - [ ] Sistema de comentários
@@ -837,7 +851,7 @@ jobs:
 
 ## 📊 Status de Desenvolvimento
 
-### Progresso Geral: 70% ✅
+### Progresso Geral: 85% ✅
 
 **Última Atualização**: 11 de Agosto de 2025
 
@@ -899,11 +913,22 @@ jobs:
   - Formulário detalhado com validações
   - Repository pattern offline-first
 
+- ✅ **Fase 5 - Sistema de Tarefas**: 100% concluída
+  - Clean Architecture completa para tarefas implementada
+  - CRUD de tarefas com 8 tipos diferentes (regar, adubar, podar, etc.)
+  - TasksProvider com filtros inteligentes e busca
+  - Dashboard com estatísticas e progresso visual
+  - Sistema de notificações locais completo (flutter_local_notifications)
+  - Agendamento automático de lembretes por tipo de tarefa
+  - Configurações granulares de notificações com persistência
+  - TaskHistory para histórico completo de cuidados realizados
+  - Integração com dependency injection e routing
+  - UI Material Design 3 com estados responsivos
+
 ### Próximos Passos:
-1. **Desenvolver sistema de tarefas** (Fase 5 - lembretes e cuidados) ⬅️ **PRÓXIMO**
-2. **Adicionar comentários e upload de imagens** (Fase 6)
-3. **Implementar funcionalidades premium** (Fase 7 - limites e upgrades)
-4. **Polish e otimizações finais** (Fase 8 - animações, testes, dark mode)
+1. **Adicionar comentários e upload de imagens** (Fase 6) ⬅️ **PRÓXIMO**
+2. **Implementar funcionalidades premium** (Fase 7 - limites e upgrades)
+3. **Polish e otimizações finais** (Fase 8 - animações, testes, dark mode)
 
 ### Arquivos Principais Criados:
 ```
@@ -944,7 +969,30 @@ lib/
 │   │       ├── providers/       # SpacesProvider, SpaceFormProvider
 │   │       ├── pages/          # SpacesListPage, SpaceFormPage
 │   │       └── widgets/        # SpaceCard, SpaceListTile, EmptySpacesWidget
-│   └── tasks/                   # Tarefas (placeholders)
+│   ├── tasks/                   # Sistema completo de tarefas
+│   │   ├── domain/
+│   │   │   ├── entities/        # Task, TaskHistory, TaskType, TaskStatus, TaskPriority
+│   │   │   ├── repositories/    # TasksRepository interface
+│   │   │   └── usecases/        # Get, Add, Update, Complete, Delete use cases
+│   │   ├── data/
+│   │   │   ├── datasources/     # Local (Hive) + Remote (Firebase)
+│   │   │   ├── models/          # TaskModel com serialização
+│   │   │   └── repositories/    # TasksRepositoryImpl offline-first
+│   │   └── presentation/
+│   │       ├── providers/       # TasksProvider com filtros e busca
+│   │       ├── pages/          # TasksListPage com dashboard e tabs
+│   │       └── widgets/        # TasksDashboard, TasksListView, TasksFab, etc.
+│   ├── settings/                # Configurações de notificações
+│   │   └── presentation/
+│   │       ├── providers/       # NotificationsSettingsProvider
+│   │       └── pages/          # NotificationsSettingsPage
+├── core/
+│   ├── services/                # Serviços especializados
+│   │   ├── notification_service.dart        # flutter_local_notifications base
+│   │   └── task_notification_service.dart   # Notificações de tarefas
+│   ├── theme/                   # Design system completo
+│   ├── router/                  # Sistema de rotas com Provider integration
+│   └── di/                      # Injeção de dependências GetIt
 └── shared/
     └── widgets/                 # MainScaffold, BottomNavigation
 ```
@@ -967,8 +1015,61 @@ lib/
      - Visualize lista: Grid/tile view com busca por tipo
      - Configure temperatura, umidade, luz, ventilação
      - 9 tipos diferentes de espaços disponíveis
+   - **Sistema de Tarefas**:
+     - Acesse pela tab "Tarefas": Dashboard com estatísticas
+     - Crie tarefas: Botão "Nova Tarefa" com 8 tipos disponíveis
+     - Filtros inteligentes: Todas, Hoje, Atrasadas, Próximas, Concluídas
+     - Complete tarefas: Toque no círculo ou nos detalhes
+     - Configurações: Menu de notificações personalizáveis
+     - Histórico: Registro automático de cuidados realizados
+   - **Sistema de Notificações**:
+     - Habilite nas configurações do dispositivo
+     - Configure horários e tipos de lembretes
+     - Teste notificação instantânea
+     - Receba lembretes automáticos de tarefas
    - **Teste navegação**: Entre todas as telas
    - **Teste persistência**: Logout/login mantém dados
+
+### 🔧 **Tecnologias e Recursos Implementados:**
+
+**Arquitetura e Padrões:**
+- ✅ Clean Architecture com SOLID principles
+- ✅ Provider + ChangeNotifier para estado
+- ✅ GetIt para dependency injection
+- ✅ Repository pattern com offline-first
+- ✅ Use Cases pattern
+- ✅ Either pattern para error handling
+
+**Persistência e Sincronização:**
+- ✅ Hive para storage local
+- ✅ Firebase Firestore para sync remoto  
+- ✅ Firebase Auth para autenticação
+- ✅ SharedPreferences para configurações
+
+**UI/UX e Design:**
+- ✅ Material Design 3 completo
+- ✅ Tema personalizado com cores de plantas
+- ✅ Responsive design (grid/list views)
+- ✅ Estados de loading, error, empty
+- ✅ Bottom navigation com tabs
+- ✅ GoRouter para navegação avançada
+
+**Notificações e Lembretes:**
+- ✅ flutter_local_notifications
+- ✅ Permissões Android 13+ e iOS
+- ✅ Agendamento automático de tarefas
+- ✅ Configurações granulares por tipo
+- ✅ Canais de notificação personalizados
+
+**Funcionalidades Principais:**
+- ✅ Sistema completo de plantas (CRUD)
+- ✅ Sistema completo de espaços (9 tipos)
+- ✅ Sistema completo de tarefas (8 tipos)
+- ✅ Dashboard com estatísticas visuais
+- ✅ Filtros e busca inteligente
+- ✅ Histórico de cuidados realizados
+- ✅ Validações em tempo real
+- ✅ Integração entre módulos
 
 ---
 

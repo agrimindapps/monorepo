@@ -1,0 +1,187 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/flutter_assets
+**/ios/Flutter/flutter_export_environment.sh
+**/dart_tool/
+**/.dart_tool/
+**/flutter-plugins
+**/.flutter-plugins
+**/flutter-plugins-dependencies
+**/.flutter-plugins-dependencies
+**/.packages
+.pub-cache/
+.pub/
+**/build/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/app/outputs/
+
+# iOS related
+**/ios/**/dgph
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Linux
+**/linux/flutter/ephemeral/
+
+# Windows
+**/windows/flutter/ephemeral/
+
+# Web related
+**/web/
+
+# Coverage
+coverage/
+
+# Exceptions to above rules.
+!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
+# Melos
+.melos_tool/
+
+# Firebase
+firebase_app_id_file.json
+
+# Google Services
+google-services.json
+GoogleService-Info.plist
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Local development files
+*.local
+
+# Archive files
+*.tar.gz
+*.zip
+*.rar
+
+# Generated files
+*.freezed.dart
+*.g.dart
+*.gr.dart
+*.config.dart
+
+# Test coverage
+lcov.info
+
+# Built application files
+*.apk
+*.aab
+*.ipa
+*.app
+
+# Keystore files
+*.jks
+*.keystore
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Firebase Functions
+**/functions/node_modules/
+**/functions/.runtimeconfig.json
+
+# Firebase Hosting
+.firebase/
+
+# Firebase Crashlytics
+**/ios/firebase_app_id_file.json
+**/android/app/google-services.json
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Flutter Version Manager
+.fvm/
+
+# FVM Config
+.fvmrc
+
+# Asdf-vm
+.tool-versions

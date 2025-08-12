@@ -104,32 +104,26 @@ class EmptyPlantsWidget extends StatelessWidget {
     // Estado vazio inicial (sem plantas)
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ilustração
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: PlantisColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.eco,
-                size: 64,
-                color: PlantisColors.primary,
-              ),
+            // Ícone de folha grande e cinza
+            Icon(
+              Icons.eco_outlined,
+              size: 120,
+              color: Colors.grey.shade400,
             ),
             
             const SizedBox(height: 32),
             
             // Título
             Text(
-              'Sua coleção está vazia',
+              'Nenhuma planta cadastrada',
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
+                color: Colors.grey.shade700,
+                fontSize: 24,
               ),
               textAlign: TextAlign.center,
             ),
@@ -138,21 +132,23 @@ class EmptyPlantsWidget extends StatelessWidget {
             
             // Mensagem
             Text(
-              'Que tal adicionar sua primeira planta?\nComece sua jornada verde conosco!',
+              'Adicione sua primeira planta para começar a cuidar\ndela com o Grow',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Colors.grey.shade600,
+                fontSize: 16,
+                height: 1.4,
               ),
               textAlign: TextAlign.center,
             ),
             
-            const SizedBox(height: 40),
+            const SizedBox(height: 48),
             
             // Botão para adicionar
             if (onAddPlant != null)
               ElevatedButton.icon(
                 onPressed: onAddPlant,
-                icon: const Icon(Icons.add),
-                label: const Text('Adicionar minha primeira planta'),
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text('Adicionar primeira planta'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PlantisColors.primary,
                   foregroundColor: Colors.white,
@@ -161,11 +157,11 @@ class EmptyPlantsWidget extends StatelessWidget {
                     vertical: 16,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(25),
                   ),
                   textStyle: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

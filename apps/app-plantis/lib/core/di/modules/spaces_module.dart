@@ -14,7 +14,7 @@ class SpacesDIModule {
   static void init(GetIt sl) {
     // Data sources
     sl.registerLazySingleton<SpacesLocalDatasource>(
-      () => SpacesLocalDatasourceImpl(),
+      () => SpacesLocalDatasourceImpl(storage: sl()),
     );
     
     sl.registerLazySingleton<SpacesRemoteDatasource>(

@@ -7,6 +7,7 @@ class PlantModel extends Plant {
     super.species,
     super.spaceId,
     super.imageBase64,
+    super.imageUrls = const [],
     super.plantingDate,
     super.notes,
     super.config,
@@ -27,6 +28,7 @@ class PlantModel extends Plant {
       species: plant.species,
       spaceId: plant.spaceId,
       imageBase64: plant.imageBase64,
+      imageUrls: plant.imageUrls,
       plantingDate: plant.plantingDate,
       notes: plant.notes,
       config: plant.config,
@@ -44,6 +46,9 @@ class PlantModel extends Plant {
       species: json['species'] as String?,
       spaceId: json['spaceId'] as String?,
       imageBase64: json['imageBase64'] as String?,
+      imageUrls: json['imageUrls'] != null 
+          ? List<String>.from(json['imageUrls'] as List)
+          : const [],
       plantingDate: json['plantingDate'] != null
           ? DateTime.parse(json['plantingDate'] as String)
           : null,
@@ -69,6 +74,7 @@ class PlantModel extends Plant {
       'species': species,
       'spaceId': spaceId,
       'imageBase64': imageBase64,
+      'imageUrls': imageUrls,
       'plantingDate': plantingDate?.toIso8601String(),
       'notes': notes,
       'config': config != null ? PlantConfigModel.fromEntity(config!).toJson() : null,
@@ -86,6 +92,7 @@ class PlantModel extends Plant {
     String? species,
     String? spaceId,
     String? imageBase64,
+    List<String>? imageUrls,
     DateTime? plantingDate,
     String? notes,
     PlantConfig? config,
@@ -104,6 +111,7 @@ class PlantModel extends Plant {
       species: species ?? this.species,
       spaceId: spaceId ?? this.spaceId,
       imageBase64: imageBase64 ?? this.imageBase64,
+      imageUrls: imageUrls ?? this.imageUrls,
       plantingDate: plantingDate ?? this.plantingDate,
       notes: notes ?? this.notes,
       config: config ?? this.config,

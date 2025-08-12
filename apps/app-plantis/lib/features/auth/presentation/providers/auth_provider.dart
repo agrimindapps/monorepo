@@ -100,17 +100,24 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      // TODO: Implement registration UseCase when available in core
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // For now, just try to login after mock registration
-      await login(email, password);
-    } catch (e) {
-      _errorMessage = e.toString();
-      _isLoading = false;
-      notifyListeners();
-    }
+    final result = await _authRepository.signUpWithEmailAndPassword(
+      email: email,
+      password: password,
+      displayName: name,
+    );
+    
+    result.fold(
+      (failure) {
+        _errorMessage = failure.message;
+        _isLoading = false;
+        notifyListeners();
+      },
+      (user) {
+        _currentUser = user;
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
   
   void clearError() {

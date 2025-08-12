@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import '../../domain/entities/space.dart';
 
 class SpaceListTile extends StatelessWidget {
@@ -34,7 +36,7 @@ class SpaceListTile extends StatelessWidget {
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.memory(
-                    Uri.dataFromString(space.imageBase64!).data?.contentAsBytes() ?? [],
+                    Uint8List.fromList(Uri.dataFromString(space.imageBase64!).data?.contentAsBytes() ?? []),
                     fit: BoxFit.cover,
                   ),
                 )

@@ -5,9 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 
 import '../interfaces/network_info.dart';
+import '../services/notification_service.dart';
+import '../services/task_notification_service.dart';
+import '../services/image_service.dart';
 import 'modules/domain_module.dart';
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
+import 'modules/tasks_module.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
 
 final sl = GetIt.instance;
 
@@ -55,13 +60,25 @@ void _initCoreServices() {
   // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService());
   
+  // Notification Services
+  sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(() => TaskNotificationService());
+  
+  // Image Service
+  sl.registerLazySingleton(() => ImageService());
+  
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl(), sl()));
 }
 
 void _initAuth() {
-  AuthModule.init(sl);
+  // Auth Provider
+  sl.registerLazySingleton(() => providers.AuthProvider(
+    loginUseCase: sl(),
+    logoutUseCase: sl(),
+    authRepository: sl(),
+  ));
 }
 
 void _initPlants() {
@@ -77,13 +94,13 @@ void _initTasks() {
 }
 
 void _initComments() {
-  CommentsModule.init(sl);
+  // TODO: Implement comments module
 }
 
 void _initPremium() {
-  PremiumModule.init(sl);
+  // TODO: Implement premium module
 }
 
 void _initAppServices() {
-  AppServicesModule.init(sl);
+  // TODO: Implement app services module
 }

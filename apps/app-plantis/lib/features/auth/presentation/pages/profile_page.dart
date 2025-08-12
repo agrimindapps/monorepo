@@ -10,279 +10,908 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        backgroundColor: PlantisColors.surface,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            final user = authProvider.currentUser;
-            
-            if (user == null) {
-              return const Center(
-                child: Text('Usuário não encontrado'),
-              );
-            }
-            
-            return Column(
-              children: [
-                // Profile Header
-                Container(
-                  padding: const EdgeInsets.all(24.0),
-                  decoration: BoxDecoration(
-                    color: PlantisColors.surface,
-                    borderRadius: BorderRadius.circular(16.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: PlantisColors.shadow,
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Profile Picture
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: PlantisColors.primaryLight,
-                        child: user.hasProfilePhoto
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(50),
-                                child: Image.network(
-                                  user.photoUrl!,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text(
-                                      user.initials,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium
-                                          ?.copyWith(
-                                            color: PlantisColors.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    );
-                                  },
-                                ),
-                              )
-                            : Text(
-                                user.initials,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(
-                                      color: PlantisColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // User Info
-                      Text(
-                        user.displayName,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: PlantisColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      
-                      // Account Status
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: user.isEmailVerified
-                              ? PlantisColors.successLight
-                              : PlantisColors.warningLight,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          user.isEmailVerified
-                              ? 'Email Verificado'
-                              : 'Email Não Verificado',
-                          style: TextStyle(
-                            color: user.isEmailVerified
-                                ? PlantisColors.success
-                                : PlantisColors.warning,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+      backgroundColor: const Color(0xFF1A1A1A), // Dark background like the image
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              final user = authProvider.currentUser;
+              
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          'Minha Conta',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 32,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Account Info
-                _buildInfoCard(
-                  'Informações da Conta',
-                  [
-                    _buildInfoItem(
-                      Icons.person_outline,
-                      'Nome',
-                      user.displayName,
-                    ),
-                    _buildInfoItem(
-                      Icons.email_outlined,
-                      'Email',
-                      user.email,
-                    ),
-                    _buildInfoItem(
-                      Icons.verified_user_outlined,
-                      'Provedor',
-                      user.provider.name,
-                    ),
-                    if (user.lastLoginAt != null)
-                      _buildInfoItem(
-                        Icons.access_time,
-                        'Último Login',
-                        _formatDate(user.lastLoginAt!),
-                      ),
-                    if (user.createdAt != null)
-                      _buildInfoItem(
-                        Icons.calendar_today_outlined,
-                        'Membro desde',
-                        _formatDate(user.createdAt!),
-                      ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Action Buttons
-                _buildInfoCard(
-                  'Ações',
-                  [
-                    if (!user.isEmailVerified)
-                      _buildActionItem(
-                        Icons.mark_email_read_outlined,
-                        'Verificar Email',
-                        'Enviar email de verificação',
-                        () => _sendEmailVerification(context),
-                      ),
-                    _buildActionItem(
-                      Icons.settings_outlined,
-                      'Configurações',
-                      'Ajustes da conta',
-                      () => context.go('/settings'),
-                    ),
-                    _buildActionItem(
-                      Icons.help_outline,
-                      'Ajuda',
-                      'Central de ajuda',
-                      () => _showHelp(context),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Logout Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () => _showLogoutDialog(context),
-                    icon: authProvider.isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.logout),
-                    label: const Text('Sair da Conta'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: PlantisColors.error,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                        const SizedBox(height: 8),
+                        Text(
+                          user != null && user.displayName.isNotEmpty 
+                              ? 'Bem-vindo, ${user.displayName}'
+                              : 'Bem-vindo, Usuário Anônimo',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.grey.shade400,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: 32),
-              ],
-            );
-          },
+                  
+                  const SizedBox(height: 40),
+                  
+                  // User Profile Card
+                  Container(
+                    padding: const EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A), // Dark gray card
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Row(
+                      children: [
+                        // Avatar
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: PlantisColors.primary,
+                          child: user != null && user.hasProfilePhoto
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: Image.network(
+                                    user.photoUrl!,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Text(
+                                        user.initials,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )
+                              : Text(
+                                  user?.initials ?? 'LR',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(width: 16),
+                        
+                        // User Info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user?.displayName ?? 'Lucinei Robson Lo...',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                user?.email ?? 'lucinei@controlsoft.com.br',
+                                style: TextStyle(
+                                  color: Colors.grey.shade400,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    color: Colors.grey.shade500,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _getMemberSince(user?.createdAt),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Menu dots
+                        Icon(
+                          Icons.more_vert,
+                          color: Colors.grey.shade500,
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Premium Plan Card
+                  Container(
+                    padding: const EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A), // Dark gray card
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Plan Header
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.star_outline,
+                              color: PlantisColors.primary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Plano Gratuito',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Desbloqueie recursos premium',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Premium Resources
+                        const Text(
+                          'Recursos Premium:',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        _buildPremiumFeature('Plantas ilimitadas'),
+                        _buildPremiumFeature('Backup automático na nuvem'),
+                        _buildPremiumFeature('Relatórios avançados de cuidados'),
+                        _buildPremiumFeature('Lembretes personalizados'),
+                        
+                        const SizedBox(height: 16),
+                        
+                        Text(
+                          'E mais 3 recursos...',
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Premium Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => context.go('/premium'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: PlantisColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.star),
+                            label: const Text(
+                              'Assinar Premium',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Configurations Section
+                  const Text(
+                    'Configurações',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Configurations Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Column(
+                      children: [
+                        // Notifications
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.notifications_outlined,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Notificações',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Configure quando ser notificado',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Configurações de notificações em desenvolvimento'),
+                              ),
+                            );
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Theme Toggle
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.dark_mode_outlined,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Tema',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Tema escuro ativo',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: Switch(
+                            value: true, // Always true since we're in dark mode
+                            onChanged: (value) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Alternância de tema em desenvolvimento'),
+                                ),
+                              );
+                            },
+                            activeColor: PlantisColors.primary,
+                            trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+                            thumbColor: WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return PlantisColors.primary;
+                              }
+                              return Colors.grey.shade400;
+                            }),
+                            trackColor: WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return PlantisColors.primary.withValues(alpha: 0.3);
+                              }
+                              return Colors.grey.shade600;
+                            }),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Support Section
+                  const Text(
+                    'Suporte',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Support Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Column(
+                      children: [
+                        // Send Feedback
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.feedback_outlined,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Enviar Feedback',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Nos ajude a melhorar o app',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Sistema de feedback em desenvolvimento'),
+                              ),
+                            );
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Rate App
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.star_outline,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Avaliar o App',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Avalie nossa experiência',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Redirecionamento para loja em desenvolvimento'),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Legal Section
+                  const Text(
+                    'Legal',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Legal Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Column(
+                      children: [
+                        // Privacy Policy
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.shield_outlined,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Política de Privacidade',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Como protegemos seus dados',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showPrivacyPolicy(context);
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Terms of Use
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.description_outlined,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Termos de Uso',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Termos e condições de uso',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showTermsOfUse(context);
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // About App
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.info_outline,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Sobre o App',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Versão e informações do app',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showAboutApp(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Development Section
+                  const Text(
+                    'Desenvolvimento',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Development Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Column(
+                      children: [
+                        // Generate Test Data
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.settings,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Gerar dados de teste',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showDevelopmentDialog(context, 'Gerar dados de teste', 
+                              'Esta função criará dados fictícios para teste do aplicativo.');
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Clear All Records
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.delete_sweep,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Limpar todos os registros',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showDevelopmentDialog(context, 'Limpar todos os registros', 
+                              'ATENÇÃO: Esta ação removerá todos os dados do aplicativo permanentemente.');
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Promotional Page
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.campaign,
+                              color: Colors.blue,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Página promocional',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showDevelopmentDialog(context, 'Página promocional', 
+                              'Abre a página promocional do aplicativo.');
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Generate Local License
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.verified,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Gerar Licença Local',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Ativa premium por 30 dias',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showDevelopmentDialog(context, 'Gerar Licença Local', 
+                              'Esta função ativará o premium localmente por 30 dias para testes.');
+                          },
+                        ),
+                        
+                        // Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Divider(
+                            color: Colors.grey.shade700,
+                            height: 1,
+                          ),
+                        ),
+                        
+                        // Revoke Local License
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.remove_circle_outline,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Revogar Licença Local',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Remove licença de teste',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            _showDevelopmentDialog(context, 'Revogar Licença Local', 
+                              'Esta função removerá a licença premium local.');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
   
-  Widget _buildInfoCard(String title, List<Widget> children) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: PlantisColors.surface,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: PlantisColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildInfoItem(IconData icon, String label, String value) {
+  Widget _buildPremiumFeature(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Icon(
-            icon,
+            Icons.check_circle_outline,
+            color: Colors.grey.shade500,
             size: 20,
-            color: PlantisColors.textSecondary,
           ),
           const SizedBox(width: 12),
           Text(
-            '$label:',
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              color: PlantisColors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+            text,
+            style: TextStyle(
+              color: Colors.grey.shade300,
+              fontSize: 14,
             ),
           ),
         ],
@@ -290,119 +919,276 @@ class ProfilePage extends StatelessWidget {
     );
   }
   
-  Widget _buildActionItem(
-    IconData icon,
-    String title,
-    String subtitle,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: PlantisColors.primaryLight.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: PlantisColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: PlantisColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              color: PlantisColors.textSecondary,
-            ),
-          ],
-        ),
-      ),
-    );
+  String _getMemberSince(DateTime? createdAt) {
+    if (createdAt == null) return 'Membro desde 10 dias';
+    
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+    
+    if (difference.inDays < 30) {
+      return 'Membro desde ${difference.inDays} dias';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return 'Membro desde $months ${months == 1 ? 'mês' : 'meses'}';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return 'Membro desde $years ${years == 1 ? 'ano' : 'anos'}';
+    }
   }
   
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-  
-  Future<void> _sendEmailVerification(BuildContext context) async {
-    // TODO: Implement email verification
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade em desenvolvimento'),
-        backgroundColor: PlantisColors.info,
-      ),
-    );
-  }
-  
-  void _showHelp(BuildContext context) {
+  void _showPrivacyPolicy(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Ajuda'),
-        content: const Text(
-          'Para suporte técnico, entre em contato conosco através do email: suporte@plantis.com',
+        backgroundColor: const Color(0xFF2A2A2A),
+        title: const Text(
+          'Política de Privacidade',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            '''Esta Política de Privacidade descreve como coletamos, usamos e protegemos suas informações pessoais no PlantApp.
+
+INFORMAÇÕES QUE COLETAMOS:
+• Dados de conta (email, nome, avatar)
+• Informações sobre suas plantas e cuidados
+• Dados de uso do aplicativo
+
+COMO USAMOS SUAS INFORMAÇÕES:
+• Para fornecer e melhorar nossos serviços
+• Para personalizar sua experiência
+• Para enviar notificações importantes
+
+PROTEÇÃO DE DADOS:
+• Seus dados são criptografados e seguros
+• Não compartilhamos informações pessoais com terceiros
+• Você pode solicitar exclusão de dados a qualquer momento
+
+Para mais informações, entre em contato conosco.''',
+            style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(
+              'Fechar',
+              style: TextStyle(color: PlantisColors.primary),
+            ),
           ),
         ],
       ),
     );
   }
   
-  Future<void> _showLogoutDialog(BuildContext context) async {
-    final result = await showDialog<bool>(
+  void _showTermsOfUse(BuildContext context) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sair da Conta'),
-        content: const Text('Tem certeza que deseja sair da sua conta?'),
+        backgroundColor: const Color(0xFF2A2A2A),
+        title: const Text(
+          'Termos de Uso',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            '''Ao usar o PlantApp, você concorda com os seguintes termos:
+
+USO DO APLICATIVO:
+• O app destina-se ao cuidado e gestão de plantas
+• É proibido usar o app para fins ilegais
+• Você é responsável pelas informações inseridas
+
+CONTA DO USUÁRIO:
+• Mantenha suas credenciais seguras
+• Você é responsável por toda atividade em sua conta
+• Notifique-nos imediatamente sobre uso não autorizado
+
+CONTEÚDO:
+• O conteúdo do app é protegido por direitos autorais
+• Você pode usar o app apenas para fins pessoais
+• É proibida a reprodução não autorizada
+
+LIMITAÇÃO DE RESPONSABILIDADE:
+• O app é fornecido "como está"
+• Não garantimos que o serviço será ininterrupto
+• Não nos responsabilizamos por danos indiretos
+
+Estes termos podem ser atualizados periodicamente.''',
+            style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+          ),
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: PlantisColors.error,
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Fechar',
+              style: TextStyle(color: PlantisColors.primary),
             ),
-            child: const Text('Sair'),
           ),
         ],
       ),
     );
-    
-    if (result == true && context.mounted) {
-      final authProvider = context.read<AuthProvider>();
-      await authProvider.logout();
-    }
   }
+  
+  void _showAboutApp(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2A2A2A),
+        title: const Text(
+          'Sobre o PlantApp',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // App Icon
+              Center(
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.eco,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              Center(
+                child: Text(
+                  'PlantApp',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 8),
+              
+              Center(
+                child: Text(
+                  'Versão 1.0.0',
+                  style: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                'O PlantApp é seu companheiro perfeito para cuidar das suas plantas. Com recursos avançados de gerenciamento, lembretes personalizados e relatórios detalhados, nunca foi tão fácil manter suas plantas saudáveis.',
+                style: TextStyle(
+                  color: Colors.grey.shade300,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                'RECURSOS:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              
+              const SizedBox(height: 8),
+              
+              Text(
+                '''• Gerenciamento de plantas ilimitado
+• Lembretes personalizados de cuidados
+• Relatórios avançados de saúde
+• Backup automático na nuvem
+• Interface intuitiva e moderna''',
+                style: TextStyle(
+                  color: Colors.grey.shade300,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                'Desenvolvido com ❤️ para amantes de plantas',
+                style: TextStyle(
+                  color: PlantisColors.primary,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Fechar',
+              style: TextStyle(color: PlantisColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showDevelopmentDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2A2A2A),
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.grey.shade300),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.grey.shade400),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$title - Função em desenvolvimento'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            },
+            child: Text(
+              'Executar',
+              style: TextStyle(color: PlantisColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

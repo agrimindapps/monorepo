@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../providers/plants_provider.dart';
-import '../providers/spaces_provider.dart';
+// import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_grid_view.dart';
 import '../widgets/plants_list_view.dart';
@@ -22,14 +22,14 @@ class PlantsListPage extends StatefulWidget {
 
 class _PlantsListPageState extends State<PlantsListPage> {
   late PlantsProvider _plantsProvider;
-  late SpacesProvider _spacesProvider;
+  // late spaces.SpacesProvider _spacesProvider;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _plantsProvider = di.sl<PlantsProvider>();
-    _spacesProvider = di.sl<SpacesProvider>();
+    // _spacesProvider = di.sl<spaces.SpacesProvider>();
     _loadInitialData();
   }
 
@@ -42,7 +42,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
   Future<void> _loadInitialData() async {
     await Future.wait([
       _plantsProvider.loadPlants(),
-      _spacesProvider.loadSpaces(),
+      // _spacesProvider.loadSpaces(),
     ]);
   }
 
@@ -84,7 +84,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _plantsProvider),
-        ChangeNotifierProvider.value(value: _spacesProvider),
+        // ChangeNotifierProvider.value(value: _spacesProvider),
       ],
       child: Scaffold(
         body: SafeArea(
@@ -93,6 +93,27 @@ class _PlantsListPageState extends State<PlantsListPage> {
               // App Bar com título e ações
               Consumer<PlantsProvider>(
                 builder: (context, plantsProvider, child) {
+                  // Mostra AppBar simplificado quando não há plantas
+                  if (plantsProvider.plants.isEmpty && !plantsProvider.isLoading) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Minhas Plantas',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                fontSize: 32,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
                   return PlantsAppBar(
                     plantsCount: plantsProvider.plantsCount,
                     viewMode: plantsProvider.viewMode,
@@ -103,9 +124,12 @@ class _PlantsListPageState extends State<PlantsListPage> {
                 },
               ),
               
-              // Barra de pesquisa
+              // Barra de pesquisa (só quando há plantas)
               Consumer<PlantsProvider>(
                 builder: (context, plantsProvider, child) {
+                  if (plantsProvider.plants.isEmpty && !plantsProvider.isLoading) {
+                    return const SizedBox.shrink();
+                  }
                   return PlantsSearchBar(
                     searchQuery: plantsProvider.searchQuery,
                     onSearchChanged: _onSearchChanged,
@@ -114,11 +138,14 @@ class _PlantsListPageState extends State<PlantsListPage> {
                 },
               ),
               
-              // Filtros
-              Consumer2<PlantsProvider, SpacesProvider>(
-                builder: (context, plantsProvider, spacesProvider, child) {
+              // Filtros (só quando há plantas)
+              Consumer<PlantsProvider>(
+                builder: (context, plantsProvider, child) {
+                  if (plantsProvider.plants.isEmpty && !plantsProvider.isLoading) {
+                    return const SizedBox.shrink();
+                  }
                   return PlantsFilterBar(
-                    spaces: spacesProvider.spaces,
+                    spaces: const [], // Empty list for now
                     selectedSpaceId: plantsProvider.filterBySpace,
                     onSpaceFilterChanged: _onSpaceFilterChanged,
                   );
@@ -153,6 +180,10 @@ class _PlantsListPageState extends State<PlantsListPage> {
                         isSearching: plantsProvider.searchQuery.isNotEmpty,
                         searchQuery: plantsProvider.searchQuery,
                         onClearSearch: () => _onSearchChanged(''),
+                        onAddPlant: () {
+                          // Navigate to add plant page
+                          Navigator.of(context).pushNamed('/add-plant');
+                        },
                       );
                     }
                     

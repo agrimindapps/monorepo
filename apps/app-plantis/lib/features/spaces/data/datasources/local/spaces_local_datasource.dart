@@ -13,34 +13,40 @@ abstract class SpacesLocalDatasource {
 
 class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   static const String _boxName = 'spaces';
-  late final HiveStorageService _storage;
+  final ILocalStorageRepository _storage;
 
-  SpacesLocalDatasourceImpl() {
-    _storage = HiveStorageService();
-  }
+  SpacesLocalDatasourceImpl({required ILocalStorageRepository storage}) : _storage = storage;
 
   @override
   Future<List<SpaceModel>> getSpaces() async {
     try {
-      await _storage.init();
-      final spacesData = await _storage.getAll<Map<String, dynamic>>(_boxName);
+      final result = await _storage.getValues<Map<String, dynamic>>(box: _boxName);
       
-      return spacesData.map((data) => SpaceModel.fromJson(data)).toList()
-        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      return result.fold(
+        (failure) => throw CacheFailure('Erro ao buscar espaços locais: ${failure.message}'),
+        (spacesData) {
+          return spacesData
+              .map((data) => SpaceModel.fromJson(data))
+              .toList()
+            ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        },
+      );
     } catch (e) {
-      throw const CacheFailure('Erro ao buscar espaços locais');
+      throw CacheFailure('Erro ao buscar espaços locais: $e');
     }
   }
 
   @override
   Future<SpaceModel?> getSpaceById(String id) async {
     try {
-      await _storage.init();
-      final spaceData = await _storage.get<Map<String, dynamic>>(_boxName, id);
+      final result = await _storage.get<Map<String, dynamic>>(key: id, box: _boxName);
       
-      return spaceData != null ? SpaceModel.fromJson(spaceData) : null;
+      return result.fold(
+        (failure) => throw CacheFailure('Erro ao buscar espaço local: ${failure.message}'),
+        (spaceData) => spaceData != null ? SpaceModel.fromJson(spaceData) : null,
+      );
     } catch (e) {
-      throw const CacheFailure('Erro ao buscar espaço local');
+      throw CacheFailure('Erro ao buscar espaço local: $e');
     }
   }
 
@@ -63,42 +69,66 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   @override
   Future<void> cacheSpace(SpaceModel space) async {
     try {
-      await _storage.init();
-      await _storage.put(_boxName, space.id, space.toJson());
+      final result = await _storage.save<Map<String, dynamic>>(
+        key: space.id, 
+        data: space.toJson(), 
+        box: _boxName,
+      );
+      
+      result.fold(
+        (failure) => throw CacheFailure('Erro ao salvar espaço localmente: ${failure.message}'),
+        (_) => null,
+      );
     } catch (e) {
-      throw const CacheFailure('Erro ao salvar espaço localmente');
+      throw CacheFailure('Erro ao salvar espaço localmente: $e');
     }
   }
 
   @override
   Future<void> cacheSpaces(List<SpaceModel> spaces) async {
     try {
-      await _storage.init();
       for (final space in spaces) {
-        await _storage.put(_boxName, space.id, space.toJson());
+        final result = await _storage.save<Map<String, dynamic>>(
+          key: space.id, 
+          data: space.toJson(), 
+          box: _boxName,
+        );
+        
+        result.fold(
+          (failure) => throw CacheFailure('Erro ao salvar espaços localmente: ${failure.message}'),
+          (_) => null,
+        );
       }
     } catch (e) {
-      throw const CacheFailure('Erro ao salvar espaços localmente');
+      throw CacheFailure('Erro ao salvar espaços localmente: $e');
     }
   }
 
   @override
   Future<void> removeSpace(String id) async {
     try {
-      await _storage.init();
-      await _storage.delete(_boxName, id);
+      final result = await _storage.remove(key: id, box: _boxName);
+      
+      result.fold(
+        (failure) => throw CacheFailure('Erro ao remover espaço local: ${failure.message}'),
+        (_) => null,
+      );
     } catch (e) {
-      throw const CacheFailure('Erro ao remover espaço local');
+      throw CacheFailure('Erro ao remover espaço local: $e');
     }
   }
 
   @override
   Future<void> clearCache() async {
     try {
-      await _storage.init();
-      await _storage.clear(_boxName);
+      final result = await _storage.clear(box: _boxName);
+      
+      result.fold(
+        (failure) => throw CacheFailure('Erro ao limpar cache de espaços: ${failure.message}'),
+        (_) => null,
+      );
     } catch (e) {
-      throw const CacheFailure('Erro ao limpar cache de espaços');
+      throw CacheFailure('Erro ao limpar cache de espaços: $e');
     }
   }
 }

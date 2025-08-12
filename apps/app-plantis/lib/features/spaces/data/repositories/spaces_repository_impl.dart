@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/space.dart';
 import '../../domain/repositories/spaces_repository.dart';
 import '../datasources/local/spaces_local_datasource.dart';
@@ -10,7 +11,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   final SpacesLocalDatasource localDatasource;
   final SpacesRemoteDatasource remoteDatasource;
   final NetworkInfo networkInfo;
-  final AuthService authService;
+  final IAuthRepository authService;
 
   SpacesRepositoryImpl({
     required this.localDatasource,
@@ -19,17 +20,19 @@ class SpacesRepositoryImpl implements SpacesRepository {
     required this.authService,
   });
 
+  String? get _currentUserId => null; // TODO: Implement auth user access
+
   @override
   Future<Either<Failure, List<Space>>> getSpaces() async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
         try {
-          final remoteSpaces = await remoteDatasource.getSpaces(user.uid);
+          final remoteSpaces = await remoteDatasource.getSpaces(userId);
           await localDatasource.cacheSpaces(remoteSpaces);
           return Right(remoteSpaces);
         } catch (e) {
@@ -41,26 +44,26 @@ class SpacesRepositoryImpl implements SpacesRepository {
         final localSpaces = await localDatasource.getSpaces();
         return Right(localSpaces);
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      if (e.toString().contains('server') || e.toString().contains('network')) {
+        return Left(ServerFailure(e.toString()));
+      } else {
+        return Left(CacheFailure(e.toString()));
+      }
     }
   }
 
   @override
   Future<Either<Failure, Space>> getSpaceById(String id) async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
         try {
-          final remoteSpace = await remoteDatasource.getSpaceById(user.uid, id);
+          final remoteSpace = await remoteDatasource.getSpaceById(userId, id);
           await localDatasource.cacheSpace(remoteSpace);
           return Right(remoteSpace);
         } catch (e) {
@@ -80,26 +83,26 @@ class SpacesRepositoryImpl implements SpacesRepository {
           return const Left(NotFoundFailure('Espaço não encontrado'));
         }
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      if (e.toString().contains('server') || e.toString().contains('network')) {
+        return Left(ServerFailure(e.toString()));
+      } else {
+        return Left(CacheFailure(e.toString()));
+      }
     }
   }
 
   @override
   Future<Either<Failure, List<Space>>> searchSpaces(String query) async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
         try {
-          final remoteSpaces = await remoteDatasource.searchSpaces(user.uid, query);
+          final remoteSpaces = await remoteDatasource.searchSpaces(userId, query);
           return Right(remoteSpaces);
         } catch (e) {
           // If remote fails, fallback to local search
@@ -110,21 +113,21 @@ class SpacesRepositoryImpl implements SpacesRepository {
         final localSpaces = await localDatasource.searchSpaces(query);
         return Right(localSpaces);
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      if (e.toString().contains('server') || e.toString().contains('network')) {
+        return Left(ServerFailure(e.toString()));
+      } else {
+        return Left(CacheFailure(e.toString()));
+      }
     }
   }
 
   @override
   Future<Either<Failure, Space>> addSpace(Space space) async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       final spaceModel = SpaceModel.fromEntity(space);
@@ -134,7 +137,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
 
       if (await networkInfo.isConnected) {
         try {
-          final savedSpace = await remoteDatasource.addSpace(user.uid, spaceModel);
+          final savedSpace = await remoteDatasource.addSpace(userId, spaceModel);
           await localDatasource.cacheSpace(savedSpace);
           return Right(savedSpace);
         } catch (e) {
@@ -144,21 +147,21 @@ class SpacesRepositoryImpl implements SpacesRepository {
       } else {
         return Right(spaceModel.copyWith(isDirty: true));
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      if (e.toString().contains('server') || e.toString().contains('network')) {
+        return Left(ServerFailure(e.toString()));
+      } else {
+        return Left(CacheFailure(e.toString()));
+      }
     }
   }
 
   @override
   Future<Either<Failure, Space>> updateSpace(Space space) async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       final spaceModel = SpaceModel.fromEntity(space);
@@ -168,7 +171,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
 
       if (await networkInfo.isConnected) {
         try {
-          final updatedSpace = await remoteDatasource.updateSpace(user.uid, spaceModel);
+          final updatedSpace = await remoteDatasource.updateSpace(userId, spaceModel);
           await localDatasource.cacheSpace(updatedSpace);
           return Right(updatedSpace);
         } catch (e) {
@@ -178,21 +181,21 @@ class SpacesRepositoryImpl implements SpacesRepository {
       } else {
         return Right(spaceModel.copyWith(isDirty: true));
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      if (e.toString().contains('server') || e.toString().contains('network')) {
+        return Left(ServerFailure(e.toString()));
+      } else {
+        return Left(CacheFailure(e.toString()));
+      }
     }
   }
 
   @override
   Future<Either<Failure, void>> deleteSpace(String id) async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       // Remove locally first
@@ -200,7 +203,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
 
       if (await networkInfo.isConnected) {
         try {
-          await remoteDatasource.deleteSpace(user.uid, id);
+          await remoteDatasource.deleteSpace(userId, id);
         } catch (e) {
           // If remote fails, we already removed locally
           // The sync will handle this later
@@ -208,26 +211,26 @@ class SpacesRepositoryImpl implements SpacesRepository {
       }
 
       return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      if (e.toString().contains('server') || e.toString().contains('network')) {
+        return Left(ServerFailure(e.toString()));
+      } else {
+        return Left(CacheFailure(e.toString()));
+      }
     }
   }
 
   @override
   Future<Either<Failure, int>> getPlantCountBySpace(String spaceId) async {
     try {
-      final user = authService.currentUser;
-      if (user == null) {
-        return const Left(AuthFailure('Usuário não autenticado'));
+      final userId = _currentUserId;
+      if (userId == null) {
+        return Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
         try {
-          final count = await remoteDatasource.getPlantCountBySpace(user.uid, spaceId);
+          final count = await remoteDatasource.getPlantCountBySpace(userId, spaceId);
           return Right(count);
         } catch (e) {
           // If remote fails, return 0 to allow deletion
@@ -237,10 +240,8 @@ class SpacesRepositoryImpl implements SpacesRepository {
         // When offline, return 0 to allow deletion
         return const Right(0);
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado: ${e.toString()}'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

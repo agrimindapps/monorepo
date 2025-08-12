@@ -5,7 +5,8 @@ class Plant extends BaseSyncEntity {
   final String name;
   final String? species;
   final String? spaceId;
-  final String? imageBase64;
+  final String? imageBase64; // Manter para compatibilidade
+  final List<String> imageUrls; // Nova lista de URLs de imagens
   final DateTime? plantingDate;
   final String? notes;
   final PlantConfig? config;
@@ -16,6 +17,7 @@ class Plant extends BaseSyncEntity {
     this.species,
     this.spaceId,
     this.imageBase64,
+    this.imageUrls = const [],
     this.plantingDate,
     this.notes,
     this.config,
@@ -29,7 +31,11 @@ class Plant extends BaseSyncEntity {
     super.moduleName,
   });
   
-  bool get hasImage => imageBase64 != null && imageBase64!.isNotEmpty;
+  bool get hasImage => imageUrls.isNotEmpty || (imageBase64 != null && imageBase64!.isNotEmpty);
+  
+  String? get primaryImageUrl => imageUrls.isNotEmpty ? imageUrls.first : null;
+  
+  int get imagesCount => imageUrls.length;
   
   String get displayName => name.trim().isEmpty ? 'Planta sem nome' : name;
   
@@ -50,6 +56,7 @@ class Plant extends BaseSyncEntity {
       'species': species,
       'space_id': spaceId,
       'image_base64': imageBase64,
+      'image_urls': imageUrls,
       'planting_date': plantingDate?.toIso8601String(),
       'notes': notes,
       'config': config != null ? {
@@ -109,6 +116,7 @@ class Plant extends BaseSyncEntity {
     String? species,
     String? spaceId,
     String? imageBase64,
+    List<String>? imageUrls,
     DateTime? plantingDate,
     String? notes,
     PlantConfig? config,
@@ -127,6 +135,7 @@ class Plant extends BaseSyncEntity {
       species: species ?? this.species,
       spaceId: spaceId ?? this.spaceId,
       imageBase64: imageBase64 ?? this.imageBase64,
+      imageUrls: imageUrls ?? this.imageUrls,
       plantingDate: plantingDate ?? this.plantingDate,
       notes: notes ?? this.notes,
       config: config ?? this.config,
@@ -148,6 +157,7 @@ class Plant extends BaseSyncEntity {
     species,
     spaceId,
     imageBase64,
+    imageUrls,
     plantingDate,
     notes,
     config,

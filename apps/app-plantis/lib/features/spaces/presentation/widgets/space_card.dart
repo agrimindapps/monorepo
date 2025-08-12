@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import '../../domain/entities/space.dart';
 
 class SpaceCard extends StatelessWidget {
@@ -36,7 +38,7 @@ class SpaceCard extends StatelessWidget {
               child: space.imageBase64 != null
                   ? Image.memory(
                       // Convert base64 to image
-                      Uri.dataFromString(space.imageBase64!).data?.contentAsBytes() ?? [],
+                      Uint8List.fromList(Uri.dataFromString(space.imageBase64!).data?.contentAsBytes() ?? []),
                       fit: BoxFit.cover,
                     )
                   : Icon(

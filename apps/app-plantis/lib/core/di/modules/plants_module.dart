@@ -59,6 +59,7 @@ class PlantsDIModule {
       getPlantByIdUseCase: sl(),
       addPlantUseCase: sl(),
       updatePlantUseCase: sl(),
+      imageService: sl(),
     ));
   }
 }

@@ -8,6 +8,7 @@ import '../widgets/plant_details_info.dart';
 import '../widgets/plant_details_care.dart';
 import '../widgets/plant_details_config.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/services/image_service.dart';
 
 class PlantDetailsPage extends StatefulWidget {
   final String plantId;
@@ -94,6 +95,10 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                   children: [
                     PlantDetailsHeader(plant: plant),
                     const SizedBox(height: 24),
+                    if (plant.hasImage) ...[
+                      _buildImageGallery(context, plant),
+                      const SizedBox(height: 24),
+                    ],
                     PlantDetailsInfo(plant: plant),
                     const SizedBox(height: 24),
                     PlantDetailsCare(plant: plant),
@@ -186,13 +191,229 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
               ],
             ),
           ),
-          child: plant.imageBase64 != null
-              ? Container() // TODO: Implement image display
+          child: plant.hasImage && plant.primaryImageUrl != null
+              ? ImageService().buildImagePreview(
+                  plant.primaryImageUrl,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                )
               : Icon(
                   Icons.eco,
                   size: 80,
                   color: PlantisColors.primary.withValues(alpha: 0.3),
                 ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageGallery(BuildContext context, Plant plant) {
+    final theme = Theme.of(context);
+    
+    if (plant.imageUrls.isEmpty) return SizedBox.shrink();
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Fotos da Planta',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (plant.imageUrls.length > 1)
+                TextButton(
+                  onPressed: () => _showFullGallery(context, plant),
+                  child: Text(
+                    'Ver todas (${plant.imageUrls.length})',
+                    style: TextStyle(
+                      color: PlantisColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 200,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: plant.imageUrls.length > 3 ? 3 : plant.imageUrls.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                  child: GestureDetector(
+                    onTap: () => _showImagePreview(context, plant.imageUrls, index),
+                    child: Hero(
+                      tag: 'plant_image_$index',
+                      child: Container(
+                        width: 160,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              ImageService().buildImagePreview(
+                                plant.imageUrls[index],
+                                width: 160,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              ),
+                              if (index == 2 && plant.imageUrls.length > 3)
+                                Container(
+                                  color: Colors.black.withValues(alpha: 0.6),
+                                  child: Center(
+                                    child: Text(
+                                      '+${plant.imageUrls.length - 3}',
+                                      style: theme.textTheme.headlineMedium?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showImagePreview(BuildContext context, List<String> imageUrls, int initialIndex) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: PageController(initialPage: initialIndex),
+              itemCount: imageUrls.length,
+              itemBuilder: (context, index) {
+                return Center(
+                  child: Hero(
+                    tag: 'plant_image_$index',
+                    child: InteractiveViewer(
+                      child: ImageService().buildImagePreview(
+                        imageUrls[index],
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 16,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFullGallery(BuildContext context, Plant plant) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Galeria de Fotos',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: GridView.builder(
+                padding: EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: plant.imageUrls.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _showImagePreview(context, plant.imageUrls, index);
+                    },
+                    child: Hero(
+                      tag: 'plant_image_gallery_$index',
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: ImageService().buildImagePreview(
+                          plant.imageUrls[index],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,19 +1,23 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
+import '../../../../core/services/image_service.dart';
 
 class PlantFormProvider extends ChangeNotifier {
   final GetPlantByIdUseCase getPlantByIdUseCase;
   final AddPlantUseCase addPlantUseCase;
   final UpdatePlantUseCase updatePlantUseCase;
+  final ImageService imageService;
 
   PlantFormProvider({
     required this.getPlantByIdUseCase,
     required this.addPlantUseCase,
     required this.updatePlantUseCase,
+    required this.imageService,
   });
 
   // Form state
@@ -28,7 +32,9 @@ class PlantFormProvider extends ChangeNotifier {
   String? _spaceId;
   String _notes = '';
   DateTime? _plantingDate;
-  String? _imageBase64;
+  String? _imageBase64; // Manter para compatibilidade
+  List<String> _imageUrls = []; // Nova lista de URLs de imagens
+  bool _isUploadingImages = false;
 
   // Plant config fields
   int? _wateringIntervalDays;
@@ -55,6 +61,9 @@ class PlantFormProvider extends ChangeNotifier {
   String get notes => _notes;
   DateTime? get plantingDate => _plantingDate;
   String? get imageBase64 => _imageBase64;
+  List<String> get imageUrls => List.unmodifiable(_imageUrls);
+  bool get isUploadingImages => _isUploadingImages;
+  bool get hasImages => _imageUrls.isNotEmpty;
 
   // Config getters
   int? get wateringIntervalDays => _wateringIntervalDays;
@@ -162,6 +171,100 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Métodos para gerenciar múltiplas imagens
+  Future<void> addImageFromCamera() async {
+    _isUploadingImages = true;
+    notifyListeners();
+
+    try {
+      final imageFile = await imageService.pickImageFromCamera();
+      if (imageFile != null) {
+        final downloadUrl = await imageService.uploadImage(
+          imageFile,
+          folder: ImageUploadType.plant.folder,
+        );
+        
+        if (downloadUrl != null) {
+          _imageUrls.add(downloadUrl);
+        }
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao capturar imagem da câmera';
+    } finally {
+      _isUploadingImages = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> addImageFromGallery() async {
+    _isUploadingImages = true;
+    notifyListeners();
+
+    try {
+      final imageFile = await imageService.pickImageFromGallery();
+      if (imageFile != null) {
+        final downloadUrl = await imageService.uploadImage(
+          imageFile,
+          folder: ImageUploadType.plant.folder,
+        );
+        
+        if (downloadUrl != null) {
+          _imageUrls.add(downloadUrl);
+        }
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao selecionar imagem da galeria';
+    } finally {
+      _isUploadingImages = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> addMultipleImagesFromGallery() async {
+    _isUploadingImages = true;
+    notifyListeners();
+
+    try {
+      final imageFiles = await imageService.pickMultipleImages(
+        maxImages: 5 - _imageUrls.length, // Limitar total a 5 imagens
+      );
+      
+      if (imageFiles.isNotEmpty) {
+        final downloadUrls = await imageService.uploadMultipleImages(
+          imageFiles,
+          folder: ImageUploadType.plant.folder,
+        );
+        
+        _imageUrls.addAll(downloadUrls);
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao fazer upload das imagens';
+    } finally {
+      _isUploadingImages = false;
+      notifyListeners();
+    }
+  }
+
+  void removeImage(int index) {
+    if (index >= 0 && index < _imageUrls.length) {
+      final imageUrl = _imageUrls[index];
+      _imageUrls.removeAt(index);
+      notifyListeners();
+      
+      // Remover a imagem do Firebase Storage em background
+      imageService.deleteImage(imageUrl);
+    }
+  }
+
+  void removeAllImages() {
+    final urlsToDelete = List<String>.from(_imageUrls);
+    _imageUrls.clear();
+    notifyListeners();
+    
+    // Remover todas as imagens do Firebase Storage em background
+    imageService.deleteMultipleImages(urlsToDelete);
+  }
+
   // Config setters
   void setWateringInterval(int? value) {
     _wateringIntervalDays = value;
@@ -258,6 +361,7 @@ class PlantFormProvider extends ChangeNotifier {
     _notes = plant.notes ?? '';
     _plantingDate = plant.plantingDate;
     _imageBase64 = plant.imageBase64;
+    _imageUrls = List<String>.from(plant.imageUrls);
 
     final config = plant.config;
     if (config != null) {
@@ -281,6 +385,7 @@ class PlantFormProvider extends ChangeNotifier {
     _notes = '';
     _plantingDate = null;
     _imageBase64 = null;
+    _imageUrls.clear();
     _clearConfig();
   }
 
@@ -316,6 +421,7 @@ class PlantFormProvider extends ChangeNotifier {
       notes: _notes.trim().isEmpty ? null : _notes.trim(),
       plantingDate: _plantingDate,
       imageBase64: _imageBase64,
+      imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
       config: config,
     );
   }
@@ -342,6 +448,7 @@ class PlantFormProvider extends ChangeNotifier {
       notes: _notes.trim().isEmpty ? null : _notes.trim(),
       plantingDate: _plantingDate,
       imageBase64: _imageBase64,
+      imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
       config: config,
     );
   }

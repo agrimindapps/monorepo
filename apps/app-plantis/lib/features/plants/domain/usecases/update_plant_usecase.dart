@@ -28,6 +28,7 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
           species: params.species?.trim(),
           spaceId: params.spaceId,
           imageBase64: params.imageBase64,
+          imageUrls: params.imageUrls,
           plantingDate: params.plantingDate,
           notes: params.notes?.trim(),
           config: params.config,
@@ -75,6 +76,7 @@ class UpdatePlantParams {
   final String? species;
   final String? spaceId;
   final String? imageBase64;
+  final List<String>? imageUrls;
   final DateTime? plantingDate;
   final String? notes;
   final PlantConfig? config;
@@ -85,6 +87,7 @@ class UpdatePlantParams {
     this.species,
     this.spaceId,
     this.imageBase64,
+    this.imageUrls,
     this.plantingDate,
     this.notes,
     this.config,

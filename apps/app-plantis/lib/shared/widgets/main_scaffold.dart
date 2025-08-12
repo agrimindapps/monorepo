@@ -21,8 +21,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     if (location.startsWith('/plants')) return 0;
     if (location.startsWith('/spaces')) return 1;
     if (location.startsWith('/tasks')) return 2;
-    if (location.startsWith('/premium')) return 3;
-    if (location.startsWith('/profile')) return 4;
+    if (location.startsWith('/profile')) return 3;
     
     return 0;
   }
@@ -39,9 +38,6 @@ class _MainScaffoldState extends State<MainScaffold> {
         context.go('/tasks');
         break;
       case 3:
-        context.go('/premium');
-        break;
-      case 4:
         context.go('/profile');
         break;
     }
@@ -73,11 +69,6 @@ class _MainScaffoldState extends State<MainScaffold> {
             selectedIcon: Icon(Icons.checklist),
             icon: Icon(Icons.checklist_outlined),
             label: 'Tarefas',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.star),
-            icon: Icon(Icons.star_outline),
-            label: 'Premium',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.person),

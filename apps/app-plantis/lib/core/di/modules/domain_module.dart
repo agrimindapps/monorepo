@@ -24,15 +24,6 @@ class SpacesModule {
   }
 }
 
-class TasksModule {
-  static void init(GetIt sl) {
-    // TODO: Implement tasks module dependencies when needed
-    // Providers
-    // Use cases
-    // Repositories
-    // Data sources
-  }
-}
 
 class CommentsModule {
   static void init(GetIt sl) {

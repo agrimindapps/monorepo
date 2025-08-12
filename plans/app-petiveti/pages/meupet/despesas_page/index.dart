@@ -1,0 +1,11 @@
+export 'controllers/despesas_page_controller.dart';
+export 'models/despesas_page_model.dart';
+export 'models/despesas_page_state.dart';
+export 'services/despesas_filter_service.dart';
+export 'services/despesas_service.dart';
+export 'utils/despesas_utils.dart';
+export 'views/despesas_page_view.dart';
+export 'views/styles/despesas_colors.dart';
+export 'views/widgets/despesa_card.dart';
+export 'views/widgets/no_data_message.dart';
+export 'views/widgets/search_field.dart';

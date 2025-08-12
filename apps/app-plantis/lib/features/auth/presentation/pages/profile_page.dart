@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/providers/theme_provider.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -347,29 +348,31 @@ class ProfilePage extends StatelessWidget {
                               fontSize: 12,
                             ),
                           ),
-                          trailing: Switch(
-                            value: true, // Always true since we're in dark mode
-                            onChanged: (value) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Alternância de tema em desenvolvimento'),
-                                ),
+                          trailing: Consumer<ThemeProvider>(
+                            builder: (context, themeProvider, _) {
+                              final isDark = themeProvider.isDarkThemeActive(context);
+                              
+                              return Switch(
+                                value: isDark,
+                                onChanged: (value) async {
+                                  await themeProvider.toggleLightDark();
+                                },
+                                activeColor: PlantisColors.primary,
+                                trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+                                thumbColor: WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return PlantisColors.primary;
+                                  }
+                                  return Colors.grey.shade400;
+                                }),
+                                trackColor: WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return PlantisColors.primary.withValues(alpha: 0.3);
+                                  }
+                                  return Colors.grey.shade600;
+                                }),
                               );
                             },
-                            activeColor: PlantisColors.primary,
-                            trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                            thumbColor: WidgetStateProperty.resolveWith((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return PlantisColors.primary;
-                              }
-                              return Colors.grey.shade400;
-                            }),
-                            trackColor: WidgetStateProperty.resolveWith((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return PlantisColors.primary.withValues(alpha: 0.3);
-                              }
-                              return Colors.grey.shade600;
-                            }),
                           ),
                         ),
                       ],

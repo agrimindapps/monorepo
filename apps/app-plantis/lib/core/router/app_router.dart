@@ -19,11 +19,14 @@ import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../shared/widgets/main_scaffold.dart';
+import '../../presentation/pages/landing_page.dart';
+import '../utils/navigation_service.dart';
 
 class AppRouter {
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/';
+  static const String landing = '/welcome';
   static const String plants = '/plants';
   static const String plantDetails = '/plants/:id';
   static const String plantAdd = '/plants/add';
@@ -40,32 +43,62 @@ class AppRouter {
     final authProvider = context.read<AuthProvider>();
     
     return GoRouter(
-      initialLocation: plants,
+      navigatorKey: NavigationService.instance.navigatorKey,
+      initialLocation: landing,
       refreshListenable: authProvider,
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
         final isInitialized = authProvider.isInitialized;
         final isLoggingIn = state.matchedLocation == login;
         final isRegistering = state.matchedLocation == register;
+        final isOnLanding = state.matchedLocation == landing;
+        
+        // Lista de rotas protegidas que requerem autenticação
+        final protectedRoutes = [
+          plants, plantDetails, plantAdd, plantEdit,
+          spaces, spaceAdd, spaceEdit,
+          tasks, premium, profile, settings, home
+        ];
+        
+        final isAccessingProtectedRoute = protectedRoutes.any((route) => 
+          state.matchedLocation.startsWith(route) || 
+          state.matchedLocation == route
+        );
         
         // Wait for auth initialization
         if (!isInitialized) {
           return null;
         }
         
-        // If not authenticated and not on auth pages, redirect to login
-        if (!isAuthenticated && !isLoggingIn && !isRegistering) {
+        // Se autenticado e não está no app, redireciona para plantas
+        if (isAuthenticated && (isLoggingIn || isRegistering || isOnLanding)) {
+          return plants;
+        }
+        
+        // Se não autenticado e tentando acessar rota protegida
+        if (!isAuthenticated && isAccessingProtectedRoute) {
+          // Mostra mensagem de acesso negado após um pequeno delay
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            NavigationService.instance.showAccessDeniedMessage();
+          });
           return login;
         }
         
-        // If authenticated and on auth pages, redirect to home
-        if (isAuthenticated && (isLoggingIn || isRegistering)) {
-          return plants;
+        // Se não autenticado e tentando acessar outras rotas não protegidas, vai para landing
+        if (!isAuthenticated && !isLoggingIn && !isRegistering && !isOnLanding) {
+          return landing;
         }
         
         return null;
       },
       routes: [
+        // Landing Page Route
+        GoRoute(
+          path: landing,
+          name: 'landing',
+          builder: (context, state) => const LandingPage(),
+        ),
+        
         // Auth Routes - Unified Auth Page
         GoRoute(
           path: login,

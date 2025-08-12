@@ -584,6 +584,66 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 24),
+                            
+                            // Anonymous login button
+                            Consumer<AuthProvider>(
+                              builder: (context, authProvider, _) {
+                                return SizedBox(
+                                  width: double.infinity,
+                                  height: 48,
+                                  child: OutlinedButton(
+                                    onPressed: authProvider.isLoading
+                                        ? null
+                                        : () async {
+                                            await authProvider.signInAnonymously();
+                                            if (authProvider.isAuthenticated && mounted) {
+                                              context.go('/plants');
+                                            }
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: PlantisColors.primary,
+                                      side: BorderSide(
+                                        color: PlantisColors.primary.withValues(alpha: 0.3),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: authProvider.isLoading
+                                        ? SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                PlantisColors.primary,
+                                              ),
+                                            ),
+                                          )
+                                        : Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.person_outline,
+                                                size: 20,
+                                                color: PlantisColors.primary,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Continuar sem conta',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: PlantisColors.primary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),

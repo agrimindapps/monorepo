@@ -7,6 +7,8 @@ import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/plants/presentation/providers/plants_list_provider.dart';
 import 'features/spaces/presentation/providers/spaces_provider.dart';
 import 'features/tasks/presentation/providers/tasks_provider.dart';
+import 'features/premium/presentation/providers/premium_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'core/di/injection_container.dart' as di;
 
 class PlantisApp extends StatelessWidget {
@@ -28,17 +30,27 @@ class PlantisApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => di.sl<TasksProvider>(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<PremiumProvider>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<ThemeProvider>()..initialize(),
+        ),
       ],
       builder: (context, child) {
         final router = AppRouter.router(context);
         
-        return MaterialApp.router(
-          title: 'Plantis - Cuidado de Plantas',
-          theme: PlantisTheme.lightTheme,
-          darkTheme: PlantisTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          routerConfig: router,
-          debugShowCheckedModeBanner: false,
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp.router(
+              title: 'Plantis - Cuidado de Plantas',
+              theme: PlantisTheme.lightTheme,
+              darkTheme: PlantisTheme.darkTheme,
+              themeMode: themeProvider.themeMode,
+              routerConfig: router,
+              debugShowCheckedModeBanner: false,
+            );
+          },
         );
       },
     );

@@ -8,11 +8,14 @@ import '../interfaces/network_info.dart';
 import '../services/notification_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/image_service.dart';
-import 'modules/domain_module.dart';
+import '../utils/navigation_service.dart';
+import '../providers/analytics_provider.dart';
+import '../providers/theme_provider.dart';
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
+import '../../features/premium/presentation/providers/premium_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -57,6 +60,9 @@ void _initCoreServices() {
   // Analytics Repository
   sl.registerLazySingleton<IAnalyticsRepository>(() => FirebaseAnalyticsService());
   
+  // Crashlytics Repository
+  sl.registerLazySingleton<ICrashlyticsRepository>(() => FirebaseCrashlyticsService());
+  
   // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService());
   
@@ -78,6 +84,7 @@ void _initAuth() {
     loginUseCase: sl(),
     logoutUseCase: sl(),
     authRepository: sl(),
+    subscriptionRepository: sl<ISubscriptionRepository>(),
   ));
 }
 
@@ -98,9 +105,30 @@ void _initComments() {
 }
 
 void _initPremium() {
-  // TODO: Implement premium module
+  // Repository
+  sl.registerLazySingleton<ISubscriptionRepository>(
+    () => RevenueCatService(),
+  );
+  
+  // Provider
+  sl.registerFactory(
+    () => PremiumProvider(
+      subscriptionRepository: sl(),
+      authRepository: sl(),
+    ),
+  );
 }
 
 void _initAppServices() {
-  // TODO: Implement app services module
+  // Navigation Service
+  sl.registerLazySingleton(() => NavigationService.instance);
+  
+  // Analytics Provider
+  sl.registerLazySingleton<AnalyticsProvider>(() => AnalyticsProvider(
+    analyticsRepository: sl<IAnalyticsRepository>(),
+    crashlyticsRepository: sl<ICrashlyticsRepository>(),
+  ));
+  
+  // Theme Provider
+  sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
 }

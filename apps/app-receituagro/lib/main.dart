@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'core/di/injection_container.dart' as di;
+import 'features/settings/settings_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize dependency injection
+  await di.init();
+  
   runApp(const ReceitaAgroApp());
 }
 
@@ -33,6 +40,20 @@ class ReceitaAgroHomePage extends StatelessWidget {
         title: const Text('🧪 ReceitaAgro'),
         centerTitle: true,
         elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                ),
+              );
+            },
+            tooltip: 'Configurações',
+          ),
+        ],
       ),
       body: Center(
         child: Column(

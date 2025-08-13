@@ -9,7 +9,8 @@
       "dependencies": [
         "core",
         "cupertino_icons",
-        "flutter"
+        "flutter",
+        "get_it"
       ],
       "devDependencies": [
         "flutter_lints",
@@ -57,6 +58,15 @@
       "dependencies": []
     },
     {
+      "name": "get_it",
+      "version": "8.2.0",
+      "dependencies": [
+        "async",
+        "collection",
+        "meta"
+      ]
+    },
+    {
       "name": "core",
       "version": "1.0.0",
       "dependencies": [
@@ -79,7 +89,9 @@
         "intl",
         "path_provider",
         "purchases_flutter",
-        "shared_preferences"
+        "rate_my_app",
+        "shared_preferences",
+        "url_launcher"
       ]
     },
     {
@@ -279,21 +291,35 @@
       ]
     },
     {
-      "name": "get_it",
-      "version": "8.2.0",
-      "dependencies": [
-        "async",
-        "collection",
-        "meta"
-      ]
-    },
-    {
       "name": "flutter_bloc",
       "version": "8.1.6",
       "dependencies": [
         "bloc",
         "flutter",
         "provider"
+      ]
+    },
+    {
+      "name": "url_launcher",
+      "version": "6.3.2",
+      "dependencies": [
+        "flutter",
+        "url_launcher_android",
+        "url_launcher_ios",
+        "url_launcher_linux",
+        "url_launcher_macos",
+        "url_launcher_platform_interface",
+        "url_launcher_web",
+        "url_launcher_windows"
+      ]
+    },
+    {
+      "name": "rate_my_app",
+      "version": "2.3.2",
+      "dependencies": [
+        "flutter",
+        "flutter_rating_bar",
+        "shared_preferences"
       ]
     },
     {
@@ -470,6 +496,71 @@
       "version": "8.1.4",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "url_launcher_windows",
+      "version": "3.1.4",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_web",
+      "version": "2.4.1",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "url_launcher_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "url_launcher_platform_interface",
+      "version": "2.3.2",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_macos",
+      "version": "3.2.2",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_linux",
+      "version": "3.2.1",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_ios",
+      "version": "6.3.3",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_android",
+      "version": "6.3.17",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "flutter_rating_bar",
+      "version": "4.0.1",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -801,16 +892,16 @@
       ]
     },
     {
-      "name": "ffi",
-      "version": "2.1.4",
-      "dependencies": []
-    },
-    {
       "name": "plugin_platform_interface",
       "version": "2.1.8",
       "dependencies": [
         "meta"
       ]
+    },
+    {
+      "name": "ffi",
+      "version": "2.1.4",
+      "dependencies": []
     },
     {
       "name": "platform",

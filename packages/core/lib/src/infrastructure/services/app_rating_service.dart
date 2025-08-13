@@ -42,9 +42,11 @@ class AppRatingService implements IAppRatingRepository {
     try {
       await init();
       
+      if (context == null) return false;
+      
       if (_rateMyApp.shouldOpenDialog) {
-        _rateMyApp.showRateDialog(
-          context: context, // Required context from the calling widget
+        await _rateMyApp.showRateDialog(
+          context,
           title: 'Avalie o App',
           message: 'Você está gostando do aplicativo? Que tal nos dar uma avaliação na loja?',
           rateButton: 'AVALIAR',
@@ -73,7 +75,8 @@ class AppRatingService implements IAppRatingRepository {
   Future<bool> openAppStore() async {
     try {
       await init();
-      return await _rateMyApp.launchStore();
+      await _rateMyApp.launchStore();
+      return true; // Se não lançar exceção, assume que foi bem-sucedido
     } catch (e) {
       return false;
     }

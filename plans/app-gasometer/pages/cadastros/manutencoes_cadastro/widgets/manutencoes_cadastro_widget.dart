@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // Project imports:
+import '../../../../../core/style/shadcn_style.dart';
 import '../../../../database/25_manutencao_model.dart';
 import '../../../../widgets/dialog_cadastro_widget.dart';
 import '../controller/manutencoes_cadastro_form_controller.dart';
@@ -16,9 +17,14 @@ Future<bool?> manutencaoCadastro(
 
   return DialogCadastro.show(
     context: context,
-    title: 'Manutenção',
+    title: manutencao != null ? 'Editar Manutenção' : 'Nova Manutenção',
     formKey: formWidgetKey,
-    maxHeight: 570,
+    maxHeight: 620,
+    borderColor: ShadcnStyle.primaryColor.withValues(alpha: 0.3),
+    titleIcon: Icons.build,
+    titleIconColor: ShadcnStyle.primaryColor,
+    submitButtonText: manutencao != null ? 'Salvar Alterações' : 'Adicionar',
+    submitButtonColor: ShadcnStyle.primaryColor,
     onSubmit: () {
       final controller = Get.find<ManutencoesCadastroFormController>();
       if (!controller.isLoading.value) {
@@ -46,13 +52,29 @@ class ManutencoesCadastroWidget extends StatefulWidget {
       ManutencoesCadastroWidgetState();
 }
 
-class ManutencoesCadastroWidgetState extends State<ManutencoesCadastroWidget> {
+class ManutencoesCadastroWidgetState extends State<ManutencoesCadastroWidget>
+    with SingleTickerProviderStateMixin {
   late ManutencoesCadastroFormController _controller;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
     _initializeController();
+  }
+
+  void _initializeAnimations() {
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.forward();
   }
 
   void _initializeController() {
@@ -71,6 +93,7 @@ class ManutencoesCadastroWidgetState extends State<ManutencoesCadastroWidget> {
 
   @override
   void dispose() {
+    _animationController.dispose();
     // Clean up controller when widget is disposed
     if (Get.isRegistered<ManutencoesCadastroFormController>()) {
       Get.delete<ManutencoesCadastroFormController>();
@@ -80,17 +103,76 @@ class ManutencoesCadastroWidgetState extends State<ManutencoesCadastroWidget> {
 
   Future<void> submit() async {
     if (mounted) {
+      // Show loading indicator
+      _controller.isLoading.value = true;
+      
       final success = await _controller.submit(context);
+      
       if (success && mounted) {
-        Navigator.of(context).pop(true);
+        // Success animation before closing
+        await _animationController.reverse();
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        _controller.isLoading.value = false;
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ManutencoesCadastroFormController>(
-      builder: (controller) => const ManutencoesCadastroFormView(),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: GetBuilder<ManutencoesCadastroFormController>(
+        builder: (controller) => Stack(
+          children: [
+            const ManutencoesCadastroFormView(),
+            // Loading overlay
+            Obx(() => controller.isLoading.value
+                ? Container(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ShadcnStyle.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              widget.manutencao != null
+                                  ? 'Salvando alterações...'
+                                  : 'Adicionando manutenção...',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink()),
+          ],
+        ),
+      ),
     );
   }
 }

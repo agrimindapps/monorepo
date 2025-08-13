@@ -5,17 +5,37 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // Project imports:
+import '../bindings/manutencoes_page_bindings.dart';
 import '../controller/manutencoes_page_controller.dart';
 import '../views/manutencoes_page_view.dart';
 
-class ManutencoesPage extends StatefulWidget {
+class ManutencoesPage extends StatelessWidget {
   const ManutencoesPage({super.key});
 
   @override
-  ManutencoesPageWidgetState createState() => ManutencoesPageWidgetState();
+  Widget build(BuildContext context) {
+    // Garante que o binding foi inicializado
+    if (!Get.isRegistered<ManutencoesPageController>()) {
+      ManutencoesPageBinding().dependencies();
+    }
+
+    return const ManutencoesPageView();
+  }
 }
 
-class ManutencoesPageWidgetState extends State<ManutencoesPage> {
+// Widget alternativo com estado para compatibilidade
+class ManutencoesPageStateful extends StatefulWidget {
+  const ManutencoesPageStateful({super.key});
+
+  @override
+  ManutencoesPageStatefulState createState() => ManutencoesPageStatefulState();
+}
+
+class ManutencoesPageStatefulState extends State<ManutencoesPageStateful>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
@@ -23,25 +43,21 @@ class ManutencoesPageWidgetState extends State<ManutencoesPage> {
   }
 
   void _initializeController() {
-    // Initialize controller if not already present
     if (!Get.isRegistered<ManutencoesPageController>()) {
-      Get.put(ManutencoesPageController());
+      ManutencoesPageBinding().dependencies();
     }
   }
 
   @override
   void dispose() {
-    // Clean up controller when widget is disposed
-    if (Get.isRegistered<ManutencoesPageController>()) {
-      Get.delete<ManutencoesPageController>();
-    }
+    // Mantém o controller vivo para preservar estado
+    // O controller só será destruído quando o app for fechado
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ManutencoesPageController>(
-      builder: (controller) => const ManutencoesPageView(),
-    );
+    super.build(context);
+    return const ManutencoesPageView();
   }
 }

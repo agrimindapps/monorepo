@@ -24,6 +24,8 @@ class ManutencoesPageController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool showHeader = true.obs;
   final RxInt currentCarouselIndex = 0.obs;
+  final RxDouble scrollOffset = 0.0.obs;
+  final RxList<ManutencaoCar> abastecimentosAgrupados = <ManutencaoCar>[].obs;
 
   // Getters
   String get selectedVeiculoId => _veiculosRepository.selectedVeiculoId;
@@ -99,6 +101,19 @@ class ManutencoesPageController extends GetxController {
 
   bool hasDataForMonth(DateTime month) {
     return filterManutencoesByMonth(month).isNotEmpty;
+  }
+
+  // Atualizar offset de scroll
+  void updateScrollOffset(double offset) {
+    scrollOffset.value = offset;
+  }
+
+  // Obter manutenções do mês atual baseado no índice do carousel
+  List<ManutencaoCar> get currentMonthManutencoes {
+    if (monthsList.isEmpty || currentCarouselIndex.value >= monthsList.length) {
+      return [];
+    }
+    return filterManutencoesByMonth(monthsList[currentCarouselIndex.value]);
   }
 
   // Estatísticas mensais

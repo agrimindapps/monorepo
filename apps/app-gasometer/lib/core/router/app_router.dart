@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../features/vehicles/presentation/pages/vehicle_details_page.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
@@ -16,23 +17,74 @@ import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/promo/presentation/pages/privacy_policy_page.dart';
 import '../../features/promo/presentation/pages/terms_conditions_page.dart';
 import '../../shared/widgets/main_navigation.dart';
+import '../services/platform_service.dart';
 
 class AppRouter {
+  static String _getInitialLocation(AuthProvider authProvider, PlatformService platformService) {
+    // Se já está autenticado (incluindo anônimo), vai direto para o app
+    if (authProvider.isAuthenticated) {
+      return '/';
+    }
+    
+    // Se é web e não está autenticado, vai para promo
+    if (platformService.isWeb) {
+      return '/promo';
+    }
+    
+    // Para mobile, vai direto para o app (será criado login anônimo automaticamente)
+    return '/';
+  }
+  
   static GoRouter router(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final platformService = PlatformService();
     
     return GoRouter(
-      initialLocation: '/',
+      initialLocation: _getInitialLocation(authProvider, platformService),
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
         final isLoginRoute = state.matchedLocation == '/login';
+        final isPromoRoute = state.matchedLocation == '/promo';
+        final isPrivacyRoute = state.matchedLocation == '/privacy';
+        final isTermsRoute = state.matchedLocation == '/terms';
         
-        if (!isAuthenticated && !isLoginRoute) {
-          return '/login';
+        // Se usuário está autenticado (incluindo anônimo) e tenta acessar promo/login
+        if (isAuthenticated && (isPromoRoute || isLoginRoute)) {
+          return '/';
         }
         
-        if (isAuthenticated && isLoginRoute) {
-          return '/';
+        // Permitir acesso às páginas de políticas sempre
+        if (isPrivacyRoute || isTermsRoute) {
+          return null;
+        }
+        
+        // Para web
+        if (platformService.isWeb) {
+          // Se autenticado (incluindo anônimo), permitir acesso a todas as rotas do app
+          if (isAuthenticated) {
+            return null;
+          }
+          
+          // Se não autenticado e não está em promo/login, redirecionar para promo
+          if (!isAuthenticated && !isLoginRoute && !isPromoRoute) {
+            return '/promo';
+          }
+        }
+        
+        // Para mobile, permitir acesso direto às funcionalidades (modo anônimo)
+        if (platformService.isMobile) {
+          // Se não autenticado e tentando acessar login, permitir
+          if (!isAuthenticated && isLoginRoute) {
+            return null;
+          }
+          
+          // Para mobile, permitir acesso a todas as rotas mesmo sem autenticação
+          return null;
+        }
+        
+        // Lógica padrão para outras plataformas
+        if (!isAuthenticated && !isLoginRoute && !isPromoRoute) {
+          return '/login';
         }
         
         return null;
@@ -66,6 +118,7 @@ class AppRouter {
           builder: (context, state) => const LoginPage(),
         ),
         
+        
         // Main Shell Route
         ShellRoute(
           builder: (context, state, child) => MainNavigation(child: child),
@@ -74,7 +127,7 @@ class AppRouter {
             GoRoute(
               path: '/',
               name: 'home',
-              builder: (context, state) => const VehiclesPage(),
+              builder: (context, state) => const DashboardPage(),
             ),
             
             // Vehicles

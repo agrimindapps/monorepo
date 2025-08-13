@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'notification_form_dialog.dart';
 
@@ -84,41 +85,81 @@ class CallToAction extends StatelessWidget {
                     ),
                     const SizedBox(height: 40),
 
-                    // Botão principal
-                    ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => const NotificationFormDialog(),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber[400],
-                        foregroundColor: Colors.black87,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 32 : 40,
-                          vertical: isMobile ? 16 : 20,
+                    // Botões de ação
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Botão principal - Acessar App
+                        ElevatedButton(
+                          onPressed: () {
+                            context.go('/login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber[400],
+                            foregroundColor: Colors.black87,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 24 : 32,
+                              vertical: isMobile ? 16 : 20,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 6,
+                            shadowColor: Colors.black.withValues(alpha: 0.3),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.login, size: 20),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Acessar App',
+                                style: TextStyle(
+                                  fontSize: isMobile ? 16 : 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 6,
-                        shadowColor: Colors.black.withValues(alpha: 0.3),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.notifications, size: 20),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Cadastrar para Ser Notificado',
-                            style: TextStyle(
-                              fontSize: isMobile ? 16 : 18,
-                              fontWeight: FontWeight.bold,
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Botão secundário - Ser Notificado
+                        OutlinedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => const NotificationFormDialog(),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white, width: 2),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 24 : 32,
+                              vertical: isMobile ? 16 : 20,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ],
-                      ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.notifications, size: 20),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Ser Notificado',
+                                style: TextStyle(
+                                  fontSize: isMobile ? 16 : 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 30),
 

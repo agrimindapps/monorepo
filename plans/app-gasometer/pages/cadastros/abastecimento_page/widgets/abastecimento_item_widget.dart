@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 // Project imports:
 import '../../../../../core/style/shadcn_style.dart';
+import '../../../../../core/themes/manager.dart';
 import '../../../../database/23_abastecimento_model.dart';
 import '../../abastecimento_cadastro/widgets/abastecimento_cadastro.dart';
 import '../constants/abastecimento_strings.dart';

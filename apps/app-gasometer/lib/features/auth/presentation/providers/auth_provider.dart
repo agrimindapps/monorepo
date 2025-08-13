@@ -3,10 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/platform_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final AnalyticsService _analytics = AnalyticsService();
+  final PlatformService _platformService = PlatformService();
   
   User? _currentUser;
   bool _isLoading = false;
@@ -36,19 +40,35 @@ class AuthProvider extends ChangeNotifier {
       (user) async {
         _currentUser = user;
         
-        // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
-        if (user == null && await shouldUseAnonymousMode()) {
-          await signInAnonymously();
-          return;
-        }
-        
-        _isInitialized = true;
-        
-        // Sincroniza dados do usuário quando não é anônimo
-        if (user != null && !isAnonymous) {
+        // Se há usuário (incluindo anônimo), marca como inicializado
+        if (user != null) {
+          _isInitialized = true;
+          
+          // Se é usuário anônimo, apenas notifica
+          if (user.isAnonymous) {
+            debugPrint('🔐 Usuário anônimo já autenticado: ${user.uid}');
+            _isPremium = false;
+            notifyListeners();
+            return;
+          }
+          
+          // Sincroniza dados do usuário quando não é anônimo
           await _syncUserData();
           await _checkPremiumStatus();
+          // Configurar usuário no analytics
+          await _analytics.setUserId(user.uid);
+          await _analytics.setUserProperties({
+            'user_type': 'authenticated',
+            'is_premium': _isPremium.toString(),
+          });
         } else {
+          // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
+          if (await shouldUseAnonymousMode()) {
+            debugPrint('🔐 Iniciando modo anônimo automaticamente');
+            await signInAnonymously();
+            return;
+          }
+          _isInitialized = true;
           _isPremium = false;
         }
         
@@ -134,6 +154,13 @@ class AuthProvider extends ChangeNotifier {
       );
       
       _currentUser = credential.user;
+      
+      // Log analytics
+      await _analytics.logLogin('email');
+      await _analytics.logUserAction('login_success', parameters: {
+        'method': 'email',
+      });
+      
       _isLoading = false;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
@@ -183,19 +210,31 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
+      debugPrint('🔐 Iniciando login anônimo...');
       final credential = await _firebaseAuth.signInAnonymously();
       _currentUser = credential.user;
+      debugPrint('🔐 Usuário anônimo criado: ${_currentUser?.uid}');
       _isLoading = false;
       
       // Salvar preferência de modo anônimo
       await _saveAnonymousPreference();
       
+      // Log analytics para modo anônimo
+      await _analytics.logAnonymousSignIn();
+      await _analytics.setUserProperties({
+        'user_type': 'anonymous',
+        'is_premium': 'false',
+      });
+      
+      debugPrint('🔐 Usuário logado anonimamente. isAuthenticated: $isAuthenticated');
       notifyListeners();
     } on FirebaseAuthException catch (e) {
+      debugPrint('🔐 Erro Firebase: ${e.code} - ${e.message}');
       _errorMessage = _getFirebaseErrorMessage(e.code);
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      debugPrint('🔐 Erro inesperado: $e');
       _errorMessage = 'Erro inesperado: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
@@ -208,10 +247,15 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
+      // Log analytics antes do logout
+      await _analytics.logLogout();
+      
       await _firebaseAuth.signOut();
       _currentUser = null;
       _isPremium = false;
       _isLoading = false;
+      
+      debugPrint('🔐 Usuário deslogado');
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Erro ao fazer logout: ${e.toString()}';
@@ -231,10 +275,19 @@ class AuthProvider extends ChangeNotifier {
   
   Future<bool> shouldUseAnonymousMode() async {
     try {
+      // Se for mobile (Android/iOS), usar modo anônimo por padrão
+      if (_platformService.shouldUseAnonymousByDefault) {
+        final prefs = await SharedPreferences.getInstance();
+        // Retorna true por padrão para mobile, ou a preferência salva se existir
+        return prefs.getBool('use_anonymous_mode') ?? true;
+      }
+      
+      // Para outras plataformas (web/desktop), só usar se explicitamente habilitado
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool('use_anonymous_mode') ?? false;
     } catch (e) {
-      return false;
+      // Em caso de erro, usar modo anônimo se for mobile
+      return _platformService.shouldUseAnonymousByDefault;
     }
   }
   

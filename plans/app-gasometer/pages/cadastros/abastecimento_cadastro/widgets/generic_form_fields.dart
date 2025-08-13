@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 // Project imports:
 import '../../../../../core/style/shadcn_style.dart';
+import '../../../../../core/themes/manager.dart';
 
 class GenericNumericField extends StatelessWidget {
   final TextEditingController textController;
@@ -91,48 +92,104 @@ class SectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget child;
+  final Color? sectionColor;
 
   const SectionCard({
     super.key,
     required this.title,
     required this.icon,
     required this.child,
+    this.sectionColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-          child: Row(
-            children: [
-              Icon(icon, size: 16, color: ShadcnStyle.mutedTextColor),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+    final color = sectionColor ?? _getSectionColor(title);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.03),
+            Colors.transparent,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header da seção
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: ThemeManager().isDark.value
+                        ? Colors.white
+                        : ShadcnStyle.textColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Conteúdo
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: ThemeManager().isDark.value
+                    ? Colors.grey.shade900
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: ShadcnStyle.borderColor.withValues(alpha: 0.3),
                 ),
               ),
-            ],
+              padding: const EdgeInsets.all(16),
+              child: child,
+            ),
           ),
-        ),
-        Card(
-          elevation: 0,
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: ShadcnStyle.borderColor),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: child,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  Color _getSectionColor(String title) {
+    switch (title.toLowerCase()) {
+      case 'informações básicas':
+      case 'informacoes basicas':
+        return Colors.blue;
+      case 'valores':
+        return Colors.green;
+      case 'observação':
+      case 'observacao':
+        return Colors.purple;
+      default:
+        return ShadcnStyle.primaryColor;
+    }
   }
 }

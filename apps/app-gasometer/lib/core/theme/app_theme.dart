@@ -26,7 +26,7 @@ class GasOMeterTheme {
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -76,7 +76,7 @@ class GasOMeterTheme {
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: GasOMeterColors.darkSurface,
         elevation: 4,
         shape: RoundedRectangleBorder(

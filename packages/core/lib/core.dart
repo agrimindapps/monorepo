@@ -21,6 +21,7 @@ export 'src/domain/repositories/i_storage_repository.dart';
 export 'src/domain/repositories/i_crashlytics_repository.dart';
 export 'src/domain/repositories/i_local_storage_repository.dart';
 export 'src/domain/repositories/i_sync_repository.dart';
+export 'src/domain/repositories/i_app_rating_repository.dart';
 
 // Use Cases
 export 'src/domain/usecases/base_usecase.dart';
@@ -41,6 +42,7 @@ export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/log_repository_service.dart';
 export 'src/infrastructure/services/database_inspector_service.dart';
+export 'src/infrastructure/services/app_rating_service.dart';
 
 // ========== PRESENTATION LAYER ==========
 // Widgets

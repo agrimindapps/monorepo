@@ -66,6 +66,16 @@ void _initCoreServices() {
   // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService());
   
+  // App Rating Repository
+  sl.registerLazySingleton<IAppRatingRepository>(() => AppRatingService(
+    appStoreId: '123456789', // TODO: Replace with actual App Store ID
+    googlePlayId: 'br.com.agrimsolution.plantis', // TODO: Replace with actual Play Store ID
+    minDays: 3,
+    minLaunches: 5,
+    remindDays: 7,
+    remindLaunches: 10,
+  ));
+  
   // Notification Services
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());

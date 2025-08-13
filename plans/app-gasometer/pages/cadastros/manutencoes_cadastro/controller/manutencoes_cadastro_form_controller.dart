@@ -45,6 +45,7 @@ class ManutencoesCadastroFormController extends GetxController {
   ManutencoesCadastroFormModel get formModel => _formModel.value;
   bool get isEditing => _originalManutencao != null;
   bool get hasVeiculo => veiculo.value != null;
+  bool get isInitialized => veiculoId.value.isNotEmpty || veiculo.value != null;
 
   @override
   void onInit() {

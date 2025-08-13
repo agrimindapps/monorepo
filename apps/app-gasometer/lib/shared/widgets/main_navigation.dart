@@ -18,6 +18,10 @@ class MainNavigation extends StatelessWidget {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Início',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),
             label: 'Veículos',
           ),
@@ -33,10 +37,6 @@ class MainNavigation extends StatelessWidget {
             icon: Icon(Icons.bar_chart),
             label: 'Relatórios',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
         ],
       ),
     );
@@ -45,31 +45,31 @@ class MainNavigation extends StatelessWidget {
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
     
-    if (location.startsWith('/vehicles')) return 0;
-    if (location.startsWith('/fuel')) return 1;
-    if (location.startsWith('/maintenance')) return 2;
-    if (location.startsWith('/reports')) return 3;
-    if (location.startsWith('/profile')) return 4;
+    if (location == '/' || location.startsWith('/dashboard')) return 0;
+    if (location.startsWith('/vehicles')) return 1;
+    if (location.startsWith('/fuel')) return 2;
+    if (location.startsWith('/maintenance')) return 3;
+    if (location.startsWith('/reports')) return 4;
     
-    return 0; // Default to vehicles
+    return 0; // Default to dashboard
   }
 
   void _onTap(BuildContext context, int index) {
     switch (index) {
       case 0:
-        context.go('/vehicles');
+        context.go('/');
         break;
       case 1:
-        context.go('/fuel');
+        context.go('/vehicles');
         break;
       case 2:
-        context.go('/maintenance');
+        context.go('/fuel');
         break;
       case 3:
-        context.go('/reports');
+        context.go('/maintenance');
         break;
       case 4:
-        context.go('/profile');
+        context.go('/reports');
         break;
     }
   }

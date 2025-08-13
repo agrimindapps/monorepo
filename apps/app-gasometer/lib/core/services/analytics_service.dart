@@ -1,0 +1,281 @@
+import 'package:flutter/foundation.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
+/// Serviço centralizado para Analytics e Crashlytics do Gasometer
+class AnalyticsService {
+  static final AnalyticsService _instance = AnalyticsService._internal();
+  factory AnalyticsService() => _instance;
+  AnalyticsService._internal();
+
+  late final FirebaseAnalytics _analytics;
+  late final FirebaseCrashlytics _crashlytics;
+
+  /// Verifica se analytics está habilitado (desabilitado em debug)
+  bool get _isAnalyticsEnabled => !kDebugMode;
+
+  /// Inicializa o serviço
+  void initialize() {
+    _analytics = FirebaseAnalytics.instance;
+    _crashlytics = FirebaseCrashlytics.instance;
+    
+    // Configure analytics collection
+    _analytics.setAnalyticsCollectionEnabled(_isAnalyticsEnabled);
+    
+    if (kDebugMode) {
+      debugPrint('📊 Analytics Service initialized (Debug Mode - Analytics disabled)');
+    } else {
+      debugPrint('📊 Analytics Service initialized (Production Mode - Analytics enabled)');
+    }
+  }
+
+  // ===== ANALYTICS METHODS =====
+
+  /// Log de visualização de tela
+  Future<void> logScreenView(String screenName) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('📊 [DEV] Screen view: $screenName');
+      return;
+    }
+
+    try {
+      await _analytics.logScreenView(
+        screenName: screenName,
+      );
+      debugPrint('📊 Screen view logged: $screenName');
+    } catch (e, stackTrace) {
+      await _crashlytics.recordError(e, stackTrace);
+    }
+  }
+
+  /// Log de evento customizado
+  Future<void> logEvent(String eventName, Map<String, Object>? parameters) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('📊 [DEV] Event: $eventName ${parameters ?? ''}');
+      return;
+    }
+
+    try {
+      await _analytics.logEvent(
+        name: eventName,
+        parameters: parameters,
+      );
+      debugPrint('📊 Event logged: $eventName');
+    } catch (e, stackTrace) {
+      await _crashlytics.recordError(e, stackTrace);
+    }
+  }
+
+  /// Log de ação do usuário
+  Future<void> logUserAction(String action, {Map<String, Object>? parameters}) async {
+    await logEvent('user_action', {
+      'action': action,
+      ...?parameters,
+    });
+  }
+
+  // ===== AUTH EVENTS =====
+
+  Future<void> logLogin(String method) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('📊 [DEV] Login: $method');
+      return;
+    }
+    await _analytics.logLogin(loginMethod: method);
+  }
+
+  Future<void> logSignUp(String method) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('📊 [DEV] SignUp: $method');
+      return;
+    }
+    await _analytics.logSignUp(signUpMethod: method);
+  }
+
+  Future<void> logAnonymousSignIn() async {
+    await logEvent('anonymous_sign_in', {
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+  Future<void> logLogout() async {
+    await logEvent('logout', {
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+  // ===== APP LIFECYCLE EVENTS =====
+
+  Future<void> logAppOpen() async {
+    await logEvent('app_open', null);
+  }
+
+  Future<void> logAppBackground() async {
+    await logEvent('app_background', null);
+  }
+
+  // ===== GASOMETER SPECIFIC EVENTS =====
+
+  /// Eventos de abastecimento
+  Future<void> logFuelRefill({
+    required String fuelType,
+    required double liters,
+    required double totalCost,
+    required bool fullTank,
+  }) async {
+    await logEvent('fuel_refill', {
+      'fuel_type': fuelType,
+      'liters': liters,
+      'total_cost': totalCost,
+      'full_tank': fullTank,
+    });
+  }
+
+  /// Eventos de manutenção
+  Future<void> logMaintenance({
+    required String maintenanceType,
+    required double cost,
+    required int odometer,
+  }) async {
+    await logEvent('maintenance_logged', {
+      'maintenance_type': maintenanceType,
+      'cost': cost,
+      'odometer': odometer,
+    });
+  }
+
+  /// Eventos de despesas
+  Future<void> logExpense({
+    required String expenseType,
+    required double amount,
+  }) async {
+    await logEvent('expense_logged', {
+      'expense_type': expenseType,
+      'amount': amount,
+    });
+  }
+
+  /// Eventos de veículo
+  Future<void> logVehicleCreated(String vehicleType) async {
+    await logEvent('vehicle_created', {
+      'vehicle_type': vehicleType,
+    });
+  }
+
+  /// Eventos de relatórios
+  Future<void> logReportViewed(String reportType) async {
+    await logEvent('report_viewed', {
+      'report_type': reportType,
+    });
+  }
+
+  /// Eventos de features premium
+  Future<void> logPremiumFeatureAttempted(String featureName) async {
+    await logEvent('premium_feature_attempted', {
+      'feature': featureName,
+    });
+  }
+
+  /// Eventos de exportação
+  Future<void> logDataExport(String exportType) async {
+    await logEvent('data_exported', {
+      'export_type': exportType,
+    });
+  }
+
+  // ===== USER PROPERTIES =====
+
+  Future<void> setUserId(String userId) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('👤 [DEV] User ID: $userId');
+      return;
+    }
+
+    await _analytics.setUserId(id: userId);
+    await _crashlytics.setUserIdentifier(userId);
+  }
+
+  Future<void> setUserProperties(Map<String, String> properties) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('👤 [DEV] User properties: $properties');
+      return;
+    }
+
+    for (final entry in properties.entries) {
+      await _analytics.setUserProperty(
+        name: entry.key,
+        value: entry.value,
+      );
+    }
+  }
+
+  // ===== CRASHLYTICS METHODS =====
+
+  /// Registra erro não fatal
+  Future<void> recordError(
+    dynamic error,
+    StackTrace? stackTrace, {
+    String? reason,
+    Map<String, Object>? customKeys,
+  }) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('🔥 [DEV] Error: ${error.toString()}');
+      if (reason != null) debugPrint('🔥 [DEV] Reason: $reason');
+      return;
+    }
+
+    if (customKeys != null) {
+      for (final entry in customKeys.entries) {
+        await _crashlytics.setCustomKey(entry.key, entry.value);
+      }
+    }
+
+    await _crashlytics.recordError(
+      error,
+      stackTrace ?? StackTrace.current,
+      reason: reason,
+    );
+
+    debugPrint('🔥 Error recorded: ${error.toString()}');
+  }
+
+  /// Log customizado para Crashlytics
+  Future<void> log(String message) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('📝 [DEV] Log: $message');
+      return;
+    }
+
+    await _crashlytics.log(message);
+  }
+
+  /// Define chave customizada
+  Future<void> setCustomKey(String key, dynamic value) async {
+    if (!_isAnalyticsEnabled) {
+      debugPrint('🔑 [DEV] Custom key - $key: $value');
+      return;
+    }
+
+    await _crashlytics.setCustomKey(key, value);
+  }
+
+  // ===== TEST METHODS =====
+
+  /// Força crash para teste (apenas em debug)
+  Future<void> testCrash() async {
+    if (kDebugMode) {
+      throw Exception('Test crash from Gasometer Analytics Service');
+    }
+  }
+
+  /// Testa erro não fatal (apenas em debug)
+  Future<void> testNonFatalError() async {
+    if (kDebugMode) {
+      await recordError(
+        Exception('Test non-fatal error'),
+        StackTrace.current,
+        reason: 'Testing non-fatal error reporting',
+      );
+    }
+  }
+}

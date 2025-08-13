@@ -1,14 +1,831 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class MaintenancePage extends StatelessWidget {
+class MaintenancePage extends StatefulWidget {
   const MaintenancePage({super.key});
 
   @override
+  State<MaintenancePage> createState() => _MaintenancePageState();
+}
+
+class _MaintenancePageState extends State<MaintenancePage> {
+  final List<Map<String, dynamic>> _maintenanceRecords = [
+    {
+      'id': '1',
+      'vehicleId': '1',
+      'vehicleName': 'Honda Civic',
+      'type': 'Troca de Óleo',
+      'category': 'preventiva',
+      'date': DateTime.now().subtract(const Duration(days: 30)),
+      'cost': 180.00,
+      'odometer': 24500,
+      'workshop': 'Oficina Central',
+      'description': 'Troca de óleo do motor e filtro',
+      'nextService': DateTime.now().add(const Duration(days: 150)),
+    },
+    {
+      'id': '2',
+      'vehicleId': '1',
+      'vehicleName': 'Honda Civic',
+      'type': 'Alinhamento e Balanceamento',
+      'category': 'preventiva',
+      'date': DateTime.now().subtract(const Duration(days: 60)),
+      'cost': 120.00,
+      'odometer': 24000,
+      'workshop': 'Auto Center ABC',
+      'description': 'Alinhamento e balanceamento das 4 rodas',
+      'nextService': null,
+    },
+    {
+      'id': '3',
+      'vehicleId': '2',
+      'vehicleName': 'Toyota Corolla',
+      'type': 'Troca de Pastilhas de Freio',
+      'category': 'corretiva',
+      'date': DateTime.now().subtract(const Duration(days: 15)),
+      'cost': 350.00,
+      'odometer': 18000,
+      'workshop': 'Freios & Cia',
+      'description': 'Substituição das pastilhas de freio dianteiras',
+      'nextService': null,
+    },
+    {
+      'id': '4',
+      'vehicleId': '1',
+      'vehicleName': 'Honda Civic',
+      'type': 'Revisão Completa',
+      'category': 'preventiva',
+      'date': DateTime.now().subtract(const Duration(days: 90)),
+      'cost': 890.00,
+      'odometer': 23500,
+      'workshop': 'Concessionária Honda',
+      'description': 'Revisão completa de 20.000 km',
+      'nextService': DateTime.now().add(const Duration(days: 270)),
+    },
+  ];
+
+  String _selectedFilter = 'all';
+  String _selectedCategory = 'all';
+  String _searchQuery = '';
+
+  List<Map<String, dynamic>> get _filteredRecords {
+    var filtered = _maintenanceRecords;
+
+    // Aplicar filtro por veículo
+    if (_selectedFilter != 'all') {
+      filtered = filtered.where((r) => r['vehicleId'] == _selectedFilter).toList();
+    }
+
+    // Aplicar filtro por categoria
+    if (_selectedCategory != 'all') {
+      filtered = filtered.where((r) => r['category'] == _selectedCategory).toList();
+    }
+
+    // Aplicar busca
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((r) {
+        final vehicleName = r['vehicleName'].toString().toLowerCase();
+        final type = r['type'].toString().toLowerCase();
+        final workshop = r['workshop'].toString().toLowerCase();
+        final query = _searchQuery.toLowerCase();
+        return vehicleName.contains(query) || 
+               type.contains(query) || 
+               workshop.contains(query);
+      }).toList();
+    }
+
+    // Ordenar por data (mais recente primeiro)
+    filtered.sort((a, b) => b['date'].compareTo(a['date']));
+
+    return filtered;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Maintenance Page - Em desenvolvimento'),
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: _buildContent(context),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.build,
+                      color: Colors.orange,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Manutenções',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          'Histórico de manutenções dos seus veículos',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildFilters(context),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  Widget _buildFilters(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: TextField(
+                onChanged: (value) => setState(() => _searchQuery = value),
+                decoration: InputDecoration(
+                  hintText: 'Buscar por tipo, veículo ou oficina...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.orange, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: DropdownButton<String>(
+                  value: _selectedFilter,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  icon: const Icon(Icons.arrow_drop_down),
+                  items: const [
+                    DropdownMenuItem(value: 'all', child: Text('Todos os veículos')),
+                    DropdownMenuItem(value: '1', child: Text('Honda Civic')),
+                    DropdownMenuItem(value: '2', child: Text('Toyota Corolla')),
+                  ],
+                  onChanged: (value) => setState(() => _selectedFilter = value!),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: DropdownButton<String>(
+                  value: _selectedCategory,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  icon: const Icon(Icons.arrow_drop_down),
+                  items: const [
+                    DropdownMenuItem(value: 'all', child: Text('Todas as categorias')),
+                    DropdownMenuItem(value: 'preventiva', child: Text('Preventiva')),
+                    DropdownMenuItem(value: 'corretiva', child: Text('Corretiva')),
+                  ],
+                  onChanged: (value) => setState(() => _selectedCategory = value!),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (_filteredRecords.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildStatistics(),
+        const SizedBox(height: 24),
+        _buildUpcomingMaintenances(),
+        const SizedBox(height: 24),
+        _buildRecordsList(),
+      ],
+    );
+  }
+
+  Widget _buildStatistics() {
+    final totalCost = _filteredRecords.fold<double>(
+      0,
+      (sum, record) => sum + (record['cost'] as double),
+    );
+    final preventiveCount = _filteredRecords
+        .where((r) => r['category'] == 'preventiva')
+        .length;
+    final correctiveCount = _filteredRecords
+        .where((r) => r['category'] == 'corretiva')
+        .length;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            'Gasto Total',
+            'R\$ ${totalCost.toStringAsFixed(2)}',
+            Icons.attach_money,
+            Colors.green,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatCard(
+            'Preventivas',
+            preventiveCount.toString(),
+            Icons.schedule,
+            Colors.blue,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatCard(
+            'Corretivas',
+            correctiveCount.toString(),
+            Icons.build_circle,
+            Colors.orange,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingMaintenances() {
+    final upcomingServices = _maintenanceRecords
+        .where((r) => r['nextService'] != null)
+        .where((r) => (r['nextService'] as DateTime).isAfter(DateTime.now()))
+        .toList();
+
+    if (upcomingServices.isEmpty) return const SizedBox.shrink();
+
+    upcomingServices.sort((a, b) => 
+      (a['nextService'] as DateTime).compareTo(b['nextService'] as DateTime));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.notification_important, color: Colors.orange, size: 20),
+            const SizedBox(width: 8),
+            const Text(
+              'Próximas Manutenções',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...upcomingServices.take(2).map((service) {
+          final daysUntil = (service['nextService'] as DateTime)
+              .difference(DateTime.now())
+              .inDays;
+          return Card(
+            elevation: 0,
+            margin: const EdgeInsets.only(bottom: 8),
+            color: Colors.orange.withValues(alpha: 0.05),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: Colors.orange.withValues(alpha: 0.3)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.access_time,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${service['vehicleName']} - ${service['type']}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Em $daysUntil dias',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildRecordsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Histórico de Manutenções',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ..._filteredRecords.map((record) => _buildRecordCard(record)),
+      ],
+    );
+  }
+
+  Widget _buildRecordCard(Map<String, dynamic> record) {
+    final date = record['date'] as DateTime;
+    final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final isPreventive = record['category'] == 'preventiva';
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () => _showRecordDetails(record),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: (isPreventive ? Colors.blue : Colors.orange)
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      isPreventive ? Icons.schedule : Icons.build_circle,
+                      color: isPreventive ? Colors.blue : Colors.orange,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                record['type'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              formattedDate,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              record['vehicleName'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '•',
+                              style: TextStyle(
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              record['workshop'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoItem(
+                    Icons.speed,
+                    '${record['odometer']} km',
+                    'Odômetro',
+                  ),
+                  _buildInfoItem(
+                    Icons.attach_money,
+                    'R\$ ${record['cost'].toStringAsFixed(2)}',
+                    'Custo',
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: (isPreventive ? Colors.blue : Colors.orange)
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      isPreventive ? 'Preventiva' : 'Corretiva',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isPreventive ? Colors.blue : Colors.orange,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(IconData icon, String value, String label) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: Colors.grey.shade500,
+        ),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SizedBox(
+      height: 400,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.build_outlined,
+              color: Colors.grey.shade400,
+              size: 64,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Nenhuma manutenção encontrada',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Registre a primeira manutenção do seu veículo',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    return FloatingActionButton.extended(
+      onPressed: () => context.go('/maintenance/add'),
+      backgroundColor: Colors.orange,
+      foregroundColor: Colors.white,
+      icon: const Icon(Icons.add),
+      label: const Text('Nova Manutenção'),
+    );
+  }
+
+  void _showRecordDetails(Map<String, dynamic> record) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              record['category'] == 'preventiva' ? Icons.schedule : Icons.build_circle,
+              color: record['category'] == 'preventiva' ? Colors.blue : Colors.orange,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                record['type'],
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow('Veículo', record['vehicleName']),
+              _buildDetailRow('Oficina', record['workshop']),
+              _buildDetailRow('Data', _formatDate(record['date'])),
+              _buildDetailRow('Odômetro', '${record['odometer']} km'),
+              _buildDetailRow('Custo', 'R\$ ${record['cost'].toStringAsFixed(2)}'),
+              _buildDetailRow('Categoria', 
+                record['category'] == 'preventiva' ? 'Preventiva' : 'Corretiva'),
+              const SizedBox(height: 12),
+              const Text(
+                'Descrição:',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                record['description'],
+                style: TextStyle(color: Colors.grey.shade700),
+              ),
+              if (record['nextService'] != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.notification_important,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Próxima manutenção: ${_formatDate(record['nextService'])}',
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }

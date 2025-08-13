@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/auth_provider.dart';
+import 'package:core/core.dart';
+import '../providers/auth_provider.dart' as auth_providers;
 import '../../../../core/theme/colors.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/di/injection_container.dart' as di;
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -15,7 +17,7 @@ class ProfilePage extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
-          child: Consumer<AuthProvider>(
+          child: Consumer<auth_providers.AuthProvider>(
             builder: (context, authProvider, _) {
               final user = authProvider.currentUser;
               
@@ -64,11 +66,11 @@ class ProfilePage extends StatelessWidget {
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: PlantisColors.primary,
-                          child: user != null && user.hasProfilePhoto
+                          child: user?.hasProfilePhoto == true
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(30),
                                   child: Image.network(
-                                    user.photoUrl!,
+                                    user!.photoUrl!,
                                     width: 60,
                                     height: 60,
                                     fit: BoxFit.cover,
@@ -485,13 +487,7 @@ class ProfilePage extends StatelessWidget {
                             Icons.chevron_right,
                             color: Colors.grey,
                           ),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Redirecionamento para loja em desenvolvimento'),
-                              ),
-                            );
-                          },
+                          onTap: () => _showRateAppDialog(context),
                         ),
                       ],
                     ),
@@ -936,6 +932,43 @@ class ProfilePage extends StatelessWidget {
     } else {
       final years = (difference.inDays / 365).floor();
       return 'Membro desde $years ${years == 1 ? 'ano' : 'anos'}';
+    }
+  }
+
+  Future<void> _showRateAppDialog(BuildContext context) async {
+    final appRatingRepository = di.sl<IAppRatingRepository>();
+    
+    try {
+      // Check if we can show the rating dialog
+      final canShow = await appRatingRepository.canShowRatingDialog();
+      
+      if (canShow) {
+        // Show the rate my app dialog
+        if (context.mounted) {
+          await appRatingRepository.showRatingDialog(context: context);
+        }
+      } else {
+        // Fallback: directly open the app store
+        final success = await appRatingRepository.openAppStore();
+        
+        if (!success && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Não foi possível abrir a loja de aplicativos'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao abrir avaliação do app'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
   

@@ -40,6 +40,7 @@ class DespesaCadastroFormController extends GetxController {
   DespesaCadastroFormModel get formModel => _formModel.value;
   bool get isEditing => _originalDespesa != null;
   bool get hasVeiculo => veiculo.value != null;
+  bool get isInitialized => veiculoId.value.isNotEmpty || veiculo.value != null;
 
   @override
   void onInit() {

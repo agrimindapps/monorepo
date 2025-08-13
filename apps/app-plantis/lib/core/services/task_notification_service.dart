@@ -1,14 +1,35 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:core/core.dart';
 import '../../features/tasks/domain/entities/task.dart' as task_entity;
-import 'notification_service.dart';
+import 'plantis_notification_service.dart';
 
 class TaskNotificationService {
   static final TaskNotificationService _instance = TaskNotificationService._internal();
   factory TaskNotificationService() => _instance;
   TaskNotificationService._internal();
 
-  final NotificationService _notificationService = NotificationService();
+  final PlantisNotificationService _notificationService = PlantisNotificationService();
+  
+  /// Método temporário para compatibilidade - usar até definir regras de negócio
+  Future<void> _showCompatibilityNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    // Usar o método básico do core até implementar a lógica específica
+    final notificationRepository = (_notificationService as dynamic)._notificationRepository;
+    final notification = NotificationHelper.createReminderNotification(
+      appName: 'Plantis',
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      color: 0xFF4CAF50,
+    );
+    await notificationRepository.showNotification(notification);
+  }
 
   /// Agendar notificação para uma tarefa específica
   Future<void> scheduleTaskNotification(task_entity.Task task) async {
@@ -25,11 +46,11 @@ class TaskNotificationService {
 
       final String title = _getNotificationTitle(task);
       final String body = _getNotificationBody(task);
-      final String payload = _createNotificationPayload(task, NotificationType.taskReminder);
+      final String payload = _createNotificationPayload(task, PlantisNotificationType.taskReminder);
 
-      final int notificationId = NotificationService.createNotificationId('${task.id}_reminder');
+      final int notificationId = _createNotificationId('${task.id}_reminder');
 
-      await _notificationService.showInstantNotification(
+      await _showCompatibilityNotification(
         id: notificationId,
         title: title,
         body: body,
@@ -48,11 +69,11 @@ class TaskNotificationService {
 
       final String title = 'Tarefa em Atraso! 🚨';
       final String body = '${task.title} para ${task.plantName} está atrasada';
-      final String payload = _createNotificationPayload(task, NotificationType.taskOverdue);
+      final String payload = _createNotificationPayload(task, PlantisNotificationType.overdueTask);
 
-      final int notificationId = NotificationService.createNotificationId('${task.id}_overdue');
+      final int notificationId = _createNotificationId('${task.id}_overdue');
 
-      await _notificationService.showInstantNotification(
+      await _showCompatibilityNotification(
         id: notificationId,
         title: title,
         body: body,
@@ -77,7 +98,7 @@ class TaskNotificationService {
 
       const int notificationId = 9999; // ID fixo para resumo diário
 
-      await _notificationService.showInstantNotification(
+      await _showCompatibilityNotification(
         id: notificationId,
         title: title,
         body: body,
@@ -91,11 +112,8 @@ class TaskNotificationService {
   /// Cancelar notificação de uma tarefa específica
   Future<void> cancelTaskNotifications(String taskId) async {
     try {
-      final int reminderId = NotificationService.createNotificationId('${taskId}_reminder');
-      final int overdueId = NotificationService.createNotificationId('${taskId}_overdue');
-
-      await _notificationService.cancelNotification(reminderId);
-      await _notificationService.cancelNotification(overdueId);
+      await _notificationService.cancelNotification('${taskId}_reminder');
+      await _notificationService.cancelNotification('${taskId}_overdue');
     } catch (e) {
       debugPrint('Erro ao cancelar notificações da tarefa: $e');
     }
@@ -172,7 +190,12 @@ class TaskNotificationService {
   }
 
   /// Criar payload da notificação
-  String _createNotificationPayload(task_entity.Task task, NotificationType type) {
+  /// Criar ID único para notificação baseado em string
+  int _createNotificationId(String identifier) {
+    return identifier.hashCode.abs() % 2147483647;
+  }
+
+  String _createNotificationPayload(task_entity.Task task, PlantisNotificationType type) {
     final Map<String, dynamic> payload = {
       'type': type.value,
       'taskId': task.id,
@@ -185,7 +208,7 @@ class TaskNotificationService {
   /// Criar payload do resumo diário
   String _createDailySummaryPayload(List<task_entity.Task> tasks) {
     final Map<String, dynamic> payload = {
-      'type': NotificationType.dailyReminder.value,
+      'type': PlantisNotificationType.dailyCareReminder.value,
       'taskIds': tasks.map((t) => t.id).toList(),
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };

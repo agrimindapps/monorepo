@@ -7,6 +7,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'app.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/local_data_service.dart';
+import 'core/services/gasometer_notification_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -22,6 +23,10 @@ void main() async {
   // Initialize Local Data Service
   final localDataService = LocalDataService();
   await localDataService.initialize();
+
+  // Initialize notifications
+  final notificationService = GasOMeterNotificationService();
+  await notificationService.initialize();
 
   // Configure Crashlytics and error handling
   if (!kDebugMode) {

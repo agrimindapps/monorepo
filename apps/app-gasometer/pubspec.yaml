@@ -31,9 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados (TODO: uncomment when available)
-  # core:
-  #   path: ../../packages/core
+  # Core Package - Serviços compartilhados
+  core:
+    path: ../../packages/core
 
   # State Management
   provider: ^6.1.2

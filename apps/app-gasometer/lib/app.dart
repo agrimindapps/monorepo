@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
-import 'core/theme/app_theme.dart';
+import 'core/theme/gasometer_theme.dart';
 import 'core/router/app_router.dart';
-import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
 
@@ -16,7 +17,7 @@ class GasOMeterApp extends StatelessWidget {
       providers: [
         // Auth Provider - deve ser o primeiro
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(),
+          create: (_) => local.AuthProvider(),
         ),
         
         // Premium Provider
@@ -29,23 +30,31 @@ class GasOMeterApp extends StatelessWidget {
           create: (_) => VehiclesProvider(),
         ),
         
+        // Theme Provider
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider()..initialize(),
+        ),
+        
         // TODO: Adicionar outros providers quando criados
         // - FuelProvider
         // - MaintenanceProvider  
         // - ReportsProvider
-        // - ThemeProvider
         // - AnalyticsProvider
       ],
       builder: (context, child) {
         final router = AppRouter.router(context);
         
-        return MaterialApp.router(
-          title: 'GasOMeter - Controle de Veículos',
-          theme: GasOMeterTheme.lightTheme,
-          darkTheme: GasOMeterTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          routerConfig: router,
-          debugShowCheckedModeBanner: false,
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp.router(
+              title: 'GasOMeter - Controle de Veículos',
+              theme: GasometerTheme.lightTheme,
+              darkTheme: GasometerTheme.darkTheme,
+              themeMode: themeProvider.themeMode,
+              routerConfig: router,
+              debugShowCheckedModeBanner: false,
+            );
+          },
         );
       },
     );

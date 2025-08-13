@@ -1,14 +1,65 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 import 'core/di/injection_container.dart' as di;
-import 'features/settings/settings_page.dart';
+import 'core/theme/receituagro_theme.dart';
+import 'core/services/receituagro_notification_service.dart';
+import 'features/navigation/main_navigation_page.dart';
+import 'firebase_options.dart';
 
 void main() async {
+  // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
+  // Configure Crashlytics (only in production/staging)
+  if (EnvironmentConfig.enableAnalytics) {
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    
+    // Pass all uncaught asynchronous errors to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
+
   // Initialize dependency injection
   await di.init();
-  
-  runApp(const ReceitaAgroApp());
+
+  // Initialize notifications
+  final notificationService = ReceitaAgroNotificationService();
+  await notificationService.initialize();
+
+  // Run app
+  if (EnvironmentConfig.enableAnalytics) {
+    // Run app in guarded zone for Crashlytics only in production/staging
+    runZonedGuarded<Future<void>>(
+      () async {
+        runApp(const ReceitaAgroApp());
+      },
+      (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      },
+    );
+  } else {
+    // Run app normally in development
+    runApp(const ReceitaAgroApp());
+  }
 }
 
 class ReceitaAgroApp extends StatelessWidget {
@@ -16,115 +67,19 @@ class ReceitaAgroApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ReceitaAgro',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const ReceitaAgroHomePage(),
-    );
-  }
-}
-
-class ReceitaAgroHomePage extends StatelessWidget {
-  const ReceitaAgroHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.blue.shade50,
-      appBar: AppBar(
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
-        title: const Text('🧪 ReceitaAgro'),
-        centerTitle: true,
-        elevation: 2,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsPage(),
-                ),
-              );
-            },
-            tooltip: 'Configurações',
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.science,
-                    size: 80,
-                    color: Colors.blue.shade600,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'ReceitaAgro',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          color: Colors.blue.shade700,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Receitas Agronômicas',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.blue.shade600,
-                        ),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Em Desenvolvimento',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Compêndio de pragas e receitas de defensivos agrícolas',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.blue.shade700,
-                  ),
-            ),
-          ],
-        ),
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider()..initialize(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Pragas Soja',
+            theme: ReceitaAgroTheme.lightTheme,
+            darkTheme: ReceitaAgroTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const MainNavigationPage(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }

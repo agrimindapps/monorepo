@@ -12,6 +12,10 @@ export 'src/domain/entities/log_entry.dart';
 export 'src/domain/entities/database_record.dart';
 export 'src/domain/entities/custom_box_type.dart';
 export 'src/domain/entities/shared_preferences_record.dart';
+export 'src/domain/entities/notification_entity.dart';
+export 'src/domain/entities/security_entity.dart';
+export 'src/domain/entities/file_entity.dart';
+export 'src/domain/entities/performance_entity.dart';
 
 // Repository Interfaces
 export 'src/domain/repositories/i_auth_repository.dart';
@@ -22,6 +26,10 @@ export 'src/domain/repositories/i_crashlytics_repository.dart';
 export 'src/domain/repositories/i_local_storage_repository.dart';
 export 'src/domain/repositories/i_sync_repository.dart';
 export 'src/domain/repositories/i_app_rating_repository.dart';
+export 'src/domain/repositories/i_notification_repository.dart';
+export 'src/domain/repositories/i_security_repository.dart';
+export 'src/domain/repositories/i_file_repository.dart';
+export 'src/domain/repositories/i_performance_repository.dart';
 
 // Use Cases
 export 'src/domain/usecases/base_usecase.dart';
@@ -43,11 +51,24 @@ export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/log_repository_service.dart';
 export 'src/infrastructure/services/database_inspector_service.dart';
 export 'src/infrastructure/services/app_rating_service.dart';
+export 'src/infrastructure/services/local_notification_service.dart';
+export 'src/infrastructure/services/security_service.dart';
+export 'src/infrastructure/services/file_manager_service.dart';
+export 'src/infrastructure/services/performance_service.dart';
+
+// Helpers
+export 'src/infrastructure/helpers/notification_helper.dart';
 
 // ========== PRESENTATION LAYER ==========
 // Widgets
 export 'src/presentation/widgets/loading_widget.dart';
 export 'src/presentation/widgets/error_widget.dart';
+
+// Theme System
+export 'src/presentation/theme/providers/theme_provider.dart';
+export 'src/presentation/theme/base/base_theme.dart';
+export 'src/presentation/theme/base/base_colors.dart';
+export 'src/presentation/theme/base/base_typography.dart';
 
 // ========== SHARED LAYER ==========
 // Config

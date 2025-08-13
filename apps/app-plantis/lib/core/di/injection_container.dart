@@ -5,12 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 
 import '../interfaces/network_info.dart';
-import '../services/notification_service.dart';
+import '../services/plantis_notification_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/image_service.dart';
 import '../utils/navigation_service.dart';
 import '../providers/analytics_provider.dart';
-import '../providers/theme_provider.dart';
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
@@ -77,7 +76,7 @@ void _initCoreServices() {
   ));
   
   // Notification Services
-  sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
   
   // Image Service

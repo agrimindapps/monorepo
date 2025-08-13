@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
-import 'core/theme/app_theme.dart';
+import 'core/theme/plantis_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/plants/presentation/providers/plants_list_provider.dart';
 import 'features/spaces/presentation/providers/spaces_provider.dart';
 import 'features/tasks/presentation/providers/tasks_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
-import 'core/providers/theme_provider.dart';
 import 'core/di/injection_container.dart' as di;
 
 class PlantisApp extends StatelessWidget {
@@ -34,7 +34,7 @@ class PlantisApp extends StatelessWidget {
           create: (_) => di.sl<PremiumProvider>(),
         ),
         ChangeNotifierProvider(
-          create: (_) => di.sl<ThemeProvider>()..initialize(),
+          create: (_) => ThemeProvider()..initialize(),
         ),
       ],
       builder: (context, child) {

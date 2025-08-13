@@ -9,7 +9,8 @@ import 'package:core/core.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
-import 'core/services/notification_service.dart';
+import 'core/services/plantis_notification_service.dart';
+import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -43,13 +44,16 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+  
+  // Initialize DatabaseInspectorService with app-specific boxes
+  AppDataInspectorInitializer.initialize();
 
   // Initialize RevenueCat after DI
   final revenueCatService = di.sl<ISubscriptionRepository>();
   // O RevenueCat é inicializado automaticamente no construtor do RevenueCatService
 
   // Initialize notifications
-  final notificationService = NotificationService();
+  final notificationService = PlantisNotificationService();
   await notificationService.initialize();
 
   // Run app

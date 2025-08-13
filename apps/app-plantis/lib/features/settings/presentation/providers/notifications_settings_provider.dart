@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/services/notification_service.dart';
-import '../../../../core/services/task_notification_service.dart';
+import '../../../../core/services/plantis_notification_service.dart';
 
 class NotificationsSettingsProvider extends ChangeNotifier {
-  final NotificationService _notificationService;
-  final TaskNotificationService _taskNotificationService;
+  final PlantisNotificationService _notificationService;
   final SharedPreferences _prefs;
 
   NotificationsSettingsProvider({
-    required NotificationService notificationService,
-    required TaskNotificationService taskNotificationService,
+    required PlantisNotificationService notificationService,
     required SharedPreferences prefs,
   })  : _notificationService = notificationService,
-        _taskNotificationService = taskNotificationService,
         _prefs = prefs;
 
   // Estado de carregamento
@@ -137,24 +133,21 @@ class NotificationsSettingsProvider extends ChangeNotifier {
 
   /// Abrir configurações do sistema
   Future<void> openNotificationSettings() async {
-    // Em uma implementação real, você poderia usar um plugin como
-    // app_settings para abrir as configurações do sistema
-    debugPrint('Abrindo configurações de notificação do sistema');
+    await _notificationService.openNotificationSettings();
   }
 
   /// Enviar notificação de teste
   Future<void> sendTestNotification() async {
-    await _notificationService.showInstantNotification(
-      id: 99999,
-      title: 'Notificação de Teste 🌱',
-      body: 'As notificações estão funcionando corretamente!',
-      payload: 'test_notification',
+    await _notificationService.showTaskReminderNotification(
+      taskName: 'Teste de Notificação',
+      plantName: 'Planta de Teste',
+      taskDescription: 'As notificações estão funcionando corretamente! 🌱',
     );
   }
 
   /// Limpar todas as notificações
   Future<void> clearAllNotifications() async {
-    await _taskNotificationService.cancelAllTaskNotifications();
+    await _notificationService.cancelAllNotifications();
   }
 
   /// Verificar se um tipo de tarefa está habilitado

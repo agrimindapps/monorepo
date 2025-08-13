@@ -3,6 +3,7 @@ import '../widgets/settings_section.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/user_profile_card.dart';
 import '../widgets/premium_subscription_card.dart';
+import '../../features/development/presentation/pages/data_inspector_page.dart';
 
 class AccountSettingsPage extends StatelessWidget {
   const AccountSettingsPage({super.key});
@@ -127,10 +128,24 @@ class AccountSettingsPage extends StatelessWidget {
               title: 'Desenvolvimento',
               children: [
                 SettingsItem(
+                  icon: Icons.storage,
+                  title: 'Inspetor de Dados',
+                  subtitle: 'Visualizar dados locais do app',
+                  iconColor: Colors.blue,
+                  isFirst: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DataInspectorPage(),
+                      ),
+                    );
+                  },
+                ),
+                SettingsItem(
                   icon: Icons.bug_report,
                   title: 'Gerar dados de teste',
                   iconColor: Colors.orange,
-                  isFirst: true,
                   onTap: () {
                     // Handle generate test data tap
                   },

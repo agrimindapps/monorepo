@@ -44,6 +44,25 @@ dependencies:
   rate_my_app: ^2.0.0
   url_launcher: ^6.3.1
   
+  # Local Notifications
+  flutter_local_notifications: ^18.0.1
+  permission_handler: ^11.3.1
+  timezone: ^0.9.4
+  
+  # Security Services
+  crypto: ^3.0.6
+  local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.2
+  
+  # File Management
+  path: ^1.9.1
+  mime: ^2.0.0
+  archive: ^3.6.1
+  
+  # Performance Monitoring
+  device_info_plus: ^10.1.2
+  firebase_performance: ^0.9.4
+  
   # State Management & Utils
   flutter_bloc: ^8.1.6
   get_it: ^8.0.0

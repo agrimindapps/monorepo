@@ -1,0 +1,26 @@
+// Main export for the Favoritos page
+// Bindings
+export 'bindings/favoritos_binding.dart';
+// Controller
+export 'controller/favoritos_controller.dart';
+export 'favoritos_page.dart';
+export 'models/favoritos_data.dart';
+// Models
+export 'models/view_mode.dart';
+// Tabs
+export 'tabs/defensivos_tab.dart';
+export 'tabs/diagnostico_tab.dart';
+export 'tabs/pragas_tab.dart';
+// Utils
+export 'utils/image_path_helper.dart';
+// Widgets
+export 'widgets/custom_tab_bar_physics.dart';
+export 'widgets/empty_state_widget.dart';
+export 'widgets/favorito_card.dart';
+export 'widgets/favorito_diagnostico_list_item.dart';
+export 'widgets/favorito_list_item.dart';
+export 'widgets/favorito_praga_card.dart';
+export 'widgets/favorito_praga_list_item.dart';
+export 'widgets/list_content_widget.dart';
+export 'widgets/premium_card_widget.dart';
+export 'widgets/view_toggle_options.dart';

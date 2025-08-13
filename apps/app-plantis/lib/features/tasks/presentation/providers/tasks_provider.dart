@@ -83,6 +83,15 @@ class TasksProvider extends ChangeNotifier {
   int get pendingTasks => _allTasks.where((t) => t.status == task_entity.TaskStatus.pending).length;
   int get overdueTasks => _allTasks.where((t) => t.isOverdue && t.status == task_entity.TaskStatus.pending).length;
   int get todayTasks => _allTasks.where((t) => t.isDueToday && t.status == task_entity.TaskStatus.pending).length;
+  int get upcomingTasksCount {
+    final now = DateTime.now();
+    final nextWeek = now.add(const Duration(days: 7));
+    return _allTasks.where((t) => 
+      t.status == task_entity.TaskStatus.pending &&
+      t.dueDate.isAfter(now) &&
+      t.dueDate.isBefore(nextWeek)
+    ).length;
+  }
 
   // Tarefas por prioridade
   List<task_entity.Task> get highPriorityTasks => _filteredTasks.where((t) => 

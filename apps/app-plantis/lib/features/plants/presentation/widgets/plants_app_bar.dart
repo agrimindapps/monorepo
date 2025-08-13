@@ -4,253 +4,128 @@ import '../providers/plants_provider.dart';
 
 class PlantsAppBar extends StatelessWidget {
   final int plantsCount;
+  final String searchQuery;
+  final ValueChanged<String> onSearchChanged;
   final ViewMode viewMode;
   final ValueChanged<ViewMode> onViewModeChanged;
-  final SortBy sortBy;
-  final ValueChanged<SortBy> onSortChanged;
 
   const PlantsAppBar({
     super.key,
     required this.plantsCount,
+    required this.searchQuery,
+    required this.onSearchChanged,
     required this.viewMode,
     required this.onViewModeChanged,
-    required this.sortBy,
-    required this.onSortChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.1),
-            offset: const Offset(0, 2),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: Row(
+      color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.primary,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
         children: [
-          // Título e contador
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Minhas Plantas',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: PlantisColors.primary,
-                  ),
+          // Header with title and badge
+          Row(
+            children: [
+              Text(
+                'Minhas Plantas',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimary,
                 ),
-                Text(
+              ),
+              const Spacer(),
+              // Badge with plant count
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.colorScheme.secondary),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
                   plantsCount == 1 
                       ? '$plantsCount planta' 
                       : '$plantsCount plantas',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  style: TextStyle(
+                    color: theme.colorScheme.secondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           
-          // Botões de ação
+          const SizedBox(height: 20),
+          
+          // Search bar with grid button
           Row(
             children: [
-              // Menu de ordenação
-              PopupMenuButton<SortBy>(
-                icon: Icon(
-                  Icons.sort,
-                  color: theme.colorScheme.primary,
+              Expanded(
+                child: Container(
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: isDark ? null : Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                  ),
+                  child: TextField(
+                    onChanged: onSearchChanged,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar plantas...',
+                      hintStyle: TextStyle(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        fontSize: 16,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        size: 20,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
                 ),
-                tooltip: 'Ordenar',
-                onSelected: onSortChanged,
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: SortBy.newest,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          size: 20,
-                          color: sortBy == SortBy.newest 
-                              ? theme.colorScheme.primary 
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Mais recentes',
-                          style: TextStyle(
-                            color: sortBy == SortBy.newest 
-                                ? theme.colorScheme.primary 
-                                : null,
-                            fontWeight: sortBy == SortBy.newest 
-                                ? FontWeight.bold 
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: SortBy.oldest,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.history,
-                          size: 20,
-                          color: sortBy == SortBy.oldest 
-                              ? theme.colorScheme.primary 
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Mais antigas',
-                          style: TextStyle(
-                            color: sortBy == SortBy.oldest 
-                                ? theme.colorScheme.primary 
-                                : null,
-                            fontWeight: sortBy == SortBy.oldest 
-                                ? FontWeight.bold 
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: SortBy.name,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.sort_by_alpha,
-                          size: 20,
-                          color: sortBy == SortBy.name 
-                              ? theme.colorScheme.primary 
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Nome A-Z',
-                          style: TextStyle(
-                            color: sortBy == SortBy.name 
-                                ? theme.colorScheme.primary 
-                                : null,
-                            fontWeight: sortBy == SortBy.name 
-                                ? FontWeight.bold 
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: SortBy.species,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.category,
-                          size: 20,
-                          color: sortBy == SortBy.species 
-                              ? theme.colorScheme.primary 
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Espécie',
-                          style: TextStyle(
-                            color: sortBy == SortBy.species 
-                                ? theme.colorScheme.primary 
-                                : null,
-                            fontWeight: sortBy == SortBy.species 
-                                ? FontWeight.bold 
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
               
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               
-              // Toggle de visualização
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _ViewModeButton(
-                      icon: Icons.grid_view,
-                      isSelected: viewMode == ViewMode.grid,
-                      onTap: () => onViewModeChanged(ViewMode.grid),
-                      tooltip: 'Visualização em grade',
-                    ),
-                    _ViewModeButton(
-                      icon: Icons.view_list,
-                      isSelected: viewMode == ViewMode.list,
-                      onTap: () => onViewModeChanged(ViewMode.list),
-                      tooltip: 'Visualização em lista',
-                    ),
-                  ],
+              // Grid/List toggle button
+              GestureDetector(
+                onTap: () {
+                  final newMode = viewMode == ViewMode.grid 
+                      ? ViewMode.list 
+                      : ViewMode.grid;
+                  onViewModeChanged(newMode);
+                },
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: isDark ? null : Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                  ),
+                  child: Icon(
+                    viewMode == ViewMode.grid ? Icons.grid_view : Icons.view_list,
+                    color: theme.colorScheme.secondary,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ViewModeButton extends StatelessWidget {
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final String tooltip;
-
-  const _ViewModeButton({
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-    required this.tooltip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isSelected 
-                ? theme.colorScheme.primary 
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: isSelected 
-                ? theme.colorScheme.onPrimary 
-                : theme.colorScheme.primary,
-          ),
-        ),
       ),
     );
   }

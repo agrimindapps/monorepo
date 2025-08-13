@@ -25,6 +25,18 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
+  // Initialize Performance Service
+  final performanceService = PerformanceService();
+  await performanceService.startPerformanceTracking(
+    config: const PerformanceConfig(
+      enableFpsMonitoring: true,
+      enableMemoryMonitoring: true,
+      enableCpuMonitoring: false,
+      enableFirebaseIntegration: true,
+    ),
+  );
+  await performanceService.markAppStarted();
+  
   // Configure Crashlytics (only in production/staging)
   if (EnvironmentConfig.enableAnalytics) {
     FlutterError.onError = (errorDetails) {
@@ -50,6 +62,7 @@ void main() async {
     // Run app in guarded zone for Crashlytics only in production/staging
     runZonedGuarded<Future<void>>(
       () async {
+        await performanceService.markFirstFrame();
         runApp(const ReceitaAgroApp());
       },
       (error, stack) {
@@ -58,6 +71,7 @@ void main() async {
     );
   } else {
     // Run app normally in development
+    await performanceService.markFirstFrame();
     runApp(const ReceitaAgroApp());
   }
 }

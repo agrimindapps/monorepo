@@ -1,232 +1,282 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
-import '../../domain/entities/vehicle_entity.dart';
+import '../../../core/data/models/base_sync_model.dart';
 
 part 'vehicle_model.g.dart';
 
+/// Vehicle model with Firebase sync support
+/// TypeId: 0 - New sequential numbering  
 @HiveType(typeId: 0)
-class VehicleModel extends HiveObject {
-  @HiveField(0)
-  final String id;
-  
-  @HiveField(1)
-  final String userId;
-  
-  @HiveField(2)
-  final String name;
-  
-  @HiveField(3)
-  final String brand;
-  
-  @HiveField(4)
-  final String model;
-  
-  @HiveField(5)
-  final int year;
-  
-  @HiveField(6)
-  final String color;
-  
-  @HiveField(7)
-  final String licensePlate;
-  
-  @HiveField(8)
-  final String type; // VehicleType as string
-  
-  @HiveField(9)
-  final List<String> supportedFuels; // FuelType list as strings
-  
-  @HiveField(10)
-  final double? tankCapacity;
-  
-  @HiveField(11)
-  final double? engineSize;
-  
-  @HiveField(12)
-  final String? photoUrl;
-  
-  @HiveField(13)
-  final double currentOdometer;
-  
-  @HiveField(14)
-  final double? averageConsumption;
-  
-  @HiveField(15)
-  final DateTime createdAt;
-  
-  @HiveField(16)
-  final DateTime updatedAt;
-  
-  @HiveField(17)
-  final bool isActive;
-  
-  @HiveField(18)
-  final Map<String, dynamic> metadata;
-  
-  VehicleModel({
+class VehicleModel extends BaseSyncModel {
+  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  @HiveField(0) final String id;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(4) final bool isDirty;
+  @HiveField(5) final bool isDeleted;
+  @HiveField(6) final int version;
+  @HiveField(7) final String? userId;
+  @HiveField(8) final String? moduleName;
+
+  // Vehicle specific fields  
+  @HiveField(10) final String marca;
+  @HiveField(11) final String modelo;
+  @HiveField(12) final int ano;
+  @HiveField(13) final String placa;
+  @HiveField(14) final double odometroInicial;
+  @HiveField(15) final int combustivel;
+  @HiveField(16) final String renavan;
+  @HiveField(17) final String chassi;
+  @HiveField(18) final String cor;
+  @HiveField(19) final bool vendido;
+  @HiveField(20) final double valorVenda;
+  @HiveField(21) final double odometroAtual;
+  @HiveField(22) final String? foto;
+
+  const VehicleModel({
     required this.id,
-    required this.userId,
-    required this.name,
-    required this.brand,
-    required this.model,
-    required this.year,
-    required this.color,
-    required this.licensePlate,
-    required this.type,
-    required this.supportedFuels,
-    this.tankCapacity,
-    this.engineSize,
-    this.photoUrl,
-    required this.currentOdometer,
-    this.averageConsumption,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isActive = true,
-    this.metadata = const {},
-  });
-  
-  factory VehicleModel.fromEntity(VehicleEntity entity) {
-    return VehicleModel(
-      id: entity.id,
-      userId: entity.userId,
-      name: entity.name,
-      brand: entity.brand,
-      model: entity.model,
-      year: entity.year,
-      color: entity.color,
-      licensePlate: entity.licensePlate,
-      type: entity.type.name,
-      supportedFuels: entity.supportedFuels.map((f) => f.name).toList(),
-      tankCapacity: entity.tankCapacity,
-      engineSize: entity.engineSize,
-      photoUrl: entity.photoUrl,
-      currentOdometer: entity.currentOdometer,
-      averageConsumption: entity.averageConsumption,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      isActive: entity.isActive,
-      metadata: entity.metadata,
-    );
-  }
-  
-  factory VehicleModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    this.createdAtMs,
+    this.updatedAtMs,
+    this.lastSyncAtMs,
+    this.isDirty = false,
+    this.isDeleted = false,
+    this.version = 1,
+    this.userId,
+    this.moduleName = 'gasometer',
+    required this.marca,
+    required this.modelo,
+    required this.ano,
+    required this.placa,
+    required this.odometroInicial,
+    this.combustivel = 0,
+    this.renavan = '',
+    this.chassi = '',
+    this.cor = '',
+    this.vendido = false,
+    this.valorVenda = 0.0,
+    this.odometroAtual = 0.0,
+    this.foto,
+  }) : super(
+          id: id,
+          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
+          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
+          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
+          isDirty: isDirty,
+          isDeleted: isDeleted,
+          version: version,
+          userId: userId,
+          moduleName: moduleName,
+        );
+
+  @override
+  String get collectionName => 'vehicles';
+
+  /// Factory constructor for creating new vehicle
+  factory VehicleModel.create({
+    String? id,
+    String? userId,
+    required String marca,
+    required String modelo,
+    required int ano,
+    required String placa,
+    required double odometroInicial,
+    int combustivel = 0,
+    String renavan = '',
+    String chassi = '',
+    String cor = '',
+    bool vendido = false,
+    double valorVenda = 0.0,
+    double odometroAtual = 0.0,
+    String? foto,
+  }) {
+    final now = DateTime.now();
+    final vehicleId = id ?? now.millisecondsSinceEpoch.toString();
     
     return VehicleModel(
-      id: doc.id,
-      userId: data['userId'] ?? '',
-      name: data['name'] ?? '',
-      brand: data['brand'] ?? '',
-      model: data['model'] ?? '',
-      year: data['year'] ?? 0,
-      color: data['color'] ?? '',
-      licensePlate: data['licensePlate'] ?? '',
-      type: data['type'] ?? 'car',
-      supportedFuels: List<String>.from(data['supportedFuels'] ?? ['gasoline']),
-      tankCapacity: data['tankCapacity']?.toDouble(),
-      engineSize: data['engineSize']?.toDouble(),
-      photoUrl: data['photoUrl'],
-      currentOdometer: data['currentOdometer']?.toDouble() ?? 0.0,
-      averageConsumption: data['averageConsumption']?.toDouble(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      isActive: data['isActive'] ?? true,
-      metadata: Map<String, dynamic>.from(data['metadata'] ?? {}),
-    );
-  }
-  
-  VehicleEntity toEntity() {
-    return VehicleEntity(
-      id: id,
+      id: vehicleId,
+      createdAtMs: now.millisecondsSinceEpoch,
+      updatedAtMs: now.millisecondsSinceEpoch,
+      isDirty: true,
       userId: userId,
-      name: name,
-      brand: brand,
-      model: model,
-      year: year,
-      color: color,
-      licensePlate: licensePlate,
-      type: VehicleType.fromString(type),
-      supportedFuels: supportedFuels.map((f) => FuelType.fromString(f)).toList(),
-      tankCapacity: tankCapacity,
-      engineSize: engineSize,
-      photoUrl: photoUrl,
-      currentOdometer: currentOdometer,
-      averageConsumption: averageConsumption,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      isActive: isActive,
-      metadata: metadata,
+      marca: marca,
+      modelo: modelo,
+      ano: ano,
+      placa: placa,
+      odometroInicial: odometroInicial,
+      combustivel: combustivel,
+      renavan: renavan,
+      chassi: chassi,
+      cor: cor,
+      vendido: vendido,
+      valorVenda: valorVenda,
+      odometroAtual: odometroAtual,
+      foto: foto,
     );
   }
-  
-  Map<String, dynamic> toFirestore() {
-    return {
-      'userId': userId,
-      'name': name,
-      'brand': brand,
-      'model': model,
-      'year': year,
-      'color': color,
-      'licensePlate': licensePlate,
-      'type': type,
-      'supportedFuels': supportedFuels,
-      'tankCapacity': tankCapacity,
-      'engineSize': engineSize,
-      'photoUrl': photoUrl,
-      'currentOdometer': currentOdometer,
-      'averageConsumption': averageConsumption,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-      'isActive': isActive,
-      'metadata': metadata,
-    };
-  }
-  
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'userId': userId,
-      'name': name,
-      'brand': brand,
-      'model': model,
-      'year': year,
-      'color': color,
-      'licensePlate': licensePlate,
-      'type': type,
-      'supportedFuels': supportedFuels,
-      'tankCapacity': tankCapacity,
-      'engineSize': engineSize,
-      'photoUrl': photoUrl,
-      'currentOdometer': currentOdometer,
-      'averageConsumption': averageConsumption,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'isActive': isActive,
-      'metadata': metadata,
-    };
-  }
-  
-  factory VehicleModel.fromJson(Map<String, dynamic> json) {
+
+  /// Create from Hive map
+  factory VehicleModel.fromHiveMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
+    
     return VehicleModel(
-      id: json['id'] ?? '',
-      userId: json['userId'] ?? '',
-      name: json['name'] ?? '',
-      brand: json['brand'] ?? '',
-      model: json['model'] ?? '',
-      year: json['year'] ?? 0,
-      color: json['color'] ?? '',
-      licensePlate: json['licensePlate'] ?? '',
-      type: json['type'] ?? 'car',
-      supportedFuels: List<String>.from(json['supportedFuels'] ?? ['gasoline']),
-      tankCapacity: json['tankCapacity']?.toDouble(),
-      engineSize: json['engineSize']?.toDouble(),
-      photoUrl: json['photoUrl'],
-      currentOdometer: json['currentOdometer']?.toDouble() ?? 0.0,
-      averageConsumption: json['averageConsumption']?.toDouble(),
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
-      isActive: json['isActive'] ?? true,
-      metadata: Map<String, dynamic>.from(json['metadata'] ?? {}),
+      id: baseFields['id'] as String,
+      createdAtMs: map['createdAt'] as int?,
+      updatedAtMs: map['updatedAt'] as int?,
+      lastSyncAtMs: map['lastSyncAt'] as int?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      marca: map['marca']?.toString() ?? '',
+      modelo: map['modelo']?.toString() ?? '',
+      ano: map['ano']?.toInt() ?? 0,
+      placa: map['placa']?.toString() ?? '',
+      odometroInicial: (map['odometroInicial'] ?? 0.0).toDouble(),
+      combustivel: map['combustivel']?.toInt() ?? 0,
+      renavan: map['renavan']?.toString() ?? '',
+      chassi: map['chassi']?.toString() ?? '',
+      cor: map['cor']?.toString() ?? '',
+      vendido: map['vendido'] ?? false,
+      valorVenda: (map['valorVenda'] ?? 0.0).toDouble(),
+      odometroAtual: (map['odometroAtual'] ?? 0.0).toDouble(),
+      foto: map['foto']?.toString(),
     );
+  }
+
+  /// Convert to Hive map
+  Map<String, dynamic> toHiveMap() {
+    return super.toHiveMap()
+      ..addAll({
+        'marca': marca,
+        'modelo': modelo,
+        'ano': ano,
+        'placa': placa,
+        'odometroInicial': odometroInicial,
+        'combustivel': combustivel,
+        'renavan': renavan,
+        'chassi': chassi,
+        'cor': cor,
+        'vendido': vendido,
+        'valorVenda': valorVenda,
+        'odometroAtual': odometroAtual,
+        'foto': foto,
+      });
+  }
+
+  /// Convert to Firebase map
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      ...firebaseTimestampFields,
+      'marca': marca,
+      'modelo': modelo,
+      'ano': ano,
+      'placa': placa,
+      'odometro_inicial': odometroInicial,
+      'combustivel': combustivel,
+      'renavan': renavan,
+      'chassi': chassi,
+      'cor': cor,
+      'vendido': vendido,
+      'valor_venda': valorVenda,
+      'odometro_atual': odometroAtual,
+      'foto': foto,
+    };
+  }
+
+  /// Create from Firebase map
+  factory VehicleModel.fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
+    
+    return VehicleModel(
+      id: baseFields['id'] as String,
+      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
+      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
+      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      marca: map['marca']?.toString() ?? '',
+      modelo: map['modelo']?.toString() ?? '',
+      ano: map['ano']?.toInt() ?? 0,
+      placa: map['placa']?.toString() ?? '',
+      odometroInicial: (map['odometro_inicial'] ?? 0.0).toDouble(),
+      combustivel: map['combustivel']?.toInt() ?? 0,
+      renavan: map['renavan']?.toString() ?? '',
+      chassi: map['chassi']?.toString() ?? '',
+      cor: map['cor']?.toString() ?? '',
+      vendido: map['vendido'] ?? false,
+      valorVenda: (map['valor_venda'] ?? 0.0).toDouble(),
+      odometroAtual: (map['odometro_atual'] ?? 0.0).toDouble(),
+      foto: map['foto']?.toString(),
+    );
+  }
+
+  /// copyWith method for immutability
+  @override
+  VehicleModel copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
+    String? marca,
+    String? modelo,
+    int? ano,
+    String? placa,
+    double? odometroInicial,
+    int? combustivel,
+    String? renavan,
+    String? chassi,
+    String? cor,
+    bool? vendido,
+    double? valorVenda,
+    double? odometroAtual,
+    String? foto,
+  }) {
+    return VehicleModel(
+      id: id ?? this.id,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
+      marca: marca ?? this.marca,
+      modelo: modelo ?? this.modelo,
+      ano: ano ?? this.ano,
+      placa: placa ?? this.placa,
+      odometroInicial: odometroInicial ?? this.odometroInicial,
+      combustivel: combustivel ?? this.combustivel,
+      renavan: renavan ?? this.renavan,
+      chassi: chassi ?? this.chassi,
+      cor: cor ?? this.cor,
+      vendido: vendido ?? this.vendido,
+      valorVenda: valorVenda ?? this.valorVenda,
+      odometroAtual: odometroAtual ?? this.odometroAtual,
+      foto: foto ?? this.foto,
+    );
+  }
+
+  // Legacy compatibility methods
+  Map<String, dynamic> toMap() => toHiveMap();
+  Map<String, dynamic> toJson() => toHiveMap();
+  factory VehicleModel.fromMap(Map<String, dynamic> map) => VehicleModel.fromHiveMap(map);
+  factory VehicleModel.fromJson(Map<String, dynamic> json) => VehicleModel.fromHiveMap(json);
+
+  @override
+  String toString() {
+    return 'VehicleModel(id: $id, marca: $marca, modelo: $modelo, ano: $ano, placa: $placa)';
   }
 }

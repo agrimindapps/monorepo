@@ -87,67 +87,19 @@ class _PlantsListPageState extends State<PlantsListPage> {
         // ChangeNotifierProvider.value(value: _spacesProvider),
       ],
       child: Scaffold(
+        backgroundColor: const Color(0xFF000000), // Dark background
         body: SafeArea(
           child: Column(
             children: [
-              // App Bar com título e ações
+              // New App Bar with integrated search
               Consumer<PlantsProvider>(
                 builder: (context, plantsProvider, child) {
-                  // Mostra AppBar simplificado quando não há plantas
-                  if (plantsProvider.plants.isEmpty && !plantsProvider.isLoading) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Minhas Plantas',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                                fontSize: 32,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  
                   return PlantsAppBar(
                     plantsCount: plantsProvider.plantsCount,
-                    viewMode: plantsProvider.viewMode,
-                    onViewModeChanged: _onViewModeChanged,
-                    sortBy: plantsProvider.sortBy,
-                    onSortChanged: _onSortChanged,
-                  );
-                },
-              ),
-              
-              // Barra de pesquisa (só quando há plantas)
-              Consumer<PlantsProvider>(
-                builder: (context, plantsProvider, child) {
-                  if (plantsProvider.plants.isEmpty && !plantsProvider.isLoading) {
-                    return const SizedBox.shrink();
-                  }
-                  return PlantsSearchBar(
                     searchQuery: plantsProvider.searchQuery,
                     onSearchChanged: _onSearchChanged,
-                    isSearching: plantsProvider.isSearching,
-                  );
-                },
-              ),
-              
-              // Filtros (só quando há plantas)
-              Consumer<PlantsProvider>(
-                builder: (context, plantsProvider, child) {
-                  if (plantsProvider.plants.isEmpty && !plantsProvider.isLoading) {
-                    return const SizedBox.shrink();
-                  }
-                  return PlantsFilterBar(
-                    spaces: const [], // Empty list for now
-                    selectedSpaceId: plantsProvider.filterBySpace,
-                    onSpaceFilterChanged: _onSpaceFilterChanged,
+                    viewMode: plantsProvider.viewMode,
+                    onViewModeChanged: _onViewModeChanged,
                   );
                 },
               ),

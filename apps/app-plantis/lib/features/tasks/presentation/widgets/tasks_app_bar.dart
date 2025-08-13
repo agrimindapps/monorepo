@@ -3,106 +3,83 @@ import 'package:provider/provider.dart';
 import '../providers/tasks_provider.dart';
 
 class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final TabController tabController;
+  final ValueChanged<TasksFilterType>? onFilterChanged;
 
   const TasksAppBar({
     super.key,
-    required this.tabController,
+    this.onFilterChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return AppBar(
+      backgroundColor: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.primary,
+      elevation: 0,
       title: Consumer<TasksProvider>(
         builder: (context, provider, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          return Row(
             children: [
-              const Text(
+              Text(
                 'Tarefas',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
-              if (provider.totalTasks > 0)
-                Text(
-                  '${provider.pendingTasks} pendentes de ${provider.totalTasks}',
+              const Spacer(),
+              // Badge with total tasks
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.colorScheme.secondary),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${provider.totalTasks} tarefas',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onPrimary.withOpacity(0.8),
+                    color: theme.colorScheme.secondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
+              ),
             ],
           );
         },
       ),
-      actions: [
-        // Busca
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () => _showSearchDialog(context),
-        ),
-        // Menu de opções
-        PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(context, value),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'refresh',
-              child: Row(
-                children: [
-                  Icon(Icons.refresh),
-                  SizedBox(width: 8),
-                  Text('Atualizar'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'settings',
-              child: Row(
-                children: [
-                  Icon(Icons.settings),
-                  SizedBox(width: 8),
-                  Text('Configurações'),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(48),
+        preferredSize: const Size.fromHeight(70),
         child: Container(
-          color: theme.colorScheme.primary,
-          child: TabBar(
-            controller: tabController,
-            isScrollable: true,
-            labelColor: theme.colorScheme.onPrimary,
-            unselectedLabelColor: theme.colorScheme.onPrimary.withOpacity(0.7),
-            indicatorColor: theme.colorScheme.onPrimary,
-            tabs: const [
-              Tab(
-                icon: Icon(Icons.list_alt, size: 16),
-                text: 'Todas',
-              ),
-              Tab(
-                icon: Icon(Icons.today, size: 16),
-                text: 'Hoje',
-              ),
-              Tab(
-                icon: Icon(Icons.warning, size: 16),
-                text: 'Atrasadas',
-              ),
-              Tab(
-                icon: Icon(Icons.schedule, size: 16),
-                text: 'Próximas',
-              ),
-              Tab(
-                icon: Icon(Icons.check_circle, size: 16),
-                text: 'Concluídas',
-              ),
-              Tab(
-                icon: Icon(Icons.local_florist, size: 16),
-                text: 'Por Planta',
+          color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.primary,
+          padding: const EdgeInsets.only(left: 20, bottom: 16),
+          child: Row(
+            children: [
+              Consumer<TasksProvider>(
+                builder: (context, provider, child) {
+                  return Row(
+                    children: [
+                      // Para hoje button
+                      _FilterButton(
+                        text: 'Para hoje',
+                        isSelected: provider.currentFilter == TasksFilterType.today,
+                        onTap: () => _handleFilterChange(context, TasksFilterType.today),
+                      ),
+                      const SizedBox(width: 16),
+                      // Próximas button
+                      _FilterButton(
+                        text: 'Próximas ${provider.upcomingTasksCount}',
+                        isSelected: provider.currentFilter == TasksFilterType.upcoming,
+                        onTap: () => _handleFilterChange(context, TasksFilterType.upcoming),
+                        showBadge: true,
+                        badgeCount: provider.upcomingTasksCount,
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -111,57 +88,75 @@ class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  void _showSearchDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Buscar Tarefas'),
-        content: TextField(
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Digite o nome da tarefa ou planta...',
-            prefixIcon: Icon(Icons.search),
-          ),
-          onChanged: (query) {
-            context.read<TasksProvider>().searchTasks(query);
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              context.read<TasksProvider>().searchTasks('');
-              Navigator.of(context).pop();
-            },
-            child: const Text('Limpar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _handleMenuAction(BuildContext context, String action) {
-    final provider = context.read<TasksProvider>();
-    
-    switch (action) {
-      case 'refresh':
-        provider.refresh();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Atualizando tarefas...')),
-        );
-        break;
-      case 'settings':
-        // TODO: Implementar página de configurações de tarefas
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Configurações em desenvolvimento')),
-        );
-        break;
-    }
+  void _handleFilterChange(BuildContext context, TasksFilterType filter) {
+    context.read<TasksProvider>().setFilter(filter);
+    onFilterChanged?.call(filter);
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 48);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 70);
+}
+
+class _FilterButton extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool showBadge;
+  final int badgeCount;
+
+  const _FilterButton({
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+    this.showBadge = false,
+    this.badgeCount = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accentColor = theme.colorScheme.secondary;
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                color: isSelected ? Colors.black : theme.colorScheme.onPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (showBadge && badgeCount > 0 && isSelected) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$badgeCount',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }

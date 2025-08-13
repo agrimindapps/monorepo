@@ -13,6 +13,13 @@ import 'core/services/plantis_notification_service.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
+// Import Hive adapters
+import 'core/data/models/comentario_model.dart';
+import 'core/data/models/espaco_model.dart';
+import 'core/data/models/planta_model.dart';
+import 'core/data/models/tarefa_model.dart';
+import 'core/data/models/planta_config_model.dart';
+
 void main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +32,18 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Initialize Performance Service
+  final performanceService = PerformanceService();
+  await performanceService.startPerformanceTracking(
+    config: const PerformanceConfig(
+      enableFpsMonitoring: true,
+      enableMemoryMonitoring: true,
+      enableCpuMonitoring: false,
+      enableFirebaseIntegration: true,
+    ),
+  );
+  await performanceService.markAppStarted();
   
   // Configure Crashlytics (only in production/staging)
   if (EnvironmentConfig.enableAnalytics) {
@@ -41,6 +60,13 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
+
+  // Register Hive adapters
+  Hive.registerAdapter(ComentarioModelAdapter());      // TypeId: 0
+  Hive.registerAdapter(EspacoModelAdapter());          // TypeId: 1
+  Hive.registerAdapter(PlantaModelAdapter());          // TypeId: 2
+  Hive.registerAdapter(TarefaModelAdapter());          // TypeId: 3
+  Hive.registerAdapter(PlantaConfigModelAdapter());    // TypeId: 4
 
   // Initialize dependency injection
   await di.init();
@@ -61,6 +87,7 @@ void main() async {
     // Run app in guarded zone for Crashlytics only in production/staging
     runZonedGuarded<Future<void>>(
       () async {
+        await performanceService.markFirstFrame();
         runApp(const PlantisApp());
       },
       (error, stack) {
@@ -69,6 +96,7 @@ void main() async {
     );
   } else {
     // Run app normally in development
+    await performanceService.markFirstFrame();
     runApp(const PlantisApp());
   }
 }

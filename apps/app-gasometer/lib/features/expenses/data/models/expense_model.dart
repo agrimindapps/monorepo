@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import '../../../core/data/models/base_sync_model.dart';
+import 'package:core/core.dart';
+import '../../../../core/data/models/base_sync_model.dart';
 
 part 'expense_model.g.dart';
 
@@ -7,7 +8,7 @@ part 'expense_model.g.dart';
 /// TypeId: 3 - New sequential numbering
 @HiveType(typeId: 3)
 class ExpenseModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  // Base sync fields (required for Hive generation)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -19,14 +20,20 @@ class ExpenseModel extends BaseSyncModel {
   @HiveField(8) final String? moduleName;
 
   // Expense specific fields
-  @HiveField(10) final String veiculoId;
-  @HiveField(11) final String tipo;
-  @HiveField(12) final String descricao;
-  @HiveField(13) final double valor;
-  @HiveField(14) final int data;
-  @HiveField(15) final double odometro;
+  @HiveField(10)
+  final String veiculoId;
+  @HiveField(11)
+  final String tipo;
+  @HiveField(12)
+  final String descricao;
+  @HiveField(13)
+  final double valor;
+  @HiveField(14)
+  final int data;
+  @HiveField(15)
+  final double odometro;
 
-  const ExpenseModel({
+  ExpenseModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -70,7 +77,7 @@ class ExpenseModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final expenseId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return ExpenseModel(
       id: expenseId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -89,7 +96,7 @@ class ExpenseModel extends BaseSyncModel {
   /// Create from Hive map
   factory ExpenseModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return ExpenseModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -110,16 +117,16 @@ class ExpenseModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'veiculoId': veiculoId,
-        'tipo': tipo,
-        'descricao': descricao,
-        'valor': valor,
-        'data': data,
-        'odometro': odometro,
-      });
+    return super.toHiveMap()..addAll({
+      'veiculoId': veiculoId,
+      'tipo': tipo,
+      'descricao': descricao,
+      'valor': valor,
+      'data': data,
+      'odometro': odometro,
+    });
   }
 
   /// Convert to Firebase map
@@ -139,7 +146,8 @@ class ExpenseModel extends BaseSyncModel {
 
   /// Create from Firebase map
   factory ExpenseModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
     
     return ExpenseModel(
@@ -202,8 +210,10 @@ class ExpenseModel extends BaseSyncModel {
   // Legacy compatibility methods
   Map<String, dynamic> toMap() => toHiveMap();
   Map<String, dynamic> toJson() => toHiveMap();
-  factory ExpenseModel.fromMap(Map<String, dynamic> map) => ExpenseModel.fromHiveMap(map);
-  factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel.fromHiveMap(json);
+  factory ExpenseModel.fromMap(Map<String, dynamic> map) =>
+      ExpenseModel.fromHiveMap(map);
+  factory ExpenseModel.fromJson(Map<String, dynamic> json) =>
+      ExpenseModel.fromHiveMap(json);
 
   /// Calculate total expenses from a list
   static double calcularTotalDespesas(List<ExpenseModel> despesas) {
@@ -231,7 +241,10 @@ class ExpenseModel extends BaseSyncModel {
 
   /// Check if belongs to specific date
   bool pertenceAData(DateTime dataAlvo) {
-    return DateTime.fromMillisecondsSinceEpoch(data).isAtSameMomentAs(dataAlvo);
+    final expenseDate = DateTime.fromMillisecondsSinceEpoch(data);
+    return expenseDate.year == dataAlvo.year && 
+           expenseDate.month == dataAlvo.month &&
+           expenseDate.day == dataAlvo.day;
   }
 
   /// Check if value is within range

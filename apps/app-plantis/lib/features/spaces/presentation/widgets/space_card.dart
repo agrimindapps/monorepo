@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'dart:typed_data';
 import '../../domain/entities/space.dart';
 
@@ -33,7 +32,7 @@ class SpaceCard extends StatelessWidget {
               height: 100,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: _getSpaceTypeColor(space.type).withOpacity(0.1),
+                color: _getSpaceTypeColor(space.type).withValues(alpha: 0.1),
               ),
               child: space.imageBase64 != null
                   ? Image.memory(
@@ -74,7 +73,7 @@ class SpaceCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _getSpaceTypeColor(space.type).withOpacity(0.1),
+                        color: _getSpaceTypeColor(space.type).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(

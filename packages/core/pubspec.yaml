@@ -11,69 +11,69 @@ dependencies:
     sdk: flutter
   
   # Firebase Stack
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  firebase_analytics: ^11.3.3
-  firebase_crashlytics: ^4.1.3
-  firebase_storage: ^12.3.2
-  cloud_firestore: ^5.4.4
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.1
+  firebase_analytics: ^12.0.0
+  firebase_crashlytics: ^5.0.0
+  firebase_storage: ^13.0.0
+  cloud_firestore: ^6.0.0
   
   # RevenueCat para assinaturas
-  purchases_flutter: ^8.0.0
+  purchases_flutter: ^9.2.0
   
   # Hive para storage local
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
   # SharedPreferences para cache cross-module
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.3
   
   # Conectividade
-  connectivity_plus: ^6.0.5
+  connectivity_plus: ^6.1.5
   
   # HTTP Client
-  dio: ^5.7.0
+  dio: ^5.9.0
   
   # Formatação e internacionalização
-  intl: ^0.18.1
+  intl: ^0.20.2
   
   # Sistema de arquivos
-  path_provider: ^2.1.1
+  path_provider: ^2.1.5
   
   # App Rating
-  rate_my_app: ^2.0.0
-  url_launcher: ^6.3.1
+  rate_my_app: ^2.3.2
+  url_launcher: ^6.3.2
   
   # Local Notifications
-  flutter_local_notifications: ^18.0.1
-  permission_handler: ^11.3.1
-  timezone: ^0.9.4
+  flutter_local_notifications: ^19.4.0
+  permission_handler: ^12.0.1
+  timezone: ^0.10.1
   
   # Security Services
   crypto: ^3.0.6
   local_auth: ^2.3.0
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^9.2.4
   
   # File Management
   path: ^1.9.1
   mime: ^2.0.0
-  archive: ^3.6.1
+  archive: ^4.0.7
   
   # Performance Monitoring
-  device_info_plus: ^10.1.2
-  firebase_performance: ^0.9.4
+  device_info_plus: ^11.5.0
+  firebase_performance: ^0.11.0
   
   # State Management & Utils
-  flutter_bloc: ^8.1.6
-  get_it: ^8.0.0
+  flutter_bloc: ^9.1.1
+  get_it: ^8.2.0
   injectable: ^2.4.4
   dartz: ^0.10.1
-  equatable: ^2.0.5
+  equatable: ^2.0.7
   
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   
   # Code Generation
   build_runner: ^2.4.13
@@ -82,6 +82,6 @@ dev_dependencies:
   
   # Testing
   mockito: ^5.4.4
-  bloc_test: ^9.1.7
+  bloc_test: ^10.0.0
 
 flutter:

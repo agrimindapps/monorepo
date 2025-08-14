@@ -96,7 +96,7 @@ abstract class IPerformanceRepository {
   Future<TraceResult?> stopTrace(String traceName, {Map<String, double>? metrics});
 
   /// Medir tempo de execução de uma operação
-  Future<Duration> measureOperationTime(
+  Future<Duration> measureOperationTime<T>(
     String operationName,
     Future<T> Function() operation, {
     Map<String, String>? attributes,

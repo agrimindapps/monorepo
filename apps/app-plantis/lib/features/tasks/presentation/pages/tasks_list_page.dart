@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/tasks_provider.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../widgets/tasks_dashboard.dart';
-import '../widgets/tasks_list_view.dart';
 import '../widgets/tasks_app_bar.dart';
-import '../widgets/tasks_fab.dart';
 import '../widgets/tasks_loading_widget.dart';
 import '../widgets/tasks_error_widget.dart';
 import '../widgets/empty_tasks_widget.dart';
@@ -41,7 +38,7 @@ class _TasksListPageState extends State<TasksListPage> {
   void initState() {
     super.initState();
     
-    // Carregar tarefas ao inicializar
+    // Carregar tarefas ao inicializar com delay para garantir que auth está pronto
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TasksProvider>().loadTasks();
       // Definir filtro padrão como "Para hoje"
@@ -121,6 +118,7 @@ class _TasksListPageState extends State<TasksListPage> {
   }
 
   Widget _buildDateGroup(TaskDateGroup dateGroup) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -202,7 +200,7 @@ class _TasksListPageState extends State<TasksListPage> {
                 Text(
                   task.plantName,
                   style: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -292,41 +290,6 @@ class _TasksListPageState extends State<TasksListPage> {
     );
   }
 
-  void _showTaskDetails(BuildContext context, task_entity.Task task) {
-    // TODO: Implementar página de detalhes da tarefa
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(task.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Planta: ${task.plantName}'),
-            Text('Tipo: ${task.type.displayName}'),
-            Text('Prioridade: ${task.priority.displayName}'),
-            Text('Vencimento: ${_formatDate(task.dueDate)}'),
-            if (task.description?.isNotEmpty == true)
-              Text('Descrição: ${task.description}'),
-          ],
-        ),
-        actions: [
-          if (task.status == task_entity.TaskStatus.pending)
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                context.read<TasksProvider>().completeTask(task.id);
-              },
-              child: const Text('Marcar como Concluída'),
-            ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();

@@ -151,7 +151,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -303,13 +303,13 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withOpacity(0.3),
+                                color: PlantisColors.primary.withValues(alpha: 0.3),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withOpacity(0.3),
+                                color: PlantisColors.primary.withValues(alpha: 0.3),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -350,13 +350,13 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withOpacity(0.3),
+                                color: PlantisColors.primary.withValues(alpha: 0.3),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withOpacity(0.3),
+                                color: PlantisColors.primary.withValues(alpha: 0.3),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(

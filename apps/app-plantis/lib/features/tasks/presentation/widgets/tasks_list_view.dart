@@ -116,7 +116,7 @@ class TaskListItem extends StatelessWidget {
                             ? TextDecoration.lineThrough
                             : null,
                         color: task.status == task_entity.TaskStatus.completed
-                            ? theme.colorScheme.onSurface.withOpacity(0.6)
+                            ? theme.colorScheme.onSurface.withValues(alpha: 0.6)
                             : null,
                       ),
                     ),
@@ -129,14 +129,14 @@ class TaskListItem extends StatelessWidget {
                         Icon(
                           Icons.local_florist,
                           size: 16,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             '${task.plantName} • ${task.type.displayName}',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -164,7 +164,7 @@ class TaskListItem extends StatelessWidget {
                                   ? Colors.red
                                   : task.isDueToday
                                       ? Colors.orange
-                                      : theme.colorScheme.onSurface.withOpacity(0.6),
+                                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -174,7 +174,7 @@ class TaskListItem extends StatelessWidget {
                                     ? Colors.red
                                     : task.isDueToday
                                         ? Colors.orange
-                                        : theme.colorScheme.onSurface.withOpacity(0.7),
+                                        : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                                 fontWeight: task.isOverdue || task.isDueToday
                                     ? FontWeight.w600
                                     : FontWeight.normal,
@@ -190,10 +190,10 @@ class TaskListItem extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: _getPriorityColor(task.priority).withOpacity(0.1),
+                            color: _getPriorityColor(task.priority).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _getPriorityColor(task.priority).withOpacity(0.3),
+                              color: _getPriorityColor(task.priority).withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -216,7 +216,7 @@ class TaskListItem extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,
-                color: theme.colorScheme.onSurface.withOpacity(0.3),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 size: 20,
               ),
             ],

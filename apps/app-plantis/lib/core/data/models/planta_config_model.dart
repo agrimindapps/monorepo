@@ -6,16 +6,23 @@ part 'planta_config_model.g.dart';
 /// PlantaConfig model with Firebase sync support
 /// TypeId: 4 - Sequential numbering
 @HiveType(typeId: 4)
+// ignore: must_be_immutable
 class PlantaConfigModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  @override
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
+  @override
   @HiveField(4) final bool isDirty;
+  @override
   @HiveField(5) final bool isDeleted;
+  @override
   @HiveField(6) final int version;
+  @override
   @HiveField(7) final String? userId;
+  @override
   @HiveField(8) final String? moduleName;
 
   // PlantaConfig specific fields
@@ -33,7 +40,7 @@ class PlantaConfigModel extends BaseSyncModel {
   @HiveField(21) final bool replantarAtivo;
   @HiveField(22) final int intervaloReplantarDias;
 
-  const PlantaConfigModel({
+  PlantaConfigModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -145,6 +152,7 @@ class PlantaConfigModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -245,9 +253,9 @@ class PlantaConfigModel extends BaseSyncModel {
   }) {
     return PlantaConfigModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

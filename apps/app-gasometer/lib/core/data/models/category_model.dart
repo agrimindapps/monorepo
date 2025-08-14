@@ -22,7 +22,7 @@ class CategoryModel extends BaseSyncModel {
   @HiveField(10) final int categoria;
   @HiveField(11) final String descricao;
 
-  const CategoryModel({
+  CategoryModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,

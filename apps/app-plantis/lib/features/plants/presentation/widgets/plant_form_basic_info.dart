@@ -37,8 +37,6 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'add_vehicle_page.dart';
 
 class VehiclesPage extends StatefulWidget {
@@ -38,7 +39,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       body: SafeArea(
         child: Column(
           children: [
@@ -71,10 +72,10 @@ class _VehiclesPageState extends State<VehiclesPage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -88,12 +89,12 @@ class _VehiclesPageState extends State<VehiclesPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5722).withValues(alpha: 0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.directions_car,
-                  color: Color(0xFFFF5722),
+                  color: Theme.of(context).colorScheme.primary,
                   size: 28,
                 ),
               ),
@@ -102,19 +103,19 @@ class _VehiclesPageState extends State<VehiclesPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Meus Veículos',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       'Gerencie seus veículos cadastrados',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -124,9 +125,9 @@ class _VehiclesPageState extends State<VehiclesPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade200),
+                    border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -136,7 +137,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                         height: 12,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
-                          color: Colors.blue.shade600,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -144,7 +145,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                         'Carregando...',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.blue.shade600,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -171,18 +172,18 @@ class _VehiclesPageState extends State<VehiclesPage> {
   }
 
   Widget _buildLoadingState() {
-    return const SizedBox(
+    return SizedBox(
       height: 300,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Color(0xFFFF5722)),
-            SizedBox(height: 16),
+            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 16),
             Text(
               'Carregando veículos...',
               style: TextStyle(
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 fontSize: 14,
               ),
             ),
@@ -201,22 +202,22 @@ class _VehiclesPageState extends State<VehiclesPage> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.directions_car_outlined,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               size: 64,
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Nenhum veículo cadastrado',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -224,7 +225,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
             'Cadastre seu primeiro veículo para começar',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -242,15 +243,12 @@ class _VehiclesPageState extends State<VehiclesPage> {
           crossAxisCount = 2;
         }
 
-        return GridView.builder(
+        return AlignedGridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.2,
-          ),
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
           itemCount: _vehicles.length,
           itemBuilder: (context, index) {
             return _buildVehicleCard(_vehicles[index]);
@@ -266,10 +264,11 @@ class _VehiclesPageState extends State<VehiclesPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: Colors.grey.shade200,
+          color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
         ),
       ),
+      color: Theme.of(context).colorScheme.surface,
       child: Column(
         children: [
           _buildCardHeader(vehicle),
@@ -288,10 +287,10 @@ class _VehiclesPageState extends State<VehiclesPage> {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: const Color(0xFFFF5722).withValues(alpha: 0.1),
-            child: const Icon(
+            backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            child: Icon(
               Icons.directions_car,
-              color: Color(0xFFFF5722),
+              color: Theme.of(context).colorScheme.primary,
               size: 24,
             ),
           ),
@@ -302,10 +301,10 @@ class _VehiclesPageState extends State<VehiclesPage> {
               children: [
                 Text(
                   '${vehicle['marca']} ${vehicle['modelo']}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -314,7 +313,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                   '${vehicle['ano']} • ${vehicle['cor']}',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -366,23 +365,23 @@ class _VehiclesPageState extends State<VehiclesPage> {
         Icon(
           icon,
           size: 16,
-          color: Colors.grey.shade500,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 8),
         Text(
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         const Spacer(),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -400,7 +399,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
             label: const Text('Editar'),
             onPressed: () => _editVehicle(vehicle),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.blue.shade600,
+              foregroundColor: Theme.of(context).colorScheme.primary,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
           ),
@@ -409,7 +408,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
             label: const Text('Excluir'),
             onPressed: () => _deleteVehicle(vehicle),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red.shade600,
+              foregroundColor: Theme.of(context).colorScheme.error,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
           ),
@@ -419,24 +418,32 @@ class _VehiclesPageState extends State<VehiclesPage> {
   }
 
   Widget _buildFloatingActionButton() {
-    return FloatingActionButton.extended(
+    return FloatingActionButton(
       onPressed: _addVehicle,
-      backgroundColor: const Color(0xFFFF5722),
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.add),
-      label: const Text('Novo Veículo'),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       tooltip: 'Cadastrar novo veículo',
+      child: const Icon(Icons.add),
     );
   }
 
   void _addVehicle() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddVehiclePage(),
-      ),
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const AddVehiclePage(),
     );
     
-    if (result == true && mounted) {
+    if (result != null && mounted) {
+      setState(() {
+        _vehicles.add({
+          'id': DateTime.now().millisecondsSinceEpoch.toString(),
+          ...result,
+        });
+      });
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veículo cadastrado com sucesso'),
@@ -447,13 +454,22 @@ class _VehiclesPageState extends State<VehiclesPage> {
   }
 
   void _editVehicle(Map<String, dynamic> vehicle) async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => AddVehiclePage(vehicle: vehicle),
-      ),
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => AddVehiclePage(vehicle: vehicle),
     );
     
-    if (result == true && mounted) {
+    if (result != null && mounted) {
+      setState(() {
+        final index = _vehicles.indexWhere((v) => v['id'] == vehicle['id']);
+        if (index >= 0) {
+          _vehicles[index] = {
+            'id': vehicle['id'],
+            ...result,
+          };
+        }
+      });
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veículo editado com sucesso'),
@@ -489,7 +505,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                 ),
               );
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Excluir'),
           ),
         ],

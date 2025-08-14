@@ -13,7 +13,7 @@ import 'core/services/plantis_notification_service.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
-// Import Hive adapters
+// Import Hive adapters - these include the generated adapters from .g.dart files
 import 'core/data/models/comentario_model.dart';
 import 'core/data/models/espaco_model.dart';
 import 'core/data/models/planta_model.dart';
@@ -75,7 +75,7 @@ void main() async {
   AppDataInspectorInitializer.initialize();
 
   // Initialize RevenueCat after DI
-  final revenueCatService = di.sl<ISubscriptionRepository>();
+  // final revenueCatService = di.sl<ISubscriptionRepository>();
   // O RevenueCat é inicializado automaticamente no construtor do RevenueCatService
 
   // Initialize notifications

@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:core/src/infrastructure/services/hive_storage_service.dart';
-import '../../interfaces/network_info.dart';
+import 'package:core/core.dart';
 
 // Domain
 import '../../../features/tasks/domain/repositories/tasks_repository.dart';
@@ -23,29 +22,16 @@ class TasksModule {
     sl.registerFactory(
       () => TasksProvider(
         getTasksUseCase: sl(),
-        getTasksByPlantIdUseCase: sl(),
-        getTasksByStatusUseCase: sl(),
-        getOverdueTasksUseCase: sl(),
-        getTodayTasksUseCase: sl(),
-        getUpcomingTasksUseCase: sl(),
         addTaskUseCase: sl(),
-        updateTaskUseCase: sl(),
         completeTaskUseCase: sl(),
-        deleteTaskUseCase: sl(),
       ),
     );
 
     // Use Cases
     sl.registerLazySingleton(() => GetTasksUseCase(sl()));
-    sl.registerLazySingleton(() => GetTasksByPlantIdUseCase(sl()));
-    sl.registerLazySingleton(() => GetTasksByStatusUseCase(sl()));
-    sl.registerLazySingleton(() => GetOverdueTasksUseCase(sl()));
-    sl.registerLazySingleton(() => GetTodayTasksUseCase(sl()));
-    sl.registerLazySingleton(() => GetUpcomingTasksUseCase(sl()));
     sl.registerLazySingleton(() => AddTaskUseCase(sl()));
     sl.registerLazySingleton(() => UpdateTaskUseCase(sl()));
     sl.registerLazySingleton(() => CompleteTaskUseCase(sl()));
-    sl.registerLazySingleton(() => DeleteTaskUseCase(sl()));
 
     // Repository
     sl.registerLazySingleton<TasksRepository>(
@@ -62,7 +48,7 @@ class TasksModule {
     );
 
     sl.registerLazySingleton<TasksLocalDataSource>(
-      () => TasksLocalDataSourceImpl(sl<HiveStorageService>()),
+      () => TasksLocalDataSourceImpl(sl<ILocalStorageRepository>()),
     );
   }
 }

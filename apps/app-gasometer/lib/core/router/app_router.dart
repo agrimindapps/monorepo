@@ -5,14 +5,15 @@ import 'package:provider/provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../features/vehicles/presentation/pages/vehicle_details_page.dart';
+import '../../features/odometer/presentation/pages/odometer_page.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
 import '../../features/maintenance/presentation/pages/maintenance_page.dart';
 import '../../features/maintenance/presentation/pages/add_maintenance_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/promo/presentation/pages/privacy_policy_page.dart';
 import '../../features/promo/presentation/pages/terms_conditions_page.dart';
@@ -123,28 +124,28 @@ class AppRouter {
         ShellRoute(
           builder: (context, state, child) => MainNavigation(child: child),
           routes: [
-            // Dashboard/Home
+            // Home - Vehicles
             GoRoute(
               path: '/',
               name: 'home',
-              builder: (context, state) => const DashboardPage(),
+              builder: (context, state) => const VehiclesPage(),
             ),
             
-            // Vehicles
+            // Vehicle Details (sub-route of home)
             GoRoute(
-              path: '/vehicles',
-              name: 'vehicles',
-              builder: (context, state) => const VehiclesPage(),
-              routes: [
-                GoRoute(
-                  path: '/details/:vehicleId',
-                  name: 'vehicle_details',
-                  builder: (context, state) {
-                    final vehicleId = state.pathParameters['vehicleId']!;
-                    return VehicleDetailsPage(vehicleId: vehicleId);
-                  },
-                ),
-              ],
+              path: '/vehicle-details/:vehicleId',
+              name: 'vehicle_details',
+              builder: (context, state) {
+                final vehicleId = state.pathParameters['vehicleId']!;
+                return VehicleDetailsPage(vehicleId: vehicleId);
+              },
+            ),
+            
+            // Odometer
+            GoRoute(
+              path: '/odometer',
+              name: 'odometer',
+              builder: (context, state) => const OdometerPage(),
             ),
             
             // Fuel
@@ -180,6 +181,13 @@ class AppRouter {
               path: '/reports',
               name: 'reports',
               builder: (context, state) => const ReportsPage(),
+            ),
+            
+            // Settings
+            GoRoute(
+              path: '/settings',
+              name: 'settings',
+              builder: (context, state) => const SettingsPage(),
             ),
             
             // Profile

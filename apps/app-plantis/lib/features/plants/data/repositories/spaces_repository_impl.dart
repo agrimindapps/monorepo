@@ -20,12 +20,19 @@ class SpacesRepositoryImpl implements SpacesRepository {
     required this.authService,
   });
 
-  String? get _currentUserId => null; // TODO: Implement auth user access
+  Future<String?> get _currentUserId async {
+    try {
+      final user = await authService.currentUser.first;
+      return user?.id;
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Future<Either<Failure, List<Space>>> getSpaces() async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -61,7 +68,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, Space>> getSpaceById(String id) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -103,7 +110,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, Space>> addSpace(Space space) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -140,7 +147,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, Space>> updateSpace(Space space) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -177,7 +184,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, void>> deleteSpace(String id) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -243,7 +250,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, void>> syncPendingChanges() async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/gasometer_theme.dart';
+import '../../../../shared/widgets/vehicle_selector.dart';
 
 class MaintenancePage extends StatefulWidget {
   const MaintenancePage({super.key});
@@ -67,6 +69,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
   String _selectedFilter = 'all';
   String _selectedCategory = 'all';
   String _searchQuery = '';
+  String? _selectedVehicleId;
 
   List<Map<String, dynamic>> get _filteredRecords {
     var filtered = _maintenanceRecords;
@@ -103,7 +106,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -133,10 +136,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -152,12 +155,12 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.build,
-                      color: Colors.orange,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 28,
                     ),
                   ),
@@ -166,19 +169,19 @@ class _MaintenancePageState extends State<MaintenancePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Manutenções',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Text(
                           'Histórico de manutenções dos seus veículos',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -210,18 +213,18 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.orange, width: 2),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
               ),
             ),
@@ -234,9 +237,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: DropdownButton<String>(
                   value: _selectedFilter,
@@ -257,9 +260,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: DropdownButton<String>(
                   value: _selectedCategory,
@@ -282,18 +285,29 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_filteredRecords.isEmpty) {
-      return _buildEmptyState();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStatistics(),
+        VehicleSelector(
+          selectedVehicleId: _selectedVehicleId,
+          onVehicleChanged: (vehicleId) {
+            setState(() {
+              _selectedVehicleId = vehicleId;
+              _selectedFilter = vehicleId ?? 'all';
+            });
+          },
+          showEmptyOption: true,
+        ),
         const SizedBox(height: 24),
-        _buildUpcomingMaintenances(),
-        const SizedBox(height: 24),
-        _buildRecordsList(),
+        if (_filteredRecords.isEmpty)
+          _buildEmptyState()
+        else ...[
+          _buildStatistics(),
+          const SizedBox(height: 24),
+          _buildUpcomingMaintenances(),
+          const SizedBox(height: 24),
+          _buildRecordsList(),
+        ],
       ],
     );
   }
@@ -347,7 +361,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -373,7 +387,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   title,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -381,10 +395,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
             const SizedBox(height: 12),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -409,14 +423,14 @@ class _MaintenancePageState extends State<MaintenancePage> {
       children: [
         Row(
           children: [
-            const Icon(Icons.notification_important, color: Colors.orange, size: 20),
+            Icon(Icons.notification_important, color: Theme.of(context).colorScheme.primary, size: 20),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Próximas Manutenções',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -429,10 +443,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
           return Card(
             elevation: 0,
             margin: const EdgeInsets.only(bottom: 8),
-            color: Colors.orange.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
-              side: BorderSide(color: Colors.orange.withValues(alpha: 0.3)),
+              side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -441,12 +455,12 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.2),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.access_time,
-                      color: Colors.orange,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
                   ),
@@ -466,7 +480,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                           'Em $daysUntil dias',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -509,7 +523,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: InkWell(
         onTap: () => _showRecordDetails(record),
@@ -523,13 +537,13 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: (isPreventive ? Colors.blue : Colors.orange)
+                      color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       isPreventive ? Icons.schedule : Icons.build_circle,
-                      color: isPreventive ? Colors.blue : Colors.orange,
+                      color: isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary,
                       size: 24,
                     ),
                   ),
@@ -544,10 +558,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
                             Expanded(
                               child: Text(
                                 record['type'],
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -556,7 +570,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                               formattedDate,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade600,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ],
@@ -568,14 +582,14 @@ class _MaintenancePageState extends State<MaintenancePage> {
                               record['vehicleName'],
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade600,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               '•',
                               style: TextStyle(
-                                color: Colors.grey.shade400,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -583,7 +597,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                               record['workshop'],
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade600,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ],
@@ -612,7 +626,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: (isPreventive ? Colors.blue : Colors.orange)
+                      color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -620,7 +634,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                       isPreventive ? 'Preventiva' : 'Corretiva',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isPreventive ? Colors.blue : Colors.orange,
+                        color: isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -640,7 +654,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         Icon(
           icon,
           size: 18,
-          color: Colors.grey.shade500,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
         const SizedBox(width: 6),
         Column(
@@ -648,17 +662,17 @@ class _MaintenancePageState extends State<MaintenancePage> {
           children: [
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade500,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -676,12 +690,12 @@ class _MaintenancePageState extends State<MaintenancePage> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.build_outlined,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               size: 64,
             ),
           ),
@@ -699,7 +713,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
             'Registre a primeira manutenção do seu veículo',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -708,12 +722,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    return FloatingActionButton.extended(
+    return FloatingActionButton(
       onPressed: () => context.go('/maintenance/add'),
-      backgroundColor: Colors.orange,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Colors.white,
-      icon: const Icon(Icons.add),
-      label: const Text('Nova Manutenção'),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: 'Nova Manutenção',
+      child: const Icon(Icons.add),
     );
   }
 
@@ -725,7 +742,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
           children: [
             Icon(
               record['category'] == 'preventiva' ? Icons.schedule : Icons.build_circle,
-              color: record['category'] == 'preventiva' ? Colors.blue : Colors.orange,
+              color: record['category'] == 'preventiva' ? Colors.blue : Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -756,29 +773,29 @@ class _MaintenancePageState extends State<MaintenancePage> {
               const SizedBox(height: 4),
               Text(
                 record['description'],
-                style: TextStyle(color: Colors.grey.shade700),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               if (record['nextService'] != null) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.notification_important,
-                        color: Colors.orange,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Próxima manutenção: ${_formatDate(record['nextService'])}',
-                          style: const TextStyle(
-                            color: Colors.orange,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -809,7 +826,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
           Text(
             label,
             style: TextStyle(
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 14,
             ),
           ),

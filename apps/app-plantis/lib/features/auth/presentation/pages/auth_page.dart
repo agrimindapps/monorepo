@@ -235,7 +235,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       
                       // Tab Content
                       Container(
-                        height: 400,
+                        height: 600,
                         padding: const EdgeInsets.only(
                           left: 32,
                           right: 32,
@@ -323,7 +323,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Colors.grey.shade300,
+                            color: PlantisColors.primary.withValues(alpha: 0.3),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
@@ -537,9 +537,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                               backgroundColor: PlantisColors.primary,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               elevation: 2,
+                              shadowColor: PlantisColors.primary.withValues(alpha: 0.3),
                             ),
                             child: authProvider.isLoading
                                 ? const SizedBox(
@@ -556,6 +557,113 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Or continue with
+                    Text(
+                      'ou continue com',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: PlantisColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Social login buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildSocialButton(
+                          'G',
+                          'Google',
+                          Colors.red,
+                          () {
+                            // TODO: Implement Google login
+                          },
+                        ),
+                        _buildSocialButton(
+                          '',
+                          'Apple',
+                          Colors.black,
+                          () {
+                            // TODO: Implement Apple login
+                          },
+                          icon: Icons.apple,
+                        ),
+                        _buildSocialButton(
+                          '',
+                          'Microsoft',
+                          Colors.blue,
+                          () {
+                            // TODO: Implement Microsoft login
+                          },
+                          icon: Icons.window,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Anonymous login button
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, _) {
+                        return SizedBox(
+                          height: 48,
+                          child: OutlinedButton(
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : () async {
+                                    await authProvider.signInAnonymously();
+                                    if (authProvider.isAuthenticated && mounted) {
+                                      context.go('/plants');
+                                    }
+                                  },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: PlantisColors.primary,
+                              side: BorderSide(
+                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 1,
+                              shadowColor: Colors.black.withValues(alpha: 0.1),
+                            ),
+                            child: authProvider.isLoading
+                                ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        PlantisColors.primary,
+                                      ),
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.person_outline,
+                                        size: 20,
+                                        color: PlantisColors.primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Continuar sem conta',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: PlantisColors.primary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                           ),
                         );
@@ -970,6 +1078,43 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
           ),
         );
       },
+    );
+  }
+  
+  Widget _buildSocialButton(
+    String text,
+    String label,
+    Color color,
+    VoidCallback onPressed, {
+    IconData? icon,
+  }) {
+    return Container(
+      width: 80,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: icon != null
+            ? Icon(icon, color: color, size: 20)
+            : Text(
+                text,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+      ),
     );
   }
 }

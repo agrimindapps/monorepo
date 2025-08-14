@@ -6,16 +6,23 @@ part 'tarefa_model.g.dart';
 /// Tarefa model with Firebase sync support
 /// TypeId: 3 - Sequential numbering
 @HiveType(typeId: 3)
+// ignore: must_be_immutable
 class TarefaModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  @override
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
+  @override
   @HiveField(4) final bool isDirty;
+  @override
   @HiveField(5) final bool isDeleted;
+  @override
   @HiveField(6) final int version;
+  @override
   @HiveField(7) final String? userId;
+  @override
   @HiveField(8) final String? moduleName;
 
   // Tarefa specific fields
@@ -26,7 +33,7 @@ class TarefaModel extends BaseSyncModel {
   @HiveField(14) final String? observacoes;
   @HiveField(15) final DateTime? dataConclusao;
 
-  const TarefaModel({
+  TarefaModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -112,6 +119,7 @@ class TarefaModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -214,7 +222,7 @@ class TarefaModel extends BaseSyncModel {
     return copyWith(
       concluida: true,
       dataConclusao: DateTime.now(),
-      observacoes: observacoes ?? this.observacoes,
+      observacoes: observacoes ?? observacoes,
       isDirty: true,
       updatedAt: DateTime.now(),
     );

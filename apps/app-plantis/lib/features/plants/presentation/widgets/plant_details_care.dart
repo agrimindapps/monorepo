@@ -136,9 +136,7 @@ class PlantDetailsCare extends StatelessWidget {
       );
     }
 
-    final daysUntilNext = nextDate != null 
-        ? nextDate.difference(DateTime.now()).inDays
-        : null;
+    final daysUntilNext = nextDate?.difference(DateTime.now()).inDays;
     
     final isOverdue = daysUntilNext != null && daysUntilNext < 0;
     final isToday = daysUntilNext == 0;
@@ -149,7 +147,7 @@ class PlantDetailsCare extends StatelessWidget {
     
     if (isOverdue) {
       statusColor = Colors.red;
-      statusText = '${(-daysUntilNext!)} dias atrás';
+      statusText = '${(-daysUntilNext)} dias atrás';
     } else if (isToday) {
       statusColor = Colors.orange;
       statusText = 'Hoje';

@@ -30,7 +30,11 @@ class _PlantsListPageState extends State<PlantsListPage> {
     super.initState();
     _plantsProvider = di.sl<PlantsProvider>();
     // _spacesProvider = di.sl<spaces.SpacesProvider>();
-    _loadInitialData();
+    
+    // Load data after a small delay to ensure auth is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   @override

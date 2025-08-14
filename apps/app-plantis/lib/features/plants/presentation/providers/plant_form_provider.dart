@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
 import '../../domain/entities/plant.dart';
@@ -45,6 +44,22 @@ class PlantFormProvider extends ChangeNotifier {
   String? _soilType;
   double? _idealTemperature;
   double? _idealHumidity;
+  
+  // New care configuration fields
+  bool? _enableSunlightCare;
+  int? _sunlightIntervalDays;
+  DateTime? _lastSunlightDate;
+  
+  bool? _enablePestInspection;
+  int? _pestInspectionIntervalDays;
+  DateTime? _lastPestInspectionDate;
+  
+  bool? _enablePruning;
+  DateTime? _lastPruningDate;
+  
+  bool? _enableReplanting;
+  int? _replantingIntervalDays;
+  DateTime? _lastReplantingDate;
 
   // Getters
   Plant? get originalPlant => _originalPlant;
@@ -74,6 +89,22 @@ class PlantFormProvider extends ChangeNotifier {
   String? get soilType => _soilType;
   double? get idealTemperature => _idealTemperature;
   double? get idealHumidity => _idealHumidity;
+  
+  // New care configuration getters
+  bool? get enableSunlightCare => _enableSunlightCare;
+  int? get sunlightIntervalDays => _sunlightIntervalDays;
+  DateTime? get lastSunlightDate => _lastSunlightDate;
+  
+  bool? get enablePestInspection => _enablePestInspection;
+  int? get pestInspectionIntervalDays => _pestInspectionIntervalDays;
+  DateTime? get lastPestInspectionDate => _lastPestInspectionDate;
+  
+  bool? get enablePruning => _enablePruning;
+  DateTime? get lastPruningDate => _lastPruningDate;
+  
+  bool? get enableReplanting => _enableReplanting;
+  int? get replantingIntervalDays => _replantingIntervalDays;
+  DateTime? get lastReplantingDate => _lastReplantingDate;
 
   // Form validation
   bool get isValid => _name.trim().isNotEmpty;
@@ -306,6 +337,83 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // New care configuration setters
+  void setEnableSunlightCare(bool value) {
+    _enableSunlightCare = value;
+    if (!value) {
+      _sunlightIntervalDays = null;
+      _lastSunlightDate = null;
+    } else {
+      _sunlightIntervalDays ??= 7; // Default to 1 week
+    }
+    notifyListeners();
+  }
+
+  void setSunlightInterval(int value) {
+    _sunlightIntervalDays = value;
+    notifyListeners();
+  }
+
+  void setLastSunlightDate(DateTime? value) {
+    _lastSunlightDate = value;
+    notifyListeners();
+  }
+
+  void setEnablePestInspection(bool value) {
+    _enablePestInspection = value;
+    if (!value) {
+      _pestInspectionIntervalDays = null;
+      _lastPestInspectionDate = null;
+    } else {
+      _pestInspectionIntervalDays ??= 14; // Default to 2 weeks
+    }
+    notifyListeners();
+  }
+
+  void setPestInspectionInterval(int value) {
+    _pestInspectionIntervalDays = value;
+    notifyListeners();
+  }
+
+  void setLastPestInspectionDate(DateTime? value) {
+    _lastPestInspectionDate = value;
+    notifyListeners();
+  }
+
+  void setEnablePruning(bool value) {
+    _enablePruning = value;
+    if (!value) {
+      _lastPruningDate = null;
+    }
+    notifyListeners();
+  }
+
+  void setLastPruningDate(DateTime? value) {
+    _lastPruningDate = value;
+    notifyListeners();
+  }
+
+  void setEnableReplanting(bool value) {
+    _enableReplanting = value;
+    if (!value) {
+      _replantingIntervalDays = null;
+      _lastReplantingDate = null;
+    } else {
+      _replantingIntervalDays ??= 365; // Default to 1 year
+    }
+    notifyListeners();
+  }
+
+  void setReplantingInterval(int value) {
+    _replantingIntervalDays = value;
+    notifyListeners();
+  }
+
+  void setLastReplantingDate(DateTime? value) {
+    _lastReplantingDate = value;
+    notifyListeners();
+  }
+
   // Save plant
   Future<bool> savePlant() async {
     if (!isValid) return false;
@@ -398,6 +506,22 @@ class PlantFormProvider extends ChangeNotifier {
     _soilType = null;
     _idealTemperature = null;
     _idealHumidity = null;
+    
+    // Clear new care configuration fields
+    _enableSunlightCare = null;
+    _sunlightIntervalDays = null;
+    _lastSunlightDate = null;
+    
+    _enablePestInspection = null;
+    _pestInspectionIntervalDays = null;
+    _lastPestInspectionDate = null;
+    
+    _enablePruning = null;
+    _lastPruningDate = null;
+    
+    _enableReplanting = null;
+    _replantingIntervalDays = null;
+    _lastReplantingDate = null;
   }
 
   AddPlantParams _buildAddParams() {
@@ -466,23 +590,19 @@ class PlantFormProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure:
+      case ValidationFailure _:
         return failure.message;
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return 'Planta não encontrada';
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Sem conexão com a internet';
-      case ServerFailure:
+      case ServerFailure _:
         return 'Erro no servidor. Tente novamente.';
-      case CacheFailure:
+      case CacheFailure _:
         return 'Erro local. Verifique o armazenamento.';
       default:
         return 'Erro inesperado. Tente novamente.';
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

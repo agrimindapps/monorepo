@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:core/core.dart';
 
 class Space extends BaseSyncEntity {

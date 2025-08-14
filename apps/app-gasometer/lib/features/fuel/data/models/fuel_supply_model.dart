@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import '../../../core/data/models/base_sync_model.dart';
+import 'package:core/core.dart';
+import '../../../../core/data/models/base_sync_model.dart';
 
 part 'fuel_supply_model.g.dart';
 
@@ -7,7 +8,7 @@ part 'fuel_supply_model.g.dart';
 /// TypeId: 1 - New sequential numbering
 @HiveType(typeId: 1)
 class FuelSupplyModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  // Base sync fields (required for Hive generation)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -30,7 +31,7 @@ class FuelSupplyModel extends BaseSyncModel {
   @HiveField(18) final String? observacao;
   @HiveField(19) final int tipoCombustivel;
 
-  const FuelSupplyModel({
+  FuelSupplyModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -130,6 +131,7 @@ class FuelSupplyModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -167,7 +169,7 @@ class FuelSupplyModel extends BaseSyncModel {
 
   /// Create from Firebase map
   factory FuelSupplyModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
     
     return FuelSupplyModel(

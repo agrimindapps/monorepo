@@ -4,23 +4,24 @@ import 'package:go_router/go_router.dart';
 import 'package:core/core.dart';
 import '../providers/auth_provider.dart' as auth_providers;
 import '../../../../core/theme/colors.dart';
-import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A), // Dark background like the image
+      backgroundColor: const Color(
+        0xFF1A1A1A,
+      ), // Dark background like the image
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Consumer<auth_providers.AuthProvider>(
             builder: (context, authProvider, _) {
               final user = authProvider.currentUser;
-              
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -31,7 +32,9 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         Text(
                           'Minha Conta',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 32,
@@ -39,10 +42,12 @@ class ProfilePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          user != null && user.displayName.isNotEmpty 
+                          user != null && user.displayName.isNotEmpty
                               ? 'Bem-vindo, ${user.displayName}'
                               : 'Bem-vindo, Usuário Anônimo',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
                             color: Colors.grey.shade400,
                             fontSize: 16,
                           ),
@@ -50,9 +55,9 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
-                  
+
                   // User Profile Card
                   Container(
                     padding: const EdgeInsets.all(20.0),
@@ -66,37 +71,42 @@ class ProfilePage extends StatelessWidget {
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: PlantisColors.primary,
-                          child: user?.hasProfilePhoto == true
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(30),
-                                  child: Image.network(
-                                    user!.photoUrl!,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Text(
-                                        user.initials,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      );
-                                    },
+                          child:
+                              user?.hasProfilePhoto == true
+                                  ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: Image.network(
+                                      user!.photoUrl!,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (
+                                        context,
+                                        error,
+                                        stackTrace,
+                                      ) {
+                                        return Text(
+                                          user.initials,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                  : Text(
+                                    user?.initials ?? 'LR',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                )
-                              : Text(
-                                  user?.initials ?? 'LR',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
                         ),
                         const SizedBox(width: 16),
-                        
+
                         // User Info
                         Expanded(
                           child: Column(
@@ -139,18 +149,15 @@ class ProfilePage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        
+
                         // Menu dots
-                        Icon(
-                          Icons.more_vert,
-                          color: Colors.grey.shade500,
-                        ),
+                        Icon(Icons.more_vert, color: Colors.grey.shade500),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Premium Plan Card
                   Container(
                     padding: const EdgeInsets.all(20.0),
@@ -188,9 +195,9 @@ class ProfilePage extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Premium Resources
                         const Text(
                           'Recursos Premium:',
@@ -200,16 +207,18 @@ class ProfilePage extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         _buildPremiumFeature('Plantas ilimitadas'),
                         _buildPremiumFeature('Backup automático na nuvem'),
-                        _buildPremiumFeature('Relatórios avançados de cuidados'),
+                        _buildPremiumFeature(
+                          'Relatórios avançados de cuidados',
+                        ),
                         _buildPremiumFeature('Lembretes personalizados'),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         Text(
                           'E mais 3 recursos...',
                           style: TextStyle(
@@ -218,9 +227,9 @@ class ProfilePage extends StatelessWidget {
                             fontStyle: FontStyle.italic,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Premium Button
                         SizedBox(
                           width: double.infinity,
@@ -247,9 +256,9 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Configurations Section
                   const Text(
                     'Configurações',
@@ -259,9 +268,9 @@ class ProfilePage extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Configurations Card
                   Container(
                     decoration: BoxDecoration(
@@ -276,7 +285,9 @@ class ProfilePage extends StatelessWidget {
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -306,12 +317,14 @@ class ProfilePage extends StatelessWidget {
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Configurações de notificações em desenvolvimento'),
+                                content: Text(
+                                  'Configurações de notificações em desenvolvimento',
+                                ),
                               ),
                             );
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -320,14 +333,16 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Theme Toggle
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -352,24 +367,34 @@ class ProfilePage extends StatelessWidget {
                           ),
                           trailing: Consumer<ThemeProvider>(
                             builder: (context, themeProvider, _) {
-                              final isDark = themeProvider.isDarkThemeActive(context);
-                              
+                              final isDark = themeProvider.isDarkThemeActive(
+                                context,
+                              );
+
                               return Switch(
                                 value: isDark,
                                 onChanged: (value) async {
                                   await themeProvider.toggleLightDark();
                                 },
                                 activeColor: PlantisColors.primary,
-                                trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                                thumbColor: WidgetStateProperty.resolveWith((states) {
+                                trackOutlineColor: WidgetStateProperty.all(
+                                  Colors.transparent,
+                                ),
+                                thumbColor: WidgetStateProperty.resolveWith((
+                                  states,
+                                ) {
                                   if (states.contains(WidgetState.selected)) {
                                     return PlantisColors.primary;
                                   }
                                   return Colors.grey.shade400;
                                 }),
-                                trackColor: WidgetStateProperty.resolveWith((states) {
+                                trackColor: WidgetStateProperty.resolveWith((
+                                  states,
+                                ) {
                                   if (states.contains(WidgetState.selected)) {
-                                    return PlantisColors.primary.withValues(alpha: 0.3);
+                                    return PlantisColors.primary.withValues(
+                                      alpha: 0.3,
+                                    );
                                   }
                                   return Colors.grey.shade600;
                                 }),
@@ -380,9 +405,9 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Support Section
                   const Text(
                     'Suporte',
@@ -392,9 +417,9 @@ class ProfilePage extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Support Card
                   Container(
                     decoration: BoxDecoration(
@@ -409,7 +434,9 @@ class ProfilePage extends StatelessWidget {
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -439,12 +466,14 @@ class ProfilePage extends StatelessWidget {
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Sistema de feedback em desenvolvimento'),
+                                content: Text(
+                                  'Sistema de feedback em desenvolvimento',
+                                ),
                               ),
                             );
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -453,14 +482,16 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Rate App
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -492,9 +523,9 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Legal Section
                   const Text(
                     'Legal',
@@ -504,9 +535,9 @@ class ProfilePage extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Legal Card
                   Container(
                     decoration: BoxDecoration(
@@ -521,7 +552,9 @@ class ProfilePage extends StatelessWidget {
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -552,7 +585,7 @@ class ProfilePage extends StatelessWidget {
                             _showPrivacyPolicy(context);
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -561,14 +594,16 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Terms of Use
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -599,7 +634,7 @@ class ProfilePage extends StatelessWidget {
                             _showTermsOfUse(context);
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -608,14 +643,16 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // About App
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: PlantisColors.primary.withValues(alpha: 0.2),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -649,9 +686,9 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Development Section
                   const Text(
                     'Desenvolvimento',
@@ -661,9 +698,9 @@ class ProfilePage extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Development Card
                   Container(
                     decoration: BoxDecoration(
@@ -699,11 +736,14 @@ class ProfilePage extends StatelessWidget {
                             color: Colors.grey,
                           ),
                           onTap: () {
-                            _showDevelopmentDialog(context, 'Gerar dados de teste', 
-                              'Esta função criará dados fictícios para teste do aplicativo.');
+                            _showDevelopmentDialog(
+                              context,
+                              'Gerar dados de teste',
+                              'Esta função criará dados fictícios para teste do aplicativo.',
+                            );
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -712,7 +752,7 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Clear All Records
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
@@ -740,11 +780,14 @@ class ProfilePage extends StatelessWidget {
                             color: Colors.grey,
                           ),
                           onTap: () {
-                            _showDevelopmentDialog(context, 'Limpar todos os registros', 
-                              'ATENÇÃO: Esta ação removerá todos os dados do aplicativo permanentemente.');
+                            _showDevelopmentDialog(
+                              context,
+                              'Limpar todos os registros',
+                              'ATENÇÃO: Esta ação removerá todos os dados do aplicativo permanentemente.',
+                            );
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -753,7 +796,7 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Promotional Page
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
@@ -781,11 +824,14 @@ class ProfilePage extends StatelessWidget {
                             color: Colors.grey,
                           ),
                           onTap: () {
-                            _showDevelopmentDialog(context, 'Página promocional', 
-                              'Abre a página promocional do aplicativo.');
+                            _showDevelopmentDialog(
+                              context,
+                              'Página promocional',
+                              'Abre a página promocional do aplicativo.',
+                            );
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -794,7 +840,7 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Generate Local License
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
@@ -829,11 +875,14 @@ class ProfilePage extends StatelessWidget {
                             color: Colors.grey,
                           ),
                           onTap: () {
-                            _showDevelopmentDialog(context, 'Gerar Licença Local', 
-                              'Esta função ativará o premium localmente por 30 dias para testes.');
+                            _showDevelopmentDialog(
+                              context,
+                              'Gerar Licença Local',
+                              'Esta função ativará o premium localmente por 30 dias para testes.',
+                            );
                           },
                         ),
-                        
+
                         // Divider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -842,7 +891,7 @@ class ProfilePage extends StatelessWidget {
                             height: 1,
                           ),
                         ),
-                        
+
                         // Revoke Local License
                         ListTile(
                           contentPadding: const EdgeInsets.all(20),
@@ -877,14 +926,17 @@ class ProfilePage extends StatelessWidget {
                             color: Colors.grey,
                           ),
                           onTap: () {
-                            _showDevelopmentDialog(context, 'Revogar Licença Local', 
-                              'Esta função removerá a licença premium local.');
+                            _showDevelopmentDialog(
+                              context,
+                              'Revogar Licença Local',
+                              'Esta função removerá a licença premium local.',
+                            );
                           },
                         ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
                 ],
               );
@@ -894,7 +946,7 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildPremiumFeature(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -908,22 +960,19 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             text,
-            style: TextStyle(
-              color: Colors.grey.shade300,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
           ),
         ],
       ),
     );
   }
-  
+
   String _getMemberSince(DateTime? createdAt) {
     if (createdAt == null) return 'Membro desde 10 dias';
-    
+
     final now = DateTime.now();
     final difference = now.difference(createdAt);
-    
+
     if (difference.inDays < 30) {
       return 'Membro desde ${difference.inDays} dias';
     } else if (difference.inDays < 365) {
@@ -937,11 +986,11 @@ class ProfilePage extends StatelessWidget {
 
   Future<void> _showRateAppDialog(BuildContext context) async {
     final appRatingRepository = di.sl<IAppRatingRepository>();
-    
+
     try {
       // Check if we can show the rating dialog
       final canShow = await appRatingRepository.canShowRatingDialog();
-      
+
       if (canShow) {
         // Show the rate my app dialog
         if (context.mounted) {
@@ -950,7 +999,7 @@ class ProfilePage extends StatelessWidget {
       } else {
         // Fallback: directly open the app store
         final success = await appRatingRepository.openAppStore();
-        
+
         if (!success && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -971,19 +1020,20 @@ class ProfilePage extends StatelessWidget {
       }
     }
   }
-  
+
   void _showPrivacyPolicy(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2A2A2A),
-        title: const Text(
-          'Política de Privacidade',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            '''Esta Política de Privacidade descreve como coletamos, usamos e protegemos suas informações pessoais no PlantApp.
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFF2A2A2A),
+            title: const Text(
+              'Política de Privacidade',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: SingleChildScrollView(
+              child: Text(
+                '''Esta Política de Privacidade descreve como coletamos, usamos e protegemos suas informações pessoais no PlantApp.
 
 INFORMAÇÕES QUE COLETAMOS:
 • Dados de conta (email, nome, avatar)
@@ -1001,34 +1051,35 @@ PROTEÇÃO DE DADOS:
 • Você pode solicitar exclusão de dados a qualquer momento
 
 Para mais informações, entre em contato conosco.''',
-            style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Fechar',
-              style: TextStyle(color: PlantisColors.primary),
+                style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Fechar',
+                  style: TextStyle(color: PlantisColors.primary),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
-  
+
   void _showTermsOfUse(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2A2A2A),
-        title: const Text(
-          'Termos de Uso',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            '''Ao usar o PlantApp, você concorda com os seguintes termos:
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFF2A2A2A),
+            title: const Text(
+              'Termos de Uso',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: SingleChildScrollView(
+              child: Text(
+                '''Ao usar o PlantApp, você concorda com os seguintes termos:
 
 USO DO APLICATIVO:
 • O app destina-se ao cuidado e gestão de plantas
@@ -1051,180 +1102,182 @@ LIMITAÇÃO DE RESPONSABILIDADE:
 • Não nos responsabilizamos por danos indiretos
 
 Estes termos podem ser atualizados periodicamente.''',
-            style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Fechar',
-              style: TextStyle(color: PlantisColors.primary),
+                style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Fechar',
+                  style: TextStyle(color: PlantisColors.primary),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
-  
+
   void _showAboutApp(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2A2A2A),
-        title: const Text(
-          'Sobre o PlantApp',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // App Icon
-              Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: PlantisColors.primary,
-                    borderRadius: BorderRadius.circular(16),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFF2A2A2A),
+            title: const Text(
+              'Sobre o PlantApp',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // App Icon
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.eco,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.eco,
-                    color: Colors.white,
-                    size: 40,
+                  const SizedBox(height: 16),
+
+                  Center(
+                    child: Text(
+                      'PlantApp',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              Center(
-                child: Text(
-                  'PlantApp',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+
+                  const SizedBox(height: 8),
+
+                  Center(
+                    child: Text(
+                      'Versão 1.0.0',
+                      style: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              Center(
-                child: Text(
-                  'Versão 1.0.0',
-                  style: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 16,
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'O PlantApp é seu companheiro perfeito para cuidar das suas plantas. Com recursos avançados de gerenciamento, lembretes personalizados e relatórios detalhados, nunca foi tão fácil manter suas plantas saudáveis.',
+                    style: TextStyle(
+                      color: Colors.grey.shade300,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
                   ),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                'O PlantApp é seu companheiro perfeito para cuidar das suas plantas. Com recursos avançados de gerenciamento, lembretes personalizados e relatórios detalhados, nunca foi tão fácil manter suas plantas saudáveis.',
-                style: TextStyle(
-                  color: Colors.grey.shade300,
-                  fontSize: 14,
-                  height: 1.4,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                'RECURSOS:',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                '''• Gerenciamento de plantas ilimitado
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'RECURSOS:',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    '''• Gerenciamento de plantas ilimitado
 • Lembretes personalizados de cuidados
 • Relatórios avançados de saúde
 • Backup automático na nuvem
 • Interface intuitiva e moderna''',
-                style: TextStyle(
-                  color: Colors.grey.shade300,
-                  fontSize: 14,
-                  height: 1.4,
-                ),
+                    style: TextStyle(
+                      color: Colors.grey.shade300,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'Desenvolvido com ❤️ para amantes de plantas',
+                    style: TextStyle(
+                      color: PlantisColors.primary,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                'Desenvolvido com ❤️ para amantes de plantas',
-                style: TextStyle(
-                  color: PlantisColors.primary,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Fechar',
+                  style: TextStyle(color: PlantisColors.primary),
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Fechar',
-              style: TextStyle(color: PlantisColors.primary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showDevelopmentDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2A2A2A),
-        title: Text(
-          title,
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          message,
-          style: TextStyle(color: Colors.grey.shade300),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: Colors.grey.shade400),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('$title - Função em desenvolvimento'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
-            },
-            child: Text(
-              'Executar',
-              style: TextStyle(color: PlantisColors.primary),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
+  void _showDevelopmentDialog(
+    BuildContext context,
+    String title,
+    String message,
+  ) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFF2A2A2A),
+            title: Text(title, style: const TextStyle(color: Colors.white)),
+            content: Text(
+              message,
+              style: TextStyle(color: Colors.grey.shade300),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancelar',
+                  style: TextStyle(color: Colors.grey.shade400),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$title - Função em desenvolvimento'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                },
+                child: Text(
+                  'Executar',
+                  style: TextStyle(color: PlantisColors.primary),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
 }

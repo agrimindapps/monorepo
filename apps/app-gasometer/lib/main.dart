@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:core/core.dart';
 
 import 'app.dart';
 import 'core/services/analytics_service.dart';
@@ -25,7 +24,7 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
-  
+
   // Register Hive adapters
   Hive.registerAdapter(VehicleModelAdapter());
   Hive.registerAdapter(FuelSupplyModelAdapter());

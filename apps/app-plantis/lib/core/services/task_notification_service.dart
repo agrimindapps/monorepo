@@ -147,6 +147,8 @@ class TaskNotificationService {
         return 'Hora do sol! ☀️';
       case task_entity.TaskType.shade:
         return 'Hora da sombra! 🌤️';
+      case task_entity.TaskType.pestInspection:
+        return 'Hora da inspeção! 🔍';
       case task_entity.TaskType.custom:
         return 'Lembrete de cuidado! 🌱';
     }

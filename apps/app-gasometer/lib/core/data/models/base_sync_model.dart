@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
-  const BaseSyncModel({
+  BaseSyncModel({
     required super.id,
     super.createdAt,
     super.updatedAt,
@@ -146,6 +146,20 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
       'lastSyncAt': map['last_sync_at'] != null 
           ? DateTime.parse(map['last_sync_at'] as String)
           : null,
+    };
+  }
+
+  /// Parse base fields from Firebase map (delegate to BaseSyncEntity)
+  static Map<String, dynamic> parseBaseFirebaseFields(Map<String, dynamic> map) {
+    return BaseSyncEntity.parseBaseFirebaseFields(map);
+  }
+
+  /// Default toFirebaseMap implementation
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      ...firebaseTimestampFields,
     };
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_odometer_page.dart';
+import '../../../../shared/widgets/vehicle_selector.dart';
 
 class OdometerPage extends StatefulWidget {
   const OdometerPage({super.key});
@@ -9,15 +10,10 @@ class OdometerPage extends StatefulWidget {
 }
 
 class _OdometerPageState extends State<OdometerPage> {
-  String? _selectedVehicle;
+  String? _selectedVehicleId;
   int _currentMonthIndex = 0;
   bool _showStatistics = true;
-  bool _isLoading = false;
-
-  final List<String> _vehicles = [
-    'Honda Civic 2022',
-    'Toyota Corolla 2021',
-  ];
+  final bool _isLoading = false;
 
   final List<String> _months = [
     'Jan 25',
@@ -29,6 +25,11 @@ class _OdometerPageState extends State<OdometerPage> {
     'Jul 25',
     'Ago 25',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   final List<Map<String, dynamic>> _odometers = [
     {
@@ -64,12 +65,12 @@ class _OdometerPageState extends State<OdometerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
-            if (_selectedVehicle != null) _buildControls(),
+            if (_selectedVehicleId != null) _buildControls(),
             Expanded(child: _buildContent()),
           ],
         ),
@@ -83,10 +84,10 @@ class _OdometerPageState extends State<OdometerPage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -100,12 +101,12 @@ class _OdometerPageState extends State<OdometerPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5722).withValues(alpha: 0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.speed,
-                  color: Color(0xFFFF5722),
+                  color: Theme.of(context).colorScheme.primary,
                   size: 28,
                 ),
               ),
@@ -114,30 +115,30 @@ class _OdometerPageState extends State<OdometerPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Odômetro',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       'Registros de quilometragem',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (_selectedVehicle != null)
+              if (_selectedVehicleId != null)
                 IconButton(
                   onPressed: () => setState(() => _showStatistics = !_showStatistics),
                   icon: Icon(
                     _showStatistics ? Icons.assessment : Icons.assessment_outlined,
-                    color: const Color(0xFFFF5722),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   tooltip: _showStatistics ? 'Ocultar estatísticas' : 'Mostrar estatísticas',
                 ),
@@ -188,7 +189,14 @@ class _OdometerPageState extends State<OdometerPage> {
           constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
             children: [
-              _buildVehicleSelector(),
+              VehicleSelector(
+                selectedVehicleId: _selectedVehicleId,
+                onVehicleChanged: (vehicleId) {
+                  setState(() {
+                    _selectedVehicleId = vehicleId;
+                  });
+                },
+              ),
               const SizedBox(height: 16),
               _buildMonthsBar(),
             ],
@@ -198,56 +206,6 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Widget _buildVehicleSelector() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedVehicle,
-          hint: Row(
-            children: [
-              Icon(Icons.directions_car, color: Colors.grey.shade600, size: 20),
-              const SizedBox(width: 12),
-              Text(
-                'Selecione um veículo',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
-          isExpanded: true,
-          items: _vehicles.map((vehicle) {
-            return DropdownMenuItem<String>(
-              value: vehicle,
-              child: Row(
-                children: [
-                  const Icon(Icons.directions_car, color: Color(0xFFFF5722), size: 20),
-                  const SizedBox(width: 12),
-                  Text(
-                    vehicle,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: (value) => setState(() => _selectedVehicle = value),
-        ),
-      ),
-    );
-  }
 
   Widget _buildMonthsBar() {
     return SizedBox(
@@ -263,16 +221,16 @@ class _OdometerPageState extends State<OdometerPage> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFFF5722) : Colors.white,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFFFF5722) : Colors.grey.shade300,
+                  color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
                 ),
               ),
               child: Text(
                 _months[index],
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -284,7 +242,7 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildContent() {
-    if (_selectedVehicle == null) {
+    if (_selectedVehicleId == null) {
       return _buildNoVehicleSelected();
     }
 
@@ -317,22 +275,22 @@ class _OdometerPageState extends State<OdometerPage> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.directions_car_outlined,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               size: 64,
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Selecione um veículo',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -340,7 +298,7 @@ class _OdometerPageState extends State<OdometerPage> {
             'Escolha um veículo para visualizar os registros de odômetro',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -354,8 +312,9 @@ class _OdometerPageState extends State<OdometerPage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -366,22 +325,22 @@ class _OdometerPageState extends State<OdometerPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF5722).withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.assessment,
-                    color: Color(0xFFFF5722),
+                    color: Theme.of(context).colorScheme.primary,
                     size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Estatísticas do Mês',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -407,29 +366,29 @@ class _OdometerPageState extends State<OdometerPage> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFFFF5722),
+            color: Theme.of(context).colorScheme.primary,
             size: 24,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey.shade600,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           textAlign: TextAlign.center,
         ),
@@ -457,22 +416,22 @@ class _OdometerPageState extends State<OdometerPage> {
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.speed_outlined,
-                color: Colors.grey.shade400,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 size: 64,
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Nenhum registro encontrado',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -480,7 +439,7 @@ class _OdometerPageState extends State<OdometerPage> {
               'Não há registros de odômetro para este período',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -500,8 +459,9 @@ class _OdometerPageState extends State<OdometerPage> {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
+        color: Theme.of(context).colorScheme.surface,
         child: InkWell(
           onTap: () => _editOdometer(odometer),
           borderRadius: BorderRadius.circular(16),
@@ -516,17 +476,17 @@ class _OdometerPageState extends State<OdometerPage> {
                       weekday,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       dayOfMonth,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -535,7 +495,7 @@ class _OdometerPageState extends State<OdometerPage> {
                 Container(
                   width: 1,
                   height: 40,
-                  color: Colors.grey.shade300,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
                 const SizedBox(width: 16),
                 // Informações
@@ -567,7 +527,7 @@ class _OdometerPageState extends State<OdometerPage> {
                           odometer['description'],
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -576,7 +536,7 @@ class _OdometerPageState extends State<OdometerPage> {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Colors.grey.shade400,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ],
             ),
@@ -599,16 +559,16 @@ class _OdometerPageState extends State<OdometerPage> {
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: isHighlighted
-                ? const Color(0xFFFF5722).withValues(alpha: 0.1)
-                : Colors.grey.shade100,
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Icon(
             icon,
             size: 16,
             color: isHighlighted
-                ? const Color(0xFFFF5722)
-                : Colors.grey.shade600,
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(width: 8),
@@ -621,15 +581,15 @@ class _OdometerPageState extends State<OdometerPage> {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: isHighlighted
-                    ? Colors.black87
-                    : Colors.grey.shade700,
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -639,15 +599,28 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildFloatingActionButton() {
-    final hasSelectedVehicle = _selectedVehicle != null;
+    final hasSelectedVehicle = _selectedVehicleId != null;
     
-    return FloatingActionButton.extended(
-      onPressed: hasSelectedVehicle ? _addOdometer : null,
-      backgroundColor: hasSelectedVehicle ? const Color(0xFFFF5722) : Colors.grey.shade400,
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.add),
-      label: const Text('Novo Registro'),
-      tooltip: 'Adicionar registro de odômetro',
+    return FloatingActionButton(
+      onPressed: hasSelectedVehicle ? _addOdometer : _showSelectVehicleMessage,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: hasSelectedVehicle 
+          ? 'Adicionar registro de odômetro' 
+          : 'Selecione um veículo primeiro',
+      child: const Icon(Icons.add),
+    );
+  }
+
+  void _showSelectVehicleMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Selecione um veículo primeiro'),
+        backgroundColor: Colors.orange,
+      ),
     );
   }
 
@@ -657,13 +630,19 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   void _addOdometer() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddOdometerPage(),
-      ),
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const AddOdometerPage(),
     );
     
-    if (result == true && mounted) {
+    if (result != null && mounted) {
+      setState(() {
+        _odometers.insert(0, {
+          'id': DateTime.now().millisecondsSinceEpoch,
+          ...result,
+        });
+      });
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registro cadastrado com sucesso'),
@@ -674,13 +653,22 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   void _editOdometer(Map<String, dynamic> odometer) async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => AddOdometerPage(odometer: odometer),
-      ),
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => AddOdometerPage(odometer: odometer),
     );
     
-    if (result == true && mounted) {
+    if (result != null && mounted) {
+      setState(() {
+        final index = _odometers.indexWhere((o) => o['id'] == odometer['id']);
+        if (index >= 0) {
+          _odometers[index] = {
+            'id': odometer['id'],
+            ...result,
+          };
+        }
+      });
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registro editado com sucesso'),

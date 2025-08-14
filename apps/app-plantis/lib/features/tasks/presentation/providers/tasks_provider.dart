@@ -4,7 +4,6 @@ import 'package:core/src/domain/usecases/base_usecase.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/usecases/get_tasks_usecase.dart';
 import '../../domain/usecases/add_task_usecase.dart';
-import '../../domain/usecases/update_task_usecase.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
 import '../../../../core/services/task_notification_service.dart';
 
@@ -22,39 +21,39 @@ enum TasksFilterType {
 
 class TasksProvider extends ChangeNotifier {
   final GetTasksUseCase _getTasksUseCase;
-  final GetTasksByPlantIdUseCase _getTasksByPlantIdUseCase;
-  final GetTasksByStatusUseCase _getTasksByStatusUseCase;
-  final GetOverdueTasksUseCase _getOverdueTasksUseCase;
-  final GetTodayTasksUseCase _getTodayTasksUseCase;
-  final GetUpcomingTasksUseCase _getUpcomingTasksUseCase;
+  // final GetTasksByPlantIdUseCase _getTasksByPlantIdUseCase;
+  // final GetTasksByStatusUseCase _getTasksByStatusUseCase;
+  // final GetOverdueTasksUseCase _getOverdueTasksUseCase;
+  // final GetTodayTasksUseCase _getTodayTasksUseCase;
+  // final GetUpcomingTasksUseCase _getUpcomingTasksUseCase;
   final AddTaskUseCase _addTaskUseCase;
-  final UpdateTaskUseCase _updateTaskUseCase;
+  // final UpdateTaskUseCase _updateTaskUseCase;
   final CompleteTaskUseCase _completeTaskUseCase;
-  final DeleteTaskUseCase _deleteTaskUseCase;
+  // final DeleteTaskUseCase _deleteTaskUseCase;
   final TaskNotificationService _notificationService;
 
   TasksProvider({
     required GetTasksUseCase getTasksUseCase,
-    required GetTasksByPlantIdUseCase getTasksByPlantIdUseCase,
-    required GetTasksByStatusUseCase getTasksByStatusUseCase,
-    required GetOverdueTasksUseCase getOverdueTasksUseCase,
-    required GetTodayTasksUseCase getTodayTasksUseCase,
-    required GetUpcomingTasksUseCase getUpcomingTasksUseCase,
+    // required GetTasksByPlantIdUseCase getTasksByPlantIdUseCase,
+    // required GetTasksByStatusUseCase getTasksByStatusUseCase,
+    // required GetOverdueTasksUseCase getOverdueTasksUseCase,
+    // required GetTodayTasksUseCase getTodayTasksUseCase,
+    // required GetUpcomingTasksUseCase getUpcomingTasksUseCase,
     required AddTaskUseCase addTaskUseCase,
-    required UpdateTaskUseCase updateTaskUseCase,
+    // required UpdateTaskUseCase updateTaskUseCase,
     required CompleteTaskUseCase completeTaskUseCase,
-    required DeleteTaskUseCase deleteTaskUseCase,
+    // required DeleteTaskUseCase deleteTaskUseCase,
     TaskNotificationService? notificationService,
   })  : _getTasksUseCase = getTasksUseCase,
-        _getTasksByPlantIdUseCase = getTasksByPlantIdUseCase,
-        _getTasksByStatusUseCase = getTasksByStatusUseCase,
-        _getOverdueTasksUseCase = getOverdueTasksUseCase,
-        _getTodayTasksUseCase = getTodayTasksUseCase,
-        _getUpcomingTasksUseCase = getUpcomingTasksUseCase,
+        // _getTasksByPlantIdUseCase = getTasksByPlantIdUseCase,
+        // _getTasksByStatusUseCase = getTasksByStatusUseCase,
+        // _getOverdueTasksUseCase = getOverdueTasksUseCase,
+        // _getTodayTasksUseCase = getTodayTasksUseCase,
+        // _getUpcomingTasksUseCase = getUpcomingTasksUseCase,
         _addTaskUseCase = addTaskUseCase,
-        _updateTaskUseCase = updateTaskUseCase,
+        // _updateTaskUseCase = updateTaskUseCase,
         _completeTaskUseCase = completeTaskUseCase,
-        _deleteTaskUseCase = deleteTaskUseCase,
+        // _deleteTaskUseCase = deleteTaskUseCase,
         _notificationService = notificationService ?? TaskNotificationService();
 
   // Estado

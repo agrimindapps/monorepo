@@ -14,16 +14,16 @@ class MainNavigation extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         currentIndex: _getCurrentIndex(context),
         onTap: (index) => _onTap(context, index),
-        selectedItemColor: const Color(0xFFFF5722),
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Início',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),
             label: 'Veículos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.speed),
+            label: 'Odômetro',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_gas_station),
@@ -37,6 +37,10 @@ class MainNavigation extends StatelessWidget {
             icon: Icon(Icons.bar_chart),
             label: 'Relatórios',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Configurações',
+          ),
         ],
       ),
     );
@@ -45,13 +49,14 @@ class MainNavigation extends StatelessWidget {
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
     
-    if (location == '/' || location.startsWith('/dashboard')) return 0;
-    if (location.startsWith('/vehicles')) return 1;
+    if (location == '/' || location.startsWith('/vehicle')) return 0;
+    if (location.startsWith('/odometer')) return 1;
     if (location.startsWith('/fuel')) return 2;
     if (location.startsWith('/maintenance')) return 3;
     if (location.startsWith('/reports')) return 4;
+    if (location.startsWith('/settings')) return 5;
     
-    return 0; // Default to dashboard
+    return 0; // Default to vehicles
   }
 
   void _onTap(BuildContext context, int index) {
@@ -60,7 +65,7 @@ class MainNavigation extends StatelessWidget {
         context.go('/');
         break;
       case 1:
-        context.go('/vehicles');
+        context.go('/odometer');
         break;
       case 2:
         context.go('/fuel');
@@ -70,6 +75,9 @@ class MainNavigation extends StatelessWidget {
         break;
       case 4:
         context.go('/reports');
+        break;
+      case 5:
+        context.go('/settings');
         break;
     }
   }

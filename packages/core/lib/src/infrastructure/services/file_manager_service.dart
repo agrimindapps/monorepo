@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -7,7 +8,7 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path_helper;
 import 'package:path_provider/path_provider.dart' as path_provider;
 
-import '../../domain/entities/file_entity.dart';
+import '../../domain/entities/file_entity.dart' as domain;
 import '../../domain/repositories/i_file_repository.dart';
 
 /// Implementação do serviço de gerenciamento de arquivos
@@ -17,7 +18,7 @@ class FileManagerService implements IFileRepository {
   FileManagerService._internal();
 
   // static const MethodChannel _channel = MethodChannel('file_manager_service');
-  // CacheConfig? _cacheConfig;
+  // domain.CacheConfig? _cacheConfig;
 
   // ==========================================================================
   // OPERAÇÕES BÁSICAS DE ARQUIVO
@@ -37,7 +38,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileInfoEntity?> getFileInfo(String path) async {
+  Future<domain.FileInfoEntity?> getFileInfo(String path) async {
     try {
       final entity = await FileSystemEntity.type(path);
       if (entity == FileSystemEntityType.notFound) {
@@ -50,7 +51,7 @@ class FileManagerService implements IFileRepository {
       final mimeType = await getMimeType(path);
       final permissions = await getPermissions(path);
 
-      return FileInfoEntity(
+      return domain.FileInfoEntity(
         path: path,
         name: fileName,
         extension: extension,
@@ -69,7 +70,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> createFile({
+  Future<domain.FileOperationResult> createFile({
     required String path,
     String? content,
     Uint8List? bytes,
@@ -90,13 +91,13 @@ class FileManagerService implements IFileRepository {
         await file.create();
       }
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: path,
       );
     } catch (e) {
       debugPrint('❌ Error creating file: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -104,7 +105,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> createDirectory({
+  Future<domain.FileOperationResult> createDirectory({
     required String path,
     bool recursive = true,
   }) async {
@@ -112,13 +113,13 @@ class FileManagerService implements IFileRepository {
       final directory = Directory(path);
       await directory.create(recursive: recursive);
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: path,
       );
     } catch (e) {
       debugPrint('❌ Error creating directory: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -150,7 +151,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> writeAsString({
+  Future<domain.FileOperationResult> writeAsString({
     required String path,
     required String content,
     bool append = false,
@@ -165,13 +166,13 @@ class FileManagerService implements IFileRepository {
         await file.writeAsString(content);
       }
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: path,
       );
     } catch (e) {
       debugPrint('❌ Error writing file as string: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -179,7 +180,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> writeAsBytes({
+  Future<domain.FileOperationResult> writeAsBytes({
     required String path,
     required Uint8List bytes,
     bool append = false,
@@ -194,13 +195,13 @@ class FileManagerService implements IFileRepository {
         await file.writeAsBytes(bytes);
       }
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: path,
       );
     } catch (e) {
       debugPrint('❌ Error writing file as bytes: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -208,7 +209,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> copy({
+  Future<domain.FileOperationResult> copy({
     required String sourcePath,
     required String destinationPath,
     bool overwrite = false,
@@ -218,7 +219,7 @@ class FileManagerService implements IFileRepository {
       final destination = File(destinationPath);
 
       if (!overwrite && await destination.exists()) {
-        return const FileOperationResult(
+        return const domain.FileOperationResult(
           success: false,
           error: 'Destination file already exists',
         );
@@ -227,13 +228,13 @@ class FileManagerService implements IFileRepository {
       await destination.parent.create(recursive: true);
       await source.copy(destinationPath);
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: destinationPath,
       );
     } catch (e) {
       debugPrint('❌ Error copying file: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -241,7 +242,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> move({
+  Future<domain.FileOperationResult> move({
     required String sourcePath,
     required String destinationPath,
     bool overwrite = false,
@@ -260,7 +261,7 @@ class FileManagerService implements IFileRepository {
       return copyResult;
     } catch (e) {
       debugPrint('❌ Error moving file: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -268,7 +269,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> rename({
+  Future<domain.FileOperationResult> rename({
     required String path,
     required String newName,
   }) async {
@@ -282,19 +283,19 @@ class FileManagerService implements IFileRepository {
       } else if (entity == FileSystemEntityType.directory) {
         await Directory(path).rename(newPath);
       } else {
-        return const FileOperationResult(
+        return const domain.FileOperationResult(
           success: false,
           error: 'Path not found',
         );
       }
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: newPath,
       );
     } catch (e) {
       debugPrint('❌ Error renaming: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -302,7 +303,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> delete({
+  Future<domain.FileOperationResult> delete({
     required String path,
     bool recursive = false,
   }) async {
@@ -314,19 +315,19 @@ class FileManagerService implements IFileRepository {
       } else if (entity == FileSystemEntityType.directory) {
         await Directory(path).delete(recursive: recursive);
       } else {
-        return const FileOperationResult(
+        return const domain.FileOperationResult(
           success: false,
           error: 'Path not found',
         );
       }
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: path,
       );
     } catch (e) {
       debugPrint('❌ Error deleting: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -338,16 +339,16 @@ class FileManagerService implements IFileRepository {
   // ==========================================================================
 
   @override
-  Future<List<FileInfoEntity>> listDirectory({
+  Future<List<domain.FileInfoEntity>> listDirectory({
     required String path,
-    FileFilter? filter,
+    domain.FileFilter? filter,
     bool recursive = false,
   }) async {
     try {
       final directory = Directory(path);
       if (!await directory.exists()) return [];
 
-      final List<FileInfoEntity> result = [];
+      final List<domain.FileInfoEntity> result = [];
       final entities = directory.listSync(recursive: recursive);
 
       for (final entity in entities) {
@@ -365,14 +366,14 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<List<FileInfoEntity>> searchFiles({
+  Future<List<domain.FileInfoEntity>> searchFiles({
     required String searchPath,
     String? namePattern,
-    FileFilter? filter,
+    domain.FileFilter? filter,
     bool recursive = true,
   }) async {
     try {
-      final List<FileInfoEntity> result = [];
+      final List<domain.FileInfoEntity> result = [];
       final directory = Directory(searchPath);
       
       if (!await directory.exists()) return result;
@@ -480,20 +481,20 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<String?> getSystemDirectory(SystemDirectory type) async {
+  Future<String?> getSystemDirectory(domain.SystemDirectory type) async {
     try {
       switch (type) {
-        case SystemDirectory.documents:
+        case domain.SystemDirectory.documents:
           return await getDocumentsDirectory();
-        case SystemDirectory.cache:
+        case domain.SystemDirectory.cache:
           return await getCacheDirectory();
-        case SystemDirectory.temporary:
+        case domain.SystemDirectory.temporary:
           return await getTemporaryDirectory();
-        case SystemDirectory.downloads:
+        case domain.SystemDirectory.downloads:
           return await getDownloadsDirectory();
-        case SystemDirectory.external:
+        case domain.SystemDirectory.external:
           return await getExternalStorageDirectory();
-        case SystemDirectory.applicationSupport:
+        case domain.SystemDirectory.applicationSupport:
           final directory = await path_provider.getApplicationSupportDirectory();
           return directory.path;
       }
@@ -508,10 +509,10 @@ class FileManagerService implements IFileRepository {
   // ==========================================================================
 
   @override
-  Future<FileOperationResult> compress({
+  Future<domain.FileOperationResult> compress({
     required List<String> sourcePaths,
     required String destinationPath,
-    CompressionConfig? config,
+    domain.CompressionConfig? config,
   }) async {
     try {
       final archive = Archive();
@@ -530,14 +531,14 @@ class FileManagerService implements IFileRepository {
 
       // Comprimir
       late List<int> compressedData;
-      final compressionType = config?.type ?? CompressionType.zip;
+      final compressionType = config?.type ?? domain.CompressionType.zip;
 
       switch (compressionType) {
-        case CompressionType.zip:
+        case domain.CompressionType.zip:
           final encoder = ZipEncoder();
           compressedData = encoder.encode(archive)!;
           break;
-        case CompressionType.gzip:
+        case domain.CompressionType.gzip:
           final encoder = GZipEncoder();
           compressedData = encoder.encode(archive.files.first.content as List<int>)!;
           break;
@@ -550,13 +551,13 @@ class FileManagerService implements IFileRepository {
       await outputFile.parent.create(recursive: true);
       await outputFile.writeAsBytes(compressedData);
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: destinationPath,
       );
     } catch (e) {
       debugPrint('❌ Error compressing files: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -564,7 +565,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> decompress({
+  Future<domain.FileOperationResult> decompress({
     required String sourcePath,
     required String destinationPath,
     String? password,
@@ -586,7 +587,7 @@ class FileManagerService implements IFileRepository {
           // Para arquivos gzip simples, criar um arquivo
           final outputPath = joinPaths([destinationPath, getFileNameWithoutExtension(sourcePath)]);
           await File(outputPath).writeAsBytes(decompressed);
-          return FileOperationResult(success: true, path: outputPath);
+          return domain.FileOperationResult(success: true, path: outputPath);
         default:
           throw UnsupportedError('Archive format not supported: $extension');
       }
@@ -606,13 +607,13 @@ class FileManagerService implements IFileRepository {
         }
       }
 
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: true,
         path: destinationPath,
       );
     } catch (e) {
       debugPrint('❌ Error decompressing file: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -652,7 +653,7 @@ class FileManagerService implements IFileRepository {
   // ==========================================================================
 
   @override
-  Future<bool> configurateCache(CacheConfig config) async {
+  Future<bool> configurateCache(domain.CacheConfig config) async {
     try {
       // _cacheConfig = config;
       return true;
@@ -766,10 +767,10 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FilePermissionsEntity?> getPermissions(String path) async {
+  Future<domain.FilePermissionsEntity?> getPermissions(String path) async {
     try {
       // Simulação básica de permissões - implementar lógica específica por plataforma
-      return const FilePermissionsEntity(
+      return const domain.FilePermissionsEntity(
         readable: true,
         writable: true,
         executable: false,
@@ -783,7 +784,7 @@ class FileManagerService implements IFileRepository {
   @override
   Future<bool> setPermissions({
     required String path,
-    required FilePermissionsEntity permissions,
+    required domain.FilePermissionsEntity permissions,
   }) async {
     try {
       // Implementar lógica específica por plataforma
@@ -886,14 +887,14 @@ class FileManagerService implements IFileRepository {
   // ==========================================================================
 
   @override
-  Future<FileOperationResult> createBackup({
+  Future<domain.FileOperationResult> createBackup({
     required List<String> sourcePaths,
     required String backupPath,
-    BackupOptions? options,
+    domain.BackupOptions? options,
   }) async {
     try {
-      final config = CompressionConfig(
-        type: CompressionType.zip,
+      final config = domain.CompressionConfig(
+        type: domain.CompressionType.zip,
         password: options?.encryptionPassword,
       );
 
@@ -904,7 +905,7 @@ class FileManagerService implements IFileRepository {
       );
     } catch (e) {
       debugPrint('❌ Error creating backup: $e');
-      return FileOperationResult(
+      return domain.FileOperationResult(
         success: false,
         error: e.toString(),
       );
@@ -912,7 +913,7 @@ class FileManagerService implements IFileRepository {
   }
 
   @override
-  Future<FileOperationResult> restoreBackup({
+  Future<domain.FileOperationResult> restoreBackup({
     required String backupPath,
     required String destinationPath,
     String? password,
@@ -940,8 +941,8 @@ class FileManagerService implements IFileRepository {
   // ==========================================================================
 
   @override
-  Stream<FileInfoEntity> watchDirectory(String path) {
-    final controller = StreamController<FileInfoEntity>();
+  Stream<domain.FileInfoEntity> watchDirectory(String path) {
+    final controller = StreamController<domain.FileInfoEntity>();
     
     // Implementar watcher de diretório
     // Por enquanto, retornar stream vazio
@@ -971,7 +972,7 @@ class FileManagerService implements IFileRepository {
   // MÉTODOS AUXILIARES PRIVADOS
   // ==========================================================================
 
-  bool _matchesFilter(FileInfoEntity fileInfo, FileFilter? filter) {
+  bool _matchesFilter(domain.FileInfoEntity fileInfo, domain.FileFilter? filter) {
     if (filter == null) return true;
 
     // Verificar extensões

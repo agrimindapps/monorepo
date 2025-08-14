@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'dart:typed_data';
 import '../../domain/entities/space.dart';
 
@@ -29,7 +28,7 @@ class SpaceListTile extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            color: _getSpaceTypeColor(space.type).withOpacity(0.1),
+            color: _getSpaceTypeColor(space.type).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: space.imageBase64 != null
@@ -64,7 +63,7 @@ class SpaceListTile extends StatelessWidget {
                 vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: _getSpaceTypeColor(space.type).withOpacity(0.1),
+                color: _getSpaceTypeColor(space.type).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

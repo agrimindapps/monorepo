@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/plant.dart';
-import '../providers/plants_provider.dart';
-import '../../../../core/theme/colors.dart';
 
 class PlantCard extends StatelessWidget {
   final Plant plant;
@@ -71,32 +69,32 @@ class PlantCard extends StatelessWidget {
                         child: Text(
                           plant.displaySpecies,
                           style: TextStyle(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             fontSize: 14,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (plant.location != null) ...[
+                      if (plant.spaceId != null) ...[
                         Text(
                           ' • ',
-                          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
+                          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 14),
                         ),
                         Expanded(
                           child: Row(
                             children: [
                               Icon(
                                 Icons.location_on,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                 size: 14,
                               ),
                               const SizedBox(width: 2),
                               Expanded(
                                 child: Text(
-                                  plant.location!,
+                                  'Espaço ${plant.spaceId}',
                                   style: TextStyle(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                     fontSize: 14,
                                   ),
                                   maxLines: 1,
@@ -123,7 +121,7 @@ class PlantCard extends StatelessWidget {
               onPressed: () => _showPlantMenu(context),
               icon: Icon(
                 Icons.more_vert,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 size: 20,
               ),
             ),
@@ -265,12 +263,12 @@ class PlantCard extends StatelessWidget {
         ),
         content: Text(
           'Tem certeza que deseja excluir "${plant.displayName}"? Esta ação não pode ser desfeita.',
-          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancelar',
               style: TextStyle(color: theme.colorScheme.secondary),
             ),

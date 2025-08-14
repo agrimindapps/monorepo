@@ -18,7 +18,7 @@ abstract class TasksLocalDataSource {
 }
 
 class TasksLocalDataSourceImpl implements TasksLocalDataSource {
-  final HiveStorageService storageService;
+  final ILocalStorageRepository storageService;
   static const String _boxName = 'tasks';
 
   TasksLocalDataSourceImpl(this.storageService);

@@ -175,14 +175,14 @@ class RevenueCatService implements ISubscriptionRepository {
         return Left(RevenueCatFailure('Produto não encontrado: $productId'));
       }
 
-      final purchaserInfo = await Purchases.purchasePackage(targetPackage);
+      final purchaseResult = await Purchases.purchasePackage(targetPackage);
       
-      if (purchaserInfo.activeSubscriptions.isEmpty) {
+      if (purchaseResult.customerInfo.activeSubscriptions.isEmpty) {
         return const Left(RevenueCatFailure('Compra não foi processada corretamente'));
       }
 
       final subscription = _mapCustomerInfoToSubscription(
-        purchaserInfo,
+        purchaseResult.customerInfo,
       );
 
       if (subscription == null) {
@@ -375,7 +375,7 @@ class RevenueCatService implements ISubscriptionRepository {
   core_entities.SubscriptionEntity? _mapEntitlementToSubscription(EntitlementInfo entitlement) {
     return core_entities.SubscriptionEntity(
       id: entitlement.identifier,
-      userId: entitlement.originalPurchaseDate.toString() ?? 'unknown',
+      userId: entitlement.originalPurchaseDate?.toString() ?? 'unknown',
       productId: entitlement.productIdentifier,
       status: entitlement.isActive 
           ? core_entities.SubscriptionStatus.active 

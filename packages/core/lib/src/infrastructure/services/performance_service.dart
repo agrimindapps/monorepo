@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../domain/entities/performance_entity.dart';
 import '../../domain/repositories/i_performance_repository.dart';
@@ -31,7 +31,6 @@ class PerformanceService implements IPerformanceRepository {
   final StreamController<double> _fpsController = StreamController.broadcast();
   Timer? _fpsTimer;
   final List<double> _fpsHistory = [];
-  int _frameCount = 0;
   DateTime? _lastFrameTime;
   final List<Duration> _frameTimes = [];
 
@@ -202,7 +201,6 @@ class PerformanceService implements IPerformanceRepository {
     }
     
     _lastFrameTime = now;
-    _frameCount++;
   }
 
   void _onFirstFrame() {
@@ -634,7 +632,7 @@ class PerformanceService implements IPerformanceRepository {
       if (firebaseTrace != null) {
         if (metrics != null) {
           for (final entry in metrics.entries) {
-            firebaseTrace.putMetric(entry.key, entry.value.round());
+            firebaseTrace.setMetric(entry.key, entry.value.round());
           }
         }
         await firebaseTrace.stop();
@@ -983,6 +981,5 @@ class PerformanceService implements IPerformanceRepository {
     _memoryHistory.clear();
     _performanceHistory.clear();
     _completedTraces.clear();
-    _frameCount = 0;
   }
 }

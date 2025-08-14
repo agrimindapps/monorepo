@@ -20,12 +20,19 @@ class PlantsRepositoryImpl implements PlantsRepository {
     required this.authService,
   });
 
-  String? get _currentUserId => null; // TODO: Implement auth user access
+  Future<String?> get _currentUserId async {
+    try {
+      final user = await authService.currentUser.first;
+      return user?.id;
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Future<Either<Failure, List<Plant>>> getPlants() async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -61,7 +68,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, Plant>> getPlantById(String id) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -103,7 +110,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, Plant>> addPlant(Plant plant) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -140,7 +147,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, Plant>> updatePlant(Plant plant) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -177,7 +184,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, void>> deletePlant(String id) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -205,7 +212,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, List<Plant>>> searchPlants(String query) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -241,7 +248,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, List<Plant>>> getPlantsBySpace(String spaceId) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -299,7 +306,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, void>> syncPendingChanges() async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }

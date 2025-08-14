@@ -1,14 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth_platform_interface/types/biometric_type.dart' as platform_biometric;
-import 'package:local_auth_platform_interface/types/auth_messages.dart';
 
 import '../../domain/entities/security_entity.dart' as domain;
 import '../../domain/repositories/i_security_repository.dart';
@@ -206,25 +202,23 @@ class SecurityService implements ISecurityRepository {
       final List<domain.BiometricType> availableTypes = [];
       
       if (isAvailable) {
-        final List<platform_biometric.domain.BiometricType> deviceBiometrics = 
+        final List<BiometricType> deviceBiometrics = 
             await _localAuth.getAvailableBiometrics();
         
         for (var biometric in deviceBiometrics) {
           switch (biometric) {
-            case platform_biometric.domain.BiometricType.face:
+            case BiometricType.face:
               availableTypes.add(domain.BiometricType.face);
               break;
-            case platform_biometric.domain.BiometricType.fingerprint:
+            case BiometricType.fingerprint:
               availableTypes.add(domain.BiometricType.fingerprint);
               break;
-            case platform_biometric.domain.BiometricType.iris:
+            case BiometricType.iris:
               availableTypes.add(domain.BiometricType.iris);
               break;
-            case platform_biometric.domain.BiometricType.voice:
-              availableTypes.add(domain.BiometricType.voice);
-              break;
-            default:
-              // Tipo não reconhecido
+            case BiometricType.weak:
+            case BiometricType.strong:
+              availableTypes.add(domain.BiometricType.fingerprint);
               break;
           }
         }
@@ -263,24 +257,8 @@ class SecurityService implements ISecurityRepository {
     try {
       final bool isAuthenticated = await _localAuth.authenticate(
         localizedReason: reason,
-        authMessages: [
-          AndroidAuthMessages(
-            signInTitle: title ?? 'Autenticação Biométrica',
-            cancelButton: negativeButton ?? 'Cancelar',
-            deviceCredentialsRequiredTitle: 'Credenciais do Dispositivo',
-            deviceCredentialsSetupDescription: 'Configure suas credenciais nas configurações do dispositivo',
-            goToSettingsButton: 'Configurações',
-            goToSettingsDescription: 'Configure suas credenciais biométricas',
-          ),
-          IOSAuthMessages(
-            cancelButton: negativeButton ?? 'Cancelar',
-            goToSettingsButton: 'Configurações',
-            goToSettingsDescription: 'Configure suas credenciais biométricas',
-            lockOut: 'Tente novamente',
-          ),
-        ],
-        options: AuthenticationOptions(
-          stickyAuth: stickyAuth,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
           biometricOnly: false,
         ),
       );
@@ -309,7 +287,7 @@ class SecurityService implements ISecurityRepository {
   }
 
   @override
-  Future<bool> isdomain.BiometricTypeAvailable(domain.BiometricType type) async {
+  Future<bool> isBiometricTypeAvailable(domain.BiometricType type) async {
     try {
       final status = await getBiometricStatus();
       return status.biometricTypes.contains(type);

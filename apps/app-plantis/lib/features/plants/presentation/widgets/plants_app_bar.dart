@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/colors.dart';
 import '../providers/plants_provider.dart';
 
 class PlantsAppBar extends StatelessWidget {
@@ -72,7 +71,7 @@ class PlantsAppBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
-                    border: isDark ? null : Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                    border: isDark ? null : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
                   ),
                   child: TextField(
                     onChanged: onSearchChanged,
@@ -80,12 +79,12 @@ class PlantsAppBar extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: 'Buscar plantas...',
                       hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 16,
                       ),
                       prefixIcon: Icon(
                         Icons.search,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         size: 20,
                       ),
                       border: InputBorder.none,
@@ -114,7 +113,7 @@ class PlantsAppBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
-                    border: isDark ? null : Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                    border: isDark ? null : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
                   ),
                   child: Icon(
                     viewMode == ViewMode.grid ? Icons.grid_view : Icons.view_list,

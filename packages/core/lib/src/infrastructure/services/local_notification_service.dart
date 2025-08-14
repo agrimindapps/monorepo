@@ -402,7 +402,6 @@ class LocalNotificationService implements INotificationRepository {
         details,
         payload: notification.payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
 
       if (_settings.enableDebugLogs) {

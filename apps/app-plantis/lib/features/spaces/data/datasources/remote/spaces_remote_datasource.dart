@@ -67,7 +67,7 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
       final snapshot = await _getUserSpacesCollection(userId)
           .orderBy('name')
           .startAt([query.toLowerCase()])
-          .endAt([query.toLowerCase() + '\uf8ff'])
+          .endAt(['${query.toLowerCase()}\uf8ff'])
           .get();
 
       return snapshot.docs

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/space.dart';
-import '../../../../core/theme/colors.dart';
 
 class PlantsFilterBar extends StatelessWidget {
   final List<Space> spaces;
@@ -16,8 +15,6 @@ class PlantsFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     if (spaces.isEmpty) {
       return const SizedBox.shrink();
     }

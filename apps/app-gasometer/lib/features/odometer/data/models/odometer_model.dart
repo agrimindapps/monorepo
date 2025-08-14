@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import '../../../core/data/models/base_sync_model.dart';
+import 'package:core/core.dart';
+import '../../../../core/data/models/base_sync_model.dart';
 
 part 'odometer_model.g.dart';
 
@@ -7,7 +8,7 @@ part 'odometer_model.g.dart';
 /// TypeId: 2 - New sequential numbering
 @HiveType(typeId: 2)
 class OdometerModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  // Base sync fields (required for Hive generation)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -25,7 +26,7 @@ class OdometerModel extends BaseSyncModel {
   @HiveField(13) final String descricao;
   @HiveField(14) final String? tipoRegistro;
 
-  const OdometerModel({
+  OdometerModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -105,6 +106,7 @@ class OdometerModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -132,7 +134,7 @@ class OdometerModel extends BaseSyncModel {
 
   /// Create from Firebase map
   factory OdometerModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
     
     return OdometerModel(

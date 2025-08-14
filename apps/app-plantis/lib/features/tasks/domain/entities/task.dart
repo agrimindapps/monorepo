@@ -9,6 +9,7 @@ enum TaskType {
   spraying('pulverizar', 'Pulverizar'),
   sunlight('sol', 'Colocar no Sol'),
   shade('sombra', 'Colocar na Sombra'),
+  pestInspection('inspecao_pragas', 'Inspeção de Pragas'),
   custom('custom', 'Personalizada');
 
   const TaskType(this.key, this.displayName);

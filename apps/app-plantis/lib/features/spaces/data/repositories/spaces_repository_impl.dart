@@ -20,12 +20,19 @@ class SpacesRepositoryImpl implements SpacesRepository {
     required this.authService,
   });
 
-  String? get _currentUserId => null; // TODO: Implement auth user access
+  Future<String?> get _currentUserId async {
+    try {
+      final user = await authService.currentUser.first;
+      return user?.id;
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Future<Either<Failure, List<Space>>> getSpaces() async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -56,7 +63,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, Space>> getSpaceById(String id) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -95,14 +102,17 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, List<Space>>> searchSpaces(String query) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
         try {
-          final remoteSpaces = await remoteDatasource.searchSpaces(userId, query);
+          final remoteSpaces = await remoteDatasource.searchSpaces(
+            userId,
+            query,
+          );
           return Right(remoteSpaces);
         } catch (e) {
           // If remote fails, fallback to local search
@@ -125,7 +135,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, Space>> addSpace(Space space) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -137,7 +147,10 @@ class SpacesRepositoryImpl implements SpacesRepository {
 
       if (await networkInfo.isConnected) {
         try {
-          final savedSpace = await remoteDatasource.addSpace(userId, spaceModel);
+          final savedSpace = await remoteDatasource.addSpace(
+            userId,
+            spaceModel,
+          );
           await localDatasource.cacheSpace(savedSpace);
           return Right(savedSpace);
         } catch (e) {
@@ -159,7 +172,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, Space>> updateSpace(Space space) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -171,7 +184,10 @@ class SpacesRepositoryImpl implements SpacesRepository {
 
       if (await networkInfo.isConnected) {
         try {
-          final updatedSpace = await remoteDatasource.updateSpace(userId, spaceModel);
+          final updatedSpace = await remoteDatasource.updateSpace(
+            userId,
+            spaceModel,
+          );
           await localDatasource.cacheSpace(updatedSpace);
           return Right(updatedSpace);
         } catch (e) {
@@ -193,7 +209,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, void>> deleteSpace(String id) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
@@ -223,14 +239,17 @@ class SpacesRepositoryImpl implements SpacesRepository {
   @override
   Future<Either<Failure, int>> getPlantCountBySpace(String spaceId) async {
     try {
-      final userId = _currentUserId;
+      final userId = await _currentUserId;
       if (userId == null) {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
         try {
-          final count = await remoteDatasource.getPlantCountBySpace(userId, spaceId);
+          final count = await remoteDatasource.getPlantCountBySpace(
+            userId,
+            spaceId,
+          );
           return Right(count);
         } catch (e) {
           // If remote fails, return 0 to allow deletion

@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import '../../../core/data/models/base_sync_model.dart';
+import 'package:core/core.dart';
+import '../../../../core/data/models/base_sync_model.dart';
 
 part 'maintenance_model.g.dart';
 
@@ -7,7 +8,7 @@ part 'maintenance_model.g.dart';
 /// TypeId: 4 - New sequential numbering
 @HiveType(typeId: 4)
 class MaintenanceModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  // Base sync fields (required for Hive generation)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -28,7 +29,7 @@ class MaintenanceModel extends BaseSyncModel {
   @HiveField(16) final int? proximaRevisao;
   @HiveField(17) final bool concluida;
 
-  const MaintenanceModel({
+  MaintenanceModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -120,6 +121,7 @@ class MaintenanceModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -153,7 +155,7 @@ class MaintenanceModel extends BaseSyncModel {
 
   /// Create from Firebase map
   factory MaintenanceModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
     
     return MaintenanceModel(
@@ -257,8 +259,10 @@ class MaintenanceModel extends BaseSyncModel {
 
   /// Check if belongs to specific date
   bool pertenceAData(DateTime dataAlvo) {
-    return DateTime.fromMillisecondsSinceEpoch(data)
-        .isAtSameMomentAs(dataAlvo);
+    final maintenanceDate = DateTime.fromMillisecondsSinceEpoch(data);
+    return maintenanceDate.year == dataAlvo.year && 
+           maintenanceDate.month == dataAlvo.month &&
+           maintenanceDate.day == dataAlvo.day;
   }
 
   /// Check if maintenance is overdue

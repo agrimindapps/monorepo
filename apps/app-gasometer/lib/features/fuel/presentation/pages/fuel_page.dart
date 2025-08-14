@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/gasometer_theme.dart';
+import '../../../../shared/widgets/vehicle_selector.dart';
 
 class FuelPage extends StatefulWidget {
   const FuelPage({super.key});
@@ -53,6 +55,7 @@ class _FuelPageState extends State<FuelPage> {
 
   String _selectedFilter = 'all';
   String _searchQuery = '';
+  String? _selectedVehicleId;
 
   List<Map<String, dynamic>> get _filteredRecords {
     var filtered = _fuelRecords;
@@ -81,7 +84,7 @@ class _FuelPageState extends State<FuelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -111,10 +114,10 @@ class _FuelPageState extends State<FuelPage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -130,12 +133,12 @@ class _FuelPageState extends State<FuelPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.local_gas_station,
-                      color: Colors.green,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 28,
                     ),
                   ),
@@ -144,19 +147,19 @@ class _FuelPageState extends State<FuelPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Abastecimentos',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Text(
                           'Histórico de abastecimentos dos seus veículos',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -186,18 +189,18 @@ class _FuelPageState extends State<FuelPage> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.green, width: 2),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
               ),
               filled: true,
-              fillColor: Colors.grey.shade50,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
         ),
@@ -205,9 +208,9 @@ class _FuelPageState extends State<FuelPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
           child: DropdownButton<String>(
             value: _selectedFilter,
@@ -226,16 +229,27 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_filteredRecords.isEmpty) {
-      return _buildEmptyState();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStatistics(),
+        VehicleSelector(
+          selectedVehicleId: _selectedVehicleId,
+          onVehicleChanged: (vehicleId) {
+            setState(() {
+              _selectedVehicleId = vehicleId;
+              _selectedFilter = vehicleId ?? 'all';
+            });
+          },
+          showEmptyOption: true,
+        ),
         const SizedBox(height: 24),
-        _buildRecordsList(),
+        if (_filteredRecords.isEmpty)
+          _buildEmptyState()
+        else ...[
+          _buildStatistics(),
+          const SizedBox(height: 24),
+          _buildRecordsList(),
+        ],
       ],
     );
   }
@@ -294,7 +308,7 @@ class _FuelPageState extends State<FuelPage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -320,7 +334,7 @@ class _FuelPageState extends State<FuelPage> {
                   title,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -328,10 +342,10 @@ class _FuelPageState extends State<FuelPage> {
             const SizedBox(height: 12),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -344,12 +358,12 @@ class _FuelPageState extends State<FuelPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Histórico de Abastecimentos',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
@@ -367,7 +381,7 @@ class _FuelPageState extends State<FuelPage> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: InkWell(
         onTap: () => _showRecordDetails(record),
@@ -381,12 +395,12 @@ class _FuelPageState extends State<FuelPage> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.local_gas_station,
-                      color: Colors.green,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 24,
                     ),
                   ),
@@ -400,17 +414,17 @@ class _FuelPageState extends State<FuelPage> {
                           children: [
                             Text(
                               record['vehicleName'],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             Text(
                               formattedDate,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade600,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ],
@@ -420,7 +434,7 @@ class _FuelPageState extends State<FuelPage> {
                           record['gasStation'],
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -453,22 +467,22 @@ class _FuelPageState extends State<FuelPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(
                             Icons.check_circle,
                             size: 14,
-                            color: Colors.green,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             'Tanque cheio',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.green,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -490,22 +504,22 @@ class _FuelPageState extends State<FuelPage> {
         Icon(
           icon,
           size: 18,
-          color: Colors.grey.shade500,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey.shade500,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
           ),
         ),
       ],
@@ -521,22 +535,22 @@ class _FuelPageState extends State<FuelPage> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.local_gas_station_outlined,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               size: 64,
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Nenhum abastecimento encontrado',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -544,7 +558,7 @@ class _FuelPageState extends State<FuelPage> {
             'Registre seu primeiro abastecimento',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -553,12 +567,15 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    return FloatingActionButton.extended(
+    return FloatingActionButton(
       onPressed: () => context.go('/fuel/add'),
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.add),
-      label: const Text('Novo Abastecimento'),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: 'Novo Abastecimento',
+      child: const Icon(Icons.add),
     );
   }
 
@@ -568,7 +585,7 @@ class _FuelPageState extends State<FuelPage> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.local_gas_station, color: Colors.green),
+            Icon(Icons.local_gas_station, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 8),
             Text(record['vehicleName']),
           ],
@@ -605,7 +622,7 @@ class _FuelPageState extends State<FuelPage> {
           Text(
             label,
             style: TextStyle(
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 14,
             ),
           ),

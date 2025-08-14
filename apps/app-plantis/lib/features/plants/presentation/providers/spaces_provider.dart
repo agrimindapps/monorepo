@@ -200,14 +200,18 @@ class SpacesProvider extends ChangeNotifier {
     switch (failure.runtimeType) {
       case ValidationFailure:
         return failure.message;
-      case ServerFailure:
-        return failure.message;
       case CacheFailure:
         return failure.message;
       case NetworkFailure:
         return 'Sem conexão com a internet';
       case ServerFailure:
-        return 'Usuário não autenticado';
+        // Check if it's specifically an auth error
+        if (failure.message.contains('não autenticado') || 
+            failure.message.contains('unauthorized') ||
+            failure.message.contains('Usuário não autenticado')) {
+          return 'Erro de autenticação. Tente fazer login novamente.';
+        }
+        return failure.message;
       case NotFoundFailure:
         return failure.message;
       default:

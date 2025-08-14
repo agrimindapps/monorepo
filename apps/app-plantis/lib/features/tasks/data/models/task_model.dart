@@ -1,4 +1,4 @@
-import 'package:core/src/domain/entities/base_sync_entity.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/task.dart';
 
 class TaskModel extends Task {
@@ -207,6 +207,7 @@ class TaskModel extends Task {
     );
   }
 
+  @override
   TaskModel copyWithTaskData({
     String? title,
     String? description,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/colors.dart';
 
 class PlantsSearchBar extends StatefulWidget {
   final String searchQuery;

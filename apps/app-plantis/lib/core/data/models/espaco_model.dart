@@ -6,16 +6,23 @@ part 'espaco_model.g.dart';
 /// Espaco model with Firebase sync support
 /// TypeId: 1 - Sequential numbering
 @HiveType(typeId: 1)
+// ignore: must_be_immutable
 class EspacoModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  @override
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
+  @override
   @HiveField(4) final bool isDirty;
+  @override
   @HiveField(5) final bool isDeleted;
+  @override
   @HiveField(6) final int version;
+  @override
   @HiveField(7) final String? userId;
+  @override
   @HiveField(8) final String? moduleName;
 
   // Espaco specific fields
@@ -24,7 +31,7 @@ class EspacoModel extends BaseSyncModel {
   @HiveField(12) final bool ativo;
   @HiveField(13) final DateTime? dataCriacao;
 
-  const EspacoModel({
+  EspacoModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -102,6 +109,7 @@ class EspacoModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -168,9 +176,9 @@ class EspacoModel extends BaseSyncModel {
   }) {
     return EspacoModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

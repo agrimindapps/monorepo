@@ -3,8 +3,11 @@ import 'package:core/core.dart';
 
 /// Base sync model for all Hive models in the Plantis app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
+/// 
+/// Note: Cannot be @immutable due to HiveObjectMixin requirements
+// ignore: must_be_immutable
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin, SyncEntityMixin {
-  const BaseSyncModel({
+  BaseSyncModel({
     required super.id,
     super.createdAt,
     super.updatedAt,

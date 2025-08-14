@@ -329,23 +329,19 @@ class SpaceFormProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure:
+      case ValidationFailure _:
         return failure.message;
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return 'Espaço não encontrado';
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Sem conexão com a internet';
-      case ServerFailure:
+      case ServerFailure _:
         return 'Erro no servidor. Tente novamente.';
-      case CacheFailure:
+      case CacheFailure _:
         return 'Erro local. Verifique o armazenamento.';
       default:
         return 'Erro inesperado. Tente novamente.';
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

@@ -1,5 +1,8 @@
 import 'package:hive/hive.dart';
-import '../../../core/data/models/base_sync_model.dart';
+import 'package:core/core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/data/models/base_sync_model.dart';
+import '../../domain/entities/vehicle_entity.dart';
 
 part 'vehicle_model.g.dart';
 
@@ -7,7 +10,7 @@ part 'vehicle_model.g.dart';
 /// TypeId: 0 - New sequential numbering  
 @HiveType(typeId: 0)
 class VehicleModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  // Base sync fields (required for Hive generation)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -33,7 +36,7 @@ class VehicleModel extends BaseSyncModel {
   @HiveField(21) final double odometroAtual;
   @HiveField(22) final String? foto;
 
-  const VehicleModel({
+  VehicleModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,
@@ -145,6 +148,7 @@ class VehicleModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -188,7 +192,7 @@ class VehicleModel extends BaseSyncModel {
 
   /// Create from Firebase map
   factory VehicleModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
     
     return VehicleModel(
@@ -214,6 +218,71 @@ class VehicleModel extends BaseSyncModel {
       valorVenda: (map['valor_venda'] ?? 0.0).toDouble(),
       odometroAtual: (map['odometro_atual'] ?? 0.0).toDouble(),
       foto: map['foto']?.toString(),
+    );
+  }
+
+  /// Create from Firestore document
+  factory VehicleModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return VehicleModel.fromFirebaseMap({...data, 'id': doc.id});
+  }
+
+  /// Convert to Firestore document
+  Map<String, dynamic> toFirestore() {
+    return toFirebaseMap();
+  }
+
+  /// Convert to entity
+  VehicleEntity toEntity() {
+    return VehicleEntity(
+      id: id,
+      userId: userId ?? '',
+      name: '$marca $modelo',
+      brand: marca,
+      model: modelo,
+      year: ano,
+      color: cor,
+      licensePlate: placa,
+      type: VehicleType.car, // Default to car, you may want to map this properly
+      supportedFuels: [FuelType.values[combustivel]], // Map from int to FuelType
+      currentOdometer: odometroAtual,
+      createdAt: createdAt ?? DateTime.now(),
+      updatedAt: updatedAt ?? DateTime.now(),
+      isActive: !isDeleted,
+      metadata: {
+        'renavan': renavan,
+        'chassi': chassi,
+        'vendido': vendido,
+        'valorVenda': valorVenda,
+        'odometroInicial': odometroInicial,
+        'foto': foto,
+      },
+    );
+  }
+
+  /// Create from entity
+  factory VehicleModel.fromEntity(VehicleEntity entity) {
+    return VehicleModel(
+      id: entity.id,
+      createdAtMs: entity.createdAt.millisecondsSinceEpoch,
+      updatedAtMs: entity.updatedAt.millisecondsSinceEpoch,
+      userId: entity.userId,
+      marca: entity.brand,
+      modelo: entity.model,
+      ano: entity.year,
+      placa: entity.licensePlate,
+      odometroInicial: entity.metadata['odometroInicial']?.toDouble() ?? 0.0,
+      combustivel: entity.supportedFuels.isNotEmpty 
+          ? entity.supportedFuels.first.index 
+          : 0,
+      renavan: entity.metadata['renavan']?.toString() ?? '',
+      chassi: entity.metadata['chassi']?.toString() ?? '',
+      cor: entity.color,
+      vendido: entity.metadata['vendido'] ?? false,
+      valorVenda: entity.metadata['valorVenda']?.toDouble() ?? 0.0,
+      odometroAtual: entity.currentOdometer,
+      foto: entity.metadata['foto']?.toString(),
+      isDeleted: !entity.isActive,
     );
   }
 

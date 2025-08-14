@@ -9,6 +9,7 @@ import 'package:core/core.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/theme/receituagro_theme.dart';
 import 'core/services/receituagro_notification_service.dart';
+import 'core/services/receituagro_storage_service.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -52,6 +53,11 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // Initialize storage service
+  final storageService = ReceitaAgroStorageService();
+  await storageService.initialize();
+  di.sl.registerSingleton<ReceitaAgroStorageService>(storageService);
 
   // Initialize notifications
   final notificationService = ReceitaAgroNotificationService();

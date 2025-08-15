@@ -16,6 +16,7 @@ export 'src/domain/entities/notification_entity.dart';
 export 'src/domain/entities/security_entity.dart';
 export 'src/domain/entities/file_entity.dart';
 export 'src/domain/entities/performance_entity.dart';
+export 'src/domain/entities/box_sync_config.dart';
 
 // Repository Interfaces
 export 'src/domain/repositories/i_auth_repository.dart';
@@ -55,6 +56,7 @@ export 'src/infrastructure/services/local_notification_service.dart';
 export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/file_manager_service.dart';
 export 'src/infrastructure/services/performance_service.dart';
+export 'src/infrastructure/services/selective_sync_service.dart';
 
 // Helpers
 export 'src/infrastructure/helpers/notification_helper.dart';

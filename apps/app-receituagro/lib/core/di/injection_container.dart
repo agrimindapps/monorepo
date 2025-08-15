@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
 import 'package:core/core.dart';
-import '../services/receituagro_storage_service.dart';
 
 final sl = GetIt.instance;
 

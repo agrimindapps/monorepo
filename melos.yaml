@@ -30,6 +30,34 @@ scripts:
     run: flutter test
     description: Executa testes em todos os packages
     
+  # Build APK para todos os apps
+  build:all:apk:
+    run: |
+      echo "Iniciando build APK RELEASE para todos os apps..."
+      cd apps/app-plantis && flutter build apk --release && echo "✅ Plantis APK concluído" &&
+      cd ../app-receituagro && flutter build apk --release && echo "✅ ReceitaAgro APK concluído" &&
+      cd ../app-gasometer && flutter build apk --release && echo "✅ Gasometer APK concluído" &&
+      echo "🎉 Todos os builds APK RELEASE foram concluídos com sucesso!"
+    description: Build APK RELEASE para todos os três apps (Plantis, ReceitaAgro e Gasometer)
+    
+  build:all:apk:debug:
+    run: |
+      echo "Iniciando build APK DEBUG para todos os apps..."
+      cd apps/app-plantis && flutter build apk --debug && echo "✅ Plantis APK DEBUG concluído" &&
+      cd ../app-receituagro && flutter build apk --debug && echo "✅ ReceitaAgro APK DEBUG concluído" &&
+      cd ../app-gasometer && flutter build apk --debug && echo "✅ Gasometer APK DEBUG concluído" &&
+      echo "🎉 Todos os builds APK DEBUG foram concluídos com sucesso!"
+    description: Build APK DEBUG para todos os três apps (desenvolvimento)
+    
+  build:all:apk:profile:
+    run: |
+      echo "Iniciando build APK PROFILE para todos os apps..."
+      cd apps/app-plantis && flutter build apk --profile && echo "✅ Plantis APK PROFILE concluído" &&
+      cd ../app-receituagro && flutter build apk --profile && echo "✅ ReceitaAgro APK PROFILE concluído" &&
+      cd ../app-gasometer && flutter build apk --profile && echo "✅ Gasometer APK PROFILE concluído" &&
+      echo "🎉 Todos os builds APK PROFILE foram concluídos com sucesso!"
+    description: Build APK PROFILE para todos os três apps (análise de performance)
+    
   # Builds para produção (individual por app)
   build:plantis:android:
     run: flutter build appbundle --release
@@ -55,6 +83,18 @@ scripts:
     packageFilters:
       scope: "app_receituagro"
       
+  build:gasometer:android:
+    run: flutter build appbundle --release
+    description: Build App Bundle para Play Store - Gasometer (Controle de Combustível)
+    packageFilters:
+      scope: "app_gasometer"
+      
+  build:gasometer:ios:
+    run: flutter build ipa --release
+    description: Build IPA para App Store - Gasometer (Controle de Combustível)
+    packageFilters:
+      scope: "app_gasometer"
+      
   # Scripts específicos por app
   run:plantis:
     run: flutter run
@@ -67,6 +107,12 @@ scripts:
     description: Executa app ReceitaAgro (Compêndio de Pragas)
     packageFilters:
       scope: "app_receituagro"
+      
+  run:gasometer:
+    run: flutter run
+    description: Executa app Gasometer (Controle de Combustível)
+    packageFilters:
+      scope: "app_gasometer"
       
   # Comandos específicos para desenvolvimento
   icons:plantis:

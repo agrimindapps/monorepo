@@ -1,12 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../core/widgets/modern_header_widget.dart';
-import 'controller/favoritos_controller.dart';
-import 'widgets/favoritos_search_field_widget.dart';
-import 'tabs/defensivos_tab.dart';
-import 'tabs/pragas_tab.dart';
-import 'tabs/diagnosticos_tab.dart';
-import 'constants/favoritos_design_tokens.dart';
 
 class FavoritosPage extends StatefulWidget {
   const FavoritosPage({super.key});
@@ -16,268 +8,192 @@ class FavoritosPage extends StatefulWidget {
 }
 
 class _FavoritosPageState extends State<FavoritosPage> 
-    with TickerProviderStateMixin, WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+    with TickerProviderStateMixin {
 
   late TabController _tabController;
-  FavoritosController? _controller;
-  bool _hasAddedListener = false;
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    
-    if (_controller == null) {
-      try {
-        _controller = context.read<FavoritosController>();
-        
-        if (!_hasAddedListener) {
-          _tabController.addListener(() {
-            if (!_tabController.indexIsChanging && _controller != null) {
-              _controller!.onTabChanged(_tabController.index);
-            }
-          });
-          _hasAddedListener = true;
-        }
-      } catch (e) {
-        debugPrint('Error getting FavoritosController: $e');
-      }
-    }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _controller != null) {
-      _controller!.refreshFavorites();
-    }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      body: SafeArea(
-        child: Consumer<FavoritosController>(
-          builder: (context, controller, _) {
-            if (controller.isLoading) {
-              return _buildLoadingState(theme);
-            }
-
-            if (controller.hasError) {
-              return _buildErrorState(controller, isDark);
-            }
-
-            return Column(
+      backgroundColor: Colors.grey[50],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            backgroundColor: const Color(0xFF4CAF50),
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildHeader(),
+            ),
+            automaticallyImplyLeading: false,
+          ),
+          SliverToBoxAdapter(
+            child: Column(
               children: [
-                _buildHeader(controller, isDark),
-                _buildTabBar(controller, theme),
-                _buildSearchField(controller),
-                Expanded(
+                const SizedBox(height: 20),
+                _buildTabBar(),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - 280,
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      DefensivosTab(controller: controller),
-                      PragasTab(controller: controller),
-                      DiagnosticosTab(controller: controller),
+                      _buildDefensivosTab(),
+                      _buildPragasTab(),
+                      _buildDiagnosticosTab(),
                     ],
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader(FavoritosController controller, bool isDark) {
-    final data = controller.favoritosData;
-    final totalCount = data.totalCount;
-    
-    return ModernHeaderWidget(
-      title: 'Favoritos',
-      subtitle: totalCount > 0 
-        ? 'Você tem $totalCount itens salvos'
-        : 'Nenhum item salvo ainda',
-      leftIcon: Icons.favorite_outlined,
-      showBackButton: false,
-      showActions: false,
-      isDark: isDark,
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.favorite,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Favoritos',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Seus itens salvos',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildTabBar(FavoritosController controller, ThemeData theme) {
+  Widget _buildTabBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.green.shade100,
-            Colors.green.shade200,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: const Color(0xFFE8F5E8),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: const Color(0xFF4CAF50),
+          borderRadius: BorderRadius.circular(8),
         ),
         indicatorPadding: const EdgeInsets.all(4),
-        labelColor: theme.colorScheme.onSurface,
-        unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
-        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+        labelColor: Colors.white,
+        unselectedLabelColor: const Color(0xFF4CAF50),
+        labelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
-          fontSize: 12,
+          fontSize: 14,
         ),
-        unselectedLabelStyle: theme.textTheme.bodyMedium?.copyWith(
-          fontSize: 12,
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
         ),
-        tabs: [
-          _buildTab(controller, 0),
-          _buildTab(controller, 1),
-          _buildTab(controller, 2),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTab(FavoritosController controller, int index) {
-    final icon = FavoritosDesignTokens.getIconForTab(index);
-    final name = FavoritosDesignTokens.getTabName(index);
-    final data = controller.favoritosData;
-    
-    int count;
-    switch (index) {
-      case 0:
-        count = data.defensivos.length;
-        break;
-      case 1:
-        count = data.pragas.length;
-        break;
-      case 2:
-        count = data.diagnosticos.length;
-        break;
-      default:
-        count = 0;
-    }
-
-    return Tab(
-      height: 50,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              name,
-              overflow: TextOverflow.ellipsis,
+        tabs: const [
+          Tab(
+            height: 44,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shield_outlined, size: 16),
+                SizedBox(width: 6),
+                Text('Defensivos'),
+              ],
             ),
           ),
-          if (count > 0) ...[
-            const SizedBox(width: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: FavoritosDesignTokens.getColorForTab(index),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          Tab(
+            height: 44,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.bug_report, size: 16),
+                SizedBox(width: 6),
+                Text('Pragas'),
+              ],
             ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchField(FavoritosController controller) {
-    final tabIndex = controller.currentTabIndex;
-    final searchController = controller.getSearchControllerForTab(tabIndex);
-    final accentColor = FavoritosDesignTokens.getColorForTab(tabIndex);
-    final viewMode = controller.currentViewMode;
-    final hintText = controller.getSearchHintForTab(tabIndex);
-
-    return FavoritosSearchFieldWidget(
-      controller: searchController,
-      hintText: hintText,
-      accentColor: accentColor,
-      selectedViewMode: viewMode,
-      onChanged: (value) => controller.onSearchChanged(tabIndex, value),
-      onClear: () => controller.clearSearch(tabIndex),
-      onToggleViewMode: controller.toggleViewMode,
-    );
-  }
-
-  Widget _buildLoadingState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            'Carregando favoritos...',
-            style: theme.textTheme.bodyMedium,
+          ),
+          Tab(
+            height: 44,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.analytics, size: 16),
+                SizedBox(width: 6),
+                Text('Diagnóstico'),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorState(FavoritosController controller, bool isDark) {
+  Widget _buildDefensivosTab() {
     return Center(
       child: Container(
         margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: Colors.red.shade50,
-          borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -287,46 +203,179 @@ class _FavoritosPageState extends State<FavoritosPage>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: Colors.red.shade100,
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: Color(0xFF4CAF50),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.error_outline,
-                size: 32,
-                color: Colors.red.shade600,
+              child: const Icon(
+                Icons.favorite,
+                color: Colors.white,
+                size: 40,
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Ops! Algo deu errado',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            const SizedBox(height: 24),
+            const Text(
+              'Nenhum defensivo favorito',
+              style: TextStyle(
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              controller.errorMessage,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.red.shade700,
+              'Você ainda não possui defensivos favoritos.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPragasTab() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: Color(0xFF4CAF50),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.favorite,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Nenhuma praga favoritada',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Você ainda não possui pragas favoritas.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiagnosticosTab() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.orange[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.orange[300]!, width: 2),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Diagnósticos não disponíveis',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: controller.retryInitialization,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade600,
-                foregroundColor: Colors.white,
+            Text(
+              'Este recurso está disponível apenas para assinantes do app.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.orange[700],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showPremiumDialog(),
+                icon: const Icon(Icons.diamond, color: Colors.white),
+                label: const Text(
+                  'Desbloquear Agora',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showPremiumDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Funcionalidade Premium'),
+        content: const Text(
+          'Os diagnósticos estão disponíveis apenas para usuários premium. '
+          'Assine agora para ter acesso completo ao app.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Assinar'),
+          ),
+        ],
       ),
     );
   }

@@ -58,106 +58,86 @@ class DefensivoItemWidget extends StatelessWidget {
   }
 
   Widget _buildListItem() {
-    final color = _getClassColor;
+    final color = const Color(0xFF4CAF50); // Verde padrão como no mockup
     
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              colors: [
-                color.withValues(alpha: 0.1),
-                color.withValues(alpha: 0.05),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Row(
             children: [
+              // Ícone circular à esquerda (como no mockup)
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-                child: FaIcon(
-                  _getClassIcon,
-                  size: 20,
+                child: Icon(
+                  FontAwesomeIcons.leaf,
                   color: color,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 16),
+              // Conteúdo principal
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Nome do produto
                     Text(
                       defensivo.displayName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                        color: Colors.black87,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+                    // Ingrediente ativo
                     Text(
                       defensivo.displayIngredient,
                       style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        fontSize: 14,
+                        color: Colors.grey[600],
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
+                    // Tag da categoria
                     Row(
                       children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              defensivo.displayClass,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: color,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: isDark 
-                                ? Colors.grey.shade700.withValues(alpha: 0.5)
-                                : Colors.grey.shade200,
+                            color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            'ID: ${defensivo.idReg}',
+                            defensivo.displayClass,
                             style: TextStyle(
-                              fontSize: 10,
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                              color: Colors.grey[600],
                             ),
                           ),
                         ),
@@ -166,10 +146,11 @@ class DefensivoItemWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(
+              // Seta à direita
+              const Icon(
                 Icons.chevron_right,
-                color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                color: Colors.grey,
+                size: 20,
               ),
             ],
           ),

@@ -7,6 +7,7 @@ import 'widgets/defensivo_search_field.dart';
 import 'widgets/defensivo_item_widget.dart';
 import 'widgets/defensivos_empty_state_widget.dart';
 import 'widgets/defensivos_loading_skeleton_widget.dart';
+import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 
 class ListaDefensivosPage extends StatefulWidget {
   const ListaDefensivosPage({super.key});
@@ -43,108 +44,108 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   }
 
   void _loadMockData() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
     
     final mockData = [
       const DefensivoModel(
         idReg: '1', 
-        line1: '2,4-D Amina', 
-        line2: 'Ácido 2,4-diclorofenoxiacético',
-        nomeComum: '2,4-D Amina',
-        ingredienteAtivo: 'Ácido 2,4-diclorofenoxiacético',
+        line1: 'BLOWOUT, CLEANOVER', 
+        line2: 'Dibrometo de diquate',
+        nomeComum: 'BLOWOUT, CLEANOVER',
+        ingredienteAtivo: 'Dibrometo de diquate',
         classeAgronomica: 'Herbicida',
-        fabricante: 'Nufarm',
-        modoAcao: 'Auxina sintética'
+        fabricante: 'Syngenta',
+        modoAcao: 'Inibidor do fotossistema I'
       ),
       const DefensivoModel(
         idReg: '2',
-        line1: 'Abamectina',
-        line2: 'Abamectina',
-        nomeComum: 'Abamectina',
-        ingredienteAtivo: 'Abamectina',
-        classeAgronomica: 'Inseticida/Acaricida',
-        fabricante: 'Syngenta',
-        modoAcao: 'Modulador do canal de cloreto'
+        line1: 'Biagro Solo',
+        line2: 'Trichoderma harzianum (Rifai), cepa...',
+        nomeComum: 'Biagro Solo',
+        ingredienteAtivo: 'Trichoderma harzianum (Rifai), cepa',
+        classeAgronomica: 'Fungicida microbiológico',
+        fabricante: 'Biagro',
+        modoAcao: 'Controle biológico'
       ),
       const DefensivoModel(
         idReg: '3',
-        line1: 'Acefato',
-        line2: 'Acefato',
-        nomeComum: 'Acefato',
-        ingredienteAtivo: 'Acefato',
-        classeAgronomica: 'Inseticida',
-        fabricante: 'FMC',
-        modoAcao: 'Inibidor da acetilcolinesterase'
+        line1: 'Owner',
+        line2: 'Baculovirus Helicoverpa armigera (...',
+        nomeComum: 'Owner',
+        ingredienteAtivo: 'Baculovirus Helicoverpa armigera',
+        classeAgronomica: 'Inseticida microbiológico',
+        fabricante: 'AgBiTech',
+        modoAcao: 'Agente viral'
       ),
       const DefensivoModel(
         idReg: '4',
-        line1: 'Azoxistrobina',
-        line2: 'Azoxistrobina',
-        nomeComum: 'Azoxistrobina',
-        ingredienteAtivo: 'Azoxistrobina',
-        classeAgronomica: 'Fungicida',
-        fabricante: 'Syngenta',
-        modoAcao: 'Inibidor da respiração'
+        line1: 'CRISO-VIT',
+        line2: 'Chrysoperla externa',
+        nomeComum: 'CRISO-VIT',
+        ingredienteAtivo: 'Chrysoperla externa',
+        classeAgronomica: 'Agente Biológico de Controle',
+        fabricante: 'Bug Agentes Biológicos',
+        modoAcao: 'Controle biológico'
       ),
       const DefensivoModel(
         idReg: '5',
-        line1: 'Glifosato',
-        line2: 'N-(fosfonometil)glicina',
-        nomeComum: 'Glifosato',
-        ingredienteAtivo: 'N-(fosfonometil)glicina',
-        classeAgronomica: 'Herbicida',
-        fabricante: 'Bayer',
-        modoAcao: 'Inibidor da EPSPS'
+        line1: 'LEPROTECT S.F',
+        line2: 'Spodoptera frugiperda multiple nu...',
+        nomeComum: 'LEPROTECT S.F',
+        ingredienteAtivo: 'Spodoptera frugiperda multiple nucleopolyhedrovirus',
+        classeAgronomica: 'Inseticida microbiológico',
+        fabricante: 'Lallemand',
+        modoAcao: 'Agente viral'
       ),
       const DefensivoModel(
         idReg: '6',
-        line1: 'Atrazina',
+        line1: 'ROW Vispo',
+        line2: 'Bacillus subtilis cepa IAB/BS03',
+        nomeComum: 'ROW Vispo',
+        ingredienteAtivo: 'Bacillus subtilis cepa IAB/BS03',
+        classeAgronomica: 'Fungicida microbiológico',
+        fabricante: 'IHARA',
+        modoAcao: 'Controle biológico'
+      ),
+      const DefensivoModel(
+        idReg: '7',
+        line1: 'Octane',
+        line2: 'Isaria fumosorosea',
+        nomeComum: 'Octane',
+        ingredienteAtivo: 'Isaria fumosorosea',
+        classeAgronomica: 'Nematicida Microbiológico',
+        fabricante: 'Koppert',
+        modoAcao: 'Fungo entomopatogênico'
+      ),
+      const DefensivoModel(
+        idReg: '8',
+        line1: 'Lalstop I32 SC',
+        line2: 'Bacillus amyloliquefaciens Cepa IB...',
+        nomeComum: 'Lalstop I32 SC',
+        ingredienteAtivo: 'Bacillus amyloliquefaciens Cepa IB32',
+        classeAgronomica: 'Fungicida microbiológico',
+        fabricante: 'Lallemand',
+        modoAcao: 'Controle biológico'
+      ),
+      const DefensivoModel(
+        idReg: '9',
+        line1: 'Glifosato Master',
+        line2: 'N-(fosfonometil)glicina',
+        nomeComum: 'Glifosato Master',
+        ingredienteAtivo: 'N-(fosfonometil)glicina',
+        classeAgronomica: 'Herbicida',
+        fabricante: 'Nufarm',
+        modoAcao: 'Inibidor da EPSPS'
+      ),
+      const DefensivoModel(
+        idReg: '10',
+        line1: 'Atrazina 500 SC',
         line2: '6-cloro-N-etil-N\'-(1-metiletil)-1,3,5-triazina',
-        nomeComum: 'Atrazina',
+        nomeComum: 'Atrazina 500 SC',
         ingredienteAtivo: '6-cloro-N-etil-N\'-(1-metiletil)-1,3,5-triazina',
         classeAgronomica: 'Herbicida',
         fabricante: 'Syngenta',
         modoAcao: 'Inibidor do fotossistema II'
-      ),
-      const DefensivoModel(
-        idReg: '7',
-        line1: 'Clorotalonil',
-        line2: 'Tetracloroisoftalonitrila',
-        nomeComum: 'Clorotalonil',
-        ingredienteAtivo: 'Tetracloroisoftalonitrila',
-        classeAgronomica: 'Fungicida',
-        fabricante: 'ISK',
-        modoAcao: 'Multi-sítio'
-      ),
-      const DefensivoModel(
-        idReg: '8',
-        line1: 'Imidacloprido',
-        line2: '1-(6-cloro-3-piridinil-metil)-N-nitroimidazolidin-2-ilidenamine',
-        nomeComum: 'Imidacloprido',
-        ingredienteAtivo: '1-(6-cloro-3-piridinil-metil)-N-nitroimidazolidin-2-ilidenamine',
-        classeAgronomica: 'Inseticida',
-        fabricante: 'Bayer',
-        modoAcao: 'Agonista do receptor nicotínico'
-      ),
-      const DefensivoModel(
-        idReg: '9',
-        line1: 'Tebuconazol',
-        line2: '1-(4-clorofenil)-4,4-dimetil-3-(1H-1,2,4-triazol-1-ilmetil)-pentan-3-ol',
-        nomeComum: 'Tebuconazol',
-        ingredienteAtivo: '1-(4-clorofenil)-4,4-dimetil-3-(1H-1,2,4-triazol-1-ilmetil)-pentan-3-ol',
-        classeAgronomica: 'Fungicida',
-        fabricante: 'Bayer',
-        modoAcao: 'Inibidor da desmetilação'
-      ),
-      const DefensivoModel(
-        idReg: '10',
-        line1: 'Paraquat',
-        line2: '1,1\'-dimetil-4,4\'-bipiridínio',
-        nomeComum: 'Paraquat',
-        ingredienteAtivo: '1,1\'-dimetil-4,4\'-bipiridínio',
-        classeAgronomica: 'Herbicida',
-        fabricante: 'Syngenta',
-        modoAcao: 'Inibidor do fotossistema I'
       ),
     ];
 
@@ -223,11 +224,13 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   }
 
   void _onDefensivoTap(DefensivoModel defensivo) {
-    debugPrint('Navegar para detalhes do defensivo: ${defensivo.displayName}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Detalhes de ${defensivo.displayName}'),
-        duration: const Duration(seconds: 2),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetalheDefensivoPage(
+          defensivoName: defensivo.displayName,
+          fabricante: defensivo.displayFabricante,
+        ),
       ),
     );
   }
@@ -251,54 +254,107 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     return '$total defensivos cadastrados';
   }
 
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.shield_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Defensivos',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _getHeaderSubtitle(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: SafeArea(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Column(
-            children: [
-              ModernHeaderWidget(
-                title: 'Defensivos',
-                subtitle: _getHeaderSubtitle(),
-                leftIcon: Icons.shield_outlined,
-                rightIcon: _isAscending
-                    ? Icons.arrow_upward_outlined
-                    : Icons.arrow_downward_outlined,
-                isDark: isDark,
-                showBackButton: true,
-                showActions: true,
-                onBackPressed: () => Navigator.of(context).pop(),
-                onRightIconPressed: _toggleSort,
-              ),
-              DefensivoSearchField(
-                controller: _searchController,
-                isDark: isDark,
-                isSearching: _isSearching,
-                selectedViewMode: _selectedViewMode,
-                onToggleViewMode: _toggleViewMode,
-                onClear: _clearSearch,
-                onSubmitted: () => _performSearch(_searchController.text),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                  child: Card(
-                    elevation: 2,
-                    color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _buildContent(isDark),
-                  ),
+      backgroundColor: Colors.grey[50],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            backgroundColor: const Color(0xFF4CAF50),
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildHeader(),
+            ),
+            automaticallyImplyLeading: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha,
+                  color: Colors.white,
                 ),
+                onPressed: _toggleSort,
               ),
             ],
           ),
-        ),
+          SliverToBoxAdapter(
+            child: DefensivoSearchField(
+              controller: _searchController,
+              isDark: isDark,
+              isSearching: _isSearching,
+              selectedViewMode: _selectedViewMode,
+              onToggleViewMode: _toggleViewMode,
+              onClear: _clearSearch,
+              onSubmitted: () => _performSearch(_searchController.text),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _buildContent(isDark),
+          ),
+        ],
       ),
     );
   }
@@ -333,40 +389,40 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
               ? 3
               : 2;
 
-      return GridView.builder(
-        controller: _scrollController,
+      return Container(
         padding: const EdgeInsets.all(8),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.8,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
+        height: 600, // Fixed height for grid in SliverToBoxAdapter
+        child: GridView.builder(
+          controller: _scrollController,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.8,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: _filteredDefensivos.length,
+          itemBuilder: (context, index) {
+            final defensivo = _filteredDefensivos[index];
+            return DefensivoItemWidget(
+              defensivo: defensivo,
+              isDark: isDark,
+              onTap: () => _onDefensivoTap(defensivo),
+              isGridView: true,
+            );
+          },
         ),
-        itemCount: _filteredDefensivos.length,
-        itemBuilder: (context, index) {
-          final defensivo = _filteredDefensivos[index];
-          return DefensivoItemWidget(
-            defensivo: defensivo,
-            isDark: isDark,
-            onTap: () => _onDefensivoTap(defensivo),
-            isGridView: true,
-          );
-        },
       );
     } else {
-      return ListView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: _filteredDefensivos.length,
-        itemBuilder: (context, index) {
-          final defensivo = _filteredDefensivos[index];
-          return DefensivoItemWidget(
+      return Column(
+        children: [
+          ..._filteredDefensivos.map((defensivo) => DefensivoItemWidget(
             defensivo: defensivo,
             isDark: isDark,
             onTap: () => _onDefensivoTap(defensivo),
             isGridView: false,
-          );
-        },
+          )),
+          const SizedBox(height: 80), // Espaço para bottom navigation
+        ],
       );
     }
   }

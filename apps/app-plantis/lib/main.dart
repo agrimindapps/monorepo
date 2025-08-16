@@ -32,7 +32,7 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   // Initialize Performance Service
   final performanceService = PerformanceService();
   await performanceService.startPerformanceTracking(
@@ -44,13 +44,13 @@ void main() async {
     ),
   );
   await performanceService.markAppStarted();
-  
+
   // Configure Crashlytics (only in production/staging)
   if (EnvironmentConfig.enableAnalytics) {
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
     };
-    
+
     // Pass all uncaught asynchronous errors to Crashlytics
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -62,15 +62,15 @@ void main() async {
   await Hive.initFlutter();
 
   // Register Hive adapters
-  Hive.registerAdapter(ComentarioModelAdapter());      // TypeId: 0
-  Hive.registerAdapter(EspacoModelAdapter());          // TypeId: 1
-  Hive.registerAdapter(PlantaModelAdapter());          // TypeId: 2
-  Hive.registerAdapter(TarefaModelAdapter());          // TypeId: 3
-  Hive.registerAdapter(PlantaConfigModelAdapter());    // TypeId: 4
+  Hive.registerAdapter(ComentarioModelAdapter()); // TypeId: 0
+  Hive.registerAdapter(EspacoModelAdapter()); // TypeId: 1
+  Hive.registerAdapter(PlantaModelAdapter()); // TypeId: 2
+  Hive.registerAdapter(TarefaModelAdapter()); // TypeId: 3
+  Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
 
   // Initialize dependency injection
   await di.init();
-  
+
   // Initialize DatabaseInspectorService with app-specific boxes
   AppDataInspectorInitializer.initialize();
 

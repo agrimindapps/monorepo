@@ -8,10 +8,11 @@ import '../interfaces/network_info.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/image_service.dart';
+import '../services/test_data_generator_service.dart';
+import '../services/data_cleaner_service.dart';
 import '../utils/navigation_service.dart';
 import '../providers/analytics_provider.dart';
 import 'modules/plants_module.dart';
-import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
 import '../../features/premium/presentation/providers/premium_provider.dart';
@@ -28,7 +29,6 @@ Future<void> init() async {
   // Features
   _initAuth();
   _initPlants();
-  _initSpaces();
   _initTasks();
   _initComments();
   _initPremium();
@@ -101,9 +101,6 @@ void _initPlants() {
   PlantsDIModule.init(sl);
 }
 
-void _initSpaces() {
-  SpacesDIModule.init(sl);
-}
 
 void _initTasks() {
   TasksModule.init(sl);
@@ -140,4 +137,17 @@ void _initAppServices() {
   
   // Theme Provider
   sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
+  
+  // Test Data Generator Service
+  sl.registerLazySingleton<TestDataGeneratorService>(() => TestDataGeneratorService(
+    addPlantUseCase: sl(),
+    addTaskUseCase: sl(),
+  ));
+  
+  // Data Cleaner Service
+  sl.registerLazySingleton<DataCleanerService>(() => DataCleanerService(
+    plantsRepository: sl(),
+    tasksRepository: sl(),
+    deletePlantUseCase: sl(),
+  ));
 }

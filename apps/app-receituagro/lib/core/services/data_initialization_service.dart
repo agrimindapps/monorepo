@@ -1,187 +1,190 @@
 import 'dart:developer' as developer;
-import '../contracts/i_static_data_repository.dart';
-import '../repositories/cultura_repository.dart';
-import '../repositories/pragas_repository.dart';
+import 'package:dartz/dartz.dart';
+import 'asset_loader_service.dart';
+import 'version_manager_service.dart';
+import '../repositories/cultura_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
+import '../repositories/diagnostico_hive_repository.dart';
+import '../repositories/fitossanitario_info_hive_repository.dart';
+import '../repositories/plantas_inf_hive_repository.dart';
+import '../repositories/pragas_inf_hive_repository.dart';
 
-/// Serviço de inicialização de dados simplificado
-/// Princípios: Single Responsibility + Dependency Inversion
+/// Serviço responsável por inicializar e gerenciar dados da aplicação
+/// Orquestra o carregamento de JSONs e populacião das Hive boxes
 class DataInitializationService {
-  final Map<String, IStaticDataRepository> _repositories;
-  final IAssetLoader _assetLoader;
-  
-  bool _isInitialized = false;
+  final AssetLoaderService _assetLoader;
+  final VersionManagerService _versionManager;
+  final CulturaHiveRepository _culturaRepository;
+  final PragasHiveRepository _pragasRepository;
+  final FitossanitarioHiveRepository _fitossanitarioRepository;
+  final DiagnosticoHiveRepository _diagnosticoRepository;
+  final FitossanitarioInfoHiveRepository _fitossanitarioInfoRepository;
+  final PlantasInfHiveRepository _plantasInfRepository;
+  final PragasInfHiveRepository _pragasInfRepository;
 
   DataInitializationService({
-    required IAssetLoader assetLoader,
-    Map<String, IStaticDataRepository>? repositories,
-  }) : _assetLoader = assetLoader,
-       _repositories = repositories ?? _createDefaultRepositories();
+    required AssetLoaderService assetLoader,
+    required VersionManagerService versionManager,
+    required CulturaHiveRepository culturaRepository,
+    required PragasHiveRepository pragasRepository,
+    required FitossanitarioHiveRepository fitossanitarioRepository,
+    required DiagnosticoHiveRepository diagnosticoRepository,
+    required FitossanitarioInfoHiveRepository fitossanitarioInfoRepository,
+    required PlantasInfHiveRepository plantasInfRepository,
+    required PragasInfHiveRepository pragasInfRepository,
+  })  : _assetLoader = assetLoader,
+        _versionManager = versionManager,
+        _culturaRepository = culturaRepository,
+        _pragasRepository = pragasRepository,
+        _fitossanitarioRepository = fitossanitarioRepository,
+        _diagnosticoRepository = diagnosticoRepository,
+        _fitossanitarioInfoRepository = fitossanitarioInfoRepository,
+        _plantasInfRepository = plantasInfRepository,
+        _pragasInfRepository = pragasInfRepository;
 
-  /// Factory method para repositórios padrão
-  static Map<String, IStaticDataRepository> _createDefaultRepositories() {
-    return {
-      'culturas': CulturaRepository(),
-      'pragas': PragasRepository(),
-      // TODO: Adicionar outros repositórios conforme necessário
-    };
-  }
-
-  /// Inicializa o serviço
-  Future<bool> initialize() async {
-    if (_isInitialized) return true;
-
+  /// Inicializa todos os dados da aplicação se necessário
+  Future<Either<Exception, void>> initializeData() async {
     try {
-      // Inicializa cada repositório
-      for (final entry in _repositories.entries) {
-        final name = entry.key;
-        final repository = entry.value;
-        
-        developer.log('Inicializando repositório: $name', name: 'DataInitializationService');
-        
-        // TODO: Adicionar lógica de inicialização específica se necessário
-        // Por exemplo, abrir boxes do Hive, carregar configurações, etc.
-      }
-
-      _isInitialized = true;
+      developer.log('Iniciando carregamento de dados...', name: 'DataInitializationService');
       
-      developer.log('Todos os repositórios inicializados com sucesso', name: 'DataInitializationService');
-      return true;
+      final currentVersion = await _versionManager.getCurrentVersionAsync();
+      developer.log('Versão atual da aplicação: $currentVersion', name: 'DataInitializationService');
       
-    } catch (e) {
-      developer.log('Erro na inicialização: $e', name: 'DataInitializationService');
-      return false;
-    }
-  }
-
-  /// Carrega dados estáticos de uma versão específica
-  Future<bool> loadStaticData(String version) async {
-    try {
-      if (!_isInitialized) {
-        await initialize();
-      }
-
-      developer.log('Carregando dados estáticos versão: $version', name: 'DataInitializationService');
-
-      // TODO: Implementar carregamento real dos dados
-      // final assetResult = await _assetLoader.loadAllAssets(version);
-      // 
-      // if (assetResult.isRight()) {
-      //   final data = assetResult.right;
-      //   return await _saveToRepositories(data);
-      // }
-
-      // Por enquanto, apenas simula sucesso
-      developer.log('Dados carregados com sucesso', name: 'DataInitializationService');
-      return true;
+      // Lista de categorias e seus repositórios correspondentes
+      final categories = [
+        _CategoryData('tbculturas', _culturaRepository),
+        _CategoryData('tbpragas', _pragasRepository),
+        _CategoryData('tbfitossanitarios', _fitossanitarioRepository),
+        _CategoryData('tbdiagnostico', _diagnosticoRepository),
+        _CategoryData('tbfitossanitariosinfo', _fitossanitarioInfoRepository),
+        _CategoryData('tbplantasinf', _plantasInfRepository),
+        _CategoryData('tbpragasinf', _pragasInfRepository),
+      ];
       
-    } catch (e) {
-      developer.log('Erro ao carregar dados: $e', name: 'DataInitializationService');
-      return false;
-    }
-  }
-
-  /// Verifica se dados precisam ser atualizados
-  Future<bool> needsUpdate(String currentVersion) async {
-    try {
-      // TODO: Implementar verificação real baseada na versão armazenada
-      // final storedVersion = await _versionManager.getCurrentVersion();
-      // return storedVersion != currentVersion;
-      
-      // Por enquanto, sempre retorna false (dados sempre atualizados)
-      return false;
-      
-    } catch (e) {
-      developer.log('Erro ao verificar necessidade de atualização: $e', name: 'DataInitializationService');
-      return true; // Se há erro, assume que precisa atualizar
-    }
-  }
-
-  /// Força recarregamento de todos os dados
-  Future<bool> forceReload(String version) async {
-    try {
-      developer.log('Forçando recarregamento de dados versão: $version', name: 'DataInitializationService');
-      
-      // Limpa dados atuais
-      await _clearAllData();
-      
-      // Recarrega
-      return await loadStaticData(version);
-      
-    } catch (e) {
-      developer.log('Erro no recarregamento forçado: $e', name: 'DataInitializationService');
-      return false;
-    }
-  }
-
-  /// Obtém estatísticas de inicialização
-  Map<String, dynamic> getInitializationStats() {
-    return {
-      'is_initialized': _isInitialized,
-      'repositories_count': _repositories.length,
-      'repositories': _repositories.keys.toList(),
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-  }
-
-  /// Limpa todos os dados dos repositórios
-  Future<void> _clearAllData() async {
-    try {
-      for (final entry in _repositories.entries) {
-        final name = entry.key;
-        final repository = entry.value;
-        
-        developer.log('Limpando dados do repositório: $name', name: 'DataInitializationService');
-        
-        // TODO: Implementar limpeza específica se os repositórios tiverem esse método
-        // await repository.clear();
-      }
-    } catch (e) {
-      developer.log('Erro ao limpar dados: $e', name: 'DataInitializationService');
-      rethrow;
-    }
-  }
-
-  /// Salva dados nos repositórios apropriados
-  Future<bool> _saveToRepositories(Map<String, dynamic> allData) async {
-    try {
-      var successCount = 0;
-      
-      for (final entry in _repositories.entries) {
-        final name = entry.key;
-        final repository = entry.value;
-        final data = allData[name] as List<Map<String, dynamic>>?;
-        
-        if (data != null) {
-          developer.log('Salvando ${data.length} itens no repositório: $name', name: 'DataInitializationService');
-          
-          // TODO: Implementar salvamento específico
-          // final result = await repository.saveAll(data);
-          // if (result.isRight()) {
-          //   successCount++;
-          // }
-          
-          successCount++; // Mock por enquanto
+      // Carrega cada categoria
+      for (final category in categories) {
+        final result = await _loadCategoryData(category, currentVersion);
+        if (result.isLeft()) {
+          return result;
         }
       }
       
-      return successCount == _repositories.length;
+      developer.log('Carregamento de dados concluído com sucesso', name: 'DataInitializationService');
+      return const Right(null);
       
     } catch (e) {
-      developer.log('Erro ao salvar nos repositórios: $e', name: 'DataInitializationService');
-      return false;
+      developer.log('Erro durante inicialização de dados: $e', name: 'DataInitializationService');
+      return Left(Exception('Falha na inicialização: ${e.toString()}'));
     }
   }
 
-  /// Dispose dos recursos
-  Future<void> dispose() async {
+  /// Carrega dados de uma categoria específica
+  Future<Either<Exception, void>> _loadCategoryData(_CategoryData category, String currentVersion) async {
     try {
-      developer.log('Fazendo dispose do DataInitializationService', name: 'DataInitializationService');
+      developer.log('Verificando necessidade de atualização para ${category.name}...', name: 'DataInitializationService');
       
-      // TODO: Cleanup se necessário
-      _isInitialized = false;
+      // Verifica se precisa atualizar esta categoria
+      final needsReload = await _versionManager.needsDataReload(category.name);
+      
+      if (!needsReload) {
+        developer.log('Dados de ${category.name} já estão atualizados', name: 'DataInitializationService');
+        return const Right(null);
+      }
+      
+      developer.log('Carregando dados de ${category.name}...', name: 'DataInitializationService');
+      
+      // Carrega dados do JSON
+      final jsonResult = await _assetLoader.loadCategoryData(category.name);
+      if (jsonResult.isLeft()) {
+        return Left(Exception('Erro ao carregar JSON de ${category.name}: ${jsonResult.fold((e) => e.toString(), (r) => '')}'));
+      }
+      
+      final jsonData = jsonResult.fold((l) => <Map<String, dynamic>>[], (r) => r);
+      developer.log('Carregados ${jsonData.length} registros de ${category.name}', name: 'DataInitializationService');
+      
+      // Salva no repositório
+      final saveResult = await category.repository.loadFromJson(jsonData, currentVersion);
+      if (saveResult.isLeft()) {
+        return Left(Exception('Erro ao salvar dados de ${category.name}: ${saveResult.fold((e) => e.toString(), (r) => '')}'));
+      }
+      
+      // Marca como atualizado
+      await _versionManager.markAsUpdated(currentVersion, category.name);
+      
+      developer.log('Dados de ${category.name} carregados com sucesso', name: 'DataInitializationService');
+      return const Right(null);
       
     } catch (e) {
-      developer.log('Erro durante dispose: $e', name: 'DataInitializationService');
+      developer.log('Erro ao carregar categoria ${category.name}: $e', name: 'DataInitializationService');
+      return Left(Exception('Erro na categoria ${category.name}: ${e.toString()}'));
     }
   }
+
+  /// Força recarregamento de todos os dados (útil para desenvolvimento)
+  Future<Either<Exception, void>> forceReloadAllData() async {
+    try {
+      developer.log('Forçando recarregamento de todos os dados...', name: 'DataInitializationService');
+      
+      await _versionManager.forceDataUpdate();
+      return await initializeData();
+      
+    } catch (e) {
+      developer.log('Erro durante recarregamento forçado: $e', name: 'DataInitializationService');
+      return Left(Exception('Falha no recarregamento: ${e.toString()}'));
+    }
+  }
+
+  /// Obtém estatísticas de carregamento para debug
+  Future<Map<String, dynamic>> getLoadingStats() async {
+    try {
+      final versionStats = await _versionManager.getVersionStats();
+      
+      return {
+        'version_info': versionStats,
+        'repositories': {
+          'culturas': await _culturaRepository.countAsync(),
+          'pragas': await _pragasRepository.countAsync(),
+          'fitossanitarios': await _fitossanitarioRepository.countAsync(),
+          'diagnosticos': await _diagnosticoRepository.countAsync(),
+          'fitossanitarios_info': await _fitossanitarioInfoRepository.countAsync(),
+          'plantas_inf': await _plantasInfRepository.countAsync(),
+          'pragas_inf': await _pragasInfRepository.countAsync(),
+        },
+        'last_update': await _versionManager.getLastDataVersion(),
+      };
+    } catch (e) {
+      developer.log('Erro ao obter estatísticas: $e', name: 'DataInitializationService');
+      return {'error': e.toString()};
+    }
+  }
+
+  /// Verifica se todos os dados estão carregados
+  Future<bool> isDataLoaded() async {
+    try {
+      final counts = await Future.wait([
+        _culturaRepository.countAsync(),
+        _pragasRepository.countAsync(),
+        _fitossanitarioRepository.countAsync(),
+        _diagnosticoRepository.countAsync(),
+        _fitossanitarioInfoRepository.countAsync(),
+        _plantasInfRepository.countAsync(),
+        _pragasInfRepository.countAsync(),
+      ]);
+      
+      // Verifica se pelo menos uma box tem dados
+      return counts.any((count) => count > 0);
+    } catch (e) {
+      developer.log('Erro ao verificar se dados estão carregados: $e', name: 'DataInitializationService');
+      return false;
+    }
+  }
+}
+
+/// Classe auxiliar para agrupar dados de categoria
+class _CategoryData {
+  final String name;
+  final dynamic repository;
+  
+  _CategoryData(this.name, this.repository);
 }

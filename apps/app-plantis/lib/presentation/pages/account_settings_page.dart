@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/user_profile_card.dart';
 import '../widgets/premium_subscription_card.dart';
 import '../../features/development/presentation/pages/data_inspector_page.dart';
+import '../../core/di/injection_container.dart' as di;
+import '../../core/services/test_data_generator_service.dart';
+import '../../core/services/data_cleaner_service.dart';
 
 class AccountSettingsPage extends StatelessWidget {
   const AccountSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Minha Conta',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -34,7 +39,7 @@ class AccountSettingsPage extends StatelessWidget {
             Text(
               'Bem-vindo, Usuário Anônimo',
               style: TextStyle(
-                color: Colors.grey.shade400,
+                color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 16,
               ),
             ),
@@ -76,11 +81,46 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.notifications,
                   title: 'Notificações',
                   subtitle: 'Configure quando ser notificado',
-                  iconColor: Colors.teal,
+                  iconColor: theme.colorScheme.primary,
                   isFirst: true,
-                  isLast: true,
                   onTap: () {
                     // Handle notifications tap
+                  },
+                ),
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    return SettingsItem(
+                      icon: Icons.dark_mode,
+                      title: 'Tema',
+                      subtitle: themeProvider.isDarkMode 
+                          ? 'Tema escuro ativo' 
+                          : themeProvider.isLightMode 
+                              ? 'Tema claro ativo' 
+                              : 'Seguir sistema',
+                      iconColor: themeProvider.isDarkMode 
+                          ? theme.colorScheme.secondary 
+                          : theme.colorScheme.primary,
+                      isLast: true,
+                      trailing: Switch(
+                        value: themeProvider.isDarkMode,
+                        onChanged: (value) {
+                          if (value) {
+                            themeProvider.setDarkTheme();
+                          } else {
+                            themeProvider.setLightTheme();
+                          }
+                        },
+                        activeColor: theme.colorScheme.primary,
+                      ),
+                      onTap: () {
+                        // Toggle theme
+                        if (themeProvider.isDarkMode) {
+                          themeProvider.setLightTheme();
+                        } else {
+                          themeProvider.setDarkTheme();
+                        }
+                      },
+                    );
                   },
                 ),
               ],
@@ -94,7 +134,7 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.privacy_tip,
                   title: 'Política de Privacidade',
                   subtitle: 'Como protegemos seus dados',
-                  iconColor: Colors.teal,
+                  iconColor: theme.colorScheme.primary,
                   isFirst: true,
                   onTap: () {
                     // Handle privacy policy tap
@@ -104,7 +144,7 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.description,
                   title: 'Termos de Uso',
                   subtitle: 'Termos e condições de uso',
-                  iconColor: Colors.teal,
+                  iconColor: theme.colorScheme.primary,
                   onTap: () {
                     // Handle terms tap
                   },
@@ -113,7 +153,7 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.info,
                   title: 'Sobre o App',
                   subtitle: 'Versão e informações do app',
-                  iconColor: Colors.teal,
+                  iconColor: theme.colorScheme.primary,
                   isLast: true,
                   onTap: () {
                     // Handle about tap
@@ -131,7 +171,7 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.storage,
                   title: 'Inspetor de Dados',
                   subtitle: 'Visualizar dados locais do app',
-                  iconColor: Colors.blue,
+                  iconColor: theme.colorScheme.secondary,
                   isFirst: true,
                   onTap: () {
                     Navigator.push(
@@ -145,24 +185,23 @@ class AccountSettingsPage extends StatelessWidget {
                 SettingsItem(
                   icon: Icons.bug_report,
                   title: 'Gerar dados de teste',
-                  iconColor: Colors.orange,
+                  iconColor: theme.colorScheme.tertiary,
                   onTap: () {
-                    // Handle generate test data tap
+                    _showGenerateTestDataDialog(context);
                   },
                 ),
                 SettingsItem(
                   icon: Icons.clear_all,
                   title: 'Limpar todos os registros',
-                  iconColor: Colors.red,
+                  iconColor: theme.colorScheme.error,
                   onTap: () {
-                    // Handle clear data tap
                     _showClearDataDialog(context);
                   },
                 ),
                 SettingsItem(
                   icon: Icons.campaign,
                   title: 'Página promocional',
-                  iconColor: Colors.purple,
+                  iconColor: theme.colorScheme.primary,
                   onTap: () {
                     // Handle promotional page tap
                   },
@@ -171,7 +210,7 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.verified,
                   title: 'Gerar Licença Local',
                   subtitle: 'Ativa premium por 30 dias',
-                  iconColor: Colors.green,
+                  iconColor: theme.colorScheme.secondary,
                   onTap: () {
                     // Handle local license tap
                   },
@@ -180,7 +219,7 @@ class AccountSettingsPage extends StatelessWidget {
                   icon: Icons.remove_circle,
                   title: 'Revogar Licença Local',
                   subtitle: 'Remove licença de teste',
-                  iconColor: Colors.red,
+                  iconColor: theme.colorScheme.error,
                   isLast: true,
                   onTap: () {
                     // Handle revoke license tap
@@ -199,8 +238,8 @@ class AccountSettingsPage extends StatelessWidget {
                   _showLogoutDialog(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.error,
+                  foregroundColor: theme.colorScheme.onError,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -228,9 +267,9 @@ class AccountSettingsPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey.shade600,
+        backgroundColor: theme.colorScheme.surface,
+        selectedItemColor: theme.colorScheme.primary,
+        unselectedItemColor: theme.colorScheme.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
         currentIndex: 2, // Account tab selected
         items: const [
@@ -270,14 +309,13 @@ class AccountSettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Text(
+        title: Text(
           'Assinar Premium',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        content: const Text(
+        content: Text(
           'Deseja ativar o plano premium para acessar todos os recursos?',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -289,8 +327,8 @@ class AccountSettingsPage extends StatelessWidget {
               Navigator.of(context).pop();
               // Handle subscription
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-            child: const Text('Assinar', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+            child: Text('Assinar', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
           ),
         ],
       ),
@@ -301,23 +339,22 @@ class AccountSettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Text(
+        title: Text(
           'Sobre o App',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Plantis - Gerenciamento de Plantas', 
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Versão: 1.0.0', style: TextStyle(color: Colors.grey)),
-            Text('Build: 1', style: TextStyle(color: Colors.grey)),
-            SizedBox(height: 12),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Versão: 1.0.0', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text('Build: 1', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            const SizedBox(height: 12),
             Text('Sistema de cuidados e lembretes para suas plantas',
-                style: TextStyle(color: Colors.grey)),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ],
         ),
         actions: [
@@ -330,18 +367,124 @@ class AccountSettingsPage extends StatelessWidget {
     );
   }
 
-  void _showClearDataDialog(BuildContext context) {
+  void _showClearDataDialog(BuildContext context) async {
+    // Primeiro, obter estatísticas dos dados
+    final dataCleanerService = di.sl<DataCleanerService>();
+    final stats = await dataCleanerService.getDataStats();
+    
+    if (!context.mounted) return;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Text(
-          'Limpar Dados',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          'Limpar Todos os Dados',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        content: const Text(
-          'Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.',
-          style: TextStyle(color: Colors.grey),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Esta ação irá remover permanentemente:',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 12),
+            if (stats.hasData) ...[
+              Text(
+                '• ${stats.plantsCount} plantas',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              Text(
+                '• ${stats.tasksCount} tarefas',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Esta ação não pode ser desfeita. Continuar?',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ] else ...[
+              Text(
+                'Não há dados para limpar.',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          if (stats.hasData)
+            ElevatedButton(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final theme = Theme.of(context);
+                
+                navigator.pop();
+                
+                // Show loading
+                _showLoadingDialog(context, 'Limpando dados...');
+                
+                try {
+                  final result = await dataCleanerService.clearAllData();
+                  
+                  navigator.pop(); // Close loading
+                  
+                  result.fold(
+                    (failure) {
+                      scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text('Erro: ${failure.message}'),
+                          backgroundColor: theme.colorScheme.error,
+                        ),
+                      );
+                    },
+                    (_) {
+                      scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text('${stats.totalItems} itens removidos com sucesso'),
+                          backgroundColor: theme.colorScheme.primary,
+                        ),
+                      );
+                    },
+                  );
+                } catch (e) {
+                  navigator.pop(); // Close loading
+                  
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Erro inesperado: $e'),
+                      backgroundColor: theme.colorScheme.error,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+              child: Text('Limpar Tudo', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showGenerateTestDataDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Gerar Dados de Teste',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        content: Text(
+          'Isso criará plantas e tarefas fictícias para testar a interface. Continuar?',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -349,20 +492,63 @@ class AccountSettingsPage extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Handle clear data
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Dados limpos com sucesso'),
-                  backgroundColor: Colors.teal,
-                ),
-              );
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final theme = Theme.of(context);
+              
+              navigator.pop();
+              
+              // Show loading
+              _showLoadingDialog(context);
+              
+              try {
+                final testDataService = di.sl<TestDataGeneratorService>();
+                await testDataService.generateTestData();
+                
+                navigator.pop(); // Close loading
+                
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: const Text('Dados de teste gerados com sucesso!'),
+                    backgroundColor: theme.colorScheme.primary,
+                  ),
+                );
+              } catch (e) {
+                navigator.pop(); // Close loading
+                
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Erro ao gerar dados: $e'),
+                    backgroundColor: theme.colorScheme.error,
+                  ),
+                );
+              }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Limpar', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+            child: Text('Gerar', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context, [String message = 'Gerando dados de teste...']) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -371,14 +557,13 @@ class AccountSettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Text(
+        title: Text(
           'Sair do App',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        content: const Text(
+        content: Text(
           'Tem certeza que deseja sair?',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -391,8 +576,8 @@ class AccountSettingsPage extends StatelessWidget {
               // Handle logout
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Sair', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            child: Text('Sair', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
           ),
         ],
       ),

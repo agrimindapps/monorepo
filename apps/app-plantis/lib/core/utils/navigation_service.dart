@@ -8,11 +8,24 @@ class NavigationService {
   static NavigationService get instance => _instance;
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  
+  // Controle para evitar múltiplas mensagens de acesso negado
+  DateTime? _lastAccessDeniedMessage;
 
   BuildContext? get currentContext => navigatorKey.currentContext;
 
   void showAccessDeniedMessage() {
     final context = currentContext;
+    final now = DateTime.now();
+    
+    // Evita mostrar a mensagem se já foi mostrada nos últimos 5 segundos
+    if (_lastAccessDeniedMessage != null && 
+        now.difference(_lastAccessDeniedMessage!).inSeconds < 5) {
+      return;
+    }
+    
+    _lastAccessDeniedMessage = now;
+    
     if (context != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

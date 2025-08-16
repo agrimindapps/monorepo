@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/widgets/modern_header_widget.dart';
 
 class DetalhePragaPage extends StatefulWidget {
   final String pragaName;
@@ -33,115 +35,80 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            backgroundColor: const Color(0xFF4CAF50),
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeader(),
-            ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  isFavorited ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    isFavorited = !isFavorited;
-                  });
-                },
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1120),
             child: Column(
               children: [
-                const SizedBox(height: 20),
-                _buildTabBar(),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height - 280,
-                  child: TabBarView(
-                    controller: _tabController,
+                _buildModernHeader(isDark),
+                Expanded(
+                  child: Column(
                     children: [
-                      _buildInfoTab(),
-                      _buildDiagnosticoTab(),
-                      _buildComentariosTab(),
+                      const SizedBox(height: 20),
+                      _buildTabBar(),
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildInfoTab(),
+                            _buildDiagnosticoTab(),
+                            _buildComentariosTab(),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(60, 60, 60, 20),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            widget.pragaName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            widget.pragaScientificName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
+  Widget _buildModernHeader(bool isDark) {
+    return ModernHeaderWidget(
+      title: widget.pragaName,
+      subtitle: widget.pragaScientificName,
+      leftIcon: Icons.bug_report_outlined,
+      rightIcon: isFavorited ? Icons.favorite : Icons.favorite_border,
+      isDark: isDark,
+      showBackButton: true,
+      showActions: true,
+      onBackPressed: () => Navigator.of(context).pop(),
+      onRightIconPressed: () {
+        setState(() {
+          isFavorited = !isFavorited;
+        });
+      },
     );
   }
 
   Widget _buildTabBar() {
+    final theme = Theme.of(context);
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E8),
+        color: theme.colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF4CAF50),
+          color: theme.colorScheme.primary,
           borderRadius: BorderRadius.circular(8),
         ),
         indicatorPadding: const EdgeInsets.all(4),
-        labelColor: Colors.white,
-        unselectedLabelColor: const Color(0xFF4CAF50),
+        labelColor: theme.colorScheme.onPrimary,
+        unselectedLabelColor: theme.colorScheme.primary,
         labelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 14,
@@ -242,14 +209,16 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   }
 
   Widget _buildInfoSection(String title, IconData? icon, List<Widget> items) {
+    final theme = Theme.of(context);
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -265,12 +234,12 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E8),
+                    color: theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
-                    color: const Color(0xFF4CAF50),
+                    color: theme.colorScheme.primary,
                     size: 20,
                   ),
                 ),
@@ -279,17 +248,17 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.volume_up,
-                  color: Color(0xFF4CAF50),
+                  color: theme.colorScheme.primary,
                   size: 20,
                 ),
                 onPressed: () {
@@ -306,6 +275,8 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   }
 
   Widget _buildInfoItem(String label, String value) {
+    final theme = Theme.of(context);
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -313,10 +284,10 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -324,34 +295,88 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
             value,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const Divider(height: 16),
+          Divider(
+            height: 16,
+            color: theme.dividerColor,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildDiagnosticoTab() {
+    return Column(
+      children: [
+        _buildDiagnosticoFilters(),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCulturaSection('Arroz', '1 diagnóstico'),
+                const SizedBox(height: 16),
+                _buildDefensivoItem(
+                  '2,4 D Amina 840 SI',
+                  '2,4-D-dimetilamina (720 g/L)',
+                  '••• mg/L',
+                ),
+                const SizedBox(height: 24),
+                _buildCulturaSection('Braquiária', '1 diagnóstico'),
+                const SizedBox(height: 16),
+                _buildDefensivoItem(
+                  '2,4-D Nortox',
+                  '2,4-D + Equivalente ácido de 2,4-D (8...',
+                  '••• mg/L',
+                ),
+                const SizedBox(height: 24),
+                _buildCulturaSection('Cana-de-açúcar', '2 diagnósticos'),
+                const SizedBox(height: 16),
+                _buildDefensivoItem(
+                  '2,4 D Amina 840 SI',
+                  '2,4-D-dimetilamina (720 g/L)',
+                  '••• mg/L',
+                ),
+                const SizedBox(height: 12),
+                _buildDefensivoItem(
+                  'Ametrina Atanor 50 SC',
+                  'Ametrina (500 g/L)',
+                  '••• mg/L',
+                ),
+                const SizedBox(height: 80),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildComentariosTab() {
+    final theme = Theme.of(context);
+    final warningColor = theme.colorScheme.tertiary;
+    
     return Center(
       child: Container(
         margin: const EdgeInsets.all(32),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.orange[50],
+          color: theme.colorScheme.tertiaryContainer,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.orange[300]!, width: 2),
+          border: Border.all(color: warningColor.withValues(alpha: 0.3), width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Diagnósticos não disponíveis',
+            Text(
+              'Comentários não disponíveis',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.orange,
+                color: warningColor,
               ),
               textAlign: TextAlign.center,
             ),
@@ -360,7 +385,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
               'Este recurso está disponível apenas para assinantes do app.',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.orange[700],
+                color: theme.colorScheme.onTertiaryContainer,
               ),
               textAlign: TextAlign.center,
             ),
@@ -378,7 +403,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: warningColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -392,81 +417,237 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
     );
   }
 
-  Widget _buildComentariosTab() {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.orange[50],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.orange[300]!, width: 2),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Comentários não disponíveis',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
+  Widget _buildDiagnosticoFilters() {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Este recurso está disponível apenas para assinantes do app.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.orange[700],
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.search,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Localizar',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _showPremiumDialog(),
-                icon: const Icon(Icons.diamond, color: Colors.white),
-                label: const Text(
-                  'Desbloquear Agora',
+          ),
+          const SizedBox(width: 12),
+          Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_view_day,
+                  color: theme.colorScheme.primary,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Todas',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  size: 20,
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCulturaSection(String cultura, String diagnosticos) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.eco,
+            color: theme.colorScheme.primary,
+            size: 18,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '$cultura ($diagnosticos)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefensivoItem(String nome, String ingredienteAtivo, String dosagem) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.agriculture,
+              color: theme.colorScheme.onPrimary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nome,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  ingredienteAtivo,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Dosagem: $dosagem',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Icon(
+                Icons.warning,
+                color: Colors.orange[600],
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   void _showPremiumDialog() {
+    // Don't show premium dialog for anonymous users
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.isAnonymous) {
+      return;
+    }
+    
+    final theme = Theme.of(context);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Funcionalidade Premium'),
-        content: const Text(
+        backgroundColor: theme.dialogBackgroundColor,
+        title: Text(
+          'Funcionalidade Premium',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        content: Text(
           'Este recurso está disponível apenas para usuários premium. '
           'Assine agora para ter acesso completo ao app.',
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
             child: const Text('Assinar'),
           ),
         ],

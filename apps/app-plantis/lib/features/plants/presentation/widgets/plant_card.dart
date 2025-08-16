@@ -154,10 +154,15 @@ class PlantCard extends StatelessWidget {
   }
 
   Widget _buildIconPlaceholder() {
-    return const Icon(
-      Icons.eco,
-      color: Colors.black,
-      size: 28,
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Icon(
+          Icons.eco,
+          color: theme.colorScheme.onSecondary,
+          size: 28,
+        );
+      },
     );
   }
 
@@ -171,7 +176,7 @@ class PlantCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF8B6914), // Brown/orange color like in the image
+        color: const Color(0xFFFF9500), // Orange warning color
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

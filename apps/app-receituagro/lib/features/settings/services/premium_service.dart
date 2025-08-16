@@ -8,6 +8,9 @@ abstract class IPremiumService extends ChangeNotifier {
   /// Premium status information
   PremiumStatus get status;
   
+  /// Whether should show premium dialogs (not for anonymous users)
+  bool get shouldShowPremiumDialogs;
+  
   /// Generate a test subscription for development
   Future<void> generateTestSubscription();
   
@@ -59,6 +62,15 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   
   @override
   PremiumStatus get status => _status;
+  
+  @override
+  bool get shouldShowPremiumDialogs {
+    // Don't show premium dialogs for anonymous users
+    // In a real implementation, this should check the auth service
+    // For now, we'll return true to maintain current behavior
+    // TODO: Integrate with proper auth service when available
+    return true;
+  }
   
   @override
   Future<void> generateTestSubscription() async {

@@ -85,13 +85,15 @@ class _PlantsListPageState extends State<PlantsListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _plantsProvider),
         // ChangeNotifierProvider.value(value: _spacesProvider),
       ],
       child: Scaffold(
-        backgroundColor: const Color(0xFF000000), // Dark background
+        backgroundColor: theme.colorScheme.surface,
         body: SafeArea(
           child: Column(
             children: [

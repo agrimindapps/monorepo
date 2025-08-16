@@ -37,9 +37,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
+      // Always get from local first for instant UI response
+      final localPlants = await localDatasource.getPlants();
+      
+      // If we have local data, return it immediately
+      if (localPlants.isNotEmpty) {
+        // Sync in background if connected (fire and forget)
+        if (await networkInfo.isConnected) {
+          _syncPlantsInBackground(userId);
+        }
+        return Right(localPlants);
+      }
+      
+      // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
-          // Try to get from remote first
           final remotePlants = await remoteDatasource.getPlants(userId);
           
           // Cache locally
@@ -49,20 +61,28 @@ class PlantsRepositoryImpl implements PlantsRepository {
           
           return Right(remotePlants);
         } catch (e) {
-          // If remote fails, fallback to local
-          final localPlants = await localDatasource.getPlants();
-          return Right(localPlants);
+          return Right(localPlants); // Return empty list if both fail
         }
       } else {
-        // Offline - get from local
-        final localPlants = await localDatasource.getPlants();
-        return Right(localPlants);
+        return Right(localPlants); // Return empty list if offline and no cache
       }
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
       return Left(UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'));
     }
+  }
+
+  // Background sync method (fire and forget)
+  void _syncPlantsInBackground(String userId) {
+    remoteDatasource.getPlants(userId).then((remotePlants) {
+      // Update local cache with remote data
+      for (final plant in remotePlants) {
+        localDatasource.updatePlant(plant);
+      }
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
   }
 
   @override

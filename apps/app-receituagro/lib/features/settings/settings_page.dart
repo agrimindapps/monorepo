@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:core/core.dart';
 import '../../core/di/injection_container.dart' as di;
+import '../../core/widgets/modern_header_widget.dart';
 import '../subscription/subscription_page.dart';
 import '../../core/services/receituagro_notification_service.dart';
 
@@ -11,19 +12,19 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('⚙️ Configurações'),
-        centerTitle: true,
-        elevation: 2,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // App Info Card
-          Card(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildModernHeader(context, isDark),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // App Info Card
+                  Card(
             elevation: 2,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -63,84 +64,28 @@ class SettingsPage extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Appearance Section
-          Text(
-            'Aparência',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Theme Selection
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  themeProvider.isDarkMode
-                      ? Icons.dark_mode
-                      : themeProvider.isLightMode
-                          ? Icons.light_mode
-                          : Icons.auto_mode,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              title: const Text(
-                'Tema do App',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: Text(
-                themeProvider.themeDisplayName,
-                style: const TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showThemeSelector(context, themeProvider),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Notifications Section
-          Text(
-            'Notificações',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Notification Settings
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Notifications Section
+                  Text(
+                    'Notificações',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Notification Settings
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 8,
@@ -189,12 +134,12 @@ class SettingsPage extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
+                  color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.bug_report,
-                  color: Colors.blue.shade600,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               title: const Text(
@@ -220,7 +165,7 @@ class SettingsPage extends StatelessWidget {
           Text(
             'Premium',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.orange.shade700,
+              color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -241,12 +186,12 @@ class SettingsPage extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
+                  color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.star,
-                  color: Colors.orange.shade600,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               title: const Text(
@@ -279,7 +224,7 @@ class SettingsPage extends StatelessWidget {
           Text(
             'Suporte',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.green.shade700,
+              color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -300,12 +245,12 @@ class SettingsPage extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
+                  color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.star_outline,
-                  color: Colors.orange.shade600,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               title: const Text(
@@ -341,12 +286,12 @@ class SettingsPage extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: theme.colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.feedback_outlined,
-                  color: Colors.green.shade600,
+                  color: theme.colorScheme.secondary,
                 ),
               ),
               title: const Text(
@@ -379,7 +324,7 @@ class SettingsPage extends StatelessWidget {
             Text(
               'Desenvolvimento',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.orange.shade700,
+                color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -400,12 +345,12 @@ class SettingsPage extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.purple.shade100,
+                    color: theme.colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.analytics,
-                    color: Colors.purple.shade600,
+                    color: theme.colorScheme.tertiary,
                   ),
                 ),
                 title: const Text(
@@ -441,12 +386,12 @@ class SettingsPage extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade100,
+                    color: theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.bug_report,
-                    color: Colors.red.shade600,
+                    color: theme.colorScheme.error,
                   ),
                 ),
                 title: const Text(
@@ -473,7 +418,7 @@ class SettingsPage extends StatelessWidget {
           Text(
             'Sobre',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.green.shade700,
+              color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -494,12 +439,12 @@ class SettingsPage extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: theme.colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.info_outline,
-                  color: Colors.green.shade600,
+                  color: theme.colorScheme.secondary,
                 ),
               ),
               title: const Text(
@@ -514,11 +459,15 @@ class SettingsPage extends StatelessWidget {
                   fontSize: 12,
                 ),
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showAboutDialog(context),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _showAboutDialog(context),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -541,9 +490,9 @@ class SettingsPage extends StatelessWidget {
         
         if (!success && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Não foi possível abrir a loja de aplicativos'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Não foi possível abrir a loja de aplicativos'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -551,9 +500,9 @@ class SettingsPage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao abrir avaliação do app'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Erro ao abrir avaliação do app'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -584,9 +533,9 @@ class SettingsPage extends StatelessWidget {
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('📊 Evento de Analytics enviado com sucesso!'),
-            backgroundColor: Colors.purple,
+          SnackBar(
+            content: const Text('📊 Evento de Analytics enviado com sucesso!'),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
           ),
         );
       }
@@ -595,7 +544,7 @@ class SettingsPage extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erro no Analytics: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -607,7 +556,7 @@ class SettingsPage extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -615,7 +564,7 @@ class SettingsPage extends StatelessWidget {
           children: [
             Icon(
               Icons.warning,
-              color: Colors.orange.shade600,
+              color: Theme.of(context).colorScheme.primary,
               size: 32,
             ),
             const SizedBox(width: 12),
@@ -631,14 +580,14 @@ class SettingsPage extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange.shade600,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             child: const Text('Testar'),
           ),
@@ -675,16 +624,16 @@ class SettingsPage extends StatelessWidget {
         );
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🐛 Erro de teste enviado para Crashlytics!'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: const Text('🐛 Erro de teste enviado para Crashlytics!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erro no Crashlytics: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -697,7 +646,7 @@ class SettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -705,7 +654,7 @@ class SettingsPage extends StatelessWidget {
           children: [
             Icon(
               Icons.science,
-              color: Colors.green.shade600,
+              color: Theme.of(context).colorScheme.primary,
               size: 32,
             ),
             const SizedBox(width: 12),
@@ -786,157 +735,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showThemeSelector(BuildContext context, ThemeProvider themeProvider) async {
-    final theme = Theme.of(context);
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.palette,
-              color: theme.colorScheme.primary,
-              size: 32,
-            ),
-            const SizedBox(width: 12),
-            const Text('Escolher Tema'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // System Theme
-            _buildThemeOption(
-              context: context,
-              themeProvider: themeProvider,
-              mode: ThemeMode.system,
-              title: 'Sistema',
-              subtitle: 'Segue o tema do sistema',
-              icon: Icons.auto_mode,
-              isSelected: themeProvider.isSystemMode,
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Light Theme
-            _buildThemeOption(
-              context: context,
-              themeProvider: themeProvider,
-              mode: ThemeMode.light,
-              title: 'Claro',
-              subtitle: 'Tema claro sempre',
-              icon: Icons.light_mode,
-              isSelected: themeProvider.isLightMode,
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Dark Theme
-            _buildThemeOption(
-              context: context,
-              themeProvider: themeProvider,
-              mode: ThemeMode.dark,
-              title: 'Escuro',
-              subtitle: 'Tema escuro sempre',
-              icon: Icons.dark_mode,
-              isSelected: themeProvider.isDarkMode,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Fechar',
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThemeOption({
-    required BuildContext context,
-    required ThemeProvider themeProvider,
-    required ThemeMode mode,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required bool isSelected,
-  }) {
-    final theme = Theme.of(context);
-    
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () async {
-        await themeProvider.setThemeMode(mode);
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected 
-                ? theme.colorScheme.primary 
-                : theme.colorScheme.outline,
-            width: isSelected ? 2 : 1,
-          ),
-          color: isSelected 
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected 
-                  ? theme.colorScheme.primary 
-                  : theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: isSelected 
-                          ? theme.colorScheme.primary 
-                          : theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Future<void> _showNotificationSettings(BuildContext context) async {
     final theme = Theme.of(context);
@@ -1041,7 +839,7 @@ class SettingsPage extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: enabled ? theme.colorScheme.primary : Colors.grey,
+          color: enabled ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
           size: 24,
         ),
         const SizedBox(width: 16),
@@ -1053,13 +851,13 @@ class SettingsPage extends StatelessWidget {
                 title,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: enabled ? theme.colorScheme.onSurface : Colors.grey,
+                  color: enabled ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               Text(
                 subtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -1095,9 +893,9 @@ class SettingsPage extends StatelessWidget {
         
         if (!granted && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Permissão de notificação negada'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Permissão de notificação negada'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
           return;
@@ -1112,9 +910,9 @@ class SettingsPage extends StatelessWidget {
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🔔 Notificação de teste enviada!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('🔔 Notificação de teste enviada!'),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
           ),
         );
       }
@@ -1123,10 +921,54 @@ class SettingsPage extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erro ao enviar notificação: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
+    }
+  }
+
+  Widget _buildModernHeader(BuildContext context, bool isDark) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
+    return ModernHeaderWidget(
+      title: 'Configurações',
+      subtitle: 'Preferências e ajustes do app',
+      leftIcon: Icons.settings,
+      showBackButton: false,
+      showActions: true,
+      isDark: isDark,
+      additionalActions: [
+        _buildThemeToggleButton(context, themeProvider),
+      ],
+    );
+  }
+
+  Widget _buildThemeToggleButton(BuildContext context, ThemeProvider themeProvider) {
+    return GestureDetector(
+      onTap: () => _toggleTheme(themeProvider),
+      child: Padding(
+        padding: const EdgeInsets.all(9),
+        child: Icon(
+          themeProvider.isDarkMode
+              ? Icons.light_mode
+              : themeProvider.isLightMode
+                  ? Icons.dark_mode
+                  : Icons.auto_mode,
+          color: Theme.of(context).colorScheme.onPrimary,
+          size: 17,
+        ),
+      ),
+    );
+  }
+
+  void _toggleTheme(ThemeProvider themeProvider) async {
+    if (themeProvider.isSystemMode) {
+      await themeProvider.setThemeMode(ThemeMode.light);
+    } else if (themeProvider.isLightMode) {
+      await themeProvider.setThemeMode(ThemeMode.dark);
+    } else {
+      await themeProvider.setThemeMode(ThemeMode.system);
     }
   }
 }

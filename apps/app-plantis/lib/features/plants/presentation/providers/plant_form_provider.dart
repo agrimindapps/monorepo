@@ -39,11 +39,7 @@ class PlantFormProvider extends ChangeNotifier {
   int? _wateringIntervalDays;
   int? _fertilizingIntervalDays;
   int? _pruningIntervalDays;
-  String? _lightRequirement;
   String? _waterAmount;
-  String? _soilType;
-  double? _idealTemperature;
-  double? _idealHumidity;
   
   // New care configuration fields
   bool? _enableSunlightCare;
@@ -84,11 +80,7 @@ class PlantFormProvider extends ChangeNotifier {
   int? get wateringIntervalDays => _wateringIntervalDays;
   int? get fertilizingIntervalDays => _fertilizingIntervalDays;
   int? get pruningIntervalDays => _pruningIntervalDays;
-  String? get lightRequirement => _lightRequirement;
   String? get waterAmount => _waterAmount;
-  String? get soilType => _soilType;
-  double? get idealTemperature => _idealTemperature;
-  double? get idealHumidity => _idealHumidity;
   
   // New care configuration getters
   bool? get enableSunlightCare => _enableSunlightCare;
@@ -128,13 +120,6 @@ class PlantFormProvider extends ChangeNotifier {
       errors['pruningInterval'] = 'Intervalo deve ser maior que 0';
     }
     
-    if (_idealTemperature != null && (_idealTemperature! < -50 || _idealTemperature! > 60)) {
-      errors['temperature'] = 'Temperatura deve estar entre -50°C e 60°C';
-    }
-    
-    if (_idealHumidity != null && (_idealHumidity! < 0 || _idealHumidity! > 100)) {
-      errors['humidity'] = 'Umidade deve estar entre 0% e 100%';
-    }
     
     return errors;
   }
@@ -202,7 +187,7 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Métodos para gerenciar múltiplas imagens
+  // Métodos para gerenciar uma única imagem
   Future<void> addImageFromCamera() async {
     _isUploadingImages = true;
     notifyListeners();
@@ -216,6 +201,12 @@ class PlantFormProvider extends ChangeNotifier {
         );
         
         if (downloadUrl != null) {
+          // Remove imagem anterior se existir
+          if (_imageUrls.isNotEmpty) {
+            final oldImageUrl = _imageUrls.first;
+            imageService.deleteImage(oldImageUrl);
+          }
+          _imageUrls.clear();
           _imageUrls.add(downloadUrl);
         }
       }
@@ -240,6 +231,12 @@ class PlantFormProvider extends ChangeNotifier {
         );
         
         if (downloadUrl != null) {
+          // Remove imagem anterior se existir
+          if (_imageUrls.isNotEmpty) {
+            final oldImageUrl = _imageUrls.first;
+            imageService.deleteImage(oldImageUrl);
+          }
+          _imageUrls.clear();
           _imageUrls.add(downloadUrl);
         }
       }
@@ -251,49 +248,15 @@ class PlantFormProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addMultipleImagesFromGallery() async {
-    _isUploadingImages = true;
-    notifyListeners();
-
-    try {
-      final imageFiles = await imageService.pickMultipleImages(
-        maxImages: 5 - _imageUrls.length, // Limitar total a 5 imagens
-      );
-      
-      if (imageFiles.isNotEmpty) {
-        final downloadUrls = await imageService.uploadMultipleImages(
-          imageFiles,
-          folder: ImageUploadType.plant.folder,
-        );
-        
-        _imageUrls.addAll(downloadUrls);
-      }
-    } catch (e) {
-      _errorMessage = 'Erro ao fazer upload das imagens';
-    } finally {
-      _isUploadingImages = false;
-      notifyListeners();
-    }
-  }
-
   void removeImage(int index) {
     if (index >= 0 && index < _imageUrls.length) {
       final imageUrl = _imageUrls[index];
-      _imageUrls.removeAt(index);
+      _imageUrls.clear();
       notifyListeners();
       
       // Remover a imagem do Firebase Storage em background
       imageService.deleteImage(imageUrl);
     }
-  }
-
-  void removeAllImages() {
-    final urlsToDelete = List<String>.from(_imageUrls);
-    _imageUrls.clear();
-    notifyListeners();
-    
-    // Remover todas as imagens do Firebase Storage em background
-    imageService.deleteMultipleImages(urlsToDelete);
   }
 
   // Config setters
@@ -307,33 +270,9 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPruningInterval(int? value) {
-    _pruningIntervalDays = value;
-    notifyListeners();
-  }
-
-  void setLightRequirement(String? value) {
-    _lightRequirement = value;
-    notifyListeners();
-  }
 
   void setWaterAmount(String? value) {
     _waterAmount = value;
-    notifyListeners();
-  }
-
-  void setSoilType(String? value) {
-    _soilType = value;
-    notifyListeners();
-  }
-
-  void setIdealTemperature(double? value) {
-    _idealTemperature = value;
-    notifyListeners();
-  }
-
-  void setIdealHumidity(double? value) {
-    _idealHumidity = value;
     notifyListeners();
   }
 
@@ -383,8 +322,16 @@ class PlantFormProvider extends ChangeNotifier {
   void setEnablePruning(bool value) {
     _enablePruning = value;
     if (!value) {
+      _pruningIntervalDays = null;
       _lastPruningDate = null;
+    } else {
+      _pruningIntervalDays ??= 90; // Default to 3 months
     }
+    notifyListeners();
+  }
+
+  void setPruningInterval(int value) {
+    _pruningIntervalDays = value;
     notifyListeners();
   }
 
@@ -476,11 +423,7 @@ class PlantFormProvider extends ChangeNotifier {
       _wateringIntervalDays = config.wateringIntervalDays;
       _fertilizingIntervalDays = config.fertilizingIntervalDays;
       _pruningIntervalDays = config.pruningIntervalDays;
-      _lightRequirement = config.lightRequirement;
       _waterAmount = config.waterAmount;
-      _soilType = config.soilType;
-      _idealTemperature = config.idealTemperature;
-      _idealHumidity = config.idealHumidity;
     } else {
       _clearConfig();
     }
@@ -501,11 +444,7 @@ class PlantFormProvider extends ChangeNotifier {
     _wateringIntervalDays = null;
     _fertilizingIntervalDays = null;
     _pruningIntervalDays = null;
-    _lightRequirement = null;
     _waterAmount = null;
-    _soilType = null;
-    _idealTemperature = null;
-    _idealHumidity = null;
     
     // Clear new care configuration fields
     _enableSunlightCare = null;
@@ -530,11 +469,7 @@ class PlantFormProvider extends ChangeNotifier {
             wateringIntervalDays: _wateringIntervalDays,
             fertilizingIntervalDays: _fertilizingIntervalDays,
             pruningIntervalDays: _pruningIntervalDays,
-            lightRequirement: _lightRequirement,
             waterAmount: _waterAmount,
-            soilType: _soilType,
-            idealTemperature: _idealTemperature,
-            idealHumidity: _idealHumidity,
           )
         : null;
 
@@ -556,11 +491,7 @@ class PlantFormProvider extends ChangeNotifier {
             wateringIntervalDays: _wateringIntervalDays,
             fertilizingIntervalDays: _fertilizingIntervalDays,
             pruningIntervalDays: _pruningIntervalDays,
-            lightRequirement: _lightRequirement,
             waterAmount: _waterAmount,
-            soilType: _soilType,
-            idealTemperature: _idealTemperature,
-            idealHumidity: _idealHumidity,
           )
         : null;
 
@@ -581,11 +512,7 @@ class PlantFormProvider extends ChangeNotifier {
     return _wateringIntervalDays != null ||
            _fertilizingIntervalDays != null ||
            _pruningIntervalDays != null ||
-           _lightRequirement != null ||
-           _waterAmount != null ||
-           _soilType != null ||
-           _idealTemperature != null ||
-           _idealHumidity != null;
+           _waterAmount != null;
   }
 
   String _getErrorMessage(Failure failure) {

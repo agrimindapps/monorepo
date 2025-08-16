@@ -38,9 +38,14 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     super.initState();
     _category = DefensivosAgrupadosCategory.fromString(widget.tipoAgrupamento);
     _searchController.addListener(_onSearchChanged);
+    _configureStatusBar();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _initializeState();
     _loadInitialData();
-    _configureStatusBar();
   }
 
   @override
@@ -63,11 +68,13 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
   }
 
   void _initializeState() {
-    _state = _state.copyWith(
-      categoria: widget.tipoAgrupamento,
-      title: _category.title,
-      isDark: Theme.of(context).brightness == Brightness.dark,
-    );
+    if (mounted) {
+      _state = _state.copyWith(
+        categoria: widget.tipoAgrupamento,
+        title: _category.title,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+      );
+    }
   }
 
   void _loadInitialData() async {

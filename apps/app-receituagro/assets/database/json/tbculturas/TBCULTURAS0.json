@@ -1,0 +1,1682 @@
+[
+  {
+    "objectId": "-MrKPA2jwhNDZzAhPxAd",
+    "createdAt": 1642590237119,
+    "updatedAt": 1642732296180,
+    "idReg": "02bnBukA54r3B",
+    "status": true,
+    "cultura": "Manga"
+  },
+  {
+    "objectId": "-MrKPA2xZqzKgUyhshzc",
+    "createdAt": 1642590237131,
+    "updatedAt": 1642732296195,
+    "idReg": "0DYpYYYLhyUiq",
+    "status": true,
+    "cultura": "Eucalipto"
+  },
+  {
+    "idReg": "0Zz8HClflYQSo",
+    "cultura": "Laranja",
+    "objectId": null,
+    "createdAt": 1698600524883,
+    "updatedAt": 1698600524883,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPA31kEDmQ_iEAK5V",
+    "createdAt": 1642590237136,
+    "updatedAt": 1642732296249,
+    "idReg": "0p8OjCucQPbg5",
+    "status": true,
+    "cultura": "Chicória"
+  },
+  {
+    "objectId": "-MrKPA352fx7TbOvv4LE",
+    "createdAt": 1642590237143,
+    "updatedAt": 1642732296260,
+    "idReg": "20uu8jaDFvg9O",
+    "status": true,
+    "cultura": "Melancia"
+  },
+  {
+    "objectId": "-MrKPA39uxUbI2kTjvF-",
+    "createdAt": 1642590237151,
+    "updatedAt": 1642732296275,
+    "idReg": "2gvr7BUTEMwnW",
+    "status": true,
+    "cultura": "Bromelia"
+  },
+  {
+    "objectId": "-MrKPC9nV7wG6pQ7TkPR",
+    "createdAt": 1642590237196,
+    "updatedAt": 1642732296287,
+    "idReg": "2y7IVuyvAX0hX",
+    "status": true,
+    "cultura": "Jiló"
+  },
+  {
+    "objectId": "-MrKPC9rvln9w1gZ0V7Y",
+    "createdAt": 1642590237204,
+    "updatedAt": 1642732296299,
+    "idReg": "33AR4vY1GB0H8",
+    "status": true,
+    "cultura": "Aveia"
+  },
+  {
+    "objectId": "-MrKPC9uFhcgmU6IDBvn",
+    "createdAt": 1642590237211,
+    "updatedAt": 1642732296359,
+    "idReg": "3HRviZNZxrLJx",
+    "status": true,
+    "cultura": "Nêspera"
+  },
+  {
+    "objectId": "-MrKPC9wAk2l_wky3vsr",
+    "createdAt": 1642590237218,
+    "updatedAt": 1642732296369,
+    "idReg": "3a4nSAh29ceN1",
+    "status": true,
+    "cultura": "Samambaias"
+  },
+  {
+    "objectId": "-MrKPCA2keNXJYms89NS",
+    "createdAt": 1642590237227,
+    "updatedAt": 1642732296381,
+    "idReg": "4JrbT1krxhzYC",
+    "status": true,
+    "cultura": "Pinus"
+  },
+  {
+    "objectId": "-MrKPaBGZhKm_0LfZbr4",
+    "createdAt": 1642590237247,
+    "updatedAt": 1642732296403,
+    "idReg": "4KgvR3htynZ9e",
+    "status": true,
+    "cultura": "Pimenta"
+  },
+  {
+    "objectId": "-MrKPaBIdI4Mxhg3F51a",
+    "createdAt": 1642590237444,
+    "updatedAt": 1642732296456,
+    "idReg": "4fKX84eUaP1le",
+    "status": true,
+    "cultura": "Todas"
+  },
+  {
+    "idReg": "4tLzUHEQE7WfL",
+    "cultura": "Anonacea",
+    "objectId": null,
+    "createdAt": 1698196689772,
+    "updatedAt": 1698196689772,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaBJIwaouNE5_UuA",
+    "createdAt": 1642590237802,
+    "updatedAt": 1642732296465,
+    "idReg": "5JCpKA76Ghwju",
+    "status": true,
+    "cultura": "Cacau"
+  },
+  {
+    "objectId": "-MrKPaBM1H4np3YwZgjo",
+    "createdAt": 1642590237949,
+    "updatedAt": 1642732296521,
+    "idReg": "5dTHhwdGIIfsw",
+    "status": true,
+    "cultura": "Aspargo Pendente"
+  },
+  {
+    "objectId": "-MrKPaBPyt9QfjqZny4l",
+    "createdAt": 1642590238096,
+    "updatedAt": 1642732296531,
+    "idReg": "5uh3CVI7kG5R9",
+    "status": true,
+    "cultura": "Seriguela"
+  },
+  {
+    "objectId": "-MrKPaBR_U70G5vOx-we",
+    "createdAt": 1642590238226,
+    "updatedAt": 1642732296541,
+    "idReg": "68N5R65t3N8Ey",
+    "status": true,
+    "cultura": "Aveia Preta"
+  },
+  {
+    "objectId": "-MrKPaBSyqzm5dl831gp",
+    "createdAt": 1642590238309,
+    "updatedAt": 1642732296552,
+    "idReg": "6O95Fno1ysuJ6",
+    "status": true,
+    "cultura": "Coco"
+  },
+  {
+    "idReg": "6QiWQKcQ12C0R",
+    "cultura": "Gengibre",
+    "objectId": null,
+    "createdAt": 1698194568447,
+    "updatedAt": 1698194568447,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaBU5mWX5yWSlucN",
+    "createdAt": 1642590238365,
+    "updatedAt": 1642732296563,
+    "idReg": "6SWBhhbMvT0DE",
+    "status": true,
+    "cultura": "Abacate"
+  },
+  {
+    "idReg": "6mb7C9K6NhBsd",
+    "cultura": "Azeitona",
+    "objectId": null,
+    "createdAt": 1698599200754,
+    "updatedAt": 1698599200754,
+    "Status": true
+  },
+  {
+    "idReg": "6oST8r0ljdGmD",
+    "cultura": "Feijão-mungo",
+    "objectId": null,
+    "createdAt": 1728842012193,
+    "updatedAt": 1728842012193,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaBXZO5L3u3h_WXj",
+    "createdAt": 1642590238382,
+    "updatedAt": 1642732296611,
+    "idReg": "7AxY8Q5hEiEf8",
+    "status": true,
+    "cultura": "Pêssego"
+  },
+  {
+    "objectId": "-MrKPaBZDobOVCo0_pXH",
+    "createdAt": 1642590238399,
+    "updatedAt": 1642732296623,
+    "idReg": "7F7drSqOksbaK",
+    "status": true,
+    "cultura": "Alcachofra"
+  },
+  {
+    "objectId": "-MrKPaBaEWio2M6WYE_b",
+    "createdAt": 1642590238430,
+    "updatedAt": 1642732296637,
+    "idReg": "7nML3plO083PW",
+    "status": true,
+    "cultura": "Croton"
+  },
+  {
+    "objectId": "-MrKPaBd-Z6PJHbbsm5U",
+    "createdAt": 1642590238474,
+    "updatedAt": 1642732296648,
+    "idReg": "8IcacfVUzXWen",
+    "status": true,
+    "cultura": "Uva"
+  },
+  {
+    "objectId": "-MrKPaBjuCPfgX6BdAV2",
+    "createdAt": 1642590238489,
+    "updatedAt": 1642732296690,
+    "idReg": "8t28jHItKRgZM",
+    "status": true,
+    "cultura": "Ervilha"
+  },
+  {
+    "objectId": "-MrKPaBm36tdXJ7MSFAj",
+    "createdAt": 1642590238526,
+    "updatedAt": 1642732296719,
+    "idReg": "93BwUJRuZvfEU",
+    "status": true,
+    "cultura": "Lentilha"
+  },
+  {
+    "objectId": "-MrKPaBodvGpX6Gpat00",
+    "createdAt": 1642590238545,
+    "updatedAt": 1642732296737,
+    "idReg": "9KAJLKD94vT89",
+    "status": true,
+    "cultura": "Feijão-caupi"
+  },
+  {
+    "objectId": "-MrKPaBqiJHxLCpYHQEd",
+    "createdAt": 1642590238567,
+    "updatedAt": 1642732296759,
+    "idReg": "9sxNfdrCbAeEy",
+    "status": true,
+    "cultura": "Cana-de-açúcar"
+  },
+  {
+    "objectId": "-MrKPaBtGxTax5z9DUXQ",
+    "createdAt": 1642590238589,
+    "updatedAt": 1642732296773,
+    "idReg": "9z5BeatKyV62L",
+    "status": true,
+    "cultura": "Seringueira"
+  },
+  {
+    "idReg": "A6fMmeyyiEbVK",
+    "cultura": "Batata-doce",
+    "objectId": null,
+    "createdAt": 1698599196631,
+    "updatedAt": 1698599196631,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaBwU3-fcaQMKb7C",
+    "createdAt": 1642590238640,
+    "updatedAt": 1642732296808,
+    "idReg": "AFg9txNbr33b0",
+    "status": true,
+    "cultura": "Alho"
+  },
+  {
+    "objectId": "-MrKPaBznmc6dQQ2sSQw",
+    "createdAt": 1642590238671,
+    "updatedAt": 1642732296824,
+    "idReg": "AP8TGo07Ich6d",
+    "status": true,
+    "cultura": "Arroz"
+  },
+  {
+    "objectId": "-MrKPaC1vHxXzAgLbwsR",
+    "createdAt": 1642590238693,
+    "updatedAt": 1642732296843,
+    "idReg": "APPG8X6ut3q3E",
+    "status": true,
+    "cultura": "Couve-de-bruxelas"
+  },
+  {
+    "objectId": "-MrKPaC4NZO6zGfnJLHw",
+    "createdAt": 1642590238714,
+    "updatedAt": 1642732296855,
+    "idReg": "AXuE1HNQCZ8xA",
+    "status": true,
+    "cultura": "Tomate"
+  },
+  {
+    "objectId": "-MrKPaC7d5E-ci1THnOp",
+    "createdAt": 1642590238761,
+    "updatedAt": 1642732296874,
+    "idReg": "AosdmrWY57tQX",
+    "status": true,
+    "cultura": "Melão"
+  },
+  {
+    "idReg": "B8gqhZOXyibFe",
+    "cultura": "Inhame",
+    "objectId": null,
+    "createdAt": 1698194535119,
+    "updatedAt": 1698194535119,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaCBpGYHkx_AiaRm",
+    "createdAt": 1642590238781,
+    "updatedAt": 1642732296886,
+    "idReg": "BNbbPeU1pRPTh",
+    "status": true,
+    "cultura": "Morango"
+  },
+  {
+    "objectId": "-MrKPaCEiIRpH9CO1JME",
+    "createdAt": 1642590238805,
+    "updatedAt": 1642732296904,
+    "idReg": "BPgU9diZxErwa",
+    "status": true,
+    "cultura": "Tratamento De Solo"
+  },
+  {
+    "objectId": "-MrKPaCGv2vcE9xxWwRr",
+    "createdAt": 1642590238823,
+    "updatedAt": 1642732296918,
+    "idReg": "CLM7Or2uAloGX",
+    "status": true,
+    "cultura": "Orquídeas"
+  },
+  {
+    "objectId": "-MrKPaCJ2KGaVe4WT5yD",
+    "createdAt": 1642590238876,
+    "updatedAt": 1642732296934,
+    "idReg": "CfT28ZTJBdKNh",
+    "status": true,
+    "cultura": "Aspargo"
+  },
+  {
+    "objectId": "-MrKPaCMhODYYVL2sCDl",
+    "createdAt": 1642590238956,
+    "updatedAt": 1642732296944,
+    "idReg": "CiWOEtmuwNzHd",
+    "status": true,
+    "cultura": "Figo"
+  },
+  {
+    "objectId": "-MrKPaCPvU7O6DHrSAvb",
+    "createdAt": 1642590238980,
+    "updatedAt": 1642732296957,
+    "idReg": "CkpbcjPVW8DKO",
+    "status": true,
+    "cultura": "Berinjela"
+  },
+  {
+    "idReg": "D3iT0doEVgZOf",
+    "cultura": "Mirtilo",
+    "objectId": null,
+    "createdAt": 1698599167560,
+    "updatedAt": 1698599167560,
+    "Status": true
+  },
+  {
+    "idReg": "DGgmxeRgWjUjW",
+    "cultura": "Estévia",
+    "objectId": null,
+    "createdAt": 1698196711627,
+    "updatedAt": 1698196711627,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaCRZ1cxQD1ojhqM",
+    "createdAt": 1642590238990,
+    "updatedAt": 1642732296969,
+    "idReg": "DV9X8Q41tOLwy",
+    "status": true,
+    "cultura": "Café S.P.D"
+  },
+  {
+    "objectId": "-MrKPaCUi5wl5LJeS_65",
+    "createdAt": 1642590239014,
+    "updatedAt": 1642732296985,
+    "idReg": "DokVqsIMRzOh2",
+    "status": true,
+    "cultura": "Algodão S.P.D"
+  },
+  {
+    "objectId": "-MrKPaCXK_uQakOEC9wG",
+    "createdAt": 1642590239032,
+    "updatedAt": 1642732296999,
+    "idReg": "E2zzEnUuqtrcb",
+    "status": true,
+    "cultura": "Begonia"
+  },
+  {
+    "objectId": "-MrKPaC_ppynQOCYCbz1",
+    "createdAt": 1642590239053,
+    "updatedAt": 1642732297014,
+    "idReg": "EO63rViYEZ7tF",
+    "status": true,
+    "cultura": "Cebolinha"
+  },
+  {
+    "objectId": "-MrKPaCcq3eoF9zR3Gqv",
+    "createdAt": 1642590239071,
+    "updatedAt": 1642732297026,
+    "idReg": "ExYO9lPT7f6fr",
+    "status": true,
+    "cultura": "Gladíolo"
+  },
+  {
+    "objectId": "-MrKPaCfmyMyggwLjNW2",
+    "createdAt": 1642590239091,
+    "updatedAt": 1642732297039,
+    "idReg": "FFfPgrtr2RKqJ",
+    "status": true,
+    "cultura": "Maracujá"
+  },
+  {
+    "objectId": "-MrKPaCifNRUfV6DY9Jt",
+    "createdAt": 1642590239115,
+    "updatedAt": 1642732297052,
+    "idReg": "FHrF3IXdhbFHd",
+    "status": true,
+    "cultura": "Maçã"
+  },
+  {
+    "idReg": "FUjm7w5T6EvMA",
+    "cultura": "Feijão-fava",
+    "objectId": null,
+    "createdAt": 1698105123350,
+    "updatedAt": 1698105123350,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaCl4S0rXEV4i3Oy",
+    "createdAt": 1642590239135,
+    "updatedAt": 1642732297063,
+    "idReg": "FducOQRBPfAjv",
+    "status": true,
+    "cultura": "Soja"
+  },
+  {
+    "objectId": "-MrKPaCoXtPFiIOSXHYf",
+    "createdAt": 1642590239154,
+    "updatedAt": 1642732297074,
+    "idReg": "FmaVHFePvHuyq",
+    "status": true,
+    "cultura": "Farinha"
+  },
+  {
+    "idReg": "FpHOiLb63xSbR",
+    "cultura": "Milho Geneticamente Modificado",
+    "objectId": null,
+    "createdAt": 1728840574694,
+    "updatedAt": 1728840574694,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaCrnhuoVAfO-vi2",
+    "createdAt": 1642590239177,
+    "updatedAt": 1642732297089,
+    "idReg": "GNUeXDxLqoWYa",
+    "status": true,
+    "cultura": "Repolho"
+  },
+  {
+    "objectId": "-MrKPaCuiK2WPW3vt8-f",
+    "createdAt": 1642590239188,
+    "updatedAt": 1642732297106,
+    "idReg": "H9z0cqljQROLQ",
+    "status": true,
+    "cultura": "Milheto"
+  },
+  {
+    "objectId": "-MrKPaCxkgAdSRVJenfr",
+    "createdAt": 1642590239206,
+    "updatedAt": 1642732297115,
+    "idReg": "I8MzkQLz0UM10",
+    "status": true,
+    "cultura": "Soja - Geneticamente Modificada"
+  },
+  {
+    "objectId": "-MrKPaCybWVE5NSjHLZD",
+    "createdAt": 1642590239221,
+    "updatedAt": 1642732297130,
+    "idReg": "IUrSCZhDrdbFW",
+    "status": true,
+    "cultura": "Alface"
+  },
+  {
+    "idReg": "JIxJW3oPrWeVk",
+    "cultura": "Quivi (Kiwui)",
+    "objectId": null,
+    "createdAt": 1698196729378,
+    "updatedAt": 1698196729378,
+    "Status": true
+  },
+  {
+    "idReg": "JPbB9SPe3GxV5",
+    "cultura": "Soja - Geneticamente Modificada",
+    "objectId": null,
+    "createdAt": 1728840582344,
+    "updatedAt": 1728840582344,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaD-TBy_UOfQILCy",
+    "createdAt": 1642590239238,
+    "updatedAt": 1642732297146,
+    "idReg": "JcaGsQncrW7FO",
+    "status": true,
+    "cultura": "Ameixa"
+  },
+  {
+    "objectId": "-MrKPaD2mjJnzdWtEk6O",
+    "createdAt": 1642590239258,
+    "updatedAt": 1642732297160,
+    "idReg": "Jh0lbDiXcFX6W",
+    "status": true,
+    "cultura": "Feijão-vagem"
+  },
+  {
+    "objectId": "-MrKPaD4WMTSCUInm_5b",
+    "createdAt": 1642590239273,
+    "updatedAt": 1642732297176,
+    "idReg": "JncgXJ6OGVz4Z",
+    "status": true,
+    "cultura": "Pepino"
+  },
+  {
+    "objectId": "-MrKPaD7BdkXBNkOb2xT",
+    "createdAt": 1642590239292,
+    "updatedAt": 1642732297191,
+    "idReg": "JuBmm95WeouNE",
+    "status": true,
+    "cultura": "Tulipa"
+  },
+  {
+    "objectId": "-MrKPaD9IVA1CLZc5Lq5",
+    "createdAt": 1642590239311,
+    "updatedAt": 1642732297206,
+    "idReg": "K7Irr1PFPdbp6",
+    "status": true,
+    "cultura": "Girassol"
+  },
+  {
+    "objectId": "-MrKPaDCq1nyVE5zu37w",
+    "createdAt": 1642590239329,
+    "updatedAt": 1642732297222,
+    "idReg": "KG9DIm448EJlL",
+    "status": true,
+    "cultura": "Citros"
+  },
+  {
+    "objectId": "-MrKPaDFDBvidT9JxesY",
+    "createdAt": 1642590239350,
+    "updatedAt": 1642732297237,
+    "idReg": "KLNo3DyJRePm1",
+    "status": true,
+    "cultura": "Rosa"
+  },
+  {
+    "objectId": "-MrKPaDI0RRepg9dmt3M",
+    "createdAt": 1642590239369,
+    "updatedAt": 1642732297255,
+    "idReg": "Kc1CjU0DfSNBS",
+    "status": true,
+    "cultura": "Arroz Irrigado"
+  },
+  {
+    "objectId": "-MrKPaDK8Mi9pzXjR-1_",
+    "createdAt": 1642590239391,
+    "updatedAt": 1642732297267,
+    "idReg": "Ki14M1SmDPEVa",
+    "status": true,
+    "cultura": "Caqui"
+  },
+  {
+    "objectId": "-MrKPaDMlilxL4aUltUd",
+    "createdAt": 1642590239412,
+    "updatedAt": 1642732297279,
+    "idReg": "L37WUyW3FSMAA",
+    "status": true,
+    "cultura": "Cerinha"
+  },
+  {
+    "objectId": "-MrKPaDPFRERUE44Yqzr",
+    "createdAt": 1642590239432,
+    "updatedAt": 1642732297454,
+    "idReg": "L3pqNh3wpuuMo",
+    "status": true,
+    "cultura": "Kiwi"
+  },
+  {
+    "objectId": "-MrKPaDYYKvfQEgOotoB",
+    "createdAt": 1642590239444,
+    "updatedAt": 1642732297481,
+    "idReg": "LZVtuD2vWlAbz",
+    "status": true,
+    "cultura": "Champignon"
+  },
+  {
+    "objectId": "-MrKPaD_qnIMFV_rXY4W",
+    "createdAt": 1642590239458,
+    "updatedAt": 1642732297516,
+    "idReg": "Lh8AreOXvNCes",
+    "status": true,
+    "cultura": "Lirio da paz"
+  },
+  {
+    "objectId": "-MrKPaDbQ-6LCfmI7-gZ",
+    "createdAt": 1642590239476,
+    "updatedAt": 1642732297533,
+    "idReg": "LrtiqLV7mF6L5",
+    "status": true,
+    "cultura": "Gramíneas forrageiras"
+  },
+  {
+    "objectId": "-MrKPaDd_eYjG9GT1Fb7",
+    "createdAt": 1642590239493,
+    "updatedAt": 1642732297549,
+    "idReg": "LukCnqNd2NP3i",
+    "status": true,
+    "cultura": "Canola"
+  },
+  {
+    "idReg": "Lyq4UDfhnLbHp",
+    "cultura": "Gérbera",
+    "objectId": null,
+    "createdAt": 1698600466202,
+    "updatedAt": 1698600466202,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaDfOTjZGgXyqnVG",
+    "createdAt": 1642590239509,
+    "updatedAt": 1642732297571,
+    "idReg": "MDv9gE8SeApRW",
+    "status": true,
+    "cultura": "Caju"
+  },
+  {
+    "idReg": "NuCMBBpG6qP3n",
+    "cultura": "Chalota",
+    "objectId": null,
+    "createdAt": 1698196695797,
+    "updatedAt": 1698196695797,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaDkL3IVLTEUHbFT",
+    "createdAt": 1642590239522,
+    "updatedAt": 1642732297587,
+    "idReg": "O1TwcREkE823n",
+    "status": true,
+    "cultura": "Carambola"
+  },
+  {
+    "objectId": "-MrKPaDmIK-1onq_dLON",
+    "createdAt": 1642590239538,
+    "updatedAt": 1642732297603,
+    "idReg": "O2v3SeGi76ZNj",
+    "status": true,
+    "cultura": "Dália"
+  },
+  {
+    "objectId": "-MrKPaDpwpbWjN5Nya3x",
+    "createdAt": 1642590239554,
+    "updatedAt": 1642732297625,
+    "idReg": "O8X4LO1jfZ1Hc",
+    "status": true,
+    "cultura": "Álamo"
+  },
+  {
+    "objectId": "-MrKPaDr20fg81Foi2mI",
+    "createdAt": 1642590239570,
+    "updatedAt": 1642732297642,
+    "idReg": "OCVOeCoPFtLwT",
+    "status": true,
+    "cultura": "Cevada"
+  },
+  {
+    "objectId": "-MrKPaDuHxpvU3woK1Fm",
+    "createdAt": 1642590239581,
+    "updatedAt": 1642732297657,
+    "idReg": "OVkfTymSacei8",
+    "status": true,
+    "cultura": "Couve"
+  },
+  {
+    "objectId": "-MrKPaDwjCAFM5eqW-qe",
+    "createdAt": 1642590239599,
+    "updatedAt": 1642732297670,
+    "idReg": "PXlRSBcztOvDk",
+    "status": true,
+    "cultura": "Espinafre"
+  },
+  {
+    "objectId": "-MrKPaE-xXkevGs1260I",
+    "createdAt": 1642590239618,
+    "updatedAt": 1642732297687,
+    "idReg": "Q2jZTDik2vL24",
+    "status": true,
+    "cultura": "Centeio"
+  },
+  {
+    "idReg": "Q7DS37u1hbjSD",
+    "cultura": "Mangaba",
+    "objectId": null,
+    "createdAt": 1698599172208,
+    "updatedAt": 1698599172208,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaE1d8zy2FoEWgTA",
+    "createdAt": 1642590239635,
+    "updatedAt": 1642732297708,
+    "idReg": "QQmEh0spP70xj",
+    "status": true,
+    "cultura": "Aipo"
+  },
+  {
+    "objectId": "-MrKPaE3iRzycN1EFLDd",
+    "createdAt": 1642590239647,
+    "updatedAt": 1642732297729,
+    "idReg": "R8TDH7JgRi0sy",
+    "status": true,
+    "cultura": "Linhaça"
+  },
+  {
+    "objectId": "-MrKPaE68eVxRow2os2a",
+    "createdAt": 1642590239666,
+    "updatedAt": 1642732297749,
+    "idReg": "R8eiKy9h7Y0nL",
+    "status": true,
+    "cultura": "Jambo"
+  },
+  {
+    "idReg": "RJfgOUVtTIrB6",
+    "cultura": "Algodão Geneticamente Modificado",
+    "objectId": null,
+    "createdAt": 1728840523171,
+    "updatedAt": 1728840523171,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaE97vmt2vwzyW4g",
+    "createdAt": 1642590239676,
+    "updatedAt": 1642732297767,
+    "idReg": "RTad93pWdmlS0",
+    "status": true,
+    "cultura": "Mandioca"
+  },
+  {
+    "objectId": "-MrKPaEEg6TbgNOkvTis",
+    "createdAt": 1642590239688,
+    "updatedAt": 1642732297785,
+    "idReg": "Rptn8Mc0jmG7m",
+    "status": true,
+    "cultura": "Batata"
+  },
+  {
+    "objectId": "-MrKPaEH6pIACZZmmQsq",
+    "createdAt": 1642590239698,
+    "updatedAt": 1642732297797,
+    "idReg": "S97er5O5DVfa7",
+    "status": true,
+    "cultura": "Abacaxi"
+  },
+  {
+    "objectId": "-MrKPaEKxcp9xtX6z3YM",
+    "createdAt": 1642590239714,
+    "updatedAt": 1642732297813,
+    "idReg": "SfahmAHQiPezd",
+    "status": true,
+    "cultura": "Feijão"
+  },
+  {
+    "idReg": "So6BX3gUIolGp",
+    "cultura": "Manejo outonal",
+    "objectId": null,
+    "createdAt": 1698668823790,
+    "updatedAt": 1698668823790,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaENlDogunPsd-H_",
+    "createdAt": 1642590239727,
+    "updatedAt": 1642732297831,
+    "idReg": "THLJdOm9uoX74",
+    "status": true,
+    "cultura": "Gypsofila"
+  },
+  {
+    "objectId": "-MrKPaEPSRakXRJVGoo0",
+    "createdAt": 1642590239743,
+    "updatedAt": 1642732297851,
+    "idReg": "TIflocL9IlePt",
+    "status": true,
+    "cultura": "Cupuaçu"
+  },
+  {
+    "idReg": "TMfYN3jgaha3I",
+    "cultura": "Lichia",
+    "objectId": null,
+    "createdAt": 1698599181209,
+    "updatedAt": 1698599181209,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaES6oYqKKhc67IA",
+    "createdAt": 1642590239767,
+    "updatedAt": 1642732297866,
+    "idReg": "TWfyc8cUshEnY",
+    "status": true,
+    "cultura": "Sorgo"
+  },
+  {
+    "objectId": "-MrKPaEVKuEAWMBs8MCx",
+    "createdAt": 1642590239777,
+    "updatedAt": 1642732297884,
+    "idReg": "TqMYFsqVN7cAy",
+    "status": true,
+    "cultura": "Noz Pecã"
+  },
+  {
+    "objectId": "-MrKPaEXxma6qZyPTDRi",
+    "createdAt": 1642590239791,
+    "updatedAt": 1642732297909,
+    "idReg": "UF5zxONZ2DGen",
+    "status": true,
+    "cultura": "Couve-flor"
+  },
+  {
+    "idReg": "UMnA3EX3pYaKI",
+    "cultura": "Trigo S.P.D.",
+    "objectId": null,
+    "createdAt": 1698030130425,
+    "updatedAt": 1698030130425,
+    "Status": true
+  },
+  {
+    "idReg": "UhOodan34a0sX",
+    "cultura": "Duboisia",
+    "objectId": null,
+    "createdAt": 1698027687671,
+    "updatedAt": 1698027687671,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaEZJ3MNQ2k6Le2e",
+    "createdAt": 1642590239807,
+    "updatedAt": 1642732297933,
+    "idReg": "UohkZAqhnO9Cy",
+    "status": true,
+    "cultura": "Cipó uva"
+  },
+  {
+    "idReg": "V2mRBgKOmQYPz",
+    "cultura": "Batata-doce",
+    "objectId": null,
+    "createdAt": 1698194480298,
+    "updatedAt": 1698194480298,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaEb8cX9A773Zar4",
+    "createdAt": 1642590239822,
+    "updatedAt": 1642732297946,
+    "idReg": "VKncmVxARZOyn",
+    "status": true,
+    "cultura": "Palma Forrageira"
+  },
+  {
+    "objectId": "-MrKPaEezviAKI7wb68y",
+    "createdAt": 1642590239836,
+    "updatedAt": 1642732297964,
+    "idReg": "VlocyinF4ZrtE",
+    "status": true,
+    "cultura": "Cravo"
+  },
+  {
+    "idReg": "WBitmPvs1K8dl",
+    "cultura": "Batata-salsa",
+    "objectId": null,
+    "createdAt": 1698194751009,
+    "updatedAt": 1698194751009,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaEgR3zuOzuUCy-n",
+    "createdAt": 1642590239855,
+    "updatedAt": 1642732297981,
+    "idReg": "WDht7YuahEjm7",
+    "status": true,
+    "cultura": "Ardósia"
+  },
+  {
+    "idReg": "WWvaxmV3U9CTz",
+    "cultura": "Begônia",
+    "objectId": null,
+    "createdAt": 1698600457770,
+    "updatedAt": 1698600457770,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaEjzSPLQ58ZrTg_",
+    "createdAt": 1642590239867,
+    "updatedAt": 1642732298002,
+    "idReg": "WYUyJY7MDtWKV",
+    "status": true,
+    "cultura": "Goiaba"
+  },
+  {
+    "objectId": "-MrKPaElbHStNdnz4QjL",
+    "createdAt": 1642590239883,
+    "updatedAt": 1642732298022,
+    "idReg": "WfZXldeKgVyhd",
+    "status": true,
+    "cultura": "Violeta"
+  },
+  {
+    "idReg": "Y0Tgu36GDT0MV",
+    "cultura": "Ornamentais",
+    "objectId": null,
+    "createdAt": 1698200910171,
+    "updatedAt": 1698200910171,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaEn4qjMafXiumEJ",
+    "createdAt": 1642590239899,
+    "updatedAt": 1642732298038,
+    "idReg": "Y3ckA7ABr1TCv",
+    "status": true,
+    "cultura": "Fumo"
+  },
+  {
+    "objectId": "-MrKPaEpcJ9-HEqjswaI",
+    "createdAt": 1642590239911,
+    "updatedAt": 1642732298056,
+    "idReg": "YHtiFMYSGrcRX",
+    "status": true,
+    "cultura": "Marmelo"
+  },
+  {
+    "objectId": "-MrKPaEsTk_uCn-8A9sX",
+    "createdAt": 1642590239926,
+    "updatedAt": 1642732298069,
+    "idReg": "YmGuUboks4FAN",
+    "status": true,
+    "cultura": "Abóbora"
+  },
+  {
+    "objectId": "-MrKPaEtzwVbRtn0hD0j",
+    "createdAt": 1642590239941,
+    "updatedAt": 1642732298086,
+    "idReg": "Yvf6fMt0Msqtf",
+    "status": true,
+    "cultura": "Poinsétia"
+  },
+  {
+    "objectId": "-MrKPaEuEYRcHwIw5sTN",
+    "createdAt": 1642590239954,
+    "updatedAt": 1642732298108,
+    "idReg": "YwnX5a5xfChhL",
+    "status": true,
+    "cultura": "Amendoim"
+  },
+  {
+    "objectId": "-MrKPaEwaykgLwJr2dkl",
+    "createdAt": 1642590239969,
+    "updatedAt": 1642732298122,
+    "idReg": "Za6Kt5vT9aYHH",
+    "status": true,
+    "cultura": "Menta"
+  },
+  {
+    "objectId": "-MrKPaExGXIEp8V1rD_8",
+    "createdAt": 1642590239983,
+    "updatedAt": 1642732298147,
+    "idReg": "ZutWTEYxCnFzX",
+    "status": true,
+    "cultura": "Nabo"
+  },
+  {
+    "objectId": "-MrKPaEy5moHWREHNykf",
+    "createdAt": 1642590239999,
+    "updatedAt": 1642732298163,
+    "idReg": "ZvZwVg84yKu7Y",
+    "status": true,
+    "cultura": "Flores"
+  },
+  {
+    "objectId": "-MrKPaF-gr2trvt79ov4",
+    "createdAt": 1642590240018,
+    "updatedAt": 1642732298187,
+    "idReg": "Zz4DJm0egjpe5",
+    "status": true,
+    "cultura": "Banana"
+  },
+  {
+    "idReg": "anlw1BvcMOhFf",
+    "cultura": "Cará",
+    "objectId": null,
+    "createdAt": 1698599190628,
+    "updatedAt": 1698599190628,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaF0g6qSzST-kOMi",
+    "createdAt": 1642590240039,
+    "updatedAt": 1642732298206,
+    "idReg": "b3fJg577vUZm6",
+    "status": true,
+    "cultura": "Mamão"
+  },
+  {
+    "objectId": "-MrKPaF2y89jFYX-VwlU",
+    "createdAt": 1642590240060,
+    "updatedAt": 1642732298224,
+    "idReg": "b4ODHzKyWf2AA",
+    "status": true,
+    "cultura": "Acerola"
+  },
+  {
+    "objectId": "-MrKPaF3F7m7ejC04LjO",
+    "createdAt": 1642590240080,
+    "updatedAt": 1642732298240,
+    "idReg": "cFZPV4sWuQJmy",
+    "status": true,
+    "cultura": "Abobrinha"
+  },
+  {
+    "idReg": "cLgmd2lbq86bQ",
+    "cultura": "Gergelim",
+    "objectId": null,
+    "createdAt": 1698667195424,
+    "updatedAt": 1698667195424,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaF5ptZh2HmRYMSQ",
+    "createdAt": 1642590240097,
+    "updatedAt": 1642732298257,
+    "idReg": "cwQ7Eanh2S2MX",
+    "status": true,
+    "cultura": "Crisântemo"
+  },
+  {
+    "objectId": "-MrKPaF62-NgUrt6g4z4",
+    "createdAt": 1642590240110,
+    "updatedAt": 1642732298268,
+    "idReg": "dAnvbAGR5HU32",
+    "status": true,
+    "cultura": "Braquiária"
+  },
+  {
+    "idReg": "dYkMN871xwHtr",
+    "cultura": "Rabanete",
+    "objectId": null,
+    "createdAt": 1698599157854,
+    "updatedAt": 1698599157854,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaF7B-uMyPhxW4vx",
+    "createdAt": 1642590240126,
+    "updatedAt": 1642732298291,
+    "idReg": "dhC00cOEeA1n3",
+    "status": true,
+    "cultura": "Todas as culturas com ocorrência do alvo biológico"
+  },
+  {
+    "objectId": "-MrKPaF9U45W1eZU1jNf",
+    "createdAt": 1642590240148,
+    "updatedAt": 1642732298310,
+    "idReg": "dtgYhqP4AhMrn",
+    "status": true,
+    "cultura": "Almeirão"
+  },
+  {
+    "objectId": "-MrKPaFAl5vHXmTLJR70",
+    "createdAt": 1642590240162,
+    "updatedAt": 1642732298329,
+    "idReg": "e3RDQQLLPrhVh",
+    "status": true,
+    "cultura": "Acelga"
+  },
+  {
+    "objectId": "-MrKPaFCQnfvNOnMRu9k",
+    "createdAt": 1642590240183,
+    "updatedAt": 1642732298350,
+    "idReg": "e67w0MATE7lhZ",
+    "status": true,
+    "cultura": "Algodão"
+  },
+  {
+    "idReg": "e8Ae0hOdQQAaU",
+    "cultura": "Feijão-guandu",
+    "objectId": null,
+    "createdAt": 1728842002802,
+    "updatedAt": 1728842002802,
+    "Status": true
+  },
+  {
+    "idReg": "elGOv8UoneLny",
+    "cultura": "Framboesa",
+    "objectId": null,
+    "createdAt": 1698599185442,
+    "updatedAt": 1698599185442,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaFERDWdd5cx7AFX",
+    "createdAt": 1642590240200,
+    "updatedAt": 1642732298364,
+    "idReg": "fSHydsvZ8hHYg",
+    "status": true,
+    "cultura": "Acácia"
+  },
+  {
+    "objectId": "-MrKPaFF-ZXz0e4ya85E",
+    "createdAt": 1642590240217,
+    "updatedAt": 1642732298383,
+    "idReg": "fj1dXQZ8GhJoA",
+    "status": true,
+    "cultura": "Farinha-de-trigo"
+  },
+  {
+    "objectId": "-MrKPaFGR97wbrHwsL3w",
+    "createdAt": 1642590240235,
+    "updatedAt": 1642732298406,
+    "idReg": "gG9jeIyt4o0LY",
+    "status": true,
+    "cultura": "Hortênsia"
+  },
+  {
+    "objectId": "-MrKPaFIrWwYc5US1s3s",
+    "createdAt": 1642590240255,
+    "updatedAt": 1642732298418,
+    "idReg": "gg63DD7MiylXl",
+    "status": true,
+    "cultura": "Café"
+  },
+  {
+    "objectId": "-MrKPaFJj0QLdq6wB70y",
+    "createdAt": 1642590240267,
+    "updatedAt": 1642732298439,
+    "idReg": "hA8exQ6Rvnjji",
+    "status": true,
+    "cultura": "Cheflera Pequena"
+  },
+  {
+    "idReg": "hDdVdQEAlA2eV",
+    "cultura": "Macadâmia",
+    "objectId": null,
+    "createdAt": 1698599176442,
+    "updatedAt": 1698599176442,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaFK-HpHSSRfq6bG",
+    "createdAt": 1642590240285,
+    "updatedAt": 1642732298466,
+    "idReg": "hbCToL7DhK4Yp",
+    "status": true,
+    "cultura": "Aralia Elegante"
+  },
+  {
+    "objectId": "-MrKPaFO4Wk8ao8rk-5f",
+    "createdAt": 1642590240303,
+    "updatedAt": 1642732298477,
+    "idReg": "hoGbayphDFqRI",
+    "status": true,
+    "cultura": "Pinhão"
+  },
+  {
+    "objectId": "-MrKPaFQSLt9q7DICwsH",
+    "createdAt": 1642590240331,
+    "updatedAt": 1642732298497,
+    "idReg": "hu9fp5c8FenLD",
+    "status": true,
+    "cultura": "Alfafa"
+  },
+  {
+    "objectId": "-MrKPaFSqy-kIaJoz7FP",
+    "createdAt": 1642590240345,
+    "updatedAt": 1642732298514,
+    "idReg": "hzZYr4atwseBW",
+    "status": true,
+    "cultura": "Erva-mate"
+  },
+  {
+    "objectId": "-MrKPaFTIoPWnCz4vU1s",
+    "createdAt": 1642590240358,
+    "updatedAt": 1642732298531,
+    "idReg": "if9FLuMY2a7Xj",
+    "status": true,
+    "cultura": "Mandioquinha-salsa"
+  },
+  {
+    "objectId": "-MrKPaFVsCnSLKZbXGPU",
+    "createdAt": 1642590240380,
+    "updatedAt": 1642732298549,
+    "idReg": "jheA5TyKob90i",
+    "status": true,
+    "cultura": "Pastagens S.P.D"
+  },
+  {
+    "objectId": "-MrKPaFW5HNkobBEsgX4",
+    "createdAt": 1642590240399,
+    "updatedAt": 1642732298562,
+    "idReg": "kWTubqIB5fpx6",
+    "status": true,
+    "cultura": "Trigo"
+  },
+  {
+    "objectId": "-MrKPaFYfXuxh8agyZsI",
+    "createdAt": 1642590240417,
+    "updatedAt": 1642732298581,
+    "idReg": "kdBo5KmloHyLT",
+    "status": true,
+    "cultura": "Cineraria"
+  },
+  {
+    "objectId": "-MrKPaFZWtV3vIOPmQcA",
+    "createdAt": 1642590240432,
+    "updatedAt": 1642732298605,
+    "idReg": "khOZPQsnNpsje",
+    "status": true,
+    "cultura": "Castanhola"
+  },
+  {
+    "objectId": "-MrKPaF_T9C2kalzF8uU",
+    "createdAt": 1642590240440,
+    "updatedAt": 1642732298621,
+    "idReg": "krUJAeNFGE8eo",
+    "status": true,
+    "cultura": "Beterraba"
+  },
+  {
+    "objectId": "-MrKPaFa3_e-uqVoQn4F",
+    "createdAt": 1642590240456,
+    "updatedAt": 1642732298643,
+    "idReg": "kwmhGSoPXmufa",
+    "status": true,
+    "cultura": "Chicoria"
+  },
+  {
+    "objectId": "-MrKPaFbTksIqAOcchcS",
+    "createdAt": 1642590240469,
+    "updatedAt": 1642732298665,
+    "idReg": "l3zOBNcogkSLu",
+    "status": true,
+    "cultura": "Hortaliças"
+  },
+  {
+    "idReg": "l8ggsM2Nof0nN",
+    "cultura": "Batata-yacon",
+    "objectId": null,
+    "createdAt": 1698194490594,
+    "updatedAt": 1698194490594,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaFcdC7bxJLdT4g7",
+    "createdAt": 1642590240482,
+    "updatedAt": 1642732298681,
+    "idReg": "lHdA2o2YLaWD2",
+    "status": true,
+    "cultura": "Margarida"
+  },
+  {
+    "objectId": "-MrKPaFeHjQBQ-BdTpbZ",
+    "createdAt": 1642590240513,
+    "updatedAt": 1642732298701,
+    "idReg": "m6SGv7csoHczP",
+    "status": true,
+    "cultura": "Anonáceas"
+  },
+  {
+    "idReg": "mBNnG7INMOlJ1",
+    "cultura": "Pitanga",
+    "objectId": null,
+    "createdAt": 1698599162639,
+    "updatedAt": 1698599162639,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaFfXo-tajoQFXcz",
+    "createdAt": 1642590240525,
+    "updatedAt": 1642732298719,
+    "idReg": "mmHOyBpKacVsj",
+    "status": true,
+    "cultura": "Gramados"
+  },
+  {
+    "objectId": "-MrKPaFgvQvXCZds_32B",
+    "createdAt": 1642590240535,
+    "updatedAt": 1642732298739,
+    "idReg": "nH8gf0dLmQiif",
+    "status": true,
+    "cultura": "Pimenta-do-reino"
+  },
+  {
+    "objectId": "-MrKPaFhJZg3GoYm9Zwo",
+    "createdAt": 1642590240551,
+    "updatedAt": 1642732298755,
+    "idReg": "naR38fZt7KPk1",
+    "status": true,
+    "cultura": "Milho"
+  },
+  {
+    "objectId": "-MrKPaFigd0exPNGe131",
+    "createdAt": 1642590240568,
+    "updatedAt": 1642732298776,
+    "idReg": "ngT7ONwBuhjeQ",
+    "status": true,
+    "cultura": "Soja CV - Geneticamente Modificada"
+  },
+  {
+    "objectId": "-MrKPaFkf00ntz9Ue3rR",
+    "createdAt": 1642590240685,
+    "updatedAt": 1642732298798,
+    "idReg": "ntiQRHvFQxSjC",
+    "status": true,
+    "cultura": "Oliveira"
+  },
+  {
+    "objectId": "-MrKPaFmAkUFU5tVFY0G",
+    "createdAt": 1642590240732,
+    "updatedAt": 1642732298819,
+    "idReg": "o3u7YlGfTznef",
+    "status": true,
+    "cultura": "Marantas"
+  },
+  {
+    "objectId": "-MrKPaFnjN0EV4GIfWd4",
+    "createdAt": 1642590240747,
+    "updatedAt": 1642732298838,
+    "idReg": "oEzYiaBkIERQb",
+    "status": true,
+    "cultura": "Agrião"
+  },
+  {
+    "objectId": "-MrKPaFozdQ4DQiCzODn",
+    "createdAt": 1642590240762,
+    "updatedAt": 1642732298856,
+    "idReg": "oLVbz1DqyTtqN",
+    "status": true,
+    "cultura": "Nectarina"
+  },
+  {
+    "idReg": "oZmaPsSsKZeSl",
+    "cultura": "Amora",
+    "objectId": null,
+    "createdAt": 1698599205463,
+    "updatedAt": 1698599205463,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaFqSR5h_5AhC9kg",
+    "createdAt": 1642590240783,
+    "updatedAt": 1642732298874,
+    "idReg": "oxxwycqdtlwbM",
+    "status": true,
+    "cultura": "Chuchu"
+  },
+  {
+    "objectId": "-MrKPaFr4WFcAyLRUUEj",
+    "createdAt": 1642590240798,
+    "updatedAt": 1642732298894,
+    "idReg": "pBDGP4S1j4b4w",
+    "status": true,
+    "cultura": "Quiabo"
+  },
+  {
+    "objectId": "-MrKPaFst6UL-Fo1IXak",
+    "createdAt": 1642590240811,
+    "updatedAt": 1642732298910,
+    "idReg": "pBVtu7tD0sTku",
+    "status": true,
+    "cultura": "Mostarda"
+  },
+  {
+    "objectId": "-MrKPaFuKr6FrNtgA6bQ",
+    "createdAt": 1642590240833,
+    "updatedAt": 1642732298925,
+    "idReg": "qDUb5WVYCXDXR",
+    "status": true,
+    "cultura": "Soja S.P.D"
+  },
+  {
+    "objectId": "-MrKPaFv2zlw7z3cP4Ds",
+    "createdAt": 1642590240842,
+    "updatedAt": 1642732298948,
+    "idReg": "qMWHWQZGA8nLb",
+    "status": true,
+    "cultura": "Azevem"
+  },
+  {
+    "objectId": "-MrKPaFxva67YxcUqjIk",
+    "createdAt": 1642590240858,
+    "updatedAt": 1642732298955,
+    "idReg": "qs7AHs4GKtGr8",
+    "status": true,
+    "cultura": "Aralia Japonesa"
+  },
+  {
+    "objectId": "-MrKPaFypYOvpZfcbuiJ",
+    "createdAt": 1642590240880,
+    "updatedAt": 1642732298977,
+    "idReg": "qyfsbYueSx6vM",
+    "status": true,
+    "cultura": "Azaléia"
+  },
+  {
+    "objectId": "-MrKPaFzAbyYzCfqkntM",
+    "createdAt": 1642590240893,
+    "updatedAt": 1642732299002,
+    "idReg": "r6AaxqieqLuIU",
+    "status": true,
+    "cultura": "Antúrio"
+  },
+  {
+    "objectId": "-MrKPaG-24un01IwrUgM",
+    "createdAt": 1642590240913,
+    "updatedAt": 1642732299018,
+    "idReg": "r6okeLOUoIuar",
+    "status": true,
+    "cultura": "Todas as culturas com ocorrência do alvo biológico"
+  },
+  {
+    "objectId": "-MrKPaG1-0F1QzlxaC10",
+    "createdAt": 1642590240929,
+    "updatedAt": 1642732299041,
+    "idReg": "rCWeRsqz3Wg91",
+    "status": true,
+    "cultura": "Caja"
+  },
+  {
+    "objectId": "-MrKPaG24K1rIP9RZlzY",
+    "createdAt": 1642590240946,
+    "updatedAt": 1642732299058,
+    "idReg": "sTSgwrc9rL836",
+    "status": true,
+    "cultura": "Grão-de-bico"
+  },
+  {
+    "objectId": "-MrKPaG4sCPV5_6OwpvY",
+    "createdAt": 1642590240963,
+    "updatedAt": 1642732299074,
+    "idReg": "sTUSbk5zn5waY",
+    "status": true,
+    "cultura": "Pimentão"
+  },
+  {
+    "objectId": "-MrKPaG5alYzt21nadpW",
+    "createdAt": 1642590240978,
+    "updatedAt": 1642732299091,
+    "idReg": "sYSwYTsPGFm6j",
+    "status": true,
+    "cultura": "Pastagens"
+  },
+  {
+    "idReg": "scpioXKCobEav",
+    "cultura": "Coentro",
+    "objectId": null,
+    "createdAt": 1698194580009,
+    "updatedAt": 1698194580009,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaG6hzYR6HfCwRIb",
+    "createdAt": 1642590240998,
+    "updatedAt": 1642732299105,
+    "idReg": "smTysQaKIwQAF",
+    "status": true,
+    "cultura": "Dendê"
+  },
+  {
+    "objectId": "-MrKPaG8RhmpvALDQpFx",
+    "createdAt": 1642590241015,
+    "updatedAt": 1642732299125,
+    "idReg": "tHmfUp2l0n68J",
+    "status": true,
+    "cultura": "Maxixe"
+  },
+  {
+    "objectId": "-MrKPaG9q7-IUaoNC9rG",
+    "createdAt": 1642590241031,
+    "updatedAt": 1642732299145,
+    "idReg": "txn4oh6FltEIX",
+    "status": true,
+    "cultura": "Farelo De Soja"
+  },
+  {
+    "objectId": "-MrKPaGBjHrPcXxXp-xz",
+    "createdAt": 1642590241054,
+    "updatedAt": 1642732299163,
+    "idReg": "udtBZNnH3ySPC",
+    "status": true,
+    "cultura": "Sisal"
+  },
+  {
+    "objectId": "-MrKPaGCtGBEBlrFJCUK",
+    "createdAt": 1642590241069,
+    "updatedAt": 1642732299186,
+    "idReg": "uhneoZ1KoBufd",
+    "status": true,
+    "cultura": "Camomila"
+  },
+  {
+    "objectId": "-MrKPaGDGw3DnbfbronF",
+    "createdAt": 1642590241088,
+    "updatedAt": 1642732299598,
+    "idReg": "upsns1WTjv1Sm",
+    "status": true,
+    "cultura": "Couve-chinesa"
+  },
+  {
+    "idReg": "uxL6bMetSbObm",
+    "cultura": "Guaraná",
+    "objectId": null,
+    "createdAt": 1698196718428,
+    "updatedAt": 1698196718428,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaGFzmBRYVi06Qfp",
+    "createdAt": 1642590241102,
+    "updatedAt": 1642732299643,
+    "idReg": "vryrLbHGStx6G",
+    "status": true,
+    "cultura": "Milho - Geneticamente modificado"
+  },
+  {
+    "objectId": "-MrKPaGGABzW5X7oYOp3",
+    "createdAt": 1642590241114,
+    "updatedAt": 1642732299684,
+    "idReg": "vw879RtGsTXsO",
+    "status": true,
+    "cultura": "Cebola"
+  },
+  {
+    "idReg": "wXFUKBDT1dWM3",
+    "cultura": "Romã",
+    "objectId": null,
+    "createdAt": 1698196735379,
+    "updatedAt": 1698196735379,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaGLV4K5AD3z_irJ",
+    "createdAt": 1642590241146,
+    "updatedAt": 1642732299742,
+    "idReg": "wdoiZxoTJq4Yy",
+    "status": true,
+    "cultura": "Triticale"
+  },
+  {
+    "idReg": "wwSCIW92xoeFR",
+    "cultura": "Salsa",
+    "objectId": null,
+    "createdAt": 1698194548881,
+    "updatedAt": 1698194548881,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaGNOyGymg5_XRDX",
+    "createdAt": 1642590241158,
+    "updatedAt": 1642732299800,
+    "idReg": "x1v148S2XVVP9",
+    "status": true,
+    "cultura": "Rúcula"
+  },
+  {
+    "objectId": "-MrKPaGOUfQ362Y9G--N",
+    "createdAt": 1642590241175,
+    "updatedAt": 1642732299869,
+    "idReg": "x3szGXFSGfGR6",
+    "status": true,
+    "cultura": "Brócolis"
+  },
+  {
+    "objectId": "-MrKPaGPFdPoMUhcQfxJ",
+    "createdAt": 1642590241190,
+    "updatedAt": 1642732299923,
+    "idReg": "x7N64ISDxICjU",
+    "status": true,
+    "cultura": "Mamona"
+  },
+  {
+    "objectId": "-MrKPaGRsyZbB80QIlHR",
+    "createdAt": 1642590241216,
+    "updatedAt": 1642732299959,
+    "idReg": "xD2kyhmlvL7MR",
+    "status": true,
+    "cultura": "Milho S.P.D"
+  },
+  {
+    "objectId": "-MrKPaGT7foRssty1N5z",
+    "createdAt": 1642590241239,
+    "updatedAt": 1642732300017,
+    "idReg": "xgJBiHkDb35gc",
+    "status": true,
+    "cultura": "Cenoura"
+  },
+  {
+    "objectId": "-MrKPaGUK-HTApmqirKd",
+    "createdAt": 1642590241255,
+    "updatedAt": 1642732300085,
+    "idReg": "yRzR7kimpkzab",
+    "status": true,
+    "cultura": "Pêra"
+  },
+  {
+    "objectId": "-MrKPaGW7OvaW5x9JRLc",
+    "createdAt": 1642590241271,
+    "updatedAt": 1642732300119,
+    "idReg": "yiobaGM7YzWq5",
+    "status": true,
+    "cultura": "Álamo"
+  },
+  {
+    "objectId": "-MrKPaGYURq0JmNdppNJ",
+    "createdAt": 1642590241290,
+    "updatedAt": 1642732300185,
+    "idReg": "yqSRS17iP3cqb",
+    "status": true,
+    "cultura": "Fruta do Conde"
+  },
+  {
+    "objectId": "-MrKPaG_tIS7EGF5kNtu",
+    "createdAt": 1642590241307,
+    "updatedAt": 1642732300236,
+    "idReg": "yujAcBfuK9uHc",
+    "status": true,
+    "cultura": "Comigo-ninguém-pode"
+  },
+  {
+    "objectId": "-MrKPaGbJybG-GuMQxww",
+    "createdAt": 1642590241321,
+    "updatedAt": 1642732300294,
+    "idReg": "z0jQiRtWdIjIO",
+    "status": true,
+    "cultura": "Gérrbera"
+  },
+  {
+    "objectId": "-MrKPaGcLkhCuvvIz9Yt",
+    "createdAt": 1642590241336,
+    "updatedAt": 1642732300330,
+    "idReg": "zMgMNGfsRFQjO",
+    "status": true,
+    "cultura": "Lirio"
+  },
+  {
+    "idReg": "zY1jNaisjyH6F",
+    "cultura": "Cupuaçú",
+    "objectId": null,
+    "createdAt": 1698196703774,
+    "updatedAt": 1698196703774,
+    "Status": true
+  },
+  {
+    "objectId": "-MrKPaGe1WYIpLZWj4vw",
+    "createdAt": 1642590241350,
+    "updatedAt": 1642732300348,
+    "idReg": "zn6ZmTWyf40My",
+    "status": true,
+    "cultura": "Pinhão Manso"
+  }
+]

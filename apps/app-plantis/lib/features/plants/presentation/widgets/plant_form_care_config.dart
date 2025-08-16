@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../providers/plant_form_provider.dart';
 import '../../../../core/theme/colors.dart';
 
@@ -201,106 +200,15 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
             ],
           ),
           
-          // Configuration options (only visible when enabled)
+          // Expanded content when enabled
           if (isEnabled) ...[
             const SizedBox(height: 16),
-            
-            // Interval selector
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Intervalo',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: interval,
-                            items: _intervalOptions.map((option) {
-                              return DropdownMenuItem(
-                                value: option,
-                                child: Text(option),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                onIntervalChanged(value);
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(width: 16),
-                
-                // Last date selector
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Última vez',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: () => _selectDate(context, lastDate, onDateChanged),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                lastDate != null
-                                    ? DateFormat('dd/MM/yyyy').format(lastDate)
-                                    : 'Selecionar',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: lastDate != null 
-                                      ? theme.colorScheme.onSurface
-                                      : Colors.grey[600],
-                                ),
-                              ),
-                              Icon(
-                                Icons.calendar_today,
-                                size: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            _buildExpandedContent(
+              interval: interval,
+              onIntervalChanged: onIntervalChanged,
+              lastDate: lastDate,
+              onDateChanged: onDateChanged,
+              iconColor: iconColor,
             ),
           ],
         ],
@@ -308,30 +216,250 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     );
   }
 
-  Future<void> _selectDate(
-    BuildContext context, 
-    DateTime? currentDate, 
-    ValueChanged<DateTime?> onChanged
-  ) async {
-    final selectedDate = await showDatePicker(
-      context: context,
-      initialDate: currentDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: PlantisColors.primary,
+  Widget _buildExpandedContent({
+    required String interval,
+    required ValueChanged<String> onIntervalChanged,
+    required DateTime? lastDate,
+    required ValueChanged<DateTime?> onDateChanged,
+    required Color iconColor,
+  }) {
+    return Column(
+      children: [
+        // Interval selector
+        _buildIntervalSelector(
+          label: 'Intervalo',
+          value: interval,
+          onChanged: onIntervalChanged,
+          iconColor: iconColor,
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Last date selector
+        _buildDateSelector(
+          label: 'Última vez',
+          value: lastDate,
+          onChanged: onDateChanged,
+          iconColor: iconColor,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIntervalSelector({
+    required String label,
+    required String value,
+    required ValueChanged<String> onChanged,
+    required Color iconColor,
+  }) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: iconColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.schedule,
+            color: iconColor,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
             ),
           ),
-          child: child!,
-        );
-      },
+          const Spacer(),
+          GestureDetector(
+            onTap: () => _showIntervalPicker(value, onChanged),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: iconColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    value,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: iconColor,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.edit,
+                    color: iconColor,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateSelector({
+    required String label,
+    required DateTime? value,
+    required ValueChanged<DateTime?> onChanged,
+    required Color iconColor,
+  }) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: iconColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.calendar_today,
+            color: iconColor,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => _showDatePicker(value, onChanged),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: iconColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    value != null ? _formatDate(value) : 'Hoje',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: iconColor,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.calendar_today,
+                    color: iconColor,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showIntervalPicker(String currentValue, ValueChanged<String> onChanged) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        height: 300,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              'Selecionar Intervalo',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _intervalOptions.length,
+                itemBuilder: (context, index) {
+                  final option = _intervalOptions[index];
+                  final isSelected = option == currentValue;
+                  
+                  return ListTile(
+                    title: Text(option),
+                    trailing: isSelected ? const Icon(Icons.check) : null,
+                    selected: isSelected,
+                    onTap: () {
+                      onChanged(option);
+                      Navigator.of(context).pop();
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDatePicker(DateTime? currentValue, ValueChanged<DateTime?> onChanged) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: currentValue ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
     );
     
-    if (selectedDate != null) {
-      onChanged(selectedDate);
+    if (date != null) {
+      onChanged(date);
     }
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+    
+    if (dateOnly == today) {
+      return 'Hoje';
+    }
+    
+    final yesterday = today.subtract(const Duration(days: 1));
+    if (dateOnly == yesterday) {
+      return 'Ontem';
+    }
+    
+    final months = [
+      'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+    ];
+    
+    return '${date.day} ${months[date.month - 1]}';
   }
 }

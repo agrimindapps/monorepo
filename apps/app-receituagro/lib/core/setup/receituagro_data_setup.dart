@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
-import 'package:flutter/services.dart';
 import '../services/receituagro_hive_service.dart';
 
 /// Configuração e inicialização dos dados estáticos do ReceitaAgro
@@ -37,51 +35,6 @@ class ReceitaAgroDataSetup {
     }
   }
 
-  /// Carrega dados dos assets JSON (versão futura)
-  static Future<void> _loadDataFromAssets() async {
-    const currentAppVersion = '1.0.0'; // Versão atual do app
-    
-    try {
-      developer.log('📦 Carregando dados estáticos versão $currentAppVersion...', name: 'ReceitaAgroDataSetup');
-
-      // TODO: Implementar carregamento real dos JSONs
-      // final futures = await Future.wait([
-      //   _loadJsonAsset('assets/data/pragas.json'),
-      //   _loadJsonAsset('assets/data/culturas.json'),
-      //   _loadJsonAsset('assets/data/diagnosticos.json'),
-      //   _loadJsonAsset('assets/data/fitossanitarios.json'),
-      // ]);
-      
-      // final pragasJson = futures[0];
-      // final culturasJson = futures[1];
-      // final diagnosticosJson = futures[2];
-      // final fitossanitariosJson = futures[3];
-
-      // await ReceitaAgroHiveService.loadAllStaticData(
-      //   pragasJson: pragasJson,
-      //   culturasJson: culturasJson,
-      //   diagnosticosJson: diagnosticosJson,
-      //   fitossanitariosJson: fitossanitariosJson,
-      //   appVersion: currentAppVersion,
-      // );
-
-      developer.log('✅ Dados carregados com sucesso!', name: 'ReceitaAgroDataSetup');
-    } catch (e) {
-      developer.log('❌ Erro ao carregar dados: $e', name: 'ReceitaAgroDataSetup');
-      rethrow;
-    }
-  }
-
-  /// Carrega um JSON dos assets
-  static Future<Map<String, dynamic>> _loadJsonAsset(String assetPath) async {
-    try {
-      final jsonString = await rootBundle.loadString(assetPath);
-      return json.decode(jsonString) as Map<String, dynamic>;
-    } catch (e) {
-      developer.log('Erro ao carregar asset $assetPath: $e', name: 'ReceitaAgroDataSetup');
-      rethrow;
-    }
-  }
 
   /// Força recarregamento dos dados (para desenvolvimento)
   static Future<void> forceReload() async {

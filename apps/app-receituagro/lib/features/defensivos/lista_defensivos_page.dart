@@ -254,94 +254,19 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     return '$total defensivos cadastrados';
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.shield_outlined,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Defensivos',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _getHeaderSubtitle(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            backgroundColor: const Color(0xFF4CAF50),
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeader(),
-            ),
-            automaticallyImplyLeading: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha,
-                  color: Colors.white,
-                ),
-                onPressed: _toggleSort,
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: DefensivoSearchField(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildModernHeader(context, isDark),
+            DefensivoSearchField(
               controller: _searchController,
               isDark: isDark,
               isSearching: _isSearching,
@@ -350,11 +275,11 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
               onClear: _clearSearch,
               onSubmitted: () => _performSearch(_searchController.text),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: _buildContent(isDark),
-          ),
-        ],
+            Expanded(
+              child: _buildContent(isDark),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -391,7 +316,6 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
 
       return Container(
         padding: const EdgeInsets.all(8),
-        height: 600, // Fixed height for grid in SliverToBoxAdapter
         child: GridView.builder(
           controller: _scrollController,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -413,17 +337,35 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         ),
       );
     } else {
-      return Column(
-        children: [
-          ..._filteredDefensivos.map((defensivo) => DefensivoItemWidget(
-            defensivo: defensivo,
-            isDark: isDark,
-            onTap: () => _onDefensivoTap(defensivo),
-            isGridView: false,
-          )),
-          const SizedBox(height: 80), // Espaço para bottom navigation
-        ],
+      return SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(8),
+          child: Column(
+          children: [
+            ..._filteredDefensivos.map((defensivo) => DefensivoItemWidget(
+              defensivo: defensivo,
+              isDark: isDark,
+              onTap: () => _onDefensivoTap(defensivo),
+              isGridView: false,
+            )),
+            const SizedBox(height: 80), // Espaço para bottom navigation
+          ],
+        ),
       );
     }
+  }
+
+  Widget _buildModernHeader(BuildContext context, bool isDark) {
+    return ModernHeaderWidget(
+      title: 'Defensivos',
+      subtitle: _getHeaderSubtitle(),
+      leftIcon: Icons.shield_outlined,
+      showBackButton: true,
+      showActions: true,
+      isDark: isDark,
+      rightIcon: _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha,
+      onRightIconPressed: _toggleSort,
+      onBackPressed: () => Navigator.of(context).pop(),
+    );
   }
 }

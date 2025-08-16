@@ -9,6 +9,7 @@ import 'widgets/praga_cultura_tab_bar_widget.dart';
 import 'widgets/praga_cultura_item_widget.dart';
 import 'widgets/praga_cultura_loading_skeleton_widget.dart';
 import 'widgets/praga_cultura_empty_state_widget.dart';
+import 'detalhe_praga_page.dart';
 
 class ListaPragasPorCulturaPage extends StatefulWidget {
   final String? culturaId;
@@ -38,8 +39,13 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabChanged);
     _searchController.addListener(_onSearchChanged);
-    _initializeState();
     _loadInitialData();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeState();
   }
 
   @override
@@ -260,10 +266,13 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   }
 
   void _handleItemTap(PragaCulturaItemModel praga) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${praga.displayType} selecionada: ${praga.displayName}'),
-        duration: const Duration(seconds: 2),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetalhePragaPage(
+          pragaName: praga.displayName,
+          pragaScientificName: praga.nomeCientifico ?? 'Nome científico não disponível',
+        ),
       ),
     );
   }

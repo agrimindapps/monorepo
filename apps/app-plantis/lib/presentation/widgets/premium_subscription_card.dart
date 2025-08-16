@@ -18,10 +18,12 @@ class PremiumSubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.grey.shade800,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -34,12 +36,12 @@ class PremiumSubscriptionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.teal,
+                    color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.star_outline,
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimary,
                     size: 20,
                   ),
                 ),
@@ -50,8 +52,8 @@ class PremiumSubscriptionCard extends StatelessWidget {
                     children: [
                       Text(
                         planName,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -59,7 +61,7 @@ class PremiumSubscriptionCard extends StatelessWidget {
                       Text(
                         description,
                         style: TextStyle(
-                          color: Colors.grey.shade400,
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
@@ -72,7 +74,7 @@ class PremiumSubscriptionCard extends StatelessWidget {
             Text(
               'Recursos Premium:',
               style: TextStyle(
-                color: Colors.grey.shade300,
+                color: theme.colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -84,7 +86,7 @@ class PremiumSubscriptionCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.check_circle,
-                        color: Colors.teal,
+                        color: theme.colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
@@ -92,7 +94,7 @@ class PremiumSubscriptionCard extends StatelessWidget {
                         child: Text(
                           feature,
                           style: TextStyle(
-                            color: Colors.grey.shade300,
+                            color: theme.colorScheme.onSurface,
                             fontSize: 14,
                           ),
                         ),
@@ -104,7 +106,7 @@ class PremiumSubscriptionCard extends StatelessWidget {
             Text(
               'E mais 3 recursos...',
               style: TextStyle(
-                color: Colors.grey.shade500,
+                color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 13,
                 fontStyle: FontStyle.italic,
               ),
@@ -115,8 +117,8 @@ class PremiumSubscriptionCard extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onSubscribeTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -129,9 +131,10 @@ class PremiumSubscriptionCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       ctaText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     ),
                   ],

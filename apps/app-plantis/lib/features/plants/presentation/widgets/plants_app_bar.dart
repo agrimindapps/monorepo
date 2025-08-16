@@ -23,7 +23,7 @@ class PlantsAppBar extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     
     return Container(
-      color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.primary,
+      color: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
@@ -35,7 +35,7 @@ class PlantsAppBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const Spacer(),

@@ -11,10 +11,6 @@ import '../di/injection_container.dart';
 import '../../features/plants/presentation/pages/plants_list_page.dart';
 import '../../features/plants/presentation/pages/plant_details_page.dart';
 import '../../features/plants/presentation/pages/plant_form_page.dart';
-import '../../features/spaces/presentation/pages/spaces_list_page.dart';
-import '../../features/spaces/presentation/pages/space_form_page.dart';
-import '../../features/spaces/presentation/providers/spaces_provider.dart';
-import '../../features/spaces/presentation/providers/space_form_provider.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
@@ -31,9 +27,6 @@ class AppRouter {
   static const String plantDetails = '/plants/:id';
   static const String plantAdd = '/plants/add';
   static const String plantEdit = '/plants/edit/:id';
-  static const String spaces = '/spaces';
-  static const String spaceAdd = '/spaces/add';
-  static const String spaceEdit = '/spaces/edit/:id';
   static const String tasks = '/tasks';
   static const String premium = '/premium';
   static const String profile = '/profile';
@@ -53,10 +46,10 @@ class AppRouter {
         final isRegistering = state.matchedLocation == register;
         final isOnLanding = state.matchedLocation == landing;
         
+        
         // Lista de rotas protegidas que requerem autenticação
         final protectedRoutes = [
           plants, plantDetails, plantAdd, plantEdit,
-          spaces, spaceAdd, spaceEdit,
           tasks, premium, profile, settings, home
         ];
         
@@ -77,10 +70,12 @@ class AppRouter {
         
         // Se não autenticado e tentando acessar rota protegida
         if (!isAuthenticated && isAccessingProtectedRoute) {
-          // Mostra mensagem de acesso negado após um pequeno delay
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            NavigationService.instance.showAccessDeniedMessage();
-          });
+          // Só mostra mensagem se não está inicializando modo anônimo
+          if (isInitialized) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              NavigationService.instance.showAccessDeniedMessage();
+            });
+          }
           return login;
         }
         
@@ -150,41 +145,6 @@ class AppRouter {
                     return ChangeNotifierProvider(
                       create: (context) => sl<PlantFormProvider>(),
                       child: PlantFormPage(plantId: plantId),
-                    );
-                  },
-                ),
-              ],
-            ),
-            
-            // Spaces Routes
-            GoRoute(
-              path: spaces,
-              name: 'spaces',
-              builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => sl<SpacesProvider>(),
-                  child: const SpacesListPage(),
-                );
-              },
-              routes: [
-                GoRoute(
-                  path: 'add',
-                  name: 'space-add',
-                  builder: (context, state) {
-                    return ChangeNotifierProvider(
-                      create: (context) => sl<SpaceFormProvider>(),
-                      child: const SpaceFormPage(),
-                    );
-                  },
-                ),
-                GoRoute(
-                  path: 'edit/:id',
-                  name: 'space-edit',
-                  builder: (context, state) {
-                    final spaceId = state.pathParameters['id']!;
-                    return ChangeNotifierProvider(
-                      create: (context) => sl<SpaceFormProvider>(),
-                      child: SpaceFormPage(spaceId: spaceId),
                     );
                   },
                 ),

@@ -32,10 +32,10 @@ class PlantDetailsConfig extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.05),
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.grey.withValues(alpha: 0.2),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(
@@ -43,20 +43,20 @@ class PlantDetailsConfig extends StatelessWidget {
                   Icon(
                     Icons.settings_outlined,
                     size: 48,
-                    color: Colors.grey[400],
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Nenhuma configuração definida',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.grey[600],
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Configure os cuidados da planta para receber lembretes',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[500],
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),

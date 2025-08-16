@@ -343,6 +343,11 @@ class PerformanceService implements IPerformanceRepository {
   @override
   Future<MemoryUsage> getMemoryUsage() async {
     try {
+      // Skip platform checks on web
+      if (kIsWeb) {
+        return await _getGenericMemoryUsage();
+      }
+      
       if (Platform.isAndroid) {
         return await _getAndroidMemoryUsage();
       } else if (Platform.isIOS) {
@@ -495,6 +500,11 @@ class PerformanceService implements IPerformanceRepository {
   @override
   Future<double> getCpuUsage() async {
     try {
+      // Skip platform checks on web
+      if (kIsWeb) {
+        return 0.0;
+      }
+      
       if (Platform.isLinux || Platform.isAndroid) {
         return await _getLinuxCpuUsage();
       } else if (Platform.isIOS || Platform.isMacOS) {
@@ -967,8 +977,8 @@ class PerformanceService implements IPerformanceRepository {
   Future<Map<String, bool>> getFeatureSupport() async {
     return {
       'fps_monitoring': true,
-      'memory_monitoring': Platform.isAndroid || Platform.isIOS,
-      'cpu_monitoring': Platform.isAndroid || Platform.isIOS || Platform.isLinux,
+      'memory_monitoring': !kIsWeb && (Platform.isAndroid || Platform.isIOS),
+      'cpu_monitoring': !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isLinux),
       'firebase_performance': true,
       'custom_traces': true,
       'device_info': true,

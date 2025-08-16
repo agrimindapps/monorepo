@@ -7,6 +7,7 @@ import 'widgets/praga_search_field_widget.dart';
 import 'widgets/praga_item_widget.dart';
 import 'widgets/pragas_empty_state_widget.dart';
 import 'widgets/pragas_loading_skeleton_widget.dart';
+import 'detalhe_praga_page.dart';
 
 class ListaPragasPage extends StatefulWidget {
   final String? pragaType;
@@ -257,10 +258,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   void _handleItemTap(PragaModel praga) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Praga selecionada: ${praga.displayName}'),
-        duration: const Duration(seconds: 2),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetalhePragaPage(
+          pragaName: praga.displayName,
+          pragaScientificName: praga.nomeCientifico ?? 'Nome científico não disponível',
+        ),
       ),
     );
   }

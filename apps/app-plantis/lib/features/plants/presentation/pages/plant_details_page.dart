@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/plant.dart';
 import '../providers/plant_details_provider.dart';
-import '../widgets/plant_details_header.dart';
 import '../widgets/plant_details_info.dart';
 import '../widgets/plant_details_care.dart';
 import '../widgets/plant_details_config.dart';
@@ -53,13 +52,13 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     provider.errorMessage ?? 'Erro desconhecido',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -86,29 +85,33 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
             );
           }
 
-          return CustomScrollView(
-            slivers: [
-              _buildAppBar(context, plant),
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PlantDetailsHeader(plant: plant),
-                    const SizedBox(height: 24),
-                    if (plant.hasImage) ...[
-                      _buildImageGallery(context, plant),
-                      const SizedBox(height: 24),
+          return DefaultTabController(
+            length: 4,
+            child: CustomScrollView(
+              slivers: [
+                _buildAppBar(context, plant),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 8),
+                      _buildTabBar(context),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: TabBarView(
+                          children: [
+                            _buildVisaoGeralTab(context, plant),
+                            _buildTarefasTab(context, plant),
+                            _buildCuidadosTab(context, plant),
+                            _buildComentariosTab(context, plant),
+                          ],
+                        ),
+                      ),
                     ],
-                    PlantDetailsInfo(plant: plant),
-                    const SizedBox(height: 24),
-                    PlantDetailsCare(plant: plant),
-                    const SizedBox(height: 24),
-                    PlantDetailsConfig(plant: plant),
-                    const SizedBox(height: 100), // Space for FAB
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
@@ -143,7 +146,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -165,7 +168,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -259,7 +262,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
+                              color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
                               blurRadius: 8,
                               offset: Offset(0, 4),
                             ),
@@ -278,7 +281,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                               ),
                               if (index == 2 && plant.imageUrls.length > 3)
                                 Container(
-                                  color: Colors.black.withValues(alpha: 0.6),
+                                  color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.6),
                                   child: Center(
                                     child: Text(
                                       '+${plant.imageUrls.length - 3}',
@@ -308,7 +311,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
     showDialog(
       context: context,
       builder: (context) => Dialog.fullscreen(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.scrim,
         child: Stack(
           children: [
             PageView.builder(
@@ -336,12 +339,12 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                 icon: Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.close,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -510,6 +513,154 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
               foregroundColor: Colors.red[400],
             ),
             child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBar(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TabBar(
+        indicator: BoxDecoration(
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        labelColor: theme.colorScheme.onPrimary,
+        unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+        labelStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        tabs: const [
+          Tab(text: 'Visão Geral'),
+          Tab(text: 'Tarefas'),
+          Tab(text: 'Cuidados'),
+          Tab(text: 'Comentários'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVisaoGeralTab(BuildContext context, Plant plant) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        children: [
+          PlantDetailsInfo(plant: plant),
+          if (plant.hasImage) ...[
+            const SizedBox(height: 24),
+            _buildImageGallery(context, plant),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTarefasTab(BuildContext context, Plant plant) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.task_alt,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Tarefas da Planta',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Sistema de tarefas em desenvolvimento.\nEm breve você poderá gerenciar todas as tarefas relacionadas à ${plant.name}.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCuidadosTab(BuildContext context, Plant plant) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        children: [
+          PlantDetailsConfig(plant: plant),
+          const SizedBox(height: 16),
+          PlantDetailsCare(plant: plant),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComentariosTab(BuildContext context, Plant plant) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.comment,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Comentários e Observações',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Sistema de comentários em desenvolvimento.\nEm breve você poderá adicionar observações e notas sobre ${plant.name}.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

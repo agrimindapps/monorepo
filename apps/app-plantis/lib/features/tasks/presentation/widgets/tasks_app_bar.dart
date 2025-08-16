@@ -16,7 +16,7 @@ class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDark = theme.brightness == Brightness.dark;
     
     return AppBar(
-      backgroundColor: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.primary,
+      backgroundColor: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
       elevation: 0,
       title: Consumer<TasksProvider>(
         builder: (context, provider, child) {
@@ -27,7 +27,7 @@ class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const Spacer(),
@@ -54,7 +54,7 @@ class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
-          color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.primary,
+          color: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
           padding: const EdgeInsets.only(left: 20, bottom: 16),
           child: Row(
             children: [
@@ -131,7 +131,7 @@ class _FilterButton extends StatelessWidget {
             Text(
               text,
               style: TextStyle(
-                color: isSelected ? Colors.black : theme.colorScheme.onPrimary,
+                color: isSelected ? Colors.black : theme.colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),

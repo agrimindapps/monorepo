@@ -39,6 +39,33 @@ class PlantisTheme {
       elevation: 8,
     ),
     
+    // Navigation bar personalizado (Material 3)
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: Colors.white,
+      indicatorColor: PlantisColors.primary.withValues(alpha: 0.2),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: PlantisColors.primary);
+        }
+        return IconThemeData(color: PlantisColors.primaryDark.withValues(alpha: 0.6));
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(
+            color: PlantisColors.primary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          );
+        }
+        return TextStyle(
+          color: PlantisColors.primaryDark.withValues(alpha: 0.6),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        );
+      }),
+      elevation: 8,
+    ),
+    
     // Chip theme personalizado para plantas
     chipTheme: ChipThemeData(
       backgroundColor: PlantisColors.secondaryLight,
@@ -121,6 +148,33 @@ class PlantisTheme {
       unselectedItemColor: Colors.grey.shade600,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
+      elevation: 8,
+    ),
+    
+    // Navigation bar para modo escuro (Material 3)
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: const Color(0xFF1E1E1E),
+      indicatorColor: PlantisColors.primaryLight.withValues(alpha: 0.3),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: PlantisColors.primaryLight);
+        }
+        return IconThemeData(color: Colors.grey.shade600);
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(
+            color: PlantisColors.primaryLight,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          );
+        }
+        return TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        );
+      }),
       elevation: 8,
     ),
     

@@ -1,17 +1,18 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:dartz/dartz.dart';
 import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../domain/repositories/i_analytics_repository.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/config/environment_config.dart';
 
 /// Implementação concreta do repositório de analytics usando Firebase Analytics
 class FirebaseAnalyticsService implements IAnalyticsRepository {
-  final FirebaseAnalytics _analytics;
+  final FirebaseAnalytics? _analytics;
 
   FirebaseAnalyticsService({
     FirebaseAnalytics? analytics,
-  }) : _analytics = analytics ?? FirebaseAnalytics.instance;
+  }) : _analytics = analytics ?? (kIsWeb ? null : FirebaseAnalytics.instance);
 
   @override
   Future<Either<Failure, void>> logEvent(
@@ -19,15 +20,15 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
     Map<String, dynamic>? parameters,
   }) async {
     try {
-      // Não registrar eventos em modo debug para não poluir os dados
-      if (!EnvironmentConfig.enableAnalytics) {
+      // Não executar no web ou se analytics estiver desabilitado
+      if (kIsWeb || !EnvironmentConfig.enableAnalytics) {
         if (EnvironmentConfig.enableLogging) {
-          developer.log('📊 Analytics (DEBUG): $eventName - $parameters', name: 'FirebaseAnalytics');
+          developer.log('📊 Analytics (${kIsWeb ? 'WEB' : 'DEBUG'}): $eventName - $parameters', name: 'FirebaseAnalytics');
         }
         return const Right(null);
       }
 
-      await _analytics.logEvent(
+      await _analytics?.logEvent(
         name: eventName,
         parameters: _sanitizeParameters(parameters),
       );
@@ -43,15 +44,15 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
     required Map<String, String> properties,
   }) async {
     try {
-      if (!EnvironmentConfig.enableAnalytics) {
+      if (kIsWeb || !EnvironmentConfig.enableAnalytics) {
         if (EnvironmentConfig.enableLogging) {
-          developer.log('📊 Analytics Properties (DEBUG): $properties', name: 'FirebaseAnalytics');
+          developer.log('📊 Analytics Properties (${kIsWeb ? 'WEB' : 'DEBUG'}): $properties', name: 'FirebaseAnalytics');
         }
         return const Right(null);
       }
 
       for (final entry in properties.entries) {
-        await _analytics.setUserProperty(
+        await _analytics?.setUserProperty(
           name: entry.key,
           value: entry.value,
         );
@@ -66,14 +67,14 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
   @override
   Future<Either<Failure, void>> setUserId(String? userId) async {
     try {
-      if (!EnvironmentConfig.enableAnalytics) {
+      if (kIsWeb || !EnvironmentConfig.enableAnalytics) {
         if (EnvironmentConfig.enableLogging) {
-          developer.log('📊 Analytics User ID (DEBUG): $userId', name: 'FirebaseAnalytics');
+          developer.log('📊 Analytics User ID (${kIsWeb ? 'WEB' : 'DEBUG'}): $userId', name: 'FirebaseAnalytics');
         }
         return const Right(null);
       }
 
-      await _analytics.setUserId(id: userId);
+      await _analytics?.setUserId(id: userId);
       return const Right(null);
     } catch (e) {
       return Left(FirebaseFailure('Erro ao definir ID do usuário: $e'));
@@ -86,14 +87,14 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
     String? screenClassOverride,
   }) async {
     try {
-      if (!EnvironmentConfig.enableAnalytics) {
+      if (kIsWeb || !EnvironmentConfig.enableAnalytics) {
         if (EnvironmentConfig.enableLogging) {
-          developer.log('📊 Analytics Screen (DEBUG): $screenName', name: 'FirebaseAnalytics');
+          developer.log('📊 Analytics Screen (${kIsWeb ? 'WEB' : 'DEBUG'}): $screenName', name: 'FirebaseAnalytics');
         }
         return const Right(null);
       }
 
-      await _analytics.logScreenView(
+      await _analytics?.logScreenView(
         screenName: screenName,
         screenClass: screenClassOverride,
       );

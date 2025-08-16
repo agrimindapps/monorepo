@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../providers/plant_form_provider.dart';
 import '../widgets/plant_form_basic_info.dart';
 import '../widgets/plant_form_care_config.dart';
-import '../widgets/plant_form_environment_config.dart';
-import '../../../../core/theme/colors.dart';
 
 class PlantFormPage extends StatefulWidget {
   final String? plantId;
@@ -68,8 +66,8 @@ class _PlantFormPageState extends State<PlantFormPage> {
                         'Salvar',
                         style: TextStyle(
                           color: provider.isValid
-                              ? PlantisColors.primary
-                              : Colors.grey,
+                              ? theme.colorScheme.primary
+                              : theme.disabledColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -139,12 +137,6 @@ class _PlantFormPageState extends State<PlantFormPage> {
                       _buildSectionTitle('Configurações de Cuidado'),
                       const PlantFormCareConfig(),
                       
-                      const SizedBox(height: 32),
-                      
-                      // Ambiente
-                      _buildSectionTitle('Ambiente'),
-                      const PlantFormEnvironmentConfig(),
-                      
                       const SizedBox(height: 100), // Espaço para o botão flutuante
                     ],
                   ),
@@ -161,8 +153,8 @@ class _PlantFormPageState extends State<PlantFormPage> {
                 ? () => _savePlant(context)
                 : null,
             backgroundColor: provider.isValid 
-                ? PlantisColors.primary 
-                : Colors.grey,
+                ? theme.colorScheme.primary 
+                : theme.disabledColor,
             foregroundColor: Colors.white,
             icon: provider.isSaving
                 ? const SizedBox(
@@ -190,7 +182,7 @@ class _PlantFormPageState extends State<PlantFormPage> {
         title,
         style: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.bold,
-          color: PlantisColors.primary,
+          color: theme.colorScheme.primary,
         ),
       ),
     );
@@ -215,12 +207,13 @@ class _PlantFormPageState extends State<PlantFormPage> {
       }
     } else {
       if (mounted) {
+        final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               _provider.errorMessage ?? 'Erro ao salvar planta',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: theme.colorScheme.error,
           ),
         );
       }

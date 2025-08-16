@@ -57,14 +57,10 @@ class _DefensivosAgrupadosLoadingSkeletonWidgetState
   }
 
   Widget _buildListSkeleton() {
-    return Padding(
+    return ListView.builder(
       padding: const EdgeInsets.all(8),
-      child: Column(
-        children: List.generate(
-          widget.itemCount.clamp(6, 10),
-          (index) => _buildListSkeletonItem(),
-        ),
-      ),
+      itemCount: widget.itemCount.clamp(6, 10),
+      itemBuilder: (context, index) => _buildListSkeletonItem(),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:dartz/dartz.dart';
 import '../contracts/i_static_data_repository.dart';
 
 /// Repositório base para entidades Hive
@@ -11,13 +12,13 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
 
   /// Template method - define o fluxo, subclasses implementam detalhes
   @override
-  Future<bool> loadFromJson(
+  Future<Either<Exception, void>> loadFromJson(
     List<Map<String, dynamic>> jsonData,
     String appVersion,
   ) async {
     try {
       if (isUpToDate(appVersion)) {
-        return true; // Já atualizado
+        return const Right(null); // Já atualizado
       }
 
       final box = await _getBox();
@@ -29,18 +30,20 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
         await box.put(key, entity);
       }
 
-      await box.put(_versionKey, appVersion);
-      return true;
+      // Salva versão em box separado para metadados
+      final metaBox = await Hive.openBox<String>('${_boxName}_meta');
+      await metaBox.put(_versionKey, appVersion);
+      return const Right(null);
     } catch (e) {
-      return false;
+      return Left(Exception('Erro ao carregar dados: ${e.toString()}'));
     }
   }
 
   @override
   bool isUpToDate(String appVersion) {
     try {
-      final box = Hive.box<T>(_boxName);
-      final storedVersion = box.get(_versionKey);
+      final metaBox = Hive.box<String>('${_boxName}_meta');
+      final storedVersion = metaBox.get(_versionKey);
       return storedVersion == appVersion;
     } catch (e) {
       return false; // Box não aberta ou erro
@@ -51,9 +54,7 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
   List<T> getAll() {
     try {
       final box = Hive.box<T>(_boxName);
-      return box.values
-          .where((item) => getKeyFromEntity(item) != _versionKey)
-          .toList();
+      return box.values.toList();
     } catch (e) {
       return [];
     }
@@ -75,18 +76,23 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
   }
 
   @override
-  Future<bool> clear() async {
+  Future<Either<Exception, void>> clear() async {
     try {
       final box = await _getBox();
       await box.clear();
-      return true;
+      return const Right(null);
     } catch (e) {
-      return false;
+      return Left(Exception('Erro ao limpar dados: ${e.toString()}'));
     }
   }
 
   @override
   int get count => getAll().length;
+  
+  /// Método count async para uso em Future.wait
+  Future<int> countAsync() async {
+    return count;
+  }
 
   /// Métodos abstratos - subclasses devem implementar
   T createFromJson(Map<String, dynamic> json);

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/plant.dart';
 import '../providers/plants_provider.dart';
-import '../../../../core/theme/colors.dart';
 
 class PlantListTile extends StatelessWidget {
   final Plant plant;
@@ -107,25 +106,30 @@ class PlantListTile extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary.withValues(alpha: 0.1),
-            PlantisColors.primary.withValues(alpha: 0.2),
-          ],
-        ),
-      ),
-      child: Icon(
-        Icons.eco,
-        size: 28,
-        color: PlantisColors.primary.withValues(alpha: 0.7),
-      ),
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary.withValues(alpha: 0.1),
+                theme.colorScheme.primary.withValues(alpha: 0.2),
+              ],
+            ),
+          ),
+          child: Icon(
+            Icons.eco,
+            size: 28,
+            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+          ),
+        );
+      },
     );
   }
 
@@ -222,7 +226,7 @@ class PlantListTile extends StatelessWidget {
 
   CareStatusInfo _getCareStatus() {
     if (plant.config?.wateringIntervalDays == null) {
-      return CareStatusInfo(
+      return const CareStatusInfo(
         status: CareStatus.unknown,
         label: 'Config',
         icon: Icons.settings,
@@ -238,25 +242,25 @@ class PlantListTile extends StatelessWidget {
     final daysDifference = nextWatering.difference(now).inDays;
 
     if (daysDifference <= 0) {
-      return CareStatusInfo(
+      return const CareStatusInfo(
         status: CareStatus.needsWater,
         label: 'Regar',
         icon: Icons.water_drop,
         color: Colors.red,
       );
     } else if (daysDifference <= 2) {
-      return CareStatusInfo(
+      return const CareStatusInfo(
         status: CareStatus.soonWater,
         label: 'Em breve',
         icon: Icons.schedule,
-        color: Colors.orange,
+        color: Color(0xFFFF9500),
       );
     } else {
-      return CareStatusInfo(
+      return const CareStatusInfo(
         status: CareStatus.good,
         label: 'Ok',
         icon: Icons.check_circle,
-        color: Colors.green,
+        color: Color(0xFF34C759),
       );
     }
   }

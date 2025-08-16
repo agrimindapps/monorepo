@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/plant_form_provider.dart';
-import '../../../../core/theme/colors.dart';
 import '../../../../core/services/image_service.dart';
 
 class PlantFormBasicInfo extends StatefulWidget {
@@ -60,9 +59,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Galeria de imagens ou área para adicionar primeira imagem
+            // Área para uma única imagem
             if (provider.hasImages)
-              _buildImageGallery(context, provider)
+              _buildSingleImage(context, provider)
             else
               _buildEmptyImageArea(context, provider),
             
@@ -76,60 +75,48 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     );
   }
 
-  Widget _buildImageGallery(BuildContext context, PlantFormProvider provider) {
+  Widget _buildSingleImage(BuildContext context, PlantFormProvider provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Fotos da Planta (${provider.imageUrls.length}/5)',
+          'Foto da Planta',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: provider.imageUrls.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(right: 12),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: ImageService().buildImagePreview(
-                        provider.imageUrls[index],
-                        width: 160,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: () => _showRemoveImageDialog(context, provider, index),
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+        Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: ImageService().buildImagePreview(
+                provider.imageUrls.first,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () => _showRemoveImageDialog(context, provider, 0),
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Theme.of(context).colorScheme.onError,
+                    size: 20,
+                  ),
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -142,10 +129,10 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       width: double.infinity,
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.grey[300]!,
+          color: theme.colorScheme.outline.withValues(alpha: 0.5),
           width: 2,
           style: BorderStyle.solid,
         ),
@@ -156,20 +143,20 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           Icon(
             Icons.add_a_photo,
             size: 48,
-            color: Colors.grey[400],
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
-            'Adicionar fotos da planta',
+            'Adicionar foto da planta',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Opcional - Máximo 5 fotos',
+            'Opcional - Uma única foto',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.grey[500],
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -178,75 +165,40 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   }
 
   Widget _buildImageActionButtons(BuildContext context, PlantFormProvider provider) {
-    final canAddMore = provider.imageUrls.length < 5;
+    final hasNoImage = !provider.hasImages;
     
-    return Column(
+    return Row(
       children: [
-        // Botões principais para câmera e galeria
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: canAddMore && !provider.isUploadingImages
-                    ? () => provider.addImageFromCamera()
-                    : null,
-                icon: provider.isUploadingImages 
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.camera_alt),
-                label: Text('Câmera'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: canAddMore && !provider.isUploadingImages
-                    ? () => provider.addImageFromGallery()
-                    : null,
-                icon: provider.isUploadingImages 
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.photo_library),
-                label: Text('Galeria'),
-              ),
-            ),
-          ],
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: hasNoImage && !provider.isUploadingImages
+                ? () => provider.addImageFromCamera()
+                : null,
+            icon: provider.isUploadingImages 
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(Icons.camera_alt),
+            label: Text('Câmera'),
+          ),
         ),
-        
-        const SizedBox(height: 12),
-        
-        // Botão para múltiplas imagens e remover todas
-        Row(
-          children: [
-            if (canAddMore)
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: !provider.isUploadingImages
-                      ? () => provider.addMultipleImagesFromGallery()
-                      : null,
-                  icon: Icon(Icons.photo_library_outlined),
-                  label: Text('Múltiplas'),
-                ),
-              ),
-            if (provider.hasImages) ...[
-              SizedBox(width: canAddMore ? 16 : 0),
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: !provider.isUploadingImages
-                      ? () => _showRemoveAllImagesDialog(context, provider)
-                      : null,
-                  icon: Icon(Icons.delete_outline, color: Colors.red),
-                  label: Text('Remover Todas', style: TextStyle(color: Colors.red)),
-                ),
-              ),
-            ],
-          ],
+        const SizedBox(width: 16),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: hasNoImage && !provider.isUploadingImages
+                ? () => provider.addImageFromGallery()
+                : null,
+            icon: provider.isUploadingImages 
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(Icons.photo_library),
+            label: Text('Galeria'),
+          ),
         ),
       ],
     );
@@ -268,7 +220,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               provider.removeImage(index);
               Navigator.of(context).pop();
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: Text('Remover'),
           ),
         ],
@@ -276,29 +228,6 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     );
   }
 
-  void _showRemoveAllImagesDialog(BuildContext context, PlantFormProvider provider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Remover Todas as Imagens'),
-        content: Text('Deseja remover todas as imagens da planta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              provider.removeAllImages();
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Remover Todas'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildBasicInfoForm(BuildContext context) {
     return Consumer<PlantFormProvider>(
@@ -378,7 +307,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             Icon(
               icon,
               size: 20,
-              color: PlantisColors.primary,
+              color: theme.colorScheme.primary,
             ),
             const SizedBox(width: 8),
             Text(
@@ -392,7 +321,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               Text(
                 ' *',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -407,23 +336,23 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             hintText: hint,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PlantisColors.primary, width: 2),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
             ),
             filled: true,
             fillColor: theme.colorScheme.surface,
@@ -452,7 +381,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             Icon(
               icon,
               size: 20,
-              color: PlantisColors.primary,
+              color: theme.colorScheme.primary,
             ),
             const SizedBox(width: 8),
             Text(
@@ -476,7 +405,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 return Theme(
                   data: theme.copyWith(
                     colorScheme: theme.colorScheme.copyWith(
-                      primary: PlantisColors.primary,
+                      primary: theme.colorScheme.primary,
                     ),
                   ),
                   child: child!,
@@ -492,7 +421,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
               borderRadius: BorderRadius.circular(12),
               color: theme.colorScheme.surface,
             ),
@@ -506,13 +435,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: value != null
                           ? theme.colorScheme.onSurface
-                          : Colors.grey[600],
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
                 Icon(
                   Icons.calendar_today,
-                  color: Colors.grey[600],
+                  color: theme.colorScheme.onSurfaceVariant,
                   size: 20,
                 ),
               ],

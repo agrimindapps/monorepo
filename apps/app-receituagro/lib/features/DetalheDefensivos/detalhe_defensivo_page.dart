@@ -1,4 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/widgets/modern_header_widget.dart';
+
+// Modelo de dados para comentário
+class ComentarioModel {
+  final String id;
+  final String conteudo;
+  final DateTime createdAt;
+  final String ferramenta;
+  final String pkIdentificador;
+
+  ComentarioModel({
+    required this.id,
+    required this.conteudo,
+    required this.createdAt,
+    required this.ferramenta,
+    required this.pkIdentificador,
+  });
+}
 
 class DetalheDefensivoPage extends StatefulWidget {
   final String defensivoName;
@@ -18,12 +38,58 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   bool isFavorited = false;
+  bool isLoading = false;
+  bool hasError = false;
+  
+  // Estado dos comentários
+  List<ComentarioModel> _comentarios = [];
+  int _maxComentarios = 5; // Limite para usuários premium
+  
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _simulateLoading();
+    _loadComentarios();
   }
+
+  void _loadComentarios() {
+    // Simula alguns comentários existentes
+    _comentarios = [
+      ComentarioModel(
+        id: '1',
+        conteudo: 'Excelente produto! Uso há anos na minha propriedade e sempre tive ótimos resultados no controle de plantas daninhas.',
+        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        ferramenta: 'Defensivos - ${widget.defensivoName}',
+        pkIdentificador: '1',
+      ),
+      ComentarioModel(
+        id: '2',
+        conteudo: 'Produto eficaz, mas é importante seguir rigorosamente as instruções de aplicação e usar os EPIs adequados.',
+        createdAt: DateTime.now().subtract(const Duration(hours: 12)),
+        ferramenta: 'Defensivos - ${widget.defensivoName}',
+        pkIdentificador: '2',
+      ),
+    ];
+  }
+
+  void _simulateLoading() async {
+    setState(() {
+      isLoading = true;
+      hasError = false;
+    });
+    
+    // Simula carregamento
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  
 
   @override
   void dispose() {
@@ -33,51 +99,665 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            backgroundColor: const Color(0xFF4CAF50),
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeader(),
-            ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  isFavorited ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    isFavorited = !isFavorited;
-                  });
-                },
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1120),
             child: Column(
               children: [
-                const SizedBox(height: 20),
-                _buildTabBar(),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height - 280,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildInfoTab(),
-                      _buildDiagnosticoTab(),
-                      _buildAplicacaoTab(),
-                      _buildComentariosTab(),
-                    ],
+                _buildModernHeader(context),
+                Expanded(
+                  child: isLoading
+                      ? _buildLoadingState(context)
+                      : hasError
+                          ? _buildErrorState(context)
+                          : _buildContent(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
+
+  Widget _buildModernHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return ModernHeaderWidget(
+      title: widget.defensivoName,
+      subtitle: widget.fabricante,
+      leftIcon: Icons.shield_outlined,
+      rightIcon: isFavorited ? Icons.favorite : Icons.favorite_border,
+      isDark: isDark,
+      showBackButton: true,
+      showActions: true,
+      onBackPressed: () => Navigator.of(context).pop(),
+      onRightIconPressed: () {
+        setState(() {
+          isFavorited = !isFavorited;
+        });
+      },
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Carregando detalhes...',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Aguarde enquanto buscamos as informações',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.red.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                FontAwesomeIcons.triangleExclamation,
+                size: 32,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Erro ao carregar detalhes',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Não foi possível carregar as informações do defensivo. Verifique sua conexão e tente novamente.',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => _simulateLoading(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Tentar novamente'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                TextButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(FontAwesomeIcons.arrowLeft),
+                  label: const Text('Voltar'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return Column(
+      children: [
+        _buildTabBar(),
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(
+              left: 8,
+              right: 8,
+              top: 4,
+              bottom: 8,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _wrapTabContent(_buildInformacoesTab(), 'informacoes'),
+                _wrapTabContent(_buildDiagnosticoTab(), 'diagnostico'),
+                _wrapTabContent(_buildTecnologiaTab(), 'tecnologia'),
+                _wrapTabContent(_buildComentariosTab(), 'comentarios'),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _wrapTabContent(Widget content, String type) {
+    return Container(
+      padding: EdgeInsets.zero,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            key: ValueKey('$type-content'),
+            physics: const BouncingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: content,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      height: 44,
+      margin: const EdgeInsets.only(
+        top: 8,
+        bottom: 4,
+        left: 8,
+        right: 8,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.green.shade100,
+            Colors.green.shade200,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.shade200.withValues(alpha: 0.5),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TabBar(
+        controller: _tabController,
+        tabs: _buildTabsWithIcons(),
+        indicator: BoxDecoration(
+          color: Colors.green.shade700,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.green.shade800,
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+        dividerColor: Colors.transparent,
+        indicatorSize: TabBarIndicatorSize.tab,
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+      ),
+    );
+  }
+
+  List<Widget> _buildTabsWithIcons() {
+    final tabData = [
+      {'icon': FontAwesomeIcons.info, 'text': 'Informações'},
+      {'icon': FontAwesomeIcons.magnifyingGlass, 'text': 'Diagnóstico'},
+      {'icon': FontAwesomeIcons.gear, 'text': 'Tecnologia'},
+      {'icon': FontAwesomeIcons.comment, 'text': 'Comentários'},
+    ];
+
+    return tabData.asMap().entries.map((entry) {
+      final index = entry.key;
+      final data = entry.value;
+      
+      return Tab(
+        child: AnimatedBuilder(
+          animation: _tabController,
+          builder: (context, _) {
+            final isActive = _tabController.index == index;
+            
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: isActive ? null : 40,
+              child: Row(
+                mainAxisSize: isActive ? MainAxisSize.min : MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    data['icon'] as IconData,
+                    size: isActive ? 18 : 16,
+                  ),
+                  if (isActive) ...[
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        data['text'] as String,
+                        style: const TextStyle(fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }).toList();
+  }
+
+  Widget _buildInformacoesTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInfoCardWidget(),
+          const SizedBox(height: 16),
+          _buildClassificacaoCardWidget(),
+          const SizedBox(height: 80), // Espaço para bottom navigation
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCardWidget() {
+    final theme = Theme.of(context);
+    
+    // Dados mock do defensivo
+    final caracteristicas = {
+      'ingredienteAtivo': 'Glifosato 480g/L',
+      'nomeTecnico': '2,4-D-dimetilamina',
+      'toxico': 'Classe III - Medianamente tóxico',
+      'inflamavel': 'Não inflamável',
+      'corrosivo': 'Não corrosivo',
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header do card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.primary.withValues(alpha: 0.8),
+                  theme.colorScheme.primary.withValues(alpha: 0.9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    FontAwesomeIcons.info,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Informações Técnicas',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Conteúdo do card
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoItem(
+                  'Ingrediente Ativo',
+                  caracteristicas['ingredienteAtivo']!,
+                  FontAwesomeIcons.flask,
+                  theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Nome Técnico',
+                  caracteristicas['nomeTecnico']!,
+                  FontAwesomeIcons.tag,
+                  theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Toxicologia',
+                  caracteristicas['toxico']!,
+                  FontAwesomeIcons.skull,
+                  theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Inflamável',
+                  caracteristicas['inflamavel']!,
+                  FontAwesomeIcons.fire,
+                  theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Corrosivo',
+                  caracteristicas['corrosivo']!,
+                  FontAwesomeIcons.droplet,
+                  theme.colorScheme.primary,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClassificacaoCardWidget() {
+    final theme = Theme.of(context);
+    
+    // Dados mock do defensivo
+    final caracteristicas = {
+      'modoAcao': 'Sistêmico',
+      'classeAgronomica': 'Herbicida',
+      'classAmbiental': 'Classe II - Muito perigoso',
+      'formulacao': 'Suspensão concentrada',
+      'mapa': '12345-67',
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header do card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.secondary.withValues(alpha: 0.8),
+                  theme.colorScheme.secondary.withValues(alpha: 0.9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    FontAwesomeIcons.layerGroup,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Classificação',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Conteúdo do card
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoItem(
+                  'Modo de Ação',
+                  caracteristicas['modoAcao']!,
+                  FontAwesomeIcons.gear,
+                  theme.colorScheme.secondary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Classe Agronômica',
+                  caracteristicas['classeAgronomica']!,
+                  FontAwesomeIcons.seedling,
+                  theme.colorScheme.secondary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Classe Ambiental',
+                  caracteristicas['classAmbiental']!,
+                  FontAwesomeIcons.leaf,
+                  theme.colorScheme.secondary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Formulação',
+                  caracteristicas['formulacao']!,
+                  FontAwesomeIcons.flask,
+                  theme.colorScheme.secondary,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoItem(
+                  'Registro MAPA',
+                  caracteristicas['mapa']!,
+                  FontAwesomeIcons.map,
+                  theme.colorScheme.secondary,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(
+    String label,
+    String value,
+    IconData icon,
+    Color accentColor,
+  ) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  accentColor.withValues(alpha: 0.15),
+                  accentColor.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              icon,
+              color: accentColor,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -88,126 +768,168 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(60, 60, 60, 20),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            widget.defensivoName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            widget.fabricante,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E8),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          color: const Color(0xFF4CAF50),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        indicatorPadding: const EdgeInsets.all(4),
-        labelColor: Colors.white,
-        unselectedLabelColor: const Color(0xFF4CAF50),
-        labelStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 12,
-        ),
-        tabs: const [
-          Tab(
-            height: 44,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.info_outline, size: 14),
-                SizedBox(width: 4),
-                Text('Info'),
-              ],
-            ),
-          ),
-          Tab(
-            height: 44,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.search, size: 14),
-                SizedBox(width: 4),
-                Text('Diagnós...'),
-              ],
-            ),
-          ),
-          Tab(
-            height: 44,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.agriculture, size: 14),
-                SizedBox(width: 4),
-                Text('Apl...'),
-              ],
-            ),
-          ),
-          Tab(
-            height: 44,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.comment, size: 14),
-                SizedBox(width: 4),
-                Text('Co...'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoTab() {
+  Widget _buildTecnologiaTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTecnologiaSection(),
+          _buildApplicationInfoSection(
+            'Tecnologia',
+            _getTecnologiaContent(),
+            Icons.precision_manufacturing_outlined,
+          ),
+          const SizedBox(height: 24),
+          _buildApplicationInfoSection(
+            'Embalagens',
+            _getEmbalagensContent(),
+            Icons.inventory_2_outlined,
+          ),
+          const SizedBox(height: 24),
+          _buildApplicationInfoSection(
+            'Manejo Integrado',
+            _getManejoIntegradoContent(),
+            Icons.integration_instructions_outlined,
+          ),
+          const SizedBox(height: 24),
+          _buildApplicationInfoSection(
+            'Manejo de Resistência',
+            _getManejoResistenciaContent(),
+            Icons.shield_outlined,
+          ),
+          const SizedBox(height: 24),
+          _buildApplicationInfoSection(
+            'Precauções Humanas',
+            _getPrecaucoesHumanasContent(),
+            Icons.person_outlined,
+          ),
+          const SizedBox(height: 24),
+          _buildApplicationInfoSection(
+            'Precauções Ambientais',
+            _getPrecaucoesAmbientaisContent(),
+            Icons.nature_outlined,
+          ),
+          const SizedBox(height: 24),
+          _buildApplicationInfoSection(
+            'Compatibilidade',
+            _getCompatibilidadeContent(),
+            Icons.compare_arrows_outlined,
+          ),
           const SizedBox(height: 80), // Espaço para bottom navigation
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApplicationInfoSection(String title, String content, IconData icon) {
+    final theme = Theme.of(context);
+    
+    if (content.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final accentColor = theme.colorScheme.tertiary;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header da seção
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  accentColor.withValues(alpha: 0.8),
+                  accentColor.withValues(alpha: 0.9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.volume_up,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    onPressed: () {
+                      // Implementar TTS aqui
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lendo: $title')),
+                      );
+                    },
+                    tooltip: 'Ouvir texto',
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Conteúdo da seção
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: SelectableText(
+              content,
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface,
+                height: 1.6,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -228,7 +950,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -250,7 +972,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
@@ -396,7 +1118,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -470,58 +1192,192 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  Widget _buildAplicacaoTab() {
+
+
+
+
+
+
+  Widget _buildComentariosTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Botão para adicionar novo comentário
+          if (_comentarios.length < _maxComentarios)
+            _buildAddCommentButton(),
+          
+          if (_comentarios.length >= _maxComentarios)
+            _buildLimitReachedWidget(),
+          
+          const SizedBox(height: 16),
+          
+          // Lista de comentários
+          if (_comentarios.isEmpty)
+            _buildEmptyCommentsState()
+          else
+            ..._comentarios.asMap().entries.map((entry) {
+              final index = entry.key;
+              final comentario = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildComentarioCard(comentario, index),
+              );
+            }).toList(),
+          
+          const SizedBox(height: 80), // Espaço para bottom navigation
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddCommentButton() {
+    final theme = Theme.of(context);
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.add_comment,
+            size: 48,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Adicionar Comentário',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Compartilhe sua experiência com este defensivo',
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _showAddCommentDialog,
+            icon: const Icon(Icons.edit),
+            label: const Text('Escrever Comentário'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLimitReachedWidget() {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: theme.colorScheme.onSurface,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Limite de comentários atingido',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Você já adicionou ${_comentarios.length} de $_maxComentarios comentários disponíveis.',
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Para adicionar mais comentários, assine o plano premium.',
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyCommentsState() {
+    final theme = Theme.of(context);
+    
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.orange[50],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.orange[300]!, width: 2),
-        ),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Aplicação não disponível',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
-              ),
-              textAlign: TextAlign.center,
+            Icon(
+              Icons.comment_outlined,
+              size: 64,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
-              'Este recurso está disponível apenas para assinantes do app.',
+              'Nenhum comentário ainda',
               style: TextStyle(
-                fontSize: 16,
-                color: Colors.orange[700],
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Seja o primeiro a comentar sobre este defensivo',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _showPremiumDialog(),
-                icon: const Icon(Icons.diamond, color: Colors.white),
-                label: const Text(
-                  'Desbloquear Agora',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
             ),
           ],
         ),
@@ -529,74 +1385,435 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  Widget _buildComentariosTab() {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(24),
+  Widget _buildComentarioCard(ComentarioModel comentario, int index) {
+    final theme = Theme.of(context);
+    
+    return Dismissible(
+      key: Key(comentario.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: Colors.orange[50],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.orange[300]!, width: 2),
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Comentários não disponíveis',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 24,
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirmar exclusão'),
+            content: const Text('Tem certeza que deseja excluir este comentário?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Este recurso está disponível apenas para assinantes do app.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.orange[700],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _showPremiumDialog(),
-                icon: const Icon(Icons.diamond, color: Colors.white),
-                label: const Text(
-                  'Desbloquear Agora',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Excluir'),
+              ),
+            ],
+          ),
+        );
+      },
+      onDismissed: (direction) {
+        _deleteComentario(index);
+      },
+      child: GestureDetector(
+        onTap: () => _showEditCommentDialog(comentario, index),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withValues(alpha: 0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cabeçalho com origem e data
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Defensivos',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          widget.defensivoName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _formatDate(comentario.createdAt),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Conteúdo do comentário
+              Text(
+                comentario.conteudo,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: theme.colorScheme.onSurface,
+                  height: 1.4,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              // Indicador de ação
+              Row(
+                children: [
+                  const Spacer(),
+                  Text(
+                    'Toque para editar',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  Icon(
+                    Icons.edit,
+                    size: 12,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   String _getTecnologiaContent() {
-    return '${widget.defensivoName} é um herbicida à base do ingrediente ativo Indaziflam, indicado para o controle pré-emergente das plantas daninhas nas culturas da cana-de-açúcar (cana planta e cana soca), café e citros.';
+    return 'MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO - MAPA\n\nINSTRUÇÕES DE USO:\n\n${widget.defensivoName} é um herbicida à base do ingrediente ativo Indaziflam, indicado para o controle pré-emergente das plantas daninhas nas culturas da cana-de-açúcar (cana planta e cana soca), café e citros.\n\nMODO DE APLICAÇÃO:\nAplicar via pulverização foliar, preferencialmente no início da manhã ou final da tarde. Utilizar equipamentos de proteção individual adequados.\n\nNÚMERO, ÉPOCA E INTERVALO DE APLICAÇÃO:\nCana-de-açúcar: O produto deve ser pulverizado sobre o solo úmido, bem preparado e livre de torrões, em cana-planta e na cana-soca, na pré-emergência da cultura e das plantas daninhas. Aplicar somente em solo médio e pesado.\n\nCafé: o produto deve ser aplicado em pulverização sobre o solo úmido, nas entre fileiras da cultura, na pré-emergência das plantas daninhas.';
+  }
+
+  String _getEmbalagensContent() {
+    return 'EMBALAGENS DISPONÍVEIS:\n\n• Frasco plástico de 1 litro\n• Bombona plástica de 5 litros\n• Bombona plástica de 20 litros\n• Tambor plástico de 200 litros\n\nDESTINAÇÃO ADEQUADA DAS EMBALAGENS:\nApós o uso correto deste produto, as embalagens devem ser:\n• Lavadas três vezes (tríplice lavagem)\n• Armazenadas em local adequado\n• Devolvidas ao estabelecimento comercial ou posto de recebimento\n\nNÃO REUTILIZAR EMBALAGENS VAZIAS.\nEsta embalagem deve ser reciclada em instalação autorizada.';
+  }
+
+  String _getManejoIntegradoContent() {
+    return 'MANEJO INTEGRADO DE PRAGAS (MIP):\n\nO ${widget.defensivoName} deve ser utilizado dentro de um programa de Manejo Integrado de Pragas, que inclui:\n\n• Monitoramento regular da cultura\n• Uso de métodos de controle biológico quando possível\n• Rotação de produtos com diferentes modos de ação\n• Preservação de inimigos naturais\n• Práticas culturais adequadas\n\nRESISTÊNCIA:\nPara evitar o desenvolvimento de populações resistentes, recomenda-se:\n• Não repetir aplicações do mesmo produto\n• Alternar com produtos de diferentes grupos químicos\n• Respeitar intervalos de aplicação\n• Monitorar a eficácia do controle';
+  }
+
+  String _getManejoResistenciaContent() {
+    return 'ESTRATÉGIAS DE MANEJO DE RESISTÊNCIA:\n\n1. ROTAÇÃO DE MECANISMOS DE AÇÃO:\n• Alternar produtos com diferentes modos de ação\n• Não utilizar o mesmo produto consecutivamente\n• Respeitar janela de aplicação\n\n2. MONITORAMENTO:\n• Avaliar eficácia após aplicações\n• Identificar sinais de perda de eficiência\n• Comunicar suspeitas de resistência\n\n3. BOAS PRÁTICAS:\n• Usar doses recomendadas\n• Calibrar equipamentos adequadamente\n• Aplicar em condições climáticas favoráveis\n• Manter registros de aplicações\n\n4. MEDIDAS PREVENTIVAS:\n• Limpeza de equipamentos\n• Controle de plantas daninhas resistentes\n• Integração com métodos não químicos';
+  }
+
+  String _getPrecaucoesHumanasContent() {
+    return 'PRECAUÇÕES DE USO E ADVERTÊNCIAS:\n\nEQUIPAMENTOS DE PROTEÇÃO INDIVIDUAL (EPI):\n• Macacão com mangas compridas\n• Luvas impermeáveis\n• Botas impermeáveis\n• Máscara facial ou respirador\n• Óculos de proteção\n\nPRECAUÇÕES DURANTE A APLICAÇÃO:\n• Não comer, beber ou fumar durante o manuseio\n• Aplicar somente em ausência de ventos fortes\n• Evitar aplicação em condições de alta temperatura\n• Manter pessoas e animais afastados da área tratada\n\nPRIMEIROS SOCORROS:\n• Em caso de intoxicação, procurar atendimento médico imediato\n• Levar a embalagem ou rótulo do produto\n• Centro de Intoxicações: 0800-722-6001\n\nSINTOMAS DE INTOXICAÇÃO:\nNáuseas, vômitos, dor de cabeça, tontura.';
+  }
+
+  String _getPrecaucoesAmbientaisContent() {
+    return 'PRECAUÇÕES AMBIENTAIS:\n\nPROTEÇÃO DO MEIO AMBIENTE:\n• Este produto é tóxico para organismos aquáticos\n• Não contaminar córregos, lagos, açudes, poços e nascentes\n• Não aplicar em dias de vento forte\n• Manter distância mínima de 30 metros de corpos d\'água\n\nDESTINO ADEQUADO DE RESTOS:\n• Não descartar em esgotos ou corpos d\'água\n• Não enterrar embalagens ou restos do produto\n• Utilizar sobras do produto conforme recomendações\n\nPROTEÇÃO DA FAUNA:\n• Produto tóxico para abelhas\n• Não aplicar durante floração\n• Evitar deriva para vegetação nativa\n• Proteger organismos benéficos\n\nRESTRIÇÕES:\n• Uso restrito a aplicadores treinados\n• Venda sob receituário agronômico\n• Registro no MAPA sob número 12345-67';
+  }
+
+  String _getCompatibilidadeContent() {
+    return 'COMPATIBILIDADE E MISTURAS:\n\nCOMPATIBILIDADE QUÍMICA:\nO ${widget.defensivoName} é compatível com:\n• Adjuvantes recomendados pelo fabricante\n• Fertilizantes foliares específicos\n• Outros herbicidas quando recomendado\n\nINCOMPATIBILIDADES:\n• Produtos alcalinos (pH > 8,0)\n• Fertilizantes com cálcio em alta concentração\n• Produtos à base de cobre\n• Óleos minerais ou vegetais\n\nTESTE DE COMPATIBILIDADE:\nAntes de fazer misturas:\n1. Preparar pequena quantidade da mistura\n2. Observar por 30 minutos\n3. Verificar formação de precipitados ou separação de fases\n4. Não utilizar em caso de incompatibilidade\n\nRECOMENDAÇÕES:\n• Sempre consultar engenheiro agrônomo\n• Realizar teste prévio em pequena área\n• Preparar mistura apenas para uso imediato\n• Agitar constantemente durante aplicação';
   }
 
   String _getAplicacaoContent() {
     return 'Cana-de-açúcar: O produto deve ser pulverizado sobre o solo úmido, bem preparado e livre de torrões, em cana-planta e na cana-soca, na pré-emergência da cultura e das plantas daninhas. Aplicar somente em solo médio e pesado.\n\nCafé: o produto deve ser aplicado em pulverização sobre o solo úmido, nas entre fileiras da cultura, na pré-emergência das plantas daninhas.';
   }
 
+  Widget? _buildFloatingActionButton(BuildContext context) {
+    // Só mostra o FAB se estiver na aba de comentários (agora é a quarta aba, índice 3)
+    if (_tabController.index != 3) {
+      return null;
+    }
+    
+    return FloatingActionButton(
+      onPressed: () => _showCommentDialog(),
+      backgroundColor: Colors.green,
+      foregroundColor: Colors.white,
+      tooltip: 'Adicionar comentário',
+      child: const Icon(Icons.add),
+    );
+  }
+
+  void _showAddCommentDialog() {
+    final TextEditingController controller = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Adicionar Comentário'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Defensivos - ${widget.defensivoName}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Compartilhe sua experiência com este defensivo...',
+                border: OutlineInputBorder(),
+                counterText: '',
+              ),
+              maxLines: 4,
+              maxLength: 300,
+              autofocus: true,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Mínimo 5 caracteres, máximo 300 caracteres',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final content = controller.text.trim();
+              if (_validateComment(content)) {
+                _addComentario(content);
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditCommentDialog(ComentarioModel comentario, int index) {
+    final TextEditingController controller = TextEditingController(text: comentario.conteudo);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Comentário'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Defensivos - ${widget.defensivoName}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Edite seu comentário...',
+                border: OutlineInputBorder(),
+                counterText: '',
+              ),
+              maxLines: 4,
+              maxLength: 300,
+              autofocus: true,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Mínimo 5 caracteres, máximo 300 caracteres',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final content = controller.text.trim();
+              if (_validateComment(content)) {
+                _editComentario(index, content);
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _validateComment(String content) {
+    if (content.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O comentário deve ter pelo menos 5 caracteres'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    
+    if (content.length > 300) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O comentário não pode ter mais que 300 caracteres'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    
+    return true;
+  }
+
+  void _addComentario(String content) {
+    final novoComentario = ComentarioModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      conteudo: content,
+      createdAt: DateTime.now(),
+      ferramenta: 'Defensivos - ${widget.defensivoName}',
+      pkIdentificador: DateTime.now().millisecondsSinceEpoch.toString(),
+    );
+    
+    setState(() {
+      _comentarios.add(novoComentario);
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Comentário adicionado com sucesso!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _editComentario(int index, String newContent) {
+    setState(() {
+      _comentarios[index] = ComentarioModel(
+        id: _comentarios[index].id,
+        conteudo: newContent,
+        createdAt: _comentarios[index].createdAt,
+        ferramenta: _comentarios[index].ferramenta,
+        pkIdentificador: _comentarios[index].pkIdentificador,
+      );
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Comentário editado com sucesso!'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+  }
+
+  void _deleteComentario(int index) {
+    final comentario = _comentarios[index];
+    
+    setState(() {
+      _comentarios.removeAt(index);
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Comentário excluído'),
+        action: SnackBarAction(
+          label: 'Desfazer',
+          onPressed: () {
+            setState(() {
+              _comentarios.insert(index, comentario);
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d atrás';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h atrás';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m atrás';
+    } else {
+      return 'Agora';
+    }
+  }
+
+  void _showCommentDialog() {
+    _showAddCommentDialog();
+  }
+
   void _showPremiumDialog() {
+    // Import the helper at the top of the file first
+    // For now, just check directly
+    final firebaseAuth = FirebaseAuth.instance;
+    final user = firebaseAuth.currentUser;
+    
+    // Don't show premium dialog for anonymous users
+    if (user != null && user.isAnonymous) {
+      return;
+    }
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

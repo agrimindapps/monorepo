@@ -24,6 +24,8 @@ class SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -38,7 +40,7 @@ class SettingsItem extends StatelessWidget {
             border: !isLast
                 ? Border(
                     bottom: BorderSide(
-                      color: Colors.grey.shade700,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       width: 0.5,
                     ),
                   )
@@ -50,12 +52,12 @@ class SettingsItem extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: iconColor ?? Colors.teal,
+                  color: iconColor ?? theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color: Colors.white,
+                  color: theme.colorScheme.onPrimary,
                   size: 18,
                 ),
               ),
@@ -66,8 +68,8 @@ class SettingsItem extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -77,7 +79,7 @@ class SettingsItem extends StatelessWidget {
                       Text(
                         subtitle!,
                         style: TextStyle(
-                          color: Colors.grey.shade400,
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
@@ -88,7 +90,7 @@ class SettingsItem extends StatelessWidget {
               trailing ??
                   Icon(
                     Icons.chevron_right,
-                    color: Colors.grey.shade500,
+                    color: theme.colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
             ],

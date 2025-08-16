@@ -6,40 +6,26 @@ import 'core/theme/plantis_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as app_auth;
 import 'features/plants/presentation/providers/plants_list_provider.dart';
-import 'features/spaces/presentation/providers/spaces_provider.dart';
 import 'features/tasks/presentation/providers/tasks_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'core/di/injection_container.dart' as di;
 
 class PlantisApp extends StatelessWidget {
   const PlantisApp({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => di.sl<app_auth.AuthProvider>(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => di.sl<PlantsListProvider>(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => di.sl<SpacesProvider>(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => di.sl<TasksProvider>(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => di.sl<PremiumProvider>(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ThemeProvider()..initialize(),
-        ),
+        ChangeNotifierProvider(create: (_) => di.sl<app_auth.AuthProvider>()),
+        ChangeNotifierProvider(create: (_) => di.sl<PlantsListProvider>()),
+        ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),
+        ChangeNotifierProvider(create: (_) => di.sl<PremiumProvider>()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
       ],
       builder: (context, child) {
         final router = AppRouter.router(context);
-        
+
         return Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
             return MaterialApp.router(

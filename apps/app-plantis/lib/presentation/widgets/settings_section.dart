@@ -16,6 +16,8 @@ class SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Container(
       width: double.infinity,
       margin: margin ?? const EdgeInsets.only(bottom: 24),
@@ -26,15 +28,15 @@ class SettingsSection extends StatelessWidget {
             padding: const EdgeInsets.only(left: 16, bottom: 8),
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey.shade300,
+              style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade800,
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(

@@ -18,10 +18,12 @@ class UserProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.grey.shade800,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
@@ -35,11 +37,11 @@ class UserProfileCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: Colors.teal,
+                  backgroundColor: theme.colorScheme.primary,
                   child: Text(
                     initials,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -52,8 +54,8 @@ class UserProfileCard extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -64,7 +66,7 @@ class UserProfileCard extends StatelessWidget {
                       Text(
                         email,
                         style: TextStyle(
-                          color: Colors.grey.shade400,
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 14,
                         ),
                         maxLines: 1,
@@ -75,14 +77,14 @@ class UserProfileCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.access_time,
-                            color: Colors.grey.shade400,
+                            color: theme.colorScheme.onSurfaceVariant,
                             size: 14,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             membershipInfo,
                             style: TextStyle(
-                              color: Colors.grey.shade400,
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -93,7 +95,7 @@ class UserProfileCard extends StatelessWidget {
                 ),
                 Icon(
                   Icons.more_vert,
-                  color: Colors.grey.shade500,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ],
             ),

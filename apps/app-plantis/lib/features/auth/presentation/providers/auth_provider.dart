@@ -53,6 +53,9 @@ class AuthProvider extends ChangeNotifier {
         
         // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
         if (user == null && await shouldUseAnonymousMode()) {
+          // Marca como inicializado ANTES de fazer login anônimo para evitar redirecionamentos
+          _isInitialized = true;
+          notifyListeners();
           await signInAnonymously();
           return; // O signInAnonymously vai disparar este listener novamente
         }

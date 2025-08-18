@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../providers/plants_provider.dart';
+import '../providers/plant_form_provider.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_grid_view.dart';
@@ -12,6 +13,7 @@ import '../widgets/empty_plants_widget.dart';
 import '../widgets/plants_loading_widget.dart';
 import '../widgets/plants_error_widget.dart';
 import '../widgets/plants_fab.dart';
+import '../widgets/plant_form_modal.dart';
 
 class PlantsListPage extends StatefulWidget {
   const PlantsListPage({super.key});
@@ -83,6 +85,18 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
+  void _showAddPlantModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ChangeNotifierProvider(
+        create: (_) => di.sl<PlantFormProvider>(),
+        child: const PlantFormModal(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -139,8 +153,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
                         searchQuery: plantsProvider.searchQuery,
                         onClearSearch: () => _onSearchChanged(''),
                         onAddPlant: () {
-                          // Navigate to add plant page
-                          Navigator.of(context).pushNamed('/add-plant');
+                          // Show modal for adding plant
+                          _showAddPlantModal(context);
                         },
                       );
                     }

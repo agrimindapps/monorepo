@@ -37,35 +37,17 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
-      // Always get from local first for instant UI response
+      // ALWAYS return local data first for instant UI response
       final localPlants = await localDatasource.getPlants();
       
-      // If we have local data, return it immediately
-      if (localPlants.isNotEmpty) {
-        // Sync in background if connected (fire and forget)
-        if (await networkInfo.isConnected) {
-          _syncPlantsInBackground(userId);
-        }
-        return Right(localPlants);
+      // Start background sync immediately (fire and forget) 
+      // This ensures local-first approach with background updates
+      if (await networkInfo.isConnected) {
+        _syncPlantsInBackground(userId);
       }
       
-      // If no local data, try remote as fallback
-      if (await networkInfo.isConnected) {
-        try {
-          final remotePlants = await remoteDatasource.getPlants(userId);
-          
-          // Cache locally
-          for (final plant in remotePlants) {
-            await localDatasource.updatePlant(plant);
-          }
-          
-          return Right(remotePlants);
-        } catch (e) {
-          return Right(localPlants); // Return empty list if both fail
-        }
-      } else {
-        return Right(localPlants); // Return empty list if offline and no cache
-      }
+      // Return local data immediately (empty list is fine)
+      return Right(localPlants);
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
@@ -85,6 +67,16 @@ class PlantsRepositoryImpl implements PlantsRepository {
     });
   }
 
+  // Background sync method for single plant (fire and forget)
+  void _syncSinglePlantInBackground(String plantId, String userId) {
+    remoteDatasource.getPlantById(plantId, userId).then((remotePlant) {
+      // Update local cache with remote data
+      localDatasource.updatePlant(remotePlant);
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
+  }
+
   @override
   Future<Either<Failure, Plant>> getPlantById(String id) async {
     try {
@@ -93,34 +85,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
+      // ALWAYS get from local first for instant response
+      final localPlant = await localDatasource.getPlantById(id);
+      
+      // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        try {
-          // Try to get from remote first
-          final remotePlant = await remoteDatasource.getPlantById(id, userId);
-          
-          // Cache locally
-          await localDatasource.updatePlant(remotePlant);
-          
-          return Right(remotePlant);
-        } catch (e) {
-          // If remote fails, fallback to local
-          final localPlant = await localDatasource.getPlantById(id);
-          if (localPlant != null) {
-            return Right(localPlant);
-          }
-          return Left(NotFoundFailure('Planta não encontrada'));
-        }
+        _syncSinglePlantInBackground(id, userId);
+      }
+      
+      // Return local data immediately (or error if not found)
+      if (localPlant != null) {
+        return Right(localPlant);
       } else {
-        // Offline - get from local
-        final localPlant = await localDatasource.getPlantById(id);
-        if (localPlant != null) {
-          return Right(localPlant);
-        }
         return Left(NotFoundFailure('Planta não encontrada'));
       }
     } on CacheFailure catch (e) {
-      return Left(e);
-    } on ServerFailure catch (e) {
       return Left(e);
     } catch (e) {
       return Left(UnknownFailure('Erro inesperado ao buscar planta: ${e.toString()}'));

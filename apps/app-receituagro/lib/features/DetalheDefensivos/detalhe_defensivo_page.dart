@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/widgets/modern_header_widget.dart';
 
@@ -17,6 +18,25 @@ class ComentarioModel {
     required this.createdAt,
     required this.ferramenta,
     required this.pkIdentificador,
+  });
+}
+
+// Modelo de dados para diagnóstico
+class DiagnosticoModel {
+  final String id;
+  final String nome;
+  final String ingredienteAtivo;
+  final String dosagem;
+  final String cultura;
+  final String grupo;
+
+  DiagnosticoModel({
+    required this.id,
+    required this.nome,
+    required this.ingredienteAtivo,
+    required this.dosagem,
+    required this.cultura,
+    required this.grupo,
   });
 }
 
@@ -44,6 +64,21 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   // Estado dos comentários
   List<ComentarioModel> _comentarios = [];
   int _maxComentarios = 5; // Limite para usuários premium
+  final TextEditingController _commentController = TextEditingController();
+  
+  // Estado dos diagnósticos
+  String _searchQuery = '';
+  String _selectedCultura = 'Todas';
+  List<DiagnosticoModel> _diagnosticos = [];
+  final List<String> _culturas = [
+    'Todas',
+    'Arroz',
+    'Braquiária', 
+    'Cana-de-açúcar',
+    'Café',
+    'Milho',
+    'Soja'
+  ];
   
 
   @override
@@ -52,6 +87,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     _tabController = TabController(length: 4, vsync: this);
     _simulateLoading();
     _loadComentarios();
+    _loadDiagnosticos();
   }
 
   void _loadComentarios() {
@@ -70,6 +106,92 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         createdAt: DateTime.now().subtract(const Duration(hours: 12)),
         ferramenta: 'Defensivos - ${widget.defensivoName}',
         pkIdentificador: '2',
+      ),
+    ];
+  }
+
+  void _loadDiagnosticos() {
+    // Simula diagnósticos para diferentes culturas
+    _diagnosticos = [
+      DiagnosticoModel(
+        id: '1',
+        nome: '2,4 D Amina 840 SI',
+        ingredienteAtivo: '2,4-D-dimetilamina (720 g/L)',
+        dosagem: '2,0 L/ha',
+        cultura: 'Arroz',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '2',
+        nome: 'Glifosato Nortox',
+        ingredienteAtivo: 'Glifosato (480 g/L)',
+        dosagem: '3,0 L/ha',
+        cultura: 'Arroz',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '3',
+        nome: '2,4-D Nortox',
+        ingredienteAtivo: '2,4-D + Equivalente ácido (867 g/L)',
+        dosagem: '1,5 L/ha',
+        cultura: 'Braquiária',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '4',
+        nome: 'Ametrina Atanor 50 SC',
+        ingredienteAtivo: 'Ametrina (500 g/L)',
+        dosagem: '4,0 L/ha',
+        cultura: 'Cana-de-açúcar',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '5',
+        nome: 'Roundup Original DI',
+        ingredienteAtivo: 'Glifosato (445 g/L)',
+        dosagem: '6,0 L/ha',
+        cultura: 'Cana-de-açúcar',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '6',
+        nome: 'Paraquat Syngenta',
+        ingredienteAtivo: 'Paraquat (200 g/L)',
+        dosagem: '2,5 L/ha',
+        cultura: 'Café',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '7',
+        nome: 'Atrazina Nortox SC',
+        ingredienteAtivo: 'Atrazina (500 g/L)',
+        dosagem: '5,0 L/ha',
+        cultura: 'Milho',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '8',
+        nome: 'Glifosato Monsanto',
+        ingredienteAtivo: 'Glifosato (480 g/L)',
+        dosagem: '3,0 L/ha',
+        cultura: 'Soja',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '9',
+        nome: 'Flex 25 WG',
+        ingredienteAtivo: 'Fomesafen (250 g/kg)',
+        dosagem: '0,8 kg/ha',
+        cultura: 'Soja',
+        grupo: 'Herbicida',
+      ),
+      DiagnosticoModel(
+        id: '10',
+        nome: 'Select 240 EC',
+        ingredienteAtivo: 'Cletodim (240 g/L)',
+        dosagem: '0,5 L/ha',
+        cultura: 'Soja',
+        grupo: 'Herbicida',
       ),
     ];
   }
@@ -94,6 +216,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -1042,67 +1165,240 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildDiagnosticoTab() {
-    return SingleChildScrollView(
+    final filteredDiagnosticos = _getFilteredDiagnosticos();
+    final groupedDiagnosticos = _groupDiagnosticosByCultura(filteredDiagnosticos);
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildDiagnosticoFilters(),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (filteredDiagnosticos.isEmpty)
+                  _buildNoDiagnosticosFound()
+                else
+                  ...groupedDiagnosticos.entries.map((entry) {
+                    final cultura = entry.key;
+                    final diagnosticos = entry.value;
+                    
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildCulturaSection(cultura, '${diagnosticos.length} diagnóstico${diagnosticos.length != 1 ? 's' : ''}'),
+                        const SizedBox(height: 16),
+                        ...diagnosticos.map((diagnostico) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildDiagnosticoItem(
+                            diagnostico.nome,
+                            diagnostico.ingredienteAtivo,
+                            diagnostico.dosagem,
+                          ),
+                        )).toList(),
+                        const SizedBox(height: 24),
+                      ],
+                    );
+                  }).toList(),
+                const SizedBox(height: 80),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDiagnosticoFilters() {
+    final theme = Theme.of(context);
+    
+    return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          _buildCulturaSection('Arroz', '1 diagnóstico'),
-          const SizedBox(height: 16),
-          _buildDiagnosticoItem(
-            '2,4 D Amina 840 SI',
-            '2,4-D-dimetilamina (720 g/L)',
-            '••• mg/L',
+          // Campo de pesquisa (metade esquerda)
+          Expanded(
+            flex: 1,
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  hintText: 'Pesquisar diagnósticos...',
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
-          _buildCulturaSection('Braquiária', '1 diagnóstico'),
-          const SizedBox(height: 16),
-          _buildDiagnosticoItem(
-            '2,4-D Nortox',
-            '2,4-D + Equivalente ácido de 2,4-D (8...',
-            '••• mg/L',
+          const SizedBox(width: 12),
+          // Seletor de cultura (metade direita)
+          Expanded(
+            flex: 1,
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+              child: DropdownButton<String>(
+                value: _selectedCultura,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedCultura = newValue ?? 'Todas';
+                  });
+                },
+                isExpanded: true,
+                underline: const SizedBox(),
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                items: _culturas.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
-          _buildCulturaSection('Cana-de-açúcar', '2 diagnósticos'),
-          const SizedBox(height: 16),
-          _buildDiagnosticoItem(
-            '2,4 D Amina 840 SI',
-            '2,4-D-dimetilamina (720 g/L)',
-            '••• mg/L',
-          ),
-          const SizedBox(height: 12),
-          _buildDiagnosticoItem(
-            'Ametrina Atanor 50 SC',
-            'Ametrina (500 g/L)',
-            '••• mg/L',
-          ),
-          const SizedBox(height: 80),
         ],
       ),
     );
   }
 
+  Widget _buildNoDiagnosticosFound() {
+    final theme = Theme.of(context);
+    
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhum diagnóstico encontrado',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _searchQuery.isNotEmpty 
+                  ? 'Tente buscar por outros termos ou altere o filtro de cultura'
+                  : 'Não há diagnósticos para a cultura selecionada',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<DiagnosticoModel> _getFilteredDiagnosticos() {
+    List<DiagnosticoModel> filtered = _diagnosticos;
+    
+    // Filtrar por cultura
+    if (_selectedCultura != 'Todas') {
+      filtered = filtered.where((d) => d.cultura == _selectedCultura).toList();
+    }
+    
+    // Filtrar por pesquisa
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = filtered.where((d) => 
+        d.nome.toLowerCase().contains(query) ||
+        d.ingredienteAtivo.toLowerCase().contains(query) ||
+        d.cultura.toLowerCase().contains(query)
+      ).toList();
+    }
+    
+    return filtered;
+  }
+
+  Map<String, List<DiagnosticoModel>> _groupDiagnosticosByCultura(List<DiagnosticoModel> diagnosticos) {
+    final Map<String, List<DiagnosticoModel>> grouped = {};
+    
+    for (final diagnostico in diagnosticos) {
+      if (!grouped.containsKey(diagnostico.cultura)) {
+        grouped[diagnostico.cultura] = [];
+      }
+      grouped[diagnostico.cultura]!.add(diagnostico);
+    }
+    
+    // Ordenar as culturas alfabeticamente
+    final sortedKeys = grouped.keys.toList()..sort();
+    final Map<String, List<DiagnosticoModel>> sortedGrouped = {};
+    
+    for (final key in sortedKeys) {
+      sortedGrouped[key] = grouped[key]!;
+    }
+    
+    return sortedGrouped;
+  }
+
   Widget _buildCulturaSection(String cultura, String diagnosticos) {
+    final theme = Theme.of(context);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.eco,
-            color: Color(0xFF4CAF50),
-            size: 16,
+            color: theme.colorScheme.primary,
+            size: 18,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Text(
             '$cultura ($diagnosticos)',
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -1111,83 +1407,90 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildDiagnosticoItem(String nome, String principio, String dosagem) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: Color(0xFF4CAF50),
-              borderRadius: BorderRadius.all(Radius.circular(8)),
+    final theme = Theme.of(context);
+    
+    return GestureDetector(
+      onTap: () => _showDiagnosticDialog(nome, principio, dosagem),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: 0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            child: const Icon(
-              Icons.agriculture,
-              color: Colors.white,
-              size: 24,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.agriculture,
+                color: theme.colorScheme.onPrimary,
+                size: 24,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    nome,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    principio,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Dosagem: $dosagem',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
               children: [
-                Text(
-                  nome,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+                Icon(
+                  Icons.warning,
+                  color: Colors.orange[600],
+                  size: 18,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  principio,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Dosagem: $dosagem',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[500],
-                  ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  size: 20,
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              Icon(
-                Icons.warning,
-                color: Colors.orange[600],
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.grey,
-                size: 20,
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1797,6 +2100,241 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     } else {
       return 'Agora';
     }
+  }
+  
+  void _showDiagnosticDialog(String nome, String principio, String dosagem) {
+    final theme = Theme.of(context);
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: theme.dialogBackgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+            maxWidth: MediaQuery.of(context).size.width - 32,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        nome,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Ingrediente Ativo
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Text(
+                          'Ingrediente Ativo: $principio',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontStyle: FontStyle.italic,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      // Information Cards
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            _buildInfoRow(
+                              'Dosagem',
+                              dosagem,
+                              Icons.medication,
+                              isPremium: true, // Simulating premium for this demo
+                            ),
+                            const SizedBox(height: 16),
+                            _buildInfoRow(
+                              'Aplicação Terrestre',
+                              '••• L/ha',
+                              Icons.agriculture,
+                              isPremium: false,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildInfoRow(
+                              'Aplicação Aérea',
+                              '••• L/ha',
+                              Icons.flight,
+                              isPremium: false,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildInfoRow(
+                              'Intervalo de Aplicação',
+                              '••• dias',
+                              Icons.schedule,
+                              isPremium: false,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+              // Actions
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Stay on current defensivo page (already here)
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Defensivo'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetalheDiagnosticoPage(
+                                diagnosticoId: '1',
+                                nomeDefensivo: widget.defensivoName,
+                                nomePraga: nome,
+                                cultura: 'Soja',
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Diagnóstico'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildInfoRow(String label, String value, IconData icon, {required bool isPremium}) {
+    final theme = Theme.of(context);
+    
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isPremium ? FontWeight.w600 : FontWeight.w300,
+                  color: isPremium 
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!isPremium) ...[
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.diamond,
+                size: 12,
+                color: Colors.amber.shade600,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Premium',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.amber.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
   }
 
   void _showCommentDialog() {

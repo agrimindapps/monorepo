@@ -113,23 +113,30 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getTasksByStatus(TaskStatus status) async {
     try {
+      // Always get from local first for instant UI response
+      final localTasks = await localDataSource.getTasksByStatus(status);
+      
+      // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        final remoteTasks = await remoteDataSource.getTasksByStatus(status);
-        for (final task in remoteTasks) {
-          await localDataSource.cacheTask(task);
-        }
-        return Right(remoteTasks.cast<Task>());
-      } else {
-        final localTasks = await localDataSource.getTasksByStatus(status);
-        return Right(localTasks.cast<Task>());
+        _syncTasksByStatusInBackground(status);
       }
+      
+      // Return local data immediately (empty list is fine)
+      return Right(localTasks.cast<Task>());
     } on Exception catch (e) {
       final localTasks = await localDataSource.getTasksByStatus(status);
-      if (localTasks.isNotEmpty) {
-        return Right(localTasks.cast<Task>());
-      }
-      return Left(ServerFailure('Erro ao buscar tarefas por status: ${e.toString()}'));
+      return Right(localTasks.cast<Task>());
     }
+  }
+
+  void _syncTasksByStatusInBackground(TaskStatus status) {
+    remoteDataSource.getTasksByStatus(status).then((remoteTasks) {
+      for (final task in remoteTasks) {
+        localDataSource.cacheTask(task);
+      }
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
   }
 
   @override
@@ -225,42 +232,49 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getUpcomingTasks() async {
     try {
-      if (await networkInfo.isConnected) {
-        final remoteTasks = await remoteDataSource.getUpcomingTasks();
-        for (final task in remoteTasks) {
-          await localDataSource.cacheTask(task);
-        }
-        return Right(remoteTasks.cast<Task>());
-      } else {
-        final localTasks = await localDataSource.getUpcomingTasks();
-        return Right(localTasks.cast<Task>());
-      }
-    } on Exception catch (e) {
+      // Always get from local first for instant UI response
       final localTasks = await localDataSource.getUpcomingTasks();
-      if (localTasks.isNotEmpty) {
-        return Right(localTasks.cast<Task>());
+      
+      // Start background sync if connected (fire and forget)
+      if (await networkInfo.isConnected) {
+        _syncUpcomingTasksInBackground();
       }
-      return Left(ServerFailure('Erro ao buscar tarefas próximas: ${e.toString()}'));
+      
+      // Return local data immediately (empty list is fine)
+      return Right(localTasks.cast<Task>());
+    } on Exception {
+      final localTasks = await localDataSource.getUpcomingTasks();
+      return Right(localTasks.cast<Task>());
     }
+  }
+
+  void _syncUpcomingTasksInBackground() {
+    remoteDataSource.getUpcomingTasks().then((remoteTasks) {
+      for (final task in remoteTasks) {
+        localDataSource.cacheTask(task);
+      }
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
   }
 
   @override
   Future<Either<Failure, Task>> getTaskById(String id) async {
     try {
+      // Always get from local first for instant response
+      final localTask = await localDataSource.getTaskById(id);
+      
+      // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        final remoteTask = await remoteDataSource.getTaskById(id);
-        if (remoteTask != null) {
-          await localDataSource.cacheTask(remoteTask);
-          return Right(remoteTask);
-        }
+        _syncTaskByIdInBackground(id);
       }
       
-      final localTask = await localDataSource.getTaskById(id);
+      // Return local data immediately (or error if not found)
       if (localTask != null) {
         return Right(localTask);
+      } else {
+        return Left(NotFoundFailure('Tarefa não encontrada'));
       }
-      
-      return Left(NotFoundFailure('Tarefa não encontrada'));
     } on Exception catch (e) {
       final localTask = await localDataSource.getTaskById(id);
       if (localTask != null) {
@@ -268,6 +282,16 @@ class TasksRepositoryImpl implements TasksRepository {
       }
       return Left(ServerFailure('Erro ao buscar tarefa: ${e.toString()}'));
     }
+  }
+
+  void _syncTaskByIdInBackground(String id) {
+    remoteDataSource.getTaskById(id).then((remoteTask) {
+      if (remoteTask != null) {
+        localDataSource.cacheTask(remoteTask);
+      }
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
   }
 
   @override

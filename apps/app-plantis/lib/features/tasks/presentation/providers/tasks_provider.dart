@@ -104,7 +104,12 @@ class TasksProvider extends ChangeNotifier {
 
   // Carregar tarefas
   Future<void> loadTasks() async {
-    _setLoading(true);
+    // Só mostrar loading se não temos tarefas ainda
+    final shouldShowLoading = _allTasks.isEmpty;
+    
+    if (shouldShowLoading) {
+      _setLoading(true);
+    }
     _clearError();
 
     try {
@@ -124,13 +129,14 @@ class TasksProvider extends ChangeNotifier {
     } catch (e) {
       _setError('Erro inesperado ao carregar tarefas');
     } finally {
-      _setLoading(false);
+      if (shouldShowLoading) {
+        _setLoading(false);
+      }
     }
   }
 
   // Adicionar tarefa
   Future<bool> addTask(task_entity.Task task) async {
-    _setLoading(true);
     _clearError();
 
     try {
@@ -146,20 +152,17 @@ class TasksProvider extends ChangeNotifier {
           _applyFilters();
           // Agendar notificação para a nova tarefa
           _notificationService.scheduleTaskNotification(addedTask);
-          _setLoading(false);
           return true;
         },
       );
     } catch (e) {
       _setError('Erro inesperado ao adicionar tarefa');
-      _setLoading(false);
       return false;
     }
   }
 
   // Completar tarefa
   Future<bool> completeTask(String taskId, {String? notes}) async {
-    _setLoading(true);
     _clearError();
 
     try {
@@ -182,13 +185,11 @@ class TasksProvider extends ChangeNotifier {
             // Reagendar notificações para tarefas restantes
             _notificationService.rescheduleTaskNotifications(_allTasks);
           }
-          _setLoading(false);
           return true;
         },
       );
     } catch (e) {
       _setError('Erro inesperado ao completar tarefa');
-      _setLoading(false);
       return false;
     }
   }

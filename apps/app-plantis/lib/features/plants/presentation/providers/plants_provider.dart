@@ -61,7 +61,12 @@ class PlantsProvider extends ChangeNotifier {
 
   // Load all plants
   Future<void> loadPlants() async {
-    _setLoading(true);
+    // Only show loading if no plants exist yet (first load)
+    final shouldShowLoading = _plants.isEmpty;
+    
+    if (shouldShowLoading) {
+      _setLoading(true);
+    }
     _clearError();
 
     final result = await _getPlantsUseCase.call(NoParams());
@@ -74,7 +79,9 @@ class PlantsProvider extends ChangeNotifier {
       },
     );
 
-    _setLoading(false);
+    if (shouldShowLoading) {
+      _setLoading(false);
+    }
   }
 
   // Get plant by ID

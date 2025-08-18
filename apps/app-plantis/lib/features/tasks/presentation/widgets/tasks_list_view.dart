@@ -18,7 +18,7 @@ class TasksListView extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: () async {
         // Simular refresh - será implementado no provider
-        await Future.delayed(const Duration(milliseconds: 500));
+        // Removed artificial delay for instant refresh
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),

@@ -15,7 +15,7 @@ class PlantsListProvider extends ChangeNotifier {
     
     try {
       // TODO: Implement actual loading logic
-      await Future.delayed(const Duration(seconds: 2));
+      // Removed artificial delay for instant loading
       _plants = [];
       _isLoading = false;
       notifyListeners();

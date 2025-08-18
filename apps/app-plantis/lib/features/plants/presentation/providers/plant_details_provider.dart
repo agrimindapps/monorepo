@@ -23,9 +23,15 @@ class PlantDetailsProvider extends ChangeNotifier {
   bool get hasError => _errorMessage != null;
 
   Future<void> loadPlant(String plantId) async {
+    // If we already have this plant loaded, don't show loading
     if (_plant?.id == plantId && !hasError) return;
 
-    _isLoading = true;
+    // Only show loading if we don't have any plant data yet
+    final shouldShowLoading = _plant?.id != plantId;
+    
+    if (shouldShowLoading) {
+      _isLoading = true;
+    }
     _errorMessage = null;
     notifyListeners();
 
@@ -42,7 +48,9 @@ class PlantDetailsProvider extends ChangeNotifier {
       },
     );
 
-    _isLoading = false;
+    if (shouldShowLoading) {
+      _isLoading = false;
+    }
     notifyListeners();
   }
 

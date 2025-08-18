@@ -53,9 +53,10 @@ class _LandingPageState extends State<LandingPage>
   void _checkUserLoginStatus() {
     final authProvider = context.read<AuthProvider>();
     
-    // Se já está inicializado e autenticado, redireciona
+    // Se já está inicializado e autenticado, redireciona instantaneamente
     if (authProvider.isInitialized && authProvider.isAuthenticated) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      // Removed artificial delay - redirect immediately for better UX
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           context.go('/plants');
         }

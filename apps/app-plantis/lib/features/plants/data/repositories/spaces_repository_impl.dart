@@ -37,32 +37,34 @@ class SpacesRepositoryImpl implements SpacesRepository {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
+      // ALWAYS return local data first for instant UI response
+      final localSpaces = await localDatasource.getSpaces();
+      
+      // Start background sync immediately (fire and forget) 
+      // This ensures local-first approach with background updates
       if (await networkInfo.isConnected) {
-        try {
-          // Try to get from remote first
-          final remoteSpaces = await remoteDatasource.getSpaces(userId);
-          
-          // Cache locally
-          for (final space in remoteSpaces) {
-            await localDatasource.updateSpace(space);
-          }
-          
-          return Right(remoteSpaces);
-        } catch (e) {
-          // If remote fails, fallback to local
-          final localSpaces = await localDatasource.getSpaces();
-          return Right(localSpaces);
-        }
-      } else {
-        // Offline - get from local
-        final localSpaces = await localDatasource.getSpaces();
-        return Right(localSpaces);
+        _syncSpacesInBackground(userId);
       }
+      
+      // Return local data immediately (empty list is fine)
+      return Right(localSpaces);
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
       return Left(UnknownFailure('Erro inesperado ao buscar espaços: ${e.toString()}'));
     }
+  }
+
+  // Background sync method (fire and forget)
+  void _syncSpacesInBackground(String userId) {
+    remoteDatasource.getSpaces(userId).then((remoteSpaces) {
+      // Update local cache with remote data
+      for (final space in remoteSpaces) {
+        localDatasource.updateSpace(space);
+      }
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
   }
 
   @override
@@ -73,38 +75,35 @@ class SpacesRepositoryImpl implements SpacesRepository {
         return Left(ServerFailure('Usuário não autenticado'));
       }
 
+      // ALWAYS get from local first for instant response
+      final localSpace = await localDatasource.getSpaceById(id);
+      
+      // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        try {
-          // Try to get from remote first
-          final remoteSpace = await remoteDatasource.getSpaceById(id, userId);
-          
-          // Cache locally
-          await localDatasource.updateSpace(remoteSpace);
-          
-          return Right(remoteSpace);
-        } catch (e) {
-          // If remote fails, fallback to local
-          final localSpace = await localDatasource.getSpaceById(id);
-          if (localSpace != null) {
-            return Right(localSpace);
-          }
-          return Left(NotFoundFailure('Espaço não encontrado'));
-        }
+        _syncSingleSpaceInBackground(id, userId);
+      }
+      
+      // Return local data immediately (or error if not found)
+      if (localSpace != null) {
+        return Right(localSpace);
       } else {
-        // Offline - get from local
-        final localSpace = await localDatasource.getSpaceById(id);
-        if (localSpace != null) {
-          return Right(localSpace);
-        }
         return Left(NotFoundFailure('Espaço não encontrado'));
       }
     } on CacheFailure catch (e) {
       return Left(e);
-    } on ServerFailure catch (e) {
-      return Left(e);
     } catch (e) {
       return Left(UnknownFailure('Erro inesperado ao buscar espaço: ${e.toString()}'));
     }
+  }
+
+  // Background sync method for single space (fire and forget)
+  void _syncSingleSpaceInBackground(String spaceId, String userId) {
+    remoteDatasource.getSpaceById(spaceId, userId).then((remoteSpace) {
+      // Update local cache with remote data
+      localDatasource.updateSpace(remoteSpace);
+    }).catchError((e) {
+      // Ignore sync errors in background
+    });
   }
 
   @override

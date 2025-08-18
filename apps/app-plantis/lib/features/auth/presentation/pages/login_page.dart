@@ -94,23 +94,24 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                child: IntrinsicHeight(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                       // Logo and title
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -150,33 +151,40 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Entrar',
-                                          style: TextStyle(
-                                            color: Colors.black87,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: PlantisColors.primary.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            'Entrar',
+                                            style: TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 300),
-                                          height: 3,
-                                          decoration: BoxDecoration(
-                                            color: PlantisColors.primary,
-                                            borderRadius: BorderRadius.circular(2),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: PlantisColors.primary.withValues(alpha: 0.3),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                          const SizedBox(height: 8),
+                                          AnimatedContainer(
+                                            duration: const Duration(milliseconds: 300),
+                                            height: 3,
+                                            decoration: BoxDecoration(
+                                              color: PlantisColors.primary,
+                                              borderRadius: BorderRadius.circular(2),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: PlantisColors.primary.withValues(alpha: 0.3),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -648,6 +656,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         ),
                       ),
                     ],
+                    ),
                   ),
                 ),
               ),

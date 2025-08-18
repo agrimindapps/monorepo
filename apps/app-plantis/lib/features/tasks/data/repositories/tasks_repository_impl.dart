@@ -49,7 +49,7 @@ class TasksRepositoryImpl implements TasksRepository {
       } else {
         return Right(localTasks.cast<Task>()); // Return empty list if offline and no cache
       }
-    } on Exception catch (e) {
+    } on Exception {
       final localTasks = await localDataSource.getTasks();
       return Right(localTasks.cast<Task>());
     }
@@ -94,7 +94,7 @@ class TasksRepositoryImpl implements TasksRepository {
       } else {
         return Right(localTasks.cast<Task>());
       }
-    } on Exception catch (e) {
+    } on Exception {
       final localTasks = await localDataSource.getTasksByPlantId(plantId);
       return Right(localTasks.cast<Task>());
     }
@@ -123,7 +123,7 @@ class TasksRepositoryImpl implements TasksRepository {
       
       // Return local data immediately (empty list is fine)
       return Right(localTasks.cast<Task>());
-    } on Exception catch (e) {
+    } on Exception {
       final localTasks = await localDataSource.getTasksByStatus(status);
       return Right(localTasks.cast<Task>());
     }
@@ -275,12 +275,12 @@ class TasksRepositoryImpl implements TasksRepository {
       } else {
         return Left(NotFoundFailure('Tarefa não encontrada'));
       }
-    } on Exception catch (e) {
+    } on Exception {
       final localTask = await localDataSource.getTaskById(id);
       if (localTask != null) {
         return Right(localTask);
       }
-      return Left(ServerFailure('Erro ao buscar tarefa: ${e.toString()}'));
+      return Left(ServerFailure('Erro ao buscar tarefa'));
     }
   }
 
@@ -309,8 +309,8 @@ class TasksRepositoryImpl implements TasksRepository {
         await localDataSource.cacheTask(offlineTask);
         return Right(offlineTask);
       }
-    } on Exception catch (e) {
-      return Left(ServerFailure('Erro ao adicionar tarefa: ${e.toString()}'));
+    } on Exception {
+      return Left(ServerFailure('Erro ao adicionar tarefa'));
     }
   }
 

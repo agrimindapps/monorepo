@@ -279,6 +279,7 @@ class PlantaConfigModel extends BaseSyncModel {
 
   // Legacy compatibility methods
   Map<String, dynamic> toMap() => toHiveMap();
+  @override
   Map<String, dynamic> toJson() => toHiveMap();
   factory PlantaConfigModel.fromMap(Map<String, dynamic> map) => PlantaConfigModel.fromHiveMap(map);
   factory PlantaConfigModel.fromJson(Map<String, dynamic> json) => PlantaConfigModel.fromHiveMap(json);

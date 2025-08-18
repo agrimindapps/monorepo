@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../models/praga_model.dart';
+import '../../../core/models/pragas_hive.dart';
+import '../../../core/extensions/pragas_hive_extension.dart';
 import '../models/praga_view_mode.dart';
 
 class PragaItemWidget extends StatelessWidget {
-  final PragaModel praga;
+  final PragasHive praga;
   final PragaViewMode viewMode;
   final bool isDark;
   final VoidCallback onTap;

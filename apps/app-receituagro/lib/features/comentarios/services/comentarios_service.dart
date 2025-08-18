@@ -2,16 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/comentario_model.dart';
 import '../constants/comentarios_design_tokens.dart';
+import '../../settings/services/premium_service.dart';
 
 abstract class IComentariosRepository {
   Future<List<ComentarioModel>> getAllComentarios();
   Future<void> addComentario(ComentarioModel comentario);
   Future<void> updateComentario(ComentarioModel comentario);
   Future<void> deleteComentario(String id);
-}
-
-abstract class IPremiumService {
-  bool get isPremium;
 }
 
 class ComentariosService extends ChangeNotifier {

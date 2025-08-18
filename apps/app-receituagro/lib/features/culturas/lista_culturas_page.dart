@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas/lista_pragas_por_cultura_page.dart';
-import 'models/cultura_model.dart';
+import '../../core/models/cultura_hive.dart';
+import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/di/injection_container.dart';
 import 'widgets/cultura_search_field.dart';
 import 'widgets/cultura_item_widget.dart';
 import 'widgets/empty_state_widget.dart';
@@ -17,17 +19,19 @@ class ListaCulturasPage extends StatefulWidget {
 
 class _ListaCulturasPageState extends State<ListaCulturasPage> {
   final TextEditingController _searchController = TextEditingController();
-  final List<CulturaModel> _allCulturas = [];
-  List<CulturaModel> _filteredCulturas = [];
+  final CulturaHiveRepository _repository = sl<CulturaHiveRepository>();
+  final List<CulturaHive> _allCulturas = [];
+  List<CulturaHive> _filteredCulturas = [];
   bool _isLoading = true;
   bool _isSearching = false;
   bool _isAscending = true;
   Timer? _debounceTimer;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadMockData();
+    _loadRealData();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -38,34 +42,31 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     super.dispose();
   }
 
-  void _loadMockData() async {
-    // Simula carregamento de dados
-    await Future.delayed(const Duration(seconds: 2));
-    
-    final mockData = [
-      const CulturaModel(idReg: '1', cultura: 'Soja', grupo: 'Oleaginosas'),
-      const CulturaModel(idReg: '2', cultura: 'Milho', grupo: 'Cereais'),
-      const CulturaModel(idReg: '3', cultura: 'Feijão', grupo: 'Leguminosas'),
-      const CulturaModel(idReg: '4', cultura: 'Algodão', grupo: 'Fibras'),
-      const CulturaModel(idReg: '5', cultura: 'Trigo', grupo: 'Cereais'),
-      const CulturaModel(idReg: '6', cultura: 'Arroz', grupo: 'Cereais'),
-      const CulturaModel(idReg: '7', cultura: 'Tomate', grupo: 'Hortaliças'),
-      const CulturaModel(idReg: '8', cultura: 'Alface', grupo: 'Hortaliças'),
-      const CulturaModel(idReg: '9', cultura: 'Café', grupo: 'Permanentes'),
-      const CulturaModel(idReg: '10', cultura: 'Cana-de-açúcar', grupo: 'Industriais'),
-      const CulturaModel(idReg: '11', cultura: 'Banana', grupo: 'Frutas'),
-      const CulturaModel(idReg: '12', cultura: 'Laranja', grupo: 'Frutas'),
-      const CulturaModel(idReg: '13', cultura: 'Maçã', grupo: 'Frutas'),
-      const CulturaModel(idReg: '14', cultura: 'Batata', grupo: 'Hortaliças'),
-      const CulturaModel(idReg: '15', cultura: 'Cenoura', grupo: 'Hortaliças'),
-    ];
-
-    if (mounted) {
+  Future<void> _loadRealData() async {
+    try {
       setState(() {
-        _allCulturas.addAll(mockData);
-        _filteredCulturas = List.from(_allCulturas);
-        _isLoading = false;
+        _isLoading = true;
+        _errorMessage = null;
       });
+      
+      // Carrega culturas do repositório Hive
+      final culturas = _repository.getAll();
+      
+      if (mounted) {
+        setState(() {
+          _allCulturas.clear();
+          _allCulturas.addAll(culturas);
+          _filteredCulturas = List.from(_allCulturas);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Erro ao carregar culturas: $e';
+        });
+      }
     }
   }
 
@@ -95,8 +96,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     final searchLower = searchText.toLowerCase();
     
     final filtered = _allCulturas.where((cultura) {
-      return cultura.cultura.toLowerCase().contains(searchLower) ||
-          cultura.grupo.toLowerCase().contains(searchLower);
+      return cultura.cultura.toLowerCase().contains(searchLower);
     }).toList();
 
     if (mounted) {
@@ -126,7 +126,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
   }
 
-  void _onCulturaTap(CulturaModel cultura) {
+  void _onCulturaTap(CulturaHive cultura) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -145,12 +145,16 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     if (_isLoading && total == 0) {
       return 'Carregando culturas...';
     }
+    
+    if (_errorMessage != null) {
+      return 'Erro no carregamento';
+    }
 
     if (filtered < total) {
       return '$filtered de $total culturas';
     }
 
-    return '$total culturas cadastradas';
+    return '$total culturas disponíveis';
   }
 
   @override
@@ -206,6 +210,12 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
   Widget _buildContent(bool isDark) {
     if (_isLoading) {
       return LoadingSkeletonWidget(isDark: isDark);
+    } else if (_errorMessage != null) {
+      return EmptyStateWidget(
+        isDark: isDark,
+        message: 'Erro ao carregar culturas',
+        subtitle: _errorMessage!,
+      );
     } else if (_filteredCulturas.isEmpty) {
       return EmptyStateWidget(
         isDark: isDark,
@@ -214,7 +224,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
             : 'Nenhuma cultura disponível',
         subtitle: _searchController.text.isNotEmpty
             ? 'Tente ajustar os termos da busca'
-            : 'As culturas serão carregadas em breve',
+            : 'Verifique se os dados foram carregados',
       );
     } else {
       return ListView.builder(

@@ -1,12 +1,22 @@
 import 'package:hive/hive.dart';
 import 'package:core/core.dart';
 
+import '../../sync/sync_status.dart' as local;
+
 /// Base sync model for all Hive models in the Plantis app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 /// 
 /// Note: Cannot be @immutable due to HiveObjectMixin requirements
 // ignore: must_be_immutable
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin, SyncEntityMixin {
+  /// Field to track last user who modified the entity
+  final String? lastModifiedBy;
+
+  /// Current synchronization status of the entity
+  final local.SyncStatus syncStatus;
+
+  /// Additional conflict information
+  final Map<String, dynamic>? conflictData;
   BaseSyncModel({
     required super.id,
     super.createdAt,
@@ -17,6 +27,9 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin, SyncEn
     super.version = 1,
     super.userId,
     super.moduleName = 'plantis',
+    this.lastModifiedBy,
+    this.syncStatus = local.SyncStatus.pending,
+    this.conflictData,
   });
 
   /// Convert to Hive-compatible map (using millisecond timestamps)
@@ -138,7 +151,23 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin, SyncEn
     'created_at': createdAt?.toIso8601String(),
     'updated_at': updatedAt?.toIso8601String(),
     'last_sync_at': lastSyncAt?.toIso8601String(),
+    'last_modified_by': lastModifiedBy,
+    'sync_status': syncStatus.index,
+    'conflict_data': conflictData,
   };
+
+  /// Parse timestamps and sync fields from Firebase
+  static Map<String, dynamic> parseFirebaseFields(Map<String, dynamic> map) {
+    final baseFields = parseBaseFirebaseFields(map);
+    return {
+      ...baseFields,
+      'lastModifiedBy': map['last_modified_by'] as String?,
+      'syncStatus': map['sync_status'] != null
+          ? local.SyncStatus.values[map['sync_status'] as int]
+          : local.SyncStatus.pending,
+      'conflictData': map['conflict_data'] as Map<String, dynamic>?,
+    };
+  }
 
   /// Parse timestamps from Firebase (ISO8601 strings)
   static Map<String, DateTime?> parseFirebaseTimestamps(Map<String, dynamic> map) {
@@ -168,6 +197,16 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin, SyncEn
   /// Calcula hash do conteúdo para detecção de mudanças
   String getContentHash() {
     return calculateContentHash(toFirebaseMap());
+  }
+
+  /// Método de conversão para sync queue
+  Map<String, dynamic> toJson() {
+    return {
+      ...toHiveMap(),
+      'lastModifiedBy': lastModifiedBy,
+      'syncStatus': syncStatus.index,
+      'conflictData': conflictData,
+    };
   }
 
   /// Resolve conflito usando estratégia do core

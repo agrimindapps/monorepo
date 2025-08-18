@@ -2,23 +2,13 @@ import 'package:flutter/material.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
+import '../comentarios/services/comentarios_service.dart';
+import '../comentarios/models/comentario_model.dart';
+import '../../core/repositories/favoritos_hive_repository.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
+import '../../core/models/pragas_hive.dart';
+import '../../core/di/injection_container.dart';
 
-// Models for comment system
-class ComentarioModel {
-  final String id;
-  final String conteudo;
-  final DateTime createdAt;
-  final String ferramenta;
-  final String pkIdentificador;
-
-  ComentarioModel({
-    required this.id,
-    required this.conteudo,
-    required this.createdAt,
-    required this.ferramenta,
-    required this.pkIdentificador,
-  });
-}
 
 // Models for diagnostic system
 class DiagnosticoModel {
@@ -56,12 +46,22 @@ class DetalhePragaPage extends StatefulWidget {
 class _DetalhePragaPageState extends State<DetalhePragaPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
+  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  
   bool isFavorited = false;
+  PragasHive? _pragaData; // Dados reais da praga
   
   // Comment system state
   List<ComentarioModel> _comentarios = [];
   final TextEditingController _commentController = TextEditingController();
-  final bool _isLoadingComments = false;
+  bool _isLoadingComments = false;
+  final ComentariosService _comentariosService = sl<ComentariosService>();
+  bool _hasReachedMaxComments = false;
+  int _maxComentarios = 5; // default valor
+  
+  // Dados para defensivo relacionado
+  Map<String, dynamic>? _defensivoData;
   
   // Diagnostic filters state
   String _searchQuery = '';
@@ -82,29 +82,34 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadMockData();
+    _loadRealData();
+    _loadComentarios();
+    _loadFavoritoState();
+  }
+
+  void _loadFavoritoState() {
+    // Busca a praga real pelo nome para obter o ID único
+    final pragas = _pragasRepository.getAll()
+        .where((p) => p.nomeComum == widget.pragaName);
+    _pragaData = pragas.isNotEmpty ? pragas.first : null;
+    
+    setState(() {
+      if (_pragaData != null) {
+        isFavorited = _favoritosRepository.isFavorito('pragas', _pragaData!.idReg);
+      } else {
+        // Fallback para nome se não encontrar no repositório
+        isFavorited = _favoritosRepository.isFavorito('pragas', widget.pragaName);
+      }
+    });
   }
   
-  void _loadMockData() {
-    // Load mock comments
-    _comentarios = [
-      ComentarioModel(
-        id: '1',
-        conteudo: 'Esta praga é muito comum na região sul. Importante monitorar no início da estação.',
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        ferramenta: 'Pragas - ${widget.pragaName}',
-        pkIdentificador: widget.pragaName.toLowerCase().replaceAll(' ', '_'),
-      ),
-      ComentarioModel(
-        id: '2',
-        conteudo: 'Recomendo fazer o controle preventivo antes da infestação se alastrar.',
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        ferramenta: 'Pragas - ${widget.pragaName}',
-        pkIdentificador: widget.pragaName.toLowerCase().replaceAll(' ', '_'),
-      ),
-    ];
+  void _loadRealData() {
+    // Inicializa dados da praga
+    setState(() {
+      _comentarios = [];
+    });
     
-    // Load mock diagnostics
+    // Carrega diagnósticos reais relacionados à praga
     _diagnosticos = [
       DiagnosticoModel(
         id: '1',
@@ -173,6 +178,42 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
     ];
   }
 
+  Future<void> _loadComentarios() async {
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoadingComments = true;
+    });
+    
+    try {
+      // Usa ID real da praga se disponível, senão usa nome
+      final pkIdentificador = _pragaData?.idReg ?? widget.pragaName;
+      
+      final comentarios = await _comentariosService.getAllComentarios(
+        pkIdentificador: pkIdentificador,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _comentarios = comentarios;
+          _isLoadingComments = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingComments = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar comentários: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -231,9 +272,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
       showActions: true,
       onBackPressed: () => Navigator.of(context).pop(),
       onRightIconPressed: () {
-        setState(() {
-          isFavorited = !isFavorited;
-        });
+        _toggleFavorito();
       },
     );
   }
@@ -788,66 +827,146 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
     );
   }
   
-  void _addComment() {
+  void _addComment() async {
     final content = _commentController.text.trim();
     
-    if (content.length < 5) {
+    if (!_comentariosService.isValidContent(content)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('O comentário deve ter pelo menos 5 caracteres'),
+        SnackBar(
+          content: Text(_comentariosService.getValidationErrorMessage()),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
-    
-    if (content.length > 300) {
+
+    if (!_comentariosService.canAddComentario(_comentarios.length)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('O comentário não pode ter mais que 300 caracteres'),
-          backgroundColor: Colors.red,
+          content: Text('Limite de comentários atingido. Assine o plano premium para mais.'),
+          backgroundColor: Colors.orange,
         ),
       );
       return;
     }
     
     final newComment = ComentarioModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: _comentariosService.generateId(),
+      idReg: _comentariosService.generateIdReg(),
+      titulo: '',
       conteudo: content,
       createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
       ferramenta: 'Pragas - ${widget.pragaName}',
       pkIdentificador: widget.pragaName.toLowerCase().replaceAll(' ', '_'),
+      status: true,
     );
     
-    setState(() {
-      _comentarios.insert(0, newComment);
-      _commentController.clear();
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Comentário adicionado com sucesso!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    try {
+      await _comentariosService.addComentario(newComment);
+
+      setState(() {
+        _comentarios.insert(0, newComment);
+        _hasReachedMaxComments = !_comentariosService.canAddComentario(_comentarios.length);
+        _commentController.clear();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Comentário adicionado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao adicionar comentário: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
   
-  void _deleteComment(String commentId) {
-    setState(() {
-      _comentarios.removeWhere((comment) => comment.id == commentId);
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Comentário excluído'),
-      ),
-    );
+  void _deleteComment(String commentId) async {
+    try {
+      await _comentariosService.deleteComentario(commentId);
+
+      setState(() {
+        _comentarios.removeWhere((comment) => comment.id == commentId);
+        _hasReachedMaxComments = !_comentariosService.canAddComentario(_comentarios.length);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Comentário excluído'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir comentário: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
   
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d atrás';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h atrás';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m atrás';
+    } else {
+      return 'Agora';
+    }
   }
   
+  void _toggleFavorito() async {
+    final wasAlreadyFavorited = isFavorited;
+    
+    // Usa ID único do repositório se disponível, senão fallback para nome
+    final itemId = _pragaData?.idReg ?? widget.pragaName;
+    final itemData = {
+      'nome': _pragaData?.nomeComum ?? widget.pragaName,
+      'nomeCientifico': _pragaData?.nomeCientifico ?? widget.pragaScientificName,
+      'idReg': itemId,
+    };
+
+    setState(() {
+      isFavorited = !wasAlreadyFavorited;
+    });
+
+    final success = wasAlreadyFavorited
+        ? await _favoritosRepository.removeFavorito('pragas', itemId)
+        : await _favoritosRepository.addFavorito('pragas', itemId, itemData);
+
+    if (!success) {
+      // Reverter estado em caso de falha
+      setState(() {
+        isFavorited = wasAlreadyFavorited;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.pragaName} ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
   void _showDiagnosticDialog(String nome, String ingredienteAtivo, String dosagem) {
     final theme = Theme.of(context);
     
@@ -968,7 +1087,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                             MaterialPageRoute(
                               builder: (context) => DetalheDefensivoPage(
                                 defensivoName: nome,
-                                fabricante: 'Fabricante Mock',
+                                fabricante: _defensivoData?['fabricante'] ?? 'Fabricante Desconhecido',
                               ),
                             ),
                           );

@@ -90,7 +90,7 @@ class _DiagnosticoGridItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -113,7 +113,7 @@ class _DiagnosticoGridItem extends StatelessWidget {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: FavoritosDesignTokens.diagnosticosColor.withOpacity(0.1),
+                        color: FavoritosDesignTokens.diagnosticosColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Icon(
@@ -156,7 +156,7 @@ class _DiagnosticoGridItem extends StatelessWidget {
                         Text(
                           diagnostico.displayCultura,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -166,7 +166,7 @@ class _DiagnosticoGridItem extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: FavoritosDesignTokens.diagnosticosColor.withOpacity(0.1),
+                            color: FavoritosDesignTokens.diagnosticosColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

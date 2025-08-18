@@ -73,7 +73,6 @@ class FavoritosDI {
         storage: _getIt<IFavoritosStorage>(),
         dataResolver: _getIt<IFavoritosDataResolver>(),
         entityFactory: _getIt<IFavoritosEntityFactory>(),
-        cache: _getIt<IFavoritosCache>(),
       ),
     );
 
@@ -203,7 +202,6 @@ class FavoritosDI {
     _getIt.registerFactory<FavoritosProvider>(
       () => FavoritosProvider(
         getAllFavoritosUseCase: _getIt<GetAllFavoritosUseCase>(),
-        getFavoritosByTipoUseCase: _getIt<GetFavoritosByTipoUseCase>(),
         getDefensivosFavoritosUseCase: _getIt<GetDefensivosFavoritosUseCase>(),
         getPragasFavoritosUseCase: _getIt<GetPragasFavoritosUseCase>(),
         getDiagnosticosFavoritosUseCase: _getIt<GetDiagnosticosFavoritosUseCase>(),

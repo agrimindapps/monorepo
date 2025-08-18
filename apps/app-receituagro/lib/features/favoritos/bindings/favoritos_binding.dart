@@ -4,16 +4,13 @@ import '../controller/favoritos_controller.dart';
 import '../services/favoritos_data_service.dart';
 import '../services/favoritos_search_service.dart';
 import '../services/favoritos_ui_state_service.dart';
-import '../services/mock_favoritos_repository.dart';
-import '../services/mock_premium_service.dart';
-import '../services/mock_navigation_service.dart';
+import '../services/favoritos_hive_repository.dart';
 
 class FavoritosProviders {
   static List<SingleChildWidget> get providers => [
     ChangeNotifierProvider<FavoritosDataService>(
       create: (_) => FavoritosDataService(
-        repository: MockFavoritosRepository(),
-        premiumService: MockPremiumService(),
+        repository: FavoritosHiveRepository(),
       ),
     ),
     ChangeNotifierProvider<FavoritosUIStateService>(
@@ -29,7 +26,6 @@ class FavoritosProviders {
         dataService: context.read<FavoritosDataService>(),
         searchService: context.read<FavoritosSearchService>(),
         uiStateService: context.read<FavoritosUIStateService>(),
-        navigationService: MockNavigationService(),
       ),
     ),
   ];

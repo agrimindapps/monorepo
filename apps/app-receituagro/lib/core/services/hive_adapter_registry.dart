@@ -6,6 +6,9 @@ import '../models/diagnostico_hive.dart';
 import '../models/fitossanitario_info_hive.dart';
 import '../models/plantas_inf_hive.dart';
 import '../models/pragas_inf_hive.dart';
+import '../models/premium_status_hive.dart';
+import '../models/comentario_hive.dart';
+import '../models/favorito_item_hive.dart';
 
 /// Registry centralizado para registro de todos os adapters Hive
 /// Responsável por registrar todos os type adapters necessários
@@ -27,6 +30,9 @@ class HiveAdapterRegistry {
       Hive.registerAdapter(FitossanitarioInfoHiveAdapter());
       Hive.registerAdapter(PlantasInfHiveAdapter());
       Hive.registerAdapter(PragasInfHiveAdapter());
+      Hive.registerAdapter(PremiumStatusHiveAdapter());
+      Hive.registerAdapter(ComentarioHiveAdapter());
+      Hive.registerAdapter(FavoritoItemHiveAdapter());
 
       _isRegistered = true;
       
@@ -47,6 +53,9 @@ class HiveAdapterRegistry {
     'fitossanitarios_info': 'receituagro_fitossanitarios_info',
     'plantas_inf': 'receituagro_plantas_inf',
     'pragas_inf': 'receituagro_pragas_inf',
+    'premium_status': 'receituagro_premium_status',
+    'comentarios': 'receituagro_comentarios',
+    'favoritos': 'receituagro_favoritos',
   };
 
   /// Abre todas as boxes necessárias
@@ -60,6 +69,9 @@ class HiveAdapterRegistry {
         Hive.openBox<FitossanitarioInfoHive>(boxNames['fitossanitarios_info']!),
         Hive.openBox<PlantasInfHive>(boxNames['plantas_inf']!),
         Hive.openBox<PragasInfHive>(boxNames['pragas_inf']!),
+        Hive.openBox<PremiumStatusHive>(boxNames['premium_status']!),
+        Hive.openBox<ComentarioHive>(boxNames['comentarios']!),
+        Hive.openBox<FavoritoItemHive>(boxNames['favoritos']!),
       ]);
       
     } catch (e) {
@@ -78,6 +90,9 @@ class HiveAdapterRegistry {
         _closeBoxIfOpen(boxNames['fitossanitarios_info']!),
         _closeBoxIfOpen(boxNames['plantas_inf']!),
         _closeBoxIfOpen(boxNames['pragas_inf']!),
+        _closeBoxIfOpen(boxNames['premium_status']!),
+        _closeBoxIfOpen(boxNames['comentarios']!),
+        _closeBoxIfOpen(boxNames['favoritos']!),
       ]);
       
     } catch (e) {
@@ -115,6 +130,15 @@ class HiveAdapterRegistry {
       }
       if (Hive.isBoxOpen(boxNames['pragas_inf']!)) {
         await Hive.box<PragasInfHive>(boxNames['pragas_inf']!).clear();
+      }
+      if (Hive.isBoxOpen(boxNames['premium_status']!)) {
+        await Hive.box<PremiumStatusHive>(boxNames['premium_status']!).clear();
+      }
+      if (Hive.isBoxOpen(boxNames['comentarios']!)) {
+        await Hive.box<ComentarioHive>(boxNames['comentarios']!).clear();
+      }
+      if (Hive.isBoxOpen(boxNames['favoritos']!)) {
+        await Hive.box<FavoritoItemHive>(boxNames['favoritos']!).clear();
       }
       
     } catch (e) {

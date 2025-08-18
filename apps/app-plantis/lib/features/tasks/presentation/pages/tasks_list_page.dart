@@ -291,6 +291,7 @@ class _TasksListPageState extends State<TasksListPage> {
   }
 
 
+  // ignore: unused_element
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

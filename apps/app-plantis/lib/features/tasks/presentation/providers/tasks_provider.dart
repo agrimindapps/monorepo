@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:core/src/shared/utils/failure.dart';
-import 'package:core/src/domain/usecases/base_usecase.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/usecases/get_tasks_usecase.dart';
 import '../../domain/usecases/add_task_usecase.dart';

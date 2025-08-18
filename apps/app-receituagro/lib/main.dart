@@ -80,16 +80,15 @@ void main() async {
   await di.init();
 
   // Initialize storage service
-  final storageService = ReceitaAgroStorageService();
+  final storageService = di.sl<ReceitaAgroStorageService>();
   await storageService.initialize();
-  di.sl.registerSingleton<ReceitaAgroStorageService>(storageService);
 
   // Initialize notifications
-  final notificationService = ReceitaAgroNotificationService();
+  final notificationService = di.sl<IReceitaAgroNotificationService>();
   await notificationService.initialize();
 
   // Initialize data system
-  final dataManager = AppDataManager.instance;
+  final dataManager = di.sl<IAppDataManager>();
   final dataResult = await dataManager.initialize();
 
   dataResult.fold(

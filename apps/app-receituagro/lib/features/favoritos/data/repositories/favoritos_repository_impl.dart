@@ -354,17 +354,14 @@ class FavoritosDiagnosticosRepositoryImpl implements IFavoritosDiagnosticosRepos
   final IFavoritosStorage _storage;
   final IFavoritosDataResolver _dataResolver;
   final IFavoritosEntityFactory _entityFactory;
-  final IFavoritosCache _cache;
 
   const FavoritosDiagnosticosRepositoryImpl({
     required IFavoritosStorage storage,
     required IFavoritosDataResolver dataResolver,
     required IFavoritosEntityFactory entityFactory,
-    required IFavoritosCache cache,
   }) : _storage = storage,
        _dataResolver = dataResolver,
-       _entityFactory = entityFactory,
-       _cache = cache;
+       _entityFactory = entityFactory;
 
   @override
   Future<List<FavoritoDiagnosticoEntity>> getDiagnosticos() async {

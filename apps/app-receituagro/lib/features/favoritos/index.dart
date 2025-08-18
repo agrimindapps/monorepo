@@ -8,12 +8,10 @@ export 'models/favorito_diagnostico_model.dart';
 export 'models/favoritos_data.dart';
 export 'models/view_mode.dart';
 
-export 'services/favoritos_data_service.dart';
 export 'services/favoritos_search_service.dart';
 export 'services/favoritos_ui_state_service.dart';
-export 'services/mock_favoritos_repository.dart';
-export 'services/mock_premium_service.dart';
-export 'services/mock_navigation_service.dart';
+export 'services/favoritos_hive_repository.dart';
+export 'repositories/i_favoritos_repository.dart';
 
 export 'constants/favoritos_design_tokens.dart';
 

@@ -7,6 +7,11 @@ import '../../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/add_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/update_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/complete_task_usecase.dart';
+import '../../../features/tasks/domain/usecases/generate_initial_tasks_usecase.dart';
+import '../../../features/tasks/domain/usecases/complete_task_with_regeneration_usecase.dart';
+
+// Core services
+import '../../services/task_generation_service.dart';
 
 // Data
 import '../../../features/tasks/data/repositories/tasks_repository_impl.dart';
@@ -27,11 +32,23 @@ class TasksModule {
       ),
     );
 
+    // Services
+    sl.registerLazySingleton(() => TaskGenerationService());
+
     // Use Cases
     sl.registerLazySingleton(() => GetTasksUseCase(sl()));
     sl.registerLazySingleton(() => AddTaskUseCase(sl()));
     sl.registerLazySingleton(() => UpdateTaskUseCase(sl()));
     sl.registerLazySingleton(() => CompleteTaskUseCase(sl()));
+    sl.registerLazySingleton(() => GenerateInitialTasksUseCase(
+          tasksRepository: sl(),
+          taskGenerationService: sl(),
+        ));
+    sl.registerLazySingleton(() => CompleteTaskWithRegenerationUseCase(
+          tasksRepository: sl(),
+          plantsRepository: sl(),
+          taskGenerationService: sl(),
+        ));
 
     // Repository
     sl.registerLazySingleton<TasksRepository>(

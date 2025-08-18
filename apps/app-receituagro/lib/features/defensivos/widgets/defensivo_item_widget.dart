@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../models/defensivo_model.dart';
+import '../../../core/models/fitossanitario_hive.dart';
+import '../../../core/extensions/fitossanitario_hive_extension.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
-  final DefensivoModel defensivo;
+  final FitossanitarioHive defensivo;
   final bool isDark;
   final VoidCallback onTap;
   final bool isGridView;

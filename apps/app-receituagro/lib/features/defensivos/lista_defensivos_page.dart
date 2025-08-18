@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../core/widgets/modern_header_widget.dart';
-import 'models/defensivo_model.dart';
+import '../../core/models/fitossanitario_hive.dart';
+import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../core/di/injection_container.dart';
 import 'models/view_mode.dart';
 import 'widgets/defensivo_search_field.dart';
 import 'widgets/defensivo_item_widget.dart';
@@ -19,18 +22,20 @@ class ListaDefensivosPage extends StatefulWidget {
 class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<DefensivoModel> _allDefensivos = [];
-  List<DefensivoModel> _filteredDefensivos = [];
+  final FitossanitarioHiveRepository _repository = sl<FitossanitarioHiveRepository>();
+  final List<FitossanitarioHive> _allDefensivos = [];
+  List<FitossanitarioHive> _filteredDefensivos = [];
   ViewMode _selectedViewMode = ViewMode.list;
   bool _isLoading = true;
   bool _isSearching = false;
   bool _isAscending = true;
   Timer? _debounceTimer;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadMockData();
+    _loadRealData();
     _searchController.addListener(_onSearchChanged);
     _scrollController.addListener(_onScroll);
   }
@@ -43,118 +48,31 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     super.dispose();
   }
 
-  void _loadMockData() async {
-    await Future.delayed(const Duration(seconds: 1));
-    
-    final mockData = [
-      const DefensivoModel(
-        idReg: '1', 
-        line1: 'BLOWOUT, CLEANOVER', 
-        line2: 'Dibrometo de diquate',
-        nomeComum: 'BLOWOUT, CLEANOVER',
-        ingredienteAtivo: 'Dibrometo de diquate',
-        classeAgronomica: 'Herbicida',
-        fabricante: 'Syngenta',
-        modoAcao: 'Inibidor do fotossistema I'
-      ),
-      const DefensivoModel(
-        idReg: '2',
-        line1: 'Biagro Solo',
-        line2: 'Trichoderma harzianum (Rifai), cepa...',
-        nomeComum: 'Biagro Solo',
-        ingredienteAtivo: 'Trichoderma harzianum (Rifai), cepa',
-        classeAgronomica: 'Fungicida microbiológico',
-        fabricante: 'Biagro',
-        modoAcao: 'Controle biológico'
-      ),
-      const DefensivoModel(
-        idReg: '3',
-        line1: 'Owner',
-        line2: 'Baculovirus Helicoverpa armigera (...',
-        nomeComum: 'Owner',
-        ingredienteAtivo: 'Baculovirus Helicoverpa armigera',
-        classeAgronomica: 'Inseticida microbiológico',
-        fabricante: 'AgBiTech',
-        modoAcao: 'Agente viral'
-      ),
-      const DefensivoModel(
-        idReg: '4',
-        line1: 'CRISO-VIT',
-        line2: 'Chrysoperla externa',
-        nomeComum: 'CRISO-VIT',
-        ingredienteAtivo: 'Chrysoperla externa',
-        classeAgronomica: 'Agente Biológico de Controle',
-        fabricante: 'Bug Agentes Biológicos',
-        modoAcao: 'Controle biológico'
-      ),
-      const DefensivoModel(
-        idReg: '5',
-        line1: 'LEPROTECT S.F',
-        line2: 'Spodoptera frugiperda multiple nu...',
-        nomeComum: 'LEPROTECT S.F',
-        ingredienteAtivo: 'Spodoptera frugiperda multiple nucleopolyhedrovirus',
-        classeAgronomica: 'Inseticida microbiológico',
-        fabricante: 'Lallemand',
-        modoAcao: 'Agente viral'
-      ),
-      const DefensivoModel(
-        idReg: '6',
-        line1: 'ROW Vispo',
-        line2: 'Bacillus subtilis cepa IAB/BS03',
-        nomeComum: 'ROW Vispo',
-        ingredienteAtivo: 'Bacillus subtilis cepa IAB/BS03',
-        classeAgronomica: 'Fungicida microbiológico',
-        fabricante: 'IHARA',
-        modoAcao: 'Controle biológico'
-      ),
-      const DefensivoModel(
-        idReg: '7',
-        line1: 'Octane',
-        line2: 'Isaria fumosorosea',
-        nomeComum: 'Octane',
-        ingredienteAtivo: 'Isaria fumosorosea',
-        classeAgronomica: 'Nematicida Microbiológico',
-        fabricante: 'Koppert',
-        modoAcao: 'Fungo entomopatogênico'
-      ),
-      const DefensivoModel(
-        idReg: '8',
-        line1: 'Lalstop I32 SC',
-        line2: 'Bacillus amyloliquefaciens Cepa IB...',
-        nomeComum: 'Lalstop I32 SC',
-        ingredienteAtivo: 'Bacillus amyloliquefaciens Cepa IB32',
-        classeAgronomica: 'Fungicida microbiológico',
-        fabricante: 'Lallemand',
-        modoAcao: 'Controle biológico'
-      ),
-      const DefensivoModel(
-        idReg: '9',
-        line1: 'Glifosato Master',
-        line2: 'N-(fosfonometil)glicina',
-        nomeComum: 'Glifosato Master',
-        ingredienteAtivo: 'N-(fosfonometil)glicina',
-        classeAgronomica: 'Herbicida',
-        fabricante: 'Nufarm',
-        modoAcao: 'Inibidor da EPSPS'
-      ),
-      const DefensivoModel(
-        idReg: '10',
-        line1: 'Atrazina 500 SC',
-        line2: '6-cloro-N-etil-N\'-(1-metiletil)-1,3,5-triazina',
-        nomeComum: 'Atrazina 500 SC',
-        ingredienteAtivo: '6-cloro-N-etil-N\'-(1-metiletil)-1,3,5-triazina',
-        classeAgronomica: 'Herbicida',
-        fabricante: 'Syngenta',
-        modoAcao: 'Inibidor do fotossistema II'
-      ),
-    ];
-
-    if (mounted) {
+  Future<void> _loadRealData() async {
+    try {
       setState(() {
-        _allDefensivos.addAll(mockData);
-        _filteredDefensivos = List.from(_allDefensivos);
-        _isLoading = false;
+        _isLoading = true;
+        _errorMessage = null;
       });
+      
+      // Carrega defensivos ativos e elegíveis do repositório Hive
+      final defensivos = _repository.getActiveDefensivos();
+      
+      if (mounted) {
+        setState(() {
+          _allDefensivos.clear();
+          _allDefensivos.addAll(defensivos);
+          _filteredDefensivos = List.from(_allDefensivos);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Erro ao carregar defensivos: $e';
+        });
+      }
     }
   }
 
@@ -223,7 +141,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     });
   }
 
-  void _onDefensivoTap(DefensivoModel defensivo) {
+  void _onDefensivoTap(FitossanitarioHive defensivo) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -246,12 +164,16 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     if (_isLoading && total == 0) {
       return 'Carregando defensivos...';
     }
+    
+    if (_errorMessage != null) {
+      return 'Erro no carregamento';
+    }
 
     if (filtered < total) {
       return '$filtered de $total defensivos';
     }
 
-    return '$total defensivos cadastrados';
+    return '$total defensivos disponíveis';
   }
 
 
@@ -290,6 +212,39 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         isDark: isDark,
         viewMode: _selectedViewMode,
       );
+    } else if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: isDark ? Colors.red.shade400 : Colors.red.shade600,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Erro ao carregar defensivos',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
     } else if (_filteredDefensivos.isEmpty) {
       return DefensivosEmptyStateWidget(
         isDark: isDark,
@@ -299,7 +254,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
             : 'Nenhum defensivo disponível',
         subtitle: _searchController.text.isNotEmpty
             ? 'Tente ajustar os termos da busca'
-            : 'Os defensivos serão carregados em breve',
+            : 'Verifique se os dados foram carregados',
       );
     } else {
       return _buildDefensivosList(isDark);

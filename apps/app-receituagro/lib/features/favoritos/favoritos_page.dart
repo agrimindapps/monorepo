@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/repositories/favoritos_hive_repository.dart';
+import '../../core/di/injection_container.dart';
+import 'services/favoritos_cache_service.dart';
+import 'services/favoritos_navigation_service.dart';
 import 'models/favorito_defensivo_model.dart';
 import 'models/favorito_praga_model.dart';
 import 'models/favorito_diagnostico_model.dart';
-import 'services/mock_favoritos_repository.dart';
-import '../DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../pragas/detalhe_praga_page.dart';
-import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 
 class FavoritosPage extends StatefulWidget {
   const FavoritosPage({super.key});
@@ -22,8 +22,12 @@ class _FavoritosPageState extends State<FavoritosPage>
 
   late TabController _tabController;
   
-  // Favoritos data
-  final MockFavoritosRepository _favoritosRepository = MockFavoritosRepository();
+  // Repositórios e serviços via DI
+  final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
+  final FavoritosCacheService _cacheService = sl<FavoritosCacheService>();
+  final FavoritosNavigationService _navigationService = sl<FavoritosNavigationService>();
+  
+  // Estado dos favoritos
   List<FavoritoDefensivoModel> _favoritosDefensivos = [];
   List<FavoritoPragaModel> _favoritosPragas = [];
   List<FavoritoDiagnosticoModel> _favoritosDiagnosticos = [];
@@ -42,9 +46,10 @@ class _FavoritosPageState extends State<FavoritosPage>
     });
     
     try {
-      final defensivos = await _favoritosRepository.getFavoritosDefensivos();
-      final pragas = await _favoritosRepository.getFavoritosPragas();
-      final diagnosticos = await _favoritosRepository.getFavoritosDiagnosticos();
+      // Carrega todos os favoritos usando o cache service otimizado
+      final defensivos = await _cacheService.getFavoritosDefensivos();
+      final pragas = await _cacheService.getFavoritosPragas();
+      final diagnosticos = await _cacheService.getFavoritosDiagnosticos();
       
       if (mounted) {
         setState(() {
@@ -53,8 +58,12 @@ class _FavoritosPageState extends State<FavoritosPage>
           _favoritosDiagnosticos = diagnosticos;
           _isLoading = false;
         });
+        
+        // Executa validação de integridade em background
+        _validateFavoritesIntegrity();
       }
     } catch (e) {
+      debugPrint('Erro ao carregar favoritos: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -62,6 +71,12 @@ class _FavoritosPageState extends State<FavoritosPage>
       }
     }
   }
+
+  // Método removido - agora usa cache service
+
+  // Método removido - agora usa cache service
+
+  // Método removido - agora usa cache service
 
   @override
   void dispose() {
@@ -106,8 +121,8 @@ class _FavoritosPageState extends State<FavoritosPage>
       showBackButton: false,
       showActions: true,
       isDark: isDark,
-      rightIcon: Icons.filter_list,
-      onRightIconPressed: () => _showFilterOptions(context),
+      rightIcon: Icons.more_vert,
+      onRightIconPressed: () => _showMoreOptions(context),
     );
   }
 
@@ -177,8 +192,6 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   Widget _buildDefensivosTab() {
-    final theme = Theme.of(context);
-    
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -209,8 +222,6 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   Widget _buildPragasTab() {
-    final theme = Theme.of(context);
-    
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -241,8 +252,6 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   Widget _buildDiagnosticosTab() {
-    final theme = Theme.of(context);
-    
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -352,41 +361,61 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  void _showFilterOptions(BuildContext context) {
-    showDialog(
+  void _showMoreOptions(BuildContext context) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filtrar Favoritos'),
-        content: const Column(
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Opções dos Favoritos',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
             ListTile(
-              leading: Icon(Icons.shield_outlined),
-              title: Text('Defensivos'),
-              trailing: Icon(Icons.check),
+              leading: const Icon(Icons.refresh),
+              title: const Text('Atualizar Favoritos'),
+              subtitle: const Text('Recarrega dados dos favoritos'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _refreshFavorites();
+              },
             ),
             ListTile(
-              leading: Icon(Icons.pest_control),
-              title: Text('Pragas'),
-              trailing: Icon(Icons.check),
+              leading: const Icon(Icons.verified_user),
+              title: const Text('Validar Integridade'),
+              subtitle: const Text('Remove favoritos inválidos'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _validateFavoritesIntegrity();
+              },
             ),
             ListTile(
-              leading: Icon(Icons.medical_services_outlined),
-              title: Text('Diagnósticos'),
-              trailing: Icon(Icons.check),
+              leading: const Icon(Icons.clear_all),
+              title: const Text('Limpar Cache'),
+              subtitle: const Text('Força recarregamento completo'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _clearCacheAndReload();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Estatísticas'),
+              subtitle: const Text('Informações sobre os favoritos'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showStatistics();
+              },
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Aplicar'),
-          ),
-        ],
       ),
     );
   }
@@ -570,9 +599,7 @@ class _FavoritosPageState extends State<FavoritosPage>
                 color: Colors.red,
                 size: 20,
               ),
-              onPressed: () {
-                // Remover dos favoritos
-              },
+              onPressed: () => _removerDefensivoDosFavoritos(defensivo),
             ),
           ],
         ),
@@ -647,9 +674,7 @@ class _FavoritosPageState extends State<FavoritosPage>
                 color: Colors.red,
                 size: 20,
               ),
-              onPressed: () {
-                // Remover dos favoritos
-              },
+              onPressed: () => _removerPragaDosFavoritos(praga),
             ),
           ],
         ),
@@ -692,18 +717,22 @@ class _FavoritosPageState extends State<FavoritosPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    diagnostico.nome ?? 'Nome não disponível',
+                    diagnostico.nome,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  Text(
-                    diagnostico.cultura ?? 'Cultura não disponível',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurfaceVariant,
+                  GestureDetector(
+                    onTap: () => _navigateToCulturaInfo(diagnostico.cultura),
+                    child: Text(
+                      diagnostico.cultura ?? 'Cultura não disponível',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                   Text(
@@ -722,9 +751,7 @@ class _FavoritosPageState extends State<FavoritosPage>
                 color: Colors.red,
                 size: 20,
               ),
-              onPressed: () {
-                // Remover dos favoritos
-              },
+              onPressed: () => _removerDiagnosticoDosFavoritos(diagnostico),
             ),
           ],
         ),
@@ -733,39 +760,287 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   void _navigateToDefensivoDetails(FavoritoDefensivoModel defensivo) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetalheDefensivoPage(
-          defensivoName: defensivo.nomeComum ?? 'Defensivo',
-          fabricante: defensivo.fabricante ?? 'Fabricante não informado',
-        ),
-      ),
-    );
+    _navigationService.navigateToDefensivoDetails(context, defensivo);
   }
 
   void _navigateToPragaDetails(FavoritoPragaModel praga) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetalhePragaPage(
-          pragaName: praga.nomeComum,
-          pragaScientificName: praga.nomeCientifico ?? 'Nome científico não disponível',
+    _navigationService.navigateToPragaDetails(context, praga);
+  }
+
+  void _navigateToDiagnosticoDetails(FavoritoDiagnosticoModel diagnostico) {
+    _navigationService.navigateToDiagnosticoDetails(context, diagnostico);
+  }
+
+  /// Métodos para remoção de favoritos com invalidação de cache
+  Future<void> _removerDefensivoDosFavoritos(FavoritoDefensivoModel defensivo) async {
+    try {
+      final sucesso = await _favoritosRepository.removeFavorito('defensivos', defensivo.idReg);
+      if (sucesso) {
+        // Invalida o cache e recarrega
+        _cacheService.invalidateCache('defensivos');
+        final novosDefensivos = await _cacheService.getFavoritosDefensivos();
+        
+        if (mounted) {
+          setState(() {
+            _favoritosDefensivos = novosDefensivos;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${defensivo.displayName} removido dos favoritos'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao remover favorito'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _removerPragaDosFavoritos(FavoritoPragaModel praga) async {
+    try {
+      final sucesso = await _favoritosRepository.removeFavorito('pragas', praga.idReg);
+      if (sucesso) {
+        // Invalida o cache e recarrega
+        _cacheService.invalidateCache('pragas');
+        final novasPragas = await _cacheService.getFavoritosPragas();
+        
+        if (mounted) {
+          setState(() {
+            _favoritosPragas = novasPragas;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${praga.displayName} removido dos favoritos'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao remover favorito'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _removerDiagnosticoDosFavoritos(FavoritoDiagnosticoModel diagnostico) async {
+    try {
+      final sucesso = await _favoritosRepository.removeFavorito('diagnosticos', diagnostico.idReg);
+      if (sucesso) {
+        // Invalida o cache e recarrega
+        _cacheService.invalidateCache('diagnosticos');
+        final novosDiagnosticos = await _cacheService.getFavoritosDiagnosticos();
+        
+        if (mounted) {
+          setState(() {
+            _favoritosDiagnosticos = novosDiagnosticos;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${diagnostico.displayName} removido dos favoritos'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao remover favorito'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+
+  /// Navega para informações da cultura
+  void _navigateToCulturaInfo(String? culturaNome) {
+    if (culturaNome == null || culturaNome == 'Cultura não encontrada') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Informações da cultura não disponíveis'),
+          backgroundColor: Colors.orange,
         ),
+      );
+      return;
+    }
+
+    _navigationService.navigateToCulturaPage(context, culturaNome, culturaNome);
+  }
+
+  /// Validação de integridade dos favoritos
+  Future<void> _validateFavoritesIntegrity() async {
+    try {
+      int removedCount = 0;
+      
+      // Valida defensivos
+      final invalidDefensivos = <String>[];
+      for (final defensivo in _favoritosDefensivos) {
+        final isValid = await _navigationService.isItemStillValid('defensivos', defensivo.idReg);
+        if (!isValid) {
+          invalidDefensivos.add(defensivo.idReg);
+        }
+      }
+      
+      // Remove defensivos inválidos
+      for (final id in invalidDefensivos) {
+        await _favoritosRepository.removeFavorito('defensivos', id);
+        removedCount++;
+      }
+      
+      // Valida pragas
+      final invalidPragas = <String>[];
+      for (final praga in _favoritosPragas) {
+        final isValid = await _navigationService.isItemStillValid('pragas', praga.idReg);
+        if (!isValid) {
+          invalidPragas.add(praga.idReg);
+        }
+      }
+      
+      // Remove pragas inválidas
+      for (final id in invalidPragas) {
+        await _favoritosRepository.removeFavorito('pragas', id);
+        removedCount++;
+      }
+      
+      // Valida diagnósticos
+      final invalidDiagnosticos = <String>[];
+      for (final diagnostico in _favoritosDiagnosticos) {
+        final isValid = await _navigationService.isItemStillValid('diagnosticos', diagnostico.idReg);
+        if (!isValid) {
+          invalidDiagnosticos.add(diagnostico.idReg);
+        }
+      }
+      
+      // Remove diagnósticos inválidos
+      for (final id in invalidDiagnosticos) {
+        await _favoritosRepository.removeFavorito('diagnosticos', id);
+        removedCount++;
+      }
+      
+      // Recarrega dados se algo foi removido
+      if (removedCount > 0) {
+        _cacheService.clearAllCache();
+        _loadFavoritos();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$removedCount favorito(s) inválido(s) removido(s) automaticamente'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Erro na validação de integridade: $e');
+    }
+  }
+
+  /// Força atualização dos favoritos
+  Future<void> _refreshFavorites() async {
+    _cacheService.clearAllCache();
+    _loadFavoritos();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Favoritos atualizados com sucesso'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  /// Limpa cache e recarrega tudo
+  Future<void> _clearCacheAndReload() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    _cacheService.clearAllCache();
+    await Future.delayed(const Duration(milliseconds: 500)); // Pequena pausa visual
+    _loadFavoritos();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cache limpo e dados recarregados'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    }
+  }
+
+  /// Mostra estatísticas dos favoritos
+  void _showStatistics() {
+    final cacheStats = _cacheService.getCacheStats();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Estatísticas dos Favoritos'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStatItem('Defensivos favoritos', '${_favoritosDefensivos.length}'),
+            _buildStatItem('Pragas favoritas', '${_favoritosPragas.length}'),
+            _buildStatItem('Diagnósticos favoritos', '${_favoritosDiagnosticos.length}'),
+            const Divider(),
+            _buildStatItem('Total de favoritos', '${_favoritosDefensivos.length + _favoritosPragas.length + _favoritosDiagnosticos.length}'),
+            const Divider(),
+            const Text(
+              'Cache:',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            _buildStatItem('Status do cache', cacheStats['defensivos_cached'] == true ? 'Ativo' : 'Inativo'),
+            _buildStatItem('Entradas no cache', '${cacheStats['total_cache_entries']}'),
+            _buildStatItem('Tempo de vida', '${cacheStats['cache_lifetime_minutes']} min'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
       ),
     );
   }
 
-  void _navigateToDiagnosticoDetails(FavoritoDiagnosticoModel diagnostico) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetalheDiagnosticoPage(
-          diagnosticoId: diagnostico.idReg ?? 'DIAG001',
-          nomeDefensivo: 'Defensivo Exemplo',
-          nomePraga: diagnostico.nome ?? 'Diagnóstico',
-          cultura: diagnostico.cultura ?? 'Cultura não especificada',
-        ),
+  /// Constrói item das estatísticas
+  Widget _buildStatItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,4 @@
-import 'package:core/src/domain/entities/base_sync_entity.dart';
+import 'package:core/core.dart';
 
 enum TaskType {
   watering('regar', 'Regar'),
@@ -273,5 +273,91 @@ class Task extends BaseSyncEntity {
       isDirty: true,
       updatedAt: DateTime.now(),
     );
+  }
+
+  /// Cria uma Task entity a partir de um TarefaModel
+  static Task fromModel(dynamic tarefaModel, {String? plantName}) {
+    // Mapeia tipos de cuidado para TaskType
+    TaskType mapCareType(String tipoCuidado) {
+      switch (tipoCuidado) {
+        case 'agua':
+          return TaskType.watering;
+        case 'adubo':
+          return TaskType.fertilizing;
+        case 'poda':
+          return TaskType.pruning;
+        case 'replantar':
+          return TaskType.repotting;
+        case 'inspecao_pragas':
+          return TaskType.pestInspection;
+        case 'banho_sol':
+          return TaskType.sunlight;
+        default:
+          return TaskType.custom;
+      }
+    }
+
+    // Mapeia prioridade baseado no tipo de cuidado
+    TaskPriority mapPriority(String tipoCuidado) {
+      switch (tipoCuidado) {
+        case 'agua':
+          return TaskPriority.high;
+        case 'adubo':
+          return TaskPriority.medium;
+        case 'poda':
+          return TaskPriority.medium;
+        case 'replantar':
+          return TaskPriority.high;
+        case 'inspecao_pragas':
+          return TaskPriority.high;
+        case 'banho_sol':
+          return TaskPriority.low;
+        default:
+          return TaskPriority.medium;
+      }
+    }
+
+    final taskType = mapCareType(tarefaModel.tipoCuidado);
+    
+    return Task(
+      id: tarefaModel.id,
+      createdAt: tarefaModel.createdAt ?? DateTime.now(),
+      updatedAt: tarefaModel.updatedAt ?? DateTime.now(),
+      lastSyncAt: tarefaModel.lastSyncAt,
+      isDirty: tarefaModel.isDirty,
+      isDeleted: tarefaModel.isDeleted,
+      version: tarefaModel.version,
+      userId: tarefaModel.userId,
+      moduleName: tarefaModel.moduleName,
+      title: taskType.displayName,
+      description: _getTaskDescription(tarefaModel.tipoCuidado),
+      plantId: tarefaModel.plantaId,
+      plantName: plantName ?? 'Planta',
+      type: taskType,
+      status: tarefaModel.concluida ? TaskStatus.completed : TaskStatus.pending,
+      priority: mapPriority(tarefaModel.tipoCuidado),
+      dueDate: tarefaModel.dataExecucao,
+      completedAt: tarefaModel.dataConclusao,
+      completionNotes: tarefaModel.observacoes,
+    );
+  }
+
+  static String _getTaskDescription(String tipoCuidado) {
+    switch (tipoCuidado) {
+      case 'agua':
+        return 'Verificar e regar conforme necessário';
+      case 'adubo':
+        return 'Aplicar fertilizante ou adubo';
+      case 'banho_sol':
+        return 'Expor a planta ao sol adequado';
+      case 'inspecao_pragas':
+        return 'Verificar folhas e caule em busca de pragas';
+      case 'poda':
+        return 'Remover folhas secas e fazer poda necessária';
+      case 'replantar':
+        return 'Trocar vaso ou substrato';
+      default:
+        return 'Executar cuidado personalizado';
+    }
   }
 }

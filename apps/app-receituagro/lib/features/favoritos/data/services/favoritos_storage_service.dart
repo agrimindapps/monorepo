@@ -1,15 +1,19 @@
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
+import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../../core/di/injection_container.dart';
 
 /// Implementação do storage local para favoritos usando Hive (Data Layer)
 /// Princípio: Single Responsibility - Apenas storage
 class FavoritosStorageService implements IFavoritosStorage {
+  final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
+  
   // Constantes para chaves de storage
   static const Map<String, String> _storageKeys = {
-    'defensivo': 'receituagro_user_favorites_defensivos',
-    'praga': 'receituagro_user_favorites_pragas',
-    'diagnostico': 'receituagro_user_favorites_diagnosticos',
-    'cultura': 'receituagro_user_favorites_culturas',
+    'defensivo': 'defensivos',
+    'praga': 'pragas',
+    'diagnostico': 'diagnosticos',
+    'cultura': 'culturas',
   };
 
   @override
@@ -18,12 +22,11 @@ class FavoritosStorageService implements IFavoritosStorage {
       final boxName = _getBoxName(tipo);
       if (boxName == null) return [];
 
-      // TODO: Implementar com Hive box do core
-      // final box = Hive.box<String>(boxName);
-      // return box.values.toList();
-      
-      // Mock implementation por enquanto
-      return [];
+      final tipoKey = _storageKeys[tipo];
+      if (tipoKey == null) return [];
+
+      final favoritos = _repository.getFavoritosByTipo(tipoKey);
+      return favoritos.map((f) => f.itemId).toList();
     } catch (e) {
       throw FavoritosException('Erro ao buscar IDs favoritos: $e', tipo: tipo);
     }
@@ -35,13 +38,17 @@ class FavoritosStorageService implements IFavoritosStorage {
       final boxName = _getBoxName(tipo);
       if (boxName == null) return false;
 
-      // TODO: Implementar com Hive box do core
-      // final box = Hive.box<String>(boxName);
-      // await box.put(id, id);
-      // return true;
+      final tipoKey = _storageKeys[tipo];
+      if (tipoKey == null) return false;
+
+      // Adiciona com dados básicos para cache
+      final itemData = {
+        'id': id,
+        'tipo': tipo,
+        'adicionadoEm': DateTime.now().toIso8601String(),
+      };
       
-      // Mock implementation
-      return true;
+      return await _repository.addFavorito(tipoKey, id, itemData);
     } catch (e) {
       throw FavoritosException('Erro ao adicionar favorito: $e', tipo: tipo, id: id);
     }

@@ -25,7 +25,7 @@ class DiagnosticoFavoritoListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -45,7 +45,7 @@ class DiagnosticoFavoritoListItem extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: FavoritosDesignTokens.diagnosticosColor.withOpacity(0.1),
+                    color: FavoritosDesignTokens.diagnosticosColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -73,7 +73,7 @@ class DiagnosticoFavoritoListItem extends StatelessWidget {
                         Text(
                           'Cultura: ${diagnostico.displayCultura}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -83,7 +83,7 @@ class DiagnosticoFavoritoListItem extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: FavoritosDesignTokens.diagnosticosColor.withOpacity(0.1),
+                            color: FavoritosDesignTokens.diagnosticosColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -112,7 +112,7 @@ class DiagnosticoFavoritoListItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Icon(
                       Icons.chevron_right,
-                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                   ],
                 ),

@@ -193,6 +193,7 @@ class EspacoModel extends BaseSyncModel {
 
   // Legacy compatibility methods
   Map<String, dynamic> toMap() => toHiveMap();
+  @override
   Map<String, dynamic> toJson() => toHiveMap();
   factory EspacoModel.fromMap(Map<String, dynamic> map) => EspacoModel.fromHiveMap(map);
   factory EspacoModel.fromJson(Map<String, dynamic> json) => EspacoModel.fromHiveMap(json);

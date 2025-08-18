@@ -620,6 +620,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                 : () async {
                                     await authProvider.signInAnonymously();
                                     if (authProvider.isAuthenticated && mounted) {
+                                      // ignore: use_build_context_synchronously
                                       context.go('/plants');
                                     }
                                   },

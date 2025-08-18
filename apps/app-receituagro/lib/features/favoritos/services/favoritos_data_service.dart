@@ -20,7 +20,6 @@ abstract class IPremiumService {
 
 class FavoritosDataService extends ChangeNotifier {
   final IFavoritosRepository? _repository;
-  final IPremiumService? _premiumService;
   
   FavoritosData _favoritosData = const FavoritosData();
   bool _isLoading = false;
@@ -28,9 +27,7 @@ class FavoritosDataService extends ChangeNotifier {
 
   FavoritosDataService({
     IFavoritosRepository? repository,
-    IPremiumService? premiumService,
-  }) : _repository = repository,
-       _premiumService = premiumService;
+  }) : _repository = repository;
 
   FavoritosData get favoritosData => _favoritosData;
   bool get isLoading => _isLoading;
@@ -77,11 +74,7 @@ class FavoritosDataService extends ChangeNotifier {
   }
 
   Future<void> _carregarFavoritosDiagnosticos() async {
-    if (_premiumService?.isPremium != true) {
-      debugPrint('⚠️ Usuário não premium, pulando diagnósticos');
-      return;
-    }
-
+    // Premium check removido - usando dados reais via Hive
     try {
       final dados = await _repository?.getFavoritosDiagnosticos() ?? <FavoritoDiagnosticoModel>[];
       _favoritosData = _favoritosData.copyWith(diagnosticos: dados);
@@ -150,8 +143,4 @@ class FavoritosDataService extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

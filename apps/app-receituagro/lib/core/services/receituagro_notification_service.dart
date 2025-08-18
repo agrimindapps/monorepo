@@ -2,17 +2,53 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 
-/// Serviço de notificações específico do ReceitaAgro
-class ReceitaAgroNotificationService {
-  static final ReceitaAgroNotificationService _instance = ReceitaAgroNotificationService._internal();
-  factory ReceitaAgroNotificationService() => _instance;
-  ReceitaAgroNotificationService._internal();
+/// Interface para o serviço de notificações do ReceitaAgro
+abstract class IReceitaAgroNotificationService {
+  Future<bool> initialize();
+  Future<bool> areNotificationsEnabled();
+  Future<bool> requestNotificationPermission();
+  Future<bool> openNotificationSettings();
+  Future<void> showPestDetectedNotification({
+    required String pestName,
+    required String plantName,
+    String? imageUrl,
+  });
+  Future<void> showApplicationReminderNotification({
+    required String defensiveName,
+    required String plantName,
+    required DateTime applicationDate,
+  });
+  Future<void> showNewRecipeNotification({
+    required String recipeName,
+    required String category,
+  });
+  Future<void> showWeatherAlertNotification({
+    required String message,
+    required String recommendation,
+  });
+  Future<void> scheduleMonitoringReminder({
+    required String fieldName,
+    required Duration interval,
+  });
+  Future<bool> cancelNotification(String identifier);
+  Future<bool> cancelAllNotifications();
+  Future<List<PendingNotificationEntity>> getPendingNotifications();
+  Future<bool> isNotificationScheduled(String identifier);
+}
+
+/// Implementação do serviço de notificações específico do ReceitaAgro
+class ReceitaAgroNotificationService implements IReceitaAgroNotificationService {
 
   static const String _appName = 'ReceitaAgro';
   static const int _primaryColor = 0xFF4CAF50; // Verde agricultura
 
-  final INotificationRepository _notificationRepository = LocalNotificationService();
+  final INotificationRepository _notificationRepository;
   bool _isInitialized = false;
+  
+  /// Construtor que permite injeção de dependência
+  ReceitaAgroNotificationService({
+    INotificationRepository? notificationRepository,
+  }) : _notificationRepository = notificationRepository ?? LocalNotificationService();
 
   /// Inicializa o serviço de notificações do ReceitaAgro
   Future<bool> initialize() async {

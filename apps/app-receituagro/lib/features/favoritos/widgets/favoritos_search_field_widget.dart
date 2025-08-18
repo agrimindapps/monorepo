@@ -37,7 +37,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -56,7 +56,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
                       ? IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: onClear,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         )
                       : null,
                   border: InputBorder.none,
@@ -65,7 +65,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
                     vertical: 14.0,
                   ),
                   hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 style: theme.textTheme.bodyMedium,
@@ -80,7 +80,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -117,7 +117,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
     final isSelected = selectedViewMode == mode;
 
     return Material(
-      color: isSelected ? accentColor.withOpacity(0.1) : Colors.transparent,
+      color: isSelected ? accentColor.withValues(alpha: 0.1) : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: () => onToggleViewMode?.call(mode),
@@ -127,7 +127,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
           child: Icon(
             icon,
             size: 20,
-            color: isSelected ? accentColor : theme.colorScheme.onSurface.withOpacity(0.6),
+            color: isSelected ? accentColor : theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ),

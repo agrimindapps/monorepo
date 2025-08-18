@@ -1,0 +1,136 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
+
+import '../services/connectivity_service.dart';
+import '../data/models/sync_queue_item.dart';
+import 'sync_queue.dart';
+
+@singleton
+class SyncOperations {
+  final SyncQueue _syncQueue;
+  final ConnectivityService _connectivityService;
+
+  late StreamSubscription<NetworkStatus> _networkSubscription;
+  bool _isProcessingSync = false;
+
+  SyncOperations(this._syncQueue, this._connectivityService) {
+    _initializeNetworkListener();
+  }
+
+  void _initializeNetworkListener() {
+    _networkSubscription = _connectivityService.networkStatusStream.listen((status) {
+      if (status != NetworkStatus.offline) {
+        processOfflineQueue();
+      }
+    });
+  }
+
+  Future<void> processOfflineQueue() async {
+    // Prevent multiple sync processes
+    if (_isProcessingSync) return;
+    _isProcessingSync = true;
+
+    try {
+      final pendingItems = _syncQueue.getPendingItems();
+      
+      // Priority order: Create > Update > Delete
+      final prioritizedItems = _prioritizeItems(pendingItems);
+
+      for (var item in prioritizedItems) {
+        try {
+          await _processSyncItem(item);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error syncing item ${item.id}: $e');
+          }
+          
+          // Increment retry count or skip if too many retries
+          if (item.retryCount < 3) {
+            await _syncQueue.incrementRetryCount(item.id);
+          }
+        }
+      }
+
+      // Clean up successfully synced items
+      _syncQueue.clearSyncedItems();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error processing offline queue: $e');
+      }
+    } finally {
+      _isProcessingSync = false;
+    }
+  }
+
+  List<SyncQueueItem> _prioritizeItems(List<SyncQueueItem> items) {
+    items.sort((a, b) {
+      // Custom priority mapping
+      int getPriority(SyncQueueItem item) {
+        switch (item.operationType) {
+          case SyncOperationType.create:
+            return 3;
+          case SyncOperationType.update:
+            return 2;
+          case SyncOperationType.delete:
+            return 1;
+        }
+      }
+
+      // Sort by priority (descending) and then by timestamp
+      final priorityComparison = getPriority(b).compareTo(getPriority(a));
+      return priorityComparison != 0 
+        ? priorityComparison 
+        : a.timestamp.compareTo(b.timestamp);
+    });
+
+    return items;
+  }
+
+  Future<void> _processSyncItem(SyncQueueItem item) async {
+    // Here you would integrate with your repository/service layer to sync
+    // This is a placeholder - replace with actual sync logic for your models
+    switch (item.operationType) {
+      case SyncOperationType.create:
+        await _performCreate(item);
+        break;
+      case SyncOperationType.update:
+        await _performUpdate(item);
+        break;
+      case SyncOperationType.delete:
+        await _performDelete(item);
+        break;
+    }
+
+    // Mark as synced if successful
+    await _syncQueue.markItemAsSynced(item.id);
+  }
+
+  Future<void> _performCreate(SyncQueueItem item) async {
+    // Implement create logic for specific model types
+    // Example (placeholder):
+    switch (item.modelType) {
+      case 'Plant':
+        // Call repository to create plant
+        break;
+      case 'Task':
+        // Call repository to create task
+        break;
+      // Add other model types
+    }
+  }
+
+  Future<void> _performUpdate(SyncQueueItem item) async {
+    // Implement update logic for specific model types
+    // Similar to create method
+  }
+
+  Future<void> _performDelete(SyncQueueItem item) async {
+    // Implement delete logic for specific model types
+    // Similar to create method
+  }
+
+  void dispose() {
+    _networkSubscription.cancel();
+  }
+}

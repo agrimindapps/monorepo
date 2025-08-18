@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../core/widgets/modern_header_widget.dart';
-import 'models/praga_model.dart';
+import '../../core/models/pragas_hive.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
+import '../../core/extensions/pragas_hive_extension.dart';
+import '../../core/di/injection_container.dart';
 import 'models/praga_view_mode.dart';
 import 'widgets/praga_search_field_widget.dart';
 import 'widgets/praga_item_widget.dart';
@@ -23,6 +26,7 @@ class ListaPragasPage extends StatefulWidget {
 
 class _ListaPragasPageState extends State<ListaPragasPage> {
   final TextEditingController _searchController = TextEditingController();
+  final PragasHiveRepository _repository = sl<PragasHiveRepository>();
   Timer? _searchDebounceTimer;
   
   bool _isLoading = false;
@@ -30,9 +34,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   bool _isAscending = true;
   PragaViewMode _viewMode = PragaViewMode.grid;
   
-  List<PragaModel> _pragas = [];
-  List<PragaModel> _pragasFiltered = [];
+  final List<PragasHive> _pragas = [];
+  List<PragasHive> _pragasFiltered = [];
   String _searchText = '';
+  String? _errorMessage;
   late String _currentPragaType;
 
   @override
@@ -40,7 +45,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     super.initState();
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
-    _loadInitialData();
+    _loadRealData();
   }
 
   @override
@@ -51,143 +56,34 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     super.dispose();
   }
 
-  void _loadInitialData() async {
-    setState(() {
-      _isLoading = true;
-    });
-    
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    setState(() {
-      _pragas = _generateMockData();
-      _pragasFiltered = List.from(_pragas);
-      _isLoading = false;
-    });
-  }
-
-  List<PragaModel> _generateMockData() {
-    switch (_currentPragaType) {
-      case '1': // Insetos
-        return [
-          const PragaModel(
-            idReg: '1',
-            nomeComum: 'Lagarta do Cartucho',
-            nomeCientifico: 'Spodoptera frugiperda',
-            tipoPraga: '1',
-            descricao: 'Praga importante do milho',
-            sintomas: 'Danos nas folhas jovens',
-            controle: 'Inseticidas e controle biológico',
-          ),
-          const PragaModel(
-            idReg: '2',
-            nomeComum: 'Percevejo da Soja',
-            nomeCientifico: 'Nezara viridula',
-            tipoPraga: '1',
-            descricao: 'Percevejo que ataca grãos de soja',
-            sintomas: 'Manchas nos grãos',
-            controle: 'Monitoramento e inseticidas',
-          ),
-          const PragaModel(
-            idReg: '3',
-            nomeComum: 'Broca do Colmo',
-            nomeCientifico: 'Diatraea saccharalis',
-            tipoPraga: '1',
-            descricao: 'Broca que ataca cana-de-açúcar',
-            sintomas: 'Galerias no colmo',
-            controle: 'Controle biológico com Cotesia',
-          ),
-          const PragaModel(
-            idReg: '4',
-            nomeComum: 'Mosca Branca',
-            nomeCientifico: 'Bemisia tabaci',
-            tipoPraga: '1',
-            descricao: 'Praga sugadora de diversas culturas',
-            sintomas: 'Amarelecimento das folhas',
-            controle: 'Inseticidas sistêmicos',
-          ),
-          const PragaModel(
-            idReg: '5',
-            nomeComum: 'Ácaro Rajado',
-            nomeCientifico: 'Tetranychus urticae',
-            tipoPraga: '1',
-            descricao: 'Ácaro que ataca folhas',
-            sintomas: 'Pontuações amarelas nas folhas',
-            controle: 'Acaricidas específicos',
-          ),
-        ];
-      case '2': // Doenças
-        return [
-          const PragaModel(
-            idReg: '6',
-            nomeComum: 'Ferrugem da Soja',
-            nomeCientifico: 'Phakopsora pachyrhizi',
-            tipoPraga: '2',
-            descricao: 'Doença fúngica da soja',
-            sintomas: 'Pústulas alaranjadas nas folhas',
-            controle: 'Fungicidas preventivos',
-          ),
-          const PragaModel(
-            idReg: '7',
-            nomeComum: 'Mancha Parda',
-            nomeCientifico: 'Septoria glycines',
-            tipoPraga: '2',
-            descricao: 'Doença foliar da soja',
-            sintomas: 'Manchas marrons nas folhas',
-            controle: 'Rotação de culturas',
-          ),
-          const PragaModel(
-            idReg: '8',
-            nomeComum: 'Antracnose',
-            nomeCientifico: 'Colletotrichum truncatum',
-            tipoPraga: '2',
-            descricao: 'Doença que afeta vagens',
-            sintomas: 'Manchas escuras nas vagens',
-            controle: 'Sementes tratadas',
-          ),
-          const PragaModel(
-            idReg: '9',
-            nomeComum: 'Oídio',
-            nomeCientifico: 'Microsphaera diffusa',
-            tipoPraga: '2',
-            descricao: 'Doença do pó branco',
-            sintomas: 'Pó branco nas folhas',
-            controle: 'Fungicidas específicos',
-          ),
-        ];
-      case '3': // Plantas Daninhas
-        return [
-          const PragaModel(
-            idReg: '10',
-            nomeComum: 'Capim Amargoso',
-            nomeCientifico: 'Digitaria insularis',
-            tipoPraga: '3',
-            descricao: 'Gramínea invasora perene',
-            sintomas: 'Competição por nutrientes',
-            controle: 'Herbicidas sistêmicos',
-          ),
-          const PragaModel(
-            idReg: '11',
-            nomeComum: 'Buva',
-            nomeCientifico: 'Conyza bonariensis',
-            tipoPraga: '3',
-            descricao: 'Planta daninha resistente',
-            sintomas: 'Competição por luz',
-            controle: 'Herbicidas pré-emergentes',
-          ),
-          const PragaModel(
-            idReg: '12',
-            nomeComum: 'Caruru',
-            nomeCientifico: 'Amaranthus retroflexus',
-            tipoPraga: '3',
-            descricao: 'Planta invasora anual',
-            sintomas: 'Competição por água',
-            controle: 'Controle mecânico e químico',
-          ),
-        ];
-      default:
-        return [];
+  Future<void> _loadRealData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+      
+      // Carrega pragas do repositório Hive filtradas por tipo
+      final pragas = _repository.findByTipo(_currentPragaType);
+      
+      if (mounted) {
+        setState(() {
+          _pragas.clear();
+          _pragas.addAll(pragas);
+          _pragasFiltered = _sortPragas(List.from(_pragas));
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Erro ao carregar pragas: $e';
+        });
+      }
     }
   }
+
 
   void _onSearchChanged() {
     _searchDebounceTimer?.cancel();
@@ -211,7 +107,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     });
   }
 
-  List<PragaModel> _filterPragas(List<PragaModel> pragas, String searchText) {
+  List<PragasHive> _filterPragas(List<PragasHive> pragas, String searchText) {
     if (searchText.isEmpty) {
       return _sortPragas(List.from(pragas));
     }
@@ -219,14 +115,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     final query = searchText.toLowerCase();
     final filtered = pragas.where((praga) {
       return praga.nomeComum.toLowerCase().contains(query) ||
-          (praga.nomeSecundario?.toLowerCase().contains(query) ?? false) ||
-          (praga.nomeCientifico?.toLowerCase().contains(query) ?? false);
+          praga.nomeCientifico.toLowerCase().contains(query);
     }).toList();
     
     return _sortPragas(filtered);
   }
 
-  List<PragaModel> _sortPragas(List<PragaModel> pragas) {
+  List<PragasHive> _sortPragas(List<PragasHive> pragas) {
     pragas.sort((a, b) {
       final comparison = a.nomeComum.compareTo(b.nomeComum);
       return _isAscending ? comparison : -comparison;
@@ -257,13 +152,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     });
   }
 
-  void _handleItemTap(PragaModel praga) {
+  void _handleItemTap(PragasHive praga) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => DetalhePragaPage(
           pragaName: praga.displayName,
-          pragaScientificName: praga.nomeCientifico ?? 'Nome científico não disponível',
+          pragaScientificName: praga.nomeCientifico.isNotEmpty ? praga.nomeCientifico : 'Nome científico não disponível',
         ),
       ),
     );
@@ -345,6 +240,41 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       return PragasLoadingSkeletonWidget(
         viewMode: _viewMode,
         isDark: isDark,
+      );
+    }
+    
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: isDark ? Colors.red.shade400 : Colors.red.shade600,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Erro ao carregar pragas',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -477,7 +407,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       return 'Carregando registros...';
     }
     
-    return '$total registros';
+    if (_errorMessage != null) {
+      return 'Erro no carregamento';
+    }
+    
+    return '$total registros disponíveis';
   }
 
   IconData _getHeaderIcon() {

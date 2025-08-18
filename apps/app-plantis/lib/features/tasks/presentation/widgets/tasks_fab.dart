@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/tasks_provider.dart';
+import '../../../plants/presentation/providers/plants_provider.dart';
+import '../../domain/entities/task.dart';
 
 class TasksFab extends StatelessWidget {
   const TasksFab({super.key});
@@ -22,7 +26,10 @@ class TasksFab extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _AddTaskBottomSheet(),
+      builder: (context) => ChangeNotifierProvider.value(
+        value: Provider.of<TasksProvider>(context, listen: false),
+        child: _AddTaskBottomSheet(),
+      ),
     );
   }
 }
@@ -41,6 +48,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
   String _selectedPriority = 'medium';
   DateTime? _selectedDate;
   String? _selectedPlantId;
+  bool _isCreatingTask = false;
 
   final List<Map<String, dynamic>> _taskTypes = [
     {'value': 'watering', 'label': 'Rega', 'icon': Icons.water_drop},
@@ -141,36 +149,37 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
 
                   const SizedBox(height: 16),
 
-                  // Planta (será implementado quando tiver lista de plantas)
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Planta',
-                      prefixIcon: Icon(Icons.local_florist),
-                      border: OutlineInputBorder(),
-                    ),
-                    value: _selectedPlantId,
-                    hint: const Text('Selecione uma planta'),
-                    items: const [
-                      // TODO: Carregar plantas do usuário
-                      DropdownMenuItem(
-                        value: 'sample-plant-1',
-                        child: Text('Violeta Africana'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'sample-plant-2',
-                        child: Text('Suculenta'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedPlantId = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Por favor, selecione uma planta';
-                      }
-                      return null;
+                  // Planta - carregada dinamicamente
+                  Consumer<PlantsProvider>(
+                    builder: (context, plantsProvider, child) {
+                      final plants = plantsProvider.plants;
+                      
+                      return DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                          labelText: 'Planta',
+                          prefixIcon: Icon(Icons.local_florist),
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedPlantId,
+                        hint: const Text('Selecione uma planta'),
+                        items: plants.map((plant) {
+                          return DropdownMenuItem<String>(
+                            value: plant.id,
+                            child: Text(plant.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedPlantId = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Por favor, selecione uma planta';
+                          }
+                          return null;
+                        },
+                      );
                     },
                   ),
 
@@ -275,8 +284,14 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _saveTask,
-                          child: const Text('Salvar Tarefa'),
+                          onPressed: _isCreatingTask ? null : _saveTask,
+                          child: _isCreatingTask 
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Salvar Tarefa'),
                         ),
                       ),
                     ],
@@ -307,25 +322,121 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
     }
   }
 
-  void _saveTask() {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor, selecione uma data de vencimento'),
-          ),
-        );
-        return;
-      }
+  Future<void> _saveTask() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      // TODO: Implementar criação da tarefa usando o provider
+    if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Criação de tarefa em desenvolvimento...'),
+          content: Text('Por favor, selecione uma data de vencimento'),
+          backgroundColor: Colors.orange,
         ),
       );
+      return;
+    }
 
-      Navigator.of(context).pop();
+    setState(() {
+      _isCreatingTask = true;
+    });
+
+    try {
+      // Buscar dados da planta selecionada
+      final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+      final plant = plantsProvider.plants.firstWhere((p) => p.id == _selectedPlantId!);
+      
+      // Mapear tipo de tarefa para TaskType
+      TaskType mapTaskType(String value) {
+        switch (value) {
+          case 'watering':
+            return TaskType.watering;
+          case 'fertilizing':
+            return TaskType.fertilizing;
+          case 'pruning':
+            return TaskType.pruning;
+          case 'repotting':
+            return TaskType.repotting;
+          case 'inspection':
+            return TaskType.pestInspection;
+          case 'other':
+            return TaskType.custom;
+          default:
+            return TaskType.custom;
+        }
+      }
+
+      // Mapear prioridade para TaskPriority
+      TaskPriority mapPriority(String value) {
+        switch (value) {
+          case 'low':
+            return TaskPriority.low;
+          case 'medium':
+            return TaskPriority.medium;
+          case 'high':
+            return TaskPriority.high;
+          case 'urgent':
+            return TaskPriority.urgent;
+          default:
+            return TaskPriority.medium;
+        }
+      }
+
+      // Criar task entity
+      final task = Task(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isDirty: true,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        plantId: plant.id,
+        plantName: plant.name,
+        type: mapTaskType(_selectedTaskType),
+        status: TaskStatus.pending,
+        priority: mapPriority(_selectedPriority),
+        dueDate: _selectedDate!,
+      );
+
+      // Salvar usando o provider
+      final tasksProvider = Provider.of<TasksProvider>(context, listen: false);
+      final success = await tasksProvider.addTask(task);
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Tarefa "${task.title}" criada com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao criar tarefa: ${tasksProvider.errorMessage ?? 'Erro desconhecido'}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro inesperado: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreatingTask = false;
+        });
+      }
     }
   }
 }

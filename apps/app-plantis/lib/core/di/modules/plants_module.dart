@@ -36,7 +36,10 @@ class PlantsDIModule {
     sl.registerLazySingleton(() => GetPlantsUseCase(sl()));
     sl.registerLazySingleton(() => GetPlantByIdUseCase(sl()));
     sl.registerLazySingleton(() => SearchPlantsUseCase(sl()));
-    sl.registerLazySingleton(() => AddPlantUseCase(sl()));
+    sl.registerLazySingleton(() => AddPlantUseCase(
+          sl(),
+          generateInitialTasksUseCase: sl(),
+        ));
     sl.registerLazySingleton(() => UpdatePlantUseCase(sl()));
     sl.registerLazySingleton(() => DeletePlantUseCase(sl()));
     

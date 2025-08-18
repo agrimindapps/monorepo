@@ -12,10 +12,16 @@ import '../services/test_data_generator_service.dart';
 import '../services/data_cleaner_service.dart';
 import '../utils/navigation_service.dart';
 import '../providers/analytics_provider.dart';
+import '../providers/sync_status_provider.dart';
 import 'modules/plants_module.dart';
 import 'modules/tasks_module.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
 import '../../features/premium/presentation/providers/premium_provider.dart';
+
+// Sync dependencies
+import '../services/connectivity_service.dart' as local_connectivity;
+import '../sync/sync_queue.dart';
+import '../sync/sync_operations.dart';
 
 final sl = GetIt.instance;
 
@@ -44,6 +50,11 @@ Future<void> _initExternal() async {
   
   // Connectivity
   sl.registerLazySingleton(() => Connectivity());
+  
+  // Network Services
+  sl.registerLazySingleton(() => local_connectivity.ConnectivityService());
+  sl.registerLazySingleton(() => SyncQueue(sl()));
+  sl.registerLazySingleton(() => SyncOperations(sl(), sl()));
 }
 
 void _initCoreServices() {
@@ -137,6 +148,9 @@ void _initAppServices() {
   
   // Theme Provider
   sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
+  
+  // Sync Status Provider
+  sl.registerLazySingleton<SyncStatusProvider>(() => SyncStatusProvider(sl(), sl()));
   
   // Test Data Generator Service
   sl.registerLazySingleton<TestDataGeneratorService>(() => TestDataGeneratorService(

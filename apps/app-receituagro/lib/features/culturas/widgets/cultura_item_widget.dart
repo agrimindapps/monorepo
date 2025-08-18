@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../models/cultura_model.dart';
+import '../../../core/models/cultura_hive.dart';
 
 class CulturaItemWidget extends StatelessWidget {
-  final CulturaModel cultura;
+  final CulturaHive cultura;
   final bool isDark;
   final VoidCallback onTap;
 
@@ -14,8 +14,32 @@ class CulturaItemWidget extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Deriva o grupo baseado no nome da cultura
+  String get _getCulturaGroup {
+    final culturaNome = cultura.cultura.toLowerCase();
+    
+    if (culturaNome.contains('soja') || culturaNome.contains('girassol') || culturaNome.contains('amendoim')) {
+      return 'Oleaginosas';
+    } else if (culturaNome.contains('milho') || culturaNome.contains('trigo') || culturaNome.contains('arroz') || culturaNome.contains('aveia')) {
+      return 'Cereais';
+    } else if (culturaNome.contains('feijão') || culturaNome.contains('lentilha') || culturaNome.contains('ervilha')) {
+      return 'Leguminosas';
+    } else if (culturaNome.contains('tomate') || culturaNome.contains('alface') || culturaNome.contains('batata') || culturaNome.contains('cenoura') || culturaNome.contains('repolho')) {
+      return 'Hortaliças';
+    } else if (culturaNome.contains('banana') || culturaNome.contains('laranja') || culturaNome.contains('maçã') || culturaNome.contains('uva') || culturaNome.contains('manga')) {
+      return 'Frutas';
+    } else if (culturaNome.contains('algodão')) {
+      return 'Fibras';
+    } else if (culturaNome.contains('café') || culturaNome.contains('cacau')) {
+      return 'Permanentes';
+    } else if (culturaNome.contains('cana')) {
+      return 'Industriais';
+    }
+    return 'Outras';
+  }
+
   Color get _getGroupColor {
-    final group = cultura.grupo.toLowerCase();
+    final group = _getCulturaGroup.toLowerCase();
     if (group.contains('cereais') || group.contains('grãos')) {
       return Colors.amber.shade700;
     } else if (group.contains('frutas') || group.contains('frutíferas')) {
@@ -31,7 +55,7 @@ class CulturaItemWidget extends StatelessWidget {
   }
 
   IconData get _getGroupIcon {
-    final group = cultura.grupo.toLowerCase();
+    final group = _getCulturaGroup.toLowerCase();
     if (group.contains('cereais') || group.contains('grãos')) {
       return FontAwesomeIcons.wheatAwn;
     } else if (group.contains('frutas') || group.contains('frutíferas')) {
@@ -106,7 +130,7 @@ class CulturaItemWidget extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            cultura.grupo,
+                            _getCulturaGroup,
                             style: TextStyle(
                               fontSize: 13,
                               color: color,

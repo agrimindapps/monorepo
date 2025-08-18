@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:core/src/shared/utils/failure.dart';
-import 'package:core/src/domain/usecases/base_usecase.dart';
+import 'package:core/core.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 

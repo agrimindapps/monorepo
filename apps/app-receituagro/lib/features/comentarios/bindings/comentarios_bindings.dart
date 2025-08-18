@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../controller/comentarios_controller.dart';
 import '../services/comentarios_service.dart';
 import '../services/mock_comentarios_repository.dart';
-import '../services/mock_premium_service.dart';
+import '../../settings/services/premium_service.dart';
 import '../comentarios_page.dart';
 
 /// Centralized provider configuration for comentarios module

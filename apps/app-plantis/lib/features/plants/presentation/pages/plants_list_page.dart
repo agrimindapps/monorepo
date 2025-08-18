@@ -69,10 +69,12 @@ class _PlantsListPageState extends State<PlantsListPage> {
     _plantsProvider.setViewMode(mode);
   }
 
+  // ignore: unused_element
   void _onSortChanged(SortBy sort) {
     _plantsProvider.setSortBy(sort);
   }
 
+  // ignore: unused_element
   void _onSpaceFilterChanged(String? spaceId) {
     _plantsProvider.setSpaceFilter(spaceId);
   }

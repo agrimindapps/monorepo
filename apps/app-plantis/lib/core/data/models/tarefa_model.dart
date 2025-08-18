@@ -213,6 +213,7 @@ class TarefaModel extends BaseSyncModel {
 
   // Legacy compatibility methods
   Map<String, dynamic> toMap() => toHiveMap();
+  @override
   Map<String, dynamic> toJson() => toHiveMap();
   factory TarefaModel.fromMap(Map<String, dynamic> map) => TarefaModel.fromHiveMap(map);
   factory TarefaModel.fromJson(Map<String, dynamic> json) => TarefaModel.fromHiveMap(json);

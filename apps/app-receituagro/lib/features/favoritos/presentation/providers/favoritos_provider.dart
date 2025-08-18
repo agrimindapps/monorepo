@@ -8,7 +8,6 @@ import '../../domain/usecases/favoritos_usecases.dart';
 class FavoritosProvider extends ChangeNotifier {
   // Use Cases injetados via DI
   final GetAllFavoritosUseCase _getAllFavoritosUseCase;
-  final GetFavoritosByTipoUseCase _getFavoritosByTipoUseCase;
   final GetDefensivosFavoritosUseCase _getDefensivosFavoritosUseCase;
   final GetPragasFavoritosUseCase _getPragasFavoritosUseCase;
   final GetDiagnosticosFavoritosUseCase _getDiagnosticosFavoritosUseCase;
@@ -31,7 +30,6 @@ class FavoritosProvider extends ChangeNotifier {
 
   FavoritosProvider({
     required GetAllFavoritosUseCase getAllFavoritosUseCase,
-    required GetFavoritosByTipoUseCase getFavoritosByTipoUseCase,
     required GetDefensivosFavoritosUseCase getDefensivosFavoritosUseCase,
     required GetPragasFavoritosUseCase getPragasFavoritosUseCase,
     required GetDiagnosticosFavoritosUseCase getDiagnosticosFavoritosUseCase,
@@ -40,7 +38,6 @@ class FavoritosProvider extends ChangeNotifier {
     required SearchFavoritosUseCase searchFavoritosUseCase,
     required GetFavoritosStatsUseCase getFavoritosStatsUseCase,
   }) : _getAllFavoritosUseCase = getAllFavoritosUseCase,
-       _getFavoritosByTipoUseCase = getFavoritosByTipoUseCase,
        _getDefensivosFavoritosUseCase = getDefensivosFavoritosUseCase,
        _getPragasFavoritosUseCase = getPragasFavoritosUseCase,
        _getDiagnosticosFavoritosUseCase = getDiagnosticosFavoritosUseCase,

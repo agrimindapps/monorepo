@@ -2,24 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/repositories/favoritos_hive_repository.dart';
+import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/models/fitossanitario_hive.dart';
+import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../comentarios/services/comentarios_service.dart';
+import '../comentarios/models/comentario_model.dart';
 
-// Modelo de dados para comentário
-class ComentarioModel {
-  final String id;
-  final String conteudo;
-  final DateTime createdAt;
-  final String ferramenta;
-  final String pkIdentificador;
-
-  ComentarioModel({
-    required this.id,
-    required this.conteudo,
-    required this.createdAt,
-    required this.ferramenta,
-    required this.pkIdentificador,
-  });
-}
 
 // Modelo de dados para diagnóstico
 class DiagnosticoModel {
@@ -57,14 +47,21 @@ class DetalheDefensivoPage extends StatefulWidget {
 class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
+  final FitossanitarioHiveRepository _fitossanitarioRepository = sl<FitossanitarioHiveRepository>();
+  final ComentariosService _comentariosService = sl<ComentariosService>();
+  
   bool isFavorited = false;
+  FitossanitarioHive? _defensivoData; // Dados reais do defensivo
   bool isLoading = false;
   bool hasError = false;
   
   // Estado dos comentários
   List<ComentarioModel> _comentarios = [];
-  int _maxComentarios = 5; // Limite para usuários premium
+  bool _isLoadingComments = false;
   final TextEditingController _commentController = TextEditingController();
+  bool _hasReachedMaxComments = false;
+  final int _maxComentarios = 5; // default valor
   
   // Estado dos diagnósticos
   String _searchQuery = '';
@@ -85,29 +82,62 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _simulateLoading();
+    _loadRealData();
     _loadComentarios();
     _loadDiagnosticos();
+    _loadFavoritoState();
   }
 
-  void _loadComentarios() {
-    // Simula alguns comentários existentes
-    _comentarios = [
-      ComentarioModel(
-        id: '1',
-        conteudo: 'Excelente produto! Uso há anos na minha propriedade e sempre tive ótimos resultados no controle de plantas daninhas.',
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        ferramenta: 'Defensivos - ${widget.defensivoName}',
-        pkIdentificador: '1',
-      ),
-      ComentarioModel(
-        id: '2',
-        conteudo: 'Produto eficaz, mas é importante seguir rigorosamente as instruções de aplicação e usar os EPIs adequados.',
-        createdAt: DateTime.now().subtract(const Duration(hours: 12)),
-        ferramenta: 'Defensivos - ${widget.defensivoName}',
-        pkIdentificador: '2',
-      ),
-    ];
+  void _loadFavoritoState() {
+    // Busca o defensivo real pelo nome para obter o ID único
+    final defensivos = _fitossanitarioRepository.getAll()
+        .where((d) => d.nomeComum == widget.defensivoName || d.nomeTecnico == widget.defensivoName);
+    _defensivoData = defensivos.isNotEmpty ? defensivos.first : null;
+    
+    setState(() {
+      if (_defensivoData != null) {
+        isFavorited = _favoritosRepository.isFavorito('defensivos', _defensivoData!.idReg);
+      } else {
+        // Fallback para nome se não encontrar no repositório
+        isFavorited = _favoritosRepository.isFavorito('defensivos', widget.defensivoName);
+      }
+    });
+  }
+
+  Future<void> _loadComentarios() async {
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoadingComments = true;
+    });
+    
+    try {
+      // Usa ID real do defensivo se disponível, senão usa nome
+      final pkIdentificador = _defensivoData?.idReg ?? widget.defensivoName;
+      
+      final comentarios = await _comentariosService.getAllComentarios(
+        pkIdentificador: pkIdentificador,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _comentarios = comentarios;
+          _isLoadingComments = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingComments = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar comentários: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _loadDiagnosticos() {
@@ -196,19 +226,31 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     ];
   }
 
-  void _simulateLoading() async {
+  void _loadRealData() async {
     setState(() {
       isLoading = true;
       hasError = false;
     });
     
-    // Simula carregamento
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+    // Carrega dados reais do repositório
+    try {
+      final defensivos = _fitossanitarioRepository.getAll()
+          .where((d) => d.nomeComum == widget.defensivoName || d.nomeTecnico == widget.defensivoName);
+      _defensivoData = defensivos.isNotEmpty ? defensivos.first : null;
+      
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          hasError = _defensivoData == null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          hasError = true;
+        });
+      }
     }
   }
   
@@ -262,9 +304,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       showActions: true,
       onBackPressed: () => Navigator.of(context).pop(),
       onRightIconPressed: () {
-        setState(() {
-          isFavorited = !isFavorited;
-        });
+        _toggleFavorito();
       },
     );
   }
@@ -389,7 +429,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => _simulateLoading(),
+                  onPressed: () => _loadRealData(),
                   icon: const Icon(Icons.refresh),
                   label: const Text('Tentar novamente'),
                   style: ElevatedButton.styleFrom(
@@ -584,13 +624,13 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Widget _buildInfoCardWidget() {
     final theme = Theme.of(context);
     
-    // Dados mock do defensivo
+    // Dados reais do defensivo carregados do repositório
     final caracteristicas = {
-      'ingredienteAtivo': 'Glifosato 480g/L',
-      'nomeTecnico': '2,4-D-dimetilamina',
-      'toxico': 'Classe III - Medianamente tóxico',
-      'inflamavel': 'Não inflamável',
-      'corrosivo': 'Não corrosivo',
+      'ingredienteAtivo': _defensivoData?.ingredienteAtivo ?? 'Glifosato 480g/L',
+      'nomeTecnico': _defensivoData?.nomeTecnico ?? '2,4-D-dimetilamina',
+      'toxico': _defensivoData?.toxico ?? 'Classe III - Medianamente tóxico',
+      'inflamavel': _defensivoData?.inflamavel ?? 'Não inflamável',
+      'corrosivo': _defensivoData?.corrosivo ?? 'Não corrosivo',
     };
 
     return Container(
@@ -704,13 +744,13 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Widget _buildClassificacaoCardWidget() {
     final theme = Theme.of(context);
     
-    // Dados mock do defensivo
+    // Dados reais do defensivo carregados do repositório
     final caracteristicas = {
-      'modoAcao': 'Sistêmico',
-      'classeAgronomica': 'Herbicida',
-      'classAmbiental': 'Classe II - Muito perigoso',
-      'formulacao': 'Suspensão concentrada',
-      'mapa': '12345-67',
+      'modoAcao': _defensivoData?.modoAcao ?? 'Sistêmico',
+      'classeAgronomica': _defensivoData?.classeAgronomica ?? 'Herbicida',
+      'classAmbiental': _defensivoData?.classAmbiental ?? 'Classe II - Muito perigoso',
+      'formulacao': _defensivoData?.formulacao ?? 'Suspensão concentrada',
+      'mapa': _defensivoData?.idReg ?? '12345-67',
     };
 
     return Container(
@@ -2028,10 +2068,14 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   void _addComentario(String content) {
     final novoComentario = ComentarioModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      idReg: 'REG_${DateTime.now().millisecondsSinceEpoch}',
+      titulo: 'Comentário',
       conteudo: content,
-      createdAt: DateTime.now(),
       ferramenta: 'Defensivos - ${widget.defensivoName}',
-      pkIdentificador: DateTime.now().millisecondsSinceEpoch.toString(),
+      pkIdentificador: widget.defensivoName,
+      status: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
     
     setState(() {
@@ -2048,12 +2092,9 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
 
   void _editComentario(int index, String newContent) {
     setState(() {
-      _comentarios[index] = ComentarioModel(
-        id: _comentarios[index].id,
+      _comentarios[index] = _comentarios[index].copyWith(
         conteudo: newContent,
-        createdAt: _comentarios[index].createdAt,
-        ferramenta: _comentarios[index].ferramenta,
-        pkIdentificador: _comentarios[index].pkIdentificador,
+        updatedAt: DateTime.now(),
       );
     });
     
@@ -2339,6 +2380,47 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
 
   void _showCommentDialog() {
     _showAddCommentDialog();
+  }
+
+  void _toggleFavorito() async {
+    final wasAlreadyFavorited = isFavorited;
+    
+    // Usa ID único do repositório se disponível, senão fallback para nome
+    final itemId = _defensivoData?.idReg ?? widget.defensivoName;
+    final itemData = {
+      'nome': _defensivoData?.nomeComum ?? widget.defensivoName,
+      'fabricante': _defensivoData?.fabricante ?? widget.fabricante,
+      'idReg': itemId,
+    };
+
+    setState(() {
+      isFavorited = !wasAlreadyFavorited;
+    });
+
+    final success = wasAlreadyFavorited
+        ? await _favoritosRepository.removeFavorito('defensivos', itemId)
+        : await _favoritosRepository.addFavorito('defensivos', itemId, itemData);
+
+    if (!success) {
+      // Reverter estado em caso de falha
+      setState(() {
+        isFavorited = wasAlreadyFavorited;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.defensivoName} ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   void _showPremiumDialog() {

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/models/diagnostico_hive.dart';
+import '../../core/repositories/diagnostico_hive_repository.dart';
+import '../../core/repositories/favoritos_hive_repository.dart';
+import '../../core/extensions/diagnostico_hive_extension.dart';
+import '../../core/di/injection_container.dart';
+import '../detalhes_diagnostico/interfaces/i_premium_service.dart';
 
 class DetalheDiagnosticoPage extends StatefulWidget {
   final String diagnosticoId;
@@ -21,19 +27,50 @@ class DetalheDiagnosticoPage extends StatefulWidget {
 }
 
 class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
+  final DiagnosticoHiveRepository _repository = sl<DiagnosticoHiveRepository>();
+  final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
+  final IPremiumService _premiumService = sl<IPremiumService>();
   bool isFavorited = false;
   bool isLoading = false;
   bool hasError = false;
-  bool isPremium = true; // Mock - assumindo usuário premium
+  bool isPremium = false; // Será carregado via PremiumService
   bool isTtsSpeaking = false;
+  String? _errorMessage;
   
   // Dados do diagnóstico
+  DiagnosticoHive? _diagnostico;
   Map<String, String> _diagnosticoData = {};
 
   @override
   void initState() {
     super.initState();
     _loadDiagnosticoData();
+    _loadFavoritoState();
+    _loadPremiumStatus();
+  }
+
+  void _loadFavoritoState() {
+    setState(() {
+      isFavorited = _favoritosRepository.isFavorito('diagnosticos', widget.diagnosticoId);
+    });
+  }
+
+  void _loadPremiumStatus() async {
+    try {
+      final premium = await _premiumService.isPremiumUser();
+      if (mounted) {
+        setState(() {
+          isPremium = premium;
+        });
+      }
+    } catch (e) {
+      // Em caso de erro, manter como não premium
+      if (mounted) {
+        setState(() {
+          isPremium = false;
+        });
+      }
+    }
   }
 
   @override
@@ -45,30 +82,33 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
     setState(() {
       isLoading = true;
       hasError = false;
+      _errorMessage = null;
     });
     
-    // Simula carregamento
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-        _diagnosticoData = {
-          'ingredienteAtivo': 'Glifosato 480g/L',
-          'toxico': 'Classe III',
-          'classAmbiental': 'Classe II',
-          'classeAgronomica': 'Herbicida',
-          'formulacao': 'Suspensão concentrada',
-          'modoAcao': 'Sistêmico',
-          'mapa': '12345-67',
-          'dosagem': '1,5 L/ha',
-          'vazaoTerrestre': '200 L/ha',
-          'vazaoAerea': '30 L/ha',
-          'intervaloAplicacao': '14 dias',
-          'intervaloSeguranca': '30 dias',
-          'tecnologia': 'Aplicar via pulverização foliar, preferencialmente no início da manhã ou final da tarde. Utilizar equipamentos de proteção individual adequados.',
-        };
-      });
+    try {
+      // Busca diagnóstico por ID
+      final diagnostico = _repository.getById(widget.diagnosticoId);
+      
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          if (diagnostico != null) {
+            _diagnostico = diagnostico;
+            _diagnosticoData = diagnostico.toDataMap();
+          } else {
+            hasError = true;
+            _errorMessage = 'Diagnóstico não encontrado';
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          hasError = true;
+          _errorMessage = 'Erro ao carregar diagnóstico: $e';
+        });
+      }
     }
   }
 
@@ -114,9 +154,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
       showActions: isPremium,
       onBackPressed: () => Navigator.of(context).pop(),
       onRightIconPressed: () {
-        setState(() {
-          isFavorited = !isFavorited;
-        });
+        _toggleFavorito();
       },
       additionalActions: isPremium ? [
         IconButton(
@@ -667,6 +705,45 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
 
   void _compartilhar() {
     // Implementar funcionalidade de compartilhamento
+  }
+
+  void _toggleFavorito() async {
+    final wasAlreadyFavorited = isFavorited;
+    final itemData = {
+      'id': widget.diagnosticoId,
+      'nomeDefensivo': widget.nomeDefensivo,
+      'nomePraga': widget.nomePraga,
+      'cultura': widget.cultura,
+    };
+
+    setState(() {
+      isFavorited = !wasAlreadyFavorited;
+    });
+
+    final success = wasAlreadyFavorited
+        ? await _favoritosRepository.removeFavorito('diagnosticos', widget.diagnosticoId)
+        : await _favoritosRepository.addFavorito('diagnosticos', widget.diagnosticoId, itemData);
+
+    if (!success) {
+      // Reverter estado em caso de falha
+      setState(() {
+        isFavorited = wasAlreadyFavorited;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Diagnóstico ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   void _showPremiumDialog() {

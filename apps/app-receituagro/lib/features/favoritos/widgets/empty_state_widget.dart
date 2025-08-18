@@ -29,7 +29,7 @@ class EmptyStateWidget extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: tabColor.withOpacity(0.1),
+              color: tabColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -55,7 +55,7 @@ class EmptyStateWidget extends StatelessWidget {
               ? 'Tente ajustar sua busca'
               : 'Comece explorando e salvando seus ${tabName.toLowerCase()} favoritos',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),

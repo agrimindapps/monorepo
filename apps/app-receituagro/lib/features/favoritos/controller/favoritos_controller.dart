@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/favoritos_data.dart';
 import '../models/view_mode.dart';
 import '../models/favorito_defensivo_model.dart';

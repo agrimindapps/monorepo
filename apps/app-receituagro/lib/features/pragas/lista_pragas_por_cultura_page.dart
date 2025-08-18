@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/models/pragas_hive.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
+import '../../core/di/injection_container.dart';
 import 'models/praga_cultura_item_model.dart';
 import 'models/lista_pragas_cultura_state.dart';
 import 'models/praga_view_mode.dart';
@@ -29,6 +32,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  final PragasHiveRepository _repository = sl<PragasHiveRepository>();
   Timer? _searchDebounceTimer;
   
   ListaPragasCulturaState _state = const ListaPragasCulturaState();
@@ -67,124 +71,44 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   }
 
   void _loadInitialData() async {
-    _updateState(_state.copyWith(isLoading: true));
-    
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    final mockData = _generateMockData();
-    
-    _updateState(_state.copyWith(
-      pragasList: mockData,
-      pragasFiltered: mockData,
-      isLoading: false,
-    ));
-    
-    _applyCurrentFilter();
+    try {
+      _updateState(_state.copyWith(isLoading: true));
+      
+      // Carrega todas as pragas do repositório Hive
+      final pragasHive = _repository.getAll();
+      
+      // Converte para PragaCulturaItemModel
+      final realData = pragasHive.map(_convertToPragaCulturaItem).toList();
+      
+      _updateState(_state.copyWith(
+        pragasList: realData,
+        pragasFiltered: realData,
+        isLoading: false,
+      ));
+      
+      _applyCurrentFilter();
+      
+    } catch (e) {
+      _updateState(_state.copyWith(
+        isLoading: false,
+      ));
+    }
+  }
+  
+  /// Converte PragasHive para PragaCulturaItemModel
+  PragaCulturaItemModel _convertToPragaCulturaItem(PragasHive praga) {
+    return PragaCulturaItemModel(
+      idReg: praga.idReg,
+      nomeComum: praga.nomeComum,
+      nomeSecundario: null, // PragasHive não tem este campo
+      nomeCientifico: praga.nomeCientifico,
+      nomeImagem: null, // PragasHive não tem este campo
+      tipoPraga: praga.tipoPraga,
+      categoria: praga.classe ?? praga.ordem ?? praga.familia, // Usa classe, ordem ou família
+      grupo: praga.familia ?? praga.genero, // Usa família ou gênero
+    );
   }
 
-  List<PragaCulturaItemModel> _generateMockData() {
-    return [
-      // Insetos (tipoPraga: '1')
-      const PragaCulturaItemModel(
-        idReg: '1',
-        nomeComum: 'Lagarta do Cartucho',
-        nomeCientifico: 'Spodoptera frugiperda',
-        tipoPraga: '1',
-        categoria: 'Lepidoptera',
-        grupo: 'Desfolhadores',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '2',
-        nomeComum: 'Percevejo da Soja',
-        nomeCientifico: 'Nezara viridula',
-        tipoPraga: '1',
-        categoria: 'Hemiptera',
-        grupo: 'Sugadores',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '3',
-        nomeComum: 'Broca do Colmo',
-        nomeCientifico: 'Diatraea saccharalis',
-        tipoPraga: '1',
-        categoria: 'Lepidoptera',
-        grupo: 'Brocadores',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '4',
-        nomeComum: 'Mosca Branca',
-        nomeCientifico: 'Bemisia tabaci',
-        tipoPraga: '1',
-        categoria: 'Hemiptera',
-        grupo: 'Sugadores',
-      ),
-      // Doenças (tipoPraga: '2')
-      const PragaCulturaItemModel(
-        idReg: '5',
-        nomeComum: 'Ferrugem da Soja',
-        nomeCientifico: 'Phakopsora pachyrhizi',
-        tipoPraga: '2',
-        categoria: 'Fúngica',
-        grupo: 'Foliar',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '6',
-        nomeComum: 'Mancha Parda',
-        nomeCientifico: 'Septoria glycines',
-        tipoPraga: '2',
-        categoria: 'Fúngica',
-        grupo: 'Foliar',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '7',
-        nomeComum: 'Antracnose',
-        nomeCientifico: 'Colletotrichum truncatum',
-        tipoPraga: '2',
-        categoria: 'Fúngica',
-        grupo: 'Vagem',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '8',
-        nomeComum: 'Oídio',
-        nomeCientifico: 'Microsphaera diffusa',
-        tipoPraga: '2',
-        categoria: 'Fúngica',
-        grupo: 'Foliar',
-      ),
-      // Plantas Daninhas (tipoPraga: '3')
-      const PragaCulturaItemModel(
-        idReg: '9',
-        nomeComum: 'Capim Amargoso',
-        nomeCientifico: 'Digitaria insularis',
-        tipoPraga: '3',
-        categoria: 'Gramínea',
-        grupo: 'Folha Estreita',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '10',
-        nomeComum: 'Buva',
-        nomeCientifico: 'Conyza bonariensis',
-        tipoPraga: '3',
-        categoria: 'Eudicotiledônea',
-        grupo: 'Folha Larga',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '11',
-        nomeComum: 'Caruru',
-        nomeCientifico: 'Amaranthus retroflexus',
-        tipoPraga: '3',
-        categoria: 'Eudicotiledônea',
-        grupo: 'Folha Larga',
-      ),
-      const PragaCulturaItemModel(
-        idReg: '12',
-        nomeComum: 'Tiririca',
-        nomeCientifico: 'Cyperus rotundus',
-        tipoPraga: '3',
-        categoria: 'Ciperaceae',
-        grupo: 'Folha Estreita',
-      ),
-    ];
-  }
 
   void _updateState(ListaPragasCulturaState newState) {
     setState(() {

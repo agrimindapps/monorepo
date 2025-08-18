@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/models/fitossanitario_hive.dart';
+import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/di/injection_container.dart';
 import 'models/defensivo_agrupado_item_model.dart';
 import 'models/defensivos_agrupados_category.dart';
 import 'models/defensivos_agrupados_state.dart';
@@ -28,6 +31,7 @@ class ListaDefensivosAgrupadosPage extends StatefulWidget {
 class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FitossanitarioHiveRepository _repository = sl<FitossanitarioHiveRepository>();
   Timer? _searchDebounceTimer;
   
   DefensivosAgrupadosState _state = const DefensivosAgrupadosState();
@@ -78,163 +82,155 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
   }
 
   void _loadInitialData() async {
-    _updateState(_state.copyWith(isLoading: true));
-    
-    // Simula carregamento de dados
-    await Future.delayed(const Duration(milliseconds: 1200));
-    
-    final mockData = _generateMockData();
-    
-    _updateState(_state.copyWith(
-      defensivosList: mockData,
-      defensivosListFiltered: mockData,
-      isLoading: false,
-    ));
+    try {
+      _updateState(_state.copyWith(isLoading: true));
+      
+      // Carrega dados reais do repositório Hive
+      final defensivosHive = _repository.getActiveDefensivos();
+      
+      // Converte e agrupa dados conforme o tipo de agrupamento
+      final realData = _convertAndGroupData(defensivosHive);
+      
+      _updateState(_state.copyWith(
+        defensivosList: realData,
+        defensivosListFiltered: realData,
+        isLoading: false,
+      ));
+      
+    } catch (e) {
+      _updateState(_state.copyWith(
+        isLoading: false,
+      ));
+    }
   }
 
-  List<DefensivoAgrupadoItemModel> _generateMockData() {
+  /// Converte e agrupa dados do Hive conforme tipo de agrupamento
+  List<DefensivoAgrupadoItemModel> _convertAndGroupData(List<FitossanitarioHive> defensivos) {
     switch (_category) {
       case DefensivosAgrupadosCategory.fabricantes:
-        return [
-          const DefensivoAgrupadoItemModel(
-            idReg: '1',
-            line1: 'Bayer S.A.',
-            line2: 'Empresa multinacional alemã',
-            count: '245',
-            categoria: 'fabricante',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '2',
-            line1: 'Syngenta',
-            line2: 'Líder mundial em agricultura',
-            count: '187',
-            categoria: 'fabricante',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '3',
-            line1: 'BASF S.A.',
-            line2: 'Química para agricultura',
-            count: '156',
-            categoria: 'fabricante',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '4',
-            line1: 'Corteva',
-            line2: 'Inovação em proteção de cultivos',
-            count: '134',
-            categoria: 'fabricante',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '5',
-            line1: 'FMC Corporation',
-            line2: 'Soluções agrícolas avançadas',
-            count: '98',
-            categoria: 'fabricante',
-          ),
-        ];
+        return _groupByFabricante(defensivos);
       
       case DefensivosAgrupadosCategory.classeAgronomica:
-        return [
-          const DefensivoAgrupadoItemModel(
-            idReg: '6',
-            line1: 'Herbicida',
-            line2: 'Controle de plantas daninhas',
-            count: '342',
-            categoria: 'classe',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '7',
-            line1: 'Inseticida',
-            line2: 'Controle de insetos',
-            count: '267',
-            categoria: 'classe',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '8',
-            line1: 'Fungicida',
-            line2: 'Controle de fungos',
-            count: '198',
-            categoria: 'classe',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '9',
-            line1: 'Acaricida',
-            line2: 'Controle de ácaros',
-            count: '89',
-            categoria: 'classe',
-          ),
-        ];
+        return _groupByClasseAgronomica(defensivos);
       
       case DefensivosAgrupadosCategory.ingredienteAtivo:
-        return [
-          const DefensivoAgrupadoItemModel(
-            idReg: '10',
-            line1: 'Glifosato',
-            line2: 'Herbicida sistêmico não seletivo',
-            count: '45',
-            ingredienteAtivo: 'Glifosato',
-            categoria: 'ingrediente',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '11',
-            line1: '2,4-D',
-            line2: 'Herbicida hormonal seletivo',
-            count: '38',
-            ingredienteAtivo: '2,4-D',
-            categoria: 'ingrediente',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '12',
-            line1: 'Imidacloprido',
-            line2: 'Inseticida sistêmico',
-            count: '34',
-            ingredienteAtivo: 'Imidacloprido',
-            categoria: 'ingrediente',
-          ),
-        ];
+        return _groupByIngredienteAtivo(defensivos);
       
       case DefensivosAgrupadosCategory.modoAcao:
-        return [
-          const DefensivoAgrupadoItemModel(
-            idReg: '13',
-            line1: 'Inibição da síntese de aminoácidos',
-            line2: 'Grupo 9 - HRAC',
-            count: '67',
-            categoria: 'modo_acao',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '14',
-            line1: 'Auxina sintética',
-            line2: 'Grupo 4 - HRAC',
-            count: '45',
-            categoria: 'modo_acao',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '15',
-            line1: 'Antagonista do receptor nicotínico',
-            line2: 'Grupo 4A - IRAC',
-            count: '38',
-            categoria: 'modo_acao',
-          ),
-        ];
+        return _groupByModoAcao(defensivos);
       
       default:
-        return [
-          const DefensivoAgrupadoItemModel(
-            idReg: '16',
-            line1: 'Roundup Original DI',
-            line2: 'Herbicida sistêmico',
-            ingredienteAtivo: 'Glifosato',
-            categoria: 'defensivo',
-          ),
-          const DefensivoAgrupadoItemModel(
-            idReg: '17',
-            line1: 'Provence 800 WG',
-            line2: 'Fungicida protetor',
-            ingredienteAtivo: 'Mancozebe',
-            categoria: 'defensivo',
-          ),
-        ];
+        return _convertToDefensivoItems(defensivos);
+    }
+  }
+  
+  /// Agrupa por fabricante
+  List<DefensivoAgrupadoItemModel> _groupByFabricante(List<FitossanitarioHive> defensivos) {
+    final grouped = <String, List<FitossanitarioHive>>{};
+    
+    for (final defensivo in defensivos) {
+      final fabricante = defensivo.fabricante ?? 'Fabricante Não Informado';
+      grouped.putIfAbsent(fabricante, () => []).add(defensivo);
+    }
+    
+    return grouped.entries.map((entry) {
+      return DefensivoAgrupadoItemModel(
+        idReg: entry.key.hashCode.toString(),
+        line1: entry.key,
+        line2: 'Fabricante de defensivos agrícolas',
+        count: entry.value.length.toString(),
+        categoria: 'fabricante',
+      );
+    }).toList()..sort((a, b) => a.line1.compareTo(b.line1));
+  }
+  
+  /// Agrupa por classe agronômica
+  List<DefensivoAgrupadoItemModel> _groupByClasseAgronomica(List<FitossanitarioHive> defensivos) {
+    final grouped = <String, List<FitossanitarioHive>>{};
+    
+    for (final defensivo in defensivos) {
+      final classe = defensivo.classeAgronomica ?? 'Classe Não Informada';
+      grouped.putIfAbsent(classe, () => []).add(defensivo);
+    }
+    
+    return grouped.entries.map((entry) {
+      return DefensivoAgrupadoItemModel(
+        idReg: entry.key.hashCode.toString(),
+        line1: entry.key,
+        line2: _getClasseDescription(entry.key),
+        count: entry.value.length.toString(),
+        categoria: 'classe',
+      );
+    }).toList()..sort((a, b) => a.line1.compareTo(b.line1));
+  }
+  
+  /// Agrupa por ingrediente ativo
+  List<DefensivoAgrupadoItemModel> _groupByIngredienteAtivo(List<FitossanitarioHive> defensivos) {
+    final grouped = <String, List<FitossanitarioHive>>{};
+    
+    for (final defensivo in defensivos) {
+      final ingrediente = defensivo.ingredienteAtivo ?? 'Ingrediente Não Informado';
+      grouped.putIfAbsent(ingrediente, () => []).add(defensivo);
+    }
+    
+    return grouped.entries.map((entry) {
+      return DefensivoAgrupadoItemModel(
+        idReg: entry.key.hashCode.toString(),
+        line1: entry.key,
+        line2: 'Ingrediente ativo',
+        count: entry.value.length.toString(),
+        ingredienteAtivo: entry.key,
+        categoria: 'ingrediente',
+      );
+    }).toList()..sort((a, b) => a.line1.compareTo(b.line1));
+  }
+  
+  /// Agrupa por modo de ação
+  List<DefensivoAgrupadoItemModel> _groupByModoAcao(List<FitossanitarioHive> defensivos) {
+    final grouped = <String, List<FitossanitarioHive>>{};
+    
+    for (final defensivo in defensivos) {
+      final modo = defensivo.modoAcao ?? 'Modo de Ação Não Informado';
+      grouped.putIfAbsent(modo, () => []).add(defensivo);
+    }
+    
+    return grouped.entries.map((entry) {
+      return DefensivoAgrupadoItemModel(
+        idReg: entry.key.hashCode.toString(),
+        line1: entry.key,
+        line2: 'Modo de ação do defensivo',
+        count: entry.value.length.toString(),
+        categoria: 'modo_acao',
+      );
+    }).toList()..sort((a, b) => a.line1.compareTo(b.line1));
+  }
+  
+  /// Converte para itens de defensivo individuais
+  List<DefensivoAgrupadoItemModel> _convertToDefensivoItems(List<FitossanitarioHive> defensivos) {
+    return defensivos.map((defensivo) {
+      return DefensivoAgrupadoItemModel(
+        idReg: defensivo.idReg,
+        line1: defensivo.nomeComum,
+        line2: defensivo.nomeTecnico,
+        ingredienteAtivo: defensivo.ingredienteAtivo,
+        categoria: 'defensivo',
+      );
+    }).toList()..sort((a, b) => a.line1.compareTo(b.line1));
+  }
+  
+  /// Retorna descrição da classe agronômica
+  String _getClasseDescription(String classe) {
+    switch (classe.toLowerCase()) {
+      case 'herbicida':
+        return 'Controle de plantas daninhas';
+      case 'inseticida':
+        return 'Controle de insetos';
+      case 'fungicida':
+        return 'Controle de fungos';
+      case 'acaricida':
+        return 'Controle de ácaros';
+      default:
+        return 'Defensivo agrícola';
     }
   }
 

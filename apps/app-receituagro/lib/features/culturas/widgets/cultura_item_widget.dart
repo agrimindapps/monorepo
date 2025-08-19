@@ -14,65 +14,10 @@ class CulturaItemWidget extends StatelessWidget {
     required this.onTap,
   });
 
-  /// Deriva o grupo baseado no nome da cultura
-  String get _getCulturaGroup {
-    final culturaNome = cultura.cultura.toLowerCase();
-    
-    if (culturaNome.contains('soja') || culturaNome.contains('girassol') || culturaNome.contains('amendoim')) {
-      return 'Oleaginosas';
-    } else if (culturaNome.contains('milho') || culturaNome.contains('trigo') || culturaNome.contains('arroz') || culturaNome.contains('aveia')) {
-      return 'Cereais';
-    } else if (culturaNome.contains('feijão') || culturaNome.contains('lentilha') || culturaNome.contains('ervilha')) {
-      return 'Leguminosas';
-    } else if (culturaNome.contains('tomate') || culturaNome.contains('alface') || culturaNome.contains('batata') || culturaNome.contains('cenoura') || culturaNome.contains('repolho')) {
-      return 'Hortaliças';
-    } else if (culturaNome.contains('banana') || culturaNome.contains('laranja') || culturaNome.contains('maçã') || culturaNome.contains('uva') || culturaNome.contains('manga')) {
-      return 'Frutas';
-    } else if (culturaNome.contains('algodão')) {
-      return 'Fibras';
-    } else if (culturaNome.contains('café') || culturaNome.contains('cacau')) {
-      return 'Permanentes';
-    } else if (culturaNome.contains('cana')) {
-      return 'Industriais';
-    }
-    return 'Outras';
-  }
-
-  Color get _getGroupColor {
-    final group = _getCulturaGroup.toLowerCase();
-    if (group.contains('cereais') || group.contains('grãos')) {
-      return Colors.amber.shade700;
-    } else if (group.contains('frutas') || group.contains('frutíferas')) {
-      return Colors.orange.shade700;
-    } else if (group.contains('hortaliças') || group.contains('verduras')) {
-      return Colors.green.shade700;
-    } else if (group.contains('leguminosas') || group.contains('feijão')) {
-      return Colors.brown.shade600;
-    } else if (group.contains('oleaginosas') || group.contains('soja')) {
-      return Colors.yellow.shade700;
-    }
-    return const Color(0xFF2E7D32);
-  }
-
-  IconData get _getGroupIcon {
-    final group = _getCulturaGroup.toLowerCase();
-    if (group.contains('cereais') || group.contains('grãos')) {
-      return FontAwesomeIcons.wheatAwn;
-    } else if (group.contains('frutas') || group.contains('frutíferas')) {
-      return FontAwesomeIcons.apple;
-    } else if (group.contains('hortaliças') || group.contains('verduras')) {
-      return FontAwesomeIcons.carrot;
-    } else if (group.contains('leguminosas') || group.contains('feijão')) {
-      return FontAwesomeIcons.seedling;
-    } else if (group.contains('oleaginosas') || group.contains('soja')) {
-      return FontAwesomeIcons.leaf;
-    }
-    return FontAwesomeIcons.seedling;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final color = _getGroupColor;
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.primary;
     
     return Card(
       elevation: 2,
@@ -80,22 +25,12 @@ class CulturaItemWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isDark ? const Color(0xFF222228) : Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              colors: [
-                color.withValues(alpha: 0.1),
-                color.withValues(alpha: 0.05),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
           child: Row(
             children: [
               Container(
@@ -104,60 +39,23 @@ class CulturaItemWidget extends StatelessWidget {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: FaIcon(
-                  _getGroupIcon,
+                child: Icon(
+                  Icons.agriculture,
                   size: 20,
                   color: color,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cultura.cultura,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _getCulturaGroup,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: color,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'ID: ${cultura.idReg}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: color,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                child: Text(
+                  cultura.cultura,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 8),

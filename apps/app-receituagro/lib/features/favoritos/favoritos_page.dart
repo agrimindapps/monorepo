@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/praga_image_widget.dart';
 import '../../core/repositories/favoritos_hive_repository.dart';
 import '../../core/di/injection_container.dart';
 import 'services/favoritos_cache_service.dart';
@@ -119,10 +120,8 @@ class _FavoritosPageState extends State<FavoritosPage>
       subtitle: 'Seus itens salvos',
       leftIcon: Icons.favorite,
       showBackButton: false,
-      showActions: true,
+      showActions: false,
       isDark: isDark,
-      rightIcon: Icons.more_vert,
-      onRightIconPressed: () => _showMoreOptions(context),
     );
   }
 
@@ -361,64 +360,6 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  void _showMoreOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Opções dos Favoritos',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.refresh),
-              title: const Text('Atualizar Favoritos'),
-              subtitle: const Text('Recarrega dados dos favoritos'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _refreshFavorites();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.verified_user),
-              title: const Text('Validar Integridade'),
-              subtitle: const Text('Remove favoritos inválidos'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _validateFavoritesIntegrity();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.clear_all),
-              title: const Text('Limpar Cache'),
-              subtitle: const Text('Força recarregamento completo'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _clearCacheAndReload();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('Estatísticas'),
-              subtitle: const Text('Informações sobre os favoritos'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showStatistics();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildEmptyState(String title, String subtitle, IconData icon) {
     final theme = Theme.of(context);
@@ -623,17 +564,24 @@ class _FavoritosPageState extends State<FavoritosPage>
         ),
         child: Row(
           children: [
-            Container(
+            PragaImageWidget(
+              nomeCientifico: praga.nomeCientifico,
               width: 40,
               height: 40,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                praga.tipoPraga == '1' ? Icons.bug_report : Icons.coronavirus,
-                color: theme.colorScheme.secondary,
-                size: 20,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(8),
+              errorWidget: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  praga.tipoPraga == '1' ? Icons.bug_report : Icons.coronavirus,
+                  color: theme.colorScheme.secondary,
+                  size: 20,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -956,92 +904,4 @@ class _FavoritosPageState extends State<FavoritosPage>
     }
   }
 
-  /// Força atualização dos favoritos
-  Future<void> _refreshFavorites() async {
-    _cacheService.clearAllCache();
-    _loadFavoritos();
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Favoritos atualizados com sucesso'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  }
-
-  /// Limpa cache e recarrega tudo
-  Future<void> _clearCacheAndReload() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    _cacheService.clearAllCache();
-    await Future.delayed(const Duration(milliseconds: 500)); // Pequena pausa visual
-    _loadFavoritos();
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cache limpo e dados recarregados'),
-          backgroundColor: Colors.blue,
-        ),
-      );
-    }
-  }
-
-  /// Mostra estatísticas dos favoritos
-  void _showStatistics() {
-    final cacheStats = _cacheService.getCacheStats();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Estatísticas dos Favoritos'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStatItem('Defensivos favoritos', '${_favoritosDefensivos.length}'),
-            _buildStatItem('Pragas favoritas', '${_favoritosPragas.length}'),
-            _buildStatItem('Diagnósticos favoritos', '${_favoritosDiagnosticos.length}'),
-            const Divider(),
-            _buildStatItem('Total de favoritos', '${_favoritosDefensivos.length + _favoritosPragas.length + _favoritosDiagnosticos.length}'),
-            const Divider(),
-            const Text(
-              'Cache:',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            _buildStatItem('Status do cache', cacheStats['defensivos_cached'] == true ? 'Ativo' : 'Inativo'),
-            _buildStatItem('Entradas no cache', '${cacheStats['total_cache_entries']}'),
-            _buildStatItem('Tempo de vida', '${cacheStats['cache_lifetime_minutes']} min'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Constrói item das estatísticas
-  Widget _buildStatItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -123,14 +123,23 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
         return _convertToDefensivoItems(defensivos);
     }
   }
+
+  /// Valida se o nome do grupo é válido (mais de 2 caracteres após limpeza)
+  bool _isValidGroupName(String? name) {
+    if (name == null || name.isEmpty) return false;
+    final cleanName = name.trim().replaceAll(',', '').replaceAll(' ', '');
+    return cleanName.length > 2;
+  }
   
   /// Agrupa por fabricante
   List<DefensivoAgrupadoItemModel> _groupByFabricante(List<FitossanitarioHive> defensivos) {
     final grouped = <String, List<FitossanitarioHive>>{};
     
     for (final defensivo in defensivos) {
-      final fabricante = defensivo.fabricante ?? 'Fabricante Não Informado';
-      grouped.putIfAbsent(fabricante, () => []).add(defensivo);
+      final fabricante = defensivo.fabricante;
+      if (_isValidGroupName(fabricante)) {
+        grouped.putIfAbsent(fabricante!, () => []).add(defensivo);
+      }
     }
     
     return grouped.entries.map((entry) {
@@ -149,8 +158,10 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     final grouped = <String, List<FitossanitarioHive>>{};
     
     for (final defensivo in defensivos) {
-      final classe = defensivo.classeAgronomica ?? 'Classe Não Informada';
-      grouped.putIfAbsent(classe, () => []).add(defensivo);
+      final classe = defensivo.classeAgronomica;
+      if (_isValidGroupName(classe)) {
+        grouped.putIfAbsent(classe!, () => []).add(defensivo);
+      }
     }
     
     return grouped.entries.map((entry) {
@@ -169,8 +180,10 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     final grouped = <String, List<FitossanitarioHive>>{};
     
     for (final defensivo in defensivos) {
-      final ingrediente = defensivo.ingredienteAtivo ?? 'Ingrediente Não Informado';
-      grouped.putIfAbsent(ingrediente, () => []).add(defensivo);
+      final ingrediente = defensivo.ingredienteAtivo;
+      if (_isValidGroupName(ingrediente)) {
+        grouped.putIfAbsent(ingrediente!, () => []).add(defensivo);
+      }
     }
     
     return grouped.entries.map((entry) {
@@ -190,8 +203,10 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     final grouped = <String, List<FitossanitarioHive>>{};
     
     for (final defensivo in defensivos) {
-      final modo = defensivo.modoAcao ?? 'Modo de Ação Não Informado';
-      grouped.putIfAbsent(modo, () => []).add(defensivo);
+      final modo = defensivo.modoAcao;
+      if (_isValidGroupName(modo)) {
+        grouped.putIfAbsent(modo!, () => []).add(defensivo);
+      }
     }
     
     return grouped.entries.map((entry) {

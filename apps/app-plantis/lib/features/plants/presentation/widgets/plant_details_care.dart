@@ -14,72 +14,69 @@ class PlantDetailsCare extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Cuidados',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Cuidados',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.shadowColor.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildCareCard(
+                context,
+                icon: Icons.water_drop,
+                title: 'Rega',
+                interval: plant.config?.wateringIntervalDays,
+                unit: 'dias',
+                color: Colors.blue,
+                nextDate: _calculateNextWatering(),
+              ),
+              if (plant.config?.fertilizingIntervalDays != null) ...[
+                const SizedBox(height: 16),
                 _buildCareCard(
                   context,
-                  icon: Icons.water_drop,
-                  title: 'Rega',
-                  interval: plant.config?.wateringIntervalDays,
+                  icon: Icons.eco,
+                  title: 'Fertilização',
+                  interval: plant.config!.fertilizingIntervalDays!,
                   unit: 'dias',
-                  color: Colors.blue,
-                  nextDate: _calculateNextWatering(),
+                  color: PlantisColors.primary,
+                  nextDate: _calculateNextFertilizing(),
                 ),
-                if (plant.config?.fertilizingIntervalDays != null) ...[
-                  const SizedBox(height: 16),
-                  _buildCareCard(
-                    context,
-                    icon: Icons.eco,
-                    title: 'Fertilização',
-                    interval: plant.config!.fertilizingIntervalDays!,
-                    unit: 'dias',
-                    color: PlantisColors.primary,
-                    nextDate: _calculateNextFertilizing(),
-                  ),
-                ],
-                if (plant.config?.pruningIntervalDays != null) ...[
-                  const SizedBox(height: 16),
-                  _buildCareCard(
-                    context,
-                    icon: Icons.content_cut,
-                    title: 'Poda',
-                    interval: plant.config!.pruningIntervalDays!,
-                    unit: 'dias',
-                    color: Colors.orange,
-                    nextDate: _calculateNextPruning(),
-                  ),
-                ],
               ],
-            ),
+              if (plant.config?.pruningIntervalDays != null) ...[
+                const SizedBox(height: 16),
+                _buildCareCard(
+                  context,
+                  icon: Icons.content_cut,
+                  title: 'Poda',
+                  interval: plant.config!.pruningIntervalDays!,
+                  unit: 'dias',
+                  color: Colors.orange,
+                  nextDate: _calculateNextPruning(),
+                ),
+              ],
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

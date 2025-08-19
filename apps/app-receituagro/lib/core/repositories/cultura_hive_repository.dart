@@ -6,6 +6,7 @@ import 'base_hive_repository.dart';
 class CulturaHiveRepository extends BaseHiveRepository<CulturaHive> {
   CulturaHiveRepository() : super('receituagro_culturas');
 
+
   @override
   CulturaHive createFromJson(Map<String, dynamic> json) {
     return CulturaHive.fromJson(json);

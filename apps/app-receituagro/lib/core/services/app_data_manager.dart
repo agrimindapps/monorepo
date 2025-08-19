@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'hive_adapter_registry.dart';
 import 'data_initialization_service.dart';
 import 'asset_loader_service.dart';
@@ -104,13 +103,10 @@ class AppDataManager implements IAppDataManager {
     try {
       developer.log('Inicializando Hive...', name: 'AppDataManager');
       
-      // Obtém diretório de documentos para armazenamento
-      final appDocumentDir = await getApplicationDocumentsDirectory();
+      // Inicializa Hive com Flutter (usa configuração padrão multiplataforma)
+      await Hive.initFlutter();
       
-      // Inicializa Hive com Flutter
-      await Hive.initFlutter(appDocumentDir.path);
-      
-      developer.log('Hive inicializado no caminho: ${appDocumentDir.path}', name: 'AppDataManager');
+      developer.log('Hive inicializado com sucesso', name: 'AppDataManager');
       
     } catch (e) {
       developer.log('Erro ao inicializar Hive: $e', name: 'AppDataManager');

@@ -15,9 +15,7 @@ class PlantDetailsConfig extends StatelessWidget {
     final config = plant.config;
     
     if (config == null) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
+      return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -64,92 +62,88 @@ class PlantDetailsConfig extends StatelessWidget {
               ),
             ),
           ],
-        ),
       );
     }
     
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Configurações',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Configurações',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.shadowColor.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 2),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              if (config.lightRequirement != null) ...[
+                _buildConfigRow(
+                  context,
+                  icon: Icons.wb_sunny,
+                  label: 'Luminosidade',
+                  value: _getLightRequirementText(config.lightRequirement!),
+                  color: Colors.amber,
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (config.waterAmount != null) ...[
+                _buildConfigRow(
+                  context,
+                  icon: Icons.water_drop,
+                  label: 'Quantidade de água',
+                  value: config.waterAmount!,
+                  color: Colors.blue,
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (config.soilType != null) ...[
+                _buildConfigRow(
+                  context,
+                  icon: Icons.grass,
+                  label: 'Tipo de solo',
+                  value: config.soilType!,
+                  color: Colors.brown,
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (config.idealTemperature != null) ...[
+                _buildConfigRow(
+                  context,
+                  icon: Icons.thermostat,
+                  label: 'Temperatura ideal',
+                  value: '${config.idealTemperature!.toStringAsFixed(0)}°C',
+                  color: Colors.red,
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (config.idealHumidity != null) ...[
+                _buildConfigRow(
+                  context,
+                  icon: Icons.opacity,
+                  label: 'Umidade ideal',
+                  value: '${config.idealHumidity!.toStringAsFixed(0)}%',
+                  color: Colors.lightBlue,
                 ),
               ],
-            ),
-            child: Column(
-              children: [
-                if (config.lightRequirement != null) ...[
-                  _buildConfigRow(
-                    context,
-                    icon: Icons.wb_sunny,
-                    label: 'Luminosidade',
-                    value: _getLightRequirementText(config.lightRequirement!),
-                    color: Colors.amber,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (config.waterAmount != null) ...[
-                  _buildConfigRow(
-                    context,
-                    icon: Icons.water_drop,
-                    label: 'Quantidade de água',
-                    value: config.waterAmount!,
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (config.soilType != null) ...[
-                  _buildConfigRow(
-                    context,
-                    icon: Icons.grass,
-                    label: 'Tipo de solo',
-                    value: config.soilType!,
-                    color: Colors.brown,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (config.idealTemperature != null) ...[
-                  _buildConfigRow(
-                    context,
-                    icon: Icons.thermostat,
-                    label: 'Temperatura ideal',
-                    value: '${config.idealTemperature!.toStringAsFixed(0)}°C',
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (config.idealHumidity != null) ...[
-                  _buildConfigRow(
-                    context,
-                    icon: Icons.opacity,
-                    label: 'Umidade ideal',
-                    value: '${config.idealHumidity!.toStringAsFixed(0)}%',
-                    color: Colors.lightBlue,
-                  ),
-                ],
-              ],
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

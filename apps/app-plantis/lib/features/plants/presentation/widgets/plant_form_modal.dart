@@ -18,8 +18,6 @@ class PlantFormModal extends StatefulWidget {
 
 class _PlantFormModalState extends State<PlantFormModal> {
   late PlantFormProvider _provider;
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
 
   @override
   void initState() {
@@ -33,12 +31,6 @@ class _PlantFormModalState extends State<PlantFormModal> {
         _provider.initializeForAdd();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -111,30 +103,7 @@ class _PlantFormModalState extends State<PlantFormModal> {
             ),
           ),
           
-          // Page Indicator
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: (_currentPage + 1) / 2,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  '${_currentPage + 1} de 2',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           // Content
           Expanded(
@@ -180,95 +149,51 @@ class _PlantFormModalState extends State<PlantFormModal> {
                   );
                 }
 
-                return PageView(
-                  controller: _pageController,
-                  onPageChanged: (page) {
-                    setState(() {
-                      _currentPage = page;
-                    });
-                  },
-                  children: [
-                    // Página 1: Informações Básicas
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle('Informações Básicas'),
-                          const PlantFormBasicInfo(),
-                        ],
-                      ),
-                    ),
-                    
-                    // Página 2: Configurações de Cuidado
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle('Configurações de Cuidado'),
-                          const PlantFormCareConfig(),
-                        ],
-                      ),
-                    ),
-                  ],
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle('Informações Básicas'),
+                      const PlantFormBasicInfo(),
+                      
+                      const SizedBox(height: 32),
+                      
+                      _buildSectionTitle('Configurações de Cuidado'),
+                      const PlantFormCareConfig(),
+                      
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 );
               },
             ),
           ),
           
-          // Bottom Navigation
+          // Bottom Button
           Container(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                if (_currentPage > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        _pageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: const Text('Anterior'),
-                    ),
+            child: Consumer<PlantFormProvider>(
+              builder: (context, provider, child) {
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: provider.isValid && !provider.isSaving 
+                        ? () => _savePlant(context)
+                        : null,
+                    child: provider.isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(isEditing ? 'Atualizar Planta' : 'Salvar Planta'),
                   ),
-                if (_currentPage > 0) const SizedBox(width: 16),
-                Expanded(
-                  child: Consumer<PlantFormProvider>(
-                    builder: (context, provider, child) {
-                      if (_currentPage < 1) {
-                        return ElevatedButton(
-                          onPressed: () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          child: const Text('Próximo'),
-                        );
-                      } else {
-                        return ElevatedButton(
-                          onPressed: provider.isValid && !provider.isSaving 
-                              ? () => _savePlant(context)
-                              : null,
-                          child: provider.isSaving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(isEditing ? 'Atualizar' : 'Salvar'),
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ],
@@ -294,32 +219,30 @@ class _PlantFormModalState extends State<PlantFormModal> {
   Future<void> _savePlant(BuildContext context) async {
     final success = await _provider.savePlant();
     
+    if (!mounted) return;
+    
     if (success) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.plantId != null 
-                  ? 'Planta atualizada com sucesso!'
-                  : 'Planta adicionada com sucesso!',
-            ),
-            backgroundColor: Colors.green,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.plantId != null 
+                ? 'Planta atualizada com sucesso!'
+                : 'Planta adicionada com sucesso!',
           ),
-        );
-        Navigator.of(context).pop();
-      }
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.of(context).pop();
     } else {
-      if (mounted) {
-        final theme = Theme.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _provider.errorMessage ?? 'Erro ao salvar planta',
-            ),
-            backgroundColor: theme.colorScheme.error,
+      final theme = Theme.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _provider.errorMessage ?? 'Erro ao salvar planta',
           ),
-        );
-      }
+          backgroundColor: theme.colorScheme.error,
+        ),
+      );
     }
   }
 

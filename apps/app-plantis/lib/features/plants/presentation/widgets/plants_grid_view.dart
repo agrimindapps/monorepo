@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../domain/entities/plant.dart';
 import 'plant_card.dart';
 
@@ -14,16 +15,13 @@ class PlantsGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    return AlignedGridView.count(
       controller: scrollController,
       padding: const EdgeInsets.all(16),
       physics: const AlwaysScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _getCrossAxisCount(context),
-        childAspectRatio: 0.75, // Proporção mais alta para mostrar mais informações
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
+      crossAxisCount: _getCrossAxisCount(context),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
       itemCount: plants.length,
       itemBuilder: (context, index) {
         final plant = plants[index];

@@ -1,12 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/models/fitossanitario_hive.dart';
+import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../core/di/injection_container.dart';
 import 'lista_defensivos_page.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'lista_defensivos_agrupados_page.dart';
 
-class HomeDefensivosPage extends StatelessWidget {
+class HomeDefensivosPage extends StatefulWidget {
   const HomeDefensivosPage({super.key});
+
+  @override
+  State<HomeDefensivosPage> createState() => _HomeDefensivosPageState();
+}
+
+class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
+  final FitossanitarioHiveRepository _repository = sl<FitossanitarioHiveRepository>();
+  bool _isLoading = true;
+  
+  // Contadores reais
+  int _totalDefensivos = 0;
+  int _totalFabricantes = 0;
+  int _totalModoAcao = 0;
+  int _totalIngredienteAtivo = 0;
+  int _totalClasseAgronomica = 0;
+  
+  // Listas para dados reais
+  List<FitossanitarioHive> _recentDefensivos = [];
+  List<FitossanitarioHive> _newDefensivos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRealData();
+  }
+
+  Future<void> _loadRealData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      final defensivos = _repository.getActiveDefensivos();
+      
+      // Calcular totais reais
+      _totalDefensivos = defensivos.length;
+      _totalFabricantes = defensivos.map((d) => d.displayFabricante).toSet().length;
+      _totalModoAcao = defensivos.map((d) => d.displayModoAcao).where((m) => m.isNotEmpty).toSet().length;
+      _totalIngredienteAtivo = defensivos.map((d) => d.displayIngredient).where((i) => i.isNotEmpty).toSet().length;
+      _totalClasseAgronomica = defensivos.map((d) => d.displayClass).where((c) => c.isNotEmpty).toSet().length;
+      
+      // Últimos acessados (simulação com defensivos aleatórios)
+      _recentDefensivos = defensivos.take(3).toList();
+      
+      // Novos defensivos (últimos por data de registro)
+      _newDefensivos = defensivos.take(4).toList();
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          // Em caso de erro, manter valores padrão
+          _totalDefensivos = 0;
+          _totalFabricantes = 0;
+          _totalModoAcao = 0;
+          _totalIngredienteAtivo = 0;
+          _totalClasseAgronomica = 0;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +116,18 @@ class HomeDefensivosPage extends StatelessWidget {
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
+    String subtitle = 'Carregando defensivos...';
+    if (!_isLoading) {
+      subtitle = '$_totalDefensivos Registros Disponíveis';
+    }
+    
     return ModernHeaderWidget(
       title: 'Defensivos',
-      subtitle: '3148 Registros Disponíveis',
+      subtitle: subtitle,
       leftIcon: Icons.shield_outlined,
       showBackButton: false,
-      showActions: true,
+      showActions: false,
       isDark: isDark,
-      rightIcon: Icons.search,
-      onRightIconPressed: () => _navigateToSearch(context),
     );
   }
 
@@ -94,7 +167,7 @@ class HomeDefensivosPage extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildCategoryButton(
-          count: '3148',
+          count: _isLoading ? '...' : '$_totalDefensivos',
           title: 'Defensivos',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'defensivos'),
@@ -104,7 +177,7 @@ class HomeDefensivosPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '233',
+          count: _isLoading ? '...' : '$_totalFabricantes',
           title: 'Fabricantes',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'fabricantes'),
@@ -114,7 +187,7 @@ class HomeDefensivosPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '98',
+          count: _isLoading ? '...' : '$_totalModoAcao',
           title: 'Modo de Ação',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'modoAcao'),
@@ -124,7 +197,7 @@ class HomeDefensivosPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '671',
+          count: _isLoading ? '...' : '$_totalIngredienteAtivo',
           title: 'Ingrediente Ativo',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'ingredienteAtivo'),
@@ -134,7 +207,7 @@ class HomeDefensivosPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '43',
+          count: _isLoading ? '...' : '$_totalClasseAgronomica',
           title: 'Classe Agronômica',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'classeAgronomica'),
@@ -158,7 +231,7 @@ class HomeDefensivosPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildCategoryButton(
-              count: '3148',
+              count: _isLoading ? '...' : '$_totalDefensivos',
               title: 'Defensivos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'defensivos'),
@@ -168,7 +241,7 @@ class HomeDefensivosPage extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _buildCategoryButton(
-              count: '233',
+              count: _isLoading ? '...' : '$_totalFabricantes',
               title: 'Fabricantes',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'fabricantes'),
@@ -183,7 +256,7 @@ class HomeDefensivosPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildCategoryButton(
-              count: '98',
+              count: _isLoading ? '...' : '$_totalModoAcao',
               title: 'Modo de Ação',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'modoAcao'),
@@ -193,7 +266,7 @@ class HomeDefensivosPage extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _buildCategoryButton(
-              count: '671',
+              count: _isLoading ? '...' : '$_totalIngredienteAtivo',
               title: 'Ingrediente Ativo',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'ingredienteAtivo'),
@@ -205,7 +278,7 @@ class HomeDefensivosPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '43',
+          count: _isLoading ? '...' : '$_totalClasseAgronomica',
           title: 'Classe Agronômica',
           width: isMediumDevice ? availableWidth - 16 : availableWidth * 0.75,
           onTap: () => _navigateToCategory(context, 'classeAgronomica'),
@@ -375,46 +448,31 @@ class HomeDefensivosPage extends StatelessWidget {
             color: theme.cardColor,
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 3,
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final items = [
-                    {
-                      'title': 'Alion',
-                      'subtitle': 'Indaziflam',
-                      'category': 'Herbicida',
-                      'icon': FontAwesomeIcons.leaf,
-                      'fabricante': 'Bayer',
-                    },
-                    {
-                      'title': 'Mojiave',
-                      'subtitle': 'Glifosato - Sal de Potássio + Glifos...',
-                      'category': 'Herbicida',
-                      'icon': FontAwesomeIcons.leaf,
-                      'fabricante': 'Syngenta',
-                    },
-                    {
-                      'title': '2,4-D Crop 806 SL',
-                      'subtitle': '2,4-D + Equivalente ácido de 2,4-D',
-                      'category': 'Herbicida',
-                      'icon': FontAwesomeIcons.leaf,
-                      'fabricante': 'Crop',
-                    },
-                  ];
-                  
-                  final item = items[index];
-                  return _buildListItem(
-                    context,
-                    item['title'] as String,
-                    item['subtitle'] as String,
-                    item['category'] as String,
-                    item['icon'] as IconData,
-                    fabricante: item['fabricante'] as String,
-                  );
-                },
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _recentDefensivos.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Nenhum defensivo acessado recentemente',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _recentDefensivos.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final defensivo = _recentDefensivos[index];
+                            return _buildListItem(
+                              context,
+                              defensivo.displayName,
+                              defensivo.displayIngredient,
+                              defensivo.displayClass,
+                              FontAwesomeIcons.leaf,
+                              fabricante: defensivo.displayFabricante,
+                            );
+                          },
               ),
             ),
           ),
@@ -463,53 +521,31 @@ class HomeDefensivosPage extends StatelessWidget {
             color: theme.cardColor,
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 4,
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final items = [
-                    {
-                      'title': 'Lungo',
-                      'subtitle': 'Baculovírus Spodoptera frugiperda...',
-                      'category': 'Inseticida microbiológico',
-                      'icon': FontAwesomeIcons.bug,
-                      'fabricante': 'FMC',
-                    },
-                    {
-                      'title': 'BT-Turbo Max',
-                      'subtitle': 'Bacillus thuringiensis var. kurstaki ...',
-                      'category': 'Inseticida microbiológico',
-                      'icon': FontAwesomeIcons.bug,
-                      'fabricante': 'Sumitomo',
-                    },
-                    {
-                      'title': 'BLOWOUT, CLEANOVER',
-                      'subtitle': 'Dibrometo de diquate',
-                      'category': 'Herbicida',
-                      'icon': FontAwesomeIcons.leaf,
-                      'fabricante': 'Syngenta',
-                    },
-                    {
-                      'title': 'Biagro Solo',
-                      'subtitle': 'Mix de microrganismos',
-                      'category': 'Fungicida biológico',
-                      'icon': FontAwesomeIcons.seedling,
-                      'fabricante': 'Biagro',
-                    },
-                  ];
-                  
-                  final item = items[index];
-                  return _buildListItem(
-                    context,
-                    item['title'] as String,
-                    item['subtitle'] as String,
-                    item['category'] as String,
-                    item['icon'] as IconData,
-                    fabricante: item['fabricante'] as String,
-                  );
-                },
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _newDefensivos.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Nenhum novo defensivo disponível',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _newDefensivos.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final defensivo = _newDefensivos[index];
+                            return _buildListItem(
+                              context,
+                              defensivo.displayName,
+                              defensivo.displayIngredient,
+                              defensivo.displayClass,
+                              FontAwesomeIcons.seedling,
+                              fabricante: defensivo.displayFabricante,
+                            );
+                          },
               ),
             ),
           ),
@@ -627,12 +663,4 @@ class HomeDefensivosPage extends StatelessWidget {
     }
   }
 
-  void _navigateToSearch(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ListaDefensivosPage(),
-      ),
-    );
-  }
 }

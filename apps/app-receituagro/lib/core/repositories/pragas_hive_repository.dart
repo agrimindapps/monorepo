@@ -6,6 +6,7 @@ import 'base_hive_repository.dart';
 class PragasHiveRepository extends BaseHiveRepository<PragasHive> {
   PragasHiveRepository() : super('receituagro_pragas');
 
+
   @override
   PragasHive createFromJson(Map<String, dynamic> json) {
     return PragasHive.fromJson(json);

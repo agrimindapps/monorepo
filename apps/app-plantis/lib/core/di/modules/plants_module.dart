@@ -10,6 +10,8 @@ import '../../../features/plants/data/repositories/plants_repository_impl.dart';
 import '../../../features/plants/presentation/providers/plants_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../../features/plants/presentation/providers/plant_form_provider.dart';
+import '../../../features/plants/presentation/providers/plant_task_provider.dart';
+import '../../../features/plants/domain/services/task_generation_service.dart';
 
 class PlantsDIModule {
   static void init(GetIt sl) {
@@ -63,6 +65,14 @@ class PlantsDIModule {
       addPlantUseCase: sl(),
       updatePlantUseCase: sl(),
       imageService: sl(),
+    ));
+    
+    // Task generation service
+    sl.registerLazySingleton(() => TaskGenerationService());
+    
+    // Plant task provider
+    sl.registerFactory(() => PlantTaskProvider(
+      taskGenerationService: sl(),
     ));
   }
 }

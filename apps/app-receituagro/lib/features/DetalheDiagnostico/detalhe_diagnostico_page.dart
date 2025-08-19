@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/praga_image_widget.dart';
 import '../../core/models/diagnostico_hive.dart';
 import '../../core/repositories/diagnostico_hive_repository.dart';
 import '../../core/repositories/favoritos_hive_repository.dart';
@@ -424,17 +425,24 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
           ),
           child: Column(
             children: [
-              Container(
+              PragaImageWidget(
+                nomeCientifico: widget.nomePraga,
                 width: double.infinity,
                 height: 200,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  FontAwesomeIcons.image,
-                  size: 64,
-                  color: theme.colorScheme.onSurfaceVariant,
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(12),
+                errorWidget: Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    FontAwesomeIcons.image,
+                    size: 64,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

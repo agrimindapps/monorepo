@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/praga_image_widget.dart';
+import '../../core/models/pragas_hive.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
+import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/di/injection_container.dart';
 import 'detalhe_praga_page.dart';
 import 'lista_pragas_page.dart';
 import '../culturas/lista_culturas_page.dart';
@@ -13,12 +18,72 @@ class HomePragasPage extends StatefulWidget {
 
 class _HomePragasPageState extends State<HomePragasPage> {
   final PageController _pageController = PageController(viewportFraction: 0.6);
+  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+  
   int _currentCarouselIndex = 0;
+  bool _isLoading = true;
+  
+  // Contadores reais
+  int _totalInsetos = 0;
+  int _totalDoencas = 0;
+  int _totalPlantas = 0;
+  int _totalCulturas = 0;
+  
+  // Listas para dados reais
+  List<PragasHive> _recentPragas = [];
+  List<PragasHive> _suggestedPragas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRealData();
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadRealData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      final pragas = _pragasRepository.getAll();
+      final culturas = _culturaRepository.getAll();
+      
+      // Calcular totais reais por tipo de praga
+      _totalInsetos = pragas.where((p) => p.tipoPraga == '1').length;
+      _totalDoencas = pragas.where((p) => p.tipoPraga == '2').length;
+      _totalPlantas = pragas.where((p) => p.tipoPraga == '3').length;
+      _totalCulturas = culturas.length;
+      
+      // Últimas pragas acessadas (simulação com pragas aleatórias)
+      _recentPragas = pragas.take(7).toList();
+      
+      // Sugestões de pragas para o carrossel
+      _suggestedPragas = pragas.take(5).toList();
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          // Em caso de erro, manter valores padrão
+          _totalInsetos = 0;
+          _totalDoencas = 0;
+          _totalPlantas = 0;
+          _totalCulturas = 0;
+        });
+      }
+    }
   }
 
   @override
@@ -59,15 +124,19 @@ class _HomePragasPageState extends State<HomePragasPage> {
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
+    String subtitle = 'Carregando pragas...';
+    if (!_isLoading) {
+      final total = _totalInsetos + _totalDoencas + _totalPlantas;
+      subtitle = 'Identifique e controle $total pragas';
+    }
+    
     return ModernHeaderWidget(
       title: 'Pragas e Doenças',
-      subtitle: 'Identifique e controle 1139 pragas',
+      subtitle: subtitle,
       leftIcon: Icons.pest_control,
       showBackButton: false,
-      showActions: true,
+      showActions: false,
       isDark: isDark,
-      rightIcon: Icons.search,
-      onRightIconPressed: () => _navigateToSearch(context),
     );
   }
 
@@ -107,7 +176,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildCategoryButton(
-          count: '389',
+          count: _isLoading ? '...' : '$_totalInsetos',
           title: 'Insetos',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'insetos'),
@@ -116,7 +185,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '391',
+          count: _isLoading ? '...' : '$_totalDoencas',
           title: 'Doenças',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'doencas'),
@@ -125,7 +194,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '359',
+          count: _isLoading ? '...' : '$_totalPlantas',
           title: 'Plantas',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'plantas'),
@@ -134,7 +203,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '210',
+          count: _isLoading ? '...' : '$_totalCulturas',
           title: 'Culturas',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'culturas'),
@@ -157,7 +226,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildCategoryButton(
-              count: '389',
+              count: _isLoading ? '...' : '$_totalInsetos',
               title: 'Insetos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'insetos'),
@@ -166,7 +235,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
             ),
             const SizedBox(width: 8),
             _buildCategoryButton(
-              count: '391',
+              count: _isLoading ? '...' : '$_totalDoencas',
               title: 'Doenças',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'doencas'),
@@ -175,7 +244,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
             ),
             const SizedBox(width: 8),
             _buildCategoryButton(
-              count: '359',
+              count: _isLoading ? '...' : '$_totalPlantas',
               title: 'Plantas',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'plantas'),
@@ -186,7 +255,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: '210',
+          count: _isLoading ? '...' : '$_totalCulturas',
           title: 'Culturas',
           width: isMediumDevice ? availableWidth - 16 : availableWidth * 0.75,
           onTap: () => _navigateToCategory(context, 'culturas'),
@@ -395,22 +464,37 @@ class _HomePragasPageState extends State<HomePragasPage> {
 
   Widget _buildItemBackground(Map<String, dynamic> suggestion) {
     final theme = Theme.of(context);
-    final itemColor = _getColorForType(suggestion['type'] as String, context);
     
     return Container(
-      color: itemColor.withValues(alpha: 0.8),
-      child: Center(
-        child: Container(
-          width: 80,
-          height: 80,
+      width: double.infinity,
+      height: double.infinity,
+      child: PragaImageWidget(
+        nomeCientifico: suggestion['scientific'] as String,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(12),
+        errorWidget: Container(
+          width: double.infinity,
+          height: double.infinity,
           decoration: BoxDecoration(
-            color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(40),
+            color: _getColorForType(suggestion['type'] as String, context).withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Text(
-              suggestion['emoji'] as String,
-              style: const TextStyle(fontSize: 48),
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: Center(
+                child: Text(
+                  suggestion['emoji'] as String,
+                  style: const TextStyle(fontSize: 48),
+                ),
+              ),
             ),
           ),
         ),
@@ -425,14 +509,19 @@ class _HomePragasPageState extends State<HomePragasPage> {
       right: 0,
       child: Container(
         decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+          ),
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              Theme.of(context).shadowColor.withValues(alpha: 0.8),
+              Colors.black.withValues(alpha: 0.8),
+              Colors.black.withValues(alpha: 0.3),
               Colors.transparent,
             ],
-            stops: const [0.0, 0.9],
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         padding: const EdgeInsets.all(16),
@@ -441,20 +530,35 @@ class _HomePragasPageState extends State<HomePragasPage> {
           children: [
             Text(
               suggestion['name'] as String,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.surface,
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    blurRadius: 2.0,
+                    color: Colors.black,
+                    offset: Offset(0, 1),
+                  ),
+                ],
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+            const SizedBox(height: 2),
             Text(
               suggestion['scientific'] as String,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 14,
                 fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    blurRadius: 2.0,
+                    color: Colors.black,
+                    offset: Offset(0, 1),
+                  ),
+                ],
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -472,29 +576,62 @@ class _HomePragasPageState extends State<HomePragasPage> {
   }
 
   Widget _buildTypeTag(Map<String, dynamic> suggestion) {
-    final theme = Theme.of(context);
+    IconData icon;
+    Color backgroundColor;
+    
+    switch (suggestion['type'] as String) {
+      case 'Inseto':
+        icon = Icons.bug_report;
+        backgroundColor = Colors.red.withValues(alpha: 0.9);
+        break;
+      case 'Doença':
+        icon = Icons.coronavirus;
+        backgroundColor = Colors.orange.withValues(alpha: 0.9);
+        break;
+      case 'Planta':
+        icon = Icons.grass;
+        backgroundColor = Colors.green.withValues(alpha: 0.9);
+        break;
+      default:
+        icon = Icons.help;
+        backgroundColor = Colors.grey.withValues(alpha: 0.9);
+    }
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.3),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            suggestion['type'] == 'Inseto' ? Icons.bug_report : Icons.coronavirus,
-            color: theme.colorScheme.onSurface,
+            icon,
+            color: Colors.white,
             size: 14,
           ),
           const SizedBox(width: 4),
           Text(
             suggestion['type'] as String,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
+              shadows: [
+                Shadow(
+                  blurRadius: 1.0,
+                  color: Colors.black,
+                  offset: Offset(0, 0.5),
+                ),
+              ],
             ),
           ),
         ],
@@ -588,38 +725,36 @@ class _HomePragasPageState extends State<HomePragasPage> {
   }
 
   List<Map<String, dynamic>> _getSuggestionsList() {
-    return [
-      {
-        'name': 'Cochonilha',
-        'scientific': 'Planococcus minor',
-        'type': 'Inseto',
-        'emoji': '🐛',
-      },
-      {
-        'name': 'Mancha Branca',
-        'scientific': 'Pseudomonas syringae',
-        'type': 'Doença',
-        'emoji': '🟤',
-      },
-      {
-        'name': 'Ferrugem',
-        'scientific': 'Phakopsora pachyrhizi',
-        'type': 'Doença',
-        'emoji': '🟠',
-      },
-      {
-        'name': 'Lagarta',
-        'scientific': 'Spodoptera frugiperda',
-        'type': 'Inseto',
-        'emoji': '🐛',
-      },
-      {
-        'name': 'Oídio',
-        'scientific': 'Erysiphe necator',
-        'type': 'Doença',
-        'emoji': '⚪',
-      },
-    ];
+    if (_isLoading || _suggestedPragas.isEmpty) {
+      return [];
+    }
+    
+    return _suggestedPragas.map((praga) {
+      String emoji = '🐛';
+      String type = 'Inseto';
+      
+      switch (praga.tipoPraga) {
+        case '1':
+          emoji = '🐛';
+          type = 'Inseto';
+          break;
+        case '2':
+          emoji = '🦠';
+          type = 'Doença';
+          break;
+        case '3':
+          emoji = '🌿';
+          type = 'Planta';
+          break;
+      }
+      
+      return {
+        'name': praga.nomeComum,
+        'scientific': praga.nomeCientifico,
+        'type': type,
+        'emoji': emoji,
+      };
+    }).toList();
   }
 
   Widget _buildRecentAccessSection(BuildContext context) {
@@ -652,66 +787,45 @@ class _HomePragasPageState extends State<HomePragasPage> {
           ),
         ),
         const SizedBox(height: 12),
-        Column(
-          children: [
-            _buildPragaItem(
-              context,
-              'Podridão',
-              'Phoma exigua var. exigua',
-              'Doença',
-              _getColorForType('Doença', context),
-              '🟤', // Emoji como placeholder para imagem
-            ),
-            _buildPragaItem(
-              context,
-              'Broca',
-              'Etiella zinckenella',
-              'Inseto',
-              _getColorForType('Inseto', context),
-              '🐛',
-            ),
-            _buildPragaItem(
-              context,
-              'Besouro',
-              'Cathartus quadricollis',
-              'Inseto',
-              _getColorForType('Inseto', context),
-              '🪲',
-            ),
-            _buildPragaItem(
-              context,
-              'Lagarta',
-              'Bonagota cranaodes',
-              'Inseto',
-              _getColorForType('Inseto', context),
-              '🐛',
-            ),
-            _buildPragaItem(
-              context,
-              'Tripes',
-              'Thrips palmi',
-              'Inseto',
-              _getColorForType('Inseto', context),
-              '🦗',
-            ),
-            _buildPragaItem(
-              context,
-              'Erva',
-              'Polygonum aviculare',
-              'Planta',
-              _getColorForType('Planta', context),
-              '🌿',
-            ),
-            _buildPragaItem(
-              context,
-              'Apaga',
-              'Alternanthera tenella',
-              'Planta',
-              _getColorForType('Planta', context),
-              '🌱',
-            ),
-          ],
-        ),
+        _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _recentPragas.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Nenhuma praga acessada recentemente',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  )
+                : Column(
+                    children: _recentPragas.map((praga) {
+                      String emoji = '🐛';
+                      String type = 'Inseto';
+                      
+                      switch (praga.tipoPraga) {
+                        case '1':
+                          emoji = '🐛';
+                          type = 'Inseto';
+                          break;
+                        case '2':
+                          emoji = '🦠';
+                          type = 'Doença';
+                          break;
+                        case '3':
+                          emoji = '🌿';
+                          type = 'Planta';
+                          break;
+                      }
+                      
+                      return _buildPragaItem(
+                        context,
+                        praga.nomeComum,
+                        praga.nomeCientifico,
+                        type,
+                        _getColorForType(type, context),
+                        emoji,
+                      );
+                    }).toList(),
+                  ),
       ],
     );
   }
@@ -741,17 +855,24 @@ class _HomePragasPageState extends State<HomePragasPage> {
           child: Row(
             children: [
               // Foto/Imagem circular
-              Container(
+              PragaImageWidget(
+                nomeCientifico: scientificName,
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
-                  color: categoryColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 24),
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(24),
+                errorWidget: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: categoryColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      emoji,
+                      style: const TextStyle(fontSize: 24),
+                    ),
                   ),
                 ),
               ),
@@ -828,14 +949,6 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  void _navigateToSearch(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ListaPragasPage(),
-      ),
-    );
-  }
 
   void _navigateToCategory(BuildContext context, String category) {
     switch (category) {
@@ -848,12 +961,26 @@ class _HomePragasPageState extends State<HomePragasPage> {
         );
         break;
       case 'insetos':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ListaPragasPage(pragaType: '1'), // Tipo 1 = Insetos
+          ),
+        );
+        break;
       case 'doencas':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ListaPragasPage(pragaType: '2'), // Tipo 2 = Doenças
+          ),
+        );
+        break;
       case 'plantas':
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const ListaPragasPage(),
+            builder: (context) => const ListaPragasPage(pragaType: '3'), // Tipo 3 = Plantas Daninhas
           ),
         );
         break;

@@ -424,6 +424,18 @@ class PlantFormProvider extends ChangeNotifier {
       _fertilizingIntervalDays = config.fertilizingIntervalDays;
       _pruningIntervalDays = config.pruningIntervalDays;
       _waterAmount = config.waterAmount;
+      
+      // Load new care configuration fields
+      _sunlightIntervalDays = config.sunlightCheckIntervalDays;
+      _enableSunlightCare = config.sunlightCheckIntervalDays != null;
+      
+      _pestInspectionIntervalDays = config.pestInspectionIntervalDays;
+      _enablePestInspection = config.pestInspectionIntervalDays != null;
+      
+      _enablePruning = config.pruningIntervalDays != null;
+      
+      _replantingIntervalDays = config.replantingIntervalDays;
+      _enableReplanting = config.replantingIntervalDays != null;
     } else {
       _clearConfig();
     }
@@ -468,7 +480,10 @@ class PlantFormProvider extends ChangeNotifier {
         ? PlantConfig(
             wateringIntervalDays: _wateringIntervalDays,
             fertilizingIntervalDays: _fertilizingIntervalDays,
-            pruningIntervalDays: _pruningIntervalDays,
+            pruningIntervalDays: (_enablePruning == true) ? _pruningIntervalDays : null,
+            sunlightCheckIntervalDays: (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
+            pestInspectionIntervalDays: (_enablePestInspection == true) ? _pestInspectionIntervalDays : null,
+            replantingIntervalDays: (_enableReplanting == true) ? _replantingIntervalDays : null,
             waterAmount: _waterAmount,
           )
         : null;
@@ -490,7 +505,10 @@ class PlantFormProvider extends ChangeNotifier {
         ? PlantConfig(
             wateringIntervalDays: _wateringIntervalDays,
             fertilizingIntervalDays: _fertilizingIntervalDays,
-            pruningIntervalDays: _pruningIntervalDays,
+            pruningIntervalDays: (_enablePruning == true) ? _pruningIntervalDays : null,
+            sunlightCheckIntervalDays: (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
+            pestInspectionIntervalDays: (_enablePestInspection == true) ? _pestInspectionIntervalDays : null,
+            replantingIntervalDays: (_enableReplanting == true) ? _replantingIntervalDays : null,
             waterAmount: _waterAmount,
           )
         : null;
@@ -511,7 +529,10 @@ class PlantFormProvider extends ChangeNotifier {
   bool _hasConfigData() {
     return _wateringIntervalDays != null ||
            _fertilizingIntervalDays != null ||
-           _pruningIntervalDays != null ||
+           (_enablePruning == true && _pruningIntervalDays != null) ||
+           (_enableSunlightCare == true && _sunlightIntervalDays != null) ||
+           (_enablePestInspection == true && _pestInspectionIntervalDays != null) ||
+           (_enableReplanting == true && _replantingIntervalDays != null) ||
            _waterAmount != null;
   }
 

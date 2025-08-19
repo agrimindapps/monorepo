@@ -63,6 +63,9 @@ class Plant extends BaseSyncEntity {
         'watering_interval_days': config!.wateringIntervalDays,
         'fertilizing_interval_days': config!.fertilizingIntervalDays,
         'pruning_interval_days': config!.pruningIntervalDays,
+        'sunlight_check_interval_days': config!.sunlightCheckIntervalDays,
+        'pest_inspection_interval_days': config!.pestInspectionIntervalDays,
+        'replanting_interval_days': config!.replantingIntervalDays,
         'light_requirement': config!.lightRequirement,
         'water_amount': config!.waterAmount,
         'soil_type': config!.soilType,
@@ -168,6 +171,9 @@ class PlantConfig extends Equatable {
   final int? wateringIntervalDays;
   final int? fertilizingIntervalDays;
   final int? pruningIntervalDays;
+  final int? sunlightCheckIntervalDays;
+  final int? pestInspectionIntervalDays;
+  final int? replantingIntervalDays;
   final String? lightRequirement; // 'low', 'medium', 'high'
   final String? waterAmount; // 'little', 'moderate', 'plenty'
   final String? soilType;
@@ -178,6 +184,9 @@ class PlantConfig extends Equatable {
     this.wateringIntervalDays,
     this.fertilizingIntervalDays,
     this.pruningIntervalDays,
+    this.sunlightCheckIntervalDays,
+    this.pestInspectionIntervalDays,
+    this.replantingIntervalDays,
     this.lightRequirement,
     this.waterAmount,
     this.soilType,
@@ -188,11 +197,17 @@ class PlantConfig extends Equatable {
   bool get hasWateringSchedule => wateringIntervalDays != null && wateringIntervalDays! > 0;
   bool get hasFertilizingSchedule => fertilizingIntervalDays != null && fertilizingIntervalDays! > 0;
   bool get hasPruningSchedule => pruningIntervalDays != null && pruningIntervalDays! > 0;
+  bool get hasSunlightCheckSchedule => sunlightCheckIntervalDays != null && sunlightCheckIntervalDays! > 0;
+  bool get hasPestInspectionSchedule => pestInspectionIntervalDays != null && pestInspectionIntervalDays! > 0;
+  bool get hasReplantingSchedule => replantingIntervalDays != null && replantingIntervalDays! > 0;
   
   PlantConfig copyWith({
     int? wateringIntervalDays,
     int? fertilizingIntervalDays,
     int? pruningIntervalDays,
+    int? sunlightCheckIntervalDays,
+    int? pestInspectionIntervalDays,
+    int? replantingIntervalDays,
     String? lightRequirement,
     String? waterAmount,
     String? soilType,
@@ -203,6 +218,9 @@ class PlantConfig extends Equatable {
       wateringIntervalDays: wateringIntervalDays ?? this.wateringIntervalDays,
       fertilizingIntervalDays: fertilizingIntervalDays ?? this.fertilizingIntervalDays,
       pruningIntervalDays: pruningIntervalDays ?? this.pruningIntervalDays,
+      sunlightCheckIntervalDays: sunlightCheckIntervalDays ?? this.sunlightCheckIntervalDays,
+      pestInspectionIntervalDays: pestInspectionIntervalDays ?? this.pestInspectionIntervalDays,
+      replantingIntervalDays: replantingIntervalDays ?? this.replantingIntervalDays,
       lightRequirement: lightRequirement ?? this.lightRequirement,
       waterAmount: waterAmount ?? this.waterAmount,
       soilType: soilType ?? this.soilType,
@@ -216,6 +234,9 @@ class PlantConfig extends Equatable {
     wateringIntervalDays,
     fertilizingIntervalDays,
     pruningIntervalDays,
+    sunlightCheckIntervalDays,
+    pestInspectionIntervalDays,
+    replantingIntervalDays,
     lightRequirement,
     waterAmount,
     soilType,

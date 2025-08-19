@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/widgets/praga_image_widget.dart';
 
 /// Widget especializado para exibir uma praga por cultura
 /// Mostra dados integrados de PragasHive + DiagnosticoHive relacionados
@@ -54,22 +55,31 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: pragaPorCultura.isCritica 
-                  ? [Colors.red.shade400, Colors.red.shade600]
-                  : [Colors.orange.shade400, Colors.orange.shade600],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        PragaImageWidget(
+          nomeCientifico: pragaPorCultura.praga.nomeCientifico,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          borderRadius: BorderRadius.circular(12),
+          errorWidget: Container(
+            width: 60,
+            height: 60,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: pragaPorCultura.isCritica 
+                    ? [Colors.red.shade400, Colors.red.shade600]
+                    : [Colors.orange.shade400, Colors.orange.shade600],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
             ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            pragaPorCultura.isCritica ? Icons.dangerous : FontAwesomeIcons.bug,
-            color: Colors.white,
-            size: 24,
+            child: Icon(
+              pragaPorCultura.isCritica ? Icons.dangerous : FontAwesomeIcons.bug,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
         ),
         const SizedBox(width: 16),

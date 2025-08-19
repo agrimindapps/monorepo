@@ -16,7 +16,7 @@ class PlantsListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: plants.length,
       itemBuilder: (context, index) {

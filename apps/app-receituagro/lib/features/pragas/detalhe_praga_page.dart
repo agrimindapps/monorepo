@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/praga_image_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/services/comentarios_service.dart';
@@ -348,6 +349,49 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Imagem da praga
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              child: PragaImageWidget(
+                nomeCientifico: widget.pragaScientificName,
+                width: 200,
+                height: 200,
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(16),
+                errorWidget: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.bug_report,
+                        color: Colors.grey.shade400,
+                        size: 64,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Imagem não disponível',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           _buildInfoSection(
             'Informações da Planta',
             Icons.eco,

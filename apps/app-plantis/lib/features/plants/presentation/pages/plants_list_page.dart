@@ -109,7 +109,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
         // ChangeNotifierProvider.value(value: _spacesProvider),
       ],
       child: Scaffold(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: theme.brightness == Brightness.dark 
+          ? const Color(0xFF1C1C1E) 
+          : theme.colorScheme.surface,
         body: SafeArea(
           child: Column(
             children: [

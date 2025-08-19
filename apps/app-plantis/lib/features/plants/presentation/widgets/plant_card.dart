@@ -19,148 +19,153 @@ class PlantCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: isDark 
+          ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
+          : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: isDark 
+              ? Colors.black.withValues(alpha: 0.3)
+              : Colors.black.withValues(alpha: 0.08),
+            blurRadius: isDark ? 8 : 12,
+            offset: const Offset(0, 4),
+            spreadRadius: isDark ? 0 : 2,
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: onTap ?? () => context.push('/plants/${plant.id}'),
-        borderRadius: BorderRadius.circular(12),
-        child: Row(
-          children: [
-            // Ícone da planta
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: _buildPlantIcon(),
-            ),
-            
-            const SizedBox(width: 16),
-            
-            // Informações da planta
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Nome da planta
-                  Text(
-                    plant.displayName,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  
-                  const SizedBox(height: 4),
-                  
-                  // Espécie + localização
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          plant.displaySpecies,
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap ?? () => context.push('/plants/${plant.id}'),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header com menu
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => _showPlantMenu(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.more_vert,
+                          color: isDark 
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          size: 20,
                         ),
                       ),
-                      if (plant.spaceId != null) ...[
-                        Text(
-                          ' • ',
-                          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 14),
-                        ),
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.location_on,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                size: 14,
-                              ),
-                              const SizedBox(width: 2),
-                              Expanded(
-                                child: Text(
-                                  'Espaço ${plant.spaceId}',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // Avatar da planta centralizado
+                Center(
+                  child: _buildPlantAvatar(),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Nome da planta
+                Text(
+                  plant.displayName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                    fontSize: 18,
                   ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Badge de cuidados pendentes
-                  _buildPendingTasksBadge(),
-                ],
-              ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 4),
+                
+                // Espécie
+                Text(
+                  plant.displaySpecies,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: isDark 
+                      ? Colors.white.withValues(alpha: 0.7)
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Badge de cuidados pendentes
+                Center(
+                  child: _buildPendingTasksBadge(),
+                ),
+              ],
             ),
-            
-            // Menu de três pontos
-            IconButton(
-              onPressed: () => _showPlantMenu(context),
-              icon: Icon(
-                Icons.more_vert,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                size: 20,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPlantIcon() {
+  Widget _buildPlantAvatar() {
+    const size = 80.0;
+    
     if (plant.hasImage) {
       try {
         final imageBytes = base64Decode(plant.imageBase64!);
         return ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(size / 2),
           child: Image.memory(
             imageBytes,
+            width: size,
+            height: size,
             fit: BoxFit.cover,
-            width: 60,
-            height: 60,
-            errorBuilder: (context, error, stackTrace) => _buildIconPlaceholder(),
+            errorBuilder: (context, error, stackTrace) => _buildPlaceholder(size),
           ),
         );
       } catch (e) {
-        return _buildIconPlaceholder();
+        return _buildPlaceholder(size);
       }
     }
     
-    return _buildIconPlaceholder();
+    return _buildPlaceholder(size);
   }
 
-  Widget _buildIconPlaceholder() {
+  Widget _buildPlaceholder(double size) {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        return Icon(
-          Icons.eco,
-          color: theme.colorScheme.onSecondary,
-          size: 28,
+        final isDark = theme.brightness == Brightness.dark;
+        
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isDark 
+              ? const Color(0xFF2C2C2E)
+              : const Color(0xFFE3F2FD),
+            border: isDark 
+              ? Border.all(color: const Color(0xFF55D85A), width: 2)
+              : Border.all(color: const Color(0xFF55D85A), width: 2),
+          ),
+          child: Icon(
+            Icons.eco,
+            size: 36,
+            color: const Color(0xFF55D85A),
+          ),
         );
       },
     );
@@ -176,24 +181,26 @@ class PlantCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF9500), // Orange warning color
+        color: const Color(0xFFFF9500).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.schedule,
-            color: Colors.white,
+            color: const Color(0xFFFF9500),
             size: 14,
           ),
           const SizedBox(width: 6),
           Text(
-            pendingTasks == 1 
-                ? '$pendingTasks cuidado pendente'
-                : '$pendingTasks cuidados pendentes',
-            style: const TextStyle(
-              color: Colors.white,
+            '$pendingTasks pendentes',
+            style: TextStyle(
+              color: const Color(0xFFFF9500),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -305,11 +312,13 @@ class PlantCard extends StatelessWidget {
       case 'teste':
         return 6;
       case 'monstera deliciosa':
-        return 5;
+        return 10;
       case 'espada de são jorge':
-        return 5;
+        return 10;
+      case 'suculenta echeveria':
+        return 10;
       default:
-        return 0;
+        return 6;
     }
   }
 

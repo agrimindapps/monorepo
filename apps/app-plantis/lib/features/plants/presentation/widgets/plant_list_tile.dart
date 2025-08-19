@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/plant.dart';
-import '../providers/plants_provider.dart';
 
 class PlantListTile extends StatelessWidget {
   final Plant plant;
@@ -17,78 +16,136 @@ class PlantListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 1,
-      child: ListTile(
-        onTap: onTap ?? () => context.push('/plants/${plant.id}'),
-        contentPadding: const EdgeInsets.all(12),
-        
-        // Avatar/Imagem da planta
-        leading: _buildPlantAvatar(context),
-        
-        // Título e subtítulo
-        title: Text(
-          plant.displayName,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: isDark 
+          ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
+          : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: isDark 
+              ? Colors.black.withValues(alpha: 0.3)
+              : Colors.black.withValues(alpha: 0.08),
+            blurRadius: isDark ? 8 : 12,
+            offset: const Offset(0, 4),
+            spreadRadius: isDark ? 0 : 2,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              plant.displaySpecies,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap ?? () => context.push('/plants/${plant.id}'),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Avatar/Imagem da planta
+                _buildPlantAvatar(context),
+                
+                const SizedBox(width: 16),
+                
+                // Conteúdo principal
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header com nome e menu
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              plant.displayName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                                fontSize: 18,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => _showPlantMenu(context),
+                            icon: Icon(
+                              Icons.more_vert,
+                              color: isDark 
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              size: 20,
+                            ),
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 4),
+                      
+                      // Subtítulo com espécie e localização
+                      Row(
+                        children: [
+                          Text(
+                            plant.displaySpecies,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark 
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: isDark 
+                              ? Colors.white.withValues(alpha: 0.5)
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            'Sala de Estar', // TODO: Resolver nome do espaço
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark 
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 12),
+                      
+                      // Badge de cuidados pendentes
+                      _buildCareStatus(context),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            _buildPlantInfo(context),
-          ],
+          ),
         ),
-        
-        // Indicador de cuidado
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildCareIndicator(context),
-            const SizedBox(height: 4),
-            Text(
-              _getAgeText(),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
-        
-        isThreeLine: true,
       ),
     );
   }
 
   Widget _buildPlantAvatar(BuildContext context) {
-    const size = 56.0;
+    const size = 60.0;
     
     if (plant.hasImage) {
       try {
         final imageBytes = base64Decode(plant.imageBase64!);
         return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           child: Image.memory(
             imageBytes,
             width: size,
@@ -109,24 +166,26 @@ class PlantListTile extends StatelessWidget {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        
         return Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                theme.colorScheme.primary.withValues(alpha: 0.1),
-                theme.colorScheme.primary.withValues(alpha: 0.2),
-              ],
-            ),
+            borderRadius: BorderRadius.circular(12),
+            color: isDark 
+              ? const Color(0xFF2C2C2E)
+              : theme.colorScheme.primary.withValues(alpha: 0.1),
+            border: isDark 
+              ? Border.all(color: const Color(0xFF3A3A3C))
+              : null,
           ),
           child: Icon(
             Icons.eco,
             size: 28,
-            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+            color: isDark 
+              ? const Color(0xFF55D85A)
+              : theme.colorScheme.primary,
           ),
         );
       },
@@ -273,6 +332,128 @@ class PlantListTile extends StatelessWidget {
     if (age < 365) return '${(age / 30).round()}m';
     return '${(age / 365).round()}a';
   }
+
+  Widget _buildCareStatus(BuildContext context) {
+    final theme = Theme.of(context);
+    final careInfo = _getCareStatus();
+    
+    // Calcular número de cuidados pendentes
+    int pendingCares = 0;
+    if (careInfo.status == CareStatus.needsWater) {
+      pendingCares++;
+    }
+    
+    // Adicionar outros tipos de cuidados se necessário
+    pendingCares += _getOtherPendingCares();
+    
+    if (pendingCares == 0) {
+      return const SizedBox.shrink();
+    }
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF9500).withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.schedule,
+            size: 14,
+            color: const Color(0xFFFF9500),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            pendingCares == 1 
+              ? '$pendingCares cuidado pendente'
+              : '$pendingCares cuidados pendentes',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: const Color(0xFFFF9500),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _getOtherPendingCares() {
+    // Aqui você pode adicionar lógica para outros tipos de cuidados
+    // Por exemplo: fertilizar, podar, trocar vaso, etc.
+    return 4; // Valor mockado para demonstrar
+  }
+
+  void _showPlantMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Editar planta'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Navegar para edição
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.water_drop),
+                title: const Text('Registrar rega'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Registrar rega
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Excluir planta', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Confirmar exclusão
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+enum CareStatus {
+  needsWater,
+  soonWater,
+  good,
+  unknown,
 }
 
 class CareStatusInfo {

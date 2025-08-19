@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/models/pragas_hive.dart';
 import '../../../core/extensions/pragas_hive_extension.dart';
+import '../../../core/widgets/praga_image_widget.dart';
 import '../models/praga_view_mode.dart';
 
 class PragaItemWidget extends StatelessWidget {
@@ -64,14 +65,16 @@ class PragaItemWidget extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
             children: [
-              _buildIcon(),
-              const SizedBox(height: 12),
-              _buildContent(),
+              // Imagem da praga ocupando todo o card
+              _buildFullImage(),
+              // Gradiente overlay para legibilidade do texto
+              _buildGradientOverlay(),
+              // Conteúdo textual sobreposto
+              _buildOverlayContent(),
             ],
           ),
         ),
@@ -81,24 +84,31 @@ class PragaItemWidget extends StatelessWidget {
 
   Widget _buildIcon() {
     final color = _getTypeColor();
-    final icon = _getTypeIcon();
+    final size = viewMode.isList ? 48.0 : 56.0;
 
-    return Container(
-      width: viewMode.isList ? 48 : 56,
-      height: viewMode.isList ? 48 : 56,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
+    return PragaImageWidget(
+      nomeCientifico: praga.nomeCientifico,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(12),
+      errorWidget: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: color.withValues(alpha: 0.3),
+            width: 1,
+          ),
         ),
-      ),
-      child: Center(
-        child: FaIcon(
-          icon,
-          color: color,
-          size: viewMode.isList ? 20 : 24,
+        child: Center(
+          child: FaIcon(
+            _getTypeIcon(),
+            color: color,
+            size: viewMode.isList ? 20 : 24,
+          ),
         ),
       ),
     );
@@ -136,26 +146,6 @@ class PragaItemWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: _getTypeColor().withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _getTypeColor().withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: Text(
-            praga.displayType,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _getTypeColor(),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -193,4 +183,106 @@ class PragaItemWidget extends StatelessWidget {
         return FontAwesomeIcons.exclamationTriangle;
     }
   }
+
+  // Métodos específicos para o modo grid com imagem em tela cheia
+  Widget _buildFullImage() {
+    final color = _getTypeColor();
+    
+    return Positioned.fill(
+      child: PragaImageWidget(
+        nomeCientifico: praga.nomeCientifico,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.zero, // Sem bordas pois já está no ClipRRect
+        errorWidget: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: color.withValues(alpha: 0.1),
+          child: Center(
+            child: FaIcon(
+              _getTypeIcon(),
+              color: color,
+              size: 48,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientOverlay() {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 80, // Altura do overlay
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withValues(alpha: 0.8),
+              Colors.black.withValues(alpha: 0.4),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.7, 1.0],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverlayContent() {
+    return Positioned(
+      bottom: 8,
+      left: 8,
+      right: 8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            praga.displayName,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  blurRadius: 2.0,
+                  color: Colors.black,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (praga.displaySecondaryName.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              praga.displaySecondaryName,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withValues(alpha: 0.9),
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    blurRadius: 2.0,
+                    color: Colors.black,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
 }

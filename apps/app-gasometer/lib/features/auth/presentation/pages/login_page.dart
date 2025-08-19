@@ -75,21 +75,11 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProxyProvider<AuthProvider, LoginController>(
-          create: (context) => LoginController(
-            authProvider: context.read<AuthProvider>(),
-            analytics: AnalyticsService(),
-          ),
-          update: (context, authProvider, previous) =>
-              previous ?? LoginController(
-                authProvider: authProvider,
-                analytics: AnalyticsService(),
-              ),
-        ),
-      ],
+    return ChangeNotifierProvider(
+      create: (context) => LoginController(
+        authProvider: context.read<AuthProvider>(),
+        analytics: AnalyticsService(),
+      ),
       child: Consumer<LoginController>(
         builder: (context, controller, child) {
           return Scaffold(

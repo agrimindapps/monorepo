@@ -1,0 +1,87 @@
+name: app_task_manager
+description: Task Manager app seguindo princípios SOLID e Clean Architecture
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  riverpod: ^2.4.0
+  flutter_riverpod: ^2.4.0
+  
+  # Data Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # Network & API
+  dio: ^5.3.2
+  connectivity_plus: ^5.0.1
+  
+  # Firebase
+  firebase_core: ^2.17.0
+  firebase_auth: ^4.10.1
+  cloud_firestore: ^4.9.3
+  firebase_storage: ^11.2.8
+  firebase_messaging: ^14.6.9
+  
+  # Dependency Injection
+  get_it: ^7.6.4
+  injectable: ^2.3.2
+  
+  # Utils
+  uuid: ^4.1.0
+  intl: ^0.18.1
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  
+  # Notifications
+  flutter_local_notifications: ^16.1.0
+  
+  # UI
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.1.0
+  
+  # JSON
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Build tools
+  build_runner: ^2.4.7
+  hive_generator: ^2.0.1
+  injectable_generator: ^2.4.1
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+  
+  # Linting
+  flutter_lints: ^3.0.0
+  
+  # Testing
+  mockito: ^5.4.2
+  mocktail: ^1.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+        - asset: fonts/Roboto-Bold.ttf
+          weight: 700

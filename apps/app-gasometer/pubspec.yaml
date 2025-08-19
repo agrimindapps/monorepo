@@ -90,6 +90,9 @@ dependencies:
   
   # Charts for fuel consumption analytics
   fl_chart: ^1.0.0
+  
+  # In-App Purchases / Subscriptions
+  purchases_flutter: ^8.1.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

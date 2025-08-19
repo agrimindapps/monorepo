@@ -4,6 +4,7 @@ import '../models/favoritos_data.dart';
 import '../models/favorito_defensivo_model.dart';
 import '../models/favorito_praga_model.dart';
 import '../models/favorito_diagnostico_model.dart';
+import '../../../core/interfaces/i_premium_service.dart';
 
 abstract class IFavoritosRepository {
   Future<List<FavoritoDefensivoModel>> getFavoritosDefensivos();
@@ -14,12 +15,9 @@ abstract class IFavoritosRepository {
   Future<void> removeFavoritoDiagnostico(int id);
 }
 
-abstract class IPremiumService {
-  bool get isPremium;
-}
-
 class FavoritosDataService extends ChangeNotifier {
   final IFavoritosRepository? _repository;
+  final IPremiumService? _premiumService;
   
   FavoritosData _favoritosData = const FavoritosData();
   bool _isLoading = false;
@@ -27,7 +25,9 @@ class FavoritosDataService extends ChangeNotifier {
 
   FavoritosDataService({
     IFavoritosRepository? repository,
-  }) : _repository = repository;
+    IPremiumService? premiumService,
+  }) : _repository = repository,
+       _premiumService = premiumService;
 
   FavoritosData get favoritosData => _favoritosData;
   bool get isLoading => _isLoading;
@@ -141,6 +141,52 @@ class FavoritosDataService extends ChangeNotifier {
       diagnosticosFilter: '',
     );
     notifyListeners();
+  }
+
+  // ============ PREMIUM VERIFICATION METHODS ============
+
+  /// Verifica se pode adicionar mais favoritos
+  bool canAddFavorite() {
+    if (_premiumService?.isPremium == true) {
+      return true; // Usuários premium têm favoritos ilimitados
+    }
+    
+    // Usuários gratuitos têm limite
+    final totalFavorites = getTotalFavoritesCount();
+    const freeLimit = 20; // Limite para usuários gratuitos
+    return totalFavorites < freeLimit;
+  }
+
+  /// Obtém contagem total de favoritos
+  int getTotalFavoritesCount() {
+    return _favoritosData.defensivos.length +
+           _favoritosData.pragas.length +
+           _favoritosData.diagnosticos.length;
+  }
+
+  /// Obtém limite máximo de favoritos para o usuário atual
+  int getMaxFavorites() {
+    if (_premiumService?.isPremium == true) {
+      return -1; // Ilimitado
+    }
+    return 20; // Limite gratuito
+  }
+
+  /// Verifica se o limite foi atingido
+  bool hasReachedLimit() {
+    return !canAddFavorite();
+  }
+
+  /// Obtém mensagem de limite atingido
+  String getLimitMessage() {
+    final current = getTotalFavoritesCount();
+    final limit = getMaxFavorites();
+    
+    if (limit == -1) {
+      return 'Favoritos ilimitados - Premium ativo';
+    }
+    
+    return 'Limite de favoritos: $current/$limit';
   }
 
 }

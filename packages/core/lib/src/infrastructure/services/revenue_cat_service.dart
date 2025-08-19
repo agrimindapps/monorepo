@@ -332,6 +332,19 @@ class RevenueCatService implements ISubscriptionRepository {
     ]);
   }
 
+  @override
+  Future<Either<Failure, bool>> hasGasometerSubscription() async {
+    return _hasAppSubscription('gasometer');
+  }
+
+  @override
+  Future<Either<Failure, List<ProductInfo>>> getGasometerProducts() async {
+    return getAvailableProducts(productIds: [
+      EnvironmentConfig.gasometerMonthlyProduct,
+      EnvironmentConfig.gasometerYearlyProduct,
+    ]);
+  }
+
   /// Verifica se tem assinatura ativa para um app específico
   Future<Either<Failure, bool>> _hasAppSubscription(String appName) async {
     try {

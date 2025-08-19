@@ -15,10 +15,9 @@ import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/premium_service_real.dart';
+import '../interfaces/i_premium_service.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
-import '../../features/comentarios/services/mock_premium_service.dart';
-import '../../features/settings/services/premium_service.dart';
 
 final sl = GetIt.instance;
 

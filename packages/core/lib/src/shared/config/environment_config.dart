@@ -88,6 +88,29 @@ class EnvironmentConfig {
     }
   }
 
+  // GasOMeter Subscription Products
+  static String get gasometerMonthlyProduct {
+    switch (environment) {
+      case Environment.development:
+        return 'gasometer_premium_monthly_dev';
+      case Environment.staging:
+        return 'gasometer_premium_monthly_staging';
+      case Environment.production:
+        return 'gasometer_premium_monthly';
+    }
+  }
+
+  static String get gasometerYearlyProduct {
+    switch (environment) {
+      case Environment.development:
+        return 'gasometer_premium_yearly_dev';
+      case Environment.staging:
+        return 'gasometer_premium_yearly_staging';
+      case Environment.production:
+        return 'gasometer_premium_yearly';
+    }
+  }
+
   // API Keys
   static String get weatherApiKey {
     return const String.fromEnvironment('WEATHER_API_KEY', defaultValue: '');

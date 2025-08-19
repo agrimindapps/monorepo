@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 
 import 'core/theme/gasometer_theme.dart';
 import 'core/router/app_router.dart';
+import 'core/di/injection_container.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
@@ -17,7 +18,7 @@ class GasOMeterApp extends StatelessWidget {
       providers: [
         // Auth Provider - deve ser o primeiro
         ChangeNotifierProvider(
-          create: (_) => local.AuthProvider(),
+          create: (_) => sl<local.AuthProvider>(),
         ),
         
         // Premium Provider
@@ -27,7 +28,7 @@ class GasOMeterApp extends StatelessWidget {
         
         // Vehicles Provider
         ChangeNotifierProvider(
-          create: (_) => VehiclesProvider(),
+          create: (_) => sl<VehiclesProvider>(),
         ),
         
         // Theme Provider

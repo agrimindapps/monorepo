@@ -9,6 +9,7 @@ import '../../core/repositories/favoritos_hive_repository.dart';
 import '../../core/repositories/pragas_hive_repository.dart';
 import '../../core/models/pragas_hive.dart';
 import '../../core/di/injection_container.dart';
+import '../../core/interfaces/i_premium_service.dart';
 
 
 // Models for diagnostic system
@@ -49,8 +50,10 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   late TabController _tabController;
   final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
   final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  final IPremiumService _premiumService = sl<IPremiumService>();
   
   bool isFavorited = false;
+  bool isPremium = false; // Status premium carregado do service
   PragasHive? _pragaData; // Dados reais da praga
   
   // Comment system state
@@ -86,6 +89,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
     _loadRealData();
     _loadComentarios();
     _loadFavoritoState();
+    _loadPremiumStatus();
   }
 
   void _loadFavoritoState() {
@@ -100,6 +104,21 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
       } else {
         // Fallback para nome se não encontrar no repositório
         isFavorited = _favoritosRepository.isFavorito('pragas', widget.pragaName);
+      }
+    });
+  }
+
+  void _loadPremiumStatus() {
+    setState(() {
+      isPremium = _premiumService.isPremium;
+    });
+    
+    // Escuta mudanças no status premium
+    _premiumService.addListener(() {
+      if (mounted) {
+        setState(() {
+          isPremium = _premiumService.isPremium;
+        });
       }
     });
   }
@@ -1086,7 +1105,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                               'Dosagem',
                               dosagem,
                               Icons.medication,
-                              isPremium: true,
+                              isPremium: isPremium,
                             ),
                             const SizedBox(height: 16),
                             _buildDialogInfoRow(

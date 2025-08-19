@@ -7,8 +7,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
 import 'core/services/analytics_service.dart';
-import 'core/services/local_data_service.dart';
 import 'core/services/gasometer_notification_service.dart';
+import 'core/sync/services/sync_service.dart';
+import 'core/di/injection_container.dart';
 import 'firebase_options.dart';
 
 // Import Hive adapters
@@ -18,6 +19,7 @@ import 'features/odometer/data/models/odometer_model.dart';
 import 'features/expenses/data/models/expense_model.dart';
 import 'features/maintenance/data/models/maintenance_model.dart';
 import 'core/data/models/category_model.dart';
+import 'core/sync/models/sync_queue_item.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,33 +34,25 @@ void main() async {
   Hive.registerAdapter(ExpenseModelAdapter());
   Hive.registerAdapter(MaintenanceModelAdapter());
   Hive.registerAdapter(CategoryModelAdapter());
+  Hive.registerAdapter(SyncQueueItemAdapter());
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize Performance Service (comentado temporariamente)
-  // final performanceService = PerformanceService();
-  // await performanceService.startPerformanceTracking(
-  //   config: const PerformanceConfig(
-  //     enableFpsMonitoring: true,
-  //     enableMemoryMonitoring: true,
-  //     enableCpuMonitoring: false,
-  //     enableFirebaseIntegration: true,
-  //   ),
-  // );
-  // await performanceService.markAppStarted();
+  // Initialize Dependencies
+  await initializeDependencies();
 
   // Initialize Analytics Service
-  final analyticsService = AnalyticsService();
+  final analyticsService = sl<AnalyticsService>();
   analyticsService.initialize();
 
-  // Initialize Local Data Service
-  final localDataService = LocalDataService();
-  await localDataService.initialize();
-
   // Initialize notifications
-  final notificationService = GasOMeterNotificationService();
+  final notificationService = sl<GasOMeterNotificationService>();
   await notificationService.initialize();
+
+  // Initialize Sync Service
+  final syncService = sl<SyncService>();
+  await syncService.initialize();
 
   // Configure Crashlytics and error handling
   if (!kDebugMode) {

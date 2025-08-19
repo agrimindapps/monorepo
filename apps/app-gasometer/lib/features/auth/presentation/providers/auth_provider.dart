@@ -1,144 +1,170 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:injectable/injectable.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/watch_auth_state.dart';
+import '../../domain/usecases/sign_in_with_email.dart';
+import '../../domain/usecases/sign_up_with_email.dart';
+import '../../domain/usecases/sign_in_anonymously.dart';
+import '../../domain/usecases/sign_out.dart';
+import '../../domain/usecases/update_profile.dart';
+import '../../domain/usecases/send_password_reset.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/platform_service.dart';
 
+@injectable
 class AuthProvider extends ChangeNotifier {
-  final FirebaseAuth _firebaseAuth;
-  final FirebaseFirestore _firestore;
-  final AnalyticsService _analytics = AnalyticsService();
-  final PlatformService _platformService = PlatformService();
+  final GetCurrentUser _getCurrentUser;
+  final WatchAuthState _watchAuthState;
+  final SignInWithEmail _signInWithEmail;
+  final SignUpWithEmail _signUpWithEmail;
+  final SignInAnonymously _signInAnonymously;
+  final SignOut _signOut;
+  final UpdateProfile _updateProfile;
+  final SendPasswordReset _sendPasswordReset;
+  final AnalyticsService _analytics;
+  final PlatformService _platformService;
   
-  User? _currentUser;
+  UserEntity? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
   bool _isInitialized = false;
   bool _isPremium = false;
-  StreamSubscription<User?>? _userSubscription;
+  StreamSubscription? _authStateSubscription;
   
   AuthProvider({
-    FirebaseAuth? firebaseAuth,
-    FirebaseFirestore? firestore,
-  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance {
+    required GetCurrentUser getCurrentUser,
+    required WatchAuthState watchAuthState,
+    required SignInWithEmail signInWithEmail,
+    required SignUpWithEmail signUpWithEmail,
+    required SignInAnonymously signInAnonymously,
+    required SignOut signOut,
+    required UpdateProfile updateProfile,
+    required SendPasswordReset sendPasswordReset,
+    required AnalyticsService analytics,
+    required PlatformService platformService,
+  })  : _getCurrentUser = getCurrentUser,
+        _watchAuthState = watchAuthState,
+        _signInWithEmail = signInWithEmail,
+        _signUpWithEmail = signUpWithEmail,
+        _signInAnonymously = signInAnonymously,
+        _signOut = signOut,
+        _updateProfile = updateProfile,
+        _sendPasswordReset = sendPasswordReset,
+        _analytics = analytics,
+        _platformService = platformService {
     _initializeAuthState();
   }
   
-  User? get currentUser => _currentUser;
+  UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _currentUser != null;
   bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   bool get isPremium => _isPremium;
   bool get isAnonymous => _currentUser?.isAnonymous ?? false;
+  String? get userDisplayName => _currentUser?.displayName;
+  String? get userEmail => _currentUser?.email;
+  String get userId => _currentUser?.id ?? '';
   
-  void _initializeAuthState() {
-    _userSubscription = _firebaseAuth.authStateChanges().listen(
-      (user) async {
-        _currentUser = user;
-        
-        // Se há usuário (incluindo anônimo), marca como inicializado
-        if (user != null) {
+  Future<void> _initializeAuthState() async {
+    try {
+      // Get current user first
+      final result = await _getCurrentUser();
+      result.fold(
+        (failure) {
+          _errorMessage = _mapFailureToMessage(failure);
+          _isInitialized = true;
+          notifyListeners();
+        },
+        (user) async {
+          _currentUser = user;
           _isInitialized = true;
           
-          // Se é usuário anônimo, apenas notifica
-          if (user.isAnonymous) {
-            debugPrint('🔐 Usuário anônimo já autenticado: ${user.uid}');
-            _isPremium = false;
+          if (user != null) {
+            await _setupUserSession(user);
+          } else {
+            // If no user and should use anonymous mode, initialize anonymously
+            if (await shouldUseAnonymousMode()) {
+              debugPrint('🔐 Iniciando modo anônimo automaticamente');
+              await signInAnonymously();
+              return;
+            }
+          }
+          
+          notifyListeners();
+        },
+      );
+      
+      // Watch for auth state changes
+      _authStateSubscription = _watchAuthState().listen((result) {
+        result.fold(
+          (failure) {
+            _errorMessage = _mapFailureToMessage(failure);
             notifyListeners();
-            return;
-          }
-          
-          // Sincroniza dados do usuário quando não é anônimo
-          await _syncUserData();
-          await _checkPremiumStatus();
-          // Configurar usuário no analytics
-          await _analytics.setUserId(user.uid);
-          await _analytics.setUserProperties({
-            'user_type': 'authenticated',
-            'is_premium': _isPremium.toString(),
-          });
-        } else {
-          // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
-          if (await shouldUseAnonymousMode()) {
-            debugPrint('🔐 Iniciando modo anônimo automaticamente');
-            await signInAnonymously();
-            return;
-          }
-          _isInitialized = true;
-          _isPremium = false;
-        }
-        
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = error.toString();
-        _isInitialized = true;
-        notifyListeners();
-      },
-    );
-  }
-  
-  Future<void> _syncUserData() async {
-    if (_currentUser == null) return;
-    
-    try {
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(_currentUser!.uid)
-          .get();
-      
-      if (!userDoc.exists) {
-        // Criar documento do usuário se não existe
-        await _firestore.collection('users').doc(_currentUser!.uid).set({
-          'email': _currentUser!.email,
-          'displayName': _currentUser!.displayName,
-          'createdAt': FieldValue.serverTimestamp(),
-          'lastLoginAt': FieldValue.serverTimestamp(),
-          'isAnonymous': false,
-          'appVersion': 'gasometer_1.0.0',
-        });
-      } else {
-        // Atualizar último login
-        await _firestore.collection('users').doc(_currentUser!.uid).update({
-          'lastLoginAt': FieldValue.serverTimestamp(),
-        });
-      }
+          },
+          (user) async {
+            _currentUser = user;
+            
+            if (user != null) {
+              await _setupUserSession(user);
+            } else {
+              _isPremium = false;
+            }
+            
+            notifyListeners();
+          },
+        );
+      });
     } catch (e) {
-      debugPrint('Erro ao sincronizar dados do usuário: $e');
+      _errorMessage = 'Erro ao inicializar autenticação: $e';
+      _isInitialized = true;
+      notifyListeners();
     }
   }
   
-  Future<void> _checkPremiumStatus() async {
-    if (_currentUser == null) return;
-    
+  Future<void> _setupUserSession(UserEntity user) async {
     try {
-      final premiumDoc = await _firestore
-          .collection('users')
-          .doc(_currentUser!.uid)
-          .collection('subscriptions')
-          .doc('premium')
-          .get();
-      
-      if (premiumDoc.exists) {
-        final data = premiumDoc.data();
-        final expiresAt = (data?['expiresAt'] as Timestamp?)?.toDate();
-        _isPremium = expiresAt != null && expiresAt.isAfter(DateTime.now());
-      } else {
+      if (user.isAnonymous) {
+        debugPrint('🔐 Usuário anônimo: ${user.id}');
         _isPremium = false;
+        return;
       }
+      
+      // For registered users, set up analytics and check premium
+      await _analytics.setUserId(user.id);
+      await _analytics.setUserProperties({
+        'user_type': user.isAnonymous ? 'anonymous' : 'authenticated',
+        'is_premium': _isPremium.toString(),
+      });
+      
+      // Check premium status (simplified - in a real app you'd have a use case for this)
+      _isPremium = user.isPremium;
     } catch (e) {
-      debugPrint('Erro ao verificar status premium: $e');
-      _isPremium = false;
+      debugPrint('Erro ao configurar sessão do usuário: $e');
     }
   }
+
+  String _mapFailureToMessage(Failure failure) {
+    if (failure is AuthenticationFailure) {
+      return failure.message;
+    } else if (failure is NetworkFailure) {
+      return 'Erro de conexão. Verifique sua internet.';
+    } else if (failure is ServerFailure) {
+      return 'Erro do servidor. Tente novamente mais tarde.';
+    } else if (failure is ValidationFailure) {
+      return failure.message;
+    } else {
+      return 'Erro inesperado. Tente novamente.';
+    }
+  }
+  
   
   @override
   void dispose() {
-    _userSubscription?.cancel();
+    _authStateSubscription?.cancel();
     super.dispose();
   }
   
@@ -147,61 +173,61 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      final credential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      
-      _currentUser = credential.user;
-      
-      // Log analytics
-      await _analytics.logLogin('email');
-      await _analytics.logUserAction('login_success', parameters: {
-        'method': 'email',
-      });
-      
-      _isLoading = false;
-      notifyListeners();
-    } on FirebaseAuthException catch (e) {
-      _errorMessage = _getFirebaseErrorMessage(e.code);
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-    }
+    final result = await _signInWithEmail(SignInWithEmailParams(
+      email: email,
+      password: password,
+    ));
+    
+    result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+      },
+      (user) async {
+        _currentUser = user;
+        _isLoading = false;
+        
+        // Log analytics
+        await _analytics.logLogin('email');
+        await _analytics.logUserAction('login_success', parameters: {
+          'method': 'email',
+        });
+        
+        notifyListeners();
+      },
+    );
   }
   
-  Future<void> register(String email, String password, String name) async {
+  Future<void> register(String email, String password, String displayName) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      
-      if (credential.user != null) {
-        await credential.user!.updateDisplayName(name);
-        await credential.user!.reload();
-        _currentUser = _firebaseAuth.currentUser;
-      }
-      
-      _isLoading = false;
-      notifyListeners();
-    } on FirebaseAuthException catch (e) {
-      _errorMessage = _getFirebaseErrorMessage(e.code);
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-    }
+    final result = await _signUpWithEmail(SignUpWithEmailParams(
+      email: email,
+      password: password,
+      displayName: displayName,
+    ));
+    
+    result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+      },
+      (user) async {
+        _currentUser = user;
+        _isLoading = false;
+        
+        // Log analytics
+        await _analytics.logUserAction('register_success', parameters: {
+          'method': 'email',
+        });
+        
+        notifyListeners();
+      },
+    );
   }
   
   Future<void> signInAnonymously() async {
@@ -209,36 +235,36 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      debugPrint('🔐 Iniciando login anônimo...');
-      final credential = await _firebaseAuth.signInAnonymously();
-      _currentUser = credential.user;
-      debugPrint('🔐 Usuário anônimo criado: ${_currentUser?.uid}');
-      _isLoading = false;
-      
-      // Salvar preferência de modo anônimo
-      await _saveAnonymousPreference();
-      
-      // Log analytics para modo anônimo
-      await _analytics.logAnonymousSignIn();
-      await _analytics.setUserProperties({
-        'user_type': 'anonymous',
-        'is_premium': 'false',
-      });
-      
-      debugPrint('🔐 Usuário logado anonimamente. isAuthenticated: $isAuthenticated');
-      notifyListeners();
-    } on FirebaseAuthException catch (e) {
-      debugPrint('🔐 Erro Firebase: ${e.code} - ${e.message}');
-      _errorMessage = _getFirebaseErrorMessage(e.code);
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      debugPrint('🔐 Erro inesperado: $e');
-      _errorMessage = 'Erro inesperado: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-    }
+    debugPrint('🔐 Iniciando login anônimo...');
+    
+    final result = await _signInAnonymously();
+    
+    result.fold(
+      (failure) {
+        debugPrint('🔐 Erro no login anônimo: ${failure.message}');
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+      },
+      (user) async {
+        _currentUser = user;
+        debugPrint('🔐 Usuário anônimo criado: ${user.id}');
+        _isLoading = false;
+        
+        // Salvar preferência de modo anônimo
+        await _saveAnonymousPreference();
+        
+        // Log analytics para modo anônimo
+        await _analytics.logAnonymousSignIn();
+        await _analytics.setUserProperties({
+          'user_type': 'anonymous',
+          'is_premium': 'false',
+        });
+        
+        debugPrint('🔐 Usuário logado anonimamente. isAuthenticated: $isAuthenticated');
+        notifyListeners();
+      },
+    );
   }
   
   Future<void> logout() async {
@@ -250,43 +276,85 @@ class AuthProvider extends ChangeNotifier {
       // Log analytics antes do logout
       await _analytics.logLogout();
       
-      await _firebaseAuth.signOut();
-      _currentUser = null;
-      _isPremium = false;
-      _isLoading = false;
+      final result = await _signOut();
       
-      debugPrint('🔐 Usuário deslogado');
-      notifyListeners();
+      result.fold(
+        (failure) {
+          _errorMessage = _mapFailureToMessage(failure);
+          _isLoading = false;
+          notifyListeners();
+        },
+        (_) {
+          _currentUser = null;
+          _isPremium = false;
+          _isLoading = false;
+          
+          debugPrint('🔐 Usuário deslogado');
+          notifyListeners();
+        },
+      );
     } catch (e) {
       _errorMessage = 'Erro ao fazer logout: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
     }
   }
+
+  Future<void> sendPasswordReset(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    final result = await _sendPasswordReset(SendPasswordResetParams(email: email));
+    
+    result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+      },
+      (_) {
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  Future<void> updateUserProfile({String? displayName, String? photoUrl}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    final result = await _updateProfile(UpdateProfileParams(
+      displayName: displayName,
+      photoUrl: photoUrl,
+    ));
+    
+    result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+      },
+      (updatedUser) {
+        _currentUser = updatedUser;
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
   
   Future<void> _saveAnonymousPreference() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('use_anonymous_mode', true);
-    } catch (e) {
-      debugPrint('Erro ao salvar preferência anônima: $e');
-    }
+    // Anonymous preference is now handled by the auth data source
+    debugPrint('🔐 Preferência de modo anônimo salva via data source');
   }
   
   Future<bool> shouldUseAnonymousMode() async {
     try {
-      // Se for mobile (Android/iOS), usar modo anônimo por padrão
-      if (_platformService.shouldUseAnonymousByDefault) {
-        final prefs = await SharedPreferences.getInstance();
-        // Retorna true por padrão para mobile, ou a preferência salva se existir
-        return prefs.getBool('use_anonymous_mode') ?? true;
-      }
-      
-      // Para outras plataformas (web/desktop), só usar se explicitamente habilitado
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool('use_anonymous_mode') ?? false;
+      // Use platform service to determine if anonymous mode should be used by default
+      return _platformService.shouldUseAnonymousByDefault;
     } catch (e) {
-      // Em caso de erro, usar modo anônimo se for mobile
+      debugPrint('Erro ao verificar modo anônimo: $e');
       return _platformService.shouldUseAnonymousByDefault;
     }
   }
@@ -302,24 +370,4 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  String _getFirebaseErrorMessage(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'Usuário não encontrado. Verifique o email digitado.';
-      case 'wrong-password':
-        return 'Senha incorreta. Tente novamente.';
-      case 'email-already-in-use':
-        return 'Este email já está sendo usado por outra conta.';
-      case 'weak-password':
-        return 'A senha é muito fraca. Use pelo menos 6 caracteres.';
-      case 'invalid-email':
-        return 'Email inválido. Verifique o formato digitado.';
-      case 'too-many-requests':
-        return 'Muitas tentativas de login. Tente novamente mais tarde.';
-      case 'network-request-failed':
-        return 'Erro de conexão. Verifique sua internet.';
-      default:
-        return 'Erro de autenticação: $code';
-    }
-  }
 }

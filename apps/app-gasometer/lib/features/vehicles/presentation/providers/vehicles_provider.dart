@@ -1,28 +1,41 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/vehicle_entity.dart';
-import '../../data/models/vehicle_model.dart';
+import '../../domain/usecases/get_all_vehicles.dart';
+import '../../domain/usecases/get_vehicle_by_id.dart';
+import '../../domain/usecases/add_vehicle.dart';
+import '../../domain/usecases/update_vehicle.dart';
+import '../../domain/usecases/delete_vehicle.dart';
+import '../../domain/usecases/search_vehicles.dart';
+import '../../../../core/error/failures.dart';
 
+@injectable
 class VehiclesProvider extends ChangeNotifier {
-  final FirebaseAuth _firebaseAuth;
-  final FirebaseFirestore _firestore;
-  late Box<VehicleModel> _localBox;
+  final GetAllVehicles _getAllVehicles;
+  final GetVehicleById _getVehicleById;
+  final AddVehicle _addVehicle;
+  final UpdateVehicle _updateVehicle;
+  final DeleteVehicle _deleteVehicle;
+  final SearchVehicles _searchVehicles;
   
   List<VehicleEntity> _vehicles = [];
   bool _isLoading = false;
   String? _errorMessage;
   bool _isInitialized = false;
-  StreamSubscription<User?>? _authSubscription;
-  StreamSubscription<QuerySnapshot>? _firestoreSubscription;
   
   VehiclesProvider({
-    FirebaseAuth? firebaseAuth,
-    FirebaseFirestore? firestore,
-  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance {
+    required GetAllVehicles getAllVehicles,
+    required GetVehicleById getVehicleById,
+    required AddVehicle addVehicle,
+    required UpdateVehicle updateVehicle,
+    required DeleteVehicle deleteVehicle,
+    required SearchVehicles searchVehicles,
+  })  : _getAllVehicles = getAllVehicles,
+        _getVehicleById = getVehicleById,
+        _addVehicle = addVehicle,
+        _updateVehicle = updateVehicle,
+        _deleteVehicle = deleteVehicle,
+        _searchVehicles = searchVehicles {
     _initialize();
   }
   
@@ -37,15 +50,7 @@ class VehiclesProvider extends ChangeNotifier {
   
   Future<void> _initialize() async {
     try {
-      // Inicializar Hive box para armazenamento local
-      _localBox = await Hive.openBox<VehicleModel>('vehicles');
-      
-      // Carregar dados locais primeiro
-      await _loadLocalVehicles();
-      
-      // Escutar mudanças de autenticação
-      _authSubscription = _firebaseAuth.authStateChanges().listen(_onAuthStateChanged);
-      
+      await loadVehicles();
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
@@ -55,90 +60,38 @@ class VehiclesProvider extends ChangeNotifier {
     }
   }
   
-  Future<void> _loadLocalVehicles() async {
-    try {
-      final localVehicles = _localBox.values
-          .map((model) => model.toEntity())
-          .toList();
-      
-      _vehicles = localVehicles;
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Erro ao carregar veículos locais: $e');
-    }
-  }
-  
-  void _onAuthStateChanged(User? user) {
-    if (user != null && !user.isAnonymous) {
-      _startFirestoreSync(user.uid);
-    } else {
-      _stopFirestoreSync();
-      // Para usuários anônimos, manter apenas dados locais
-      if (user?.isAnonymous == true) {
-        _loadLocalVehicles();
-      } else {
-        _clearData();
-      }
-    }
-  }
-  
-  void _startFirestoreSync(String userId) {
-    _firestoreSubscription?.cancel();
-    
-    _firestoreSubscription = _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('vehicles')
-        .snapshots()
-        .listen(
-          (snapshot) => _onFirestoreSnapshot(snapshot, userId),
-          onError: (error) {
-            _errorMessage = 'Erro de sincronização: ${error.toString()}';
-            notifyListeners();
-          },
-        );
-  }
-  
-  void _stopFirestoreSync() {
-    _firestoreSubscription?.cancel();
-    _firestoreSubscription = null;
-  }
-  
-  Future<void> _onFirestoreSnapshot(QuerySnapshot snapshot, String userId) async {
-    try {
-      final firestoreVehicles = snapshot.docs
-          .map((doc) => VehicleModel.fromFirestore(doc).toEntity())
-          .toList();
-      
-      // Sincronizar com dados locais
-      await _syncWithLocal(firestoreVehicles, userId);
-      
-      _vehicles = firestoreVehicles;
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Erro ao processar snapshot do Firestore: $e');
-    }
-  }
-  
-  Future<void> _syncWithLocal(List<VehicleEntity> firestoreVehicles, String userId) async {
-    try {
-      // Limpar box local
-      await _localBox.clear();
-      
-      // Salvar dados do Firestore localmente
-      for (final vehicle in firestoreVehicles) {
-        final model = VehicleModel.fromEntity(vehicle);
-        await _localBox.put(vehicle.id, model);
-      }
-    } catch (e) {
-      debugPrint('Erro ao sincronizar localmente: $e');
-    }
-  }
-  
-  void _clearData() {
-    _vehicles = [];
-    _localBox.clear();
+  Future<void> loadVehicles() async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+    
+    final result = await _getAllVehicles();
+    result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+      },
+      (vehicles) {
+        _vehicles = vehicles;
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+  
+  String _mapFailureToMessage(Failure failure) {
+    if (failure is ServerFailure) {
+      return 'Erro do servidor. Tente novamente mais tarde.';
+    } else if (failure is NetworkFailure) {
+      return 'Erro de conexão. Verifique sua internet.';
+    } else if (failure is CacheFailure) {
+      return 'Erro de cache local.';
+    } else if (failure is VehicleNotFoundFailure) {
+      return 'Veículo não encontrado.';
+    } else {
+      return 'Erro inesperado. Tente novamente.';
+    }
   }
   
   Future<bool> addVehicle(VehicleEntity vehicle) async {
@@ -146,44 +99,22 @@ class VehiclesProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw Exception('Usuário não autenticado');
-      }
-      
-      final newVehicle = vehicle.copyWith(
-        userId: user.uid,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      
-      if (user.isAnonymous) {
-        // Salvar apenas localmente para usuários anônimos
-        final model = VehicleModel.fromEntity(newVehicle);
-        await _localBox.put(newVehicle.id, model);
-        
-        _vehicles.add(newVehicle);
-      } else {
-        // Salvar no Firestore para usuários autenticados
-        final model = VehicleModel.fromEntity(newVehicle);
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('vehicles')
-            .doc(newVehicle.id)
-            .set(model.toFirestore());
-      }
-      
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Erro ao adicionar veículo: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
+    final result = await _addVehicle(AddVehicleParams(vehicle: vehicle));
+    
+    return result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      },
+      (addedVehicle) {
+        _vehicles.add(addedVehicle);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      },
+    );
   }
   
   Future<bool> updateVehicle(VehicleEntity vehicle) async {
@@ -191,45 +122,25 @@ class VehiclesProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw Exception('Usuário não autenticado');
-      }
-      
-      final updatedVehicle = vehicle.copyWith(
-        updatedAt: DateTime.now(),
-      );
-      
-      if (user.isAnonymous) {
-        // Atualizar apenas localmente para usuários anônimos
-        final model = VehicleModel.fromEntity(updatedVehicle);
-        await _localBox.put(updatedVehicle.id, model);
-        
+    final result = await _updateVehicle(UpdateVehicleParams(vehicle: vehicle));
+    
+    return result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      },
+      (updatedVehicle) {
         final index = _vehicles.indexWhere((v) => v.id == vehicle.id);
         if (index != -1) {
           _vehicles[index] = updatedVehicle;
         }
-      } else {
-        // Atualizar no Firestore para usuários autenticados
-        final model = VehicleModel.fromEntity(updatedVehicle);
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('vehicles')
-            .doc(updatedVehicle.id)
-            .update(model.toFirestore());
-      }
-      
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Erro ao atualizar veículo: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      },
+    );
   }
   
   Future<bool> deleteVehicle(String vehicleId) async {
@@ -237,43 +148,48 @@ class VehiclesProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    try {
-      final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw Exception('Usuário não autenticado');
-      }
-      
-      if (user.isAnonymous) {
-        // Remover apenas localmente para usuários anônimos
-        await _localBox.delete(vehicleId);
+    final result = await _deleteVehicle(DeleteVehicleParams(vehicleId: vehicleId));
+    
+    return result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      },
+      (_) {
         _vehicles.removeWhere((v) => v.id == vehicleId);
-      } else {
-        // Remover do Firestore para usuários autenticados
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('vehicles')
-            .doc(vehicleId)
-            .delete();
-      }
-      
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Erro ao remover veículo: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      },
+    );
   }
   
-  VehicleEntity? getVehicleById(String vehicleId) {
-    try {
-      return _vehicles.firstWhere((v) => v.id == vehicleId);
-    } catch (e) {
-      return null;
-    }
+  Future<VehicleEntity?> getVehicleById(String vehicleId) async {
+    final result = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
+    
+    return result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        notifyListeners();
+        return null;
+      },
+      (vehicle) => vehicle,
+    );
+  }
+  
+  Future<List<VehicleEntity>> searchVehicles(String query) async {
+    final result = await _searchVehicles(SearchVehiclesParams(query: query));
+    
+    return result.fold(
+      (failure) {
+        _errorMessage = _mapFailureToMessage(failure);
+        notifyListeners();
+        return <VehicleEntity>[];
+      },
+      (vehicles) => vehicles,
+    );
   }
   
   List<VehicleEntity> getVehiclesByType(VehicleType type) {
@@ -288,12 +204,5 @@ class VehiclesProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
-  }
-  
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    _firestoreSubscription?.cancel();
-    super.dispose();
   }
 }

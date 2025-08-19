@@ -7,6 +7,7 @@ import 'package:core/core.dart';
 import '../interfaces/network_info.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/task_notification_service.dart';
+import '../services/notification_manager.dart';
 import '../services/image_service.dart';
 import '../services/test_data_generator_service.dart';
 import '../services/data_cleaner_service.dart';
@@ -89,6 +90,9 @@ void _initCoreServices() {
   // Notification Services
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
+  
+  // Notification Manager
+  sl.registerLazySingleton(() => NotificationManager());
   
   // Image Service
   sl.registerLazySingleton(() => ImageService());

@@ -1,0 +1,330 @@
+import 'dart:async';
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../datasources/auth_local_data_source.dart';
+import '../datasources/auth_remote_data_source.dart';
+
+@LazySingleton(as: AuthRepository)
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
+
+  AuthRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
+
+  @override
+  Future<Either<Failure, UserEntity?>> getCurrentUser() async {
+    try {
+      // Try to get current user from Firebase first
+      final remoteUser = await remoteDataSource.getCurrentUser();
+      
+      if (remoteUser != null) {
+        // Cache the user locally
+        await localDataSource.cacheUser(remoteUser);
+        return Right(remoteUser.toEntity());
+      }
+      
+      // Fallback to local cache
+      final cachedUser = await localDataSource.getCachedUser();
+      if (cachedUser != null) {
+        return Right(cachedUser.toEntity());
+      }
+      
+      return const Right(null);
+    } on ServerException catch (e) {
+      // Try local cache on server error
+      try {
+        final cachedUser = await localDataSource.getCachedUser();
+        if (cachedUser != null) {
+          return Right(cachedUser.toEntity());
+        }
+      } catch (_) {}
+      
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, UserEntity?>> watchAuthState() {
+    try {
+      return remoteDataSource.watchAuthState().map<Either<Failure, UserEntity?>>((userModel) {
+        if (userModel == null) {
+          // Clear local cache when user signs out
+          localDataSource.clearCachedUser().catchError((_) {});
+          return const Right(null);
+        }
+        
+        // Cache the user locally
+        localDataSource.cacheUser(userModel).catchError((_) {});
+        
+        return Right(userModel.toEntity());
+      }).handleError((error) {
+        if (error is ServerException) {
+          return Left(ServerFailure(error.message));
+        }
+        return Left(UnexpectedFailure(error.toString()));
+      });
+    } catch (e) {
+      return Stream.value(Left(UnexpectedFailure(e.toString())));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userModel = await remoteDataSource.signInWithEmail(email, password);
+      
+      // Cache user locally
+      await localDataSource.cacheUser(userModel);
+      
+      return Right(userModel.toEntity());
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInAnonymously() async {
+    try {
+      final userModel = await remoteDataSource.signInAnonymously();
+      
+      // Don't cache anonymous users
+      
+      return Right(userModel.toEntity());
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signUpWithEmail({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    try {
+      final userModel = await remoteDataSource.signUpWithEmail(
+        email,
+        password,
+        displayName,
+      );
+      
+      // Cache user locally
+      await localDataSource.cacheUser(userModel);
+      
+      return Right(userModel.toEntity());
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> updateProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
+    try {
+      final userModel = await remoteDataSource.updateProfile(displayName, photoUrl);
+      
+      // Update cached user
+      await localDataSource.cacheUser(userModel);
+      
+      return Right(userModel.toEntity());
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateEmail(String newEmail) async {
+    try {
+      await remoteDataSource.updateEmail(newEmail);
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updatePassword(String newPassword) async {
+    try {
+      await remoteDataSource.updatePassword(newPassword);
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> sendEmailVerification() async {
+    try {
+      await remoteDataSource.sendEmailVerification();
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> sendPasswordResetEmail(String email) async {
+    try {
+      await remoteDataSource.sendPasswordResetEmail(email);
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      // This would need to be implemented in the remote data source
+      // For now, return not implemented
+      return const Left(UnexpectedFailure('Password reset confirmation not implemented'));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> linkAnonymousWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userModel = await remoteDataSource.linkAnonymousWithEmail(email, password);
+      
+      // Cache the converted user
+      await localDataSource.cacheUser(userModel);
+      
+      return Right(userModel.toEntity());
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithGoogle() async {
+    // Not implemented without Google Sign-In package
+    return const Left(UnexpectedFailure('Google Sign-In not implemented'));
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> linkAnonymousWithGoogle() async {
+    // Not implemented without Google Sign-In package
+    return const Left(UnexpectedFailure('Google Sign-In linking not implemented'));
+  }
+
+  @override
+  Future<Either<Failure, Unit>> signOut() async {
+    try {
+      await remoteDataSource.signOut();
+      await localDataSource.clearCachedUser();
+      return const Right(unit);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() async {
+    try {
+      await remoteDataSource.deleteAccount();
+      await localDataSource.clearCachedUser();
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Either<Failure, Unit> validateEmail(String email) {
+    if (email.isEmpty) {
+      return const Left(ValidationFailure('Email não pode estar vazio'));
+    }
+    
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return const Left(ValidationFailure('Email inválido'));
+    }
+    
+    return const Right(unit);
+  }
+
+  @override
+  Either<Failure, Unit> validatePassword(String password) {
+    if (password.isEmpty) {
+      return const Left(ValidationFailure('Senha não pode estar vazia'));
+    }
+    
+    if (password.length < 6) {
+      return const Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
+    }
+    
+    return const Right(unit);
+  }
+}

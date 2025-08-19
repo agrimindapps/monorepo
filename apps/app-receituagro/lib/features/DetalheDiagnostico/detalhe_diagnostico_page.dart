@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
@@ -7,7 +9,7 @@ import '../../core/repositories/diagnostico_hive_repository.dart';
 import '../../core/repositories/favoritos_hive_repository.dart';
 import '../../core/extensions/diagnostico_hive_extension.dart';
 import '../../core/di/injection_container.dart';
-import '../detalhes_diagnostico/interfaces/i_premium_service.dart';
+import '../../core/interfaces/i_premium_service.dart';
 
 class DetalheDiagnosticoPage extends StatefulWidget {
   final String diagnosticoId;
@@ -711,8 +713,404 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
     );
   }
 
-  void _compartilhar() {
-    // Implementar funcionalidade de compartilhamento
+  void _compartilhar() async {
+    if (_diagnostico == null || _diagnosticoData.isEmpty) {
+      _showErrorSnackBar('Nenhum diagnóstico para compartilhar');
+      return;
+    }
+
+    try {
+      final diagnosticoText = _buildShareText();
+      
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => _buildShareBottomSheet(diagnosticoText),
+      );
+    } catch (e) {
+      _showErrorSnackBar('Erro ao compartilhar diagnóstico');
+    }
+  }
+
+  Widget _buildShareBottomSheet(String shareText) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle indicator
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            height: 4,
+            width: 40,
+            decoration: BoxDecoration(
+              color: theme.dividerColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.share,
+                  size: 48,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Compartilhar Diagnóstico',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Escolha como deseja compartilhar as informações',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          
+          // Share options
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                _buildShareOption(
+                  icon: Icons.share,
+                  title: 'Compartilhar via Apps',
+                  subtitle: 'WhatsApp, Telegram, Email, etc.',
+                  onTap: () => _shareViaApps(shareText),
+                ),
+                _buildShareOption(
+                  icon: Icons.copy,
+                  title: 'Copiar Texto',
+                  subtitle: 'Copiar informações para área de transferência',
+                  onTap: () => _copyToClipboard(shareText),
+                ),
+                _buildShareOption(
+                  icon: Icons.text_fields,
+                  title: 'Compartilhar Personalizado',
+                  subtitle: 'Editar texto antes de compartilhar',
+                  onTap: () => _shareCustomText(shareText),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShareOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: theme.dividerColor,
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _buildShareText() {
+    final buffer = StringBuffer();
+    
+    // Header
+    buffer.writeln('🔬 DIAGNÓSTICO RECEITUAGRO');
+    buffer.writeln('═' * 30);
+    buffer.writeln();
+    
+    // Informações básicas
+    buffer.writeln('📋 INFORMAÇÕES GERAIS');
+    buffer.writeln('• Defensivo: ${widget.nomeDefensivo}');
+    buffer.writeln('• Praga: ${widget.nomePraga}');
+    buffer.writeln('• Cultura: ${widget.cultura}');
+    buffer.writeln();
+    
+    // Ingrediente ativo e classificações
+    if (_diagnosticoData['ingredienteAtivo']?.isNotEmpty ?? false) {
+      buffer.writeln('🧪 INGREDIENTE ATIVO');
+      buffer.writeln('• ${_diagnosticoData['ingredienteAtivo']}');
+      buffer.writeln();
+    }
+    
+    buffer.writeln('⚠️ CLASSIFICAÇÕES');
+    buffer.writeln('• Toxicológica: ${_diagnosticoData['toxico'] ?? 'N/A'}');
+    buffer.writeln('• Ambiental: ${_diagnosticoData['classAmbiental'] ?? 'N/A'}');
+    buffer.writeln('• Agronômica: ${_diagnosticoData['classeAgronomica'] ?? 'N/A'}');
+    buffer.writeln();
+    
+    // Detalhes técnicos
+    buffer.writeln('🔧 DETALHES TÉCNICOS');
+    if (_diagnosticoData['formulacao']?.isNotEmpty ?? false) {
+      buffer.writeln('• Formulação: ${_diagnosticoData['formulacao']}');
+    }
+    if (_diagnosticoData['modoAcao']?.isNotEmpty ?? false) {
+      buffer.writeln('• Modo de Ação: ${_diagnosticoData['modoAcao']}');
+    }
+    if (_diagnosticoData['mapa']?.isNotEmpty ?? false) {
+      buffer.writeln('• Registro MAPA: ${_diagnosticoData['mapa']}');
+    }
+    buffer.writeln();
+    
+    // Aplicação
+    buffer.writeln('💧 INSTRUÇÕES DE APLICAÇÃO');
+    if (_diagnosticoData['dosagem']?.isNotEmpty ?? false) {
+      buffer.writeln('• Dosagem: ${_diagnosticoData['dosagem']}');
+    }
+    if (_diagnosticoData['vazaoTerrestre']?.isNotEmpty ?? false) {
+      buffer.writeln('• Vazão Terrestre: ${_diagnosticoData['vazaoTerrestre']}');
+    }
+    if (_diagnosticoData['vazaoAerea']?.isNotEmpty ?? false) {
+      buffer.writeln('• Vazão Aérea: ${_diagnosticoData['vazaoAerea']}');
+    }
+    if (_diagnosticoData['intervaloAplicacao']?.isNotEmpty ?? false) {
+      buffer.writeln('• Intervalo de Aplicação: ${_diagnosticoData['intervaloAplicacao']}');
+    }
+    if (_diagnosticoData['intervaloSeguranca']?.isNotEmpty ?? false) {
+      buffer.writeln('• Intervalo de Segurança: ${_diagnosticoData['intervaloSeguranca']}');
+    }
+    buffer.writeln();
+    
+    // Tecnologia se disponível
+    if (_diagnosticoData['tecnologia']?.isNotEmpty ?? false) {
+      buffer.writeln('🎯 TECNOLOGIA DE APLICAÇÃO');
+      buffer.writeln(_diagnosticoData['tecnologia']);
+      buffer.writeln();
+    }
+    
+    // Footer
+    buffer.writeln('═' * 30);
+    buffer.writeln('📱 Gerado pelo ReceitaAgro');
+    buffer.writeln('Sua ferramenta de diagnóstico agrícola');
+    
+    return buffer.toString();
+  }
+
+  void _shareViaApps(String text) async {
+    try {
+      await Share.share(
+        text,
+        subject: 'Diagnóstico ${widget.nomeDefensivo} - ${widget.nomePraga}',
+      );
+    } catch (e) {
+      _showErrorSnackBar('Erro ao compartilhar via apps');
+    }
+  }
+
+  void _copyToClipboard(String text) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+      _showSuccessSnackBar('Diagnóstico copiado para área de transferência');
+    } catch (e) {
+      _showErrorSnackBar('Erro ao copiar texto');
+    }
+  }
+
+  void _shareCustomText(String originalText) {
+    showDialog(
+      context: context,
+      builder: (context) => _buildCustomShareDialog(originalText),
+    );
+  }
+
+  Widget _buildCustomShareDialog(String originalText) {
+    final theme = Theme.of(context);
+    final textController = TextEditingController(text: originalText);
+    
+    return AlertDialog(
+      backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
+      title: Text(
+        'Personalizar Compartilhamento',
+        style: TextStyle(color: theme.colorScheme.onSurface),
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 400,
+        child: Column(
+          children: [
+            Text(
+              'Edite o texto antes de compartilhar:',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: TextField(
+                controller: textController,
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Personalize seu texto aqui...',
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _copyToClipboard(textController.text);
+              },
+              child: Text(
+                'Copiar',
+                style: TextStyle(color: theme.colorScheme.primary),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _shareViaApps(textController.text);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+              ),
+              child: const Text('Compartilhar'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _toggleFavorito() async {

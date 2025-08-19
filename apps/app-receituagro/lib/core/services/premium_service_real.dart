@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../models/premium_status_hive.dart';
-import '../../features/settings/services/premium_service.dart';
+import '../interfaces/i_premium_service.dart';
+import 'dart:async';
 
 /// Service premium real que integra RevenueCat com cache Hive local
 /// Unifica todas as interfaces IPremiumService fragmentadas do projeto
@@ -13,6 +14,9 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   
   PremiumStatus _cachedStatus = const PremiumStatus(isActive: false);
   bool _isCheckingStatus = false;
+  
+  // Stream controller para premiumStatusStream
+  final StreamController<bool> _statusStreamController = StreamController<bool>.broadcast();
   
   PremiumServiceReal({
     required PremiumHiveRepository hiveRepository,
@@ -129,7 +133,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
 
       // Atualiza status em memória e notifica listeners
       _cachedStatus = _convertHiveToStatus(hiveStatus);
-      notifyListeners();
+      _notifyStatusChange();
 
       debugPrint('Premium status synced successfully: isPremium=$isPremium');
       
@@ -165,7 +169,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
         planType: 'test_monthly',
       );
       
-      notifyListeners();
+      _notifyStatusChange();
       debugPrint('Test subscription generated successfully');
       
     } catch (e) {
@@ -182,7 +186,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       // Atualiza status em memória
       _cachedStatus = const PremiumStatus(isActive: false);
       
-      notifyListeners();
+      _notifyStatusChange();
       debugPrint('Test subscription removed successfully');
       
     } catch (e) {
@@ -193,9 +197,17 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
 
   @override
   Future<void> navigateToPremium() async {
-    // TODO: Implementar navegação para página de premium
-    // Pode usar Navigator ou sistema de rotas do app
-    debugPrint('Navigate to premium page requested');
+    try {
+      // Import necessário será adicionado quando o contexto estiver disponível
+      // Por enquanto, apenas notifica através de um stream global ou callback
+      debugPrint('Navigate to premium page requested - subscription_page.dart');
+      
+      // TODO: Implementar navegação específica quando contexto disponível
+      // Navigator.of(context).pushNamed('/subscription');
+      
+    } catch (e) {
+      debugPrint('Error navigating to premium page: $e');
+    }
   }
 
   /// Força nova sincronização (limpa cache)
@@ -218,7 +230,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   Future<void> clearAllData() async {
     await _hiveRepository.clearAllPremiumData();
     _cachedStatus = const PremiumStatus(isActive: false);
-    notifyListeners();
+    _notifyStatusChange();
   }
 
   /// Verifica se pode usar feature premium
@@ -262,8 +274,117 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
     return limit > 0 && currentUsage >= limit;
   }
 
+  // ============ NOVOS MÉTODOS REQUERIDOS PELA INTERFACE UNIFICADA ============
+
+  @override
+  Future<bool> isPremiumUser() async {
+    await checkPremiumStatus();
+    return isPremium;
+  }
+
+  @override
+  Future<String?> getSubscriptionType() async {
+    try {
+      final subscriptionResult = await _subscriptionRepository.getCurrentSubscription();
+      return subscriptionResult.fold(
+        (failure) => null,
+        (subscription) => _cachedStatus.planType,
+      );
+    } catch (e) {
+      debugPrint('Error getting subscription type: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<DateTime?> getSubscriptionExpiry() async {
+    try {
+      await _syncWithRevenueCat();
+      return _cachedStatus.expiryDate;
+    } catch (e) {
+      debugPrint('Error getting subscription expiry: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<bool> isSubscriptionActive() async {
+    return await isPremiumUser();
+  }
+
+  @override
+  Future<int> getRemainingDays() async {
+    final expiryDate = await getSubscriptionExpiry();
+    if (expiryDate == null) return -1; // Ilimitado ou erro
+    
+    final now = DateTime.now();
+    return expiryDate.isAfter(now) ? expiryDate.difference(now).inDays : 0;
+  }
+
+  @override
+  Future<void> refreshPremiumStatus() async {
+    await forceRefresh();
+  }
+
+  @override
+  Future<bool> hasFeatureAccess(String featureId) async {
+    if (await isPremiumUser()) return true;
+    
+    // Features gratuitas específicas
+    const freeFeatures = {
+      'basic_search',
+      'view_details',
+      'basic_favorites',
+    };
+    
+    return freeFeatures.contains(featureId);
+  }
+
+  @override
+  Future<List<String>> getPremiumFeatures() async {
+    return [
+      'unlimited_comments',
+      'unlimited_favorites', 
+      'advanced_search',
+      'offline_mode',
+      'priority_support',
+      'ad_free_experience',
+    ];
+  }
+
+  @override
+  Future<bool> isTrialAvailable() async {
+    // Por enquanto sempre disponível - TODO: implementar lógica específica
+    return true;
+  }
+
+  @override
+  Future<bool> startTrial() async {
+    try {
+      // Implementar lógica específica do RevenueCat para trial
+      await generateTestSubscription();
+      return true;
+    } catch (e) {
+      debugPrint('Error starting trial: $e');
+      return false;
+    }
+  }
+
+  @override
+  String? get upgradeUrl => 'https://receituagro.com/premium'; // TODO: URL real
+
+  @override
+  Stream<bool> get premiumStatusStream => _statusStreamController.stream;
+
+  /// Notifica mudanças no status premium via stream
+  void _notifyStatusChange() {
+    notifyListeners();
+    _statusStreamController.add(isPremium);
+  }
+
   @override
   void dispose() {
+    _statusStreamController.close();
     super.dispose();
   }
 }

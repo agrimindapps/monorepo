@@ -9,6 +9,7 @@ import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../comentarios/services/comentarios_service.dart';
 import '../comentarios/models/comentario_model.dart';
+import '../../core/interfaces/i_premium_service.dart';
 
 
 // Modelo de dados para diagnóstico
@@ -50,8 +51,10 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
   final FitossanitarioHiveRepository _fitossanitarioRepository = sl<FitossanitarioHiveRepository>();
   final ComentariosService _comentariosService = sl<ComentariosService>();
+  final IPremiumService _premiumService = sl<IPremiumService>();
   
   bool isFavorited = false;
+  bool isPremium = false; // Status premium carregado do service
   FitossanitarioHive? _defensivoData; // Dados reais do defensivo
   bool isLoading = false;
   bool hasError = false;
@@ -86,6 +89,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     _loadComentarios();
     _loadDiagnosticos();
     _loadFavoritoState();
+    _loadPremiumStatus();
   }
 
   void _loadFavoritoState() {
@@ -100,6 +104,21 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       } else {
         // Fallback para nome se não encontrar no repositório
         isFavorited = _favoritosRepository.isFavorito('defensivos', widget.defensivoName);
+      }
+    });
+  }
+
+  void _loadPremiumStatus() {
+    setState(() {
+      isPremium = _premiumService.isPremium;
+    });
+    
+    // Escuta mudanças no status premium
+    _premiumService.addListener(() {
+      if (mounted) {
+        setState(() {
+          isPremium = _premiumService.isPremium;
+        });
       }
     });
   }
@@ -2218,7 +2237,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                               'Dosagem',
                               dosagem,
                               Icons.medication,
-                              isPremium: true, // Simulating premium for this demo
+                              isPremium: isPremium,
                             ),
                             const SizedBox(height: 16),
                             _buildInfoRow(

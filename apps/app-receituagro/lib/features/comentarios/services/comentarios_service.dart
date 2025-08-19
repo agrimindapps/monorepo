@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/comentario_model.dart';
 import '../constants/comentarios_design_tokens.dart';
-import '../../settings/services/premium_service.dart';
+import '../../../core/interfaces/i_premium_service.dart';
 
 abstract class IComentariosRepository {
   Future<List<ComentarioModel>> getAllComentarios();

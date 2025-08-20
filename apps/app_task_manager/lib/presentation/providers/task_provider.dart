@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/task_entity.dart';
 import '../../domain/usecases/create_task.dart';
+import '../../domain/usecases/delete_task.dart';
 import '../../domain/usecases/get_tasks.dart';
 import '../../domain/usecases/update_task.dart';
 import '../../domain/usecases/watch_tasks.dart';
@@ -9,16 +10,19 @@ import '../../domain/usecases/watch_tasks.dart';
 class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   TaskNotifier({
     required CreateTask createTask,
+    required DeleteTask deleteTask,
     required GetTasks getTasks,
     required UpdateTask updateTask,
     required WatchTasks watchTasks,
   })  : _createTask = createTask,
+        _deleteTask = deleteTask,
         _getTasks = getTasks,
         _updateTask = updateTask,
         _watchTasks = watchTasks,
         super(const AsyncValue.loading());
 
   final CreateTask _createTask;
+  final DeleteTask _deleteTask;
   final GetTasks _getTasks;
   final UpdateTask _updateTask;
   final WatchTasks _watchTasks;
@@ -61,6 +65,11 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     );
   }
 
+  // Método específico para criar subtasks
+  Future<void> createSubtask(TaskEntity subtask) async {
+    await createTask(subtask);
+  }
+
   Future<void> updateTask(TaskEntity task) async {
     final result = await _updateTask(UpdateTaskParams(task: task));
 
@@ -76,6 +85,30 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
         }
       },
     );
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    final result = await _deleteTask(DeleteTaskParams(taskId: taskId));
+
+    result.fold(
+      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (_) {
+        if (state.hasValue) {
+          final currentTasks = state.value!;
+          final updatedTasks = currentTasks.where((t) => t.id != taskId).toList();
+          state = AsyncValue.data(updatedTasks);
+        }
+      },
+    );
+  }
+
+  // Métodos específicos para subtasks
+  Future<void> updateSubtask(TaskEntity subtask) async {
+    await updateTask(subtask);
+  }
+
+  Future<void> deleteSubtask(String subtaskId) async {
+    await deleteTask(subtaskId);
   }
 
   void watchTasks({

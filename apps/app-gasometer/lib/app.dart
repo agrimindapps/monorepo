@@ -23,7 +23,7 @@ class GasOMeterApp extends StatelessWidget {
         
         // Premium Provider
         ChangeNotifierProvider(
-          create: (_) => PremiumProvider(),
+          create: (_) => sl<PremiumProvider>(),
         ),
         
         // Vehicles Provider

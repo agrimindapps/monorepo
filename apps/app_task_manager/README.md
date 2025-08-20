@@ -1,159 +1,262 @@
-# Task Manager - Clean Architecture & SOLID
+# 📋 Task Manager - Gerenciador de Tarefas Pessoal
 
-Este projeto é uma implementação completa de um gerenciador de tarefas seguindo princípios **SOLID** e **Clean Architecture**, migrado do projeto original app-todoist.
+Um aplicativo Flutter moderno para gerenciamento de tarefas pessoais, seguindo princípios de Clean Architecture e design minimalista.
+
+## 🎯 Visão do Produto
+
+### Propósito
+**Aplicativo monousuário** focado em **produtividade pessoal**, permitindo organizar tarefas por contextos/categorias sem complexidade colaborativa desnecessária.
+
+### Público-Alvo
+- **Profissionais** que precisam organizar trabalho e vida pessoal
+- **Estudantes** gerenciando múltiplas disciplinas e projetos
+- **Pessoas organizadas** que preferem simplicidade à complexidade
+
+### Diferencial
+- **Simplicidade sobre funcionalidades** - foco no essencial
+- **Offline-first** - funciona sem internet
+- **Performance** - interface rápida e responsiva
+- **Privacidade** - dados apenas locais, sem tracking
 
 ## 🏗️ Arquitetura
 
-### Clean Architecture Layers
-
+### Clean Architecture + SOLID
 ```
-presentation/          # UI Layer
-├── pages/            # Screens/Pages  
-├── widgets/          # Reusable UI Components
-└── providers/        # State Management (Riverpod)
+📱 Presentation (UI)
+├── Pages (Telas)
+├── Widgets (Componentes)
+└── Providers (Estado - Riverpod)
 
-domain/               # Business Logic Layer
-├── entities/         # Core Business Objects
-├── repositories/     # Abstract Contracts
-└── usecases/         # Business Rules
+🎯 Domain (Regras de Negócio)
+├── Entities (Modelos de Domínio)
+├── Use Cases (Casos de Uso)
+└── Repositories (Contratos)
 
-data/                 # Data Layer
-├── models/           # Data Transfer Objects
-├── datasources/      # Data Source Interfaces
-└── repositories/     # Repository Implementations
+💾 Data (Dados)
+├── Models (Serialização)
+├── DataSources (Local/Remote)
+└── Repositories (Implementações)
 
-core/                 # Infrastructure
-├── constants/        # App Constants
-├── errors/           # Error Handling
-├── utils/            # Utilities
-├── network/          # Network Setup
-├── storage/          # Storage Setup
-└── di/               # Dependency Injection
+🔧 Core (Infraestrutura)
+├── DI (Injeção de Dependência)
+├── Database (Hive Config)
+└── Utils (Utilitários)
 ```
 
-## 🎯 Princípios SOLID Implementados
+### Stack Tecnológica
+- **Flutter 3.24+** - Framework UI
+- **Riverpod** - Gerenciamento de estado
+- **Hive** - Database local
+- **Dartz** - Programação funcional
+- **GetIt** - Injeção de dependência
+- **UUID** - Geração de IDs únicos
 
-### 1. **Single Responsibility Principle (SRP)**
-- **Entities**: Apenas dados de domínio
-- **Use Cases**: Uma responsabilidade por classe
-- **Repositories**: Separados por contexto (Task, User, etc.)
-- **Widgets**: Componentes focados em uma função
+## ✅ Status Atual (v1.0 - MVP)
 
-### 2. **Open/Closed Principle (OCP)**
-- **Interfaces abstratas** para repositories
-- **Strategy pattern** para diferentes data sources
-- **Extension methods** para funcionalidades adicionais
+### 🎉 Implementado
+- ✅ **Autenticação** - Login/registro local
+- ✅ **CRUD de Tasks** - Criar, editar, excluir tarefas
+- ✅ **Estados** - Pendente, em progresso, concluída
+- ✅ **Prioridades** - Baixa, média, alta, urgente
+- ✅ **Favoritos** - Marcar tasks importantes
+- ✅ **Filtros** - Por status (pendente, progresso, concluída)
+- ✅ **Persistência** - Armazenamento local com Hive
+- ✅ **Offline** - Funciona completamente offline
+- ✅ **UI Responsiva** - Estados de loading/erro/dados
 
-### 3. **Liskov Substitution Principle (LSP)**
-- **Interfaces bem definidas** que podem ser substituídas
-- **Implementações intercambiáveis** (Local/Remote DataSource)
+### 🏗️ Arquitetura Implementada
+- ✅ **Clean Architecture** completa
+- ✅ **Dependency Injection** configurado
+- ✅ **Error Handling** tipificado
+- ✅ **Use Cases** granulares
+- ✅ **Repository Pattern** implementado
+- ✅ **TypeAdapters** Hive configurados
 
-### 4. **Interface Segregation Principle (ISP)**
-- **Interfaces específicas** por responsabilidade
-- **Use Cases granulares** ao invés de services grandes
-- **DataSources separados** por função
+## 🚀 Roadmap
 
-### 5. **Dependency Inversion Principle (DIP)**
-- **Injeção de dependência** com GetIt
-- **Abstrações** ao invés de implementações concretas
-- **Inversão de controle** em todas as camadas
+### 📋 Fase 2: Gestão de Listas (Próxima)
+**Objetivo:** Organizar tasks em contextos diferentes
 
-## 🔄 Fluxos de Dados
+#### Funcionalidades Planejadas:
+- 📁 **Múltiplas Listas** - "Trabalho", "Casa", "Estudos"
+- 🎨 **Personalização** - Cores e ícones por lista
+- 📊 **Contadores** - Tasks por lista
+- 📤 **Export/Share** - Compartilhar lista como texto
+- 📋 **Templates** - Listas pré-definidas ("Projeto", "Viagem")
+- 🗃️ **Arquivamento** - Listas concluídas
 
-### Criação de Tarefa
+#### Estrutura Técnica:
+```dart
+TaskListEntity:
+├── id, name, description
+├── color, icon, position
+├── createdAt, updatedAt
+└── taskCount, completedCount
+
+TaskEntity (Atualizada):
+├── listId (referência à lista)
+└── demais campos mantidos
 ```
-UI → Use Case → Repository → DataSource → Database
-   ←           ←            ←             ←
+
+### 🔔 Fase 3: Notificações e Lembretes
+- 📱 **Notificações Locais** - Lembretes por task
+- ⏰ **Agendamento** - Data/hora específica
+- 🔄 **Recorrência** - Tasks repetitivas
+- ⚙️ **Configurações** - Personalizar notificações
+
+### 📊 Fase 4: Produtividade e Insights
+- 📈 **Estatísticas** - Tasks concluídas por período
+- 🎯 **Metas** - Objetivos diários/semanais
+- 📅 **Visualizações** - Calendário, timeline
+- 🏆 **Gamificação** - Streaks, conquistas
+
+### 🎨 Fase 5: Melhorias de UX
+- 🌙 **Tema Escuro** - Alternância de temas
+- 🎭 **Customização** - Cores, fontes, layouts
+- ⚡ **Gestos** - Swipe actions, shortcuts
+- 📱 **Widgets** - Shortcuts na tela inicial
+
+## 🚫 Fora do Escopo
+
+### Não Implementaremos:
+- ❌ **Múltiplos Usuários** - Foco monousuário
+- ❌ **Sincronização Cloud** - Offline-first
+- ❌ **Colaboração** - Sem compartilhamento online
+- ❌ **Chat/Comentários** - Sem interação social
+- ❌ **Integrações** - Sem APIs externas
+- ❌ **Assinatura** - App gratuito
+
+### Compartilhamento Simples:
+- ✅ **Export de texto** - Copiar lista como texto
+- ✅ **Share nativo** - WhatsApp, email, etc.
+- ✅ **Formato markdown** - Para desenvolvedores
+
+## 🔧 Desenvolvimento
+
+### Configuração do Ambiente
+```bash
+# Clone o repositório
+git clone [repo-url]
+cd monorepo/apps/app_task_manager
+
+# Instalar dependências
+flutter pub get
+
+# Gerar código (adapters, serialização)
+dart run build_runner build --delete-conflicting-outputs
+
+# Executar
+flutter run
 ```
 
-### Leitura de Tarefas
+### Estrutura de Pastas
 ```
-UI → Provider → Use Case → Repository → DataSource → Cache/Remote
-   ←         ←          ←            ←             ←
+lib/
+├── core/                 # Infraestrutura
+│   ├── database/        # Configuração Hive
+│   ├── di/              # Injeção de Dependência
+│   ├── errors/          # Error handling
+│   └── utils/           # Utilitários
+├── data/                # Camada de Dados
+│   ├── datasources/     # Fontes de dados
+│   ├── models/          # Modelos de dados
+│   └── repositories/    # Implementações
+├── domain/              # Regras de Negócio
+│   ├── entities/        # Entidades
+│   ├── repositories/    # Contratos
+│   └── usecases/        # Casos de uso
+└── presentation/        # Interface
+    ├── pages/           # Telas
+    ├── providers/       # Estado (Riverpod)
+    └── widgets/         # Componentes
 ```
 
-## 📦 Funcionalidades Migradas
+### Comandos Úteis
+```bash
+# Análise de código
+flutter analyze
 
-### ✅ Implementadas
-- [x] Arquitetura Clean com SOLID
-- [x] Entidades de domínio (Task, User, TaskList)
-- [x] Use Cases granulares
-- [x] Repository pattern com abstrações
-- [x] Provider pattern com Riverpod
-- [x] Estrutura de UI básica
-- [x] Sistema de erros tipificado
+# Gerar código Hive/JSON
+dart run build_runner build
 
-### 🚧 Em Desenvolvimento
-- [ ] Implementações dos DataSources
-- [ ] Firebase integration
-- [ ] Hive local storage
-- [ ] Notification system
-- [ ] Authentication flow
-- [ ] Sync mechanism
-- [ ] Testing infrastructure
+# Limpar cache de build
+flutter clean && flutter pub get
 
-### 📋 Funcionalidades do App Original
-- [ ] **Autenticação** (Email/Password, Guest mode)
-- [ ] **CRUD de Tarefas** (Create, Read, Update, Delete)
-- [ ] **Listas de Tarefas** (Compartilhamento, cores)
-- [ ] **Filtragem** (Hoje, Vencidas, Favoritas, etc.)
-- [ ] **Agrupamento** (Por prioridade, data, status)
-- [ ] **Sincronização Offline-First**
-- [ ] **Notificações** (Locais e push)
-- [ ] **Temas customizáveis**
-- [ ] **Sistema Premium**
+# Executar testes
+flutter test
+```
 
-## 🛠️ Tecnologias
+## 🎨 Design System
 
-- **Flutter 3.8+**
-- **Riverpod** (State Management)
-- **Hive** (Local Storage)  
-- **Firebase** (Backend)
-- **GetIt** (Dependency Injection)
-- **Dartz** (Functional Programming)
-- **Equatable** (Value Equality)
+### Princípios de UI/UX
+- **Minimalismo** - Interface limpa, sem distrações
+- **Consistência** - Padrões visuais uniformes
+- **Performance** - Transições fluidas, carregamento rápido
+- **Acessibilidade** - Suporte a diferentes necessidades
 
-## 📚 Benefícios da Nova Arquitetura
+### Paleta de Cores
+- **Primary:** Blue (#2196F3) - Ações principais
+- **Success:** Green (#4CAF50) - Tasks concluídas
+- **Warning:** Orange (#FF9800) - Prioridade alta
+- **Error:** Red (#F44336) - Erros e exclusões
+- **Surface:** White/Dark - Backgrounds
 
-### 🧪 **Testabilidade**
-- Use Cases isolados e testáveis
-- Mocks fáceis com interfaces
-- Testing pyramid completo
+## 📱 Casos de Uso
 
-### 🔧 **Manutenibilidade**
-- Separação clara de responsabilidades
-- Código desacoplado
-- Fácil refatoração
+### Profissional
+```
+📊 Trabalho
+├── ✅ Code review PR #123
+├── 🔄 Implementar autenticação
+├── 📝 Documentar API endpoints
+└── 📧 Responder emails importantes
 
-### 📈 **Escalabilidade**
-- Adição de features sem impacto
-- Team scaling facilitado
-- Patterns consistentes
+💼 Pessoal
+├── 📞 Agendar consulta médica
+├── 🛒 Comprar presente aniversário
+└── 💳 Pagar conta de luz
+```
 
-### 🔄 **Flexibilidade**
-- Troca de implementações sem impacto
-- Multiple data sources
-- Adaptação a mudanças de requisitos
+### Estudante
+```
+📚 Matemática
+├── ✅ Resolver exercícios cap. 5
+├── 📝 Estudar para prova
+└── 🎯 Revisar derivadas
 
-## 🚀 Próximos Passos
+🔬 Química
+├── 🧪 Relatório experimento
+├── 📖 Ler artigo sobre átomos
+└── ✏️ Fazer lista de exercícios
+```
 
-1. **Implementar DataSources** concretos
-2. **Configurar Firebase** integration
-3. **Implementar Hive** storage
-4. **Criar testes** unitários e de integração
-5. **Migrar UI** do projeto original
-6. **Adicionar features** restantes
+## 🤝 Contribuição
 
-## 🎯 Comparação com Projeto Original
+### Como Contribuir
+1. **Fork** o projeto
+2. **Crie** uma branch (`git checkout -b feature/nova-funcionalidade`)
+3. **Commit** suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. **Push** para a branch (`git push origin feature/nova-funcionalidade`)
+5. **Abra** um Pull Request
 
-| Aspecto | Original | Nova Arquitetura |
-|---------|----------|------------------|
-| **Arquitetura** | GetX MVC | Clean Architecture + SOLID |
-| **State Management** | GetX Controllers | Riverpod Providers |
-| **Business Logic** | Mixing layers | Use Cases isolados |
-| **Data Layer** | Repository direto | DataSource + Repository |
-| **Testing** | Difícil | Fácil com mocks |
-| **Manutenibilidade** | Acoplado | Desacoplado |
-| **Escalabilidade** | Limitada | Alta |
+### Padrões de Código
+- **Clean Architecture** - Separação clara de responsabilidades
+- **SOLID Principles** - Código maintível e extensível
+- **Flutter Best Practices** - Seguir convenções da comunidade
+- **Testes** - Cobertura mínima de 80% em use cases
 
-Esta nova implementação mantém **todas as funcionalidades** do projeto original, mas com uma arquitetura muito mais robusta, testável e escalável.
+## 📄 Licença
+
+Este projeto está sob licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+## 🎯 Contato
+
+- **Desenvolvedor:** [Seu Nome]
+- **Email:** [seu.email@exemplo.com]
+- **GitHub:** [seu-usuario]
+
+---
+
+> 💡 **Filosofia do Projeto:** "Simplicidade é a sofisticação suprema" - Leonardo da Vinci
+
+> 🎯 **Objetivo:** Criar uma ferramenta que ajude as pessoas a serem mais produtivas sem adicionar complexidade desnecessária às suas vidas.

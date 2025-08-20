@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/di/injection_container.dart' as di;
+import 'controller/comentarios_controller.dart';
+import 'services/comentarios_service.dart';
 
 class ComentariosPage extends StatelessWidget {
   final String? pkIdentificador;
@@ -13,12 +17,32 @@ class ComentariosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _ComentariosPageContent();
+    return ChangeNotifierProvider(
+      create: (context) {
+        final controller = ComentariosController(
+          service: di.sl<ComentariosService>(),
+        );
+        // Configura filtros antes do carregamento inicial
+        controller.pkIdentificador = pkIdentificador;
+        controller.ferramenta = ferramenta;
+        return controller;
+      },
+      child: _ComentariosPageContent(
+        pkIdentificador: pkIdentificador,
+        ferramenta: ferramenta,
+      ),
+    );
   }
 }
 
 class _ComentariosPageContent extends StatelessWidget {
-  const _ComentariosPageContent();
+  final String? pkIdentificador;
+  final String? ferramenta;
+  
+  const _ComentariosPageContent({
+    this.pkIdentificador,
+    this.ferramenta,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,28 +54,82 @@ class _ComentariosPageContent extends StatelessWidget {
           children: [
             _buildModernHeader(context, isDark),
             Expanded(
-              child: _buildEmptyState(),
+              child: Consumer<ComentariosController>(
+                builder: (context, controller, child) {
+                  final state = controller.state;
+                  
+                  if (state.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (state.error != null) {
+                    return Center(
+                      child: Text('Erro: ${state.error}'),
+                    );
+                  }
+                  
+                  // Se não há filtros (página principal), mostra todos os comentários
+                  // Se há filtros, mostra apenas os filtrados
+                  final comentariosParaMostrar = (pkIdentificador == null && ferramenta == null)
+                      ? state.comentarios
+                      : state.comentariosFiltrados;
+                  
+                  if (comentariosParaMostrar.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  
+                  return _buildComentariosList(comentariosParaMostrar);
+                },
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onAddComentario(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: Consumer<ComentariosController>(
+        builder: (context, controller, child) {
+          // Por enquanto, sempre mostra o botão
+          // A validação de limites será feita no momento do clique
+          return FloatingActionButton(
+            onPressed: () => _onAddComentario(context, controller),
+            child: const Icon(Icons.add),
+          );
+        },
       ),
     );
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return ModernHeaderWidget(
-      title: 'Comentários',
-      subtitle: 'Suas anotações pessoais',
-      leftIcon: Icons.comment_outlined,
-      showBackButton: false,
-      showActions: true,
-      isDark: isDark,
-      rightIcon: Icons.info_outline,
-      onRightIconPressed: () => _showInfoDialog(context),
+    return Consumer<ComentariosController>(
+      builder: (context, controller, child) {
+        final state = controller.state;
+        
+        String subtitle;
+        if (state.isLoading) {
+          subtitle = 'Carregando comentários...';
+        } else {
+          final total = state.comentarios.length;
+          final filtrados = state.comentariosFiltrados.length;
+          
+          if (pkIdentificador != null || ferramenta != null) {
+            // Comentários filtrados por contexto
+            subtitle = filtrados > 0 ? '$filtrados comentários para este contexto' : 'Nenhum comentário neste contexto';
+          } else {
+            // Todos os comentários
+            subtitle = total > 0 ? '$total comentários' : 'Suas anotações pessoais';
+          }
+        }
+        
+        return ModernHeaderWidget(
+          title: 'Comentários',
+          subtitle: subtitle,
+          leftIcon: Icons.comment_outlined,
+          showBackButton: false,
+          showActions: true,
+          isDark: isDark,
+          rightIcon: Icons.info_outline,
+          onRightIconPressed: () => _showInfoDialog(context),
+        );
+      },
     );
   }
 
@@ -63,13 +141,13 @@ class _ComentariosPageContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.comment_outlined,
               size: 48,
-              color: Colors.blue,
+              color: Color(0xFF4CAF50),
             ),
           ),
           const SizedBox(height: 16),
@@ -94,26 +172,220 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  void _onAddComentario(BuildContext context) {
+  Widget _buildComentariosList(List<dynamic> comentarios) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: comentarios.length,
+      itemBuilder: (context, index) {
+        final comentario = comentarios[index];
+        return _buildComentarioCard(comentario, context);
+      },
+    );
+  }
+
+  Widget _buildComentarioCard(dynamic comentario, BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header do comentário
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFF8F9FA),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    _getOriginIcon(comentario.ferramenta),
+                    size: 16,
+                    color: const Color(0xFF4CAF50),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        comentario.ferramenta,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF4CAF50),
+                        ),
+                      ),
+                      if (comentario.pkIdentificador.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'ID: ${comentario.pkIdentificador}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Text(
+                  _formatDate(comentario.createdAt),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    size: 18,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      _deleteComentario(context, comentario);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: Colors.red.shade600,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Excluir',
+                            style: TextStyle(
+                              color: Colors.red.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Conteúdo do comentário
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Text(
+              comentario.conteudo,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.4,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getOriginIcon(String origem) {
+    switch (origem.toLowerCase()) {
+      case 'defensivos':
+        return Icons.shield_outlined;
+      case 'pragas':
+        return Icons.bug_report_outlined;
+      case 'diagnóstico':
+        return Icons.medical_services_outlined;
+      case 'comentários':
+      case 'comentário direto':
+        return Icons.comment_outlined;
+      default:
+        return Icons.note_outlined;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d atrás';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h atrás';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m atrás';
+    } else {
+      return 'Agora';
+    }
+  }
+
+  void _onAddComentario(BuildContext context, ComentariosController controller) {
+    showDialog(
+      context: context,
+      builder: (context) => AddCommentDialog(
+        origem: ferramenta ?? 'Comentários',
+        itemName: pkIdentificador != null ? 'Item $pkIdentificador' : 'Comentário direto',
+        pkIdentificador: pkIdentificador,
+        ferramenta: ferramenta,
+        onSave: (content) async {
+          await controller.addComentario(content);
+        },
+        onCancel: () {
+          // Callback opcional para cancelamento
+        },
+      ),
+    );
+  }
+
+  void _deleteComentario(BuildContext context, dynamic comentario) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Novo Comentário'),
-        content: const TextField(
-          maxLines: 3,
-          decoration: InputDecoration(
-            hintText: 'Digite seu comentário...',
-            border: OutlineInputBorder(),
-          ),
-        ),
+        title: const Text('Excluir Comentário'),
+        content: const Text('Tem certeza que deseja excluir este comentário? Esta ação não pode ser desfeita.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Salvar'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Busca o controller atual
+              final controller = context.read<ComentariosController>();
+              controller.deleteComentario(comentario);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Excluir'),
           ),
         ],
       ),
@@ -138,5 +410,440 @@ class _ComentariosPageContent extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class AddCommentDialog extends StatefulWidget {
+  final String? origem;
+  final String? itemName;
+  final String? pkIdentificador;
+  final String? ferramenta;
+  final Future<void> Function(String content)? onSave;
+  final VoidCallback? onCancel;
+  
+  const AddCommentDialog({
+    super.key,
+    this.origem,
+    this.itemName,
+    this.pkIdentificador,
+    this.ferramenta,
+    this.onSave,
+    this.onCancel,
+  });
+
+  @override
+  State<AddCommentDialog> createState() => _AddCommentDialogState();
+}
+
+class _AddCommentDialogState extends State<AddCommentDialog> {
+  final TextEditingController _commentController = TextEditingController();
+  final ValueNotifier<String> _contentNotifier = ValueNotifier<String>('');
+  final int _maxLength = 300;
+  final int _minLength = 5;
+
+  @override
+  void initState() {
+    super.initState();
+    _commentController.addListener(() {
+      _contentNotifier.value = _commentController.text;
+    });
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    _contentNotifier.dispose();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      insetPadding: const EdgeInsets.all(16),
+      child: Container(
+        width: double.maxFinite,
+        constraints: const BoxConstraints(maxHeight: 500),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            _buildHeader(context, theme, isDark),
+            
+            // Origin Info (if available)
+            if (widget.origem != null || widget.itemName != null)
+              _buildOriginInfo(context, theme, isDark),
+            
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                child: _buildCommentForm(theme, isDark),
+              ),
+            ),
+            
+            // Actions
+            _buildActions(context, theme, isDark),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ThemeData theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 12, top: 12, bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFF8F9FA),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.add,
+              color: Color(0xFF4CAF50),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Adicionar Comentário',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(
+              Icons.close,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            ),
+            constraints: const BoxConstraints(
+              minWidth: 32,
+              minHeight: 32,
+            ),
+            padding: EdgeInsets.zero,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOriginInfo(BuildContext context, ThemeData theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFF8F9FA),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.origem != null)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getOriginIcon(widget.origem!),
+                  size: 16,
+                  color: const Color(0xFF4CAF50),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  widget.origem!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF4CAF50),
+                  ),
+                ),
+              ],
+            ),
+          if (widget.itemName != null) ...[
+            if (widget.origem != null) const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.label_outline,
+                  size: 14,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    widget.itemName!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  IconData _getOriginIcon(String origem) {
+    switch (origem.toLowerCase()) {
+      case 'defensivos':
+        return Icons.shield_outlined;
+      case 'pragas':
+        return Icons.bug_report_outlined;
+      case 'diagnóstico':
+        return Icons.medical_services_outlined;
+      case 'comentários':
+        return Icons.comment_outlined;
+      default:
+        return Icons.comment_outlined;
+    }
+  }
+
+
+  Widget _buildCommentForm(ThemeData theme, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          'Comentário',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: Semantics(
+            label: 'Campo de texto para comentário',
+            hint: 'Digite seu comentário aqui, mínimo $_minLength caracteres, máximo $_maxLength caracteres',
+            textField: true,
+            child: TextField(
+              controller: _commentController,
+              maxLines: null,
+              expands: true,
+              maxLength: _maxLength,
+              autofocus: true,
+              onChanged: (_) => setState(() {}),
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Digite seu comentário aqui...',
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                  fontSize: 16,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF4CAF50),
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.all(16),
+                counterText: '',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        ValueListenableBuilder<String>(
+          valueListenable: _contentNotifier,
+          builder: (context, content, child) {
+            return Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${content.length}/$_maxLength',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: content.length > _maxLength
+                      ? Colors.red
+                      : isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+
+  Widget _buildActions(BuildContext context, ThemeData theme, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+      child: ValueListenableBuilder<String>(
+        valueListenable: _contentNotifier,
+        builder: (context, content, child) {
+          final trimmedContent = content.trim();
+          final canSave = trimmedContent.length >= _minLength && 
+                         trimmedContent.length <= _maxLength;
+          
+          return Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  label: 'Botão cancelar',
+                  hint: 'Cancela a criação do comentário e fecha o diálogo',
+                  button: true,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      widget.onCancel?.call();
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(
+                      Icons.close,
+                      size: 18,
+                    ),
+                    label: const Text(
+                      'Cancelar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                      side: BorderSide(
+                        color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Semantics(
+                  label: 'Botão salvar comentário',
+                  hint: canSave 
+                      ? 'Salva o comentário e fecha o diálogo'
+                      : 'Comentário deve ter entre $_minLength e $_maxLength caracteres',
+                  button: true,
+                  child: ElevatedButton.icon(
+                    onPressed: canSave ? () => _saveComment(context, trimmedContent) : null,
+                    icon: const Icon(
+                      Icons.check,
+                      size: 18,
+                    ),
+                    label: const Text(
+                      'Salvar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4CAF50),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: isDark
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade300,
+                      disabledForegroundColor: isDark
+                          ? Colors.grey.shade600
+                          : Colors.grey.shade500,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _saveComment(BuildContext context, String content) async {
+    if (widget.onSave != null) {
+      // Aplica padding se o conteúdo for muito curto
+      String contentToSave = content;
+      if (content.length < _minLength) {
+        contentToSave = content.padRight(_minLength, ' ');
+      }
+      
+      try {
+        await widget.onSave!(contentToSave);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Comentário salvo com sucesso!'),
+              backgroundColor: Color(0xFF4CAF50),
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao salvar comentário: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } else {
+      // Fallback para demonstração
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Comentário salvo: "$content"'),
+            backgroundColor: const Color(0xFF4CAF50),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    }
   }
 }

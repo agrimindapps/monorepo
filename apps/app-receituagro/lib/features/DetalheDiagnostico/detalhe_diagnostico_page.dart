@@ -89,6 +89,9 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
     });
     
     try {
+      // Verifica se há dados na base local
+      final totalDiagnosticos = _repository.count;
+      
       // Busca diagnóstico por ID
       final diagnostico = _repository.getById(widget.diagnosticoId);
       
@@ -100,7 +103,11 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
             _diagnosticoData = diagnostico.toDataMap();
           } else {
             hasError = true;
-            _errorMessage = 'Diagnóstico não encontrado';
+            if (totalDiagnosticos == 0) {
+              _errorMessage = 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.';
+            } else {
+              _errorMessage = 'Diagnóstico com ID "${widget.diagnosticoId}" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.';
+            }
           }
         });
       }
@@ -109,7 +116,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
         setState(() {
           isLoading = false;
           hasError = true;
-          _errorMessage = 'Erro ao carregar diagnóstico: $e';
+          _errorMessage = 'Erro ao acessar dados locais: $e. Tente reiniciar o aplicativo ou resincronizar os dados.';
         });
       }
     }
@@ -273,7 +280,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Verifique sua conexão e tente novamente',
+              _errorMessage ?? 'Dados do diagnóstico não encontrados',
               style: TextStyle(
                 fontSize: 14,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -972,10 +979,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
 
   void _shareViaApps(String text) async {
     try {
-      await Share.share(
-        text,
-        subject: 'Diagnóstico ${widget.nomeDefensivo} - ${widget.nomePraga}',
-      );
+      await Share.share(text);
     } catch (e) {
       _showErrorSnackBar('Erro ao compartilhar via apps');
     }
@@ -1136,19 +1140,23 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
         isFavorited = wasAlreadyFavorited;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Diagnóstico ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Diagnóstico ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 

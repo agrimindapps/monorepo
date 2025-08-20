@@ -35,4 +35,6 @@ abstract class TaskRepository {
   });
   
   ResultFuture<List<TaskEntity>> searchTasks(String query);
+  
+  ResultFuture<List<TaskEntity>> getSubtasks(String parentTaskId);
 }

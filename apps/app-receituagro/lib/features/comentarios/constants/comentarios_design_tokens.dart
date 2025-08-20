@@ -43,8 +43,8 @@ class ComentariosDesignTokens {
   static const int minCommentLength = 5;
   static const int maxSearchLength = 100;
 
-  // Premium limits
-  static const int freeTierMaxComments = 0;
+  // Premium limits (temporariamente sem limites)
+  static const int freeTierMaxComments = 9999999;
   static const int premiumMaxComments = 9999999;
 
   // UI State Messages

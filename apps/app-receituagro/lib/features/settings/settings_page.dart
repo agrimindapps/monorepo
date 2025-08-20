@@ -5,6 +5,7 @@ import '../../core/di/injection_container.dart' as di;
 import '../../core/widgets/modern_header_widget.dart';
 import '../subscription/subscription_page.dart';
 import '../../core/services/receituagro_notification_service.dart';
+import '../../core/interfaces/i_premium_service.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -15,6 +16,7 @@ class SettingsPage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      backgroundColor: theme.cardColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -24,10 +26,18 @@ class SettingsPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 children: [
                   // App Info Card
-                  Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
+                  Container(
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -68,6 +78,33 @@ class SettingsPage extends StatelessWidget {
                   
                   const SizedBox(height: 24),
                   
+                  // Premium Section
+                  Text(
+                    'Premium',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Premium Subscription Card
+                  FutureBuilder<bool>(
+                    future: di.sl<IPremiumService>().isPremiumUser(),
+                    builder: (context, snapshot) {
+                      final isPremium = snapshot.data ?? false;
+                      
+                      if (isPremium) {
+                        return _buildActivePremiumCard(context, theme);
+                      } else {
+                        return _buildPremiumSubscriptionCard(context, theme);
+                      }
+                    },
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
                   // Notifications Section
                   Text(
                     'Notificações',
@@ -79,144 +116,88 @@ class SettingsPage extends StatelessWidget {
                   
                   const SizedBox(height: 12),
                   
-                  // Notification Settings
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
+                  // Notifications Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
-                    child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.notifications,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              title: const Text(
-                'Configurar Notificações',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: const Text(
-                'Gerenciar alertas e lembretes',
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showNotificationSettings(context),
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Test Notification
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.bug_report,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              title: const Text(
-                'Testar Notificação',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: const Text(
-                'Enviar notificação de teste',
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _testNotification(context),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Subscription Section
-          Text(
-            'Premium',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Subscription Option
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.star,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              title: const Text(
-                'Planos Premium',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: const Text(
-                'Acesse recursos exclusivos',
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SubscriptionPage(),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.notifications,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          title: const Text(
+                            'Configurar Notificações',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Gerenciar alertas e lembretes',
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => _showNotificationSettings(context),
+                        ),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.bug_report,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          title: const Text(
+                            'Testar Notificação',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Enviar notificação de teste',
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => _testNotification(context),
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
           
           const SizedBox(height: 24),
           
@@ -231,89 +212,92 @@ class SettingsPage extends StatelessWidget {
           
           const SizedBox(height: 12),
           
-          // Rate App Option
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
+          // Support Card
+          Container(
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.star_outline,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              title: const Text(
-                'Avaliar o App',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: const Text(
-                'Avalie nossa experiência na loja',
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showRateAppDialog(context),
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Feedback Option
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.feedback_outlined,
-                  color: theme.colorScheme.secondary,
-                ),
-              ),
-              title: const Text(
-                'Enviar Feedback',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: const Text(
-                'Nos ajude a melhorar o app',
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Sistema de feedback em desenvolvimento'),
+            child: Column(
+              children: [
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                );
-              },
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.star_outline,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  title: const Text(
+                    'Avaliar o App',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Avalie nossa experiência na loja',
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showRateAppDialog(context),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.feedback_outlined,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                  title: const Text(
+                    'Enviar Feedback',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Nos ajude a melhorar o app',
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Sistema de feedback em desenvolvimento'),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
           
@@ -331,83 +315,150 @@ class SettingsPage extends StatelessWidget {
             
             const SizedBox(height: 12),
             
-            // Test Analytics
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
+            // Development Card
+            Container(
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(8),
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.analytics,
+                        color: Colors.green.shade600,
+                      ),
+                    ),
+                    title: const Text(
+                      'Testar Analytics',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Enviar evento de teste',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _testAnalytics(context),
                   ),
-                  child: Icon(
-                    Icons.analytics,
-                    color: theme.colorScheme.tertiary,
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.bug_report,
+                        color: Colors.green.shade600,
+                      ),
+                    ),
+                    title: const Text(
+                      'Testar Crashlytics',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Enviar erro de teste',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _testCrashlytics(context),
                   ),
-                ),
-                title: const Text(
-                  'Testar Analytics',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.verified_user,
+                        color: Colors.green.shade600,
+                      ),
+                    ),
+                    title: const Text(
+                      'Gerar Licença Teste',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Ativa licença premium por 30 dias',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _generateTestLicense(context),
                   ),
-                ),
-                subtitle: const Text(
-                  'Enviar evento de teste',
-                  style: TextStyle(
-                    fontSize: 12,
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.no_accounts,
+                        color: Colors.green.shade600,
+                      ),
+                    ),
+                    title: const Text(
+                      'Remover Licença Teste',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Remove licença premium ativa',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _removeTestLicense(context),
                   ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _testAnalytics(context),
-              ),
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // Test Crashlytics
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.bug_report,
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-                title: const Text(
-                  'Testar Crashlytics',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Enviar erro de teste',
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _testCrashlytics(context),
+                ],
               ),
             ),
             
@@ -426,10 +477,18 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 12),
           
           // About App
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
+          Container(
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
@@ -556,7 +615,7 @@ class SettingsPage extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).dialogBackgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -646,7 +705,7 @@ class SettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).dialogBackgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -962,6 +1021,101 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  Future<void> _generateTestLicense(BuildContext context) async {
+    try {
+      final premiumService = di.sl<IPremiumService>();
+      
+      await premiumService.generateTestSubscription();
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('✅ Licença teste gerada com sucesso! (30 dias)'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Erro ao gerar licença teste: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _removeTestLicense(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning,
+              color: Theme.of(context).colorScheme.error,
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            const Text('Remover Licença Teste'),
+          ],
+        ),
+        content: const Text(
+          'Isso irá remover a licença premium de teste. Todas as funcionalidades premium serão desabilitadas. Continuar?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true && context.mounted) {
+      try {
+        final premiumService = di.sl<IPremiumService>();
+        
+        await premiumService.removeTestSubscription();
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('❌ Licença teste removida com sucesso'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Erro ao remover licença teste: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _toggleTheme(ThemeProvider themeProvider) async {
     if (themeProvider.isSystemMode) {
       await themeProvider.setThemeMode(ThemeMode.light);
@@ -970,5 +1124,343 @@ class SettingsPage extends StatelessWidget {
     } else {
       await themeProvider.setThemeMode(ThemeMode.system);
     }
+  }
+
+  Widget _buildActivePremiumCard(BuildContext context, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.green.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header com ícone premium e status
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.green.shade400,
+                        Colors.green.shade600,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.verified,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Premium Ativo',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Recursos exclusivos desbloqueados',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.green.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.green.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'ATIVO',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Lista de benefícios ativos
+            _buildBenefitItem(
+              Icons.cloud_sync,
+              'Sincronização na Nuvem',
+              'Dados seguros em todos os dispositivos',
+              theme,
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitItem(
+              Icons.analytics,
+              'Relatórios Avançados',
+              'Análises detalhadas de pragas',
+              theme,
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitItem(
+              Icons.block,
+              'Sem Anúncios',
+              'Experiência premium sem interrupções',
+              theme,
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Botão para gerenciar
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SubscriptionPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.settings_outlined, size: 18),
+                label: const Text(
+                  'Gerenciar Assinatura',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: theme.colorScheme.primary,
+                  side: BorderSide(color: theme.colorScheme.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumSubscriptionCard(BuildContext context, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Header com ícone premium
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.orange.shade400,
+                    Colors.orange.shade600,
+                  ],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.workspace_premium,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            Text(
+              'ReceitaAgro Premium',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Desbloqueie recursos avançados e tenha a melhor experiência',
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+
+            // Lista de benefícios
+            _buildBenefitItem(
+              Icons.cloud_sync,
+              'Sincronização na Nuvem',
+              'Dados seguros e acessíveis em qualquer dispositivo',
+              theme,
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitItem(
+              Icons.analytics,
+              'Relatórios Avançados',
+              'Análises detalhadas de pragas e defensivos',
+              theme,
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitItem(
+              Icons.notifications_active,
+              'Alertas Inteligentes',
+              'Notificações personalizadas e lembretes',
+              theme,
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitItem(
+              Icons.block,
+              'Sem Anúncios',
+              'Experiência premium sem interrupções',
+              theme,
+            ),
+
+            const SizedBox(height: 24),
+
+            // Botão de assinatura
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SubscriptionPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.star, size: 20),
+                label: const Text(
+                  'Assinar Premium',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade600,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBenefitItem(IconData icon, String title, String description, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+            ),
+          ),
+          child: Icon(
+            icon, 
+            color: theme.colorScheme.primary, 
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -21,6 +21,7 @@ class TaskEntity extends Equatable {
   final int position;
   final List<String> tags;
   final String? parentTaskId;
+  final String? notes;
 
   const TaskEntity({
     required this.id,
@@ -39,6 +40,7 @@ class TaskEntity extends Equatable {
     this.position = 0,
     this.tags = const [],
     this.parentTaskId,
+    this.notes,
   });
 
   bool get isCompleted => status == TaskStatus.completed;
@@ -48,6 +50,23 @@ class TaskEntity extends Equatable {
       !isCompleted;
   
   bool get isSubtask => parentTaskId != null;
+  
+  bool get isDueToday {
+    if (dueDate == null) return false;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final taskDate = DateTime(dueDate!.year, dueDate!.month, dueDate!.day);
+    return today == taskDate;
+  }
+  
+  bool get isDueThisWeek {
+    if (dueDate == null) return false;
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    return dueDate!.isAfter(startOfWeek.subtract(const Duration(days: 1))) && 
+           dueDate!.isBefore(endOfWeek.add(const Duration(days: 1)));
+  }
 
   TaskEntity copyWith({
     String? id,
@@ -66,6 +85,7 @@ class TaskEntity extends Equatable {
     int? position,
     List<String>? tags,
     String? parentTaskId,
+    String? notes,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -84,6 +104,7 @@ class TaskEntity extends Equatable {
       position: position ?? this.position,
       tags: tags ?? this.tags,
       parentTaskId: parentTaskId ?? this.parentTaskId,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -105,5 +126,6 @@ class TaskEntity extends Equatable {
         position,
         tags,
         parentTaskId,
+        notes,
       ];
 }

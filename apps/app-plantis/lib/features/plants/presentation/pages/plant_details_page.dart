@@ -712,7 +712,6 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                   context,
                   title: 'Tarefas Atrasadas',
                   tasks: overdueTasks,
-                  taskProvider: taskProvider,
                   color: Colors.red,
                   icon: Icons.warning,
                 ),
@@ -725,7 +724,6 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                   context,
                   title: 'Próximas Tarefas',
                   tasks: upcomingTasks,
-                  taskProvider: taskProvider,
                   color: Colors.orange,
                   icon: Icons.schedule,
                 ),
@@ -737,7 +735,6 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                 context,
                 title: 'Todas as Tarefas',
                 tasks: pendingTasks,
-                taskProvider: taskProvider,
                 color: PlantisColors.primary,
                 icon: Icons.task_alt,
               ),
@@ -789,6 +786,306 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
           ),
         );
       }
+    }
+  }
+
+  Widget _buildEmptyTasksState(BuildContext context, Plant plant) {
+    final theme = Theme.of(context);
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.brightness == Brightness.dark 
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.08),
+                  blurRadius: theme.brightness == Brightness.dark ? 8 : 12,
+                  offset: const Offset(0, 4),
+                  spreadRadius: theme.brightness == Brightness.dark ? 0 : 2,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.eco,
+                  size: 80,
+                  color: PlantisColors.primary.withValues(alpha: 0.7),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Sua ${plant.displayName} está em dia!',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Não há tarefas pendentes no momento. Continue cuidando bem da sua planta!',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskSummaryCards(BuildContext context, List<PlantTask> overdueTasks, List<PlantTask> upcomingTasks, List<PlantTask> pendingTasks) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildSummaryCard(
+            context,
+            'Em atraso',
+            overdueTasks.length.toString(),
+            Colors.red,
+            Icons.schedule,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildSummaryCard(
+            context,
+            'Próximas',
+            upcomingTasks.length.toString(),
+            Colors.orange,
+            Icons.upcoming,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildSummaryCard(
+            context,
+            'Pendentes',
+            pendingTasks.length.toString(),
+            PlantisColors.primary,
+            Icons.pending_actions,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryCard(BuildContext context, String title, String count, Color color, IconData icon) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskSection(BuildContext context, {
+    required String title,
+    required List<PlantTask> tasks,
+    required Color color,
+    required IconData icon,
+  }) {
+    final theme = Theme.of(context);
+    final taskProvider = context.read<PlantTaskProvider>();
+    
+    if (tasks.isEmpty) return const SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                tasks.length.toString(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...tasks.map((task) => _buildTaskCard(context, task, taskProvider)),
+      ],
+    );
+  }
+
+  Widget _buildTaskCard(BuildContext context, PlantTask task, PlantTaskProvider taskProvider) {
+    final theme = Theme.of(context);
+    final color = _getTaskColor(task);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.brightness == Brightness.dark 
+              ? Colors.black.withValues(alpha: 0.3)
+              : Colors.black.withValues(alpha: 0.08),
+            blurRadius: theme.brightness == Brightness.dark ? 8 : 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _getTaskIcon(task.type),
+              color: color,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  task.description ?? '',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    task.statusText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (task.status != TaskStatus.completed)
+            IconButton(
+              onPressed: () => taskProvider.completeTask(task.plantId, task.id),
+              icon: Icon(
+                Icons.check_circle_outline,
+                color: PlantisColors.primary,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _getTaskColor(PlantTask task) {
+    switch (task.status) {
+      case TaskStatus.overdue:
+        return Colors.red;
+      case TaskStatus.completed:
+        return Colors.green;
+      case TaskStatus.pending:
+        if (task.isDueToday || task.isDueSoon) {
+          return Colors.orange;
+        }
+        return PlantisColors.primary;
+    }
+  }
+
+  IconData _getTaskIcon(TaskType type) {
+    switch (type) {
+      case TaskType.watering:
+        return Icons.water_drop;
+      case TaskType.fertilizing:
+        return Icons.eco;
+      case TaskType.pruning:
+        return Icons.content_cut;
+      case TaskType.sunlightCheck:
+        return Icons.wb_sunny;
+      case TaskType.pestInspection:
+        return Icons.bug_report;
+      case TaskType.replanting:
+        return Icons.grass;
     }
   }
 }
@@ -1070,312 +1367,5 @@ class _CommentsTabState extends State<_CommentsTab> {
         );
       },
     );
-  }
-
-  Widget _buildEmptyTasksState(BuildContext context, Plant plant) {
-    final theme = Theme.of(context);
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.brightness == Brightness.dark 
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.08),
-                  blurRadius: theme.brightness == Brightness.dark ? 8 : 12,
-                  offset: const Offset(0, 4),
-                  spreadRadius: theme.brightness == Brightness.dark ? 0 : 2,
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.task_alt,
-                  size: 48,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Nenhuma tarefa configurada',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Configure os cuidados da planta para gerar tarefas automáticas.\nEdite a planta e ative os cuidados desejados.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaskSummaryCards(BuildContext context, List<PlantTask> overdueTasks, List<PlantTask> upcomingTasks, List<PlantTask> pendingTasks) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildSummaryCard(
-            context,
-            title: 'Atrasadas',
-            count: overdueTasks.length,
-            color: Colors.red,
-            icon: Icons.warning,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildSummaryCard(
-            context,
-            title: 'Próximas',
-            count: upcomingTasks.length,
-            color: Colors.orange,
-            icon: Icons.schedule,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildSummaryCard(
-            context,
-            title: 'Pendentes',
-            count: pendingTasks.length,
-            color: PlantisColors.primary,
-            icon: Icons.task_alt,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryCard(BuildContext context, {
-    required String title,
-    required int count,
-    required Color color,
-    required IconData icon,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark 
-              ? Colors.black.withValues(alpha: 0.2)
-              : Colors.black.withValues(alpha: 0.05),
-            blurRadius: theme.brightness == Brightness.dark ? 4 : 6,
-            offset: const Offset(0, 2),
-            spreadRadius: theme.brightness == Brightness.dark ? 0 : 1,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            count.toString(),
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaskSection(BuildContext context, {
-    required String title,
-    required List<PlantTask> tasks,
-    required PlantTaskProvider taskProvider,
-    required Color color,
-    required IconData icon,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...tasks.map((task) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildTaskCard(context, task, taskProvider),
-        )),
-      ],
-    );
-  }
-
-  Widget _buildTaskCard(BuildContext context, PlantTask task, PlantTaskProvider taskProvider) {
-    final theme = Theme.of(context);
-    final color = _getTaskColor(task);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.08),
-            blurRadius: theme.brightness == Brightness.dark ? 8 : 12,
-            offset: const Offset(0, 4),
-            spreadRadius: theme.brightness == Brightness.dark ? 0 : 2,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              _getTaskIcon(task.type),
-              color: color,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  task.description ?? '',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    task.statusText,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (task.status != TaskStatus.completed)
-            IconButton(
-              onPressed: () => taskProvider.completeTask(task.plantId, task.id),
-              icon: Icon(
-                Icons.check_circle_outline,
-                color: PlantisColors.primary,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Color _getTaskColor(PlantTask task) {
-    switch (task.status) {
-      case TaskStatus.overdue:
-        return Colors.red;
-      case TaskStatus.completed:
-        return Colors.green;
-      case TaskStatus.pending:
-        if (task.isDueToday || task.isDueSoon) {
-          return Colors.orange;
-        }
-        return PlantisColors.primary;
-    }
-  }
-
-  IconData _getTaskIcon(TaskType type) {
-    switch (type) {
-      case TaskType.watering:
-        return Icons.water_drop;
-      case TaskType.fertilizing:
-        return Icons.eco;
-      case TaskType.pruning:
-        return Icons.content_cut;
-      case TaskType.sunlightCheck:
-        return Icons.wb_sunny;
-      case TaskType.pestInspection:
-        return Icons.bug_report;
-      case TaskType.replanting:
-        return Icons.grass;
-    }
   }
 }

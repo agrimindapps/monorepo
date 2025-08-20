@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
-class CreateTaskDialog extends StatefulWidget {
+import '../../domain/entities/task_entity.dart';
+import '../providers/task_providers.dart';
+import '../providers/auth_providers.dart';
+
+class CreateTaskDialog extends ConsumerStatefulWidget {
   const CreateTaskDialog({super.key});
 
   @override
-  State<CreateTaskDialog> createState() => _CreateTaskDialogState();
+  ConsumerState<CreateTaskDialog> createState() => _CreateTaskDialogState();
 }
 
-class _CreateTaskDialogState extends State<CreateTaskDialog> {
+class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -19,10 +25,43 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
     super.dispose();
   }
 
-  void _createTask() {
+  void _createTask() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Create task using provider
-      Navigator.of(context).pop();
+      final currentUser = ref.read(authNotifierProvider).value;
+      if (currentUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuário não autenticado')),
+        );
+        return;
+      }
+
+      try {
+        const uuid = Uuid();
+        // Criar a task usando o notifier
+        await ref.read(taskNotifierProvider.notifier).createTask(
+          TaskEntity(
+            id: uuid.v4(),
+            title: _titleController.text,
+            description: _descriptionController.text.isEmpty 
+              ? null 
+              : _descriptionController.text,
+            listId: 'default', // Por enquanto usar lista padrão
+            createdById: currentUser.id,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
+
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao criar tarefa: ${e.toString()}')),
+          );
+        }
+      }
     }
   }
 

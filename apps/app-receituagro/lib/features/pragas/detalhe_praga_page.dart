@@ -750,7 +750,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
             Icon(
               Icons.comment_outlined,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant,
+              color: const Color(0xFF4CAF50),
             ),
             const SizedBox(height: 16),
             Text(

@@ -1721,7 +1721,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
             Icon(
               Icons.comment_outlined,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              color: const Color(0xFF4CAF50),
             ),
             const SizedBox(height: 16),
             Text(

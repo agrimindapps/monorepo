@@ -16,6 +16,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   bool _hasActiveSubscription = false;
   List<ProductInfo> _availableProducts = [];
   SubscriptionEntity? _currentSubscription;
+  String _selectedPlan = 'yearly';
 
   @override
   void initState() {
@@ -142,21 +143,107 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
-      appBar: AppBar(
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
-        title: const Text('Planos Premium'),
-        centerTitle: true,
-        elevation: 2,
+      backgroundColor: const Color(0xFF1A1B3E),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF1A1B3E),
+              Color(0xFF2D1B69),
+              Color(0xFF4A148C),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : _hasActiveSubscription
+                  ? _buildActiveSubscriptionView()
+                  : _buildModernSubscriptionView(),
+        ),
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : _hasActiveSubscription
-              ? _buildActiveSubscriptionView()
-              : _buildSubscriptionPlansView(),
+    );
+  }
+
+  Widget _buildModernSubscriptionView() {
+    return Column(
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Planos',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                
+                // Main Title
+                const Text(
+                  'Tenha acesso ilimitado\na todos os recursos',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
+                  ),
+                ),
+                
+                const SizedBox(height: 40),
+                
+                // Plan Options
+                _buildPlanOptions(),
+                
+                const SizedBox(height: 40),
+                
+                // Features List
+                _buildModernFeaturesList(),
+                
+                const Spacer(),
+                
+                // Get Full Access Button
+                _buildGetFullAccessButton(),
+                
+                const SizedBox(height: 20),
+                
+                // Footer Links
+                _buildFooterLinks(),
+                
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -532,6 +619,245 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPlanOptions() {
+    return Column(
+      children: [
+        _buildPlanOption(
+          title: 'Mensal',
+          price: 'R\$10,99 / mês',
+          planType: 'monthly',
+          isSelected: _selectedPlan == 'monthly',
+        ),
+        const SizedBox(height: 12),
+        _buildPlanOption(
+          title: 'Anual',
+          price: 'R\$100,99 / ano',
+          planType: 'yearly',
+          isSelected: _selectedPlan == 'yearly',
+          badge: 'MELHOR VALOR',
+        ),
+        const SizedBox(height: 12),
+        _buildPlanOption(
+          title: 'Semanal',
+          price: 'R\$4,99 / semana',
+          planType: 'weekly',
+          isSelected: _selectedPlan == 'weekly',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlanOption({
+    required String title,
+    required String price,
+    required String planType,
+    required bool isSelected,
+    String? badge,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: isSelected 
+            ? Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1)
+            : null,
+      ),
+      child: ListTile(
+        onTap: () => setState(() => _selectedPlan = planType),
+        leading: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.6),
+              width: 2,
+            ),
+            color: isSelected ? Colors.white : Colors.transparent,
+          ),
+          child: isSelected
+              ? const Icon(
+                  Icons.check,
+                  color: Color(0xFF4A148C),
+                  size: 16,
+                )
+              : null,
+        ),
+        title: Row(
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE91E63),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  badge,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        subtitle: Text(
+          price,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernFeaturesList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'O que está incluído',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureItem('Acesso completo ao banco de pragas'),
+        _buildFeatureItem('Receitas de defensivos detalhadas'),
+        _buildFeatureItem('Diagnóstico avançado de pragas'),
+        _buildFeatureItem('Suporte prioritário e exclusivo'),
+      ],
+    );
+  }
+
+  Widget _buildFeatureItem(String feature) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.check,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              feature,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGetFullAccessButton() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: ElevatedButton(
+        onPressed: () {
+          // Encontrar o produto baseado no plano selecionado
+          final productId = _selectedPlan == 'yearly' 
+              ? EnvironmentConfig.receitaAgroYearlyProduct
+              : EnvironmentConfig.receitaAgroMonthlyProduct;
+          _purchaseProduct(productId);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF4A148C),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Obter Acesso Completo',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterLinks() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        TextButton(
+          onPressed: () {
+            // TODO: Implementar Terms of Use
+          },
+          child: Text(
+            'Termos de Uso',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Text(
+          '•',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            // TODO: Implementar Privacy Policy
+          },
+          child: Text(
+            'Política de Privacidade',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Text(
+          '•',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+        ),
+        TextButton(
+          onPressed: _restorePurchases,
+          child: Text(
+            'Restaurar',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

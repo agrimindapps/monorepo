@@ -218,7 +218,8 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   String _getCurrentUserId() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw Exception('Usuário não autenticado');
+      // Como não há sistema de login, usa usuário padrão
+      return 'default_user';
     }
     return user.uid;
   }

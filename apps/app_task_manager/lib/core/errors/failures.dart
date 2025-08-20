@@ -3,60 +3,80 @@ import 'package:equatable/equatable.dart';
 abstract class Failure extends Equatable {
   const Failure([List properties = const <dynamic>[]]);
   
+  String get message;
+  
   @override
   List<Object> get props => [];
 }
 
 class ServerFailure extends Failure {
-  final String message;
+  final String _message;
   
-  const ServerFailure(this.message);
+  const ServerFailure(this._message);
   
   @override
-  List<Object> get props => [message];
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }
 
 class CacheFailure extends Failure {
-  final String message;
+  final String _message;
   
-  const CacheFailure(this.message);
+  const CacheFailure(this._message);
   
   @override
-  List<Object> get props => [message];
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }
 
 class NetworkFailure extends Failure {
-  final String message;
+  final String _message;
   
-  const NetworkFailure(this.message);
+  const NetworkFailure(this._message);
   
   @override
-  List<Object> get props => [message];
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }
 
 class ValidationFailure extends Failure {
-  final String message;
+  final String _message;
   
-  const ValidationFailure(this.message);
+  const ValidationFailure(this._message);
   
   @override
-  List<Object> get props => [message];
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }
 
 class AuthenticationFailure extends Failure {
-  final String message;
+  final String _message;
   
-  const AuthenticationFailure(this.message);
+  const AuthenticationFailure(this._message);
   
   @override
-  List<Object> get props => [message];
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }
 
 class PermissionFailure extends Failure {
-  final String message;
+  final String _message;
   
-  const PermissionFailure(this.message);
+  const PermissionFailure(this._message);
   
   @override
-  List<Object> get props => [message];
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }

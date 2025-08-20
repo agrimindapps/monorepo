@@ -27,7 +27,7 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   // Sign in anonymously if no user is logged in
   // This ensures the app works even without user authentication
   final auth = FirebaseAuth.instance;
@@ -49,7 +49,7 @@ void main() async {
 
   // Initialize Performance Service
   final performanceService = PerformanceService();
-  
+
   // Start performance tracking (only for mobile platforms)
   if (!kIsWeb) {
     await performanceService.startPerformanceTracking(

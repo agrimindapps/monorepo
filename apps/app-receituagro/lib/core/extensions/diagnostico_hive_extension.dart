@@ -73,6 +73,14 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
       'vazaoAerea': displayVazaoAerea,
       'intervaloAplicacao': displayIntervaloAplicacao,
       'epocaAplicacao': displayEpocaAplicacao,
+      'intervaloSeguranca': 'Consulte a bula do produto',
+      'ingredienteAtivo': 'Consulte a bula do produto',
+      'toxico': 'Consulte a bula do produto',
+      'classAmbiental': 'Consulte a bula do produto',
+      'classeAgronomica': 'Consulte a bula do produto',
+      'formulacao': 'Consulte a bula do produto',
+      'modoAcao': 'Consulte a bula do produto',
+      'mapa': 'Consulte o registro MAPA',
       'tecnologia': 'Aplicar conforme recomendações técnicas. Consulte um engenheiro agrônomo.',
     };
   }

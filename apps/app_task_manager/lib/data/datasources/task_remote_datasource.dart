@@ -35,4 +35,6 @@ abstract class TaskRemoteDataSource {
     TaskPriority? priority,
     bool? isStarred,
   });
+  
+  Future<List<TaskModel>> getSubtasks(String parentTaskId);
 }

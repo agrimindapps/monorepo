@@ -115,11 +115,8 @@ class ComentariosService extends ChangeNotifier {
   }
 
   int getMaxComentarios() {
-    if (_premiumService?.isPremium == true) {
-      return ComentariosDesignTokens.premiumMaxComments;
-    } else {
-      return ComentariosDesignTokens.freeTierMaxComments;
-    }
+    // Temporariamente sem limites
+    return ComentariosDesignTokens.freeTierMaxComments;
   }
 
   bool canAddComentario(int currentCount) {
@@ -128,7 +125,8 @@ class ComentariosService extends ChangeNotifier {
   }
 
   bool hasAdvancedFeatures() {
-    return _premiumService?.isPremium == true;
+    // Temporariamente todas as features estão disponíveis
+    return true;
   }
 
   String generateId() {

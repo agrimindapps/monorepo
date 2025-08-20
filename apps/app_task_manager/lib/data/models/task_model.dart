@@ -5,7 +5,7 @@ import '../../domain/entities/task_entity.dart';
 
 part 'task_model.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 2)
 @JsonSerializable()
 class TaskModel extends TaskEntity {
   const TaskModel({
@@ -25,7 +25,76 @@ class TaskModel extends TaskEntity {
     super.position,
     super.tags,
     super.parentTaskId,
+    super.notes,
   });
+
+  @HiveField(0)
+  @override
+  String get id => super.id;
+
+  @HiveField(1)
+  @override
+  String get title => super.title;
+
+  @HiveField(2)
+  @override
+  String? get description => super.description;
+
+  @HiveField(3)
+  @override
+  String get listId => super.listId;
+
+  @HiveField(4)
+  @override
+  String get createdById => super.createdById;
+
+  @HiveField(5)
+  @override
+  String? get assignedToId => super.assignedToId;
+
+  @HiveField(6)
+  @override
+  DateTime get createdAt => super.createdAt;
+
+  @HiveField(7)
+  @override
+  DateTime get updatedAt => super.updatedAt;
+
+  @HiveField(8)
+  @override
+  DateTime? get dueDate => super.dueDate;
+
+  @HiveField(9)
+  @override
+  DateTime? get reminderDate => super.reminderDate;
+
+  @HiveField(10)
+  @override
+  TaskStatus get status => super.status;
+
+  @HiveField(11)
+  @override
+  TaskPriority get priority => super.priority;
+
+  @HiveField(12)
+  @override
+  bool get isStarred => super.isStarred;
+
+  @HiveField(13)
+  @override
+  int get position => super.position;
+
+  @HiveField(14)
+  @override
+  List<String> get tags => super.tags;
+
+  @HiveField(15)
+  @override
+  String? get parentTaskId => super.parentTaskId;
+
+  @HiveField(16)
+  @override
+  String? get notes => super.notes;
 
   factory TaskModel.fromJson(Map<String, dynamic> json) =>
       _$TaskModelFromJson(json);
@@ -50,9 +119,11 @@ class TaskModel extends TaskEntity {
       position: entity.position,
       tags: entity.tags,
       parentTaskId: entity.parentTaskId,
+      notes: entity.notes,
     );
   }
 
+  @override
   TaskModel copyWith({
     String? id,
     String? title,
@@ -70,6 +141,7 @@ class TaskModel extends TaskEntity {
     int? position,
     List<String>? tags,
     String? parentTaskId,
+    String? notes,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -88,6 +160,7 @@ class TaskModel extends TaskEntity {
       position: position ?? this.position,
       tags: tags ?? this.tags,
       parentTaskId: parentTaskId ?? this.parentTaskId,
+      notes: notes ?? this.notes,
     );
   }
 }

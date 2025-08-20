@@ -14,21 +14,30 @@ abstract class INavigationService {
   void navigateToDiagnosticoDetails(String id);
 }
 
+abstract class IFavoritosNotificationService {
+  void showSuccess(String message);
+  void showError(String message);
+  void showInfo(String message);
+}
+
 class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
   late final FavoritosDataService _dataService;
   late final FavoritosSearchService _searchService;
   late final FavoritosUIStateService _uiStateService;
   late final INavigationService? _navigationService;
+  late final IFavoritosNotificationService? _notificationService;
 
   FavoritosController({
     required FavoritosDataService dataService,
     required FavoritosSearchService searchService,
     required FavoritosUIStateService uiStateService,
     INavigationService? navigationService,
+    IFavoritosNotificationService? notificationService,
   }) : _dataService = dataService,
        _searchService = searchService,
        _uiStateService = uiStateService,
-       _navigationService = navigationService {
+       _navigationService = navigationService,
+       _notificationService = notificationService {
     
     WidgetsBinding.instance.addObserver(this);
     _initializeData();
@@ -102,33 +111,57 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> removeFavoritoDefensivo(FavoritoDefensivoModel defensivo) async {
     try {
       await _dataService.removeFavoritoDefensivo(defensivo.id);
-      // TODO: Show snackbar - replace with proper snackbar implementation
-      debugPrint('Removido: ${defensivo.displayName} foi removido dos favoritos');
+      final message = '${defensivo.displayName} foi removido dos favoritos';
+      if (_notificationService != null) {
+        _notificationService!.showSuccess(message);
+      } else {
+        debugPrint('Removido: $message');
+      }
     } catch (e) {
-      // TODO: Show error snackbar - replace with proper error handling
-      debugPrint('Erro: Não foi possível remover dos favoritos');
+      const message = 'Não foi possível remover dos favoritos';
+      if (_notificationService != null) {
+        _notificationService!.showError(message);
+      } else {
+        debugPrint('Erro: $message');
+      }
     }
   }
 
   Future<void> removeFavoritoPraga(FavoritoPragaModel praga) async {
     try {
       await _dataService.removeFavoritoPraga(praga.id);
-      // TODO: Show snackbar - replace with proper snackbar implementation
-      debugPrint('Removido: ${praga.displayName} foi removido dos favoritos');
+      final message = '${praga.displayName} foi removido dos favoritos';
+      if (_notificationService != null) {
+        _notificationService!.showSuccess(message);
+      } else {
+        debugPrint('Removido: $message');
+      }
     } catch (e) {
-      // TODO: Show error snackbar - replace with proper error handling
-      debugPrint('Erro: Não foi possível remover dos favoritos');
+      const message = 'Não foi possível remover dos favoritos';
+      if (_notificationService != null) {
+        _notificationService!.showError(message);
+      } else {
+        debugPrint('Erro: $message');
+      }
     }
   }
 
   Future<void> removeFavoritoDiagnostico(FavoritoDiagnosticoModel diagnostico) async {
     try {
       await _dataService.removeFavoritoDiagnostico(diagnostico.id);
-      // TODO: Show snackbar - replace with proper snackbar implementation
-      debugPrint('Removido: ${diagnostico.displayName} foi removido dos favoritos');
+      final message = '${diagnostico.displayName} foi removido dos favoritos';
+      if (_notificationService != null) {
+        _notificationService!.showSuccess(message);
+      } else {
+        debugPrint('Removido: $message');
+      }
     } catch (e) {
-      // TODO: Show error snackbar - replace with proper error handling
-      debugPrint('Erro: Não foi possível remover dos favoritos');
+      const message = 'Não foi possível remover dos favoritos';
+      if (_notificationService != null) {
+        _notificationService!.showError(message);
+      } else {
+        debugPrint('Erro: $message');
+      }
     }
   }
 

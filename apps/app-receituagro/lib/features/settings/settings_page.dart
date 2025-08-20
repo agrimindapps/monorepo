@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:core/core.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/providers/preferences_provider.dart';
 import '../subscription/subscription_page.dart';
 import '../../core/services/receituagro_notification_service.dart';
 import '../../core/interfaces/i_premium_service.dart';
@@ -830,7 +831,10 @@ class SettingsPage extends StatelessWidget {
               title: 'Pragas Detectadas',
               subtitle: 'Alertas quando uma praga for identificada',
               icon: Icons.bug_report,
-              enabled: true, // TODO: Implementar preferências
+              enabled: context.watch<PreferencesProvider>().pragasDetectadasEnabled,
+              onChanged: (value) {
+                context.read<PreferencesProvider>().togglePragasDetectadas(value);
+              },
             ),
             const SizedBox(height: 12),
             
@@ -839,7 +843,10 @@ class SettingsPage extends StatelessWidget {
               title: 'Lembretes de Aplicação',
               subtitle: 'Lembretes para aplicar defensivos',
               icon: Icons.schedule,
-              enabled: true,
+              enabled: context.watch<PreferencesProvider>().lembretesAplicacaoEnabled,
+              onChanged: (value) {
+                context.read<PreferencesProvider>().toggleLembretesAplicacao(value);
+              },
             ),
             const SizedBox(height: 12),
             
@@ -891,6 +898,7 @@ class SettingsPage extends StatelessWidget {
     required String subtitle,
     required IconData icon,
     required bool enabled,
+    Function(bool)? onChanged,
   }) {
     final theme = Theme.of(context);
     
@@ -924,8 +932,8 @@ class SettingsPage extends StatelessWidget {
         ),
         Switch(
           value: enabled,
-          onChanged: (value) {
-            // TODO: Implementar toggle de preferências
+          onChanged: onChanged ?? (value) {
+            // Fallback para notificações não implementadas ainda
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(

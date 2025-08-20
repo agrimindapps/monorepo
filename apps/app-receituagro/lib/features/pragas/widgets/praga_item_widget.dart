@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/models/pragas_hive.dart';
 import '../../../core/extensions/pragas_hive_extension.dart';
-import '../../../core/widgets/praga_image_widget.dart';
+import '../../../core/widgets/optimized_praga_image_widget.dart';
 import '../models/praga_view_mode.dart';
 
 class PragaItemWidget extends StatelessWidget {
@@ -86,7 +86,7 @@ class PragaItemWidget extends StatelessWidget {
     final color = _getTypeColor();
     final size = viewMode.isList ? 48.0 : 56.0;
 
-    return PragaImageWidget(
+    return OptimizedPragaImageWidget(
       nomeCientifico: praga.nomeCientifico,
       width: size,
       height: size,
@@ -189,7 +189,7 @@ class PragaItemWidget extends StatelessWidget {
     final color = _getTypeColor();
     
     return Positioned.fill(
-      child: PragaImageWidget(
+      child: OptimizedPragaImageWidget(
         nomeCientifico: praga.nomeCientifico,
         width: double.infinity,
         height: double.infinity,

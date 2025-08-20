@@ -13,6 +13,8 @@ import 'core/services/receituagro_notification_service.dart';
 import 'core/services/receituagro_storage_service.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/navigation_service.dart';
+import 'core/services/startup_optimization_service.dart';
+import 'core/providers/preferences_provider.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -80,6 +82,11 @@ void main() async {
   // Initialize dependency injection
   await di.init();
 
+  // 🚀 PERFORMANCE CRITICAL: Initialize startup optimization
+  // This reduces image loading from 1181+ images (143MB) to lazy loading
+  final startupOptimizationService = StartupOptimizationService();
+  await startupOptimizationService.initializeApp();
+
   // Initialize storage service
   final storageService = di.sl<ReceitaAgroStorageService>();
   await storageService.initialize();
@@ -136,8 +143,11 @@ class ReceitaAgroApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider()..initialize(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
+        ChangeNotifierProvider(create: (_) => PreferencesProvider()..initialize()),
+      ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(

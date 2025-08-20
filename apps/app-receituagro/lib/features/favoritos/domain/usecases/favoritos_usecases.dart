@@ -70,6 +70,19 @@ class GetDiagnosticosFavoritosUseCase {
   }
 }
 
+/// Use Case para buscar favoritos de culturas
+class GetCulturasFavoritosUseCase {
+  final IFavoritosCulturasRepository _repository;
+
+  const GetCulturasFavoritosUseCase({
+    required IFavoritosCulturasRepository repository,
+  }) : _repository = repository;
+
+  Future<List<FavoritoCulturaEntity>> execute() async {
+    return await _repository.getCulturas();
+  }
+}
+
 /// Use Case para adicionar defensivo aos favoritos
 class AddDefensivoFavoritoUseCase {
   final IFavoritosDefensivosRepository _repository;

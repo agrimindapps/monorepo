@@ -11,6 +11,7 @@ class FavoritosProvider extends ChangeNotifier {
   final GetDefensivosFavoritosUseCase _getDefensivosFavoritosUseCase;
   final GetPragasFavoritosUseCase _getPragasFavoritosUseCase;
   final GetDiagnosticosFavoritosUseCase _getDiagnosticosFavoritosUseCase;
+  final GetCulturasFavoritosUseCase _getCulturasFavoritosUseCase;
   final IsFavoritoUseCase _isFavoritoUseCase;
   final ToggleFavoritoUseCase _toggleFavoritoUseCase;
   final SearchFavoritosUseCase _searchFavoritosUseCase;
@@ -33,6 +34,7 @@ class FavoritosProvider extends ChangeNotifier {
     required GetDefensivosFavoritosUseCase getDefensivosFavoritosUseCase,
     required GetPragasFavoritosUseCase getPragasFavoritosUseCase,
     required GetDiagnosticosFavoritosUseCase getDiagnosticosFavoritosUseCase,
+    required GetCulturasFavoritosUseCase getCulturasFavoritosUseCase,
     required IsFavoritoUseCase isFavoritoUseCase,
     required ToggleFavoritoUseCase toggleFavoritoUseCase,
     required SearchFavoritosUseCase searchFavoritosUseCase,
@@ -41,6 +43,7 @@ class FavoritosProvider extends ChangeNotifier {
        _getDefensivosFavoritosUseCase = getDefensivosFavoritosUseCase,
        _getPragasFavoritosUseCase = getPragasFavoritosUseCase,
        _getDiagnosticosFavoritosUseCase = getDiagnosticosFavoritosUseCase,
+       _getCulturasFavoritosUseCase = getCulturasFavoritosUseCase,
        _isFavoritoUseCase = isFavoritoUseCase,
        _toggleFavoritoUseCase = toggleFavoritoUseCase,
        _searchFavoritosUseCase = searchFavoritosUseCase,
@@ -94,7 +97,7 @@ class FavoritosProvider extends ChangeNotifier {
           _diagnosticos = await _getDiagnosticosFavoritosUseCase.execute();
           break;
         case TipoFavorito.cultura:
-          // TODO: Implementar quando tiver o use case de culturas
+          _culturas = await _getCulturasFavoritosUseCase.execute();
           break;
       }
       _currentFilter = tipo;
@@ -119,6 +122,13 @@ class FavoritosProvider extends ChangeNotifier {
   Future<void> loadDiagnosticos() async {
     await _executeUseCase(() async {
       _diagnosticos = await _getDiagnosticosFavoritosUseCase.execute();
+    });
+  }
+
+  /// Carrega culturas favoritas
+  Future<void> loadCulturas() async {
+    await _executeUseCase(() async {
+      _culturas = await _getCulturasFavoritosUseCase.execute();
     });
   }
 
@@ -227,7 +237,7 @@ class FavoritosProvider extends ChangeNotifier {
         await loadDiagnosticos();
         break;
       case TipoFavorito.cultura:
-        // TODO: Implementar quando necessário
+        await loadCulturas();
         break;
     }
     

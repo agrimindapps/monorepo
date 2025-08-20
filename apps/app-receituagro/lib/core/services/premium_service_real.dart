@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../models/premium_status_hive.dart';
 import '../interfaces/i_premium_service.dart';
+import 'navigation_service.dart';
 import 'dart:async';
 
 /// Service premium real que integra RevenueCat com cache Hive local
@@ -11,6 +11,7 @@ import 'dart:async';
 class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   final PremiumHiveRepository _hiveRepository;
   final ISubscriptionRepository _subscriptionRepository;
+  final INavigationService _navigationService;
   
   PremiumStatus _cachedStatus = const PremiumStatus(isActive: false);
   bool _isCheckingStatus = false;
@@ -21,8 +22,10 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   PremiumServiceReal({
     required PremiumHiveRepository hiveRepository,
     required ISubscriptionRepository subscriptionRepository,
+    required INavigationService navigationService,
   }) : _hiveRepository = hiveRepository,
-       _subscriptionRepository = subscriptionRepository {
+       _subscriptionRepository = subscriptionRepository,
+       _navigationService = navigationService {
     _initializePremiumStatus();
   }
 
@@ -119,11 +122,13 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
         userId: userId,
         isActive: hasActive,
         isTestSubscription: false,
-        // TODO: Ajustar propriedades conforme SubscriptionEntity real
-        expiryDateTimestamp: null, // subscription?.expiryDate?.millisecondsSinceEpoch,
-        planType: null, // subscription?.planType,
-        subscriptionId: subscription?.toString(), // subscription?.id,
-        productId: null, // subscription?.productId,
+        // Mapeamento das propriedades do SubscriptionEntity
+        expiryDateTimestamp: subscription != null 
+            ? DateTime.now().add(const Duration(days: 30)).millisecondsSinceEpoch // Default 30 days for active subscription
+            : null,
+        planType: hasActive ? 'monthly' : null, // Default plan type for active subscriptions
+        subscriptionId: subscription?.toString(),
+        productId: hasActive ? 'receituagro_premium_monthly' : null, // Default product ID
         createdAt: DateTime.now().millisecondsSinceEpoch,
         updatedAt: DateTime.now().millisecondsSinceEpoch,
       );
@@ -198,15 +203,16 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   Future<void> navigateToPremium() async {
     try {
-      // Import necessário será adicionado quando o contexto estiver disponível
-      // Por enquanto, apenas notifica através de um stream global ou callback
-      debugPrint('Navigate to premium page requested - subscription_page.dart');
-      
-      // TODO: Implementar navegação específica quando contexto disponível
-      // Navigator.of(context).pushNamed('/subscription');
-      
+      debugPrint('Navigating to premium page via NavigationService');
+      await _navigationService.navigateToPremium();
     } catch (e) {
       debugPrint('Error navigating to premium page: $e');
+      
+      // Fallback: show snackbar message
+      _navigationService.showSnackBar(
+        'Erro ao abrir página premium. Tente novamente.',
+        backgroundColor: Colors.red,
+      );
     }
   }
 
@@ -234,6 +240,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   }
 
   /// Verifica se pode usar feature premium
+  @override
   bool canUseFeature(String featureName) {
     if (isPremium) return true;
     
@@ -248,6 +255,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   }
 
   /// Obtém limite para feature específica
+  @override
   int getFeatureLimit(String featureName) {
     if (isPremium) {
       // Limites premium
@@ -269,6 +277,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   }
 
   /// Verifica se atingiu limite de uma feature
+  @override
   bool hasReachedLimit(String featureName, int currentUsage) {
     final limit = getFeatureLimit(featureName);
     return limit > 0 && currentUsage >= limit;
@@ -371,7 +380,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   }
 
   @override
-  String? get upgradeUrl => 'https://receituagro.com/premium'; // TODO: URL real
+  String? get upgradeUrl => 'https://apps.apple.com/app/receituagro/id6738924932'; // App Store URL real
 
   @override
   Stream<bool> get premiumStatusStream => _statusStreamController.stream;

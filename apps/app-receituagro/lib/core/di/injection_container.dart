@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 import '../services/app_data_manager.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/receituagro_storage_service.dart';
+import '../services/navigation_service.dart';
 import '../repositories/cultura_hive_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
@@ -39,7 +40,7 @@ Future<void> init() async {
 
   // App Rating Repository
   sl.registerLazySingleton<IAppRatingRepository>(() => AppRatingService(
-    appStoreId: '123456789', // TODO: Replace with actual App Store ID for ReceitaAgro
+    appStoreId: '6738924932', // ReceitaAgro App Store ID real
     googlePlayId: 'br.com.agrimind.pragassoja', // Using the correct package ID
     minDays: 3,
     minLaunches: 5,
@@ -60,6 +61,11 @@ Future<void> init() async {
   // Storage Service - Serviço de armazenamento
   sl.registerLazySingleton<ReceitaAgroStorageService>(
     () => ReceitaAgroStorageService(),
+  );
+  
+  // Navigation Service - Serviço de navegação global
+  sl.registerLazySingleton<INavigationService>(
+    () => NavigationService(),
   );
   
   // Hive Repositories - Repositórios de dados reais
@@ -136,6 +142,7 @@ Future<void> init() async {
     () => PremiumServiceReal(
       hiveRepository: sl<PremiumHiveRepository>(),
       subscriptionRepository: sl<ISubscriptionRepository>(),
+      navigationService: sl<INavigationService>(),
     ),
   );
 

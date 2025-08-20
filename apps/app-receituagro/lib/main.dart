@@ -12,6 +12,7 @@ import 'core/theme/receituagro_theme.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/receituagro_storage_service.dart';
 import 'core/services/app_data_manager.dart';
+import 'core/services/navigation_service.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -145,6 +146,7 @@ class ReceitaAgroApp extends StatelessWidget {
             darkTheme: ReceitaAgroTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             home: const MainNavigationPage(),
+            navigatorKey: NavigationService.navigatorKey,
             debugShowCheckedModeBanner: false,
           );
         },

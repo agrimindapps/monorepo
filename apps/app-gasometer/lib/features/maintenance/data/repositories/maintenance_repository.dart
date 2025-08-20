@@ -96,7 +96,6 @@ class MaintenanceRepository {
   /// Carrega manutenções por status
   Future<List<MaintenanceEntity>> getMaintenancesByStatus(MaintenanceStatus status) async {
     try {
-      final statusString = _statusToString(status);
       final models = _box.values
           .where((model) => !model.isDeleted)
           .toList();

@@ -193,7 +193,27 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultFuture<void> reorderTasks(List<String> taskIds) async {
     try {
-      // TODO: Implementar reordenação local
+      // Atualizar posições localmente
+      final List<TaskModel> updatedTasks = [];
+      
+      for (int i = 0; i < taskIds.length; i++) {
+        final taskId = taskIds[i];
+        final localTask = await _localDataSource.getTask(taskId);
+        
+        if (localTask != null) {
+          // Atualizar posição da task
+          final updatedTask = localTask.copyWith(
+            position: i,
+            updatedAt: DateTime.now(),
+          );
+          updatedTasks.add(updatedTask);
+        }
+      }
+      
+      // Salvar todas as tasks atualizadas em batch
+      if (updatedTasks.isNotEmpty) {
+        await _localDataSource.cacheTasks(updatedTasks);
+      }
       
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {

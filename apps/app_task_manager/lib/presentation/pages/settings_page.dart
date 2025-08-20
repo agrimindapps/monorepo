@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/theme_toggle_switch.dart';
 import '../providers/auth_providers.dart';
+import 'notification_settings_page.dart';
+import 'account_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -51,11 +53,11 @@ class SettingsPage extends ConsumerWidget {
               title: 'Conta',
               children: [
                 ListTile(
-                  leading: const Icon(Icons.person_outline),
-                  title: const Text('Perfil'),
+                  leading: const Icon(Icons.account_circle),
+                  title: const Text('Minha Conta'),
                   subtitle: Text(userDisplayName),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showProfileDialog(context, userDisplayName),
+                  onTap: () => _navigateToAccountPage(context),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -65,6 +67,23 @@ class SettingsPage extends ConsumerWidget {
                     style: TextStyle(color: AppColors.error),
                   ),
                   onTap: () => _showLogoutDialog(context, ref),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Seção de Notificações
+            _buildSectionCard(
+              context,
+              title: 'Notificações',
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.notifications_outlined),
+                  title: const Text('Configurações de Notificação'),
+                  subtitle: const Text('Lembretes, alertas e configurações'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _navigateToNotificationSettings(context),
                 ),
               ],
             ),
@@ -169,7 +188,7 @@ class SettingsPage extends ConsumerWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.onPrimary.withAlpha(51),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -192,7 +211,7 @@ class SettingsPage extends ConsumerWidget {
             'Task Manager',
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+              color: Theme.of(context).colorScheme.onPrimary.withAlpha(204),
             ),
           ),
         ],
@@ -361,6 +380,22 @@ class SettingsPage extends ConsumerWidget {
             child: const Text('Entendi'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _navigateToNotificationSettings(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const NotificationSettingsPage(),
+      ),
+    );
+  }
+
+  void _navigateToAccountPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AccountPage(),
       ),
     );
   }

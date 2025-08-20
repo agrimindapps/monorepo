@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 /// Entidade de despesa do veículo
 class ExpenseEntity extends Equatable {
@@ -133,26 +134,73 @@ class ExpenseEntity extends Equatable {
 
   /// Verifica se a despesa é do tipo recorrente (seguro, IPVA, etc.)
   bool get isRecurring => type.isRecurring;
+
+  /// Título da despesa para filtros (baseado na descrição)
+  String get title => description;
+
+  /// Nome do estabelecimento para filtros (baseado na localização)
+  String get establishmentName => location ?? '';
 }
 
 /// Enum para tipos de despesa
 enum ExpenseType {
-  insurance('Seguro', 'security', true),
-  ipva('IPVA', 'description', true),
-  parking('Estacionamento', 'local_parking', false),
-  carWash('Lavagem', 'local_car_wash', false),
-  fine('Multa', 'report_problem', false),
-  toll('Pedágio', 'toll', false),
-  licensing('Licenciamento', 'assignment', true),
-  accessories('Acessórios', 'shopping_bag', false),
-  documentation('Documentação', 'folder', false),
-  other('Outro', 'attach_money', false);
+  fuel('Combustível', 'local_gas_station', false, 0xFF2196F3),
+  maintenance('Manutenção', 'build', false, 0xFFFF9800),
+  insurance('Seguro', 'security', true, 0xFF4CAF50),
+  ipva('IPVA', 'description', true, 0xFF9C27B0),
+  parking('Estacionamento', 'local_parking', false, 0xFF607D8B),
+  carWash('Lavagem', 'local_car_wash', false, 0xFF00BCD4),
+  fine('Multa', 'report_problem', false, 0xFFF44336),
+  toll('Pedágio', 'toll', false, 0xFF795548),
+  licensing('Licenciamento', 'assignment', true, 0xFF3F51B5),
+  accessories('Acessórios', 'shopping_bag', false, 0xFFE91E63),
+  documentation('Documentação', 'folder', false, 0xFF009688),
+  other('Outro', 'attach_money', false, 0xFF757575);
 
-  const ExpenseType(this.displayName, this.iconName, this.isRecurring);
+  const ExpenseType(this.displayName, this.iconName, this.isRecurring, this._colorValue);
 
   final String displayName;
   final String iconName;
   final bool isRecurring;
+  final int _colorValue;
+
+  /// Cor associada ao tipo de despesa
+  Color get color => Color(_colorValue);
+
+  /// Ícone associado ao tipo de despesa
+  IconData get icon => _getIconFromName(iconName);
+
+  /// Função helper para converter nome do ícone em IconData
+  static IconData _getIconFromName(String iconName) {
+    switch (iconName) {
+      case 'local_gas_station':
+        return Icons.local_gas_station;
+      case 'build':
+        return Icons.build;
+      case 'security':
+        return Icons.security;
+      case 'description':
+        return Icons.description;
+      case 'local_parking':
+        return Icons.local_parking;
+      case 'local_car_wash':
+        return Icons.local_car_wash;
+      case 'report_problem':
+        return Icons.report_problem;
+      case 'toll':
+        return Icons.toll;
+      case 'assignment':
+        return Icons.assignment;
+      case 'shopping_bag':
+        return Icons.shopping_bag;
+      case 'folder':
+        return Icons.folder;
+      case 'attach_money':
+        return Icons.attach_money;
+      default:
+        return Icons.help_outline;
+    }
+  }
 
   /// Converte string para ExpenseType
   static ExpenseType fromString(String value) {

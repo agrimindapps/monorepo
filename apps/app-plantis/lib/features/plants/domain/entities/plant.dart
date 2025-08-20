@@ -48,6 +48,28 @@ class Plant extends BaseSyncEntity {
     return DateTime.now().difference(plantingDate!).inDays;
   }
 
+  /// Convert from legacy PlantaModel to modern Plant entity
+  factory Plant.fromPlantaModel(dynamic plantaModel) {
+    return Plant(
+      id: plantaModel.id,
+      name: plantaModel.nome ?? '',
+      species: plantaModel.especie,
+      spaceId: plantaModel.espacoId,
+      imageBase64: plantaModel.fotoBase64,
+      imageUrls: plantaModel.imagePaths ?? [],
+      plantingDate: plantaModel.dataCadastro,
+      notes: plantaModel.observacoes,
+      createdAt: plantaModel.createdAt,
+      updatedAt: plantaModel.updatedAt,
+      lastSyncAt: plantaModel.lastSyncAt,
+      isDirty: plantaModel.isDirty,
+      isDeleted: plantaModel.isDeleted,
+      version: plantaModel.version,
+      userId: plantaModel.userId,
+      moduleName: plantaModel.moduleName,
+    );
+  }
+
   @override
   Map<String, dynamic> toFirebaseMap() {
     return {

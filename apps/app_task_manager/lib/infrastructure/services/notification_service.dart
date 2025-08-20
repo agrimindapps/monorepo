@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 import 'dart:async';
+import 'analytics_service.dart';
+import 'crashlytics_service.dart';
 
 /// Notification service específico do app Task Manager
 class TaskManagerNotificationService {
@@ -531,6 +533,9 @@ class TaskManagerNotificationService {
 
   Future<bool> cancelAllNotifications() =>
       _notificationRepository.cancelAllNotifications();
+
+  Future<bool> cancelNotification(int notificationId) =>
+      _notificationRepository.cancelNotification(notificationId);
 
   Future<bool> isNotificationScheduled(int notificationId) =>
       _notificationRepository.isNotificationScheduled(notificationId);

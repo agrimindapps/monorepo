@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../data/models/planta_model.dart';
-import '../data/models/tarefa_model.dart';
+import '../../features/plants/data/models/plant_model.dart';
+import '../../features/tasks/data/models/task_model.dart';
 import 'conflict_resolution_strategy.dart';
 
 @injectable
@@ -36,64 +36,71 @@ class ConflictResolver {
   /// Merge inteligente baseado no tipo de modelo
   dynamic _mergeData(ConflictData conflictData) {
     switch (conflictData.modelType) {
-      case 'PlantaModel':
-        return _mergePlantaModel(
-          conflictData.localData as PlantaModel, 
-          conflictData.remoteData as PlantaModel
+      case 'PlantModel':
+        return _mergePlantModel(
+          conflictData.localData as PlantModel, 
+          conflictData.remoteData as PlantModel
         );
-      case 'TarefaModel':
-        return _mergeTarefaModel(
-          conflictData.localData as TarefaModel, 
-          conflictData.remoteData as TarefaModel
+      case 'TaskModel':
+        return _mergeTaskModel(
+          conflictData.localData as TaskModel, 
+          conflictData.remoteData as TaskModel
         );
       default:
         throw UnimplementedError('Merge não implementado para ${conflictData.modelType}');
     }
   }
 
-  /// Merge específico para PlantaModel
-  PlantaModel _mergePlantaModel(PlantaModel local, PlantaModel remote) {
+  /// Merge específico para PlantModel
+  PlantModel _mergePlantModel(PlantModel local, PlantModel remote) {
     final DateTime now = DateTime.now();
-    return PlantaModel(
+    return PlantModel(
       id: local.id,
-      createdAtMs: local.createdAtMs ?? remote.createdAtMs,
-      updatedAtMs: now.millisecondsSinceEpoch,
-      lastSyncAtMs: now.millisecondsSinceEpoch,
+      createdAt: local.createdAt ?? remote.createdAt,
+      updatedAt: now,
+      lastSyncAt: now,
       isDirty: true,
       isDeleted: local.isDeleted || remote.isDeleted,
-      version: local.version + 1,
+      version: (local.version ?? 1) + 1,
       userId: local.userId ?? remote.userId,
       moduleName: local.moduleName ?? remote.moduleName,
-      nome: local.nome ?? remote.nome,
-      especie: local.especie ?? remote.especie,
-      espacoId: local.espacoId ?? remote.espacoId,
-      imagePaths: local.imagePaths ?? remote.imagePaths,
-      observacoes: local.observacoes ?? remote.observacoes,
-      comentarios: local.comentarios ?? remote.comentarios,
-      dataCadastro: local.dataCadastro ?? remote.dataCadastro,
-      fotoBase64: local.fotoBase64 ?? remote.fotoBase64,
+      name: local.name.isNotEmpty ? local.name : remote.name,
+      species: local.species ?? remote.species,
+      spaceId: local.spaceId ?? remote.spaceId,
+      imageUrls: local.imageUrls.isNotEmpty ? local.imageUrls : remote.imageUrls,
+      notes: local.notes ?? remote.notes,
+      plantingDate: local.plantingDate ?? remote.plantingDate,
+      imageBase64: local.imageBase64 ?? remote.imageBase64,
+      config: local.config ?? remote.config,
     );
   }
 
-  /// Merge específico para TarefaModel
-  TarefaModel _mergeTarefaModel(TarefaModel local, TarefaModel remote) {
+  /// Merge específico para TaskModel
+  TaskModel _mergeTaskModel(TaskModel local, TaskModel remote) {
     final DateTime now = DateTime.now();
-    return TarefaModel(
+    return TaskModel(
       id: local.id,
-      createdAtMs: local.createdAtMs ?? remote.createdAtMs,
-      updatedAtMs: now.millisecondsSinceEpoch,
-      lastSyncAtMs: now.millisecondsSinceEpoch,
+      createdAt: local.createdAt,
+      updatedAt: now,
+      title: local.title.isNotEmpty ? local.title : remote.title,
+      description: local.description ?? remote.description,
+      plantId: local.plantId,
+      plantName: local.plantName.isNotEmpty ? local.plantName : remote.plantName,
+      type: local.type,
+      status: local.status.index > remote.status.index ? local.status : remote.status, // Status mais avançado
+      priority: local.priority,
+      dueDate: local.dueDate,
+      completedAt: local.completedAt ?? remote.completedAt,
+      completionNotes: local.completionNotes ?? remote.completionNotes,
+      isRecurring: local.isRecurring || remote.isRecurring,
+      recurringIntervalDays: local.recurringIntervalDays ?? remote.recurringIntervalDays,
+      nextDueDate: local.nextDueDate ?? remote.nextDueDate,
+      lastSyncAt: now,
       isDirty: true,
       isDeleted: local.isDeleted || remote.isDeleted,
-      version: local.version + 1,
+      version: (local.version ?? 1) + 1,
       userId: local.userId ?? remote.userId,
       moduleName: local.moduleName ?? remote.moduleName,
-      plantaId: local.plantaId,
-      tipoCuidado: local.tipoCuidado,
-      dataExecucao: local.dataExecucao,
-      concluida: local.concluida || remote.concluida,
-      observacoes: local.observacoes ?? remote.observacoes,
-      dataConclusao: local.dataConclusao ?? remote.dataConclusao,
     );
   }
 }

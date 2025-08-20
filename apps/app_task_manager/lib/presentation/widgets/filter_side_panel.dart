@@ -108,7 +108,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel> {
   Widget _buildUserSection() {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.value;
-    final userDisplayName = user?.name ?? 'Usuário';
+    final userDisplayName = user?.displayName ?? 'Usuário';
     final userEmail = user?.email ?? 'usuario@exemplo.com';
 
     return Container(

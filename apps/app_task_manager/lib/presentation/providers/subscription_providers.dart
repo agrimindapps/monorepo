@@ -124,7 +124,7 @@ final subscriptionActionsProvider = Provider<SubscriptionActions>((ref) {
 
 class SubscriptionActions {
   final TaskManagerSubscriptionService _subscriptionService;
-  final ProviderRef _ref;
+  final Ref _ref;
 
   SubscriptionActions(this._subscriptionService, this._ref);
 
@@ -198,3 +198,5 @@ class UsageStats {
     required this.activeTasksThisWeek,
   });
 }
+
+// UserLimits class is defined in subscription_service.dart

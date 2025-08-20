@@ -8,6 +8,7 @@ import '../../../features/plants/data/datasources/local/plants_local_datasource.
 import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
 import '../../../features/plants/data/repositories/plants_repository_impl.dart';
 import '../../../features/plants/presentation/providers/plants_provider.dart';
+import '../../../features/plants/presentation/providers/plants_list_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../../features/plants/presentation/providers/plant_form_provider.dart';
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';
@@ -53,6 +54,10 @@ class PlantsDIModule {
       addPlantUseCase: sl(),
       updatePlantUseCase: sl(),
       deletePlantUseCase: sl(),
+    ));
+    
+    sl.registerFactory(() => PlantsListProvider(
+      plantsRepository: sl(),
     ));
     
     sl.registerFactory(() => PlantDetailsProvider(

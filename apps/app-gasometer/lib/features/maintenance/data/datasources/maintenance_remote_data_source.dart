@@ -217,8 +217,8 @@ class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
           ? DateTime.fromMillisecondsSinceEpoch(model.proximaRevisao!) 
           : null,
       nextServiceOdometer: null,
-      photos: const [],
-      invoices: const [],
+      photosPaths: const [],
+      invoicesPaths: const [],
       parts: const {},
       notes: null,
       createdAt: model.createdAt ?? DateTime.now(),

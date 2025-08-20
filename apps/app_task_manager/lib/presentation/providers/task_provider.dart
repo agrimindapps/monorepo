@@ -4,6 +4,7 @@ import '../../domain/entities/task_entity.dart';
 import '../../domain/usecases/create_task.dart';
 import '../../domain/usecases/delete_task.dart';
 import '../../domain/usecases/get_tasks.dart';
+import '../../domain/usecases/reorder_tasks.dart';
 import '../../domain/usecases/update_task.dart';
 import '../../domain/usecases/watch_tasks.dart';
 
@@ -12,11 +13,13 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     required CreateTask createTask,
     required DeleteTask deleteTask,
     required GetTasks getTasks,
+    required ReorderTasks reorderTasks,
     required UpdateTask updateTask,
     required WatchTasks watchTasks,
   })  : _createTask = createTask,
         _deleteTask = deleteTask,
         _getTasks = getTasks,
+        _reorderTasks = reorderTasks,
         _updateTask = updateTask,
         _watchTasks = watchTasks,
         super(const AsyncValue.loading());
@@ -24,6 +27,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   final CreateTask _createTask;
   final DeleteTask _deleteTask;
   final GetTasks _getTasks;
+  final ReorderTasks _reorderTasks;
   final UpdateTask _updateTask;
   final WatchTasks _watchTasks;
 
@@ -109,6 +113,39 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
 
   Future<void> deleteSubtask(String subtaskId) async {
     await deleteTask(subtaskId);
+  }
+
+  Future<void> reorderTasks(List<String> taskIds) async {
+    final result = await _reorderTasks(ReorderTasksParams(taskIds: taskIds));
+
+    result.fold(
+      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (_) {
+        if (state.hasValue) {
+          final currentTasks = state.value!;
+          // Reordenar as tasks localmente conforme a nova ordem
+          final reorderedTasks = <TaskEntity>[];
+          
+          // Adicionar tasks na nova ordem
+          for (int i = 0; i < taskIds.length; i++) {
+            final taskId = taskIds[i];
+            final task = currentTasks.firstWhere(
+              (t) => t.id == taskId,
+              orElse: () => currentTasks.first, // fallback, não deveria acontecer
+            );
+            reorderedTasks.add(task.copyWith(position: i));
+          }
+          
+          // Adicionar qualquer task que não estava na lista de reordenação
+          final remainingTasks = currentTasks.where(
+            (task) => !taskIds.contains(task.id),
+          ).toList();
+          reorderedTasks.addAll(remainingTasks);
+          
+          state = AsyncValue.data(reorderedTasks);
+        }
+      },
+    );
   }
 
   void watchTasks({

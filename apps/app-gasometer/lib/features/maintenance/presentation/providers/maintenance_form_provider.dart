@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/maintenance_form_model.dart';
@@ -7,7 +6,6 @@ import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_formatter_service.dart';
 import '../../domain/services/maintenance_validator_service.dart';
 import '../../core/constants/maintenance_constants.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de manutenção

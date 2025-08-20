@@ -445,7 +445,7 @@ class LoginController extends ChangeNotifier {
       if (_rememberMe && savedEmail != null && savedEmail.isNotEmpty) {
         _analytics.logUserAction('saved_data_loaded', parameters: {
           'has_name': (savedName != null).toString(),
-          'has_email': (savedEmail != null).toString(),
+          'has_email': savedEmail.isNotEmpty.toString(),
         });
       }
       

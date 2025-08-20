@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
+import '../../domain/entities/vehicle_entity.dart';
+import '../providers/vehicles_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class AddVehiclePage extends StatefulWidget {
   final Map<String, dynamic>? vehicle;
@@ -133,7 +137,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           label: 'Marca',
           hint: 'Ex: Ford, Volkswagen, etc.',
           textCapitalization: TextCapitalization.words,
-          validator: (value) => value?.isEmpty == true ? 'Campo obrigatório' : null,
+          validator: (value) => _validateTextInput(value, 'Marca'),
         ),
         const SizedBox(height: 12),
         _buildTextField(
@@ -141,7 +145,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           label: 'Modelo',
           hint: 'Ex: Gol, Fiesta, etc.',
           textCapitalization: TextCapitalization.words,
-          validator: (value) => value?.isEmpty == true ? 'Campo obrigatório' : null,
+          validator: (value) => _validateTextInput(value, 'Modelo'),
         ),
         const SizedBox(height: 12),
         Row(
@@ -156,7 +160,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 label: 'Cor',
                 hint: 'Ex: Branco, Preto, etc.',
                 textCapitalization: TextCapitalization.words,
-                validator: (value) => value?.isEmpty == true ? 'Campo obrigatório' : null,
+                validator: (value) => _validateTextInput(value, 'Cor', maxLength: 30),
               ),
             ),
           ],
@@ -231,6 +235,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           maxLength: 11,
           showCounter: true,
           inputFormatters: _getRenavamFormatters(),
+          validator: _validateRenavam,
           onChanged: (value) {
             setState(() {});
           },
@@ -568,7 +573,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
 
   Widget _buildYearDropdown() {
     final currentYear = DateTime.now().year;
-    final years = List.generate(currentYear - 1980 + 1, (index) => currentYear - index);
+    final years = List.generate(currentYear - 1900 + 1, (index) => currentYear - index);
     
     return DropdownButtonFormField<int>(
       value: _anoController.text.isNotEmpty ? int.tryParse(_anoController.text) : null,
@@ -719,7 +724,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       return 'Campo obrigatório';
     }
 
-    final cleanValue = value.replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    final cleanValue = _sanitizeInput(value.replaceAll(RegExp(r'[^A-Z0-9]'), ''));
     
     // Placa Mercosul: ABC1D23
     final mercosulRegex = RegExp(r'^[A-Z]{3}[0-9][A-Z][0-9]{2}$');
@@ -738,7 +743,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       return null; // Campo opcional
     }
 
-    final cleanValue = value.replaceAll(RegExp(r'[^A-HJ-NPR-Z0-9]'), '');
+    final cleanValue = _sanitizeInput(value.replaceAll(RegExp(r'[^A-HJ-NPR-Z0-9]'), ''));
     
     if (cleanValue.length != 17) {
       return 'Chassi deve ter 17 caracteres';
@@ -747,6 +752,26 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     // Chassi não pode conter I, O, Q
     if (RegExp(r'[IOQ]').hasMatch(cleanValue)) {
       return 'Chassi inválido';
+    }
+    
+    return null;
+  }
+
+  String? _validateRenavam(String? value) {
+    if (value == null || value.isEmpty) {
+      return null; // Campo opcional
+    }
+
+    final cleanValue = _sanitizeInput(value.trim());
+    
+    // Validação de comprimento
+    if (cleanValue.length != 11) {
+      return 'RENAVAM deve ter 11 dígitos';
+    }
+    
+    // Validação se contém apenas números
+    if (!RegExp(r'^\d+$').hasMatch(cleanValue)) {
+      return 'RENAVAM deve conter apenas números';
     }
     
     return null;
@@ -764,6 +789,41 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       return 'Valor inválido';
     }
     
+    if (number > 999999.0) {
+      return 'Odômetro deve estar entre 0 e 999.999 km';
+    }
+    
+    return null;
+  }
+
+  // Sanitização de entrada para prevenir XSS
+  String _sanitizeInput(String input) {
+    return input
+        .trim()
+        .replaceAll(RegExp(r'[<>"\\&%$#@!*()[\]{}]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  // Validação melhorada para campos de texto
+  String? _validateTextInput(String? value, String fieldName, {int maxLength = 50, bool required = true}) {
+    if (value == null || value.isEmpty) {
+      return required ? 'Campo obrigatório' : null;
+    }
+
+    final trimmedValue = value.trim();
+    if (required && trimmedValue.isEmpty) {
+      return 'Campo obrigatório';
+    }
+
+    if (trimmedValue.length > maxLength) {
+      return '$fieldName deve ter no máximo $maxLength caracteres';
+    }
+
+    // Validação de caracteres especiais maliciosos (proteção XSS/SQL injection)
+    if (RegExp(r'[<>"\\&%$#@!*()[\]{}]').hasMatch(trimmedValue)) {
+      return '$fieldName contém caracteres não permitidos';
+    }
+
     return null;
   }
 
@@ -773,22 +833,61 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     setState(() => _isLoading = true);
 
     try {
-      // Simulação de salvamento
-      await Future.delayed(const Duration(seconds: 1));
+      final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+      
+      // Mapear combustível string para FuelType
+      final fuelTypeMap = {
+        'Gasolina': FuelType.gasoline,
+        'Etanol': FuelType.ethanol,
+        'Diesel': FuelType.diesel,
+        'Diesel S-10': FuelType.diesel,
+        'GNV': FuelType.gas,
+        'Energia Elétrica': FuelType.electric,
+      };
+      
+      final fuelType = fuelTypeMap[_selectedCombustivel] ?? FuelType.gasoline;
+      final odometroValue = double.tryParse(_odometroController.text.replaceAll(',', '.')) ?? 0.0;
+      
+      // Criar entidade do veículo
+      final vehicleEntity = VehicleEntity(
+        id: widget.vehicle?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: context.read<AuthProvider>().userId,
+        name: '${_sanitizeInput(_marcaController.text)} ${_sanitizeInput(_modeloController.text)}',
+        brand: _sanitizeInput(_marcaController.text),
+        model: _sanitizeInput(_modeloController.text),
+        year: int.tryParse(_anoController.text) ?? DateTime.now().year,
+        color: _sanitizeInput(_corController.text),
+        licensePlate: _sanitizeInput(_placaController.text),
+        type: VehicleType.car, // Padrão para carro
+        supportedFuels: [fuelType],
+        currentOdometer: odometroValue,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        metadata: {
+          'chassi': _sanitizeInput(_chassiController.text),
+          'renavam': _sanitizeInput(_renavamController.text),
+          'foto': _vehicleImage?.path,
+          'odometroInicial': odometroValue,
+        },
+      );
+      
+      // Salvar via provider
+      if (widget.vehicle != null) {
+        await vehiclesProvider.updateVehicle(vehicleEntity);
+      } else {
+        await vehiclesProvider.addVehicle(vehicleEntity);
+      }
       
       if (mounted) {
-        Navigator.of(context).pop({
-          'marca': _marcaController.text,
-          'modelo': _modeloController.text,
-          'ano': int.tryParse(_anoController.text),
-          'cor': _corController.text,
-          'placa': _placaController.text,
-          'chassi': _chassiController.text,
-          'renavam': _renavamController.text,
-          'odometroInicial': double.tryParse(_odometroController.text.replaceAll(',', '.')) ?? 0.0,
-          'combustivel': _selectedCombustivel,
-          'foto': _vehicleImage?.path,
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.vehicle != null 
+                ? 'Veículo atualizado com sucesso!' 
+                : 'Veículo cadastrado com sucesso!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+        Navigator.of(context).pop(true); // Retorna true para indicar sucesso
       }
     } catch (e) {
       if (mounted) {

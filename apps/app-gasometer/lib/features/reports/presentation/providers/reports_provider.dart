@@ -107,7 +107,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (report) {
         _currentMonthReport = report;
-        debugPrint('📊 Relatório mensal gerado para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Relatório mensal gerado para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -131,7 +133,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (report) {
         _currentYearReport = report;
-        debugPrint('📊 Relatório anual gerado para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Relatório anual gerado para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -158,7 +162,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (report) {
         _customReport = report;
-        debugPrint('📊 Relatório personalizado gerado para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Relatório personalizado gerado para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -189,7 +195,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (comparison) {
         _monthlyComparison = comparison;
-        debugPrint('📊 Comparação mensal gerada para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Comparação mensal gerada para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -219,7 +227,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (comparison) {
         _yearlyComparison = comparison;
-        debugPrint('📊 Comparação anual gerada para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Comparação anual gerada para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -242,7 +252,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (trends) {
         _efficiencyTrends = trends;
-        debugPrint('📊 Tendências de eficiência carregadas para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Tendências de eficiência carregadas para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -272,7 +284,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (analysis) {
         _costAnalysis = analysis;
-        debugPrint('📊 Análise de custos carregada para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Análise de custos carregada para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 
@@ -295,7 +309,9 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (patterns) {
         _usagePatterns = patterns;
-        debugPrint('📊 Padrões de uso carregados para veículo $id');
+        if (kDebugMode) {
+          debugPrint('📊 Padrões de uso carregados para veículo ${id.substring(0, 8)}...');
+        }
       },
     );
 

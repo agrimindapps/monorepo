@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/plant.dart';
+import 'optimized_plant_image_widget.dart';
 
 class PlantCard extends StatelessWidget {
   final Plant plant;
@@ -122,54 +122,15 @@ class PlantCard extends StatelessWidget {
   Widget _buildPlantAvatar() {
     const size = 80.0;
     
-    if (plant.hasImage) {
-      try {
-        final imageBytes = base64Decode(plant.imageBase64!);
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(size / 2),
-          child: Image.memory(
-            imageBytes,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildPlaceholder(size),
-          ),
-        );
-      } catch (e) {
-        return _buildPlaceholder(size);
-      }
-    }
-    
-    return _buildPlaceholder(size);
-  }
-
-  Widget _buildPlaceholder(double size) {
-    return Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-        
-        return Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDark 
-              ? const Color(0xFF2C2C2E)
-              : const Color(0xFFE3F2FD),
-            border: isDark 
-              ? Border.all(color: const Color(0xFF55D85A), width: 2)
-              : Border.all(color: const Color(0xFF55D85A), width: 2),
-          ),
-          child: Icon(
-            Icons.eco,
-            size: 36,
-            color: const Color(0xFF55D85A),
-          ),
-        );
-      },
+    return OptimizedPlantImageWidget(
+      imageBase64: plant.imageBase64,
+      imageUrls: plant.imageUrls,
+      size: size,
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(size / 2),
     );
   }
+
 
   Widget _buildPendingTasksBadge() {
     final pendingTasks = _getPendingTasksCount();

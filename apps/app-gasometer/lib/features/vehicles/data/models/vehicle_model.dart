@@ -10,6 +10,10 @@ part 'vehicle_model.g.dart';
 /// TypeId: 0 - New sequential numbering  
 @HiveType(typeId: 0)
 class VehicleModel extends BaseSyncModel {
+  @override
+  void removeFromHive() {
+    // Stub implementation to satisfy HiveObjectMixin
+  }
   // Base sync fields (required for Hive generation)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;

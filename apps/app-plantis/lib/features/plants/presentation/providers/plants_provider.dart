@@ -216,36 +216,46 @@ class PlantsProvider extends ChangeNotifier {
 
   // Set view mode
   void setViewMode(ViewMode mode) {
-    _viewMode = mode;
-    notifyListeners();
+    if (_viewMode != mode) {
+      _viewMode = mode;
+      notifyListeners();
+    }
   }
 
   // Set sort order
   void setSortBy(SortBy sort) {
-    _sortBy = sort;
-    _plants = _sortPlants(_plants);
-    _searchResults = _sortPlants(_searchResults);
-    _applyFilters();
+    if (_sortBy != sort) {
+      _sortBy = sort;
+      _plants = _sortPlants(_plants);
+      _searchResults = _sortPlants(_searchResults);
+      _applyFilters();
+    }
   }
 
   // Set space filter
   void setSpaceFilter(String? spaceId) {
-    _filterBySpace = spaceId;
-    _applyFilters();
+    if (_filterBySpace != spaceId) {
+      _filterBySpace = spaceId;
+      _applyFilters();
+    }
   }
 
   // Clear search
   void clearSearch() {
-    _searchQuery = '';
-    _searchResults = [];
-    _isSearching = false;
-    notifyListeners();
+    if (_searchQuery.isNotEmpty || _searchResults.isNotEmpty || _isSearching) {
+      _searchQuery = '';
+      _searchResults = [];
+      _isSearching = false;
+      notifyListeners();
+    }
   }
 
   // Clear selected plant
   void clearSelectedPlant() {
-    _selectedPlant = null;
-    notifyListeners();
+    if (_selectedPlant != null) {
+      _selectedPlant = null;
+      notifyListeners();
+    }
   }
 
   // Clear error
@@ -309,18 +319,24 @@ class PlantsProvider extends ChangeNotifier {
 
   // Private methods
   void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
+    if (_isLoading != loading) {
+      _isLoading = loading;
+      notifyListeners();
+    }
   }
 
   void _setError(String error) {
-    _error = error;
-    notifyListeners();
+    if (_error != error) {
+      _error = error;
+      notifyListeners();
+    }
   }
 
   void _clearError() {
-    _error = null;
-    notifyListeners();
+    if (_error != null) {
+      _error = null;
+      notifyListeners();
+    }
   }
 
   List<Plant> _sortPlants(List<Plant> plants) {

@@ -130,12 +130,10 @@ class TaskManagerCrashlyticsService {
     required String environment,
   }) async {
     await _crashlyticsRepository.setUserId(userId);
-    await _crashlyticsRepository.setCustomKeys({
-      'app_name': 'Task Manager',
-      'app_version': version,
-      'environment': environment,
-      'feature_flags': 'task_management,notifications,analytics',
-    });
+    await _crashlyticsRepository.setCustomKey(key: 'app_name', value: 'Task Manager');
+    await _crashlyticsRepository.setCustomKey(key: 'app_version', value: version);
+    await _crashlyticsRepository.setCustomKey(key: 'environment', value: environment);
+    await _crashlyticsRepository.setCustomKey(key: 'feature_flags', value: 'task_management,notifications,analytics');
   }
 
   Future<void> recordBreadcrumb({

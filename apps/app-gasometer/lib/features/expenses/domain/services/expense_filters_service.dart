@@ -147,8 +147,8 @@ class ExpenseFiltersService {
         if (!expense.title.toLowerCase().contains(query) &&
             !expense.description.toLowerCase().contains(query) &&
             !expense.type.displayName.toLowerCase().contains(query) &&
-            (expense.establishmentName?.toLowerCase().contains(query) != true) &&
-            (expense.notes?.toLowerCase().contains(query) != true)) {
+            (expense.establishmentName == null || !expense.establishmentName!.toLowerCase().contains(query)) &&
+            (expense.notes == null || !expense.notes!.toLowerCase().contains(query))) {
           return false;
         }
       }

@@ -89,7 +89,7 @@ class ExpenseStatisticsService {
     
     return {
       ...baseStats,
-      'period': _formatter.formatPeriod(start, end),
+      'period': _formatter.formatPeriod(start),
       'days': days,
       'averageDailyAmount': totalAmount / days,
       'averageDailyAmountFormatted': _formatter.formatAmount(totalAmount / days),

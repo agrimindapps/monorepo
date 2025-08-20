@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 
 import 'package:app_task_manager/domain/usecases/reorder_tasks.dart';
 import 'package:app_task_manager/domain/repositories/task_repository.dart';
+import 'package:app_task_manager/core/errors/failures.dart';
 
 import 'reorder_tasks_test.mocks.dart';
 
@@ -36,7 +37,7 @@ void main() {
 
   test('should return failure when repository fails', () async {
     // arrange
-    const tFailure = 'Server Failure';
+    const tFailure = ServerFailure('Server Failure');
     when(mockTaskRepository.reorderTasks(any))
         .thenAnswer((_) async => const Left(tFailure));
 

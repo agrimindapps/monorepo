@@ -80,3 +80,27 @@ class PermissionFailure extends Failure {
   @override
   List<Object> get props => [_message];
 }
+
+class UnexpectedFailure extends Failure {
+  final String _message;
+  
+  const UnexpectedFailure(this._message);
+  
+  @override
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
+}
+
+class AuthFailure extends Failure {
+  final String _message;
+  
+  const AuthFailure(this._message);
+  
+  @override
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
+}

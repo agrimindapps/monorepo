@@ -152,6 +152,15 @@ class TaskManagerAnalyticsService {
     });
   }
 
+  // Generic event logging method
+  Future<void> logEvent(String eventName, {Map<String, dynamic>? parameters}) async {
+    await _analyticsRepository.logEvent(eventName, parameters: {
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'app_section': 'task_manager',
+      ...?parameters,
+    });
+  }
+
   // Delegate methods do core
   Future<void> setUserId(String? userId) => _analyticsRepository.setUserId(userId);
 

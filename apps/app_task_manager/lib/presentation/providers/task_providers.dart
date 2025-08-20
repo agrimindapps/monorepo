@@ -6,6 +6,7 @@ import '../../domain/entities/task_entity.dart';
 import '../../domain/usecases/create_task.dart';
 import '../../domain/usecases/delete_task.dart';
 import '../../domain/usecases/get_tasks.dart';
+import '../../domain/usecases/reorder_tasks.dart';
 import '../../domain/usecases/update_task.dart';
 import '../../domain/usecases/watch_tasks.dart';
 import 'task_provider.dart';
@@ -16,6 +17,7 @@ final taskNotifierProvider = StateNotifierProvider<TaskNotifier, AsyncValue<List
     createTask: di.sl<CreateTask>(),
     deleteTask: di.sl<DeleteTask>(),
     getTasks: di.sl<GetTasks>(),
+    reorderTasks: di.sl<ReorderTasks>(),
     updateTask: di.sl<UpdateTask>(),
     watchTasks: di.sl<WatchTasks>(),
   );
@@ -81,6 +83,18 @@ final getTasksProvider = FutureProvider.family<List<TaskEntity>, GetTasksRequest
   return result.fold(
     (failure) => throw failure,
     (tasks) => tasks,
+  );
+});
+
+// Provider para reordenar tasks
+final reorderTasksProvider = FutureProvider.family<void, List<String>>((ref, taskIds) async {
+  final reorderTasks = di.sl<ReorderTasks>();
+  
+  final result = await reorderTasks(ReorderTasksParams(taskIds: taskIds));
+  
+  return result.fold(
+    (failure) => throw failure,
+    (_) => null,
   );
 });
 

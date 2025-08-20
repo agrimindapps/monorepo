@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../../data/datasources/task_local_datasource.dart';
 import '../../data/datasources/task_local_datasource_impl.dart';
@@ -14,6 +15,7 @@ import '../../domain/usecases/create_task.dart';
 import '../../domain/usecases/delete_task.dart';
 import '../../domain/usecases/get_subtasks.dart';
 import '../../domain/usecases/get_tasks.dart';
+import '../../domain/usecases/reorder_tasks.dart';
 import '../../domain/usecases/update_task.dart';
 import '../../domain/usecases/watch_tasks.dart';
 import '../../domain/usecases/sign_in.dart';
@@ -21,6 +23,12 @@ import '../../domain/usecases/sign_up.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/watch_auth_state.dart';
+import '../../infrastructure/services/analytics_service.dart';
+import '../../infrastructure/services/crashlytics_service.dart';
+import '../../infrastructure/services/performance_service.dart';
+import '../../infrastructure/services/subscription_service.dart';
+import '../../infrastructure/services/notification_service.dart';
+import '../../infrastructure/services/auth_service.dart';
 
 final sl = GetIt.instance;
 
@@ -30,6 +38,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => DeleteTask(sl()));
   sl.registerLazySingleton(() => GetSubtasks(sl()));
   sl.registerLazySingleton(() => GetTasks(sl()));
+  sl.registerLazySingleton(() => ReorderTasks(sl()));
   sl.registerLazySingleton(() => UpdateTask(sl()));
   sl.registerLazySingleton(() => WatchTasks(sl()));
 
@@ -59,6 +68,22 @@ Future<void> init() async {
   sl.registerLazySingleton<TaskLocalDataSource>(() => TaskLocalDataSourceImpl());
   sl.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl());
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceMock());
+  
+  // Firebase Services (Core)
+  sl.registerLazySingleton<IAnalyticsRepository>(() => FirebaseAnalyticsService());
+  sl.registerLazySingleton<ICrashlyticsRepository>(() => FirebaseCrashlyticsService());
+  sl.registerLazySingleton<IPerformanceRepository>(() => PerformanceService());
+  sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
+  sl.registerLazySingleton<INotificationRepository>(() => LocalNotificationService());
+  sl.registerLazySingleton<IAuthRepository>(() => FirebaseAuthService());
+  
+  // Task Manager Services
+  sl.registerLazySingleton(() => TaskManagerAnalyticsService(sl()));
+  sl.registerLazySingleton(() => TaskManagerCrashlyticsService(sl()));
+  sl.registerLazySingleton(() => TaskManagerPerformanceService(sl()));
+  sl.registerLazySingleton(() => TaskManagerSubscriptionService(sl(), sl(), sl()));
+  sl.registerLazySingleton(() => TaskManagerNotificationService(sl(), sl(), sl()));
+  sl.registerLazySingleton(() => TaskManagerAuthService(authRepository: sl()));
   
   // TODO: Implementar TaskRemoteDataSourceImpl quando Firebase estiver configurado
   // sl.registerLazySingleton<TaskRemoteDataSource>(() => TaskRemoteDataSourceImpl());

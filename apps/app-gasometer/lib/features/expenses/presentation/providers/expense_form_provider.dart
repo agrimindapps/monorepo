@@ -7,7 +7,6 @@ import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_validator_service.dart';
 import '../../core/constants/expense_constants.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de despesas
@@ -455,4 +454,13 @@ class ExpenseFormProvider extends ChangeNotifier {
 
   /// Verifica se tem imagem do comprovante
   bool get hasReceiptImage => _formModel.hasReceipt;
+
+  /// Limpa os erros do formulário
+  void clearError() {
+    _formModel = _formModel.copyWith(
+      lastError: null,
+      errors: const {},
+    );
+    notifyListeners();
+  }
 }

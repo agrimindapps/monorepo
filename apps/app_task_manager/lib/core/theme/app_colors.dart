@@ -104,6 +104,6 @@ class AppColors {
   }
   
   static Color withOpacity(Color color, double opacity) {
-    return color.withOpacity(opacity);
+    return color.withAlpha((opacity * 255).toInt());
   }
 }

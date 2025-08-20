@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import 'base_sync_model.dart';
-import 'comentario_model.dart';
+import '../base_sync_model.dart';
+import '../comentario_model.dart';
 
 part 'planta_model.g.dart';
 
@@ -288,6 +288,11 @@ class PlantaModel extends BaseSyncModel {
   /// Verifica se a planta tem observações
   bool get hasObservacoes =>
       observacoes != null && observacoes!.trim().isNotEmpty;
+
+  // Compatibility getters for different naming conventions
+  String? get name => nome;
+  String? get species => especie;
+  String? get notes => observacoes;
 
   /// Getter descricao para compatibilidade com facade queries
   /// Retorna combinação de nome e espécie ou observações como descrição

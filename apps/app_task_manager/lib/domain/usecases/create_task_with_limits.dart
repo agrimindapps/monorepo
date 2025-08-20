@@ -44,7 +44,7 @@ class CreateTaskWithLimits extends UseCaseWithParams<String, CreateTaskWithLimit
         },
       );
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado ao criar tarefa: $e'));
+      return const Left(UnexpectedFailure('Erro inesperado ao criar tarefa'));
     }
   }
 
@@ -52,7 +52,7 @@ class CreateTaskWithLimits extends UseCaseWithParams<String, CreateTaskWithLimit
   Future<bool> _canCreateTask() async {
     try {
       // Obter total de tarefas atuais
-      final tasksResult = await _getTasks(NoParams());
+      final tasksResult = await _getTasks(const GetTasksParams());
       
       return tasksResult.fold(
         (failure) => true, // Em caso de erro, permite criar
@@ -85,5 +85,13 @@ class CreateTaskWithLimitsParams extends Equatable {
 
 /// Failure específico para quando requer premium
 class PremiumRequiredFailure extends Failure {
-  const PremiumRequiredFailure(String message) : super(message: message);
+  final String _message;
+  
+  const PremiumRequiredFailure(this._message);
+  
+  @override
+  String get message => _message;
+  
+  @override
+  List<Object> get props => [_message];
 }

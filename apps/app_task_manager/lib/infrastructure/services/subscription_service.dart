@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 import 'dart:async';
+import 'analytics_service.dart';
+import 'crashlytics_service.dart';
 
 /// Subscription service específico do app Task Manager
 class TaskManagerSubscriptionService {

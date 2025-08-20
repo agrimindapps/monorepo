@@ -225,9 +225,9 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                  backgroundColor: AppColors.primaryColor.withAlpha(26),
                   side: BorderSide(
-                    color: AppColors.primaryColor.withOpacity(0.3),
+                    color: AppColors.primaryColor.withAlpha(77),
                     width: 1,
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

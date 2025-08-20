@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/gasometer_theme.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
 
 class FuelPage extends StatefulWidget {

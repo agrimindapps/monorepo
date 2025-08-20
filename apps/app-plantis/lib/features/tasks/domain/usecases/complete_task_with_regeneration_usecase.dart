@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../../../core/services/task_generation_service.dart';
 import '../../../../core/data/models/planta_config_model.dart';
-import '../../../../core/data/models/tarefa_model.dart';
+import '../../data/models/task_model.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 import '../../../plants/domain/repositories/plants_repository.dart';
@@ -131,12 +131,12 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
       // Converter PlantConfig para PlantaConfigModel
       final configModel = _convertToPlantaConfigModel(plant);
       
-      // Converter Task para TarefaModel para compatibilidade com o service
-      final tarefaModel = _convertToTarefaModel(currentTask);
+      // Converter Task para TaskModel para compatibilidade com o service
+      final taskModel = _convertToTaskModel(currentTask);
 
       // Gerar próxima tarefa usando o service
       final generationResult = taskGenerationService.generateNextTask(
-        completedTask: tarefaModel,
+        completedTask: taskModel,
         completionDate: completionDate,
         config: configModel,
       );
@@ -145,13 +145,13 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
         return Left(generationResult.fold((failure) => failure, (_) => throw Exception()));
       }
 
-      final nextTarefaModel = generationResult.fold((_) => null, (tarefa) => tarefa);
-      if (nextTarefaModel == null) {
+      final nextTaskModel = generationResult.fold((_) => null, (task) => task);
+      if (nextTaskModel == null) {
         return Left(ValidationFailure('Nenhuma próxima tarefa foi gerada'));
       }
 
       // Converter de volta para Task entity
-      final nextTask = task_entity.Task.fromModel(nextTarefaModel, plantName: plant.name);
+      final nextTask = task_entity.Task.fromModel(nextTaskModel, plantName: plant.name);
 
       // Salvar próxima tarefa
       final saveResult = await tasksRepository.addTask(nextTask);
@@ -182,27 +182,9 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
     }
   }
 
-  /// Converte Task para TarefaModel
-  TarefaModel _convertToTarefaModel(task_entity.Task task) {
-    final careType = _mapTaskTypeToCareType(task.type) ?? 'agua';
-    
-    return TarefaModel(
-      id: task.id,
-      createdAtMs: task.createdAt?.millisecondsSinceEpoch,
-      updatedAtMs: task.updatedAt?.millisecondsSinceEpoch,
-      lastSyncAtMs: task.lastSyncAt?.millisecondsSinceEpoch,
-      isDirty: task.isDirty,
-      isDeleted: task.isDeleted,
-      version: task.version,
-      userId: task.userId,
-      moduleName: task.moduleName,
-      plantaId: task.plantId,
-      tipoCuidado: careType,
-      dataExecucao: task.dueDate,
-      concluida: task.status == task_entity.TaskStatus.completed,
-      observacoes: task.completionNotes,
-      dataConclusao: task.completedAt,
-    );
+  /// Converte Task para TaskModel
+  TaskModel _convertToTaskModel(task_entity.Task task) {
+    return TaskModel.fromEntity(task);
   }
 
   /// Converte PlantConfig entity para PlantaConfigModel

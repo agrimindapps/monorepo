@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../services/connectivity_service.dart';
@@ -14,6 +15,10 @@ enum SyncState {
 class SyncStatusProvider with ChangeNotifier {
   final ConnectivityService _connectivityService;
   final SyncQueue _syncQueue;
+  
+  // Stream subscriptions for proper disposal
+  StreamSubscription<NetworkStatus>? _networkSubscription;
+  StreamSubscription<List<SyncQueueItem>>? _queueSubscription;
 
   SyncState _currentState = SyncState.idle;
   SyncState get currentState => _currentState;
@@ -29,7 +34,7 @@ class SyncStatusProvider with ChangeNotifier {
 
   void _initializeListeners() {
     // Listen to network status changes
-    _connectivityService.networkStatusStream.listen((status) {
+    _networkSubscription = _connectivityService.networkStatusStream.listen((status) {
       switch (status) {
         case NetworkStatus.offline:
           _updateSyncState(SyncState.offline);
@@ -42,8 +47,8 @@ class SyncStatusProvider with ChangeNotifier {
       }
     });
 
-    // Listen to sync queue changes
-    _syncQueue.queueStream.listen((items) {
+    // Listen to sync queue changes  
+    _queueSubscription = _syncQueue.queueStream.listen((items) {
       _pendingItems = items;
       
       if (items.isEmpty) {
@@ -90,5 +95,13 @@ class SyncStatusProvider with ChangeNotifier {
       case SyncState.error:
         return 'Sync Error';
     }
+  }
+  
+  @override
+  void dispose() {
+    // Cancel stream subscriptions to prevent memory leaks
+    _networkSubscription?.cancel();
+    _queueSubscription?.cancel();
+    super.dispose();
   }
 }

@@ -228,6 +228,18 @@ class ExpenseValidatorService {
   /// Validação específica por tipo de despesa
   String? _validateAmountByType(double amount, ExpenseType expenseType) {
     switch (expenseType) {
+      case ExpenseType.fuel:
+        if (amount > 500.0) {
+          return 'Valor alto para combustível (máximo esperado: R\$ 500)';
+        }
+        break;
+      
+      case ExpenseType.maintenance:
+        if (amount > 2000.0) {
+          return 'Valor alto para manutenção (máximo esperado: R\$ 2000)';
+        }
+        break;
+      
       case ExpenseType.parking:
         if (amount > 50.0) {
           return 'Valor alto para estacionamento (máximo esperado: R\$ 50)';

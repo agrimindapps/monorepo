@@ -9,17 +9,20 @@ import '../../domain/repositories/vehicle_repository.dart';
 import '../datasources/vehicle_local_data_source.dart';
 import '../datasources/vehicle_remote_data_source.dart';
 import '../models/vehicle_model.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 
 @LazySingleton(as: VehicleRepository)
 class VehicleRepositoryImpl implements VehicleRepository {
   final VehicleLocalDataSource localDataSource;
   final VehicleRemoteDataSource remoteDataSource;
   final Connectivity connectivity;
+  final AuthRepository authRepository;
 
   VehicleRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.connectivity,
+    required this.authRepository,
   });
 
   Future<bool> get _isConnected async {
@@ -27,10 +30,12 @@ class VehicleRepositoryImpl implements VehicleRepository {
     return !connectivityResults.contains(ConnectivityResult.none);
   }
 
-  String? _getCurrentUserId() {
-    // TODO: Get current user ID from auth service
-    // For now, using a placeholder - this should be injected from auth service
-    return 'anonymous_user';
+  Future<String?> _getCurrentUserId() async {
+    final userResult = await authRepository.getCurrentUser();
+    return userResult.fold(
+      (failure) => null,
+      (user) => user?.id,
+    );
   }
 
   @override
@@ -40,7 +45,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
       if (isConnected) {
         // Try to get from remote first
-        final userId = _getCurrentUserId();
+        final userId = await _getCurrentUserId();
         if (userId != null) {
           try {
             final remoteVehicles = await remoteDataSource.getAllVehicles(userId);
@@ -81,7 +86,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       final isConnected = await _isConnected;
       
       if (isConnected) {
-        final userId = _getCurrentUserId();
+        final userId = await _getCurrentUserId();
         if (userId != null) {
           try {
             final remoteVehicle = await remoteDataSource.getVehicleById(userId, id);
@@ -125,7 +130,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
       final isConnected = await _isConnected;
       if (isConnected) {
-        final userId = _getCurrentUserId();
+        final userId = await _getCurrentUserId();
         if (userId != null) {
           try {
             await remoteDataSource.saveVehicle(userId, vehicleModel);
@@ -159,7 +164,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
       final isConnected = await _isConnected;
       if (isConnected) {
-        final userId = _getCurrentUserId();
+        final userId = await _getCurrentUserId();
         if (userId != null) {
           try {
             await remoteDataSource.updateVehicle(userId, vehicleModel);
@@ -193,7 +198,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
       final isConnected = await _isConnected;
       if (isConnected) {
-        final userId = _getCurrentUserId();
+        final userId = await _getCurrentUserId();
         if (userId != null) {
           try {
             await remoteDataSource.deleteVehicle(userId, id);
@@ -225,7 +230,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         return const Left(NetworkFailure('No internet connection'));
       }
       
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       if (userId == null) {
         return const Left(AuthenticationFailure('User not authenticated'));
       }

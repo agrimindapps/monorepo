@@ -10,7 +10,7 @@ class PremiumGate extends ConsumerWidget {
   final Widget? premiumChild;
   final VoidCallback? onPremiumRequired;
   final String? premiumMessage;
-  final bool showDialog;
+  final bool showPremiumDialog;
 
   const PremiumGate({
     super.key,
@@ -19,7 +19,7 @@ class PremiumGate extends ConsumerWidget {
     this.premiumChild,
     this.onPremiumRequired,
     this.premiumMessage,
-    this.showDialog = true,
+    this.showPremiumDialog = true,
   });
 
   @override
@@ -84,7 +84,7 @@ class PremiumGate extends ConsumerWidget {
   void _handlePremiumRequired(BuildContext context) {
     if (onPremiumRequired != null) {
       onPremiumRequired!();
-    } else if (showDialog) {
+    } else if (showPremiumDialog) {
       _showPremiumDialog(context);
     } else {
       _navigateToPremium(context);
@@ -167,7 +167,7 @@ class CreationLimitGate extends ConsumerWidget {
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withAlpha(77),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(

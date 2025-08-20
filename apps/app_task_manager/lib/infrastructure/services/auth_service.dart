@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../core/di/injection_container.dart' as di;
+import 'analytics_service.dart';
+import 'crashlytics_service.dart';
 
 /// Wrapper para o serviço de autenticação Firebase Auth do core
 /// Adiciona funcionalidades específicas do Task Manager
@@ -43,8 +46,8 @@ class TaskManagerAuthService {
 
         // Registrar erro no Crashlytics
         _crashlyticsService.recordError(
-          failure,
-          null,
+          exception: failure,
+          stackTrace: StackTrace.current,
           reason: 'Login failed with email/password',
         );
 
@@ -55,7 +58,7 @@ class TaskManagerAuthService {
         _logAuthEvent('login_success', {
           'method': 'email',
           'user_id': user.id,
-          'has_display_name': user.name?.isNotEmpty == true,
+          'has_display_name': user.displayName.isNotEmpty,
         });
 
         // Configurar contexto do usuário no Crashlytics
@@ -92,8 +95,8 @@ class TaskManagerAuthService {
         });
 
         _crashlyticsService.recordError(
-          failure,
-          null,
+          exception: failure,
+          stackTrace: StackTrace.current,
           reason: 'Registration failed with email/password',
         );
 
@@ -199,8 +202,8 @@ class TaskManagerAuthService {
     return result.fold(
       (failure) {
         _crashlyticsService.recordError(
-          failure,
-          null,
+          exception: failure,
+          stackTrace: StackTrace.current,
           reason: 'Logout failed',
         );
         return Left(failure);
@@ -254,8 +257,8 @@ class TaskManagerAuthService {
       return const Left(AuthFailure('Atualização de perfil não implementada'));
     } catch (e) {
       _crashlyticsService.recordError(
-        e,
-        null,
+        exception: e,
+        stackTrace: StackTrace.current,
         reason: 'Profile update failed',
       );
       return Left(AuthFailure('Erro ao atualizar perfil: $e'));
@@ -275,8 +278,8 @@ class TaskManagerAuthService {
       return const Left(AuthFailure('Exclusão de conta não implementada'));
     } catch (e) {
       _crashlyticsService.recordError(
-        e,
-        null,
+        exception: e,
+        stackTrace: StackTrace.current,
         reason: 'Account deletion failed',
       );
       return Left(AuthFailure('Erro ao deletar conta: $e'));
@@ -285,11 +288,23 @@ class TaskManagerAuthService {
 
   /// Helper para log de eventos de autenticação
   void _logAuthEvent(String eventName, Map<String, dynamic> parameters) {
-    _analyticsService.logEvent(eventName, parameters: {
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'app_section': 'auth',
-      ...parameters,
-    });
+    // Use analytics methods from TaskManagerAnalyticsService
+    // For now, just log to console or use basic analytics
+    // TODO: Implement custom event logging in analytics service
+    switch (eventName) {
+      case 'login_success':
+        _analyticsService.logLogin(parameters['method'] as String);
+        break;
+      case 'registration_success':
+        _analyticsService.logSignUp(parameters['method'] as String);
+        break;
+      case 'logout_success':
+        _analyticsService.logLogout();
+        break;
+      default:
+        // For other events, we can add them to the analytics service later
+        break;
+    }
   }
 
   /// Helper para obter dados do usuário atual para analytics
@@ -308,10 +323,10 @@ class TaskManagerAuthService {
 
       return {
         'user_id': user.id,
-        'has_display_name': user.name?.isNotEmpty == true,
-        'has_email': user.email?.isNotEmpty == true,
-        'is_anonymous': user.isAnonymous,
-        'email_verified': user.emailVerified,
+        'has_display_name': user.displayName.isNotEmpty,
+        'has_email': user.email.isNotEmpty,
+        'is_anonymous': false, // Simplified since core UserEntity doesn't have isAnonymous
+        'email_verified': user.isEmailVerified,
       };
     } catch (e) {
       return {'user_status': 'error_getting_data'};

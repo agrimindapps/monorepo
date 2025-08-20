@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../data/models/planta_config_model.dart';
-import '../data/models/tarefa_model.dart';
+import '../data/models/legacy/tarefa_model.dart';
 import '../utils/task_schedule_calculator.dart';
 
 /// Serviço central para geração automática de tarefas baseado na configuração das plantas

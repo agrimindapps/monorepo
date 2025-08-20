@@ -205,6 +205,7 @@ class FavoritosDI {
         getDefensivosFavoritosUseCase: _getIt<GetDefensivosFavoritosUseCase>(),
         getPragasFavoritosUseCase: _getIt<GetPragasFavoritosUseCase>(),
         getDiagnosticosFavoritosUseCase: _getIt<GetDiagnosticosFavoritosUseCase>(),
+        getCulturasFavoritosUseCase: _getIt<GetCulturasFavoritosUseCase>(),
         isFavoritoUseCase: _getIt<IsFavoritoUseCase>(),
         toggleFavoritoUseCase: _getIt<ToggleFavoritoUseCase>(),
         searchFavoritosUseCase: _getIt<SearchFavoritosUseCase>(),

@@ -4,6 +4,10 @@ import 'package:core/core.dart';
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
+  @override
+  void removeFromHive() {
+    // Stub implementation to satisfy HiveObjectMixin
+  }
   BaseSyncModel({
     required super.id,
     super.createdAt,

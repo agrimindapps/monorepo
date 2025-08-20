@@ -192,44 +192,26 @@ class ExpensesPaginatedProvider extends ChangeNotifier with PaginatedProvider<Ex
 
   /// Adiciona nova despesa ao cache local (otimização)
   void addExpenseToCache(ExpenseEntity expense) {
-    // Adicionar à primeira página se corresponder aos filtros
-    if (_pageCache.containsKey(0)) {
-      final filteredExpense = _filtersService.applyFilters([expense], _filtersConfig);
-      if (filteredExpense.isNotEmpty) {
-        // Inserir no início da primeira página
-        _pageCache[0]!.insert(0, expense);
-        allItems.insert(0, expense);
-        notifyListeners();
-      }
+    // Filtrar para verificar se corresponde aos filtros atuais
+    final filteredExpense = _filtersService.applyFilters([expense], _filtersConfig);
+    if (filteredExpense.isNotEmpty) {
+      // Limpar cache para forçar recarregamento com novo item
+      clearPageCache();
+      notifyListeners();
     }
   }
 
   /// Remove despesa do cache local (otimização)
   void removeExpenseFromCache(String expenseId) {
-    // Remover de todas as páginas em cache
-    for (final page in _pageCache.values) {
-      page.removeWhere((e) => e.id == expenseId);
-    }
-    
-    allItems.removeWhere((e) => e.id == expenseId);
+    // Limpar cache para forçar recarregamento sem o item removido
+    clearPageCache();
     notifyListeners();
   }
 
   /// Atualiza despesa no cache local (otimização)
   void updateExpenseInCache(ExpenseEntity updatedExpense) {
-    // Atualizar em todas as páginas em cache
-    for (final page in _pageCache.values) {
-      final index = page.indexWhere((e) => e.id == updatedExpense.id);
-      if (index >= 0) {
-        page[index] = updatedExpense;
-      }
-    }
-    
-    final allIndex = allItems.indexWhere((e) => e.id == updatedExpense.id);
-    if (allIndex >= 0) {
-      allItems[allIndex] = updatedExpense;
-    }
-    
+    // Limpar cache para forçar recarregamento com item atualizado
+    clearPageCache();
     notifyListeners();
   }
 

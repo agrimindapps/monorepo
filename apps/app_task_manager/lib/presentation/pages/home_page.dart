@@ -11,6 +11,7 @@ import '../widgets/create_task_dialog.dart';
 import '../widgets/task_detail_drawer.dart';
 import '../widgets/bottom_input_bar.dart';
 import '../widgets/filter_side_panel.dart';
+import '../widgets/premium_banner.dart';
 import 'settings_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -96,13 +97,6 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
         await ref.read(taskNotifierProvider.notifier).createTask(task);
       }
     }
-  }
-
-  void _showCreateTaskDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const CreateTaskDialog(),
-    );
   }
 
   void _openTaskDrawer(TaskEntity task) {
@@ -251,6 +245,9 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
             ),
             body: Column(
               children: [
+                // Premium Banner
+                const PremiumBanner(),
+                
                 Container(
                   padding: const EdgeInsets.all(16),
                   child: Row(

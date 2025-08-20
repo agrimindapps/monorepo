@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/failures.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../providers/auth_providers.dart';
 import 'register_page.dart';
 
@@ -32,16 +33,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authNotifierProvider.notifier).signIn(
+      await ref.read(taskManagerAuthNotifierProvider.notifier).signInWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Navigation será tratado pelo AuthGuard baseado no estado
+        setState(() => _isLoading = false);
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading = false);
         String errorMessage = 'Erro ao fazer login';
         
         if (e is Failure) {
@@ -53,7 +56,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -70,6 +73,81 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
+  Future<void> _handleAnonymousLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(taskManagerAuthNotifierProvider.notifier).signInAnonymously();
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro no login anônimo: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(taskManagerAuthNotifierProvider.notifier).signInWithGoogle();
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login com Google não disponível ainda'),
+            backgroundColor: AppColors.info,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleForgotPassword() async {
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Digite seu email primeiro'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await ref.read(taskManagerAuthNotifierProvider.notifier).sendPasswordResetEmail(
+        _emailController.text.trim(),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email de redefinição enviado!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao enviar email: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,10 +161,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo/Título
-                const Icon(
-                  Icons.task_alt,
-                  size: 80,
-                  color: Colors.blue,
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor.withAlpha(26),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.task_alt,
+                    size: 60,
+                    color: AppColors.primaryColor,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -94,7 +179,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: AppColors.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -163,15 +248,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
-                      : const Text('Entrar'),
+                      : const Text('Entrar', style: TextStyle(fontSize: 16)),
+                ),
+                const SizedBox(height: 12),
+                
+                // Link esqueceu senha
+                TextButton(
+                  onPressed: _handleForgotPassword,
+                  child: const Text('Esqueceu a senha?'),
                 ),
                 const SizedBox(height: 16),
 
@@ -181,15 +281,69 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: const Text('Não tem uma conta? Registre-se'),
                 ),
 
-                // Botão de login demo
+                // Divider
+                const Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text('OU'),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
                 const SizedBox(height: 24),
-                OutlinedButton(
-                  onPressed: () {
-                    _emailController.text = 'demo@taskmanager.com';
-                    _passwordController.text = '123456';
-                    _handleLogin();
-                  },
-                  child: const Text('Login Demo'),
+                
+                // Botões de login social
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _handleGoogleLogin,
+                  icon: const Icon(Icons.login, color: Colors.red),
+                  label: const Text('Continuar com Google'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Botão de login anônimo
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _handleAnonymousLogin,
+                  icon: const Icon(Icons.person_outline, color: AppColors.info),
+                  label: const Text('Entrar como convidado'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: AppColors.info),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Botão de login demo
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withAlpha(26),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.warning.withAlpha(77)),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Teste rápido:',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _isLoading ? null : () {
+                          _emailController.text = 'demo@taskmanager.com';
+                          _passwordController.text = '123456';
+                          _handleLogin();
+                        },
+                        child: const Text('Usar conta demo'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

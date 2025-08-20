@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
+import '../../domain/entities/odometer_entity.dart';
+import '../constants/odometer_constants.dart';
+import '../providers/odometer_form_provider.dart';
+import '../providers/odometer_provider.dart';
+import '../services/odometer_validation_service.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 
 class AddOdometerPage extends StatefulWidget {
-  final Map<String, dynamic>? odometer;
+  final OdometerEntity? odometer;
 
   const AddOdometerPage({super.key, this.odometer});
 
@@ -15,42 +22,106 @@ class AddOdometerPage extends StatefulWidget {
 
 class _AddOdometerPageState extends State<AddOdometerPage> {
   final _formKey = GlobalKey<FormState>();
+  late OdometerFormProvider _formProvider;
+  late OdometerValidationService _validationService;
+  
+  // Controllers for form fields
   final _odometerController = TextEditingController();
   final _descriptionController = TextEditingController();
   
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  bool _isLoading = false;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.odometer != null) {
+    // Initialization will be done in didChangeDependencies
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _initializeProviders();
+      _setupFormControllers();
       _populateFields();
+      _isInitialized = true;
+    }
+  }
+  
+  void _initializeProviders() {
+    _formProvider = Provider.of<OdometerFormProvider>(context, listen: false);
+    final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+    _validationService = OdometerValidationService(vehiclesProvider);
+    
+    // Initialize form data
+    if (widget.odometer != null) {
+      _formProvider.initializeFromOdometer(widget.odometer!);
+    } else {
+      // Get selected vehicle ID from vehicles provider
+      // TODO: Get selected vehicle from provider
+      // final selectedVehicle = vehiclesProvider.selectedVehicle;
+      // For now, initialize with empty vehicle ID
+      const selectedVehicleId = '';
+      if (selectedVehicleId.isNotEmpty) {
+        _formProvider.initializeForNew(selectedVehicleId);
+        // TODO: Load and set vehicle data
+      }
+    }
+  }
+  
+  void _setupFormControllers() {
+    // Setup listeners for reactive updates
+    _formProvider.addListener(_updateControllersFromProvider);
+    
+    // Setup controllers with initial values
+    _updateControllersFromProvider();
+    
+    // Add listeners for user input
+    _odometerController.addListener(_onOdometerChanged);
+    _descriptionController.addListener(_onDescriptionChanged);
+  }
+  
+  void _updateControllersFromProvider() {
+    // Update odometer controller
+    final formattedOdometer = _formProvider.formattedOdometer;
+    if (_odometerController.text != formattedOdometer) {
+      _odometerController.text = formattedOdometer;
     }
     
-    // Add listener para atualizar contador de caracteres
-    _descriptionController.addListener(_updateUI);
+    // Update description controller
+    if (_descriptionController.text != _formProvider.description) {
+      _descriptionController.text = _formProvider.description;
+    }
+    
+    // Trigger UI update
+    if (mounted) setState(() {});
+  }
+  
+  void _onOdometerChanged() {
+    final text = _odometerController.text;
+    if (text != _formProvider.formattedOdometer) {
+      _formProvider.setOdometerFromString(text);
+    }
+  }
+  
+  void _onDescriptionChanged() {
+    final text = _descriptionController.text;
+    if (text != _formProvider.description) {
+      _formProvider.setDescription(text);
+    }
   }
 
   void _populateFields() {
-    final odometer = widget.odometer!;
-    _odometerController.text = odometer['odometer']?.toString() ?? '';
-    _descriptionController.text = odometer['description'] ?? '';
-    
-    if (odometer['date'] != null) {
-      _selectedDate = odometer['date'] as DateTime;
-      _selectedTime = TimeOfDay.fromDateTime(_selectedDate);
-    }
+    // Initial population is handled by the provider setup
+    // Controllers are updated via _updateControllersFromProvider
   }
 
-  void _updateUI() {
-    setState(() {});
-  }
 
   @override
   void dispose() {
-    _descriptionController.removeListener(_updateUI);
+    _formProvider.removeListener(_updateControllersFromProvider);
+    _odometerController.removeListener(_onOdometerChanged);
+    _descriptionController.removeListener(_onDescriptionChanged);
     _odometerController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -58,13 +129,12 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.odometer != null;
     
     return FormDialog(
       title: 'Odômetro',
       subtitle: 'Gerencie seus registros de quilometr...',
       headerIcon: Icons.speed,
-      isLoading: _isLoading,
+      isLoading: context.watch<OdometerFormProvider>().isLoading,
       confirmButtonText: 'Salvar',
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: _submitForm,
@@ -73,7 +143,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFormTitle(isEditing),
+            _buildFormTitle(),
             const SizedBox(height: 24),
             _buildBasicInfoSection(),
             const SizedBox(height: 24),
@@ -84,16 +154,24 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     );
   }
 
-  Widget _buildFormTitle(bool isEditing) {
-    return Center(
-      child: Text(
-        'Cadastrar Odômetro',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-      ),
+  Widget _buildFormTitle() {
+    return Consumer<OdometerFormProvider>(
+      builder: (context, formProvider, child) {
+        final title = formProvider.isEditing 
+            ? OdometerConstants.dialogMessages['tituloEdicao']!
+            : OdometerConstants.dialogMessages['tituloNovo']!;
+            
+        return Center(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -102,16 +180,9 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       title: 'Informações Básicas',
       icon: Icons.event_note,
       children: [
-        _buildTextField(
-          controller: _odometerController,
-          label: 'Odômetro',
-          hint: '',
-          textAlign: TextAlign.start,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: _getOdometroFormatters(),
-          validator: _validateOdometro,
-          onChanged: (value) => setState(() {}),
-        ),
+        _buildOdometerField(),
+        const SizedBox(height: 12),
+        _buildRegistrationTypeField(),
         const SizedBox(height: 12),
         _buildDateTimeField(),
       ],
@@ -123,144 +194,152 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       title: 'Adicionais',
       icon: Icons.more_horiz,
       children: [
-        _buildTextField(
-          controller: _descriptionController,
-          label: 'Descrição',
-          hint: '',
-          maxLines: 3,
-          maxLength: 255,
-          showCounter: true,
-          onChanged: (value) => setState(() {}),
-        ),
+        _buildDescriptionField(),
       ],
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    String? hint,
-    TextInputType? keyboardType,
-    TextCapitalization? textCapitalization,
-    int? maxLength,
-    int? maxLines,
-    String? suffixText,
-    String? Function(String?)? validator,
-    bool showCounter = false,
-    TextAlign? textAlign,
-    List<TextInputFormatter>? inputFormatters,
-    Function(String)? onChanged,
-  }) {
-    return Column(
-      children: [
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization ?? TextCapitalization.none,
-          maxLength: showCounter ? null : maxLength,
-          maxLines: maxLines ?? 1,
-          textAlign: textAlign ?? TextAlign.start,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          onChanged: onChanged,
+
+  // New specialized field builders
+  Widget _buildOdometerField() {
+    return Consumer<OdometerFormProvider>(
+      builder: (context, formProvider, child) {
+        return TextFormField(
+          controller: _odometerController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          textAlign: TextAlign.right,
           decoration: InputDecoration(
-            labelText: label,
-            hintText: hint,
-            suffixText: suffixText,
+            labelText: OdometerConstants.fieldLabels['odometro'],
+            hintText: OdometerConstants.fieldHints['odometro'],
+            suffixText: OdometerConstants.units['odometro'],
+            suffixIcon: formProvider.odometerValue > 0
+                ? IconButton(
+                    icon: Icon(OdometerConstants.sectionIcons['clear']),
+                    onPressed: () => formProvider.clearOdometer(),
+                  )
+                : null,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
             ),
             filled: true,
             fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            counterText: '',
-            alignLabelWithHint: maxLines != null && maxLines > 1,
           ),
-        ),
-        if (showCounter && maxLength != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                '${controller.text.length}/$maxLength',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ),
-          ),
-      ],
+          inputFormatters: _getOdometroFormatters(),
+          validator: formProvider.validateOdometer,
+          onChanged: (value) {
+            // Controller listener will handle the update
+          },
+        );
+      },
     );
   }
-
+  
+  Widget _buildRegistrationTypeField() {
+    return Consumer<OdometerFormProvider>(
+      builder: (context, formProvider, child) {
+        return DropdownButtonFormField<OdometerType>(
+          value: formProvider.registrationType,
+          decoration: InputDecoration(
+            labelText: OdometerConstants.fieldLabels['tipoRegistro'],
+            hintText: OdometerConstants.fieldHints['tipoRegistro'],
+            prefixIcon: Icon(OdometerConstants.sectionIcons['tipoRegistro']),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          items: OdometerType.allTypes.map((type) {
+            return DropdownMenuItem<OdometerType>(
+              value: type,
+              child: Text(type.displayName),
+            );
+          }).toList(),
+          onChanged: (type) {
+            if (type != null) {
+              formProvider.setRegistrationType(type);
+            }
+          },
+          validator: (value) {
+            return value == null ? OdometerConstants.validationMessages['tipoObrigatorio'] : null;
+          },
+        );
+      },
+    );
+  }
+  
+  Widget _buildDescriptionField() {
+    return Consumer<OdometerFormProvider>(
+      builder: (context, formProvider, child) {
+        return TextFormField(
+          controller: _descriptionController,
+          maxLength: OdometerConstants.maxDescriptionLength,
+          maxLines: OdometerConstants.descriptionMaxLines,
+          decoration: InputDecoration(
+            labelText: OdometerConstants.fieldLabels['descricao'],
+            hintText: OdometerConstants.fieldHints['descricao'],
+            alignLabelWithHint: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          validator: formProvider.validateDescription,
+          onChanged: (value) {
+            // Controller listener will handle the update
+          },
+        );
+      },
+    );
+  }
+  
   Widget _buildDateTimeField() {
-    return InkWell(
-      onTap: _selectDateTime,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: 'Data e Hora',
-          suffixIcon: const Icon(Icons.calendar_today, size: 20),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                DateFormat('dd/MM/yyyy').format(_selectedDate),
-                style: const TextStyle(fontSize: 16),
+    return Consumer<OdometerFormProvider>(
+      builder: (context, formProvider, child) {
+        return InkWell(
+          onTap: () => _selectDateTime(formProvider),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: OdometerConstants.fieldLabels['dataHora'],
+              suffixIcon: Icon(
+                OdometerConstants.sectionIcons['dataHora'],
+                size: OdometerConstants.dimensions['calendarIconSize'],
               ),
-            ),
-            const SizedBox(width: 16),
-            Container(
-              height: 20,
-              width: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                _selectedTime.format(context),
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.end,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
-          ],
-        ),
-      ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    DateFormat('dd/MM/yyyy').format(formProvider.registrationDate),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  height: 20,
+                  width: 1,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    TimeOfDay.fromDateTime(formProvider.registrationDate).format(context),
+                    style: const TextStyle(fontSize: 16),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -284,29 +363,14 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     ];
   }
 
-  // Validadores
-  String? _validateOdometro(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Campo obrigatório';
-    }
 
-    final cleanValue = value.replaceAll(',', '.');
-    final number = double.tryParse(cleanValue);
-    
-    if (number == null || number < 0) {
-      return 'Valor inválido';
-    }
-    
-    return null;
-  }
-
-  Future<void> _selectDateTime() async {
+  Future<void> _selectDateTime(OdometerFormProvider formProvider) async {
     // Select date first
     final date = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
+      initialDate: formProvider.registrationDate,
+      firstDate: OdometerConstants.minDate,
+      lastDate: OdometerConstants.maxDate,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -322,9 +386,10 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     if (date != null) {
       // Then select time
       if (mounted) {
+        final currentTime = TimeOfDay.fromDateTime(formProvider.registrationDate);
         final time = await showTimePicker(
           context: context,
-          initialTime: _selectedTime,
+          initialTime: currentTime,
           builder: (context, child) {
             return Theme(
               data: Theme.of(context).copyWith(
@@ -338,10 +403,9 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         );
 
         if (time != null) {
-          setState(() {
-            _selectedDate = date;
-            _selectedTime = time;
-          });
+          // Update provider instead of local state
+          formProvider.setDate(date);
+          formProvider.setTime(time.hour, time.minute);
         }
       }
     }
@@ -350,53 +414,137 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Check if date is not in the future
-    final selectedDateTime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
+    final formProvider = _formProvider;
+    final odometerProvider = Provider.of<OdometerProvider>(context, listen: false);
+
+    // Validate form with context
+    final validationResult = await _validationService.validateFormWithContext(
+      vehicleId: formProvider.vehicleId,
+      odometerValue: formProvider.odometerValue,
+      registrationDate: formProvider.registrationDate,
+      description: formProvider.description,
+      type: formProvider.registrationType,
+      currentOdometerId: formProvider.isEditing ? formProvider.currentOdometer?.id : null,
     );
 
-    if (selectedDateTime.isAfter(DateTime.now())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('A data de registro não pode ser futura'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+    if (!validationResult.isValid) {
+      // Show first validation error
+      final firstError = validationResult.errors.values.first;
+      _showError(OdometerConstants.dialogMessages['erro']!, firstError);
       return;
     }
 
-    setState(() => _isLoading = true);
+    // Show warnings if any (but allow to continue)
+    if (validationResult.hasWarnings) {
+      final shouldContinue = await _showWarningDialog(validationResult.warnings);
+      if (!shouldContinue) return;
+    }
+
+    formProvider.setIsLoading(true);
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-      
-      if (mounted) {
-        final result = {
-          'odometer': double.tryParse(_odometerController.text.replaceAll(',', '.')) ?? 0.0,
-          'date': selectedDateTime,
-          'description': _descriptionController.text,
-        };
-        
-        Navigator.of(context).pop(result);
+      bool success;
+      if (formProvider.isEditing) {
+        // Update existing odometer
+        final updatedOdometer = formProvider.toOdometerEntity(
+          id: formProvider.currentOdometer!.id,
+          createdAt: formProvider.currentOdometer!.createdAt,
+        );
+        success = await odometerProvider.updateOdometer(updatedOdometer);
+      } else {
+        // Create new odometer
+        final newOdometer = formProvider.toOdometerEntity();
+        success = await odometerProvider.addOdometer(newOdometer);
+      }
+
+      if (success) {
+        if (mounted) {
+          final successMessage = formProvider.isEditing 
+              ? OdometerConstants.successMessages['edicaoSucesso']!
+              : OdometerConstants.successMessages['cadastroSucesso']!;
+              
+          _showSuccess(successMessage);
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        if (mounted) {
+          _showError(
+            OdometerConstants.dialogMessages['erro']!,
+            odometerProvider.error.isNotEmpty 
+                ? odometerProvider.error 
+                : OdometerConstants.validationMessages['erroGenerico']!,
+          );
+        }
       }
     } catch (e) {
+      debugPrint('Error submitting form: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar registro: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        _showError(
+          OdometerConstants.dialogMessages['erro']!,
+          'Erro inesperado: $e',
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      formProvider.setIsLoading(false);
     }
+  }
+  
+  void _showError(String title, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+  
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+  
+  Future<bool> _showWarningDialog(Map<String, String> warnings) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Atenção'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Foram encontrados os seguintes avisos:'),
+              const SizedBox(height: 8),
+              ...warnings.entries.map((entry) => 
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('• ${entry.value}'),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Deseja continuar mesmo assim?'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(OdometerConstants.dateTimeLabels['cancelar']!),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(OdometerConstants.dateTimeLabels['confirmar']!),
+            ),
+          ],
+        );
+      },
+    );
+    
+    return result ?? false;
   }
 }

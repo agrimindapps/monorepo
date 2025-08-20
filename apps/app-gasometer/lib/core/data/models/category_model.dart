@@ -7,6 +7,10 @@ part 'category_model.g.dart';
 /// TypeId: 5 - New sequential numbering
 @HiveType(typeId: 5)
 class CategoryModel extends BaseSyncModel {
+  @override
+  void removeFromHive() {
+    // Stub implementation to satisfy HiveObjectMixin
+  }
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @HiveField(0) final String id;
   @HiveField(1) final int? createdAtMs;

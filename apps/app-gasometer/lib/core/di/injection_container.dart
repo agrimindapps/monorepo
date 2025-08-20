@@ -131,7 +131,7 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<SyncQueue>(() => SyncQueue());
   sl.registerLazySingleton<ConflictResolver>(() => ConflictResolver());
   sl.registerLazySingleton<SyncOperations>(() => SyncOperations(sl(), sl(), sl()));
-  sl.registerLazySingleton<SyncService>(() => SyncService(sl(), sl(), sl(), sl()));
+  sl.registerLazySingleton<SyncService>(() => SyncService(sl(), sl(), sl(), sl(), sl()));
   
   // Initialize LocalDataService
   final localDataService = sl<LocalDataService>();
@@ -197,6 +197,7 @@ Future<void> initializeDependencies() async {
       localDataSource: sl(),
       remoteDataSource: sl(),
       connectivity: sl(),
+      authRepository: sl(),
     ),
   );
 

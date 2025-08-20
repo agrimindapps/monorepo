@@ -128,7 +128,9 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _setupUserSession(UserEntity user) async {
     try {
       if (user.isAnonymous) {
-        debugPrint('🔐 Usuário anônimo: ${user.id}');
+        if (kDebugMode) {
+        debugPrint('🔐 Usuário anônimo: ${user.id.substring(0, 8)}...');
+      }
         _isPremium = false;
         return;
       }
@@ -248,7 +250,9 @@ class AuthProvider extends ChangeNotifier {
       },
       (user) async {
         _currentUser = user;
-        debugPrint('🔐 Usuário anônimo criado: ${user.id}');
+        if (kDebugMode) {
+          debugPrint('🔐 Usuário anônimo criado: ${user.id.substring(0, 8)}...');
+        }
         _isLoading = false;
         
         // Salvar preferência de modo anônimo
@@ -261,7 +265,9 @@ class AuthProvider extends ChangeNotifier {
           'is_premium': 'false',
         });
         
-        debugPrint('🔐 Usuário logado anonimamente. isAuthenticated: $isAuthenticated');
+        if (kDebugMode) {
+          debugPrint('🔐 Usuário logado anonimamente. isAuthenticated: $isAuthenticated');
+        }
         notifyListeners();
       },
     );

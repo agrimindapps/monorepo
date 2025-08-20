@@ -175,6 +175,12 @@ class ExpenseFormatterService {
 
   /// Retorna padrão de hora brasileiro
   String get timePattern => 'HH:mm';
+
+  /// Formata período simples (para estatísticas)
+  String formatPeriod(DateTime date) {
+    final monthFormatter = DateFormat('MMM yyyy', 'pt_BR');
+    return monthFormatter.format(date);
+  }
 }
 
 /// Formatter para valores monetários brasileiros

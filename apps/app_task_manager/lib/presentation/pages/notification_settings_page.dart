@@ -376,7 +376,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
           children: [
             const Text('Avisar com quantas horas de antecedência?'),
             const SizedBox(height: 16),
-            ...Duration.values.map((duration) => RadioListTile<Duration>(
+            ...DurationValues.values.map((duration) => RadioListTile<Duration>(
               title: Text(_formatDuration(duration)),
               value: duration,
               groupValue: currentDuration,
@@ -537,7 +537,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
 }
 
 // Extensão para valores de duração mais comuns
-extension Duration {
+class DurationValues {
   static const values = [
     Duration(minutes: 30),
     Duration(hours: 1),

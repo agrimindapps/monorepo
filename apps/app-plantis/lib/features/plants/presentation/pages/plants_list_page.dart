@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../providers/plants_provider.dart';
 import '../providers/plant_form_provider.dart';
+import '../selectors/plants_selectors.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_grid_view.dart';
@@ -115,69 +116,32 @@ class _PlantsListPageState extends State<PlantsListPage> {
         body: SafeArea(
           child: Column(
             children: [
-              // New App Bar with integrated search
-              Consumer<PlantsProvider>(
-                builder: (context, plantsProvider, child) {
+              // Optimized App Bar with granular selector
+              Selector<PlantsProvider, AppBarData>(
+                selector: (_, provider) => AppBarData(
+                  plantsCount: provider.plantsCount,
+                  searchQuery: provider.searchQuery,
+                  viewMode: provider.viewMode,
+                ),
+                shouldRebuild: (previous, next) {
+                  return previous.plantsCount != next.plantsCount ||
+                         previous.searchQuery != next.searchQuery ||
+                         previous.viewMode != next.viewMode;
+                },
+                builder: (context, appBarData, child) {
                   return PlantsAppBar(
-                    plantsCount: plantsProvider.plantsCount,
-                    searchQuery: plantsProvider.searchQuery,
+                    plantsCount: appBarData.plantsCount,
+                    searchQuery: appBarData.searchQuery,
                     onSearchChanged: _onSearchChanged,
-                    viewMode: plantsProvider.viewMode,
+                    viewMode: appBarData.viewMode,
                     onViewModeChanged: _onViewModeChanged,
                   );
                 },
               ),
               
-              // Lista de plantas
+              // Optimized lista with multiple granular selectors
               Expanded(
-                child: Consumer<PlantsProvider>(
-                  builder: (context, plantsProvider, child) {
-                    // Estado de carregamento
-                    if (plantsProvider.isLoading && plantsProvider.plants.isEmpty) {
-                      return const PlantsLoadingWidget();
-                    }
-                    
-                    // Estado de erro
-                    if (plantsProvider.error != null && plantsProvider.plants.isEmpty) {
-                      return PlantsErrorWidget(
-                        error: plantsProvider.error!,
-                        onRetry: _loadInitialData,
-                      );
-                    }
-                    
-                    // Determina que lista mostrar (busca ou geral)
-                    final plantsToShow = plantsProvider.searchQuery.isNotEmpty
-                        ? plantsProvider.searchResults
-                        : plantsProvider.plants;
-                    
-                    // Estado vazio
-                    if (plantsToShow.isEmpty) {
-                      return EmptyPlantsWidget(
-                        isSearching: plantsProvider.searchQuery.isNotEmpty,
-                        searchQuery: plantsProvider.searchQuery,
-                        onClearSearch: () => _onSearchChanged(''),
-                        onAddPlant: () {
-                          // Show modal for adding plant
-                          _showAddPlantModal(context);
-                        },
-                      );
-                    }
-                    
-                    // Lista com RefreshIndicator
-                    return RefreshIndicator(
-                      onRefresh: _onRefresh,
-                      child: plantsProvider.viewMode == ViewMode.grid
-                          ? PlantsGridView(
-                              plants: plantsToShow,
-                              scrollController: _scrollController,
-                            )
-                          : PlantsListView(
-                              plants: plantsToShow,
-                              scrollController: _scrollController,
-                            ),
-                    );
-                  },
-                ),
+                child: _buildOptimizedPlantsContent(),
               ),
             ],
           ),
@@ -190,5 +154,98 @@ class _PlantsListPageState extends State<PlantsListPage> {
         ),
       ),
     );
+  }
+  
+  /// Optimized content builder using granular selectors
+  Widget _buildOptimizedPlantsContent() {
+    return Selector<PlantsProvider, LoadingErrorState>(
+      selector: (_, provider) => LoadingErrorState(
+        isLoading: provider.isLoading,
+        error: provider.error,
+        hasPlants: provider.plants.isNotEmpty,
+      ),
+      shouldRebuild: (previous, next) {
+        return previous.isLoading != next.isLoading ||
+               previous.error != next.error ||
+               previous.hasPlants != next.hasPlants;
+      },
+      builder: (context, loadingErrorState, child) {
+        // Estado de carregamento
+        if (loadingErrorState.isLoading && !loadingErrorState.hasPlants) {
+          return const PlantsLoadingWidget();
+        }
+        
+        // Estado de erro
+        if (loadingErrorState.error != null && !loadingErrorState.hasPlants) {
+          return PlantsErrorWidget(
+            error: loadingErrorState.error!,
+            onRetry: _loadInitialData,
+          );
+        }
+        
+        // Content with plants
+        return _buildPlantsContent();
+      },
+    );
+  }
+  
+  /// Build the actual plants content (list/grid)
+  Widget _buildPlantsContent() {
+    return Selector<PlantsProvider, PlantsDisplayData>(
+      selector: (_, provider) => PlantsDisplayData(
+        plants: provider.searchQuery.isNotEmpty 
+            ? provider.searchResults 
+            : provider.plants,
+        isSearching: provider.searchQuery.isNotEmpty,
+        searchQuery: provider.searchQuery,
+      ),
+      shouldRebuild: (previous, next) {
+        return previous.plants.length != next.plants.length ||
+               previous.isSearching != next.isSearching ||
+               previous.searchQuery != next.searchQuery ||
+               !_listsEqual(previous.plants, next.plants);
+      },
+      builder: (context, displayData, child) {
+        // Estado vazio
+        if (displayData.plants.isEmpty) {
+          return EmptyPlantsWidget(
+            isSearching: displayData.isSearching,
+            searchQuery: displayData.searchQuery,
+            onClearSearch: () => _onSearchChanged(''),
+            onAddPlant: () => _showAddPlantModal(context),
+          );
+        }
+        
+        // View mode selector for grid/list display
+        return Selector<PlantsProvider, ViewMode>(
+          selector: (_, provider) => provider.viewMode,
+          builder: (context, viewMode, child) {
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: viewMode == ViewMode.grid
+                  ? PlantsGridView(
+                      plants: displayData.plants,
+                      scrollController: _scrollController,
+                    )
+                  : PlantsListView(
+                      plants: displayData.plants,
+                      scrollController: _scrollController,
+                    ),
+            );
+          },
+        );
+      },
+    );
+  }
+  
+  /// Efficient list comparison to avoid unnecessary rebuilds
+  bool _listsEqual(List<Plant> list1, List<Plant> list2) {
+    if (list1.length != list2.length) return false;
+    
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i].id != list2[i].id) return false;
+    }
+    
+    return true;
   }
 }

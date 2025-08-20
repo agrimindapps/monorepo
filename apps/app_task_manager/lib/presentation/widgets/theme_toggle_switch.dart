@@ -77,14 +77,14 @@ class ThemeToggleSwitch extends ConsumerWidget {
           multiSelectionEnabled: false,
           showSelectedIcon: false,
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.selected)) {
+            backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.selected)) {
                 return Theme.of(context).colorScheme.primary;
               }
               return Theme.of(context).colorScheme.surface;
             }),
-            foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.selected)) {
+            foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.selected)) {
                 return Theme.of(context).colorScheme.onPrimary;
               }
               return Theme.of(context).colorScheme.onSurface;

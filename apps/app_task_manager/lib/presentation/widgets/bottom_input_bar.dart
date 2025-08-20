@@ -187,7 +187,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withAlpha(26),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(

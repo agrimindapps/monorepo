@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_odometer_page.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
+import '../../domain/entities/odometer_entity.dart';
 
 class OdometerPage extends StatefulWidget {
   const OdometerPage({super.key});
@@ -655,7 +656,7 @@ class _OdometerPageState extends State<OdometerPage> {
   void _editOdometer(Map<String, dynamic> odometer) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AddOdometerPage(odometer: odometer),
+      builder: (context) => AddOdometerPage(odometer: OdometerEntity.fromMap(odometer)),
     );
     
     if (result != null && mounted) {

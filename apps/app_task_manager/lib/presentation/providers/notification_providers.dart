@@ -159,7 +159,7 @@ class NotificationSettings {
 /// Classe para ações de notificação
 class NotificationActions {
   final TaskManagerNotificationService _notificationService;
-  final ProviderRef _ref;
+  final Ref _ref;
 
   NotificationActions(this._notificationService, this._ref);
 

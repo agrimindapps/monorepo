@@ -9,12 +9,14 @@ class TaskListWidget extends ConsumerWidget {
   final Function(TaskEntity)? onTaskTap;
   final TaskFilter taskFilter;
   final String? selectedTag;
+  final bool enableReorder;
 
   const TaskListWidget({
     super.key,
     this.onTaskTap,
     this.taskFilter = TaskFilter.all,
     this.selectedTag,
+    this.enableReorder = true,
   });
 
   @override
@@ -66,59 +68,22 @@ class TaskListWidget extends ConsumerWidget {
           );
         }
 
-        return ListView.builder(
-          itemCount: filteredTasks.length,
-          itemBuilder: (context, index) {
-            final task = filteredTasks[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: ListTile(
-                leading: Checkbox(
-                  value: task.status == TaskStatus.completed,
-                  onChanged: (value) {
-                    final newStatus = value == true 
-                      ? TaskStatus.completed 
-                      : TaskStatus.pending;
-                    final updatedTask = task.copyWith(
-                      status: newStatus,
-                      updatedAt: DateTime.now(),
-                    );
-                    ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
-                  },
-                ),
-                title: Text(
-                  task.title,
-                  style: TextStyle(
-                    decoration: task.status == TaskStatus.completed
-                      ? TextDecoration.lineThrough
-                      : null,
-                  ),
-                ),
-                subtitle: task.description != null 
-                  ? Text(task.description!)
-                  : null,
-                trailing: IconButton(
-                  icon: Icon(
-                    task.isStarred ? Icons.star : Icons.star_border,
-                    color: task.isStarred ? Colors.amber : null,
-                  ),
-                  onPressed: () {
-                    final updatedTask = task.copyWith(
-                      isStarred: !task.isStarred,
-                      updatedAt: DateTime.now(),
-                    );
-                    ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
-                  },
-                ),
-                onTap: () {
-                  if (onTaskTap != null) {
-                    onTaskTap!(task);
-                  }
-                },
-              ),
+        return enableReorder 
+          ? ReorderableListView.builder(
+              itemCount: filteredTasks.length,
+              onReorder: (oldIndex, newIndex) => _onReorder(ref, filteredTasks, oldIndex, newIndex),
+              itemBuilder: (context, index) {
+                final task = filteredTasks[index];
+                return _buildTaskCard(context, ref, task, index);
+              },
+            )
+          : ListView.builder(
+              itemCount: filteredTasks.length,
+              itemBuilder: (context, index) {
+                final task = filteredTasks[index];
+                return _buildTaskCard(context, ref, task, index);
+              },
             );
-          },
-        );
       },
     );
   }
@@ -151,5 +116,81 @@ class TaskListWidget extends ConsumerWidget {
     }
 
     return filtered;
+  }
+
+  Widget _buildTaskCard(BuildContext context, WidgetRef ref, TaskEntity task, int index) {
+    return Card(
+      key: ValueKey(task.id), // Key necessária para ReorderableListView
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: ListTile(
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (enableReorder)
+              Icon(Icons.drag_handle, color: Colors.grey[400]),
+            Checkbox(
+              value: task.status == TaskStatus.completed,
+              onChanged: (value) {
+                final newStatus = value == true 
+                  ? TaskStatus.completed 
+                  : TaskStatus.pending;
+                final updatedTask = task.copyWith(
+                  status: newStatus,
+                  updatedAt: DateTime.now(),
+                );
+                ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+              },
+            ),
+          ],
+        ),
+        title: Text(
+          task.title,
+          style: TextStyle(
+            decoration: task.status == TaskStatus.completed
+              ? TextDecoration.lineThrough
+              : null,
+          ),
+        ),
+        subtitle: task.description != null 
+          ? Text(task.description!)
+          : null,
+        trailing: IconButton(
+          icon: Icon(
+            task.isStarred ? Icons.star : Icons.star_border,
+            color: task.isStarred ? Colors.amber : null,
+          ),
+          onPressed: () {
+            final updatedTask = task.copyWith(
+              isStarred: !task.isStarred,
+              updatedAt: DateTime.now(),
+            );
+            ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+          },
+        ),
+        onTap: () {
+          if (onTaskTap != null) {
+            onTaskTap!(task);
+          }
+        },
+      ),
+    );
+  }
+
+  void _onReorder(WidgetRef ref, List<TaskEntity> tasks, int oldIndex, int newIndex) {
+    // Ajustar newIndex se for maior que oldIndex (comportamento padrão do ReorderableListView)
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Criar nova lista com ordem atualizada
+    final reorderedTasks = List<TaskEntity>.from(tasks);
+    final movedTask = reorderedTasks.removeAt(oldIndex);
+    reorderedTasks.insert(newIndex, movedTask);
+
+    // Extrair IDs na nova ordem
+    final taskIds = reorderedTasks.map((task) => task.id).toList();
+
+    // Chamar método de reordenação
+    ref.read(taskNotifierProvider.notifier).reorderTasks(taskIds);
   }
 }

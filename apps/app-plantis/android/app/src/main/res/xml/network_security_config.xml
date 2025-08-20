@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Network Security Configuration for OWASP Mobile Security -->
+<network-security-config>
+    <!-- Default configuration for all domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system certificate authorities -->
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Configuration for trusted domains -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">firebase.googleapis.com</domain>
+        <domain includeSubdomains="true">firebaseapp.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">google.com</domain>
+        <domain includeSubdomains="true">gstatic.com</domain>
+        <domain includeSubdomains="true">googleusercontent.com</domain>
+        
+        <!-- Certificate pinning for enhanced security -->
+        <pin-set expiration="2026-01-01">
+            <!-- Google's root certificate pins -->
+            <pin digest="SHA-256">YZPgTZ+woNCCCIW3LH2CxQeLzB/aTgJlAFfmrTkG8lw=</pin>
+            <pin digest="SHA-256">3Zk0/ZXsunmSHaiELF0Z6JdPfFlF5AKJhOH7+2rLyJw=</pin>
+        </pin-set>
+        
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Debug configuration (only for development) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <!-- Allow user-added CAs for debugging -->
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+    
+    <!-- Block all cleartext traffic by default -->
+    <base-config cleartextTrafficPermitted="false" />
+    
+</network-security-config>

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/expense_form_provider.dart';
-import '../../domain/entities/expense_entity.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../../../core/presentation/theme/app_theme.dart';
 import '../../../../core/presentation/widgets/custom_text_field.dart';
-import '../../../../core/presentation/widgets/custom_dropdown.dart';
 import 'expense_type_selector.dart';
 import 'receipt_image_picker.dart';
 
@@ -90,7 +88,7 @@ class ExpenseFormView extends StatelessWidget {
                             label: 'Valor *',
                             hint: ExpenseConstants.amountPlaceholder,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            prefixIcon: Icons.attach_money,
+                            prefixIcon: const Icon(Icons.attach_money),
                             validator: (value) => provider.validateField('amount', value),
                             errorText: provider.formModel.getFieldError('amount'),
                           ),
@@ -122,7 +120,7 @@ class ExpenseFormView extends StatelessWidget {
                       label: 'Localização',
                       hint: ExpenseConstants.locationPlaceholder,
                       maxLength: ExpenseConstants.maxLocationLength,
-                      prefixIcon: Icons.location_on,
+                      prefixIcon: const Icon(Icons.location_on),
                       textCapitalization: TextCapitalization.words,
                       validator: (value) => provider.validateField('location', value),
                       errorText: provider.formModel.getFieldError('location'),
@@ -249,7 +247,7 @@ class ExpenseFormView extends StatelessWidget {
     final model = provider.formModel;
     
     return Card(
-      color: AppTheme.colors.primaryContainer.withOpacity(0.3),
+      color: AppTheme.colors.primaryLight.withOpacity(0.3),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

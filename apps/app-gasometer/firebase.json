@@ -1,1 +1,35 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"gasometer-12c83","appId":"1:68399647443:android:e8d019f4262dbc89916226","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"gasometer-12c83","appId":"1:68399647443:ios:d08b01dbe452f2b3916226","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"gasometer-12c83","configurations":{"android":"1:68399647443:android:e8d019f4262dbc89916226","ios":"1:68399647443:ios:d08b01dbe452f2b3916226","web":"1:68399647443:web:6228c3a94f180e60916226"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "gasometer-12c83",
+          "appId": "1:68399647443:android:e8d019f4262dbc89916226",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "gasometer-12c83",
+          "appId": "1:68399647443:ios:d08b01dbe452f2b3916226",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "gasometer-12c83",
+          "configurations": {
+            "android": "1:68399647443:android:e8d019f4262dbc89916226",
+            "ios": "1:68399647443:ios:d08b01dbe452f2b3916226",
+            "web": "1:68399647443:web:6228c3a94f180e60916226"
+          }
+        }
+      }
+    }
+  }
+}

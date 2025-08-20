@@ -1,58 +1,83 @@
 import 'package:equatable/equatable.dart';
 
+/// Enum para tipos de manutenção
 enum MaintenanceType {
-  preventive,
-  corrective,
-  inspection,
-  emergency;
-  
-  String get displayName {
+  preventive('Preventiva', 'Manutenção programada para prevenir problemas'),
+  corrective('Corretiva', 'Reparo de problema identificado'),
+  inspection('Revisão', 'Revisão geral do veículo'),
+  emergency('Emergencial', 'Reparo urgente e imprevisto');
+
+  const MaintenanceType(this.displayName, this.description);
+  final String displayName;
+  final String description;
+
+  /// Ícones associados aos tipos
+  String get iconName {
     switch (this) {
       case MaintenanceType.preventive:
-        return 'Preventiva';
+        return 'build_circle';
       case MaintenanceType.corrective:
-        return 'Corretiva';
+        return 'build';
       case MaintenanceType.inspection:
-        return 'Revisão';
+        return 'fact_check';
       case MaintenanceType.emergency:
-        return 'Emergencial';
+        return 'warning';
     }
   }
-  
-  String get description {
+
+  /// Cores associadas aos tipos (hex)
+  int get colorValue {
     switch (this) {
       case MaintenanceType.preventive:
-        return 'Manutenção programada para prevenir problemas';
+        return 0xFF4CAF50; // Verde
       case MaintenanceType.corrective:
-        return 'Reparo de problema identificado';
+        return 0xFFFF9800; // Laranja
       case MaintenanceType.inspection:
-        return 'Revisão geral do veículo';
+        return 0xFF2196F3; // Azul
       case MaintenanceType.emergency:
-        return 'Reparo urgente e imprevisto';
+        return 0xFFF44336; // Vermelho
+    }
+  }
+
+  /// Se é uma manutenção recorrente/periódica
+  bool get isRecurring {
+    switch (this) {
+      case MaintenanceType.preventive:
+      case MaintenanceType.inspection:
+        return true;
+      case MaintenanceType.corrective:
+      case MaintenanceType.emergency:
+        return false;
     }
   }
 }
 
+/// Enum para status da manutenção
 enum MaintenanceStatus {
-  pending,
-  inProgress,
-  completed,
-  cancelled;
-  
-  String get displayName {
+  pending('Pendente', 'Manutenção agendada'),
+  inProgress('Em Andamento', 'Manutenção sendo executada'),
+  completed('Concluída', 'Manutenção finalizada com sucesso'),
+  cancelled('Cancelada', 'Manutenção cancelada');
+
+  const MaintenanceStatus(this.displayName, this.description);
+  final String displayName;
+  final String description;
+
+  int get colorValue {
     switch (this) {
       case MaintenanceStatus.pending:
-        return 'Pendente';
+        return 0xFFFF9800; // Laranja
       case MaintenanceStatus.inProgress:
-        return 'Em Andamento';
+        return 0xFF2196F3; // Azul
       case MaintenanceStatus.completed:
-        return 'Concluída';
+        return 0xFF4CAF50; // Verde
       case MaintenanceStatus.cancelled:
-        return 'Cancelada';
+        return 0xFF9E9E9E; // Cinza
     }
   }
 }
 
+/// Entidade principal para manutenções
 class MaintenanceEntity extends Equatable {
   final String id;
   final String userId;
@@ -64,15 +89,25 @@ class MaintenanceEntity extends Equatable {
   final double cost;
   final DateTime serviceDate;
   final double odometer;
+  
+  // Informações da oficina
   final String? workshopName;
   final String? workshopPhone;
   final String? workshopAddress;
+  
+  // Próximo serviço
   final DateTime? nextServiceDate;
   final double? nextServiceOdometer;
-  final List<String> photos;
-  final List<String> invoices;
-  final Map<String, String> parts; // partName -> partNumber/info
+  
+  // Anexos
+  final List<String> photosPaths;
+  final List<String> invoicesPaths;
+  
+  // Peças e informações técnicas
+  final Map<String, String> parts; // nome da peça -> info/número da peça
   final String? notes;
+  
+  // Metadados do sistema
   final DateTime createdAt;
   final DateTime updatedAt;
   final Map<String, dynamic> metadata;
@@ -93,8 +128,8 @@ class MaintenanceEntity extends Equatable {
     this.workshopAddress,
     this.nextServiceDate,
     this.nextServiceOdometer,
-    this.photos = const [],
-    this.invoices = const [],
+    this.photosPaths = const [],
+    this.invoicesPaths = const [],
     this.parts = const {},
     this.notes,
     required this.createdAt,
@@ -119,8 +154,8 @@ class MaintenanceEntity extends Equatable {
     workshopAddress,
     nextServiceDate,
     nextServiceOdometer,
-    photos,
-    invoices,
+    photosPaths,
+    invoicesPaths,
     parts,
     notes,
     createdAt,
@@ -144,13 +179,15 @@ class MaintenanceEntity extends Equatable {
     String? workshopAddress,
     DateTime? nextServiceDate,
     double? nextServiceOdometer,
-    List<String>? photos,
-    List<String>? invoices,
+    List<String>? photosPaths,
+    List<String>? invoicesPaths,
     Map<String, String>? parts,
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
     Map<String, dynamic>? metadata,
+    bool clearWorkshop = false,
+    bool clearNextService = false,
   }) {
     return MaintenanceEntity(
       id: id ?? this.id,
@@ -163,13 +200,13 @@ class MaintenanceEntity extends Equatable {
       cost: cost ?? this.cost,
       serviceDate: serviceDate ?? this.serviceDate,
       odometer: odometer ?? this.odometer,
-      workshopName: workshopName ?? this.workshopName,
-      workshopPhone: workshopPhone ?? this.workshopPhone,
-      workshopAddress: workshopAddress ?? this.workshopAddress,
-      nextServiceDate: nextServiceDate ?? this.nextServiceDate,
-      nextServiceOdometer: nextServiceOdometer ?? this.nextServiceOdometer,
-      photos: photos ?? this.photos,
-      invoices: invoices ?? this.invoices,
+      workshopName: clearWorkshop ? null : (workshopName ?? this.workshopName),
+      workshopPhone: clearWorkshop ? null : (workshopPhone ?? this.workshopPhone),
+      workshopAddress: clearWorkshop ? null : (workshopAddress ?? this.workshopAddress),
+      nextServiceDate: clearNextService ? null : (nextServiceDate ?? this.nextServiceDate),
+      nextServiceOdometer: clearNextService ? null : (nextServiceOdometer ?? this.nextServiceOdometer),
+      photosPaths: photosPaths ?? this.photosPaths,
+      invoicesPaths: invoicesPaths ?? this.invoicesPaths,
       parts: parts ?? this.parts,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
@@ -178,25 +215,29 @@ class MaintenanceEntity extends Equatable {
     );
   }
 
-  // Helper getters
+  // Helper getters - Status
   bool get isCompleted => status == MaintenanceStatus.completed;
   bool get isPending => status == MaintenanceStatus.pending;
   bool get isInProgress => status == MaintenanceStatus.inProgress;
   bool get isCancelled => status == MaintenanceStatus.cancelled;
   
+  // Helper getters - Type
   bool get isPreventive => type == MaintenanceType.preventive;
   bool get isCorrective => type == MaintenanceType.corrective;
   bool get isInspection => type == MaintenanceType.inspection;
   bool get isEmergency => type == MaintenanceType.emergency;
   
-  bool get hasWorkshopInfo => workshopName != null && workshopName!.isNotEmpty;
+  // Helper getters - Data presence
+  bool get hasWorkshopInfo => workshopName != null && workshopName!.trim().isNotEmpty;
   bool get hasNextService => nextServiceDate != null || nextServiceOdometer != null;
-  bool get hasPhotos => photos.isNotEmpty;
-  bool get hasInvoices => invoices.isNotEmpty;
+  bool get hasPhotos => photosPaths.isNotEmpty;
+  bool get hasInvoices => invoicesPaths.isNotEmpty;
   bool get hasParts => parts.isNotEmpty;
-  bool get hasNotes => notes != null && notes!.isNotEmpty;
+  bool get hasNotes => notes != null && notes!.trim().isNotEmpty;
   
-  // Check if next service is due
+  // Business logic
+  
+  /// Verifica se a próxima manutenção está vencida
   bool isNextServiceDue(double currentOdometer) {
     if (nextServiceOdometer != null && currentOdometer >= nextServiceOdometer!) {
       return true;
@@ -207,15 +248,59 @@ class MaintenanceEntity extends Equatable {
     return false;
   }
   
-  // Days since last service
+  /// Dias desde a última manutenção
   int get daysSinceService => DateTime.now().difference(serviceDate).inDays;
   
-  // Formatted getters
-  String get formattedCost => 'R\$ ${cost.toStringAsFixed(2)}';
+  /// Quilometragem desde a última manutenção
+  double kilometersFromLastService(double currentOdometer) {
+    return currentOdometer - odometer;
+  }
+  
+  /// Nível de urgência da próxima manutenção
+  String get urgencyLevel {
+    if (!hasNextService) return 'none';
+    
+    final now = DateTime.now();
+    
+    // Verifica se já está vencida
+    if (nextServiceDate != null && now.isAfter(nextServiceDate!)) {
+      return 'overdue';
+    }
+    
+    // Verifica proximidade da data
+    if (nextServiceDate != null) {
+      final daysUntilService = nextServiceDate!.difference(now).inDays;
+      if (daysUntilService <= 7) {
+        return 'urgent';
+      } else if (daysUntilService <= 30) {
+        return 'soon';
+      }
+    }
+    
+    return 'normal';
+  }
+  
+  String get urgencyDisplayName {
+    switch (urgencyLevel) {
+      case 'overdue':
+        return 'Vencida';
+      case 'urgent':
+        return 'Urgente';
+      case 'soon':
+        return 'Em Breve';
+      case 'normal':
+        return 'Normal';
+      default:
+        return 'N/A';
+    }
+  }
+  
+  // Formatters
+  
+  String get formattedCost => 'R\$ ${cost.toStringAsFixed(2).replaceAll('.', ',')}';
   String get formattedOdometer => '${odometer.toStringAsFixed(0)} km';
-  String get formattedNextServiceOdometer => nextServiceOdometer != null 
-      ? '${nextServiceOdometer!.toStringAsFixed(0)} km' 
-      : 'N/A';
+  String get formattedNextServiceOdometer => 
+      nextServiceOdometer != null ? '${nextServiceOdometer!.toStringAsFixed(0)} km' : 'N/A';
   
   String get formattedServiceDate {
     final now = DateTime.now();
@@ -265,39 +350,34 @@ class MaintenanceEntity extends Equatable {
     }
   }
   
-  // Service urgency level
-  String get urgencyLevel {
-    if (!hasNextService) return 'none';
-    
-    if (isNextServiceDue(odometer)) {
-      return 'overdue';
+  /// Verifica se a manutenção é de alto custo (acima de R$ 1000)
+  bool get isHighCost => cost >= 1000.0;
+  
+  /// Retorna uma descrição resumida para listas
+  String get summaryDescription {
+    String summary = type.displayName;
+    if (hasWorkshopInfo) {
+      summary += ' • $workshopName';
     }
-    
-    final now = DateTime.now();
-    if (nextServiceDate != null) {
-      final daysUntilService = nextServiceDate!.difference(now).inDays;
-      if (daysUntilService <= 7) {
-        return 'urgent';
-      } else if (daysUntilService <= 30) {
-        return 'soon';
-      }
-    }
-    
-    return 'normal';
+    summary += ' • $formattedCost';
+    return summary;
   }
   
-  String get urgencyDisplayName {
-    switch (urgencyLevel) {
-      case 'overdue':
-        return 'Vencida';
-      case 'urgent':
-        return 'Urgente';
-      case 'soon':
-        return 'Em Breve';
-      case 'normal':
-        return 'Normal';
-      default:
-        return 'N/A';
-    }
+  /// Calcula o progresso até a próxima manutenção (0.0 a 1.0)
+  double nextServiceProgress(double currentOdometer) {
+    if (nextServiceOdometer == null) return 0.0;
+    
+    final totalDistance = nextServiceOdometer! - odometer;
+    final currentDistance = currentOdometer - odometer;
+    
+    if (totalDistance <= 0) return 1.0;
+    
+    final progress = currentDistance / totalDistance;
+    return progress.clamp(0.0, 1.0);
+  }
+
+  @override
+  String toString() {
+    return 'MaintenanceEntity(id: $id, type: ${type.displayName}, status: ${status.displayName}, cost: $formattedCost)';
   }
 }

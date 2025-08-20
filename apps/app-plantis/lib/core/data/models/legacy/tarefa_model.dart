@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'base_sync_model.dart';
+import '../base_sync_model.dart';
 
 part 'tarefa_model.g.dart';
 

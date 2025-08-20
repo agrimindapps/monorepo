@@ -1,123 +1,158 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../domain/entities/user_entity.dart';
-import '../../domain/usecases/sign_in.dart';
-import '../../domain/usecases/sign_up.dart';
-import '../../domain/usecases/sign_out.dart';
-import '../../domain/usecases/get_current_user.dart';
-import '../../domain/usecases/watch_auth_state.dart';
+import '../../infrastructure/services/crashlytics_service.dart';
+import '../../infrastructure/services/auth_service.dart';
 
-// Provider para o estado de autenticação
-final authStateProvider = StreamProvider<UserEntity?>((ref) {
-  final watchAuthState = di.sl<WatchAuthState>();
-  return watchAuthState();
+// Provider para o TaskManagerAuthService
+final taskManagerAuthServiceProvider = Provider<TaskManagerAuthService>((ref) {
+  return di.sl<TaskManagerAuthService>();
+});
+
+// Provider para o estado de autenticação usando o TaskManagerAuthService
+final authStateStreamProvider = StreamProvider<UserEntity?>((ref) {
+  final authService = ref.watch(taskManagerAuthServiceProvider);
+  return authService.currentUser;
+});
+
+// Provider para verificar se está logado
+final isLoggedInProvider = FutureProvider<bool>((ref) async {
+  final authService = ref.watch(taskManagerAuthServiceProvider);
+  return await authService.isLoggedIn;
 });
 
 // Provider para usuário atual
 final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
-  final getCurrentUser = di.sl<GetCurrentUser>();
-  final result = await getCurrentUser();
-  
-  return result.fold(
-    (failure) => throw failure,
-    (user) => user,
-  );
+  final authService = ref.watch(taskManagerAuthServiceProvider);
+  return authService.currentUser.first;
 });
+
+// Request classes para login/registro
+class SignInRequest {
+  final String email;
+  final String password;
+  
+  SignInRequest({required this.email, required this.password});
+}
+
+class SignUpRequest {
+  final String email;
+  final String password;
+  final String displayName;
+  
+  SignUpRequest({
+    required this.email, 
+    required this.password, 
+    required this.displayName
+  });
+}
 
 // Provider para login
 final signInProvider = FutureProvider.family<UserEntity, SignInRequest>((ref, request) async {
-  final signIn = di.sl<SignIn>();
+  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
   
-  final result = await signIn(SignInParams(
-    email: request.email,
-    password: request.password,
-  ));
-  
-  return result.fold(
-    (failure) => throw failure,
-    (user) {
-      // Invalidar o auth state para atualizar
-      ref.invalidate(authStateProvider);
-      ref.invalidate(currentUserProvider);
-      return user;
-    },
-  );
+  try {
+    final result = await authService.signInWithEmailAndPassword(
+      email: request.email,
+      password: request.password,
+    );
+    
+    return result.fold(
+      (failure) {
+        // Log erro de autenticação
+        crashlyticsService.recordAuthError(
+          authMethod: 'email_password',
+          errorCode: 'login_failed',
+          errorMessage: failure.message,
+        );
+        throw failure;
+      },
+      (user) {
+        return user;
+      },
+    );
+  } catch (e) {
+    crashlyticsService.recordError(
+      exception: e,
+      stackTrace: StackTrace.current,
+      reason: 'Login error in provider',
+    );
+    rethrow;
+  }
 });
 
 // Provider para registro
 final signUpProvider = FutureProvider.family<UserEntity, SignUpRequest>((ref, request) async {
-  final signUp = di.sl<SignUp>();
+  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
   
-  final result = await signUp(SignUpParams(
-    email: request.email,
-    password: request.password,
-    name: request.name,
-  ));
-  
-  return result.fold(
-    (failure) => throw failure,
-    (user) {
-      // Invalidar o auth state para atualizar
-      ref.invalidate(authStateProvider);
-      ref.invalidate(currentUserProvider);
-      return user;
-    },
-  );
+  try {
+    final result = await authService.signUpWithEmailAndPassword(
+      email: request.email,
+      password: request.password,
+      displayName: request.displayName,
+    );
+    
+    return result.fold(
+      (failure) {
+        crashlyticsService.recordAuthError(
+          authMethod: 'email_password',
+          errorCode: 'registration_failed',
+          errorMessage: failure.message,
+        );
+        throw failure;
+      },
+      (user) {
+        return user;
+      },
+    );
+  } catch (e) {
+    crashlyticsService.recordError(
+      exception: e,
+      stackTrace: StackTrace.current,
+      reason: 'Registration error in provider',
+    );
+    rethrow;
+  }
 });
 
 // Provider para logout
 final signOutProvider = FutureProvider<void>((ref) async {
-  final signOut = di.sl<SignOut>();
+  final authService = ref.watch(taskManagerAuthServiceProvider);
   
-  final result = await signOut();
-  
+  final result = await authService.signOut();
   return result.fold(
     (failure) => throw failure,
-    (_) {
-      // Invalidar todos os providers de auth
-      ref.invalidate(authStateProvider);
-      ref.invalidate(currentUserProvider);
-    },
+    (_) => null,
   );
 });
 
-// NotifierProvider para gerenciar estado de autenticação
+// Auth notifier para gerenciar estado global de autenticação
 class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
-  AuthNotifier({
-    required SignIn signIn,
-    required SignUp signUp,
-    required SignOut signOut,
-    required GetCurrentUser getCurrentUser,
-  })  : _signIn = signIn,
-        _signUp = signUp,
-        _signOut = signOut,
-        _getCurrentUser = getCurrentUser,
-        super(const AsyncValue.loading()) {
-    _checkAuthState();
+  AuthNotifier(this._authService) : super(const AsyncValue.loading()) {
+    _init();
   }
 
-  final SignIn _signIn;
-  final SignUp _signUp;
-  final SignOut _signOut;
-  final GetCurrentUser _getCurrentUser;
+  final TaskManagerAuthService _authService;
+  StreamSubscription<UserEntity?>? _subscription;
 
-  Future<void> _checkAuthState() async {
-    final result = await _getCurrentUser();
-    
-    result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+  void _init() {
+    _subscription = _authService.currentUser.listen(
       (user) => state = AsyncValue.data(user),
+      onError: (error, stackTrace) => state = AsyncValue.error(error, stackTrace),
     );
   }
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
     
-    final result = await _signIn(SignInParams(
+    final result = await _authService.signInWithEmailAndPassword(
       email: email,
       password: password,
-    ));
+    );
     
     result.fold(
       (failure) => state = AsyncValue.error(failure, StackTrace.current),
@@ -125,14 +160,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
     );
   }
 
-  Future<void> signUp(String email, String password, String name) async {
+  Future<void> signUp(String email, String password, String displayName) async {
     state = const AsyncValue.loading();
     
-    final result = await _signUp(SignUpParams(
+    final result = await _authService.signUpWithEmailAndPassword(
       email: email,
       password: password,
-      name: name,
-    ));
+      displayName: displayName,
+    );
     
     result.fold(
       (failure) => state = AsyncValue.error(failure, StackTrace.current),
@@ -141,72 +176,43 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   }
 
   Future<void> signOut() async {
-    final result = await _signOut();
+    state = const AsyncValue.loading();
     
+    final result = await _authService.signOut();
     result.fold(
       (failure) => state = AsyncValue.error(failure, StackTrace.current),
       (_) => state = const AsyncValue.data(null),
     );
   }
 
-  Future<void> refreshAuthState() async {
-    await _checkAuthState();
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }
 
+// Provider para o AuthNotifier
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserEntity?>>((ref) {
-  return AuthNotifier(
-    signIn: di.sl<SignIn>(),
-    signUp: di.sl<SignUp>(),
-    signOut: di.sl<SignOut>(),
-    getCurrentUser: di.sl<GetCurrentUser>(),
+  final authService = ref.watch(taskManagerAuthServiceProvider);
+  return AuthNotifier(authService);
+});
+
+// Convenience providers
+final isAuthenticatedProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+  return authState.when(
+    data: (user) => user != null,
+    loading: () => false,
+    error: (_, __) => false,
   );
 });
 
-// Classes para parâmetros
-class SignInRequest {
-  final String email;
-  final String password;
-
-  const SignInRequest({
-    required this.email,
-    required this.password,
-  });
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-  
-    return other is SignInRequest &&
-      other.email == email &&
-      other.password == password;
-  }
-
-  @override
-  int get hashCode => email.hashCode ^ password.hashCode;
-}
-
-class SignUpRequest {
-  final String email;
-  final String password;
-  final String name;
-
-  const SignUpRequest({
-    required this.email,
-    required this.password,
-    required this.name,
-  });
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-  
-    return other is SignUpRequest &&
-      other.email == email &&
-      other.password == password &&
-      other.name == name;
-  }
-
-  @override
-  int get hashCode => email.hashCode ^ password.hashCode ^ name.hashCode;
-}
+final currentAuthenticatedUserProvider = Provider<UserEntity?>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+  return authState.when(
+    data: (user) => user,
+    loading: () => null,
+    error: (_, __) => null,
+  );
+});

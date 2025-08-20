@@ -18,7 +18,6 @@ class AccountPage extends ConsumerStatefulWidget {
 }
 
 class _AccountPageState extends ConsumerState<AccountPage> {
-  bool _isUpdatingProfile = false;
   final _displayNameController = TextEditingController();
 
   @override
@@ -97,11 +96,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             // Avatar
             CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
-              backgroundImage: user.photoURL != null 
-                ? NetworkImage(user.photoURL!)
+              backgroundColor: AppColors.primaryColor.withAlpha(26),
+              backgroundImage: user.photoUrl != null 
+                ? NetworkImage(user.photoUrl!)
                 : null,
-              child: user.photoURL == null
+              child: user.photoUrl == null
                 ? Icon(
                     Icons.person,
                     size: 40,
@@ -117,7 +116,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.name ?? 'Usuário',
+                    user.displayName.isNotEmpty ? user.displayName : 'Usuário',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -125,7 +124,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    user.email ?? 'Nenhum email',
+                    user.email.isNotEmpty ? user.email : 'Nenhum email',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -137,7 +136,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                   Wrap(
                     spacing: 8,
                     children: [
-                      if (user.emailVerified)
+                      if (user.isEmailVerified)
                         _buildStatusChip(
                           'Email verificado',
                           AppColors.success,
@@ -185,8 +184,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: color.withOpacity(0.1),
-      side: BorderSide(color: color.withOpacity(0.3)),
+      backgroundColor: color.withAlpha(26),
+      side: BorderSide(color: color.withAlpha(77)),
     );
   }
 

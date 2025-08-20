@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/gasometer_notification_service.dart';
+import 'core/services/database_inspector_service.dart';
 import 'core/sync/services/sync_service.dart';
 import 'core/di/injection_container.dart';
 import 'firebase_options.dart';
@@ -45,6 +46,10 @@ void main() async {
   // Initialize Analytics Service
   final analyticsService = sl<AnalyticsService>();
   analyticsService.initialize();
+
+  // Initialize Database Inspector
+  final databaseInspectorService = GasOMeterDatabaseInspectorService.instance;
+  databaseInspectorService.initialize();
 
   // Initialize notifications
   final notificationService = sl<GasOMeterNotificationService>();

@@ -9,6 +9,7 @@ import 'sync_operations.dart';
 import 'conflict_resolver.dart';
 import '../../services/analytics_service.dart';
 import '../../data/models/base_sync_model.dart';
+import '../../../features/auth/domain/repositories/auth_repository.dart';
 
 enum SyncStatus {
   idle,
@@ -26,6 +27,7 @@ class SyncService {
   final SyncOperations _syncOperations;
   final ConflictResolver _conflictResolver;
   final AnalyticsService _analytics;
+  final AuthRepository _authRepository;
 
   final StreamController<SyncStatus> _statusController = 
       StreamController<SyncStatus>.broadcast();
@@ -51,6 +53,7 @@ class SyncService {
     this._syncOperations,
     this._conflictResolver,
     this._analytics,
+    this._authRepository,
   );
 
   /// Inicializa o serviço de sincronização
@@ -131,6 +134,26 @@ class SyncService {
       _updateStatus(SyncStatus.offline);
       _updateMessage('Offline - aguardando conexão');
       return;
+    }
+
+    // Verificar autenticação antes de sincronizar
+    final userResult = await _authRepository.getCurrentUser();
+    final currentUser = userResult.fold(
+      (failure) => null,
+      (user) => user,
+    );
+
+    if (currentUser == null) {
+      _updateStatus(SyncStatus.error);
+      _updateMessage('Usuário não autenticado - sincronização cancelada');
+      debugPrint('❌ Tentativa de sincronização sem usuário autenticado');
+      await _analytics.recordError('sync_without_auth', null);
+      return;
+    }
+
+    // Log tentativa de sincronização com user ID (apenas para debug em desenvolvimento)
+    if (kDebugMode) {
+      debugPrint('🔐 Iniciando sincronização para usuário: ${currentUser.id.substring(0, 8)}...');
     }
 
     _updateStatus(SyncStatus.syncing);

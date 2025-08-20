@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
-import '../../features/vehicles/domain/entities/vehicle_entity.dart';
 
 class VehicleSelector extends StatelessWidget {
   final String? selectedVehicleId;

@@ -42,6 +42,10 @@ class PlantTask extends Equatable {
     this.nextScheduledDate,
   });
 
+  bool get isCompleted => status == TaskStatus.completed;
+
+  DateTime get dueDate => scheduledDate;
+
   bool get isOverdue {
     if (status == TaskStatus.completed) return false;
     return DateTime.now().isAfter(scheduledDate);

@@ -23,3 +23,8 @@ abstract class StreamUseCaseWithoutParams<Type> {
   
   Stream<Type> call();
 }
+
+/// No parameters class for use cases that don't require parameters
+class NoParams {
+  const NoParams();
+}

@@ -80,6 +80,46 @@ class PlantTaskProvider extends ChangeNotifier {
     }
   }
 
+  /// Toggles task completion status
+  Future<void> toggleTaskCompletion(String plantId, String taskId) async {
+    try {
+      final tasks = getTasksForPlant(plantId);
+      final taskIndex = tasks.indexWhere((t) => t.id == taskId);
+      
+      if (taskIndex == -1) {
+        _errorMessage = 'Tarefa não encontrada';
+        notifyListeners();
+        return;
+      }
+
+      final task = tasks[taskIndex];
+      
+      if (task.isCompleted) {
+        // Mark as pending
+        final pendingTask = task.copyWith(
+          status: TaskStatus.pending,
+          completedDate: null,
+        );
+        tasks[taskIndex] = pendingTask;
+      } else {
+        // Mark as completed
+        final completedTask = task.markAsCompleted();
+        tasks[taskIndex] = completedTask;
+        
+        // Generate next task
+        final nextTask = _taskGenerationService.generateNextTask(completedTask);
+        tasks.add(nextTask);
+      }
+      
+      _plantTasks[plantId] = tasks;
+      await _updateTaskStatuses(plantId);
+      
+    } catch (e) {
+      _errorMessage = 'Erro ao alterar status da tarefa: $e';
+      notifyListeners();
+    }
+  }
+
   /// Marks a task as completed and generates the next occurrence
   Future<void> completeTask(String plantId, String taskId) async {
     try {
@@ -109,6 +149,29 @@ class PlantTaskProvider extends ChangeNotifier {
       
     } catch (e) {
       _errorMessage = 'Erro ao completar tarefa: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Deletes a task
+  Future<void> deleteTask(String plantId, String taskId) async {
+    try {
+      final tasks = getTasksForPlant(plantId);
+      final taskIndex = tasks.indexWhere((t) => t.id == taskId);
+      
+      if (taskIndex == -1) {
+        _errorMessage = 'Tarefa não encontrada';
+        notifyListeners();
+        return;
+      }
+
+      tasks.removeAt(taskIndex);
+      _plantTasks[plantId] = tasks;
+      
+      await _updateTaskStatuses(plantId);
+      
+    } catch (e) {
+      _errorMessage = 'Erro ao deletar tarefa: $e';
       notifyListeners();
     }
   }

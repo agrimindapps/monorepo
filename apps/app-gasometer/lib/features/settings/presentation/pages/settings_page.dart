@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:core/core.dart';
+import 'database_inspector_page.dart';
+import '../../../../core/services/data_generator_service.dart';
+import '../../../../core/services/data_cleaner_service.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -386,10 +389,7 @@ class SettingsPage extends StatelessWidget {
           icon: Icons.science,
           title: 'Simular Dados',
           subtitle: 'Inserir dados de teste (2 veículos, 14\nmeses)',
-          onTap: () {
-            // TODO: Implement simulate data functionality
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
-          },
+          onTap: () => _showGenerateDataDialog(context),
           trailing: Icon(
             Icons.chevron_right,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
@@ -400,7 +400,7 @@ class SettingsPage extends StatelessWidget {
           icon: Icons.delete,
           title: 'Remover Dados',
           subtitle: 'Limpar todo o banco de dados local',
-          onTap: () => _showClearDataDialog(context),
+          onTap: () => _showAdvancedClearDataDialog(context),
           trailing: Icon(
             Icons.chevron_right,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
@@ -412,8 +412,11 @@ class SettingsPage extends StatelessWidget {
           title: 'Inspetor de Banco',
           subtitle: 'Visualizar dados do Hive\nSharedPreferences',
           onTap: () {
-            // TODO: Implement database inspector
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const DatabaseInspectorPage(),
+              ),
+            );
           },
           trailing: Icon(
             Icons.chevron_right,
@@ -768,22 +771,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  void _showClearDataDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remover Dados'),
-        content: const Text(
-          'Isso irá remover TODOS os dados do aplicativo permanentemente. '
-          'Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
               Navigator.of(context).pop();
               // TODO: Implement data clearing
               _showSnackBar(context, 'Dados removidos com sucesso');
@@ -827,11 +814,725 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  void _showGenerateDataDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => _GenerateDataDialog(),
+    );
+  }
+
+  void _showAdvancedClearDataDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => _ClearDataDialog(),
+    );
+  }
+
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+}
+
+class _GenerateDataDialog extends StatefulWidget {
+  @override
+  State<_GenerateDataDialog> createState() => _GenerateDataDialogState();
+}
+
+class _GenerateDataDialogState extends State<_GenerateDataDialog> {
+  final _dataGenerator = DataGeneratorService.instance;
+  
+  int _numberOfVehicles = 2;
+  int _monthsOfHistory = 14;
+  bool _isGenerating = false;
+  Map<String, dynamic>? _lastResult;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.science, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          const Text('Gerar Dados de Teste'),
+        ],
+      ),
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Esta função irá gerar dados realísticos para testar a interface do aplicativo.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 20),
+            
+            // Configuração número de veículos
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Número de veículos:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+                Container(
+                  width: 120,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: _numberOfVehicles > 1 ? () {
+                          setState(() => _numberOfVehicles--);
+                        } : null,
+                        icon: const Icon(Icons.remove),
+                        iconSize: 20,
+                      ),
+                      Expanded(
+                        child: Text(
+                          '$_numberOfVehicles',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _numberOfVehicles < 5 ? () {
+                          setState(() => _numberOfVehicles++);
+                        } : null,
+                        icon: const Icon(Icons.add),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            
+            // Configuração meses de histórico
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Meses de histórico:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+                Container(
+                  width: 120,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: _monthsOfHistory > 6 ? () {
+                          setState(() => _monthsOfHistory -= 2);
+                        } : null,
+                        icon: const Icon(Icons.remove),
+                        iconSize: 20,
+                      ),
+                      Expanded(
+                        child: Text(
+                          '$_monthsOfHistory',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _monthsOfHistory < 24 ? () {
+                          setState(() => _monthsOfHistory += 2);
+                        } : null,
+                        icon: const Icon(Icons.add),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Estimativa de dados
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estimativa de dados a serem gerados:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildEstimateRow('Veículos', '$_numberOfVehicles'),
+                  _buildEstimateRow('Abastecimentos', '${_numberOfVehicles * _monthsOfHistory * 3}'),
+                  _buildEstimateRow('Leituras odômetro', '${_numberOfVehicles * _monthsOfHistory * 4}'),
+                  _buildEstimateRow('Despesas', '${_numberOfVehicles * _monthsOfHistory * 4}'),
+                  _buildEstimateRow('Manutenções', '${(_numberOfVehicles * _monthsOfHistory * 0.4).round()}'),
+                ],
+              ),
+            ),
+            
+            // Resultado da última geração
+            if (_lastResult != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Última geração concluída:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildResultRow('Veículos', '${_lastResult!['vehicles']}'),
+                    _buildResultRow('Abastecimentos', '${_lastResult!['fuelRecords']}'),
+                    _buildResultRow('Leituras odômetro', '${_lastResult!['odometerReadings']}'),
+                    _buildResultRow('Despesas', '${_lastResult!['expenses']}'),
+                    _buildResultRow('Manutenções', '${_lastResult!['maintenanceRecords']}'),
+                    _buildResultRow('Tempo', '${_lastResult!['duration']}ms'),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isGenerating ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _isGenerating ? null : _generateData,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+          ),
+          child: _isGenerating
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('Gerando...'),
+                  ],
+                )
+              : const Text('Gerar Dados'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEstimateRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '• $label:',
+            style: const TextStyle(fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '• $label:',
+            style: const TextStyle(fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _generateData() async {
+    setState(() => _isGenerating = true);
+    
+    try {
+      final result = await _dataGenerator.generateTestData(
+        numberOfVehicles: _numberOfVehicles,
+        monthsOfHistory: _monthsOfHistory,
+      );
+      
+      setState(() {
+        _lastResult = result;
+        _isGenerating = false;
+      });
+      
+      _showSnackBar(
+        'Dados gerados com sucesso! '
+        '${result['vehicles']} veículos, '
+        '${result['fuelRecords']} abastecimentos, '
+        '${result['expenses']} despesas.'
+      );
+      
+    } on UnimplementedError {
+      _showSnackBar(
+        'Funcionalidade em desenvolvimento.\n'
+        'O Database Inspector já está funcional para visualizar dados existentes.',
+        isError: false
+      );
+    } catch (e) {
+      setState(() => _isGenerating = false);
+      _showSnackBar('Erro ao gerar dados: $e', isError: true);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError 
+            ? Theme.of(context).colorScheme.error
+            : Colors.green,
+        duration: Duration(seconds: isError ? 4 : 3),
+      ),
+    );
+  }
+}
+
+class _ClearDataDialog extends StatefulWidget {
+  @override
+  State<_ClearDataDialog> createState() => _ClearDataDialogState();
+}
+
+class _ClearDataDialogState extends State<_ClearDataDialog> {
+  final _dataCleaner = DataCleanerService.instance;
+  
+  bool _isLoading = true;
+  bool _isClearing = false;
+  Map<String, dynamic>? _currentStats;
+  String _selectedClearType = 'all'; // 'all', 'selective'
+  Set<String> _selectedModules = {};
+  Map<String, dynamic>? _lastClearResult;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentStats();
+  }
+
+  Future<void> _loadCurrentStats() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final stats = await _dataCleaner.getDataStatsBeforeCleaning();
+      setState(() {
+        _currentStats = stats;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showSnackBar('Erro ao carregar estatísticas: $e', isError: true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+          const SizedBox(width: 8),
+          const Text('Limpar Dados'),
+        ],
+      ),
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Warning Section
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.warning, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'ATENÇÃO - AÇÃO IRREVERSÍVEL',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Esta ação irá remover permanentemente os dados selecionados. '
+                    'Não é possível desfazer esta operação.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            if (_isLoading) ...[
+              const Center(
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Carregando estatísticas...'),
+                  ],
+                ),
+              ),
+            ] else if (_currentStats != null) ...[
+              // Current Stats
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dados Atuais:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildStatsRow('HiveBoxes', '${_currentStats!['totalBoxes']}'),
+                    _buildStatsRow('Registros totais', '${_currentStats!['totalRecords']}'),
+                    _buildStatsRow('Preferências app', '${_currentStats!['appSpecificPrefs']}'),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Clear Type Selection
+              Text(
+                'Tipo de Limpeza:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              RadioListTile<String>(
+                title: Text('Limpeza Completa'),
+                subtitle: Text('Remove todos os dados da aplicação'),
+                value: 'all',
+                groupValue: _selectedClearType,
+                onChanged: (value) {
+                  setState(() => _selectedClearType = value!);
+                },
+              ),
+              
+              RadioListTile<String>(
+                title: Text('Limpeza Seletiva'),
+                subtitle: Text('Escolha módulos específicos para limpar'),
+                value: 'selective',
+                groupValue: _selectedClearType,
+                onChanged: (value) {
+                  setState(() => _selectedClearType = value!);
+                },
+              ),
+              
+              // Selective Modules (only show if selective is selected)
+              if (_selectedClearType == 'selective') ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).colorScheme.outline),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Selecione os módulos para limpar:',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 8),
+                      ..._dataCleaner.getModuleSummary().entries.map((entry) {
+                        return CheckboxListTile(
+                          title: Text(entry.key),
+                          subtitle: Text(entry.value, style: TextStyle(fontSize: 12)),
+                          value: _selectedModules.contains(entry.key),
+                          onChanged: (checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _selectedModules.add(entry.key);
+                              } else {
+                                _selectedModules.remove(entry.key);
+                              }
+                            });
+                          },
+                          dense: true,
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+            
+            // Last Clear Result
+            if (_lastClearResult != null) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Última limpeza concluída:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildResultRow('Boxes limpos', '${_lastClearResult!['totalClearedBoxes'] ?? 0}'),
+                    _buildResultRow('Preferências limpas', '${_lastClearResult!['totalClearedPreferences'] ?? 0}'),
+                    _buildResultRow('Erros', '${(_lastClearResult!['errors'] as List?)?.length ?? 0}'),
+                    _buildResultRow('Tempo', '${_lastClearResult!['duration']}ms'),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isClearing ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _isClearing || _isLoading || !_canClear() ? null : _performClear,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Colors.white,
+          ),
+          child: _isClearing
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('Limpando...'),
+                  ],
+                )
+              : Text(_selectedClearType == 'all' ? 'Limpar Tudo' : 'Limpar Selecionados'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('• $label:', style: const TextStyle(fontSize: 13)),
+          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('• $label:', style: const TextStyle(fontSize: 12)),
+          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  bool _canClear() {
+    if (_selectedClearType == 'all') return true;
+    if (_selectedClearType == 'selective') return _selectedModules.isNotEmpty;
+    return false;
+  }
+
+  Future<void> _performClear() async {
+    // Double confirmation for destructive action
+    final confirmed = await _showConfirmationDialog();
+    if (!confirmed) return;
+
+    setState(() => _isClearing = true);
+    
+    try {
+      Map<String, dynamic> result;
+      
+      if (_selectedClearType == 'all') {
+        result = await _dataCleaner.clearAllData();
+        _showSnackBar(
+          'Limpeza completa concluída! '
+          '${result['totalClearedBoxes']} boxes e '
+          '${result['totalClearedPreferences']} preferências removidas.',
+        );
+      } else {
+        // Clear selected modules
+        result = {
+          'totalClearedBoxes': 0,
+          'totalClearedPreferences': 0,
+          'errors': <String>[],
+          'duration': 0,
+        };
+        
+        final startTime = DateTime.now();
+        
+        for (final module in _selectedModules) {
+          final moduleResult = await _dataCleaner.clearModuleData(module);
+          result['totalClearedBoxes'] += (moduleResult['clearedBoxes'] as List).length;
+          if (moduleResult['errors'] != null) {
+            (result['errors'] as List).addAll(moduleResult['errors']);
+          }
+        }
+        
+        result['duration'] = DateTime.now().difference(startTime).inMilliseconds;
+        
+        _showSnackBar(
+          'Limpeza seletiva concluída! '
+          '${result['totalClearedBoxes']} boxes removidos de ${_selectedModules.length} módulos.',
+        );
+      }
+      
+      setState(() {
+        _lastClearResult = result;
+        _isClearing = false;
+        _selectedModules.clear();
+      });
+      
+      // Reload stats
+      await _loadCurrentStats();
+      
+    } catch (e) {
+      setState(() => _isClearing = false);
+      _showSnackBar('Erro durante a limpeza: $e', isError: true);
+    }
+  }
+
+  Future<bool> _showConfirmationDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Limpeza'),
+        content: Text(
+          _selectedClearType == 'all'
+            ? 'Tem certeza que deseja remover TODOS os dados? Esta ação é irreversível.'
+            : 'Tem certeza que deseja limpar os módulos selecionados: ${_selectedModules.join(", ")}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError 
+            ? Theme.of(context).colorScheme.error
+            : Colors.green,
+        duration: Duration(seconds: isError ? 5 : 4),
       ),
     );
   }

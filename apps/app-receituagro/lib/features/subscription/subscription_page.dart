@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import '../../core/di/injection_container.dart' as di;
+import '../../core/services/navigation_service.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -11,6 +12,7 @@ class SubscriptionPage extends StatefulWidget {
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final ISubscriptionRepository _subscriptionRepository = di.sl<ISubscriptionRepository>();
+  final INavigationService _navigationService = di.sl<INavigationService>();
   
   bool _isLoading = false;
   bool _hasActiveSubscription = false;
@@ -811,7 +813,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       children: [
         TextButton(
           onPressed: () {
-            // TODO: Implementar Terms of Use
+            _navigationService.openUrl('https://agrimind.com.br/termos-de-uso');
           },
           child: Text(
             'Termos de Uso',
@@ -830,7 +832,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
         TextButton(
           onPressed: () {
-            // TODO: Implementar Privacy Policy
+            _navigationService.openUrl('https://agrimind.com.br/politica-de-privacidade');
           },
           child: Text(
             'Política de Privacidade',

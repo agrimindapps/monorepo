@@ -18,6 +18,9 @@ abstract class INavigationService {
   /// Show snackbar
   void showSnackBar(String message, {Color? backgroundColor});
   
+  /// Open external URL
+  Future<void> openUrl(String url);
+  
   /// Get current context
   BuildContext? get currentContext;
 }
@@ -91,6 +94,36 @@ class NavigationService implements INavigationService {
   }
   
   @override
+  Future<void> openUrl(String url) async {
+    try {
+      debugPrint('NavigationService: Opening URL: $url');
+      // For now, show dialog with URL (since url_launcher isn't added yet)
+      final context = currentContext;
+      if (context != null) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Abrir Link'),
+            content: SelectableText(
+              'Link será aberto no navegador:\n\n$url',
+              style: const TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('NavigationService: Error opening URL: $e');
+      showSnackBar('Erro ao abrir link', backgroundColor: Colors.red);
+    }
+  }
+  
+  @override
   BuildContext? get currentContext => navigatorKey.currentContext;
 }
 
@@ -160,6 +193,32 @@ class MockNavigationService implements INavigationService {
         backgroundColor: backgroundColor,
       ),
     );
+  }
+  
+  @override
+  Future<void> openUrl(String url) async {
+    debugPrint('MockNavigationService: Opening URL: $url');
+    
+    if (_context != null) {
+      showDialog(
+        context: _context!,
+        builder: (context) => AlertDialog(
+          title: const Text('Abrir Link (Mock)'),
+          content: SelectableText(
+            'Mock: Link que seria aberto:\n\n$url',
+            style: const TextStyle(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fechar'),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    await Future.delayed(const Duration(milliseconds: 100));
   }
   
   @override

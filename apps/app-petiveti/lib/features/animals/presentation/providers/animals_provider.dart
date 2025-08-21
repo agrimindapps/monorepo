@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/interfaces/usecase.dart';
 import '../../domain/entities/animal.dart';
+import '../../domain/repositories/animal_repository.dart';
 import '../../domain/usecases/get_animals.dart';
 import '../../domain/usecases/get_animal_by_id.dart';
 import '../../domain/usecases/add_animal.dart';
@@ -139,15 +142,25 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
   }
 }
 
-// Providers - Temporarily commented until DI is properly set up
-/*
+// Providers
 final animalsProvider = StateNotifierProvider<AnimalsNotifier, AnimalsState>((ref) {
   return AnimalsNotifier(
-    getAnimals: GetIt.instance<GetAnimals>(),
-    getAnimalById: GetIt.instance<GetAnimalById>(),
-    addAnimal: GetIt.instance<AddAnimal>(),
-    updateAnimal: GetIt.instance<UpdateAnimal>(),
-    deleteAnimal: GetIt.instance<DeleteAnimal>(),
+    getAnimals: di.getIt<GetAnimals>(),
+    getAnimalById: di.getIt<GetAnimalById>(),
+    addAnimal: di.getIt<AddAnimal>(),
+    updateAnimal: di.getIt<UpdateAnimal>(),
+    deleteAnimal: di.getIt<DeleteAnimal>(),
   );
 });
-*/
+
+// Individual animal provider
+final animalProvider = FutureProvider.family<Animal?, String>((ref, id) async {
+  final notifier = ref.read(animalsProvider.notifier);
+  return await notifier.getAnimalById(id);
+});
+
+// Stream provider for real-time updates
+final animalsStreamProvider = StreamProvider<List<Animal>>((ref) {
+  final repository = di.getIt.get<AnimalRepository>();
+  return repository.watchAnimals();
+});

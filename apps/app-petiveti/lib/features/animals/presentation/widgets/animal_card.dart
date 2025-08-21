@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/animal.dart';
+
 class AnimalCard extends StatelessWidget {
-  final String animalName;
+  final Animal animal;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const AnimalCard({
     super.key,
-    required this.animalName,
+    required this.animal,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
@@ -28,10 +30,25 @@ class AnimalCard extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 radius: 24,
-                child: Icon(
-                  Icons.pets,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
+                child: animal.photo != null
+                    ? ClipOval(
+                        child: Image.network(
+                          animal.photo!,
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              animal.species.toLowerCase() == 'dog' ? Icons.pets : Icons.pets,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            );
+                          },
+                        ),
+                      )
+                    : Icon(
+                        animal.species.toLowerCase() == 'dog' ? Icons.pets : Icons.pets,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -39,14 +56,21 @@ class AnimalCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      animalName,
+                      animal.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Toque para ver detalhes',
+                      '${animal.species} • ${animal.displayAge}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Peso: ${animal.currentWeight.toStringAsFixed(1)} kg',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),

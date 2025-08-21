@@ -1,25 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/animal.dart';
+import '../providers/animals_provider.dart';
 import '../widgets/animal_card.dart';
 import '../widgets/empty_animals_state.dart';
+import '../widgets/add_animal_form.dart';
 
-class AnimalsPage extends StatefulWidget {
+class AnimalsPage extends ConsumerStatefulWidget {
   const AnimalsPage({super.key});
 
   @override
-  State<AnimalsPage> createState() => _AnimalsPageState();
+  ConsumerState<AnimalsPage> createState() => _AnimalsPageState();
 }
 
-class _AnimalsPageState extends State<AnimalsPage> {
-  final List<String> _mockAnimals = [
-    'Rex - Cachorro',
-    'Mimi - Gato', 
-    'Bob - Cachorro',
-  ];
+class _AnimalsPageState extends ConsumerState<AnimalsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load animals when page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(animalsProvider.notifier).loadAnimals();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final animalsState = ref.watch(animalsProvider);
+    
+    // Show error message if there's an error
+    if (animalsState.error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(animalsState.error!),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              onPressed: () {
+                ref.read(animalsProvider.notifier).clearError();
+                ref.read(animalsProvider.notifier).loadAnimals();
+              },
+            ),
+          ),
+        );
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meus Pets'),
@@ -78,36 +105,39 @@ class _AnimalsPageState extends State<AnimalsPage> {
   }
 
   Widget _buildBody() {
-    if (_mockAnimals.isEmpty) {
+    final animalsState = ref.watch(animalsProvider);
+    
+    if (animalsState.isLoading && animalsState.animals.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    
+    if (animalsState.animals.isEmpty) {
       return const EmptyAnimalsState();
     }
 
     return RefreshIndicator(
       onRefresh: () async {
-        // Simulate refresh
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Lista atualizada!')),
-          );
-        }
+        await ref.read(animalsProvider.notifier).loadAnimals();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _mockAnimals.length,
+        itemCount: animalsState.animals.length,
         itemBuilder: (context, index) {
+          final animal = animalsState.animals[index];
           return AnimalCard(
-            animalName: _mockAnimals[index],
-            onTap: () => _viewAnimalDetails(index),
-            onEdit: () => _editAnimal(index),
-            onDelete: () => _deleteAnimal(index),
+            animal: animal,
+            onTap: () => _viewAnimalDetails(animal),
+            onEdit: () => _editAnimal(animal),
+            onDelete: () => _deleteAnimal(animal),
           );
         },
       ),
     );
   }
 
-  void _syncAnimals() {
+  void _syncAnimals() async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(
@@ -124,104 +154,54 @@ class _AnimalsPageState extends State<AnimalsPage> {
         duration: Duration(seconds: 2),
       ),
     );
+    
+    // Trigger sync through repository
+    await ref.read(animalsProvider.notifier).loadAnimals();
   }
 
   void _addAnimal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => Container(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Novo Pet',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Nome do Pet',
-                hintText: 'Ex: Rex, Mimi, Bob...',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: 'Espécie',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'dog', child: Text('Cachorro')),
-                DropdownMenuItem(value: 'cat', child: Text('Gato')),
-              ],
-              onChanged: (value) {},
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancelar'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pet adicionado com sucesso!')),
-                      );
-                    },
-                    child: const Text('Salvar'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      builder: (context) => AddAnimalForm(
+        onSave: (animal) async {
+          Navigator.pop(context);
+          await ref.read(animalsProvider.notifier).addAnimal(animal);
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Pet adicionado com sucesso!')),
+            );
+          }
+        },
       ),
     );
   }
 
-  void _viewAnimalDetails(int index) {
+  void _viewAnimalDetails(Animal animal) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(_mockAnimals[index]),
-        content: const Column(
+        title: Text(animal.name),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Idade: 3 anos'),
-            SizedBox(height: 8),
-            Text('Peso: 15.5 kg'),
-            SizedBox(height: 8),
-            Text('Última consulta: 15/08/2024'),
-            SizedBox(height: 8),
-            Text('Status: Saudável ✅'),
+            Text('Espécie: ${animal.species}'),
+            const SizedBox(height: 8),
+            Text('Raça: ${animal.breed}'),
+            const SizedBox(height: 8),
+            Text('Idade: ${animal.displayAge}'),
+            const SizedBox(height: 8),
+            Text('Peso: ${animal.currentWeight.toStringAsFixed(1)} kg'),
+            const SizedBox(height: 8),
+            Text('Gênero: ${animal.gender}'),
+            const SizedBox(height: 8),
+            Text('Cor: ${animal.color}'),
+            if (animal.notes != null && animal.notes!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('Observações: ${animal.notes}'),
+            ],
           ],
         ),
         actions: [
@@ -232,7 +212,7 @@ class _AnimalsPageState extends State<AnimalsPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _editAnimal(index);
+              _editAnimal(animal);
             },
             child: const Text('Editar'),
           ),
@@ -241,18 +221,32 @@ class _AnimalsPageState extends State<AnimalsPage> {
     );
   }
 
-  void _editAnimal(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Editar ${_mockAnimals[index]} - Em breve!')),
+  void _editAnimal(Animal animal) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AddAnimalForm(
+        animal: animal,
+        onSave: (updatedAnimal) async {
+          Navigator.pop(context);
+          await ref.read(animalsProvider.notifier).updateAnimal(updatedAnimal);
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Pet atualizado com sucesso!')),
+            );
+          }
+        },
+      ),
     );
   }
 
-  void _deleteAnimal(int index) {
+  void _deleteAnimal(Animal animal) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Pet'),
-        content: Text('Tem certeza que deseja excluir ${_mockAnimals[index]}?'),
+        content: Text('Tem certeza que deseja excluir ${animal.name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -263,14 +257,15 @@ class _AnimalsPageState extends State<AnimalsPage> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              setState(() {
-                _mockAnimals.removeAt(index);
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Pet excluído com sucesso')),
-              );
+              await ref.read(animalsProvider.notifier).deleteAnimal(animal.id);
+              
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Pet excluído com sucesso')),
+                );
+              }
             },
             child: const Text('Excluir'),
           ),

@@ -7,17 +7,18 @@ part 'fuel_supply_model.g.dart';
 /// Fuel Supply (Abastecimento) model with Firebase sync support
 /// TypeId: 1 - New sequential numbering
 @HiveType(typeId: 1)
+// ignore: must_be_immutable
 class FuelSupplyModel extends BaseSyncModel {
   // Base sync fields (required for Hive generation)
-  @HiveField(0) final String id;
+  @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) final bool isDirty;
-  @HiveField(5) final bool isDeleted;
-  @HiveField(6) final int version;
-  @HiveField(7) final String? userId;
-  @HiveField(8) final String? moduleName;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Fuel supply specific fields
   @HiveField(10) final String veiculoId;
@@ -41,16 +42,16 @@ class FuelSupplyModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    required this.veiculoId,
-    required this.data,
-    required this.odometro,
-    required this.litros,
-    required this.valorTotal,
+    this.veiculoId = '',
+    this.data = 0,
+    this.odometro = 0.0,
+    this.litros = 0.0,
+    this.valorTotal = 0.0,
     this.tanqueCheio,
-    required this.precoPorLitro,
+    this.precoPorLitro = 0.0,
     this.posto,
     this.observacao,
-    required this.tipoCombustivel,
+    this.tipoCombustivel = 0,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -220,9 +221,9 @@ class FuelSupplyModel extends BaseSyncModel {
   }) {
     return FuelSupplyModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,
@@ -247,63 +248,11 @@ class FuelSupplyModel extends BaseSyncModel {
   factory FuelSupplyModel.fromMap(Map<String, dynamic> map) => FuelSupplyModel.fromHiveMap(map);
   factory FuelSupplyModel.fromJson(Map<String, dynamic> json) => FuelSupplyModel.fromHiveMap(json);
 
-  /// Calculate correct consumption in km/L with previous odometer
-  double calcularConsumoCorreto(double odometroAnterior) {
-    if (litros <= 0) return 0.0;
-    
-    final distanciaPercorrida = odometro - odometroAnterior;
-    if (distanciaPercorrida <= 0) return 0.0;
-    
-    return distanciaPercorrida / litros;
-  }
-  
-  /// Calculate consumption in L/100km (European standard)
-  double calcularConsumoL100km(double odometroAnterior) {
-    final consumoKmL = calcularConsumoCorreto(odometroAnterior);
-    if (consumoKmL <= 0) return 0.0;
-    
-    return 100 / consumoKmL;
-  }
+  /// Get the fuel supply date as DateTime object
+  DateTime get supplyDate => DateTime.fromMillisecondsSinceEpoch(data);
 
-  /// Calculate average price per liter
-  double calcularPrecoPorLitro() {
-    return litros > 0 ? valorTotal / litros : 0.0;
-  }
-
-  /// Check if fuel supply belongs to specific vehicle
-  bool pertenceAoVeiculo(int idVeiculo) {
-    return veiculoId.toString() == idVeiculo.toString();
-  }
-
-  /// Validate basic required fields
-  bool validarCamposBasicos() {
-    return veiculoId.isNotEmpty && 
-           data > 0 && 
-           litros > 0 && 
-           valorTotal > 0 && 
-           odometro > 0 &&
-           precoPorLitro > 0;
-  }
-  
-  /// Validate financial consistency (total value vs price per liter)
-  bool validarConsistenciaFinanceira({double toleranciaPercentual = 5.0}) {
-    if (litros <= 0 || precoPorLitro <= 0) return false;
-    
-    final valorCalculado = precoPorLitro * litros;
-    final diferenca = (valorTotal - valorCalculado).abs();
-    final percentualDiferenca = (diferenca / valorTotal) * 100;
-    
-    return percentualDiferenca <= toleranciaPercentual;
-  }
-
-  /// Update total value - returns new instance (immutable)
-  FuelSupplyModel atualizarValorTotal(double novoValor) {
-    return copyWith(
-      valorTotal: novoValor,
-      updatedAt: DateTime.now(),
-      isDirty: true,
-    );
-  }
+  /// Get calculated price per liter (for display purposes)
+  double get calculatedPricePerLiter => litros > 0 ? valorTotal / litros : 0.0;
 
   /// Clone the object - returns copy with same data
   FuelSupplyModel clone() {

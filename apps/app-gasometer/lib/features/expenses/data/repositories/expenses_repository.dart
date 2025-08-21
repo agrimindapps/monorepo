@@ -2,9 +2,10 @@ import 'package:hive/hive.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../models/expense_model.dart';
 import '../../../../core/cache/cache_manager.dart';
+import '../../../../core/interfaces/i_expenses_repository.dart';
 
 /// Repository para persistência de despesas usando Hive com cache strategy
-class ExpensesRepository with CachedRepository<ExpenseEntity> {
+class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpensesRepository {
   static const String _boxName = 'expenses';
   late Box<ExpenseModel> _box;
 
@@ -304,7 +305,146 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> {
     );
   }
 
+  /// Batch save expenses
+  @override
+  Future<List<ExpenseEntity>> saveExpenses(List<ExpenseEntity> expenses) async {
+    try {
+      final results = <ExpenseEntity>[];
+      for (final expense in expenses) {
+        final result = await saveExpense(expense);
+        if (result != null) {
+          results.add(result);
+        }
+      }
+      return results;
+    } catch (e) {
+      throw Exception('Erro ao salvar despesas em lote: $e');
+    }
+  }
+
+  /// Batch delete expenses
+  @override
+  Future<bool> deleteExpenses(List<String> expenseIds) async {
+    try {
+      for (final id in expenseIds) {
+        await deleteExpense(id);
+      }
+      return true;
+    } catch (e) {
+      throw Exception('Erro ao deletar despesas em lote: $e');
+    }
+  }
+
+  /// Advanced filtering
+  @override
+  Future<List<ExpenseEntity>> getExpensesWithFilters({
+    String? vehicleId,
+    ExpenseType? type,
+    DateTime? startDate,
+    DateTime? endDate,
+    double? minAmount,
+    double? maxAmount,
+    String? searchText,
+  }) async {
+    try {
+      final models = _box.values.where((model) {
+        if (model.isDeleted) return false;
+        
+        if (vehicleId != null && model.veiculoId != vehicleId) return false;
+        if (type != null && model.tipo != type.name) return false;
+        
+        if (startDate != null && model.data < startDate.millisecondsSinceEpoch) return false;
+        if (endDate != null && model.data > endDate.millisecondsSinceEpoch) return false;
+        
+        if (minAmount != null && model.valor < minAmount) return false;
+        if (maxAmount != null && model.valor > maxAmount) return false;
+        
+        if (searchText != null && 
+            !model.descricao.toLowerCase().contains(searchText.toLowerCase())) {
+          return false;
+        }
+        
+        return true;
+      }).toList();
+      
+      return models.map((model) => _modelToEntity(model)).toList();
+    } catch (e) {
+      throw Exception('Erro ao filtrar despesas: $e');
+    }
+  }
+
+  /// Paginated expenses
+  @override
+  Future<PagedResult<ExpenseEntity>> getExpensesPaginated({
+    int page = 0,
+    int pageSize = 20,
+    String? vehicleId,
+    ExpenseType? type,
+    DateTime? startDate,
+    DateTime? endDate,
+    ExpenseSortBy sortBy = ExpenseSortBy.date,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      // Get filtered results
+      final allExpenses = await getExpensesWithFilters(
+        vehicleId: vehicleId,
+        type: type,
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      // Sort results
+      allExpenses.sort((a, b) {
+        int comparison = 0;
+        switch (sortBy) {
+          case ExpenseSortBy.date:
+            comparison = a.date.compareTo(b.date);
+            break;
+          case ExpenseSortBy.amount:
+            comparison = a.amount.compareTo(b.amount);
+            break;
+          case ExpenseSortBy.type:
+            comparison = a.type.name.compareTo(b.type.name);
+            break;
+          case ExpenseSortBy.description:
+            comparison = a.description.compareTo(b.description);
+            break;
+          case ExpenseSortBy.odometer:
+            comparison = a.odometer.compareTo(b.odometer);
+            break;
+        }
+        
+        return sortOrder == SortOrder.ascending ? comparison : -comparison;
+      });
+
+      // Paginate
+      final totalItems = allExpenses.length;
+      final totalPages = (totalItems / pageSize).ceil();
+      final startIndex = page * pageSize;
+      final endIndex = (startIndex + pageSize).clamp(0, totalItems);
+      
+      final paginatedItems = allExpenses.sublist(
+        startIndex.clamp(0, totalItems),
+        endIndex,
+      );
+
+      return PagedResult<ExpenseEntity>(
+        items: paginatedItems,
+        currentPage: page,
+        pageSize: pageSize,
+        totalItems: totalItems,
+        totalPages: totalPages,
+        hasNext: page < totalPages - 1,
+        hasPrevious: page > 0,
+      );
+    } catch (e) {
+      throw Exception('Erro ao paginar despesas: $e');
+    }
+  }
+
   /// Fecha o box (cleanup)
+  @override
   Future<void> close() async {
     try {
       await _box.close();

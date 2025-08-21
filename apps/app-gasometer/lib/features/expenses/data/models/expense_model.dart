@@ -7,17 +7,18 @@ part 'expense_model.g.dart';
 /// Expense (Despesa) model with Firebase sync support
 /// TypeId: 3 - New sequential numbering
 @HiveType(typeId: 3)
+// ignore: must_be_immutable
 class ExpenseModel extends BaseSyncModel {
   // Base sync fields (required for Hive generation)
-  @HiveField(0) final String id;
+  @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) final bool isDirty;
-  @HiveField(5) final bool isDeleted;
-  @HiveField(6) final int version;
-  @HiveField(7) final String? userId;
-  @HiveField(8) final String? moduleName;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Expense specific fields
   @HiveField(10)
@@ -43,12 +44,12 @@ class ExpenseModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    required this.veiculoId,
-    required this.tipo,
-    required this.descricao,
-    required this.valor,
-    required this.data,
-    required this.odometro,
+    this.veiculoId = '',
+    this.tipo = '',
+    this.descricao = '',
+    this.valor = 0.0,
+    this.data = 0,
+    this.odometro = 0.0,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -190,9 +191,9 @@ class ExpenseModel extends BaseSyncModel {
   }) {
     return ExpenseModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,
@@ -215,42 +216,8 @@ class ExpenseModel extends BaseSyncModel {
   factory ExpenseModel.fromJson(Map<String, dynamic> json) =>
       ExpenseModel.fromHiveMap(json);
 
-  /// Calculate total expenses from a list
-  static double calcularTotalDespesas(List<ExpenseModel> despesas) {
-    return despesas.fold(0.0, (total, despesa) => total + despesa.valor);
-  }
-
-  /// Filter expenses by type
-  static List<ExpenseModel> filtrarPorTipo(
-    List<ExpenseModel> despesas,
-    String tipo,
-  ) {
-    return despesas.where((despesa) => despesa.tipo == tipo).toList();
-  }
-
-  /// Sort expenses by date (most recent first)
-  static List<ExpenseModel> ordenarPorData(List<ExpenseModel> despesas) {
-    despesas.sort((a, b) => b.data.compareTo(a.data));
-    return despesas;
-  }
-
-  /// Check if has higher value than another expense
-  bool possuiMaiorValor(ExpenseModel outraDespesa) {
-    return valor > outraDespesa.valor;
-  }
-
-  /// Check if belongs to specific date
-  bool pertenceAData(DateTime dataAlvo) {
-    final expenseDate = DateTime.fromMillisecondsSinceEpoch(data);
-    return expenseDate.year == dataAlvo.year && 
-           expenseDate.month == dataAlvo.month &&
-           expenseDate.day == dataAlvo.day;
-  }
-
-  /// Check if value is within range
-  bool valorDentroDoIntervalo(double min, double max) {
-    return valor >= min && valor <= max;
-  }
+  /// Get the expense date as DateTime object
+  DateTime get expenseDate => DateTime.fromMillisecondsSinceEpoch(data);
 
   /// Clone the object - returns copy with same data
   ExpenseModel clone() {

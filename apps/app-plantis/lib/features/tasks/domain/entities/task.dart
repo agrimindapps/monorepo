@@ -153,51 +153,51 @@ class Task extends BaseSyncEntity {
       completedAt: completedAt ?? this.completedAt,
       completionNotes: completionNotes ?? this.completionNotes,
       isRecurring: isRecurring ?? this.isRecurring,
-      recurringIntervalDays: recurringIntervalDays ?? this.recurringIntervalDays,
+      recurringIntervalDays:
+          recurringIntervalDays ?? this.recurringIntervalDays,
       nextDueDate: nextDueDate ?? this.nextDueDate,
     );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        createdAt,
-        updatedAt,
-        title,
-        description,
-        plantId,
-        plantName,
-        type,
-        status,
-        priority,
-        dueDate,
-        completedAt,
-        completionNotes,
-        isRecurring,
-        recurringIntervalDays,
-        nextDueDate,
-        isDeleted,
-        needsSync,
-      ];
+    id,
+    createdAt,
+    updatedAt,
+    title,
+    description,
+    plantId,
+    plantName,
+    type,
+    status,
+    priority,
+    dueDate,
+    completedAt,
+    completionNotes,
+    isRecurring,
+    recurringIntervalDays,
+    nextDueDate,
+    isDeleted,
+    needsSync,
+  ];
 
-  bool get isOverdue => 
-      status == TaskStatus.pending && 
-      DateTime.now().isAfter(dueDate);
+  bool get isOverdue =>
+      status == TaskStatus.pending && DateTime.now().isAfter(dueDate);
 
   bool get isDueToday {
     final today = DateTime.now();
     final due = dueDate;
-    return today.year == due.year && 
-           today.month == due.month && 
-           today.day == due.day;
+    return today.year == due.year &&
+        today.month == due.month &&
+        today.day == due.day;
   }
 
   bool get isDueTomorrow {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final due = dueDate;
-    return tomorrow.year == due.year && 
-           tomorrow.month == due.month && 
-           tomorrow.day == due.day;
+    return tomorrow.year == due.year &&
+        tomorrow.month == due.month &&
+        tomorrow.day == due.day;
   }
 
   @override
@@ -233,19 +233,12 @@ class Task extends BaseSyncEntity {
 
   @override
   Task markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   Task markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
@@ -259,11 +252,7 @@ class Task extends BaseSyncEntity {
 
   @override
   Task withUserId(String userId) {
-    return copyWith(
-      userId: userId,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(userId: userId, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
@@ -318,7 +307,7 @@ class Task extends BaseSyncEntity {
     }
 
     final taskType = mapCareType(tarefaModel.tipoCuidado);
-    
+
     return Task(
       id: tarefaModel.id,
       createdAt: tarefaModel.createdAt ?? DateTime.now(),

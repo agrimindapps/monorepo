@@ -4,16 +4,16 @@ import 'package:core/core.dart';
 class AnalyticsProvider {
   final IAnalyticsRepository _analyticsRepository;
   final ICrashlyticsRepository _crashlyticsRepository;
-  
+
   AnalyticsProvider({
     required IAnalyticsRepository analyticsRepository,
     required ICrashlyticsRepository crashlyticsRepository,
-  })  : _analyticsRepository = analyticsRepository,
-        _crashlyticsRepository = crashlyticsRepository;
-        
+  }) : _analyticsRepository = analyticsRepository,
+       _crashlyticsRepository = crashlyticsRepository;
+
   /// Verifica se o analytics está habilitado baseado no ambiente
   bool get _isAnalyticsEnabled => EnvironmentConfig.enableAnalytics;
-  
+
   /// Verifica se está em modo debug para logs locais
   bool get _isDebugMode => EnvironmentConfig.isDebugMode;
 
@@ -26,7 +26,7 @@ class AnalyticsProvider {
       }
       return;
     }
-    
+
     try {
       await _analyticsRepository.setCurrentScreen(screenName: screenName);
       await _analyticsRepository.logEvent(
@@ -43,20 +43,22 @@ class AnalyticsProvider {
     }
   }
 
-  Future<void> logEvent(String eventName, Map<String, dynamic>? parameters) async {
+  Future<void> logEvent(
+    String eventName,
+    Map<String, dynamic>? parameters,
+  ) async {
     // Em development, apenas loga localmente
     if (!_isAnalyticsEnabled) {
       if (_isDebugMode) {
-        debugPrint('📊 [DEV] Analytics: Event - $eventName ${parameters ?? ''}');
+        debugPrint(
+          '📊 [DEV] Analytics: Event - $eventName ${parameters ?? ''}',
+        );
       }
       return;
     }
-    
+
     try {
-      await _analyticsRepository.logEvent(
-        eventName,
-        parameters: parameters,
-      );
+      await _analyticsRepository.logEvent(eventName, parameters: parameters);
       debugPrint('📊 Analytics: Event logged - $eventName');
     } catch (e, stackTrace) {
       await _crashlyticsRepository.recordError(
@@ -67,11 +69,11 @@ class AnalyticsProvider {
     }
   }
 
-  Future<void> logUserAction(String action, {Map<String, dynamic>? parameters}) async {
-    await logEvent('user_action', {
-      'action': action,
-      ...?parameters,
-    });
+  Future<void> logUserAction(
+    String action, {
+    Map<String, dynamic>? parameters,
+  }) async {
+    await logEvent('user_action', {'action': action, ...?parameters});
   }
 
   // Auth events
@@ -151,17 +153,17 @@ class AnalyticsProvider {
       }
       return;
     }
-    
+
     if (customKeys != null) {
       await _crashlyticsRepository.setCustomKeys(keys: customKeys);
     }
-    
+
     await _crashlyticsRepository.recordError(
       exception: error,
       stackTrace: stackTrace ?? StackTrace.current,
       reason: reason,
     );
-    
+
     debugPrint('🔥 Crashlytics: Error recorded - ${error.toString()}');
   }
 
@@ -173,19 +175,23 @@ class AnalyticsProvider {
     // Em development, apenas loga localmente
     if (!_isAnalyticsEnabled) {
       if (_isDebugMode) {
-        debugPrint('⚠️ [DEV] Crashlytics: Non-fatal error - ${error.toString()}');
+        debugPrint(
+          '⚠️ [DEV] Crashlytics: Non-fatal error - ${error.toString()}',
+        );
         if (reason != null) debugPrint('⚠️ [DEV] Reason: $reason');
       }
       return;
     }
-    
+
     await _crashlyticsRepository.recordNonFatalError(
       exception: error,
       stackTrace: stackTrace ?? StackTrace.current,
       reason: reason,
     );
-    
-    debugPrint('⚠️ Crashlytics: Non-fatal error recorded - ${error.toString()}');
+
+    debugPrint(
+      '⚠️ Crashlytics: Non-fatal error recorded - ${error.toString()}',
+    );
   }
 
   Future<void> log(String message) async {
@@ -196,7 +202,7 @@ class AnalyticsProvider {
       }
       return;
     }
-    
+
     await _crashlyticsRepository.log(message);
   }
 
@@ -208,7 +214,7 @@ class AnalyticsProvider {
       }
       return;
     }
-    
+
     await _crashlyticsRepository.setCustomKey(key: key, value: value);
   }
 
@@ -220,7 +226,7 @@ class AnalyticsProvider {
       }
       return;
     }
-    
+
     await _analyticsRepository.setUserId(userId);
     await _crashlyticsRepository.setUserId(userId);
   }
@@ -233,7 +239,7 @@ class AnalyticsProvider {
       }
       return;
     }
-    
+
     await _analyticsRepository.setUserProperties(properties: properties);
   }
 

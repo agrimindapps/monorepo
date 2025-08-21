@@ -19,7 +19,8 @@ abstract class IViewModeDelegate {
 
 enum AppBarViewMode { list, grid }
 
-class EnhancedPlantsAppBar extends StatelessWidget implements PreferredSizeWidget {
+class EnhancedPlantsAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   final int plantsCount;
   final String searchQuery;
   final AppBarViewMode viewMode;
@@ -43,7 +44,7 @@ class EnhancedPlantsAppBar extends StatelessWidget implements PreferredSizeWidge
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -58,10 +59,7 @@ class EnhancedPlantsAppBar extends StatelessWidget implements PreferredSizeWidge
       child: SafeArea(
         child: Column(
           children: [
-            _HeaderSection(
-              plantsCount: plantsCount,
-              theme: theme,
-            ),
+            _HeaderSection(plantsCount: plantsCount, theme: theme),
             if (showSearchBar && plantsCount > 0)
               _SearchSection(
                 searchQuery: searchQuery,
@@ -81,10 +79,7 @@ class _HeaderSection extends StatelessWidget {
   final int plantsCount;
   final ThemeData theme;
 
-  const _HeaderSection({
-    required this.plantsCount,
-    required this.theme,
-  });
+  const _HeaderSection({required this.plantsCount, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -102,10 +97,7 @@ class _HeaderSection extends StatelessWidget {
             ),
           ),
           if (plantsCount > 0)
-            _PlantsCountBadge(
-              count: plantsCount,
-              theme: theme,
-            ),
+            _PlantsCountBadge(count: plantsCount, theme: theme),
         ],
       ),
     );
@@ -116,10 +108,7 @@ class _PlantsCountBadge extends StatelessWidget {
   final int count;
   final ThemeData theme;
 
-  const _PlantsCountBadge({
-    required this.count,
-    required this.theme,
-  });
+  const _PlantsCountBadge({required this.count, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +118,7 @@ class _PlantsCountBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: PlantisColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: PlantisColors.primary,
-          width: 1,
-        ),
+        border: Border.all(color: PlantisColors.primary, width: 1),
       ),
       child: Text(
         '$count ${count == 1 ? 'planta' : 'plantas'}',
@@ -231,9 +217,10 @@ class _EnhancedSearchBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: focusNode.hasFocus
-            ? Border.all(color: PlantisColors.primary, width: 2)
-            : Border.all(color: Colors.transparent),
+        border:
+            focusNode.hasFocus
+                ? Border.all(color: PlantisColors.primary, width: 2)
+                : Border.all(color: Colors.transparent),
       ),
       child: TextField(
         controller: controller,
@@ -249,18 +236,19 @@ class _EnhancedSearchBar extends StatelessWidget {
             Icons.search,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          suffixIcon: searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () {
-                    controller.clear();
-                    searchDelegate.onClearSearch();
-                  },
-                )
-              : null,
+          suffixIcon:
+              searchQuery.isNotEmpty
+                  ? IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    onPressed: () {
+                      controller.clear();
+                      searchDelegate.onClearSearch();
+                    },
+                  )
+                  : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -292,7 +280,10 @@ class _ViewModeToggle extends StatelessWidget {
       ),
       child: IconButton(
         onPressed: () {
-          final newMode = viewMode == AppBarViewMode.list ? AppBarViewMode.grid : AppBarViewMode.list;
+          final newMode =
+              viewMode == AppBarViewMode.list
+                  ? AppBarViewMode.grid
+                  : AppBarViewMode.list;
           viewModeDelegate.onViewModeChanged(newMode);
         },
         icon: AnimatedSwitcher(
@@ -303,9 +294,10 @@ class _ViewModeToggle extends StatelessWidget {
             color: PlantisColors.primary,
           ),
         ),
-        tooltip: viewMode == AppBarViewMode.list
-            ? 'Visualizar em grade'
-            : 'Visualizar em lista',
+        tooltip:
+            viewMode == AppBarViewMode.list
+                ? 'Visualizar em grade'
+                : 'Visualizar em lista',
       ),
     );
   }

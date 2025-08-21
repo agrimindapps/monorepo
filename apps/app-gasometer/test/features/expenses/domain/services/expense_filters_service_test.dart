@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../../../../lib/features/expenses/domain/entities/expense_entity.dart';
-import '../../../../../lib/features/expenses/domain/services/expense_filters_service.dart';
+import 'package:gasometer/features/expenses/domain/entities/expense_entity.dart';
+import 'package:gasometer/features/expenses/domain/services/expense_filters_service.dart';
 
 void main() {
   group('ExpenseFiltersService', () {

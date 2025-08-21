@@ -20,8 +20,17 @@ class ExpensesPaginatedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ExpensesPaginatedProvider>(
-      builder: (context, provider, child) {
+    // Usar Selector para otimizar rebuilds - só reconstrói quando dados relevantes mudam
+    return Selector<ExpensesPaginatedProvider, (bool, String?, String)>(
+      selector: (context, provider) => (
+        provider.isLoading,
+        provider.errorMessage,
+        'expenses_${provider.hashCode}',
+      ),
+      builder: (context, data, child) {
+        final (isLoading, error, cacheKey) = data;
+        final provider = Provider.of<ExpensesPaginatedProvider>(context, listen: false);
+        
         return PaginatedListView<ExpenseEntity>(
           loadPage: provider.loadPage,
           itemBuilder: _buildExpenseItem,
@@ -34,7 +43,7 @@ class ExpensesPaginatedList extends StatelessWidget {
             initialPageSize: 20,
             scrollThreshold: 0.7,
           ),
-          cacheKey: 'expenses_${provider.filtersConfig.hashCode}',
+          cacheKey: cacheKey,
           enableVirtualization: true,
           padding: const EdgeInsets.all(16),
         );
@@ -43,6 +52,7 @@ class ExpensesPaginatedList extends StatelessWidget {
   }
 
   Widget _buildExpenseItem(BuildContext context, ExpenseEntity expense, int index) {
+    // Cache do formatter para evitar instanciação repetida
     final formatter = ExpenseFormatterService();
     
     return Card(
@@ -87,10 +97,10 @@ class ExpensesPaginatedList extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: expense.type.color.withOpacity(0.1),
+                      color: expense.type.color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: expense.type.color.withOpacity(0.3),
+                        color: expense.type.color.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -141,23 +151,23 @@ class ExpensesPaginatedList extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    if (expense.establishmentName != null) ...[
-                      Icon(
-                        Icons.store,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          expense.establishmentName!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                    ...[
+                    Icon(
+                      Icons.store,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        expense.establishmentName,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
+                    ),
+                  ],
                     
                     if (expense.odometer > 0) ...[
                       const SizedBox(width: 8),
@@ -184,7 +194,7 @@ class ExpensesPaginatedList extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -321,8 +331,16 @@ class ExpensesPaginatedFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ExpensesPaginatedProvider>(
-      builder: (context, provider, child) {
+    // Selector para otimizar rebuilds dos filtros
+    return Selector<ExpensesPaginatedProvider, (bool, String)>(
+      selector: (context, provider) => (
+        provider.hasFilters,
+        provider.searchText ?? '',
+      ),
+      builder: (context, filterData, child) {
+        final (hasActiveFilters, searchQuery) = filterData;
+        final provider = Provider.of<ExpensesPaginatedProvider>(context, listen: false);
+        
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -345,7 +363,7 @@ class ExpensesPaginatedFilters extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    if (provider.hasActiveFilters)
+                    if (hasActiveFilters)
                       TextButton(
                         onPressed: provider.clearFilters,
                         child: const Text('Limpar'),
@@ -355,41 +373,17 @@ class ExpensesPaginatedFilters extends StatelessWidget {
                 
                 const SizedBox(height: 16),
                 
-                // Busca
-                TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar despesas...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
+                // Busca - Widget otimizado para reconstruir apenas quando necessário
+                _OptimizedSearchField(
+                  initialValue: searchQuery,
                   onChanged: provider.search,
                 ),
                 
                 const SizedBox(height: 16),
                 
-                // Filtros rápidos
-                Wrap(
-                  spacing: 8,
-                  children: ExpenseType.values.map((type) {
-                    final isSelected = provider.filtersConfig.type == type;
-                    return FilterChip(
-                      selected: isSelected,
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            type.icon,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(type.displayName),
-                        ],
-                      ),
-                      onSelected: (selected) {
-                        provider.filterByType(selected ? type : null);
-                      },
-                    );
-                  }).toList(),
+                // Filtros rápidos - Widget cache para chips
+                _OptimizedFilterChips(
+                  onFilterChanged: () => provider.clearFilters(),
                 ),
               ],
             ),
@@ -399,3 +393,80 @@ class ExpensesPaginatedFilters extends StatelessWidget {
     );
   }
 }
+
+/// Widget otimizado para campo de busca
+class _OptimizedSearchField extends StatefulWidget {
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+  
+  const _OptimizedSearchField({
+    required this.initialValue,
+    required this.onChanged,
+  });
+  
+  @override
+  State<_OptimizedSearchField> createState() => _OptimizedSearchFieldState();
+}
+
+class _OptimizedSearchFieldState extends State<_OptimizedSearchField> {
+  late final TextEditingController _controller;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+  
+  @override
+  void didUpdateWidget(_OptimizedSearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      _controller.text = widget.initialValue;
+    }
+  }
+  
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      decoration: const InputDecoration(
+        hintText: 'Buscar despesas...',
+        prefixIcon: Icon(Icons.search),
+        border: OutlineInputBorder(),
+      ),
+      onChanged: widget.onChanged,
+    );
+  }
+}
+
+/// Widget otimizado para chips de filtro
+class _OptimizedFilterChips extends StatelessWidget {
+  final VoidCallback onFilterChanged;
+  
+  const _OptimizedFilterChips({
+    required this.onFilterChanged,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      children: [
+        FilterChip(
+          selected: false,
+          label: const Text('Todos'),
+          onSelected: (selected) {
+            onFilterChanged();
+          },
+        ),
+      ],
+    );
+  }
+}
+

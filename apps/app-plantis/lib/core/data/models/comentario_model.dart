@@ -10,25 +10,37 @@ part 'comentario_model.g.dart';
 class ComentarioModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
-  @HiveField(0) final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
   @override
-  @HiveField(4) final bool isDirty;
+  @HiveField(4)
+  final bool isDirty;
   @override
-  @HiveField(5) final bool isDeleted;
+  @HiveField(5)
+  final bool isDeleted;
   @override
-  @HiveField(6) final int version;
+  @HiveField(6)
+  final int version;
   @override
-  @HiveField(7) final String? userId;
+  @HiveField(7)
+  final String? userId;
   @override
-  @HiveField(8) final String? moduleName;
+  @HiveField(8)
+  final String? moduleName;
 
   // Comentario specific fields
-  @HiveField(10) final String conteudo;
-  @HiveField(11) final DateTime? dataAtualizacao;
-  @HiveField(12) final DateTime? dataCriacao;
+  @HiveField(10)
+  final String conteudo;
+  @HiveField(11)
+  final DateTime? dataAtualizacao;
+  @HiveField(12)
+  final DateTime? dataCriacao;
 
   ComentarioModel({
     required this.id,
@@ -44,16 +56,25 @@ class ComentarioModel extends BaseSyncModel {
     this.dataAtualizacao,
     this.dataCriacao,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         lastSyncAt:
+             lastSyncAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+                 : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
   @override
   String get collectionName => 'comentarios';
@@ -68,7 +89,7 @@ class ComentarioModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final comentarioId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return ComentarioModel(
       id: comentarioId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -84,7 +105,7 @@ class ComentarioModel extends BaseSyncModel {
   /// Create from Hive map
   factory ComentarioModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return ComentarioModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -96,24 +117,25 @@ class ComentarioModel extends BaseSyncModel {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       conteudo: map['conteudo']?.toString() ?? '',
-      dataAtualizacao: map['dataAtualizacao'] != null
-          ? DateTime.parse(map['dataAtualizacao'])
-          : null,
-      dataCriacao: map['dataCriacao'] != null
-          ? DateTime.parse(map['dataCriacao'])
-          : null,
+      dataAtualizacao:
+          map['dataAtualizacao'] != null
+              ? DateTime.parse(map['dataAtualizacao'])
+              : null,
+      dataCriacao:
+          map['dataCriacao'] != null
+              ? DateTime.parse(map['dataCriacao'])
+              : null,
     );
   }
 
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'conteudo': conteudo,
-        'dataAtualizacao': dataAtualizacao?.toIso8601String(),
-        'dataCriacao': dataCriacao?.toIso8601String(),
-      });
+    return super.toHiveMap()..addAll({
+      'conteudo': conteudo,
+      'dataAtualizacao': dataAtualizacao?.toIso8601String(),
+      'dataCriacao': dataCriacao?.toIso8601String(),
+    });
   }
 
   /// Convert to Firebase map
@@ -132,7 +154,7 @@ class ComentarioModel extends BaseSyncModel {
   factory ComentarioModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return ComentarioModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -144,12 +166,14 @@ class ComentarioModel extends BaseSyncModel {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       conteudo: map['conteudo']?.toString() ?? '',
-      dataAtualizacao: map['data_atualizacao'] != null
-          ? DateTime.parse(map['data_atualizacao'])
-          : null,
-      dataCriacao: map['data_criacao'] != null
-          ? DateTime.parse(map['data_criacao'])
-          : null,
+      dataAtualizacao:
+          map['data_atualizacao'] != null
+              ? DateTime.parse(map['data_atualizacao'])
+              : null,
+      dataCriacao:
+          map['data_criacao'] != null
+              ? DateTime.parse(map['data_criacao'])
+              : null,
     );
   }
 
@@ -189,8 +213,10 @@ class ComentarioModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();
-  factory ComentarioModel.fromMap(Map<String, dynamic> map) => ComentarioModel.fromHiveMap(map);
-  factory ComentarioModel.fromJson(Map<String, dynamic> json) => ComentarioModel.fromHiveMap(json);
+  factory ComentarioModel.fromMap(Map<String, dynamic> map) =>
+      ComentarioModel.fromHiveMap(map);
+  factory ComentarioModel.fromJson(Map<String, dynamic> json) =>
+      ComentarioModel.fromHiveMap(json);
 
   @override
   bool operator ==(Object other) {

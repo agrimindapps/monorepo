@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 /// Serviço para detectar a plataforma e fornecer configurações específicas
+@lazySingleton
 class PlatformService {
-  static const PlatformService _instance = PlatformService._internal();
-  factory PlatformService() => _instance;
-  const PlatformService._internal();
+  const PlatformService();
 
   /// Verifica se está executando em plataforma mobile (Android ou iOS)
   bool get isMobile => defaultTargetPlatform == TargetPlatform.android || 

@@ -8,6 +8,7 @@ class UserEntity extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isActive;
+  final bool _emailVerified;
 
   const UserEntity({
     required this.id,
@@ -17,7 +18,8 @@ class UserEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.isActive = true,
-  });
+    bool emailVerified = false,
+  }) : _emailVerified = emailVerified;
 
   UserEntity copyWith({
     String? id,
@@ -27,6 +29,7 @@ class UserEntity extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
+    bool? emailVerified,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class UserEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,
+      emailVerified: emailVerified ?? _emailVerified,
     );
   }
 
@@ -48,5 +52,10 @@ class UserEntity extends Equatable {
         createdAt,
         updatedAt,
         isActive,
+        _emailVerified,
       ];
+
+  bool get isAnonymous => id == 'anonymous';
+  bool get emailVerified => _emailVerified;
+  bool get isEmailVerified => _emailVerified;
 }

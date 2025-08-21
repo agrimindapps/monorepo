@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'dart:async';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
+import '../../domain/entities/notification_stats.dart';
 
 /// Notification service específico do app Task Manager
 class TaskManagerNotificationService {
@@ -492,15 +493,19 @@ class TaskManagerNotificationService {
         n.id >= taskDeadlineBaseId && n.id < taskDeadlineBaseId + 10000).length;
       
       return NotificationStats(
+        totalNotifications: pending.length + active.length,
+        unreadNotifications: pending.length,
+        areNotificationsEnabled: true,
         totalPending: pending.length,
-        totalActive: active.length,
         taskReminders: taskReminders,
         taskDeadlines: taskDeadlines,
       );
     } catch (e) {
       return const NotificationStats(
+        totalNotifications: 0,
+        unreadNotifications: 0,
+        areNotificationsEnabled: false,
         totalPending: 0,
-        totalActive: 0,
         taskReminders: 0,
         taskDeadlines: 0,
       );
@@ -544,17 +549,3 @@ class TaskManagerNotificationService {
       _notificationRepository.generateNotificationId(identifier);
 }
 
-/// Classe para estatísticas de notificações
-class NotificationStats {
-  final int totalPending;
-  final int totalActive;
-  final int taskReminders;
-  final int taskDeadlines;
-
-  const NotificationStats({
-    required this.totalPending,
-    required this.totalActive,
-    required this.taskReminders,
-    required this.taskDeadlines,
-  });
-}

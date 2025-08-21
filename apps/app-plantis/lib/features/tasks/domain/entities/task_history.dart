@@ -115,12 +115,15 @@ class TaskHistory extends Equatable {
         (priority) => priority.key == map['priority'],
         orElse: () => task_entity.TaskPriority.medium,
       ),
-      originalDueDate: DateTime.fromMillisecondsSinceEpoch(map['originalDueDate'] ?? 0),
+      originalDueDate: DateTime.fromMillisecondsSinceEpoch(
+        map['originalDueDate'] ?? 0,
+      ),
       completedAt: DateTime.fromMillisecondsSinceEpoch(map['completedAt'] ?? 0),
       userId: map['userId'] ?? '',
       notes: map['notes'],
       photosUrls: List<String>.from(map['photosUrls'] ?? []),
-      timeSpent: map['timeSpent'] != null ? Duration(minutes: map['timeSpent']) : null,
+      timeSpent:
+          map['timeSpent'] != null ? Duration(minutes: map['timeSpent']) : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
@@ -145,12 +148,15 @@ class TaskHistory extends Equatable {
         (priority) => priority.key == map['priority'],
         orElse: () => task_entity.TaskPriority.medium,
       ),
-      originalDueDate: DateTime.fromMillisecondsSinceEpoch(map['originalDueDate'] ?? 0),
+      originalDueDate: DateTime.fromMillisecondsSinceEpoch(
+        map['originalDueDate'] ?? 0,
+      ),
       completedAt: DateTime.fromMillisecondsSinceEpoch(map['completedAt'] ?? 0),
       userId: map['userId'] ?? '',
       notes: map['notes'],
       photosUrls: List<String>.from(map['photosUrls'] ?? []),
-      timeSpent: map['timeSpent'] != null ? Duration(minutes: map['timeSpent']) : null,
+      timeSpent:
+          map['timeSpent'] != null ? Duration(minutes: map['timeSpent']) : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
@@ -189,8 +195,8 @@ class TaskHistory extends Equatable {
   }
 
   // Propriedades computadas
-  bool get wasCompletedOnTime => 
-      completedAt.isBefore(originalDueDate) || 
+  bool get wasCompletedOnTime =>
+      completedAt.isBefore(originalDueDate) ||
       completedAt.isAtSameMomentAs(originalDueDate);
 
   Duration get delayFromDueDate => completedAt.difference(originalDueDate);

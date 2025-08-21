@@ -7,30 +7,30 @@ class PlantListTile extends StatelessWidget {
   final Plant plant;
   final VoidCallback? onTap;
 
-  const PlantListTile({
-    super.key,
-    required this.plant,
-    this.onTap,
-  });
+  const PlantListTile({super.key, required this.plant, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: isDark 
-          ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
-          : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border:
+            isDark
+                ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
+                : Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                ),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.08),
+            color:
+                isDark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.08),
             blurRadius: isDark ? 8 : 12,
             offset: const Offset(0, 4),
             spreadRadius: isDark ? 0 : 2,
@@ -48,9 +48,9 @@ class PlantListTile extends StatelessWidget {
               children: [
                 // Avatar/Imagem da planta
                 _buildPlantAvatar(context),
-                
+
                 const SizedBox(width: 16),
-                
+
                 // Conteúdo principal
                 Expanded(
                   child: Column(
@@ -64,7 +64,10 @@ class PlantListTile extends StatelessWidget {
                               plant.displayName,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                                color:
+                                    isDark
+                                        ? Colors.white
+                                        : theme.colorScheme.onSurface,
                                 fontSize: 18,
                               ),
                               maxLines: 1,
@@ -75,9 +78,12 @@ class PlantListTile extends StatelessWidget {
                             onPressed: () => _showPlantMenu(context),
                             icon: Icon(
                               Icons.more_vert,
-                              color: isDark 
-                                ? Colors.white.withValues(alpha: 0.7)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color:
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
                               size: 20,
                             ),
                             constraints: const BoxConstraints(),
@@ -85,18 +91,21 @@ class PlantListTile extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       // Subtítulo com espécie e localização
                       Row(
                         children: [
                           Text(
                             plant.displaySpecies,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark 
-                                ? Colors.white.withValues(alpha: 0.7)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color:
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
                               fontSize: 14,
                             ),
                             maxLines: 1,
@@ -106,25 +115,31 @@ class PlantListTile extends StatelessWidget {
                           Icon(
                             Icons.location_on,
                             size: 14,
-                            color: isDark 
-                              ? Colors.white.withValues(alpha: 0.5)
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color:
+                                isDark
+                                    ? Colors.white.withValues(alpha: 0.5)
+                                    : theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
                           ),
                           const SizedBox(width: 2),
                           Text(
                             'Sala de Estar', // TODO: Resolver nome do espaço
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark 
-                                ? Colors.white.withValues(alpha: 0.7)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color:
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
                               fontSize: 14,
                             ),
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 12),
-                      
+
                       // Badge de cuidados pendentes
                       _buildCareStatus(context),
                     ],
@@ -140,7 +155,7 @@ class PlantListTile extends StatelessWidget {
 
   Widget _buildPlantAvatar(BuildContext context) {
     const size = 60.0;
-    
+
     if (plant.hasImage) {
       try {
         final imageBytes = base64Decode(plant.imageBase64!);
@@ -151,14 +166,15 @@ class PlantListTile extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildPlaceholder(size),
+            errorBuilder:
+                (context, error, stackTrace) => _buildPlaceholder(size),
           ),
         );
       } catch (e) {
         return _buildPlaceholder(size);
       }
     }
-    
+
     return _buildPlaceholder(size);
   }
 
@@ -167,121 +183,29 @@ class PlantListTile extends StatelessWidget {
       builder: (context) {
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
-        
+
         return Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: isDark 
-              ? const Color(0xFF2C2C2E)
-              : theme.colorScheme.primary.withValues(alpha: 0.1),
-            border: isDark 
-              ? Border.all(color: const Color(0xFF3A3A3C))
-              : null,
+            color:
+                isDark
+                    ? const Color(0xFF2C2C2E)
+                    : theme.colorScheme.primary.withValues(alpha: 0.1),
+            border: isDark ? Border.all(color: const Color(0xFF3A3A3C)) : null,
           ),
           child: Icon(
             Icons.eco,
             size: 28,
-            color: isDark 
-              ? const Color(0xFF55D85A)
-              : theme.colorScheme.primary,
+            color: isDark ? const Color(0xFF55D85A) : theme.colorScheme.primary,
           ),
         );
       },
     );
   }
 
-  Widget _buildPlantInfo(BuildContext context) {
-    final theme = Theme.of(context);
-    final items = <Widget>[];
-    
-    // Espaço/localização
-    if (plant.spaceId != null) {
-      items.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.location_on,
-              size: 12,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'Espaço', // TODO: Resolver nome do espaço
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    // Última rega (se tiver configuração)
-    if (plant.config?.wateringIntervalDays != null) {
-      final lastWatering = plant.updatedAt ?? plant.createdAt;
-      if (lastWatering != null) {
-        final daysSinceWatering = DateTime.now().difference(lastWatering).inDays;
-        items.add(
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.water_drop,
-                size: 12,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                daysSinceWatering == 0 
-                    ? 'Hoje' 
-                    : daysSinceWatering == 1
-                        ? 'Ontem'
-                        : '$daysSinceWatering dias',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-    
-    if (items.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    
-    return Wrap(
-      spacing: 12,
-      children: items,
-    );
-  }
 
-  Widget _buildCareIndicator(BuildContext context) {
-    final careStatus = _getCareStatus();
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: careStatus.color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: careStatus.color.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Icon(
-        careStatus.icon,
-        size: 16,
-        color: careStatus.color,
-      ),
-    );
-  }
 
   CareStatusInfo _getCareStatus() {
     if (plant.config?.wateringIntervalDays == null) {
@@ -324,32 +248,24 @@ class PlantListTile extends StatelessWidget {
     }
   }
 
-  String _getAgeText() {
-    final age = plant.ageInDays;
-    if (age == 0) return 'Nova';
-    if (age == 1) return '1d';
-    if (age < 30) return '${age}d';
-    if (age < 365) return '${(age / 30).round()}m';
-    return '${(age / 365).round()}a';
-  }
 
   Widget _buildCareStatus(BuildContext context) {
     final theme = Theme.of(context);
     final careInfo = _getCareStatus();
-    
+
     // Calcular número de cuidados pendentes
     int pendingCares = 0;
     if (careInfo.status == CareStatus.needsWater) {
       pendingCares++;
     }
-    
+
     // Adicionar outros tipos de cuidados se necessário
     pendingCares += _getOtherPendingCares();
-    
+
     if (pendingCares == 0) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -363,16 +279,12 @@ class PlantListTile extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.schedule,
-            size: 14,
-            color: const Color(0xFFFF9500),
-          ),
+          Icon(Icons.schedule, size: 14, color: const Color(0xFFFF9500)),
           const SizedBox(width: 6),
           Text(
-            pendingCares == 1 
-              ? '$pendingCares cuidado pendente'
-              : '$pendingCares cuidados pendentes',
+            pendingCares == 1
+                ? '$pendingCares cuidado pendente'
+                : '$pendingCares cuidados pendentes',
             style: theme.textTheme.bodySmall?.copyWith(
               color: const Color(0xFFFF9500),
               fontSize: 12,
@@ -397,7 +309,7 @@ class PlantListTile extends StatelessWidget {
       builder: (context) {
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
-        
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -434,7 +346,10 @@ class PlantListTile extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Excluir planta', style: TextStyle(color: Colors.red)),
+                title: const Text(
+                  'Excluir planta',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Confirmar exclusão
@@ -449,12 +364,7 @@ class PlantListTile extends StatelessWidget {
   }
 }
 
-enum CareStatus {
-  needsWater,
-  soonWater,
-  good,
-  unknown,
-}
+enum CareStatus { needsWater, soonWater, good, unknown }
 
 class CareStatusInfo {
   final CareStatus status;

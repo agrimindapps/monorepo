@@ -44,8 +44,8 @@ class ConflictHistoryService {
   /// Obtém os últimos N conflitos registrados
   List<ConflictHistoryModel> getRecentConflicts(int limit) {
     final allConflicts = getAllConflicts();
-    allConflicts.sort((a, b) => 
-      (b.createdAtMs ?? 0).compareTo(a.createdAtMs ?? 0)
+    allConflicts.sort(
+      (a, b) => (b.createdAtMs ?? 0).compareTo(a.createdAtMs ?? 0),
     );
     return allConflicts.take(limit).toList();
   }

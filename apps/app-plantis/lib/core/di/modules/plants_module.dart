@@ -20,11 +20,11 @@ class PlantsDIModule {
     sl.registerLazySingleton<PlantsLocalDatasource>(
       () => PlantsLocalDatasourceImpl(),
     );
-    
+
     sl.registerLazySingleton<PlantsRemoteDatasource>(
       () => PlantsRemoteDatasourceImpl(firestore: sl()),
     );
-    
+
     // Repository
     sl.registerLazySingleton<PlantsRepository>(
       () => PlantsRepositoryImpl(
@@ -34,50 +34,51 @@ class PlantsDIModule {
         authService: sl(),
       ),
     );
-    
+
     // Use cases
     sl.registerLazySingleton(() => GetPlantsUseCase(sl()));
     sl.registerLazySingleton(() => GetPlantByIdUseCase(sl()));
     sl.registerLazySingleton(() => SearchPlantsUseCase(sl()));
-    sl.registerLazySingleton(() => AddPlantUseCase(
-          sl(),
-          generateInitialTasksUseCase: sl(),
-        ));
+    sl.registerLazySingleton(
+      () => AddPlantUseCase(sl(), generateInitialTasksUseCase: sl()),
+    );
     sl.registerLazySingleton(() => UpdatePlantUseCase(sl()));
     sl.registerLazySingleton(() => DeletePlantUseCase(sl()));
-    
+
     // Providers
-    sl.registerFactory(() => PlantsProvider(
-      getPlantsUseCase: sl(),
-      getPlantByIdUseCase: sl(),
-      searchPlantsUseCase: sl(),
-      addPlantUseCase: sl(),
-      updatePlantUseCase: sl(),
-      deletePlantUseCase: sl(),
-    ));
-    
-    sl.registerFactory(() => PlantsListProvider(
-      plantsRepository: sl(),
-    ));
-    
-    sl.registerFactory(() => PlantDetailsProvider(
-      getPlantByIdUseCase: sl(),
-      deletePlantUseCase: sl(),
-    ));
-    
-    sl.registerFactory(() => PlantFormProvider(
-      getPlantByIdUseCase: sl(),
-      addPlantUseCase: sl(),
-      updatePlantUseCase: sl(),
-      imageService: sl(),
-    ));
-    
+    sl.registerFactory(
+      () => PlantsProvider(
+        getPlantsUseCase: sl(),
+        getPlantByIdUseCase: sl(),
+        searchPlantsUseCase: sl(),
+        addPlantUseCase: sl(),
+        updatePlantUseCase: sl(),
+        deletePlantUseCase: sl(),
+      ),
+    );
+
+    sl.registerFactory(() => PlantsListProvider(plantsRepository: sl()));
+
+    sl.registerFactory(
+      () => PlantDetailsProvider(
+        getPlantByIdUseCase: sl(),
+        deletePlantUseCase: sl(),
+      ),
+    );
+
+    sl.registerFactory(
+      () => PlantFormProvider(
+        getPlantByIdUseCase: sl(),
+        addPlantUseCase: sl(),
+        updatePlantUseCase: sl(),
+        imageService: sl(),
+      ),
+    );
+
     // Task generation service
     sl.registerLazySingleton(() => TaskGenerationService());
-    
+
     // Plant task provider
-    sl.registerFactory(() => PlantTaskProvider(
-      taskGenerationService: sl(),
-    ));
+    sl.registerFactory(() => PlantTaskProvider(taskGenerationService: sl()));
   }
 }

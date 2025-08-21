@@ -197,4 +197,17 @@ class TaskManagerAnalyticsService {
         oldValue: oldValue,
         newValue: newValue,
       );
+
+  Future<void> logPurchase({
+    required String productId,
+    required double price,
+    String? currency,
+  }) async {
+    await _analyticsRepository.logEvent('purchase', parameters: {
+      'product_id': productId,
+      'price': price,
+      'currency': currency ?? 'BRL',
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
 }

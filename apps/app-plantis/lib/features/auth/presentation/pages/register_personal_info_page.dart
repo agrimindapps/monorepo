@@ -6,21 +6,22 @@ class RegisterPersonalInfoPage extends StatefulWidget {
   const RegisterPersonalInfoPage({super.key});
 
   @override
-  State<RegisterPersonalInfoPage> createState() => _RegisterPersonalInfoPageState();
+  State<RegisterPersonalInfoPage> createState() =>
+      _RegisterPersonalInfoPageState();
 }
 
 class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  
+
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     super.dispose();
   }
-  
+
   void _handleNext() {
     if (_formKey.currentState!.validate()) {
       // Check if email exists (simulate check)
@@ -28,111 +29,100 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
         _showEmailAlreadyExistsDialog();
       } else {
         // Navigate to password page with data
-        context.go('/register/password', extra: {
-          'name': _nameController.text,
-          'email': _emailController.text,
-        });
+        context.go(
+          '/register/password',
+          extra: {'name': _nameController.text, 'email': _emailController.text},
+        );
       }
     }
   }
-  
+
   void _showEmailAlreadyExistsDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
+      builder:
+          (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.email,
-                    color: Colors.orange,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Email já cadastrado',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Este email já possui uma conta.',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Você gostaria de fazer login ou usar outro email?',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Clear email field to allow user to enter different email
-                        _emailController.clear();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: PlantisColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Usar outro email',
+                  Row(
+                    children: [
+                      Icon(Icons.email, color: Colors.orange, size: 24),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Email já cadastrado',
                         style: TextStyle(
-                          color: PlantisColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        context.go('/login');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: PlantisColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Este email já possui uma conta.',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Você gostaria de fazer login ou usar outro email?',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            // Clear email field to allow user to enter different email
+                            _emailController.clear();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: PlantisColors.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Usar outro email',
+                            style: TextStyle(color: PlantisColors.primary),
+                          ),
                         ),
                       ),
-                      child: const Text('Fazer Login'),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            context.go('/login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: PlantisColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Fazer Login'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -165,15 +155,13 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.eco,
-                        size: 32,
-                        color: PlantisColors.primary,
-                      ),
+                      Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
                         'PlantApp',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
                           color: PlantisColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -188,7 +176,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Tab navigation
                   Row(
                     children: [
@@ -205,10 +193,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Container(
-                                height: 3,
-                                color: Colors.grey.shade300,
-                              ),
+                              Container(height: 3, color: Colors.grey.shade300),
                             ],
                           ),
                         ),
@@ -239,7 +224,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Progress indicator (step 2/3)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -270,7 +255,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                     ],
                   ),
                   const SizedBox(height: 48),
-                  
+
                   // Form
                   Form(
                     key: _formKey,
@@ -303,13 +288,17 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -331,7 +320,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                           },
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Email field
                         TextFormField(
                           controller: _emailController,
@@ -350,13 +339,17 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -371,14 +364,16 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             if (value == null || value.isEmpty) {
                               return 'Por favor, insira seu email';
                             }
-                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            if (!RegExp(
+                              r'^[^@]+@[^@]+\.[^@]+',
+                            ).hasMatch(value)) {
                               return 'Por favor, insira um email válido';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 48),
-                        
+
                         // Navigation buttons
                         Row(
                           children: [
@@ -386,11 +381,15 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                               child: OutlinedButton(
                                 onPressed: () => context.pop(),
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: PlantisColors.primary),
+                                  side: BorderSide(
+                                    color: PlantisColors.primary,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 child: Text(
                                   'Voltar',
@@ -412,7 +411,9 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 child: const Text(
                                   'Próximo',
@@ -426,7 +427,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Terms text
                         Center(
                           child: Text(

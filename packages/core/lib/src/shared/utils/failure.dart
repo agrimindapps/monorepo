@@ -29,108 +29,108 @@ abstract class Failure extends Equatable {
 class ServerFailure extends Failure {
   const ServerFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de cache/storage local
 class CacheFailure extends Failure {
   const CacheFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de validação de dados
 class ValidationFailure extends Failure {
   const ValidationFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de autenticação
 class AuthFailure extends Failure {
   const AuthFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de permissão/autorização
 class PermissionFailure extends Failure {
   const PermissionFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de conexão de rede
 class NetworkFailure extends Failure {
   const NetworkFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de parsing/conversão de dados
 class ParseFailure extends Failure {
   const ParseFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha genérica/desconhecida
 class UnknownFailure extends Failure {
   const UnknownFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha específica do Firebase
 class FirebaseFailure extends Failure {
   const FirebaseFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha específica do RevenueCat
 class RevenueCatFailure extends Failure {
   const RevenueCatFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de sincronização
 class SyncFailure extends Failure {
   const SyncFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Falha de recurso não encontrado
 class NotFoundFailure extends Failure {
   const NotFoundFailure(
     String message, {
-    String? code,
-    dynamic details,
-  }) : super(message: message, code: code, details: details);
+    super.code,
+    super.details,
+  }) : super(message: message);
 }
 
 /// Extensions para facilitar o uso

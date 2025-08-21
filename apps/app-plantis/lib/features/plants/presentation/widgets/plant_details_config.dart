@@ -4,67 +4,64 @@ import '../../domain/entities/plant.dart';
 class PlantDetailsConfig extends StatelessWidget {
   final Plant plant;
 
-  const PlantDetailsConfig({
-    super.key,
-    required this.plant,
-  });
+  const PlantDetailsConfig({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final config = plant.config;
-    
+
     if (config == null) {
       return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Configurações',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Configurações',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.settings_outlined,
+                  size: 48,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.settings_outlined,
-                    size: 48,
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhuma configuração definida',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Configure os cuidados da planta para receber lembretes',
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Nenhuma configuração definida',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Configure os cuidados da planta para receber lembretes',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
+          ),
+        ],
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,7 +152,7 @@ class PlantDetailsConfig extends StatelessWidget {
     required Color color,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Container(
@@ -164,11 +161,7 @@ class PlantDetailsConfig extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: color,
-          ),
+          child: Icon(icon, size: 20, color: color),
         ),
         const SizedBox(width: 16),
         Expanded(

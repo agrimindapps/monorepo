@@ -214,7 +214,7 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
 
     if (stackTrace != null) {
       parameters['stack_trace'] = stackTrace.length > 100
-          ? stackTrace.substring(0, 100) + '...'
+          ? '${stackTrace.substring(0, 100)}...'
           : stackTrace;
     }
 
@@ -270,7 +270,7 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
       parameters: {
         'feedback_type': type,
         'feedback_content': content.length > 100
-            ? content.substring(0, 100) + '...'
+            ? '${content.substring(0, 100)}...'
             : content,
         if (rating != null) 'rating': rating,
         'timestamp': DateTime.now().millisecondsSinceEpoch,

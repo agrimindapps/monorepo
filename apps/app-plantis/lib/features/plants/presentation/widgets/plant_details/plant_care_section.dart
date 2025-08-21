@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/plant.dart';
-import '../../../../../core/theme/colors.dart';
 
 /// Widget responsável por exibir as informações de cuidados da planta
 class PlantCareSection extends StatelessWidget {
   final Plant plant;
 
-  const PlantCareSection({
-    super.key,
-    required this.plant,
-  });
+  const PlantCareSection({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
@@ -29,25 +25,24 @@ class PlantCareSection extends StatelessWidget {
 
   Widget _buildEmptyCareState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
           Icon(
             Icons.spa_outlined,
             size: 64,
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -81,50 +76,56 @@ class PlantCareSection extends StatelessWidget {
   Widget _buildCareSchedule(BuildContext context) {
     final theme = Theme.of(context);
     final config = plant.config!;
-    
+
     final careItems = <Map<String, dynamic>>[
-      if (config.hasWateringSchedule) {
-        'icon': Icons.water_drop,
-        'title': 'Rega',
-        'interval': '${config.wateringIntervalDays} dias',
-        'color': Colors.blue,
-        'description': 'Regue a planta regularmente',
-      },
-      if (config.hasFertilizingSchedule) {
-        'icon': Icons.grass,
-        'title': 'Adubação',
-        'interval': '${config.fertilizingIntervalDays} dias',
-        'color': Colors.green,
-        'description': 'Aplique fertilizante',
-      },
-      if (config.hasPruningSchedule) {
-        'icon': Icons.content_cut,
-        'title': 'Poda',
-        'interval': '${config.pruningIntervalDays} dias',
-        'color': Colors.orange,
-        'description': 'Pode folhas e galhos',
-      },
-      if (config.hasSunlightCheckSchedule) {
-        'icon': Icons.wb_sunny,
-        'title': 'Verificar luz',
-        'interval': '${config.sunlightCheckIntervalDays} dias',
-        'color': Colors.amber,
-        'description': 'Verifique a exposição à luz',
-      },
-      if (config.hasPestInspectionSchedule) {
-        'icon': Icons.bug_report,
-        'title': 'Inspeção de pragas',
-        'interval': '${config.pestInspectionIntervalDays} dias',
-        'color': Colors.red,
-        'description': 'Inspecione por pragas e doenças',
-      },
-      if (config.hasReplantingSchedule) {
-        'icon': Icons.change_circle,
-        'title': 'Replantio',
-        'interval': '${config.replantingIntervalDays} dias',
-        'color': Colors.purple,
-        'description': 'Replante em vaso maior',
-      },
+      if (config.hasWateringSchedule)
+        {
+          'icon': Icons.water_drop,
+          'title': 'Rega',
+          'interval': '${config.wateringIntervalDays} dias',
+          'color': Colors.blue,
+          'description': 'Regue a planta regularmente',
+        },
+      if (config.hasFertilizingSchedule)
+        {
+          'icon': Icons.grass,
+          'title': 'Adubação',
+          'interval': '${config.fertilizingIntervalDays} dias',
+          'color': Colors.green,
+          'description': 'Aplique fertilizante',
+        },
+      if (config.hasPruningSchedule)
+        {
+          'icon': Icons.content_cut,
+          'title': 'Poda',
+          'interval': '${config.pruningIntervalDays} dias',
+          'color': Colors.orange,
+          'description': 'Pode folhas e galhos',
+        },
+      if (config.hasSunlightCheckSchedule)
+        {
+          'icon': Icons.wb_sunny,
+          'title': 'Verificar luz',
+          'interval': '${config.sunlightCheckIntervalDays} dias',
+          'color': Colors.amber,
+          'description': 'Verifique a exposição à luz',
+        },
+      if (config.hasPestInspectionSchedule)
+        {
+          'icon': Icons.bug_report,
+          'title': 'Inspeção de pragas',
+          'interval': '${config.pestInspectionIntervalDays} dias',
+          'color': Colors.red,
+          'description': 'Inspecione por pragas e doenças',
+        },
+      if (config.hasReplantingSchedule)
+        {
+          'icon': Icons.change_circle,
+          'title': 'Replantio',
+          'interval': '${config.replantingIntervalDays} dias',
+          'color': Colors.purple,
+          'description': 'Replante em vaso maior',
+        },
     ];
 
     if (careItems.isEmpty) {
@@ -142,10 +143,12 @@ class PlantCareSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        ...careItems.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildCareItem(context, item),
-        )),
+        ...careItems.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildCareItem(context, item),
+          ),
+        ),
       ],
     );
   }
@@ -153,20 +156,19 @@ class PlantCareSection extends StatelessWidget {
   Widget _buildCareItem(BuildContext context, Map<String, dynamic> item) {
     final theme = Theme.of(context);
     final color = item['color'] as Color;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -177,14 +179,10 @@ class PlantCareSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              item['icon'] as IconData,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(item['icon'] as IconData, color: color, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -211,7 +209,7 @@ class PlantCareSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -230,38 +228,43 @@ class PlantCareSection extends StatelessWidget {
   Widget _buildCareRequirements(BuildContext context) {
     final theme = Theme.of(context);
     final config = plant.config!;
-    
+
     final requirements = <Map<String, dynamic>>[
-      if (config.lightRequirement != null) {
-        'icon': Icons.wb_sunny_outlined,
-        'title': 'Necessidade de luz',
-        'value': _getLightRequirementText(config.lightRequirement),
-        'color': Colors.amber,
-      },
-      if (config.waterAmount != null) {
-        'icon': Icons.water_drop_outlined,
-        'title': 'Quantidade de água',
-        'value': _getWaterAmountText(config.waterAmount),
-        'color': Colors.blue,
-      },
-      if (config.soilType != null) {
-        'icon': Icons.landscape_outlined,
-        'title': 'Tipo de solo',
-        'value': config.soilType!,
-        'color': Colors.brown,
-      },
-      if (config.idealTemperature != null) {
-        'icon': Icons.thermostat_outlined,
-        'title': 'Temperatura ideal',
-        'value': '${config.idealTemperature}°C',
-        'color': Colors.red,
-      },
-      if (config.idealHumidity != null) {
-        'icon': Icons.opacity_outlined,
-        'title': 'Umidade ideal',
-        'value': '${config.idealHumidity}%',
-        'color': Colors.cyan,
-      },
+      if (config.lightRequirement != null)
+        {
+          'icon': Icons.wb_sunny_outlined,
+          'title': 'Necessidade de luz',
+          'value': _getLightRequirementText(config.lightRequirement),
+          'color': Colors.amber,
+        },
+      if (config.waterAmount != null)
+        {
+          'icon': Icons.water_drop_outlined,
+          'title': 'Quantidade de água',
+          'value': _getWaterAmountText(config.waterAmount),
+          'color': Colors.blue,
+        },
+      if (config.soilType != null)
+        {
+          'icon': Icons.landscape_outlined,
+          'title': 'Tipo de solo',
+          'value': config.soilType!,
+          'color': Colors.brown,
+        },
+      if (config.idealTemperature != null)
+        {
+          'icon': Icons.thermostat_outlined,
+          'title': 'Temperatura ideal',
+          'value': '${config.idealTemperature}°C',
+          'color': Colors.red,
+        },
+      if (config.idealHumidity != null)
+        {
+          'icon': Icons.opacity_outlined,
+          'title': 'Umidade ideal',
+          'value': '${config.idealHumidity}%',
+          'color': Colors.cyan,
+        },
     ];
 
     if (requirements.isEmpty) {
@@ -282,7 +285,10 @@ class PlantCareSection extends StatelessWidget {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: requirements.map((req) => _buildRequirementChip(context, req)).toList(),
+          children:
+              requirements
+                  .map((req) => _buildRequirementChip(context, req))
+                  .toList(),
         ),
       ],
     );
@@ -291,24 +297,18 @@ class PlantCareSection extends StatelessWidget {
   Widget _buildRequirementChip(BuildContext context, Map<String, dynamic> req) {
     final theme = Theme.of(context);
     final color = req['color'] as Color;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            req['icon'] as IconData,
-            size: 18,
-            color: color,
-          ),
+          Icon(req['icon'] as IconData, size: 18, color: color),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

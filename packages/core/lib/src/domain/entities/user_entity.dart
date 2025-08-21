@@ -1,24 +1,19 @@
-import 'package:equatable/equatable.dart';
 import 'base_entity.dart';
 
 /// Entidade do usuário compartilhada entre os apps
 /// Representa dados básicos de um usuário logado no sistema
 class UserEntity extends BaseEntity {
   const UserEntity({
-    required String id,
+    required super.id,
     required this.email,
     required this.displayName,
     this.photoUrl,
     this.isEmailVerified = false,
     this.lastLoginAt,
     this.provider = AuthProvider.email,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-        );
+    super.createdAt,
+    super.updatedAt,
+  });
 
   /// Email do usuário
   final String email;

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../../lib/core/cache/cache_manager.dart';
+import 'package:gasometer/core/cache/cache_manager.dart';
 
 void main() {
   group('MemoryCacheManager', () {

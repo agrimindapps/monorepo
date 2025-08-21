@@ -40,15 +40,19 @@ class TasksModule {
     sl.registerLazySingleton(() => AddTaskUseCase(sl()));
     sl.registerLazySingleton(() => UpdateTaskUseCase(sl()));
     sl.registerLazySingleton(() => CompleteTaskUseCase(sl()));
-    sl.registerLazySingleton(() => GenerateInitialTasksUseCase(
-          tasksRepository: sl(),
-          taskGenerationService: sl(),
-        ));
-    sl.registerLazySingleton(() => CompleteTaskWithRegenerationUseCase(
-          tasksRepository: sl(),
-          plantsRepository: sl(),
-          taskGenerationService: sl(),
-        ));
+    sl.registerLazySingleton(
+      () => GenerateInitialTasksUseCase(
+        tasksRepository: sl(),
+        taskGenerationService: sl(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => CompleteTaskWithRegenerationUseCase(
+        tasksRepository: sl(),
+        plantsRepository: sl(),
+        taskGenerationService: sl(),
+      ),
+    );
 
     // Repository
     sl.registerLazySingleton<TasksRepository>(

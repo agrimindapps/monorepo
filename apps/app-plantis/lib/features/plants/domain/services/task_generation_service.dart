@@ -9,10 +9,11 @@ class TaskGenerationService {
   List<PlantTask> generateTasksForPlant(Plant plant) {
     final tasks = <PlantTask>[];
     final config = plant.config;
-    
+
     if (config == null) return tasks;
 
-    final plantingDate = plant.plantingDate ?? plant.createdAt ?? DateTime.now();
+    final plantingDate =
+        plant.plantingDate ?? plant.createdAt ?? DateTime.now();
     final now = DateTime.now();
 
     // Generate watering tasks
@@ -92,7 +93,8 @@ class TaskGenerationService {
 
   /// Generates the next task for a completed task
   PlantTask generateNextTask(PlantTask completedTask) {
-    final nextScheduledDate = completedTask.nextScheduledDate ?? 
+    final nextScheduledDate =
+        completedTask.nextScheduledDate ??
         DateTime.now().add(Duration(days: completedTask.intervalDays));
 
     return PlantTask(
@@ -124,17 +126,13 @@ class TaskGenerationService {
 
   /// Gets overdue tasks
   List<PlantTask> getOverdueTasks(List<PlantTask> tasks) {
-    return tasks
-        .where((task) => task.status == TaskStatus.overdue)
-        .toList()
+    return tasks.where((task) => task.status == TaskStatus.overdue).toList()
       ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
   }
 
   /// Gets all pending tasks sorted by date
   List<PlantTask> getPendingTasks(List<PlantTask> tasks) {
-    return tasks
-        .where((task) => task.status == TaskStatus.pending)
-        .toList()
+    return tasks.where((task) => task.status == TaskStatus.pending).toList()
       ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
   }
 
@@ -154,9 +152,10 @@ class TaskGenerationService {
     );
 
     // If the next scheduled date is in the past, use today
-    final scheduledDate = nextScheduledDate.isBefore(currentDate) 
-        ? currentDate 
-        : nextScheduledDate;
+    final scheduledDate =
+        nextScheduledDate.isBefore(currentDate)
+            ? currentDate
+            : nextScheduledDate;
 
     final task = PlantTask(
       id: _generateTaskId(),

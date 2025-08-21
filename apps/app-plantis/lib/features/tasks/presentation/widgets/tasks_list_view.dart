@@ -51,7 +51,7 @@ class TaskListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -77,13 +77,14 @@ class TaskListItem extends StatelessWidget {
                         width: 2,
                       ),
                     ),
-                    child: task.status == task_entity.TaskStatus.completed
-                        ? Icon(
-                            Icons.check,
-                            size: 16,
-                            color: _getPriorityColor(task.priority),
-                          )
-                        : null,
+                    child:
+                        task.status == task_entity.TaskStatus.completed
+                            ? Icon(
+                              Icons.check,
+                              size: 16,
+                              color: _getPriorityColor(task.priority),
+                            )
+                            : null,
                   ),
                 )
               else
@@ -94,15 +95,11 @@ class TaskListItem extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Colors.green,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    size: 16,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.check, size: 16, color: Colors.white),
                 ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Conteúdo da tarefa
               Expanded(
                 child: Column(
@@ -112,40 +109,48 @@ class TaskListItem extends StatelessWidget {
                     Text(
                       task.title,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        decoration: task.status == task_entity.TaskStatus.completed
-                            ? TextDecoration.lineThrough
-                            : null,
-                        color: task.status == task_entity.TaskStatus.completed
-                            ? theme.colorScheme.onSurface.withValues(alpha: 0.6)
-                            : null,
+                        decoration:
+                            task.status == task_entity.TaskStatus.completed
+                                ? TextDecoration.lineThrough
+                                : null,
+                        color:
+                            task.status == task_entity.TaskStatus.completed
+                                ? theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.6,
+                                )
+                                : null,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Planta e tipo
                     Row(
                       children: [
                         Icon(
                           Icons.local_florist,
                           size: 16,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             '${task.plantName} • ${task.type.displayName}',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 8),
-                    
+
                     // Data de vencimento e prioridade
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -154,35 +159,41 @@ class TaskListItem extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              task.isOverdue 
+                              task.isOverdue
                                   ? Icons.warning
                                   : task.isDueToday
-                                      ? Icons.today
-                                      : Icons.schedule,
+                                  ? Icons.today
+                                  : Icons.schedule,
                               size: 16,
-                              color: task.isOverdue
-                                  ? Colors.red
-                                  : task.isDueToday
+                              color:
+                                  task.isOverdue
+                                      ? Colors.red
+                                      : task.isDueToday
                                       ? Colors.orange
-                                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                      : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.6,
+                                      ),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               _formatDate(task.dueDate),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: task.isOverdue
-                                    ? Colors.red
-                                    : task.isDueToday
+                                color:
+                                    task.isOverdue
+                                        ? Colors.red
+                                        : task.isDueToday
                                         ? Colors.orange
-                                        : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                                fontWeight: task.isOverdue || task.isDueToday
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
+                                        : theme.colorScheme.onSurface
+                                            .withValues(alpha: 0.7),
+                                fontWeight:
+                                    task.isOverdue || task.isDueToday
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
                               ),
                             ),
                           ],
                         ),
-                        
+
                         // Prioridade
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -190,10 +201,14 @@ class TaskListItem extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: _getPriorityColor(task.priority).withValues(alpha: 0.1),
+                            color: _getPriorityColor(
+                              task.priority,
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _getPriorityColor(task.priority).withValues(alpha: 0.3),
+                              color: _getPriorityColor(
+                                task.priority,
+                              ).withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -211,7 +226,7 @@ class TaskListItem extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Ícone indicador
               const SizedBox(width: 8),
               Icon(

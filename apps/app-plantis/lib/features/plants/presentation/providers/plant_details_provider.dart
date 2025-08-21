@@ -28,7 +28,7 @@ class PlantDetailsProvider extends ChangeNotifier {
 
     // Only show loading if we don't have any plant data yet
     final shouldShowLoading = _plant?.id != plantId;
-    
+
     if (shouldShowLoading) {
       _isLoading = true;
     }
@@ -36,7 +36,7 @@ class PlantDetailsProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await getPlantByIdUseCase(plantId);
-    
+
     result.fold(
       (failure) {
         _errorMessage = _getErrorMessage(failure);
@@ -62,7 +62,7 @@ class PlantDetailsProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await deletePlantUseCase(_plant!.id);
-    
+
     bool success = false;
     result.fold(
       (failure) {
@@ -98,5 +98,4 @@ class PlantDetailsProvider extends ChangeNotifier {
         return 'Erro inesperado. Tente novamente.';
     }
   }
-
 }

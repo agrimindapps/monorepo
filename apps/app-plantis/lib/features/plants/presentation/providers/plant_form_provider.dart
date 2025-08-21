@@ -4,13 +4,13 @@ import '../../domain/entities/plant.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
-import '../../../../core/services/image_service.dart';
+import '../../../../core/services/image_service.dart' as local;
 
 class PlantFormProvider extends ChangeNotifier {
   final GetPlantByIdUseCase getPlantByIdUseCase;
   final AddPlantUseCase addPlantUseCase;
   final UpdatePlantUseCase updatePlantUseCase;
-  final ImageService imageService;
+  final local.ImageService imageService;
 
   PlantFormProvider({
     required this.getPlantByIdUseCase,
@@ -40,19 +40,19 @@ class PlantFormProvider extends ChangeNotifier {
   int? _fertilizingIntervalDays;
   int? _pruningIntervalDays;
   String? _waterAmount;
-  
+
   // New care configuration fields
   bool? _enableSunlightCare;
   int? _sunlightIntervalDays;
   DateTime? _lastSunlightDate;
-  
+
   bool? _enablePestInspection;
   int? _pestInspectionIntervalDays;
   DateTime? _lastPestInspectionDate;
-  
+
   bool? _enablePruning;
   DateTime? _lastPruningDate;
-  
+
   bool? _enableReplanting;
   int? _replantingIntervalDays;
   DateTime? _lastReplantingDate;
@@ -81,46 +81,45 @@ class PlantFormProvider extends ChangeNotifier {
   int? get fertilizingIntervalDays => _fertilizingIntervalDays;
   int? get pruningIntervalDays => _pruningIntervalDays;
   String? get waterAmount => _waterAmount;
-  
+
   // New care configuration getters
   bool? get enableSunlightCare => _enableSunlightCare;
   int? get sunlightIntervalDays => _sunlightIntervalDays;
   DateTime? get lastSunlightDate => _lastSunlightDate;
-  
+
   bool? get enablePestInspection => _enablePestInspection;
   int? get pestInspectionIntervalDays => _pestInspectionIntervalDays;
   DateTime? get lastPestInspectionDate => _lastPestInspectionDate;
-  
+
   bool? get enablePruning => _enablePruning;
   DateTime? get lastPruningDate => _lastPruningDate;
-  
+
   bool? get enableReplanting => _enableReplanting;
   int? get replantingIntervalDays => _replantingIntervalDays;
   DateTime? get lastReplantingDate => _lastReplantingDate;
 
   // Form validation
   bool get isValid => _name.trim().isNotEmpty;
-  
+
   Map<String, String> get fieldErrors {
     final errors = <String, String>{};
-    
+
     if (_name.trim().isEmpty) {
       errors['name'] = 'Nome é obrigatório';
     }
-    
+
     if (_wateringIntervalDays != null && _wateringIntervalDays! <= 0) {
       errors['wateringInterval'] = 'Intervalo deve ser maior que 0';
     }
-    
+
     if (_fertilizingIntervalDays != null && _fertilizingIntervalDays! <= 0) {
       errors['fertilizingInterval'] = 'Intervalo deve ser maior que 0';
     }
-    
+
     if (_pruningIntervalDays != null && _pruningIntervalDays! <= 0) {
       errors['pruningInterval'] = 'Intervalo deve ser maior que 0';
     }
-    
-    
+
     return errors;
   }
 
@@ -131,7 +130,7 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await getPlantByIdUseCase(plantId);
-    
+
     result.fold(
       (failure) {
         _errorMessage = _getErrorMessage(failure);
@@ -197,9 +196,9 @@ class PlantFormProvider extends ChangeNotifier {
       if (imageFile != null) {
         final downloadUrl = await imageService.uploadImage(
           imageFile,
-          folder: ImageUploadType.plant.folder,
+          folder: local.ImageUploadType.plant.folder,
         );
-        
+
         if (downloadUrl != null) {
           // Remove imagem anterior se existir
           if (_imageUrls.isNotEmpty) {
@@ -227,9 +226,9 @@ class PlantFormProvider extends ChangeNotifier {
       if (imageFile != null) {
         final downloadUrl = await imageService.uploadImage(
           imageFile,
-          folder: ImageUploadType.plant.folder,
+          folder: local.ImageUploadType.plant.folder,
         );
-        
+
         if (downloadUrl != null) {
           // Remove imagem anterior se existir
           if (_imageUrls.isNotEmpty) {
@@ -253,7 +252,7 @@ class PlantFormProvider extends ChangeNotifier {
       final imageUrl = _imageUrls[index];
       _imageUrls.clear();
       notifyListeners();
-      
+
       // Remover a imagem do Firebase Storage em background
       imageService.deleteImage(imageUrl);
     }
@@ -269,7 +268,6 @@ class PlantFormProvider extends ChangeNotifier {
     _fertilizingIntervalDays = value;
     notifyListeners();
   }
-
 
   void setWaterAmount(String? value) {
     _waterAmount = value;
@@ -369,10 +367,11 @@ class PlantFormProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    final result = isEditMode
-        ? await updatePlantUseCase(_buildUpdateParams())
-        : await addPlantUseCase(_buildAddParams());
-    
+    final result =
+        isEditMode
+            ? await updatePlantUseCase(_buildUpdateParams())
+            : await addPlantUseCase(_buildAddParams());
+
     bool success = false;
     result.fold(
       (failure) {
@@ -424,16 +423,16 @@ class PlantFormProvider extends ChangeNotifier {
       _fertilizingIntervalDays = config.fertilizingIntervalDays;
       _pruningIntervalDays = config.pruningIntervalDays;
       _waterAmount = config.waterAmount;
-      
+
       // Load new care configuration fields
       _sunlightIntervalDays = config.sunlightCheckIntervalDays;
       _enableSunlightCare = config.sunlightCheckIntervalDays != null;
-      
+
       _pestInspectionIntervalDays = config.pestInspectionIntervalDays;
       _enablePestInspection = config.pestInspectionIntervalDays != null;
-      
+
       _enablePruning = config.pruningIntervalDays != null;
-      
+
       _replantingIntervalDays = config.replantingIntervalDays;
       _enableReplanting = config.replantingIntervalDays != null;
     } else {
@@ -457,36 +456,43 @@ class PlantFormProvider extends ChangeNotifier {
     _fertilizingIntervalDays = null;
     _pruningIntervalDays = null;
     _waterAmount = null;
-    
+
     // Clear new care configuration fields
     _enableSunlightCare = null;
     _sunlightIntervalDays = null;
     _lastSunlightDate = null;
-    
+
     _enablePestInspection = null;
     _pestInspectionIntervalDays = null;
     _lastPestInspectionDate = null;
-    
+
     _enablePruning = null;
     _lastPruningDate = null;
-    
+
     _enableReplanting = null;
     _replantingIntervalDays = null;
     _lastReplantingDate = null;
   }
 
   AddPlantParams _buildAddParams() {
-    final config = _hasConfigData()
-        ? PlantConfig(
-            wateringIntervalDays: _wateringIntervalDays,
-            fertilizingIntervalDays: _fertilizingIntervalDays,
-            pruningIntervalDays: (_enablePruning == true) ? _pruningIntervalDays : null,
-            sunlightCheckIntervalDays: (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
-            pestInspectionIntervalDays: (_enablePestInspection == true) ? _pestInspectionIntervalDays : null,
-            replantingIntervalDays: (_enableReplanting == true) ? _replantingIntervalDays : null,
-            waterAmount: _waterAmount,
-          )
-        : null;
+    final config =
+        _hasConfigData()
+            ? PlantConfig(
+              wateringIntervalDays: _wateringIntervalDays,
+              fertilizingIntervalDays: _fertilizingIntervalDays,
+              pruningIntervalDays:
+                  (_enablePruning == true) ? _pruningIntervalDays : null,
+              sunlightCheckIntervalDays:
+                  (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
+              pestInspectionIntervalDays:
+                  (_enablePestInspection == true)
+                      ? _pestInspectionIntervalDays
+                      : null,
+              replantingIntervalDays:
+                  (_enableReplanting == true) ? _replantingIntervalDays : null,
+              waterAmount: _waterAmount,
+            )
+            : null;
 
     return AddPlantParams(
       name: _name.trim(),
@@ -501,17 +507,24 @@ class PlantFormProvider extends ChangeNotifier {
   }
 
   UpdatePlantParams _buildUpdateParams() {
-    final config = _hasConfigData()
-        ? PlantConfig(
-            wateringIntervalDays: _wateringIntervalDays,
-            fertilizingIntervalDays: _fertilizingIntervalDays,
-            pruningIntervalDays: (_enablePruning == true) ? _pruningIntervalDays : null,
-            sunlightCheckIntervalDays: (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
-            pestInspectionIntervalDays: (_enablePestInspection == true) ? _pestInspectionIntervalDays : null,
-            replantingIntervalDays: (_enableReplanting == true) ? _replantingIntervalDays : null,
-            waterAmount: _waterAmount,
-          )
-        : null;
+    final config =
+        _hasConfigData()
+            ? PlantConfig(
+              wateringIntervalDays: _wateringIntervalDays,
+              fertilizingIntervalDays: _fertilizingIntervalDays,
+              pruningIntervalDays:
+                  (_enablePruning == true) ? _pruningIntervalDays : null,
+              sunlightCheckIntervalDays:
+                  (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
+              pestInspectionIntervalDays:
+                  (_enablePestInspection == true)
+                      ? _pestInspectionIntervalDays
+                      : null,
+              replantingIntervalDays:
+                  (_enableReplanting == true) ? _replantingIntervalDays : null,
+              waterAmount: _waterAmount,
+            )
+            : null;
 
     return UpdatePlantParams(
       id: _originalPlant!.id,
@@ -528,12 +541,13 @@ class PlantFormProvider extends ChangeNotifier {
 
   bool _hasConfigData() {
     return _wateringIntervalDays != null ||
-           _fertilizingIntervalDays != null ||
-           (_enablePruning == true && _pruningIntervalDays != null) ||
-           (_enableSunlightCare == true && _sunlightIntervalDays != null) ||
-           (_enablePestInspection == true && _pestInspectionIntervalDays != null) ||
-           (_enableReplanting == true && _replantingIntervalDays != null) ||
-           _waterAmount != null;
+        _fertilizingIntervalDays != null ||
+        (_enablePruning == true && _pruningIntervalDays != null) ||
+        (_enableSunlightCare == true && _sunlightIntervalDays != null) ||
+        (_enablePestInspection == true &&
+            _pestInspectionIntervalDays != null) ||
+        (_enableReplanting == true && _replantingIntervalDays != null) ||
+        _waterAmount != null;
   }
 
   String _getErrorMessage(Failure failure) {
@@ -552,5 +566,4 @@ class PlantFormProvider extends ChangeNotifier {
         return 'Erro inesperado. Tente novamente.';
     }
   }
-
 }

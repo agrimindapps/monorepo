@@ -143,3 +143,8 @@ class ConflictResolver<T extends BaseSyncModel> implements IConflictResolver<T> 
     return [];
   }
 }
+
+/// ConflictResolver específico para BaseSyncModel
+@Named('BaseSyncModelConflictResolver')
+@injectable
+class BaseSyncModelConflictResolver extends ConflictResolver<BaseSyncModel> {}

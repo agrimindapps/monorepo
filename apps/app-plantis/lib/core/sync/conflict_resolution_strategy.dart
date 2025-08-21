@@ -13,7 +13,7 @@ enum ConflictResolutionStrategy {
   manual,
 
   /// Tenta fazer merge automático inteligente
-  merge
+  merge,
 }
 
 /// Representa um conflito detectado durante sincronização

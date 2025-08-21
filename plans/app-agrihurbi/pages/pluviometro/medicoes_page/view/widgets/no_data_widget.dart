@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import '../../theme/medicoes_theme.dart';
-import '../../utils/string_extensions.dart';
 
 class NoDataWidget extends StatelessWidget {
   final VoidCallback onTap;

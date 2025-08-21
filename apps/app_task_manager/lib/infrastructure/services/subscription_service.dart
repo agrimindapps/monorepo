@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'dart:async';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
+import '../../domain/entities/user_limits.dart';
 
 /// Subscription service específico do app Task Manager
 class TaskManagerSubscriptionService {
@@ -211,9 +212,8 @@ class TaskManagerSubscriptionService {
         (subscription) {
           _analyticsService.logPurchase(
             productId: productId,
-            value: _getPriceFromProductId(productId),
+            price: _getPriceFromProductId(productId),
             currency: 'BRL',
-            transactionId: subscription.id,
           );
 
           _analyticsService.logEvent('premium_activated', parameters: {
@@ -328,29 +328,23 @@ class TaskManagerSubscriptionService {
     required int currentTasks,
     required int currentSubtasks,
     required int currentTags,
+    int completedTasks = 0,
+    int completedSubtasks = 0,
   }) async {
     final hasPremium = await hasPremiumSubscription();
 
     if (hasPremium) {
-      return const UserLimits(
-        maxTasks: -1, // Ilimitado
-        maxSubtasks: -1,
-        maxTags: -1,
-        remainingTasks: -1,
-        remainingSubtasks: -1,
-        remainingTags: -1,
-        isPremium: true,
+      return UserLimits.premium(
+        currentTasks: currentTasks,
+        currentSubtasks: currentSubtasks,
+        currentTags: currentTags,
       );
     }
 
-    return UserLimits(
-      maxTasks: maxFreeTasks,
-      maxSubtasks: maxFreeSubtasks,
-      maxTags: maxFreeTags,
-      remainingTasks: (maxFreeTasks - currentTasks).clamp(0, maxFreeTasks),
-      remainingSubtasks: (maxFreeSubtasks - currentSubtasks).clamp(0, maxFreeSubtasks),
-      remainingTags: (maxFreeTags - currentTags).clamp(0, maxFreeTags),
-      isPremium: false,
+    return UserLimits.free(
+      currentTasks: currentTasks,
+      currentSubtasks: currentSubtasks,
+      currentTags: currentTags,
     );
   }
 
@@ -449,31 +443,3 @@ class TaskManagerSubscriptionService {
   }
 }
 
-/// Classe para representar limites do usuário
-class UserLimits {
-  final int maxTasks;
-  final int maxSubtasks;
-  final int maxTags;
-  final int remainingTasks;
-  final int remainingSubtasks;
-  final int remainingTags;
-  final bool isPremium;
-
-  const UserLimits({
-    required this.maxTasks,
-    required this.maxSubtasks,
-    required this.maxTags,
-    required this.remainingTasks,
-    required this.remainingSubtasks,
-    required this.remainingTags,
-    required this.isPremium,
-  });
-
-  bool get hasUnlimitedTasks => maxTasks == -1;
-  bool get hasUnlimitedSubtasks => maxSubtasks == -1;
-  bool get hasUnlimitedTags => maxTags == -1;
-
-  bool get canCreateTasks => hasUnlimitedTasks || remainingTasks > 0;
-  bool get canCreateSubtasks => hasUnlimitedSubtasks || remainingSubtasks > 0;
-  bool get canCreateTags => hasUnlimitedTags || remainingTags > 0;
-}

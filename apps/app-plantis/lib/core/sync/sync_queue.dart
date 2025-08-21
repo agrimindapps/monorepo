@@ -9,10 +9,10 @@ import '../data/models/sync_queue_item.dart';
 class SyncQueue {
   final HiveInterface _hive;
   late Box<SyncQueueItem> _syncQueueBox;
-  
-  final StreamController<List<SyncQueueItem>> _queueController = 
+
+  final StreamController<List<SyncQueueItem>> _queueController =
       StreamController<List<SyncQueueItem>>.broadcast();
-  
+
   Stream<List<SyncQueueItem>> get queueStream => _queueController.stream;
 
   SyncQueue(this._hive);
@@ -23,9 +23,9 @@ class SyncQueue {
   }
 
   void addToQueue({
-    required String modelType, 
-    required String operation, 
-    required Map<String, dynamic> data
+    required String modelType,
+    required String operation,
+    required Map<String, dynamic> data,
   }) {
     final queueItem = SyncQueueItem(
       id: const Uuid().v4(),
@@ -39,10 +39,8 @@ class SyncQueue {
   }
 
   List<SyncQueueItem> getPendingItems() {
-    return _syncQueueBox.values
-        .where((item) => !item.isSynced)
-        .toList()
-        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    return _syncQueueBox.values.where((item) => !item.isSynced).toList()
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
   }
 
   Future<void> markItemAsSynced(String itemId) async {
@@ -50,7 +48,7 @@ class SyncQueue {
       (item) => item.id == itemId,
       orElse: () => throw Exception('Item not found'),
     );
-    
+
     item.isSynced = true;
     await item.save();
     _notifyQueueUpdated();
@@ -61,7 +59,7 @@ class SyncQueue {
       (item) => item.id == itemId,
       orElse: () => throw Exception('Item not found'),
     );
-    
+
     item.retryCount++;
     await item.save();
     _notifyQueueUpdated();
@@ -72,10 +70,9 @@ class SyncQueue {
   }
 
   Future<void> clearSyncedItems() async {
-    final syncedItems = _syncQueueBox.values
-        .where((item) => item.isSynced)
-        .toList();
-    
+    final syncedItems =
+        _syncQueueBox.values.where((item) => item.isSynced).toList();
+
     for (var item in syncedItems) {
       await item.delete();
     }

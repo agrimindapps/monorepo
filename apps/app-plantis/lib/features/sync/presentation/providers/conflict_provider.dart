@@ -38,10 +38,7 @@ class ConflictProvider extends ChangeNotifier {
   ConflictState _state = ConflictState();
   ConflictState get state => _state;
 
-  ConflictProvider(
-    this._conflictHistoryService,
-    this._conflictResolver,
-  );
+  ConflictProvider(this._conflictHistoryService, this._conflictResolver);
 
   /// Carrega todos os conflitos históricos
   Future<void> loadConflicts() async {
@@ -50,10 +47,7 @@ class ConflictProvider extends ChangeNotifier {
 
     try {
       final conflicts = _conflictHistoryService.getAllConflicts();
-      _state = _state.copyWith(
-        conflicts: conflicts,
-        isLoading: false,
-      );
+      _state = _state.copyWith(conflicts: conflicts, isLoading: false);
     } catch (e) {
       _state = _state.copyWith(
         errorMessage: 'Erro ao carregar histórico de conflitos: $e',
@@ -89,9 +83,7 @@ class ConflictProvider extends ChangeNotifier {
 
       await _conflictHistoryService.saveConflict(conflictHistory);
 
-      _state = _state.copyWith(
-        isLoading: false,
-      );
+      _state = _state.copyWith(isLoading: false);
       notifyListeners();
 
       return resolvedData;
@@ -112,10 +104,7 @@ class ConflictProvider extends ChangeNotifier {
 
     try {
       await _conflictHistoryService.clearConflictHistory();
-      _state = _state.copyWith(
-        conflicts: [],
-        isLoading: false,
-      );
+      _state = _state.copyWith(conflicts: [], isLoading: false);
       notifyListeners();
     } catch (e) {
       _state = _state.copyWith(

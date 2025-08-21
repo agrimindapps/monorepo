@@ -147,7 +147,7 @@ class ExpenseFiltersService {
         if (!expense.title.toLowerCase().contains(query) &&
             !expense.description.toLowerCase().contains(query) &&
             !expense.type.displayName.toLowerCase().contains(query) &&
-            (expense.establishmentName == null || !expense.establishmentName!.toLowerCase().contains(query)) &&
+            (!expense.establishmentName.toLowerCase().contains(query)) &&
             (expense.notes == null || !expense.notes!.toLowerCase().contains(query))) {
           return false;
         }
@@ -240,7 +240,7 @@ class ExpenseFiltersService {
       return e.title.toLowerCase().contains(lowerQuery) ||
              e.description.toLowerCase().contains(lowerQuery) ||
              e.type.displayName.toLowerCase().contains(lowerQuery) ||
-             (e.establishmentName?.toLowerCase().contains(lowerQuery) == true) ||
+             (e.establishmentName.toLowerCase().contains(lowerQuery) == true) ||
              (e.notes?.toLowerCase().contains(lowerQuery) == true);
     }).toList();
   }

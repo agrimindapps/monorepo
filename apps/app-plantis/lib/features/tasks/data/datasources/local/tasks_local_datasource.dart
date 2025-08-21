@@ -31,18 +31,15 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
         box: _boxName,
       );
 
-      return result.fold(
-        (failure) => <TaskModel>[],
-        (tasksData) {
-          if (tasksData == null) return <TaskModel>[];
-          
-          return tasksData
-              .cast<Map<String, dynamic>>()
-              .map((data) => TaskModel.fromJson(data))
-              .where((task) => !task.isDeleted)
-              .toList();
-        },
-      );
+      return result.fold((failure) => <TaskModel>[], (tasksData) {
+        if (tasksData == null) return <TaskModel>[];
+
+        return tasksData
+            .cast<Map<String, dynamic>>()
+            .map((data) => TaskModel.fromJson(data))
+            .where((task) => !task.isDeleted)
+            .toList();
+      });
     } catch (e) {
       throw Exception('Erro ao buscar tarefas locais: $e');
     }
@@ -64,24 +61,29 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   Future<List<TaskModel>> getOverdueTasks() async {
     final tasks = await getTasks();
     final now = DateTime.now();
-    
-    return tasks.where((task) => 
-      task.status == TaskStatus.pending && 
-      task.dueDate.isBefore(now)
-    ).toList();
+
+    return tasks
+        .where(
+          (task) =>
+              task.status == TaskStatus.pending && task.dueDate.isBefore(now),
+        )
+        .toList();
   }
 
   @override
   Future<List<TaskModel>> getTodayTasks() async {
     final tasks = await getTasks();
     final today = DateTime.now();
-    
-    return tasks.where((task) => 
-      task.status == TaskStatus.pending &&
-      task.dueDate.year == today.year &&
-      task.dueDate.month == today.month &&
-      task.dueDate.day == today.day
-    ).toList();
+
+    return tasks
+        .where(
+          (task) =>
+              task.status == TaskStatus.pending &&
+              task.dueDate.year == today.year &&
+              task.dueDate.month == today.month &&
+              task.dueDate.day == today.day,
+        )
+        .toList();
   }
 
   @override
@@ -89,12 +91,15 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     final tasks = await getTasks();
     final now = DateTime.now();
     final nextWeek = now.add(const Duration(days: 7));
-    
-    return tasks.where((task) => 
-      task.status == TaskStatus.pending &&
-      task.dueDate.isAfter(now) &&
-      task.dueDate.isBefore(nextWeek)
-    ).toList();
+
+    return tasks
+        .where(
+          (task) =>
+              task.status == TaskStatus.pending &&
+              task.dueDate.isAfter(now) &&
+              task.dueDate.isBefore(nextWeek),
+        )
+        .toList();
   }
 
   @override
@@ -115,7 +120,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       final tasks = await getTasks();
       final existingIndex = tasks.indexWhere((t) => t.id == task.id);
-      
+
       if (existingIndex >= 0) {
         tasks[existingIndex] = task;
       } else {
@@ -132,15 +137,16 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   Future<void> cacheTasks(List<TaskModel> tasks) async {
     try {
       final taskMaps = tasks.map((task) => task.toJson()).toList();
-      
+
       final result = await storageService.save<List<Map<String, dynamic>>>(
         key: 'all_tasks',
         data: taskMaps,
         box: _boxName,
       );
-      
+
       result.fold(
-        (failure) => throw Exception('Erro ao salvar tarefas: ${failure.message}'),
+        (failure) =>
+            throw Exception('Erro ao salvar tarefas: ${failure.message}'),
         (_) => {},
       );
     } catch (e) {
@@ -158,7 +164,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       final tasks = await getTasks();
       final taskIndex = tasks.indexWhere((t) => t.id == id);
-      
+
       if (taskIndex >= 0) {
         final updatedTask = tasks[taskIndex].copyWith(
           isDeleted: true,
@@ -180,9 +186,10 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
         key: 'all_tasks',
         box: _boxName,
       );
-      
+
       result.fold(
-        (failure) => throw Exception('Erro ao limpar cache: ${failure.message}'),
+        (failure) =>
+            throw Exception('Erro ao limpar cache: ${failure.message}'),
         (_) => {},
       );
     } catch (e) {
@@ -192,15 +199,16 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
 
   Future<void> _saveTasks(List<TaskModel> tasks) async {
     final taskMaps = tasks.map((task) => task.toJson()).toList();
-    
+
     final result = await storageService.save<List<Map<String, dynamic>>>(
       key: 'all_tasks',
       data: taskMaps,
       box: _boxName,
     );
-    
+
     result.fold(
-      (failure) => throw Exception('Erro ao salvar tarefas: ${failure.message}'),
+      (failure) =>
+          throw Exception('Erro ao salvar tarefas: ${failure.message}'),
       (_) => {},
     );
   }

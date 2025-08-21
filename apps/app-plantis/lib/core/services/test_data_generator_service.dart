@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../../features/plants/domain/entities/plant.dart';
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -67,30 +68,31 @@ class TestDataGeneratorService {
 
   Future<void> generateTestData() async {
     final plants = <Plant>[];
-    
+
     // Gerar 8-12 plantas
     final plantsCount = 8 + _random.nextInt(5);
-    
+
     for (int i = 0; i < plantsCount; i++) {
       final plantIndex = _random.nextInt(_plantNames.length);
       final now = DateTime.now();
       final plantingDate = now.subtract(Duration(days: _random.nextInt(365)));
-      
+
       final plantParams = AddPlantParams(
         name: _plantNames[plantIndex],
         species: _species[plantIndex],
         plantingDate: plantingDate,
-        notes: _random.nextBool() ? _notes[_random.nextInt(_notes.length)] : null,
+        notes:
+            _random.nextBool() ? _notes[_random.nextInt(_notes.length)] : null,
         config: _generatePlantConfig(),
       );
-      
+
       final result = await addPlantUseCase(plantParams);
       result.fold(
-        (failure) => print('Erro ao criar planta: ${failure.message}'),
+        (failure) => debugPrint('Erro ao criar planta: ${failure.message}'),
         (plant) => plants.add(plant),
       );
     }
-    
+
     // Gerar tarefas para as plantas criadas
     for (final plant in plants) {
       await _generateTasksForPlant(plant);
@@ -100,7 +102,8 @@ class TestDataGeneratorService {
   PlantConfig _generatePlantConfig() {
     return PlantConfig(
       wateringIntervalDays: _random.nextBool() ? 2 + _random.nextInt(6) : null,
-      fertilizingIntervalDays: _random.nextBool() ? 15 + _random.nextInt(16) : null,
+      fertilizingIntervalDays:
+          _random.nextBool() ? 15 + _random.nextInt(16) : null,
       pruningIntervalDays: _random.nextBool() ? 30 + _random.nextInt(31) : null,
       lightRequirement: ['low', 'medium', 'high'][_random.nextInt(3)],
       waterAmount: ['little', 'moderate', 'plenty'][_random.nextInt(3)],
@@ -113,7 +116,7 @@ class TestDataGeneratorService {
   Future<void> _generateTasksForPlant(Plant plant) async {
     final now = DateTime.now();
     final config = plant.config;
-    
+
     // Gerar tarefas baseadas na configuração da planta
     if (config?.hasWateringSchedule == true) {
       await _createTask(
@@ -122,7 +125,7 @@ class TestDataGeneratorService {
         dueDate: now.add(Duration(days: _random.nextInt(3))),
       );
     }
-    
+
     if (config?.hasFertilizingSchedule == true) {
       await _createTask(
         plant: plant,
@@ -130,7 +133,7 @@ class TestDataGeneratorService {
         dueDate: now.add(Duration(days: 1 + _random.nextInt(7))),
       );
     }
-    
+
     if (config?.hasPruningSchedule == true) {
       await _createTask(
         plant: plant,
@@ -138,7 +141,7 @@ class TestDataGeneratorService {
         dueDate: now.add(Duration(days: 5 + _random.nextInt(10))),
       );
     }
-    
+
     // Algumas tarefas aleatórias
     if (_random.nextBool()) {
       await _createTask(
@@ -147,7 +150,7 @@ class TestDataGeneratorService {
         dueDate: now.add(Duration(days: _random.nextInt(14))),
       );
     }
-    
+
     if (_random.nextBool()) {
       await _createTask(
         plant: plant,
@@ -163,7 +166,7 @@ class TestDataGeneratorService {
     required DateTime dueDate,
   }) async {
     final now = DateTime.now();
-    
+
     final task = task_entity.Task(
       id: _uuid.v4(),
       createdAt: now,
@@ -174,18 +177,19 @@ class TestDataGeneratorService {
       plantName: plant.name,
       type: type,
       dueDate: dueDate,
-      priority: [
-        task_entity.TaskPriority.low,
-        task_entity.TaskPriority.medium,
-        task_entity.TaskPriority.high,
-      ][_random.nextInt(3)],
+      priority:
+          [
+            task_entity.TaskPriority.low,
+            task_entity.TaskPriority.medium,
+            task_entity.TaskPriority.high,
+          ][_random.nextInt(3)],
       isDirty: true,
     );
-    
+
     final result = await addTaskUseCase(AddTaskParams(task: task));
     result.fold(
-      (failure) => print('Erro ao criar tarefa: ${failure.message}'),
-      (task) => print('Tarefa criada: ${task.title}'),
+      (failure) => debugPrint('Erro ao criar tarefa: ${failure.message}'),
+      (task) => debugPrint('Tarefa criada: ${task.title}'),
     );
   }
 }

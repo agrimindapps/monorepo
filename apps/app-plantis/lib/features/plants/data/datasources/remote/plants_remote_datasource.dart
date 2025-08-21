@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import '../../models/plant_model.dart';
@@ -16,9 +15,9 @@ abstract class PlantsRemoteDatasource {
 
 class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   final FirebaseFirestore firestore;
-  
+
   PlantsRemoteDatasourceImpl({required this.firestore});
-  
+
   String _getUserPlantsPath(String userId) => 'users/$userId/plants';
 
   CollectionReference _getPlantsCollection(String userId) {
@@ -28,16 +27,19 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<List<PlantModel>> getPlants(String userId) async {
     try {
-      final snapshot = await _getPlantsCollection(userId)
-          .where('isDeleted', isEqualTo: false)
-          .orderBy('createdAt', descending: true)
-          .get();
-      
+      final snapshot =
+          await _getPlantsCollection(userId)
+              .where('isDeleted', isEqualTo: false)
+              .orderBy('createdAt', descending: true)
+              .get();
+
       return snapshot.docs
-          .map((doc) => PlantModel.fromJson({
-                ...doc.data() as Map<String, dynamic>,
-                'id': doc.id,
-              }))
+          .map(
+            (doc) => PlantModel.fromJson({
+              ...doc.data() as Map<String, dynamic>,
+              'id': doc.id,
+            }),
+          )
           .toList();
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao buscar plantas: ${e.message}');
@@ -50,18 +52,18 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   Future<PlantModel> getPlantById(String id, String userId) async {
     try {
       final doc = await _getPlantsCollection(userId).doc(id).get();
-      
+
       if (!doc.exists) {
         throw ServerFailure('Planta não encontrada');
       }
-      
+
       final data = doc.data() as Map<String, dynamic>;
       final plant = PlantModel.fromJson({...data, 'id': doc.id});
-      
+
       if (plant.isDeleted) {
         throw ServerFailure('Planta não encontrada');
       }
-      
+
       return plant;
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao buscar planta: ${e.message}');
@@ -76,18 +78,17 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     try {
       final plantData = plant.toJson();
       plantData.remove('id'); // Remove ID from data, it will be the document ID
-      
+
       final docRef = await _getPlantsCollection(userId).add(plantData);
-      
+
       // Return plant with the generated ID
-      return plant.copyWith(
-        id: docRef.id,
-        isDirty: false,
-      );
+      return plant.copyWith(id: docRef.id, isDirty: false);
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao adicionar planta: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao adicionar planta: ${e.toString()}');
+      throw ServerFailure(
+        'Erro inesperado ao adicionar planta: ${e.toString()}',
+      );
     }
   }
 
@@ -96,14 +97,16 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     try {
       final plantData = plant.toJson();
       plantData.remove('id'); // Remove ID from data
-      
+
       await _getPlantsCollection(userId).doc(plant.id).update(plantData);
-      
+
       return plant.copyWith(isDirty: false);
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao atualizar planta: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao atualizar planta: ${e.toString()}');
+      throw ServerFailure(
+        'Erro inesperado ao atualizar planta: ${e.toString()}',
+      );
     }
   }
 
@@ -131,15 +134,15 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
       // Algolia or implementing server-side search functions.
       final allPlants = await getPlants(userId);
       final searchQuery = query.toLowerCase().trim();
-      
+
       return allPlants.where((plant) {
         final name = plant.name.toLowerCase();
         final species = (plant.species ?? '').toLowerCase();
         final notes = (plant.notes ?? '').toLowerCase();
-        
-        return name.contains(searchQuery) || 
-               species.contains(searchQuery) || 
-               notes.contains(searchQuery);
+
+        return name.contains(searchQuery) ||
+            species.contains(searchQuery) ||
+            notes.contains(searchQuery);
       }).toList();
     } catch (e) {
       if (e is ServerFailure) rethrow;
@@ -148,24 +151,32 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   }
 
   @override
-  Future<List<PlantModel>> getPlantsBySpace(String spaceId, String userId) async {
+  Future<List<PlantModel>> getPlantsBySpace(
+    String spaceId,
+    String userId,
+  ) async {
     try {
-      final snapshot = await _getPlantsCollection(userId)
-          .where('isDeleted', isEqualTo: false)
-          .where('spaceId', isEqualTo: spaceId)
-          .orderBy('createdAt', descending: true)
-          .get();
-      
+      final snapshot =
+          await _getPlantsCollection(userId)
+              .where('isDeleted', isEqualTo: false)
+              .where('spaceId', isEqualTo: spaceId)
+              .orderBy('createdAt', descending: true)
+              .get();
+
       return snapshot.docs
-          .map((doc) => PlantModel.fromJson({
-                ...doc.data() as Map<String, dynamic>,
-                'id': doc.id,
-              }))
+          .map(
+            (doc) => PlantModel.fromJson({
+              ...doc.data() as Map<String, dynamic>,
+              'id': doc.id,
+            }),
+          )
           .toList();
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao buscar plantas por espaço: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao buscar plantas por espaço: ${e.toString()}');
+      throw ServerFailure(
+        'Erro inesperado ao buscar plantas por espaço: ${e.toString()}',
+      );
     }
   }
 
@@ -174,23 +185,25 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     try {
       final batch = firestore.batch();
       final collection = _getPlantsCollection(userId);
-      
+
       for (final plant in plants) {
         if (plant.needsSync) {
           final plantData = plant.toJson();
           plantData.remove('id');
           plantData['needsSync'] = false;
-          
+
           final docRef = collection.doc(plant.id);
           batch.set(docRef, plantData, SetOptions(merge: true));
         }
       }
-      
+
       await batch.commit();
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao sincronizar plantas: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao sincronizar plantas: ${e.toString()}');
+      throw ServerFailure(
+        'Erro inesperado ao sincronizar plantas: ${e.toString()}',
+      );
     }
   }
 }

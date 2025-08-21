@@ -6,7 +6,7 @@ class Space extends BaseSyncEntity {
   final String? lightCondition; // 'low', 'medium', 'high'
   final double? humidity; // Percentual de umidade como double
   final double? averageTemperature;
-  
+
   const Space({
     required super.id,
     required this.name,
@@ -23,12 +23,11 @@ class Space extends BaseSyncEntity {
     super.userId,
     super.moduleName,
   });
-  
+
   String get displayName => name.trim().isEmpty ? 'Espaço sem nome' : name;
-  
-  String get displayDescription => description?.trim().isEmpty ?? true
-      ? 'Sem descrição'
-      : description!;
+
+  String get displayDescription =>
+      description?.trim().isEmpty ?? true ? 'Sem descrição' : description!;
 
   @override
   Map<String, dynamic> toFirebaseMap() {
@@ -49,19 +48,12 @@ class Space extends BaseSyncEntity {
 
   @override
   Space markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   Space markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
@@ -78,7 +70,7 @@ class Space extends BaseSyncEntity {
   Space withModule(String moduleName) {
     return copyWith(moduleName: moduleName);
   }
-  
+
   @override
   Space copyWith({
     String? id,
@@ -113,7 +105,7 @@ class Space extends BaseSyncEntity {
       moduleName: moduleName ?? this.moduleName,
     );
   }
-  
+
   @override
   List<Object?> get props => [
     ...super.props,

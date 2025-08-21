@@ -9,8 +9,8 @@ class NotificationsSettingsProvider extends ChangeNotifier {
   NotificationsSettingsProvider({
     required PlantisNotificationService notificationService,
     required SharedPreferences prefs,
-  })  : _notificationService = notificationService,
-        _prefs = prefs;
+  }) : _notificationService = notificationService,
+       _prefs = prefs;
 
   // Estado de carregamento
   bool _isLoading = false;
@@ -37,7 +37,7 @@ class NotificationsSettingsProvider extends ChangeNotifier {
   TimeOfDay get dailySummaryTime => _dailySummaryTime;
 
   // Configurações por tipo de tarefa
-  Map<String, bool> _taskTypeSettings = {
+  final Map<String, bool> _taskTypeSettings = {
     'Regar': true,
     'Adubar': true,
     'Podar': true,
@@ -56,7 +56,8 @@ class NotificationsSettingsProvider extends ChangeNotifier {
   static const String _keyDailySummary = 'notifications_daily_summary';
   static const String _keyReminderMinutes = 'notifications_reminder_minutes';
   static const String _keyDailySummaryHour = 'notifications_daily_summary_hour';
-  static const String _keyDailySummaryMinute = 'notifications_daily_summary_minute';
+  static const String _keyDailySummaryMinute =
+      'notifications_daily_summary_minute';
   static const String _keyTaskTypePrefix = 'notifications_task_type_';
 
   /// Carregar configurações
@@ -65,11 +66,13 @@ class NotificationsSettingsProvider extends ChangeNotifier {
 
     try {
       // Verificar permissões
-      _areNotificationsEnabled = await _notificationService.areNotificationsEnabled();
+      _areNotificationsEnabled =
+          await _notificationService.areNotificationsEnabled();
 
       // Carregar configurações salvas
       _taskRemindersEnabled = _prefs.getBool(_keyTaskReminders) ?? true;
-      _overdueNotificationsEnabled = _prefs.getBool(_keyOverdueNotifications) ?? true;
+      _overdueNotificationsEnabled =
+          _prefs.getBool(_keyOverdueNotifications) ?? true;
       _dailySummaryEnabled = _prefs.getBool(_keyDailySummary) ?? true;
       _reminderMinutesBefore = _prefs.getInt(_keyReminderMinutes) ?? 60;
 
@@ -79,7 +82,8 @@ class NotificationsSettingsProvider extends ChangeNotifier {
 
       // Carregar configurações por tipo de tarefa
       for (final key in _taskTypeSettings.keys) {
-        _taskTypeSettings[key] = _prefs.getBool(_keyTaskTypePrefix + key) ?? true;
+        _taskTypeSettings[key] =
+            _prefs.getBool(_keyTaskTypePrefix + key) ?? true;
       }
     } catch (e) {
       debugPrint('Erro ao carregar configurações de notificações: $e');

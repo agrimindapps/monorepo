@@ -31,10 +31,10 @@ class AppRouter {
   static const String premium = '/premium';
   static const String profile = '/profile';
   static const String settings = '/settings';
-  
+
   static GoRouter router(BuildContext context) {
     final authProvider = context.read<AuthProvider>();
-    
+
     return GoRouter(
       navigatorKey: NavigationService.instance.navigatorKey,
       initialLocation: landing,
@@ -45,29 +45,36 @@ class AppRouter {
         final isLoggingIn = state.matchedLocation == login;
         final isRegistering = state.matchedLocation == register;
         final isOnLanding = state.matchedLocation == landing;
-        
-        
+
         // Lista de rotas protegidas que requerem autenticação
         final protectedRoutes = [
-          plants, plantDetails, plantAdd, plantEdit,
-          tasks, premium, profile, settings, home
+          plants,
+          plantDetails,
+          plantAdd,
+          plantEdit,
+          tasks,
+          premium,
+          profile,
+          settings,
+          home,
         ];
-        
-        final isAccessingProtectedRoute = protectedRoutes.any((route) => 
-          state.matchedLocation.startsWith(route) || 
-          state.matchedLocation == route
+
+        final isAccessingProtectedRoute = protectedRoutes.any(
+          (route) =>
+              state.matchedLocation.startsWith(route) ||
+              state.matchedLocation == route,
         );
-        
+
         // Wait for auth initialization
         if (!isInitialized) {
           return null;
         }
-        
+
         // Se autenticado e não está no app, redireciona para plantas
         if (isAuthenticated && (isLoggingIn || isRegistering || isOnLanding)) {
           return plants;
         }
-        
+
         // Se não autenticado e tentando acessar rota protegida
         if (!isAuthenticated && isAccessingProtectedRoute) {
           // Só mostra mensagem se não está inicializando modo anônimo
@@ -78,12 +85,15 @@ class AppRouter {
           }
           return login;
         }
-        
+
         // Se não autenticado e tentando acessar outras rotas não protegidas, vai para landing
-        if (!isAuthenticated && !isLoggingIn && !isRegistering && !isOnLanding) {
+        if (!isAuthenticated &&
+            !isLoggingIn &&
+            !isRegistering &&
+            !isOnLanding) {
           return landing;
         }
-        
+
         return null;
       },
       routes: [
@@ -93,19 +103,21 @@ class AppRouter {
           name: 'landing',
           builder: (context, state) => const LandingPage(),
         ),
-        
+
         // Auth Routes - Unified Auth Page
         GoRoute(
           path: login,
           name: 'login',
-          builder: (context, state) => const AuthPage(initialTab: 0), // Login tab
+          builder:
+              (context, state) => const AuthPage(initialTab: 0), // Login tab
         ),
         GoRoute(
           path: register,
           name: 'register',
-          builder: (context, state) => const AuthPage(initialTab: 1), // Register tab
+          builder:
+              (context, state) => const AuthPage(initialTab: 1), // Register tab
         ),
-        
+
         // Main Shell Route with Bottom Navigation
         ShellRoute(
           builder: (context, state, child) => MainScaffold(child: child),
@@ -150,7 +162,7 @@ class AppRouter {
                 ),
               ],
             ),
-            
+
             // Tasks Route
             GoRoute(
               path: tasks,
@@ -162,21 +174,21 @@ class AppRouter {
                 );
               },
             ),
-            
+
             // Premium Route
             GoRoute(
               path: premium,
               name: 'premium',
               builder: (context, state) => const PremiumPage(),
             ),
-            
+
             // Profile Route
             GoRoute(
               path: profile,
               name: 'profile',
               builder: (context, state) => const ProfilePage(),
             ),
-            
+
             // Settings Route
             GoRoute(
               path: settings,
@@ -194,9 +206,9 @@ class AppRouter {
 // Error Page
 class ErrorPage extends StatelessWidget {
   final Object? error;
-  
+
   const ErrorPage({super.key, this.error});
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,11 +216,7 @@ class ErrorPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Oops! Algo deu errado',
@@ -237,7 +245,7 @@ class ErrorPage extends StatelessWidget {
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return const Center(child: Text('Settings Page'));

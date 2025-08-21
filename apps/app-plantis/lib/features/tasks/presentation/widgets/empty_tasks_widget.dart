@@ -27,7 +27,9 @@ class EmptyTasksWidget extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -36,9 +38,9 @@ class EmptyTasksWidget extends StatelessWidget {
                 size: 60,
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Título
             Text(
               emptyStateInfo.title,
@@ -48,9 +50,9 @@ class EmptyTasksWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Descrição
             Text(
               emptyStateInfo.description,
@@ -59,10 +61,10 @@ class EmptyTasksWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             if (emptyStateInfo.showAddButton) ...[
               const SizedBox(height: 32),
-              
+
               // Botão de ação
               ElevatedButton.icon(
                 onPressed: onAddTask,
@@ -90,47 +92,53 @@ class EmptyTasksWidget extends StatelessWidget {
         return _EmptyStateInfo(
           icon: Icons.task_alt,
           title: 'Nenhuma tarefa encontrada',
-          description: 'Você ainda não possui tarefas cadastradas.\nComece adicionando uma nova tarefa para suas plantas!',
+          description:
+              'Você ainda não possui tarefas cadastradas.\nComece adicionando uma nova tarefa para suas plantas!',
           showAddButton: true,
         );
-        
+
       case TasksFilterType.today:
         return _EmptyStateInfo(
           icon: Icons.today,
           title: 'Nenhuma tarefa para hoje',
-          description: 'Que ótimo! Você não tem tarefas agendadas para hoje.\nSuas plantas estão sendo bem cuidadas!',
+          description:
+              'Que ótimo! Você não tem tarefas agendadas para hoje.\nSuas plantas estão sendo bem cuidadas!',
           showAddButton: false,
         );
-        
+
       case TasksFilterType.overdue:
         return _EmptyStateInfo(
           icon: Icons.check_circle,
           title: 'Nenhuma tarefa atrasada',
-          description: 'Parabéns! Você está em dia com todos os cuidados.\nSuas plantas agradecem!',
+          description:
+              'Parabéns! Você está em dia com todos os cuidados.\nSuas plantas agradecem!',
           showAddButton: false,
         );
-        
+
       case TasksFilterType.upcoming:
         return _EmptyStateInfo(
           icon: Icons.schedule,
           title: 'Nenhuma tarefa próxima',
-          description: 'Não há tarefas agendadas para os próximos dias.\nTalvez seja hora de planejar novos cuidados?',
+          description:
+              'Não há tarefas agendadas para os próximos dias.\nTalvez seja hora de planejar novos cuidados?',
           showAddButton: true,
         );
-        
+
       case TasksFilterType.completed:
         return _EmptyStateInfo(
           icon: Icons.history,
           title: 'Nenhuma tarefa concluída',
-          description: 'Você ainda não concluiu nenhuma tarefa.\nComece completando algumas tarefas pendentes!',
+          description:
+              'Você ainda não concluiu nenhuma tarefa.\nComece completando algumas tarefas pendentes!',
           showAddButton: false,
         );
-        
+
       case TasksFilterType.byPlant:
         return _EmptyStateInfo(
           icon: Icons.local_florist,
           title: 'Nenhuma tarefa para esta planta',
-          description: 'Esta planta não possui tarefas cadastradas.\nQue tal adicionar alguns cuidados?',
+          description:
+              'Esta planta não possui tarefas cadastradas.\nQue tal adicionar alguns cuidados?',
           showAddButton: true,
         );
     }

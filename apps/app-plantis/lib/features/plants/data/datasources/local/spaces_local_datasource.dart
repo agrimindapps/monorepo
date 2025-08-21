@@ -26,7 +26,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
     try {
       final hiveBox = await box;
       final spaces = <SpaceModel>[];
-      
+
       for (final key in hiveBox.keys) {
         final spaceJson = hiveBox.get(key);
         if (spaceJson != null) {
@@ -37,14 +37,19 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
           }
         }
       }
-      
+
       // Sort by creation date (newest first)
-      spaces.sort((a, b) => (b.createdAt ?? DateTime.now())
-          .compareTo(a.createdAt ?? DateTime.now()));
-      
+      spaces.sort(
+        (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+          a.createdAt ?? DateTime.now(),
+        ),
+      );
+
       return spaces;
     } catch (e) {
-      throw CacheFailure('Erro ao buscar espaços do cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao buscar espaços do cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -53,17 +58,19 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
     try {
       final hiveBox = await box;
       final spaceJson = hiveBox.get(id);
-      
+
       if (spaceJson == null) {
         return null;
       }
-      
+
       final spaceData = jsonDecode(spaceJson) as Map<String, dynamic>;
       final space = SpaceModel.fromJson(spaceData);
-      
+
       return space.isDeleted ? null : space;
     } catch (e) {
-      throw CacheFailure('Erro ao buscar espaço do cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao buscar espaço do cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -74,7 +81,9 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final spaceJson = jsonEncode(space.toJson());
       await hiveBox.put(space.id, spaceJson);
     } catch (e) {
-      throw CacheFailure('Erro ao salvar espaço no cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao salvar espaço no cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -85,7 +94,9 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final spaceJson = jsonEncode(space.toJson());
       await hiveBox.put(space.id, spaceJson);
     } catch (e) {
-      throw CacheFailure('Erro ao atualizar espaço no cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao atualizar espaço no cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -93,25 +104,27 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   Future<void> deleteSpace(String id) async {
     try {
       final hiveBox = await box;
-      
+
       // Get existing space first
       final spaceJson = hiveBox.get(id);
       if (spaceJson != null) {
         final spaceData = jsonDecode(spaceJson) as Map<String, dynamic>;
         final space = SpaceModel.fromJson(spaceData);
-        
+
         // Soft delete - mark as deleted
         final deletedSpace = space.copyWith(
           isDeleted: true,
           updatedAt: DateTime.now(),
           isDirty: true,
         );
-        
+
         final updatedJson = jsonEncode(deletedSpace.toJson());
         await hiveBox.put(id, updatedJson);
       }
     } catch (e) {
-      throw CacheFailure('Erro ao deletar espaço do cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao deletar espaço do cache local: ${e.toString()}',
+      );
     }
   }
 

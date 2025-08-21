@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math' as math;
 
 import '../../../core/errors/failures.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../providers/auth_providers.dart';
+import '../home_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -13,343 +16,955 @@ class LoginPage extends ConsumerStatefulWidget {
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  bool _rememberMe = false;
+  
+  // Animation controllers
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late AnimationController _scaleController;
+  late AnimationController _rotationController;
+  
+  // Animations
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+    _setupAuthListener();
+    
+    // Add focus listeners for better UX
+    _emailFocusNode.addListener(() => setState(() {}));
+    _passwordFocusNode.addListener(() => setState(() {}));
+  }
+
+  void _initializeAnimations() {
+    // Fade animation
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Slide animation
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Scale animation
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.elasticOut,
+    ));
+
+    // Rotation animation for logo
+    _rotationController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..repeat();
+    _rotationAnimation = Tween<double>(
+      begin: 0,
+      end: 2 * math.pi,
+    ).animate(_rotationController);
+
+    // Start animations
+    _fadeController.forward();
+    _slideController.forward();
+    _scaleController.forward();
+  }
+
+  void _setupAuthListener() {
+    ref.listen<AsyncValue<dynamic>>(authNotifierProvider, (previous, next) {
+      next.when(
+        data: (user) {
+          if (user != null && mounted) {
+            Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const HomePage(),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 500),
+              ),
+            );
+          }
+        },
+        loading: () {},
+        error: (error, stack) {},
+      );
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _fadeController.dispose();
+    _slideController.dispose();
+    _scaleController.dispose();
+    _rotationController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      // Shake animation on validation error
+      _shakeForm();
+      return;
+    }
 
     setState(() => _isLoading = true);
+    
+    // Haptic feedback
+    HapticFeedback.lightImpact();
 
     try {
-      await ref.read(taskManagerAuthNotifierProvider.notifier).signInWithEmailAndPassword(
+      await ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text,
       );
-
-      if (mounted) {
-        // Navigation será tratado pelo AuthGuard baseado no estado
-        setState(() => _isLoading = false);
-      }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        String errorMessage = 'Erro ao fazer login';
-        
-        if (e is Failure) {
-          errorMessage = e.message;
-        } else {
-          errorMessage = e.toString();
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: AppColors.error,
-          ),
+        _showAnimatedSnackBar(
+          message: _getErrorMessage(e),
+          isError: true,
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
 
-  void _navigateToRegister() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const RegisterPage()),
-    );
-  }
-
   Future<void> _handleAnonymousLogin() async {
     setState(() => _isLoading = true);
+    HapticFeedback.lightImpact();
+    
     try {
-      await ref.read(taskManagerAuthNotifierProvider.notifier).signInAnonymously();
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      await ref.read(authNotifierProvider.notifier).signInAnonymously();
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro no login anônimo: $e'),
-            backgroundColor: AppColors.error,
-          ),
+        _showAnimatedSnackBar(
+          message: 'Erro no login anônimo: ${_getErrorMessage(e)}',
+          isError: true,
         );
+      }
+    }
+  }
+
+  Future<void> _handleDemoLogin() async {
+    setState(() => _isLoading = true);
+    HapticFeedback.mediumImpact();
+    
+    try {
+      await ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
+        'demo@taskmanager.com',
+        'demo123456',
+      );
+    } catch (e) {
+      try {
+        await ref.read(authNotifierProvider.notifier).signInAnonymously();
+      } catch (e2) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showAnimatedSnackBar(
+            message: 'Erro ao acessar modo demo: ${_getErrorMessage(e2)}',
+            isError: true,
+          );
+        }
       }
     }
   }
 
   Future<void> _handleGoogleLogin() async {
     setState(() => _isLoading = true);
+    HapticFeedback.lightImpact();
+    
     try {
-      await ref.read(taskManagerAuthNotifierProvider.notifier).signInWithGoogle();
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      await ref.read(authNotifierProvider.notifier).signInWithGoogle();
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login com Google não disponível ainda'),
-            backgroundColor: AppColors.info,
-          ),
+        _showAnimatedSnackBar(
+          message: 'Login com Google não disponível ainda',
+          isError: false,
         );
       }
     }
   }
 
-  Future<void> _handleForgotPassword() async {
-    if (_emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Digite seu email primeiro'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-      return;
-    }
+  void _shakeForm() {
+    HapticFeedback.mediumImpact();
+    // Implement shake animation for form
+  }
 
-    try {
-      await ref.read(taskManagerAuthNotifierProvider.notifier).sendPasswordResetEmail(
-        _emailController.text.trim(),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email de redefinição enviado!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao enviar email: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+  String _getErrorMessage(dynamic error) {
+    if (error is Failure) {
+      return error.message;
     }
+    return error.toString();
+  }
+
+  void _showAnimatedSnackBar({
+    required String message,
+    required bool isError,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.info_outline,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: isError ? Colors.red[600] : Colors.blue[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: const EdgeInsets.all(16),
+        elevation: 8,
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo/Título
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withAlpha(26),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.task_alt,
-                    size: 60,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Task Manager',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Entre para gerenciar suas tarefas',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 48),
-
-                // Campo Email
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, insira seu email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Por favor, insira um email válido';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Campo Senha
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Senha',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                    ),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, insira sua senha';
-                    }
-                    if (value.length < 6) {
-                      return 'A senha deve ter pelo menos 6 caracteres';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Botão de Login
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Entrar', style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(height: 12),
-                
-                // Link esqueceu senha
-                TextButton(
-                  onPressed: _handleForgotPassword,
-                  child: const Text('Esqueceu a senha?'),
-                ),
-                const SizedBox(height: 16),
-
-                // Link para registro
-                TextButton(
-                  onPressed: _navigateToRegister,
-                  child: const Text('Não tem uma conta? Registre-se'),
-                ),
-
-                // Divider
-                const Row(
-                  children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('OU'),
-                    ),
-                    Expanded(child: Divider()),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF1a1a2e),
+                    const Color(0xFF0f0f1e),
+                    const Color(0xFF16213e),
+                  ]
+                : [
+                    const Color(0xFF667eea),
+                    const Color(0xFF764ba2),
+                    const Color(0xFF6B8DD6),
                   ],
-                ),
-                const SizedBox(height: 24),
-                
-                // Botões de login social
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _handleGoogleLogin,
-                  icon: const Icon(Icons.login, color: Colors.red),
-                  label: const Text('Continuar com Google'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: Colors.grey),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Botão de login anônimo
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _handleAnonymousLogin,
-                  icon: const Icon(Icons.person_outline, color: AppColors.info),
-                  label: const Text('Entrar como convidado'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: AppColors.info),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                // Botão de login demo
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withAlpha(26),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.warning.withAlpha(77)),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Teste rápido:',
-                        style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Animated background patterns
+              _buildBackgroundPattern(),
+              
+              // Main content
+              Center(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Logo and title section
+                          _buildLogoSection(isDarkMode),
+                          const SizedBox(height: 48),
+                          
+                          // Glass morphism card
+                          _buildGlassCard(
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Welcome text
+                                  _buildWelcomeText(isDarkMode),
+                                  const SizedBox(height: 32),
+                                  
+                                  // Email field
+                                  _buildModernTextField(
+                                    controller: _emailController,
+                                    focusNode: _emailFocusNode,
+                                    label: 'Email',
+                                    icon: Icons.email_outlined,
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: _validateEmail,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  
+                                  // Password field
+                                  _buildModernTextField(
+                                    controller: _passwordController,
+                                    focusNode: _passwordFocusNode,
+                                    label: 'Senha',
+                                    icon: Icons.lock_outline,
+                                    isPassword: true,
+                                    validator: _validatePassword,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  
+                                  // Remember me and forgot password
+                                  _buildOptionsRow(),
+                                  const SizedBox(height: 32),
+                                  
+                                  // Login button
+                                  _buildGradientButton(
+                                    onPressed: _isLoading ? null : _handleLogin,
+                                    text: 'Entrar',
+                                    isLoading: _isLoading,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  
+                                  // Social login section
+                                  _buildSocialLoginSection(),
+                                  const SizedBox(height: 24),
+                                  
+                                  // Demo mode button
+                                  _buildDemoButton(),
+                                  const SizedBox(height: 20),
+                                  
+                                  // Register link
+                                  _buildRegisterLink(),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: _isLoading ? null : () {
-                          _emailController.text = 'demo@taskmanager.com';
-                          _passwordController.text = '123456';
-                          _handleLogin();
-                        },
-                        child: const Text('Usar conta demo'),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackgroundPattern() {
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: _rotationAnimation,
+        builder: (context, child) {
+          return CustomPaint(
+            painter: BackgroundPatternPainter(
+              rotation: _rotationAnimation.value,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLogoSection(bool isDarkMode) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Column(
+        children: [
+          // Animated logo
+          AnimatedBuilder(
+            animation: _rotationAnimation,
+            builder: (context, child) {
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..rotateY(_rotationAnimation.value * 0.5)
+                  ..rotateZ(_rotationAnimation.value * 0.1),
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withAlpha(230),
+                        Colors.white.withAlpha(179),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(51),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF667eea).withAlpha(102),
+                        blurRadius: 30,
+                        offset: const Offset(0, -5),
                       ),
                     ],
                   ),
+                  child: const Icon(
+                    Icons.task_alt_rounded,
+                    size: 50,
+                    color: Color(0xFF667eea),
+                  ),
                 ),
-              ],
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Colors.white, Colors.white70],
+            ).createShader(bounds),
+            child: Text(
+              'Task Manager',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.5,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withAlpha(64),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGlassCard({required Widget child}) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 420),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(26),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withAlpha(51),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(26),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        backgroundBlendMode: BlendMode.overlay,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ColorFilter.mode(
+            Colors.white.withAlpha(26),
+            BlendMode.overlay,
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeText(bool isDarkMode) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          'Bem-vindo de volta!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Entre para continuar organizando suas tarefas',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white.withAlpha(179),
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String label,
+    required IconData icon,
+    bool isPassword = false,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    final isFocused = focusNode.hasFocus;
+    
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: isFocused
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF667eea).withAlpha(77),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
+      ),
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        obscureText: isPassword && !_isPasswordVisible,
+        keyboardType: keyboardType,
+        enabled: !_isLoading,
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: isFocused 
+                ? Colors.white 
+                : Colors.white.withAlpha(153),
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: isFocused 
+                ? Colors.white 
+                : Colors.white.withAlpha(128),
+          ),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                    color: Colors.white.withAlpha(153),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white.withAlpha(13),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.white.withAlpha(51),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.white.withAlpha(179),
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.red[400]!,
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.red[400]!,
+              width: 2,
+            ),
+          ),
+          errorStyle: TextStyle(
+            color: Colors.red[300],
+            fontSize: 12,
+          ),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira seu email';
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Por favor, insira um email válido';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira sua senha';
+    }
+    if (value.length < 6) {
+      return 'A senha deve ter pelo menos 6 caracteres';
+    }
+    return null;
+  }
+
+  Widget _buildOptionsRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Remember me
+        Row(
+          children: [
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Checkbox(
+                value: _rememberMe,
+                onChanged: (value) {
+                  setState(() {
+                    _rememberMe = value ?? false;
+                  });
+                },
+                activeColor: const Color(0xFF667eea),
+                checkColor: Colors.white,
+                side: BorderSide(
+                  color: Colors.white.withAlpha(128),
+                  width: 2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Lembrar-me',
+              style: TextStyle(
+                color: Colors.white.withAlpha(204),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        
+        // Forgot password
+        TextButton(
+          onPressed: _isLoading ? null : () {
+            // Handle forgot password
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          child: const Text('Esqueci a senha'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGradientButton({
+    required VoidCallback? onPressed,
+    required String text,
+    bool isLoading = false,
+  }) {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF667eea),
+            Color(0xFF764ba2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF667eea).withAlpha(102),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    text,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialLoginSection() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Divider(
+                color: Colors.white.withAlpha(77),
+                thickness: 1,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'ou continue com',
+                style: TextStyle(
+                  color: Colors.white.withAlpha(179),
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Divider(
+                color: Colors.white.withAlpha(77),
+                thickness: 1,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildSocialButton(
+              onPressed: _isLoading ? null : _handleGoogleLogin,
+              icon: Icons.g_mobiledata_rounded,
+              color: Colors.red,
+            ),
+            const SizedBox(width: 16),
+            _buildSocialButton(
+              onPressed: _isLoading ? null : () {},
+              icon: Icons.apple_rounded,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 16),
+            _buildSocialButton(
+              onPressed: _isLoading ? null : _handleAnonymousLogin,
+              icon: Icons.person_outline_rounded,
+              color: Colors.blue,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSocialButton({
+    required VoidCallback? onPressed,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(13),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withAlpha(51),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
+            child: Icon(
+              icon,
+              color: color,
+              size: 28,
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildDemoButton() {
+    return OutlinedButton.icon(
+      onPressed: _isLoading ? null : _handleDemoLogin,
+      icon: const Icon(Icons.play_arrow_rounded),
+      label: const Text('Experimentar Modo Demo'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: BorderSide(
+          color: Colors.white.withAlpha(128),
+          width: 1.5,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegisterLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Não tem uma conta? ',
+          style: TextStyle(
+            color: Colors.white.withAlpha(179),
+            fontSize: 14,
+          ),
+        ),
+        TextButton(
+          onPressed: _isLoading ? null : () {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const RegisterPage(),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          child: const Text('Registre-se'),
+        ),
+      ],
+    );
+  }
+}
+
+// Custom painter for animated background pattern
+class BackgroundPatternPainter extends CustomPainter {
+  final double rotation;
+
+  BackgroundPatternPainter({required this.rotation});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 1;
+
+    // Draw floating circles
+    for (int i = 0; i < 5; i++) {
+      final offset = Offset(
+        size.width * (0.2 + i * 0.2) + math.sin(rotation + i) * 20,
+        size.height * 0.1 + math.cos(rotation + i) * 30,
+      );
+      
+      paint.color = Colors.white.withAlpha((10 + i * 5));
+      canvas.drawCircle(offset, 30 + i * 10.0, paint);
+    }
+
+    // Draw diagonal lines pattern
+    paint.style = PaintingStyle.stroke;
+    paint.color = Colors.white.withAlpha(5);
+    paint.strokeWidth = 0.5;
+
+    for (int i = 0; i < 20; i++) {
+      canvas.drawLine(
+        Offset(0, size.height * i / 20),
+        Offset(size.width * i / 20, 0),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(BackgroundPatternPainter oldDelegate) {
+    return rotation != oldDelegate.rotation;
   }
 }

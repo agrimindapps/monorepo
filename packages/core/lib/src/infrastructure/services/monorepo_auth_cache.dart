@@ -43,9 +43,9 @@ class MonorepoAuthCache {
     _ensureInitialized();
     
     try {
-      final userKey = '${_userPrefix}${moduleName}_user';
-      final loginTimeKey = '${_userPrefix}${moduleName}_last_login';
-      final sessionKey = '${_sessionPrefix}${moduleName}';
+      final userKey = '$_userPrefix${moduleName}_user';
+      final loginTimeKey = '$_userPrefix${moduleName}_last_login';
+      final sessionKey = '$_sessionPrefix$moduleName';
       
       // Salvar dados do usuário
       final userJson = jsonEncode(user.toJson());
@@ -83,7 +83,7 @@ class MonorepoAuthCache {
     _ensureInitialized();
     
     try {
-      final userKey = '${_userPrefix}${moduleName}_user';
+      final userKey = '$_userPrefix${moduleName}_user';
       final userJson = _prefs.getString(userKey);
       
       if (userJson == null) {
@@ -104,7 +104,7 @@ class MonorepoAuthCache {
     _ensureInitialized();
     
     try {
-      final loginTimeKey = '${_userPrefix}${moduleName}_last_login';
+      final loginTimeKey = '$_userPrefix${moduleName}_last_login';
       final loginTimeStr = _prefs.getString(loginTimeKey);
       
       if (loginTimeStr == null) return null;
@@ -139,7 +139,7 @@ class MonorepoAuthCache {
     _ensureInitialized();
     
     try {
-      final sessionKey = '${_sessionPrefix}${moduleName}';
+      final sessionKey = '$_sessionPrefix$moduleName';
       final sessionJson = _prefs.getString(sessionKey);
       
       if (sessionJson == null) return null;
@@ -178,7 +178,7 @@ class MonorepoAuthCache {
       
       sessionData['lastActivity'] = DateTime.now().toIso8601String();
       
-      final sessionKey = '${_sessionPrefix}${moduleName}';
+      final sessionKey = '$_sessionPrefix$moduleName';
       await _prefs.setString(sessionKey, jsonEncode(sessionData));
       
       return true;
@@ -240,9 +240,9 @@ class MonorepoAuthCache {
     _ensureInitialized();
     
     try {
-      final userKey = '${_userPrefix}${moduleName}_user';
-      final loginTimeKey = '${_userPrefix}${moduleName}_last_login';
-      final sessionKey = '${_sessionPrefix}${moduleName}';
+      final userKey = '$_userPrefix${moduleName}_user';
+      final loginTimeKey = '$_userPrefix${moduleName}_last_login';
+      final sessionKey = '$_sessionPrefix$moduleName';
       
       await Future.wait([
         _prefs.remove(userKey),
@@ -264,7 +264,7 @@ class MonorepoAuthCache {
     _ensureInitialized();
     
     try {
-      final sessionKey = '${_sessionPrefix}${moduleName}';
+      final sessionKey = '$_sessionPrefix$moduleName';
       await _prefs.remove(sessionKey);
       
       developer.log('Sessão do módulo $moduleName limpa', name: 'AuthCache');

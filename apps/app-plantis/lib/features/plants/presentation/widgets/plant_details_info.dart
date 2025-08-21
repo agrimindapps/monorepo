@@ -5,15 +5,12 @@ import '../../../../core/theme/colors.dart';
 class PlantDetailsInfo extends StatelessWidget {
   final Plant plant;
 
-  const PlantDetailsInfo({
-    super.key,
-    required this.plant,
-  });
+  const PlantDetailsInfo({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,15 +26,17 @@ class PlantDetailsInfo extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: theme.brightness == Brightness.dark 
-              ? const Color(0xFF2C2C2E)
-              : theme.colorScheme.surface,
+            color:
+                theme.brightness == Brightness.dark
+                    ? const Color(0xFF2C2C2E)
+                    : theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: theme.brightness == Brightness.dark 
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.black.withValues(alpha: 0.08),
+                color:
+                    theme.brightness == Brightness.dark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.08),
                 blurRadius: theme.brightness == Brightness.dark ? 8 : 12,
                 offset: const Offset(0, 4),
                 spreadRadius: theme.brightness == Brightness.dark ? 0 : 2,
@@ -55,7 +54,7 @@ class PlantDetailsInfo extends StatelessWidget {
                 color: PlantisColors.primary,
               ),
               const SizedBox(height: 16),
-              
+
               // Espécie/Nome científico
               if (plant.species != null && plant.species!.isNotEmpty) ...[
                 _buildInfoRow(
@@ -67,7 +66,7 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Localização
               if (plant.spaceId != null) ...[
                 _buildInfoRow(
@@ -79,7 +78,7 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Idade da planta
               if (plant.plantingDate != null) ...[
                 _buildInfoRow(
@@ -99,7 +98,7 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Data de adição
               if (plant.createdAt != null) ...[
                 _buildInfoRow(
@@ -111,9 +110,9 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Última atualização
-              if (plant.updatedAt != null && 
+              if (plant.updatedAt != null &&
                   plant.updatedAt != plant.createdAt) ...[
                 _buildInfoRow(
                   context,
@@ -138,7 +137,7 @@ class PlantDetailsInfo extends StatelessWidget {
     required Color color,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Container(
@@ -147,11 +146,7 @@ class PlantDetailsInfo extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: color,
-          ),
+          child: Icon(icon, size: 20, color: color),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -161,9 +156,10 @@ class PlantDetailsInfo extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.brightness == Brightness.dark 
-                    ? Colors.grey[400]
-                    : Colors.grey[600],
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[600],
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -184,24 +180,34 @@ class PlantDetailsInfo extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
-    
+
     return '${date.day} de ${months[date.month - 1]} de ${date.year}';
   }
 
   String _getPlantAge() {
     if (plant.plantingDate == null) return 'Não informado';
-    
+
     final now = DateTime.now();
     final plantingDate = plant.plantingDate!;
     final difference = now.difference(plantingDate);
-    
+
     final years = difference.inDays ~/ 365;
     final months = (difference.inDays % 365) ~/ 30;
     final days = difference.inDays % 30;
-    
+
     if (years > 0) {
       if (months > 0) {
         return '$years ${years == 1 ? 'ano' : 'anos'} e $months ${months == 1 ? 'mês' : 'meses'}';
@@ -216,5 +222,4 @@ class PlantDetailsInfo extends StatelessWidget {
       return '$days ${days == 1 ? 'dia' : 'dias'}';
     }
   }
-
 }

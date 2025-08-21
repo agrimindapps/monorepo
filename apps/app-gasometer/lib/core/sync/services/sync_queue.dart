@@ -49,7 +49,7 @@ class SyncQueue {
       modelType: modelType,
       operation: operation.toLowerCase(),
       data: data,
-      userId: userId,
+      userId: userId ?? '',
       priority: priority,
     );
 

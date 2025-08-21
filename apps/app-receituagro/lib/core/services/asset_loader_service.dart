@@ -19,7 +19,7 @@ class AssetLoaderService implements IAssetLoader {
       // Se for uma lista diretamente
       if (jsonData is List) {
         final List<Map<String, dynamic>> dataList = jsonData
-            .where((item) => item is Map<String, dynamic>)
+            .whereType<Map<String, dynamic>>()
             .cast<Map<String, dynamic>>()
             .toList();
             
@@ -33,7 +33,7 @@ class AssetLoaderService implements IAssetLoader {
         for (final value in jsonData.values) {
           if (value is List) {
             final List<Map<String, dynamic>> dataList = value
-                .where((item) => item is Map<String, dynamic>)
+                .whereType<Map<String, dynamic>>()
                 .cast<Map<String, dynamic>>()
                 .toList();
                 

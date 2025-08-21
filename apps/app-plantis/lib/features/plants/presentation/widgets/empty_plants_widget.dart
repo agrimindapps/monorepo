@@ -18,7 +18,7 @@ class EmptyPlantsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (isSearching) {
       // Estado vazio da busca
       return Center(
@@ -40,9 +40,9 @@ class EmptyPlantsWidget extends StatelessWidget {
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Título
               Text(
                 'Nenhuma planta encontrada',
@@ -52,9 +52,9 @@ class EmptyPlantsWidget extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Mensagem
               RichText(
                 textAlign: TextAlign.center,
@@ -66,17 +66,15 @@ class EmptyPlantsWidget extends StatelessWidget {
                     const TextSpan(text: 'Não encontramos nenhuma planta com '),
                     TextSpan(
                       text: '"$searchQuery"',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const TextSpan(text: '.\nTente usar outros termos.'),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Botão para limpar busca
               if (onClearSearch != null)
                 OutlinedButton.icon(
@@ -100,7 +98,7 @@ class EmptyPlantsWidget extends StatelessWidget {
         ),
       );
     }
-    
+
     // Estado vazio inicial (sem plantas)
     return Center(
       child: Padding(
@@ -109,14 +107,10 @@ class EmptyPlantsWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Ícone de folha grande e cinza
-            Icon(
-              Icons.eco_outlined,
-              size: 120,
-              color: Colors.grey.shade400,
-            ),
-            
+            Icon(Icons.eco_outlined, size: 120, color: Colors.grey.shade400),
+
             const SizedBox(height: 32),
-            
+
             // Título
             Text(
               'Nenhuma planta cadastrada',
@@ -127,9 +121,9 @@ class EmptyPlantsWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Mensagem
             Text(
               'Adicione sua primeira planta para começar a cuidar\ndela com o Grow',
@@ -140,9 +134,9 @@ class EmptyPlantsWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 48),
-            
+
             // Botão para adicionar
             if (onAddPlant != null)
               ElevatedButton.icon(

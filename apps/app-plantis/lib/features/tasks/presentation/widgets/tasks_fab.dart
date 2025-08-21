@@ -26,10 +26,11 @@ class TasksFab extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ChangeNotifierProvider.value(
-        value: Provider.of<TasksProvider>(context, listen: false),
-        child: _AddTaskBottomSheet(),
-      ),
+      builder:
+          (context) => ChangeNotifierProvider.value(
+            value: Provider.of<TasksProvider>(context, listen: false),
+            child: _AddTaskBottomSheet(),
+          ),
     );
   }
 }
@@ -43,7 +44,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   String _selectedTaskType = 'watering';
   String _selectedPriority = 'medium';
   DateTime? _selectedDate;
@@ -113,7 +114,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
 
                   // Título
@@ -153,7 +154,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                   Consumer<PlantsProvider>(
                     builder: (context, plantsProvider, child) {
                       final plants = plantsProvider.plants;
-                      
+
                       return DropdownButtonFormField<String>(
                         decoration: const InputDecoration(
                           labelText: 'Planta',
@@ -162,12 +163,13 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                         ),
                         value: _selectedPlantId,
                         hint: const Text('Selecione uma planta'),
-                        items: plants.map((plant) {
-                          return DropdownMenuItem<String>(
-                            value: plant.id,
-                            child: Text(plant.name),
-                          );
-                        }).toList(),
+                        items:
+                            plants.map((plant) {
+                              return DropdownMenuItem<String>(
+                                value: plant.id,
+                                child: Text(plant.name),
+                              );
+                            }).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedPlantId = value;
@@ -193,18 +195,19 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                       border: OutlineInputBorder(),
                     ),
                     value: _selectedTaskType,
-                    items: _taskTypes.map((type) {
-                      return DropdownMenuItem<String>(
-                        value: type['value'],
-                        child: Row(
-                          children: [
-                            Icon(type['icon'], size: 20),
-                            const SizedBox(width: 8),
-                            Text(type['label']),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    items:
+                        _taskTypes.map((type) {
+                          return DropdownMenuItem<String>(
+                            value: type['value'],
+                            child: Row(
+                              children: [
+                                Icon(type['icon'], size: 20),
+                                const SizedBox(width: 8),
+                                Text(type['label']),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedTaskType = value!;
@@ -222,25 +225,26 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                       border: OutlineInputBorder(),
                     ),
                     value: _selectedPriority,
-                    items: _priorities.map((priority) {
-                      return DropdownMenuItem<String>(
-                        value: priority['value'],
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 16,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: priority['color'],
-                                shape: BoxShape.circle,
-                              ),
+                    items:
+                        _priorities.map((priority) {
+                          return DropdownMenuItem<String>(
+                            value: priority['value'],
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: priority['color'],
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(priority['label']),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            Text(priority['label']),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedPriority = value!;
@@ -263,9 +267,10 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                         _selectedDate != null
                             ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
                             : 'Selecione uma data',
-                        style: _selectedDate != null
-                            ? null
-                            : TextStyle(color: theme.hintColor),
+                        style:
+                            _selectedDate != null
+                                ? null
+                                : TextStyle(color: theme.hintColor),
                       ),
                     ),
                   ),
@@ -285,13 +290,16 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _isCreatingTask ? null : _saveTask,
-                          child: _isCreatingTask 
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Salvar Tarefa'),
+                          child:
+                              _isCreatingTask
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text('Salvar Tarefa'),
                         ),
                       ),
                     ],
@@ -343,9 +351,14 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
 
     try {
       // Buscar dados da planta selecionada
-      final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-      final plant = plantsProvider.plants.firstWhere((p) => p.id == _selectedPlantId!);
-      
+      final plantsProvider = Provider.of<PlantsProvider>(
+        context,
+        listen: false,
+      );
+      final plant = plantsProvider.plants.firstWhere(
+        (p) => p.id == _selectedPlantId!,
+      );
+
       // Mapear tipo de tarefa para TaskType
       TaskType mapTaskType(String value) {
         switch (value) {
@@ -389,7 +402,10 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
         updatedAt: DateTime.now(),
         isDirty: true,
         title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        description:
+            _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
         plantId: plant.id,
         plantName: plant.name,
         type: mapTaskType(_selectedTaskType),
@@ -416,7 +432,9 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erro ao criar tarefa: ${tasksProvider.errorMessage ?? 'Erro desconhecido'}'),
+              content: Text(
+                'Erro ao criar tarefa: ${tasksProvider.errorMessage ?? 'Erro desconhecido'}',
+              ),
               backgroundColor: Colors.red,
             ),
           );

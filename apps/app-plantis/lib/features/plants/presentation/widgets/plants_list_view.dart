@@ -21,10 +21,7 @@ class PlantsListView extends StatelessWidget {
       itemCount: plants.length,
       itemBuilder: (context, index) {
         final plant = plants[index];
-        return PlantListTile(
-          plant: plant,
-          key: ValueKey(plant.id),
-        );
+        return PlantListTile(plant: plant, key: ValueKey(plant.id));
       },
     );
   }

@@ -5,10 +5,9 @@ import '../../domain/services/task_generation_service.dart';
 
 class PlantTaskProvider extends ChangeNotifier {
   final TaskGenerationService _taskGenerationService;
-  
-  PlantTaskProvider({
-    TaskGenerationService? taskGenerationService,
-  }) : _taskGenerationService = taskGenerationService ?? TaskGenerationService();
+
+  PlantTaskProvider({TaskGenerationService? taskGenerationService})
+    : _taskGenerationService = taskGenerationService ?? TaskGenerationService();
 
   // State
   final Map<String, List<PlantTask>> _plantTasks = {};
@@ -49,7 +48,7 @@ class PlantTaskProvider extends ChangeNotifier {
     final pending = _taskGenerationService.getPendingTasks(tasks);
     final upcoming = _taskGenerationService.getUpcomingTasks(tasks);
     final overdue = _taskGenerationService.getOverdueTasks(tasks);
-    
+
     return {
       'total': tasks.length,
       'pending': pending.length,
@@ -68,10 +67,9 @@ class PlantTaskProvider extends ChangeNotifier {
     try {
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
       _plantTasks[plant.id] = tasks;
-      
+
       // Update task statuses
       await _updateTaskStatuses(plant.id);
-      
     } catch (e) {
       _errorMessage = 'Erro ao gerar tarefas: $e';
     } finally {
@@ -85,7 +83,7 @@ class PlantTaskProvider extends ChangeNotifier {
     try {
       final tasks = getTasksForPlant(plantId);
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
-      
+
       if (taskIndex == -1) {
         _errorMessage = 'Tarefa não encontrada';
         notifyListeners();
@@ -93,7 +91,7 @@ class PlantTaskProvider extends ChangeNotifier {
       }
 
       final task = tasks[taskIndex];
-      
+
       if (task.isCompleted) {
         // Mark as pending
         final pendingTask = task.copyWith(
@@ -105,15 +103,14 @@ class PlantTaskProvider extends ChangeNotifier {
         // Mark as completed
         final completedTask = task.markAsCompleted();
         tasks[taskIndex] = completedTask;
-        
+
         // Generate next task
         final nextTask = _taskGenerationService.generateNextTask(completedTask);
         tasks.add(nextTask);
       }
-      
+
       _plantTasks[plantId] = tasks;
       await _updateTaskStatuses(plantId);
-      
     } catch (e) {
       _errorMessage = 'Erro ao alterar status da tarefa: $e';
       notifyListeners();
@@ -125,7 +122,7 @@ class PlantTaskProvider extends ChangeNotifier {
     try {
       final tasks = getTasksForPlant(plantId);
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
-      
+
       if (taskIndex == -1) {
         _errorMessage = 'Tarefa não encontrada';
         notifyListeners();
@@ -134,19 +131,18 @@ class PlantTaskProvider extends ChangeNotifier {
 
       final task = tasks[taskIndex];
       final completedTask = task.markAsCompleted();
-      
+
       // Update the current task
       tasks[taskIndex] = completedTask;
-      
+
       // Generate next task
       final nextTask = _taskGenerationService.generateNextTask(completedTask);
       tasks.add(nextTask);
-      
+
       _plantTasks[plantId] = tasks;
-      
+
       // Update all task statuses
       await _updateTaskStatuses(plantId);
-      
     } catch (e) {
       _errorMessage = 'Erro ao completar tarefa: $e';
       notifyListeners();
@@ -158,7 +154,7 @@ class PlantTaskProvider extends ChangeNotifier {
     try {
       final tasks = getTasksForPlant(plantId);
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
-      
+
       if (taskIndex == -1) {
         _errorMessage = 'Tarefa não encontrada';
         notifyListeners();
@@ -167,9 +163,8 @@ class PlantTaskProvider extends ChangeNotifier {
 
       tasks.removeAt(taskIndex);
       _plantTasks[plantId] = tasks;
-      
+
       await _updateTaskStatuses(plantId);
-      
     } catch (e) {
       _errorMessage = 'Erro ao deletar tarefa: $e';
       notifyListeners();
@@ -190,7 +185,8 @@ class PlantTaskProvider extends ChangeNotifier {
   }
 
   /// Gets all tasks for all plants (for dashboard/overview)
-  Map<String, List<PlantTask>> get allPlantTasks => Map.unmodifiable(_plantTasks);
+  Map<String, List<PlantTask>> get allPlantTasks =>
+      Map.unmodifiable(_plantTasks);
 
   /// Gets all upcoming tasks across all plants
   List<PlantTask> getAllUpcomingTasks() {
@@ -226,7 +222,7 @@ class PlantTaskProvider extends ChangeNotifier {
   Future<void> updateTasksForPlantConfig(Plant plant) async {
     // Remove existing tasks
     _plantTasks.remove(plant.id);
-    
+
     // Generate new tasks based on updated config
     await generateTasksForPlant(plant);
   }

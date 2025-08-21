@@ -25,7 +25,7 @@ class SettingsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -37,14 +37,15 @@ class SettingsItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            border: !isLast
-                ? Border(
-                    bottom: BorderSide(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                      width: 0.5,
-                    ),
-                  )
-                : null,
+            border:
+                !isLast
+                    ? Border(
+                      bottom: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                        width: 0.5,
+                      ),
+                    )
+                    : null,
           ),
           child: Row(
             children: [
@@ -55,11 +56,7 @@ class SettingsItem extends StatelessWidget {
                   color: iconColor ?? theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: theme.colorScheme.onPrimary,
-                  size: 18,
-                ),
+                child: Icon(icon, color: theme.colorScheme.onPrimary, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -63,7 +63,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   List<ComentarioModel> _comentarios = [];
   bool _isLoadingComments = false;
   final TextEditingController _commentController = TextEditingController();
-  bool _hasReachedMaxComments = false;
+  final bool _hasReachedMaxComments = false;
   final int _maxComentarios = 5; // default valor
   
   // Estado dos diagnósticos
@@ -1257,11 +1257,11 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                             diagnostico.ingredienteAtivo,
                             diagnostico.dosagem,
                           ),
-                        )).toList(),
+                        )),
                         const SizedBox(height: 24),
                       ],
                     );
-                  }).toList(),
+                  }),
                 const SizedBox(height: 80),
               ],
             ),
@@ -1441,7 +1441,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -1586,7 +1586,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildComentarioCard(comentario, index),
               );
-            }).toList(),
+            }),
           
           const SizedBox(height: 80), // Espaço para bottom navigation
         ],
@@ -1842,7 +1842,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -2228,7 +2228,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(

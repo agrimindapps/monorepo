@@ -20,9 +20,9 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna a dosagem formatada
   String get displayDosagem {
     if (dsMin?.isNotEmpty == true && dsMax.isNotEmpty) {
-      return '${dsMin} - ${dsMax} ${um}';
+      return '$dsMin - $dsMax $um';
     } else if (dsMax.isNotEmpty) {
-      return '${dsMax} ${um}';
+      return '$dsMax $um';
     }
     return 'Dosagem não especificada';
   }
@@ -30,9 +30,9 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna a vazão terrestre formatada
   String get displayVazaoTerrestre {
     if (minAplicacaoT?.isNotEmpty == true && maxAplicacaoT?.isNotEmpty == true) {
-      return '${minAplicacaoT} - ${maxAplicacaoT} ${umT ?? "L/ha"}';
+      return '$minAplicacaoT - $maxAplicacaoT ${umT ?? "L/ha"}';
     } else if (maxAplicacaoT?.isNotEmpty == true) {
-      return '${maxAplicacaoT} ${umT ?? "L/ha"}';
+      return '$maxAplicacaoT ${umT ?? "L/ha"}';
     }
     return 'Não especificada';
   }
@@ -40,9 +40,9 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna a vazão aérea formatada  
   String get displayVazaoAerea {
     if (minAplicacaoA?.isNotEmpty == true && maxAplicacaoA?.isNotEmpty == true) {
-      return '${minAplicacaoA} - ${maxAplicacaoA} ${umA ?? "L/ha"}';
+      return '$minAplicacaoA - $maxAplicacaoA ${umA ?? "L/ha"}';
     } else if (maxAplicacaoA?.isNotEmpty == true) {
-      return '${maxAplicacaoA} ${umA ?? "L/ha"}';
+      return '$maxAplicacaoA ${umA ?? "L/ha"}';
     }
     return 'Não especificada';
   }
@@ -50,9 +50,9 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o intervalo de aplicação formatado
   String get displayIntervaloAplicacao {
     if (intervalo?.isNotEmpty == true) {
-      return '${intervalo} dias';
+      return '$intervalo dias';
     } else if (intervalo2?.isNotEmpty == true) {
-      return '${intervalo2} dias';
+      return '$intervalo2 dias';
     }
     return 'Não especificado';
   }

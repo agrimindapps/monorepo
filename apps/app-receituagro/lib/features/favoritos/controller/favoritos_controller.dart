@@ -113,14 +113,14 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
       await _dataService.removeFavoritoDefensivo(defensivo.id);
       final message = '${defensivo.displayName} foi removido dos favoritos';
       if (_notificationService != null) {
-        _notificationService!.showSuccess(message);
+        _notificationService.showSuccess(message);
       } else {
         debugPrint('Removido: $message');
       }
     } catch (e) {
       const message = 'Não foi possível remover dos favoritos';
       if (_notificationService != null) {
-        _notificationService!.showError(message);
+        _notificationService.showError(message);
       } else {
         debugPrint('Erro: $message');
       }
@@ -132,14 +132,14 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
       await _dataService.removeFavoritoPraga(praga.id);
       final message = '${praga.displayName} foi removido dos favoritos';
       if (_notificationService != null) {
-        _notificationService!.showSuccess(message);
+        _notificationService.showSuccess(message);
       } else {
         debugPrint('Removido: $message');
       }
     } catch (e) {
       const message = 'Não foi possível remover dos favoritos';
       if (_notificationService != null) {
-        _notificationService!.showError(message);
+        _notificationService.showError(message);
       } else {
         debugPrint('Erro: $message');
       }
@@ -151,14 +151,14 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
       await _dataService.removeFavoritoDiagnostico(diagnostico.id);
       final message = '${diagnostico.displayName} foi removido dos favoritos';
       if (_notificationService != null) {
-        _notificationService!.showSuccess(message);
+        _notificationService.showSuccess(message);
       } else {
         debugPrint('Removido: $message');
       }
     } catch (e) {
       const message = 'Não foi possível remover dos favoritos';
       if (_notificationService != null) {
-        _notificationService!.showError(message);
+        _notificationService.showError(message);
       } else {
         debugPrint('Erro: $message');
       }

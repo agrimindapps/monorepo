@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../../../../lib/features/expenses/domain/entities/expense_entity.dart';
-import '../../../../../lib/features/expenses/domain/services/expense_statistics_service.dart';
-import '../../../../../lib/features/vehicles/domain/entities/vehicle_entity.dart';
+import 'package:gasometer/features/expenses/domain/entities/expense_entity.dart';
+import 'package:gasometer/features/expenses/domain/services/expense_statistics_service.dart';
+import 'package:gasometer/features/vehicles/domain/entities/vehicle_entity.dart';
 
 void main() {
   group('ExpenseStatisticsService', () {

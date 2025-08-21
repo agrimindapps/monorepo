@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
 
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/crashlytics_service.dart';
@@ -12,7 +12,7 @@ final taskManagerAuthServiceProvider = Provider<TaskManagerAuthService>((ref) {
 });
 
 // Provider para o estado de autenticação usando o TaskManagerAuthService
-final authStateStreamProvider = StreamProvider<UserEntity?>((ref) {
+final authStateStreamProvider = StreamProvider<core.UserEntity?>((ref) {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return authService.currentUser;
 });
@@ -24,7 +24,7 @@ final isLoggedInProvider = FutureProvider<bool>((ref) async {
 });
 
 // Provider para usuário atual
-final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
+final currentUserProvider = FutureProvider<core.UserEntity?>((ref) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return authService.currentUser.first;
 });
@@ -50,7 +50,7 @@ class SignUpRequest {
 }
 
 // Provider para login
-final signInProvider = FutureProvider.family<UserEntity, SignInRequest>((ref, request) async {
+final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((ref, request) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   final crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
   
@@ -85,7 +85,7 @@ final signInProvider = FutureProvider.family<UserEntity, SignInRequest>((ref, re
 });
 
 // Provider para registro
-final signUpProvider = FutureProvider.family<UserEntity, SignUpRequest>((ref, request) async {
+final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((ref, request) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   final crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
   
@@ -131,13 +131,13 @@ final signOutProvider = FutureProvider<void>((ref) async {
 });
 
 // Auth notifier para gerenciar estado global de autenticação
-class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
+class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   AuthNotifier(this._authService) : super(const AsyncValue.loading()) {
     _init();
   }
 
   final TaskManagerAuthService _authService;
-  StreamSubscription<UserEntity?>? _subscription;
+  StreamSubscription<core.UserEntity?>? _subscription;
 
   void _init() {
     _subscription = _authService.currentUser.listen(
@@ -185,6 +185,51 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
     );
   }
 
+  Future<void> signInWithEmailAndPassword(String email, String password) async {
+    state = const AsyncValue.loading();
+    
+    final result = await _authService.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    
+    result.fold(
+      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (user) => state = AsyncValue.data(user),
+    );
+  }
+
+  Future<void> signInAnonymously() async {
+    state = const AsyncValue.loading();
+    
+    final result = await _authService.signInAnonymously();
+    
+    result.fold(
+      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (user) => state = AsyncValue.data(user),
+    );
+  }
+
+  Future<void> signInWithGoogle() async {
+    state = const AsyncValue.loading();
+    
+    final result = await _authService.signInWithGoogle();
+    
+    result.fold(
+      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (user) => state = AsyncValue.data(user),
+    );
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    final result = await _authService.sendPasswordResetEmail(email: email);
+    
+    result.fold(
+      (failure) => throw failure,
+      (_) => null,
+    );
+  }
+
   @override
   void dispose() {
     _subscription?.cancel();
@@ -193,7 +238,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
 }
 
 // Provider para o AuthNotifier
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserEntity?>>((ref) {
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<core.UserEntity?>>((ref) {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return AuthNotifier(authService);
 });
@@ -208,7 +253,7 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
   );
 });
 
-final currentAuthenticatedUserProvider = Provider<UserEntity?>((ref) {
+final currentAuthenticatedUserProvider = Provider<core.UserEntity?>((ref) {
   final authState = ref.watch(authNotifierProvider);
   return authState.when(
     data: (user) => user,

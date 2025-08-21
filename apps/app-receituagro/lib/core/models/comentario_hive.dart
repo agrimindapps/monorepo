@@ -115,6 +115,6 @@ class ComentarioHive extends HiveObject {
 
   @override
   String toString() {
-    return 'ComentarioHive(idReg: $idReg, conteudo: ${conteudo.length > 50 ? conteudo.substring(0, 50) + "..." : conteudo})';
+    return 'ComentarioHive(idReg: $idReg, conteudo: ${conteudo.length > 50 ? "${conteudo.substring(0, 50)}..." : conteudo})';
   }
 }

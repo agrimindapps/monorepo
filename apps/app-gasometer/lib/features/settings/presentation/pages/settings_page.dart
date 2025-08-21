@@ -771,20 +771,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-              Navigator.of(context).pop();
-              // TODO: Implement data clearing
-              _showSnackBar(context, 'Dados removidos com sucesso');
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Remover'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -882,7 +868,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 120,
                   child: Row(
                     children: [
@@ -922,7 +908,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 120,
                   child: Row(
                     children: [
@@ -1151,7 +1137,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
   bool _isClearing = false;
   Map<String, dynamic>? _currentStats;
   String _selectedClearType = 'all'; // 'all', 'selective'
-  Set<String> _selectedModules = {};
+  final Set<String> _selectedModules = {};
   Map<String, dynamic>? _lastClearResult;
 
   @override
@@ -1328,7 +1314,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                           },
                           dense: true,
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

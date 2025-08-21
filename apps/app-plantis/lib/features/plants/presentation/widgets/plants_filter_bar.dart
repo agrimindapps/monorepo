@@ -18,7 +18,7 @@ class PlantsFilterBar extends StatelessWidget {
     if (spaces.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       height: 50,
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -35,7 +35,7 @@ class PlantsFilterBar extends StatelessWidget {
               icon: Icons.apps,
             );
           }
-          
+
           final space = spaces[index - 1];
           return _FilterChip(
             label: space.name,
@@ -78,26 +78,26 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(right: 8),
       child: FilterChip(
         avatar: Icon(
           icon,
           size: 16,
-          color: isSelected 
-              ? theme.colorScheme.onPrimary
-              : theme.colorScheme.primary,
+          color:
+              isSelected
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.primary,
         ),
         label: Text(
           label,
           style: TextStyle(
-            color: isSelected 
-                ? theme.colorScheme.onPrimary
-                : theme.colorScheme.primary,
-            fontWeight: isSelected 
-                ? FontWeight.bold 
-                : FontWeight.normal,
+            color:
+                isSelected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.primary,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
         selected: isSelected,
@@ -106,9 +106,10 @@ class _FilterChip extends StatelessWidget {
         backgroundColor: theme.colorScheme.surface,
         checkmarkColor: theme.colorScheme.onPrimary,
         side: BorderSide(
-          color: isSelected 
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
           width: isSelected ? 2 : 1,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

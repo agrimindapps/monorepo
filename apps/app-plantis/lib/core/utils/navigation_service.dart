@@ -8,7 +8,7 @@ class NavigationService {
   static NavigationService get instance => _instance;
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+
   // Controle para evitar múltiplas mensagens de acesso negado
   DateTime? _lastAccessDeniedMessage;
 
@@ -17,25 +17,21 @@ class NavigationService {
   void showAccessDeniedMessage() {
     final context = currentContext;
     final now = DateTime.now();
-    
+
     // Evita mostrar a mensagem se já foi mostrada nos últimos 5 segundos
-    if (_lastAccessDeniedMessage != null && 
+    if (_lastAccessDeniedMessage != null &&
         now.difference(_lastAccessDeniedMessage!).inSeconds < 5) {
       return;
     }
-    
+
     _lastAccessDeniedMessage = now;
-    
+
     if (context != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
-              const Icon(
-                Icons.lock_outlined,
-                color: Colors.white,
-                size: 20,
-              ),
+              const Icon(Icons.lock_outlined, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -52,9 +48,7 @@ class NavigationService {
           backgroundColor: Colors.red.shade600,
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           margin: const EdgeInsets.all(16),
           action: SnackBarAction(
             label: 'Entrar',
@@ -81,20 +75,13 @@ class NavigationService {
           content: Row(
             children: [
               if (icon != null) ...[
-                Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                Icon(icon, color: Colors.white, size: 20),
                 const SizedBox(width: 12),
               ],
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ),
             ],
@@ -102,9 +89,7 @@ class NavigationService {
           backgroundColor: backgroundColor ?? Colors.green.shade600,
           duration: duration,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           margin: const EdgeInsets.all(16),
         ),
       );

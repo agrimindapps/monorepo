@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/plant.dart';
-import '../../../../core/theme/colors.dart';
+import '../../../../../core/theme/colors.dart';
 
 /// Widget responsável por exibir as informações básicas da planta
 class PlantInfoSection extends StatelessWidget {
   final Plant plant;
 
-  const PlantInfoSection({
-    super.key,
-    required this.plant,
-  });
+  const PlantInfoSection({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
@@ -29,21 +26,20 @@ class PlantInfoSection extends StatelessWidget {
 
   Widget _buildBasicInfo(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -60,7 +56,7 @@ class PlantInfoSection extends StatelessWidget {
               color: theme.colorScheme.onSurface,
             ),
           ),
-          
+
           if (plant.species?.isNotEmpty == true) ...[
             const SizedBox(height: 8),
             Row(
@@ -83,9 +79,9 @@ class PlantInfoSection extends StatelessWidget {
               ],
             ),
           ],
-          
+
           const SizedBox(height: 16),
-          
+
           // Informações adicionais
           Row(
             children: [
@@ -94,9 +90,10 @@ class PlantInfoSection extends StatelessWidget {
                   context,
                   icon: Icons.calendar_today_outlined,
                   label: 'Plantada há',
-                  value: plant.plantingDate != null
-                    ? '${plant.ageInDays} dias'
-                    : 'Data não informada',
+                  value:
+                      plant.plantingDate != null
+                          ? '${plant.ageInDays} dias'
+                          : 'Data não informada',
                 ),
               ),
               const SizedBox(width: 16),
@@ -105,14 +102,12 @@ class PlantInfoSection extends StatelessWidget {
                   context,
                   icon: Icons.location_on_outlined,
                   label: 'Localização',
-                  value: plant.spaceId != null
-                    ? 'Definida'
-                    : 'Não definida',
+                  value: plant.spaceId != null ? 'Definida' : 'Não definida',
                 ),
               ),
             ],
           ),
-          
+
           if (plant.config != null) ...[
             const SizedBox(height: 16),
             Row(
@@ -122,7 +117,9 @@ class PlantInfoSection extends StatelessWidget {
                     context,
                     icon: Icons.wb_sunny_outlined,
                     label: 'Luz',
-                    value: _getLightRequirementText(plant.config!.lightRequirement),
+                    value: _getLightRequirementText(
+                      plant.config!.lightRequirement,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -149,17 +146,13 @@ class PlantInfoSection extends StatelessWidget {
     required String value,
   }) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 14,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(width: 6),
             Text(
               label,
@@ -184,7 +177,7 @@ class PlantInfoSection extends StatelessWidget {
 
   Widget _buildNotesCard(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -200,16 +193,17 @@ class PlantInfoSection extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: theme.brightness == Brightness.dark 
-              ? const Color(0xFF2C2C2E)
-              : theme.colorScheme.surface,
+            color:
+                theme.brightness == Brightness.dark
+                    ? const Color(0xFF2C2C2E)
+                    : theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.1),
+              color: theme.colorScheme.outline.withValues(alpha: 0.1),
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.shadow.withOpacity(0.05),
+                color: theme.colorScheme.shadow.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -229,7 +223,7 @@ class PlantInfoSection extends StatelessWidget {
 
   Widget _buildStatsCards(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -286,23 +280,17 @@ class PlantInfoSection extends StatelessWidget {
     required Color color,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             value,

@@ -97,17 +97,17 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (pragaPorCultura.praga.nomeComum != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  pragaPorCultura.praga.nomeCientifico,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+              ...[
+              const SizedBox(height: 4),
+              Text(
+                pragaPorCultura.praga.nomeCientifico,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ],
+              ),
+            ],
               const SizedBox(height: 8),
               Row(
                 children: [

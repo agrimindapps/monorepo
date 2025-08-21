@@ -6,7 +6,7 @@ import '../../../../core/theme/colors.dart';
 
 class RegisterPasswordPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
-  
+
   const RegisterPasswordPage({super.key, this.userData});
 
   @override
@@ -19,24 +19,24 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  
+
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _handleCreateAccount() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
-      
+
       await authProvider.register(
         widget.userData?['email'] ?? '',
         _passwordController.text,
         widget.userData?['name'] ?? '',
       );
-      
+
       if (authProvider.isAuthenticated && mounted) {
         context.go('/plants');
       }
@@ -72,15 +72,13 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.eco,
-                        size: 32,
-                        color: PlantisColors.primary,
-                      ),
+                      Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
                         'PlantApp',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
                           color: PlantisColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -95,7 +93,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Tab navigation
                   Row(
                     children: [
@@ -112,10 +110,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Container(
-                                height: 3,
-                                color: Colors.grey.shade300,
-                              ),
+                              Container(height: 3, color: Colors.grey.shade300),
                             ],
                           ),
                         ),
@@ -146,7 +141,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Progress indicator (step 3/3)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -180,7 +175,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                     ],
                   ),
                   const SizedBox(height: 48),
-                  
+
                   // Form
                   Form(
                     key: _formKey,
@@ -206,7 +201,8 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Mínimo 8 caracteres, letras, números e símbolos',
+                            hintText:
+                                'Mínimo 8 caracteres, letras, números e símbolos',
                             prefixIcon: Icon(
                               Icons.lock_outline,
                               color: PlantisColors.primary,
@@ -227,13 +223,17 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -251,14 +251,16 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                             if (value.length < 8) {
                               return 'A senha deve ter pelo menos 8 caracteres';
                             }
-                            if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)').hasMatch(value)) {
+                            if (!RegExp(
+                              r'^(?=.*[a-zA-Z])(?=.*\d)',
+                            ).hasMatch(value)) {
                               return 'A senha deve conter letras e números';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Confirm Password field
                         TextFormField(
                           controller: _confirmPasswordController,
@@ -283,20 +285,25 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
                                 });
                               },
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -318,7 +325,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                           },
                         ),
                         const SizedBox(height: 48),
-                        
+
                         // Error message
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, _) {
@@ -352,7 +359,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                             return const SizedBox.shrink();
                           },
                         ),
-                        
+
                         // Navigation buttons
                         Row(
                           children: [
@@ -360,11 +367,15 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                               child: OutlinedButton(
                                 onPressed: () => context.pop(),
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: PlantisColors.primary),
+                                  side: BorderSide(
+                                    color: PlantisColors.primary,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 child: Text(
                                   'Voltar',
@@ -381,33 +392,40 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                               child: Consumer<AuthProvider>(
                                 builder: (context, authProvider, _) {
                                   return ElevatedButton(
-                                    onPressed: authProvider.isLoading
-                                        ? null
-                                        : _handleCreateAccount,
+                                    onPressed:
+                                        authProvider.isLoading
+                                            ? null
+                                            : _handleCreateAccount,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: PlantisColors.primary,
                                       foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
                                     ),
-                                    child: authProvider.isLoading
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    child:
+                                        authProvider.isLoading
+                                            ? const SizedBox(
+                                              height: 20,
+                                              width: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.white),
+                                              ),
+                                            )
+                                            : const Text(
+                                              'Criar Conta',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
-                                          )
-                                        : const Text(
-                                            'Criar Conta',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
                                   );
                                 },
                               ),
@@ -415,7 +433,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Terms text
                         Center(
                           child: Text(

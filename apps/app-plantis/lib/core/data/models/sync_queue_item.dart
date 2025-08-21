@@ -3,11 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'sync_queue_item.g.dart';
 
-enum SyncOperationType {
-  create,
-  update,
-  delete
-}
+enum SyncOperationType { create, update, delete }
 
 @HiveType(typeId: 100)
 @JsonSerializable()
@@ -50,7 +46,7 @@ class SyncQueueItem extends HiveObject {
     this.isSynced = false,
   }) : timestamp = timestamp ?? DateTime.now();
 
-  factory SyncQueueItem.fromJson(Map<String, dynamic> json) => 
+  factory SyncQueueItem.fromJson(Map<String, dynamic> json) =>
       _$SyncQueueItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$SyncQueueItemToJson(this);

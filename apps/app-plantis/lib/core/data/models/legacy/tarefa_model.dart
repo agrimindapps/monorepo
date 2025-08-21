@@ -10,28 +10,43 @@ part 'tarefa_model.g.dart';
 class TarefaModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
-  @HiveField(0) final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
   @override
-  @HiveField(4) final bool isDirty;
+  @HiveField(4)
+  final bool isDirty;
   @override
-  @HiveField(5) final bool isDeleted;
+  @HiveField(5)
+  final bool isDeleted;
   @override
-  @HiveField(6) final int version;
+  @HiveField(6)
+  final int version;
   @override
-  @HiveField(7) final String? userId;
+  @HiveField(7)
+  final String? userId;
   @override
-  @HiveField(8) final String? moduleName;
+  @HiveField(8)
+  final String? moduleName;
 
   // Tarefa specific fields
-  @HiveField(10) final String plantaId;
-  @HiveField(11) final String tipoCuidado;
-  @HiveField(12) final DateTime dataExecucao;
-  @HiveField(13) final bool concluida;
-  @HiveField(14) final String? observacoes;
-  @HiveField(15) final DateTime? dataConclusao;
+  @HiveField(10)
+  final String plantaId;
+  @HiveField(11)
+  final String tipoCuidado;
+  @HiveField(12)
+  final DateTime dataExecucao;
+  @HiveField(13)
+  final bool concluida;
+  @HiveField(14)
+  final String? observacoes;
+  @HiveField(15)
+  final DateTime? dataConclusao;
 
   TarefaModel({
     required this.id,
@@ -50,16 +65,25 @@ class TarefaModel extends BaseSyncModel {
     this.observacoes,
     this.dataConclusao,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         lastSyncAt:
+             lastSyncAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+                 : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
   @override
   String get collectionName => 'tarefas';
@@ -77,7 +101,7 @@ class TarefaModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final tarefaId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return TarefaModel(
       id: tarefaId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -96,7 +120,7 @@ class TarefaModel extends BaseSyncModel {
   /// Create from Hive map
   factory TarefaModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return TarefaModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -112,24 +136,24 @@ class TarefaModel extends BaseSyncModel {
       dataExecucao: DateTime.parse(map['dataExecucao'] as String),
       concluida: map['concluida'] ?? false,
       observacoes: map['observacoes']?.toString(),
-      dataConclusao: map['dataConclusao'] != null
-          ? DateTime.parse(map['dataConclusao'])
-          : null,
+      dataConclusao:
+          map['dataConclusao'] != null
+              ? DateTime.parse(map['dataConclusao'])
+              : null,
     );
   }
 
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'plantaId': plantaId,
-        'tipoCuidado': tipoCuidado,
-        'dataExecucao': dataExecucao.toIso8601String(),
-        'concluida': concluida,
-        'observacoes': observacoes,
-        'dataConclusao': dataConclusao?.toIso8601String(),
-      });
+    return super.toHiveMap()..addAll({
+      'plantaId': plantaId,
+      'tipoCuidado': tipoCuidado,
+      'dataExecucao': dataExecucao.toIso8601String(),
+      'concluida': concluida,
+      'observacoes': observacoes,
+      'dataConclusao': dataConclusao?.toIso8601String(),
+    });
   }
 
   /// Convert to Firebase map
@@ -151,7 +175,7 @@ class TarefaModel extends BaseSyncModel {
   factory TarefaModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return TarefaModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -167,9 +191,10 @@ class TarefaModel extends BaseSyncModel {
       dataExecucao: DateTime.parse(map['data_execucao'] as String),
       concluida: map['concluida'] ?? false,
       observacoes: map['observacoes']?.toString(),
-      dataConclusao: map['data_conclusao'] != null
-          ? DateTime.parse(map['data_conclusao'])
-          : null,
+      dataConclusao:
+          map['data_conclusao'] != null
+              ? DateTime.parse(map['data_conclusao'])
+              : null,
     );
   }
 
@@ -194,9 +219,9 @@ class TarefaModel extends BaseSyncModel {
   }) {
     return TarefaModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,
@@ -215,8 +240,10 @@ class TarefaModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();
-  factory TarefaModel.fromMap(Map<String, dynamic> map) => TarefaModel.fromHiveMap(map);
-  factory TarefaModel.fromJson(Map<String, dynamic> json) => TarefaModel.fromHiveMap(json);
+  factory TarefaModel.fromMap(Map<String, dynamic> map) =>
+      TarefaModel.fromHiveMap(map);
+  factory TarefaModel.fromJson(Map<String, dynamic> json) =>
+      TarefaModel.fromHiveMap(json);
 
   /// Marca a tarefa como concluída
   TarefaModel marcarConcluida({String? observacoes}) {
@@ -243,8 +270,11 @@ class TarefaModel extends BaseSyncModel {
   bool get isAtrasada {
     if (concluida) return false;
     final hoje = DateTime.now();
-    final dataExecucaoDate =
-        DateTime(dataExecucao.year, dataExecucao.month, dataExecucao.day);
+    final dataExecucaoDate = DateTime(
+      dataExecucao.year,
+      dataExecucao.month,
+      dataExecucao.day,
+    );
     final hojeDate = DateTime(hoje.year, hoje.month, hoje.day);
     return dataExecucaoDate.isBefore(hojeDate);
   }
@@ -252,8 +282,11 @@ class TarefaModel extends BaseSyncModel {
   /// Verifica se a tarefa é para hoje
   bool get isParaHoje {
     final hoje = DateTime.now();
-    final dataExecucaoDate =
-        DateTime(dataExecucao.year, dataExecucao.month, dataExecucao.day);
+    final dataExecucaoDate = DateTime(
+      dataExecucao.year,
+      dataExecucao.month,
+      dataExecucao.day,
+    );
     final hojeDate = DateTime(hoje.year, hoje.month, hoje.day);
     return dataExecucaoDate.isAtSameMomentAs(hojeDate);
   }
@@ -261,8 +294,11 @@ class TarefaModel extends BaseSyncModel {
   /// Verifica se a tarefa é para o futuro
   bool get isParaFuturo {
     final hoje = DateTime.now();
-    final dataExecucaoDate =
-        DateTime(dataExecucao.year, dataExecucao.month, dataExecucao.day);
+    final dataExecucaoDate = DateTime(
+      dataExecucao.year,
+      dataExecucao.month,
+      dataExecucao.day,
+    );
     final hojeDate = DateTime(hoje.year, hoje.month, hoje.day);
     return dataExecucaoDate.isAfter(hojeDate);
   }
@@ -271,8 +307,11 @@ class TarefaModel extends BaseSyncModel {
   int get diasAtrasada {
     if (!isAtrasada) return 0;
     final hoje = DateTime.now();
-    final dataExecucaoDate =
-        DateTime(dataExecucao.year, dataExecucao.month, dataExecucao.day);
+    final dataExecucaoDate = DateTime(
+      dataExecucao.year,
+      dataExecucao.month,
+      dataExecucao.day,
+    );
     final hojeDate = DateTime(hoje.year, hoje.month, hoje.day);
     return hojeDate.difference(dataExecucaoDate).inDays;
   }

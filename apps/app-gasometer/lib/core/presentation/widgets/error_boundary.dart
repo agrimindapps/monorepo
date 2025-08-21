@@ -1,0 +1,350 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
+
+/// Widget que captura e trata erros não esperados em formulários
+/// 
+/// Funciona como um "error boundary" similar ao React, capturando
+/// erros que ocorrem em widgets filhos e exibindo uma UI de fallback.
+class ErrorBoundary extends StatefulWidget {
+  final Widget child;
+  final Widget Function(Object error, StackTrace? stackTrace)? errorBuilder;
+  final void Function(Object error, StackTrace? stackTrace)? onError;
+  final String? title;
+  final String? message;
+  final bool showDebugInfo;
+
+  const ErrorBoundary({
+    super.key,
+    required this.child,
+    this.errorBuilder,
+    this.onError,
+    this.title,
+    this.message,
+    this.showDebugInfo = kDebugMode,
+  });
+
+  @override
+  State<ErrorBoundary> createState() => _ErrorBoundaryState();
+}
+
+class _ErrorBoundaryState extends State<ErrorBoundary> {
+  Object? _error;
+  StackTrace? _stackTrace;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Configurar error handler para capturar erros
+    FlutterError.onError = _handleFlutterError;
+  }
+
+  void _handleFlutterError(FlutterErrorDetails details) {
+    if (mounted) {
+      setState(() {
+        _error = details.exception;
+        _stackTrace = details.stack;
+        _hasError = true;
+      });
+
+      // Chamar callback de erro se fornecido
+      widget.onError?.call(details.exception, details.stack);
+      
+      // Log do erro para debugging
+      debugPrint('🚨 ErrorBoundary capturou erro: ${details.exception}');
+      if (widget.showDebugInfo) {
+        debugPrint('Stack trace: ${details.stack}');
+      }
+    }
+  }
+
+  /// Reseta o estado de erro para tentar renderizar novamente
+  void _resetError() {
+    setState(() {
+      _error = null;
+      _stackTrace = null;
+      _hasError = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasError && _error != null) {
+      // Usar error builder customizado se fornecido
+      if (widget.errorBuilder != null) {
+        return widget.errorBuilder!(_error!, _stackTrace);
+      }
+      
+      // Usar UI de fallback padrão
+      return _buildDefaultErrorUI();
+    }
+
+    // Encapsular child em zona de erro para capturar exceções
+    return _ErrorZone(
+      onError: (error, stackTrace) {
+        if (mounted) {
+          setState(() {
+            _error = error;
+            _stackTrace = stackTrace;
+            _hasError = true;
+          });
+          
+          widget.onError?.call(error, stackTrace);
+        }
+      },
+      child: widget.child,
+    );
+  }
+
+  Widget _buildDefaultErrorUI() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: AppTheme.colors.errorContainer.withValues(alpha: 0.1),
+        border: Border.all(
+          color: AppTheme.colors.error.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: AppTheme.colors.error,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.title ?? 'Erro inesperado',
+                  style: AppTheme.textStyles.titleSmall?.copyWith(
+                    color: AppTheme.colors.error,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          if (widget.message != null) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                widget.message!,
+                style: AppTheme.textStyles.bodySmall?.copyWith(
+                  color: AppTheme.colors.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+          
+          // Informações de debug em desenvolvimento
+          if (widget.showDebugInfo && _error != null) ...[
+            const SizedBox(height: 12),
+            ExpansionTile(
+              title: const Text(
+                'Detalhes técnicos',
+                style: TextStyle(fontSize: 12),
+              ),
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Text(
+                    'Erro: ${_error.toString()}\n'
+                    '${_stackTrace != null ? 'Stack: ${_stackTrace.toString()}' : ''}',
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: _resetError,
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('Tentar Novamente'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Widget interno que encapsula o child em uma zona de erro
+class _ErrorZone extends StatelessWidget {
+  final Widget child;
+  final void Function(Object error, StackTrace stackTrace) onError;
+
+  const _ErrorZone({
+    required this.child,
+    required this.onError,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (context) {
+        try {
+          return child;
+        } catch (error, stackTrace) {
+          // Capturar erros síncronos
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            onError(error, stackTrace);
+          });
+          
+          // Retornar widget vazio temporário
+          return const SizedBox.shrink();
+        }
+      },
+    );
+  }
+}
+
+/// Extension para adicionar error boundary facilmente a qualquer widget
+extension ErrorBoundaryExtension on Widget {
+  /// Envolve o widget com um ErrorBoundary
+  Widget withErrorBoundary({
+    Widget Function(Object error, StackTrace? stackTrace)? errorBuilder,
+    void Function(Object error, StackTrace? stackTrace)? onError,
+    String? title,
+    String? message,
+    bool showDebugInfo = kDebugMode,
+  }) {
+    return ErrorBoundary(
+      errorBuilder: errorBuilder,
+      onError: onError,
+      title: title,
+      message: message,
+      showDebugInfo: showDebugInfo,
+      child: this,
+    );
+  }
+}
+
+/// Wrapper específico para formulários com UI otimizada
+class FormErrorBoundary extends StatelessWidget {
+  final Widget child;
+  final String? formName;
+  final void Function(Object error, StackTrace? stackTrace)? onFormError;
+
+  const FormErrorBoundary({
+    super.key,
+    required this.child,
+    this.formName,
+    this.onFormError,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ErrorBoundary(
+      title: 'Erro no formulário${formName != null ? ' $formName' : ''}',
+      message: 'Algo deu errado no formulário. Você pode tentar novamente ou voltar para a tela anterior.',
+      onError: onFormError,
+      errorBuilder: (error, stackTrace) => _buildFormErrorUI(context, error),
+      child: child,
+    );
+  }
+
+  Widget _buildFormErrorUI(BuildContext context, Object error) {
+    return Card(
+      margin: const EdgeInsets.all(16.0),
+      color: AppTheme.colors.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.edit_note_outlined,
+              color: AppTheme.colors.onErrorContainer,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Erro no Formulário',
+              style: AppTheme.textStyles.titleMedium?.copyWith(
+                color: AppTheme.colors.onErrorContainer,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'O formulário encontrou um erro inesperado. '
+              'Todos os dados inseridos podem ter sido perdidos.',
+              style: AppTheme.textStyles.bodySmall?.copyWith(
+                color: AppTheme.colors.onErrorContainer,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            // Debug info em desenvolvimento
+            if (kDebugMode) ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                child: Text(
+                  error.toString(),
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+            
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Voltar'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      // Recarregar a página
+                      Navigator.of(context).pushReplacementNamed(
+                        ModalRoute.of(context)?.settings.name ?? '/',
+                      );
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Recarregar'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

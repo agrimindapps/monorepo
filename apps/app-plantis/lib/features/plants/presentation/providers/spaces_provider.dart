@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../domain/entities/space.dart';
 import '../../domain/usecases/spaces_usecases.dart';
@@ -17,11 +16,11 @@ class SpacesProvider extends ChangeNotifier {
     required AddSpaceUseCase addSpaceUseCase,
     required UpdateSpaceUseCase updateSpaceUseCase,
     required DeleteSpaceUseCase deleteSpaceUseCase,
-  })  : _getSpacesUseCase = getSpacesUseCase,
-        _getSpaceByIdUseCase = getSpaceByIdUseCase,
-        _addSpaceUseCase = addSpaceUseCase,
-        _updateSpaceUseCase = updateSpaceUseCase,
-        _deleteSpaceUseCase = deleteSpaceUseCase;
+  }) : _getSpacesUseCase = getSpacesUseCase,
+       _getSpaceByIdUseCase = getSpaceByIdUseCase,
+       _addSpaceUseCase = addSpaceUseCase,
+       _updateSpaceUseCase = updateSpaceUseCase,
+       _deleteSpaceUseCase = deleteSpaceUseCase;
 
   List<Space> _spaces = [];
   List<Space> get spaces => _spaces;
@@ -41,15 +40,15 @@ class SpacesProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _getSpacesUseCase.call(NoParams());
-    
-    result.fold(
-      (failure) => _setError(_getErrorMessage(failure)),
-      (spaces) {
-        _spaces = spaces;
-        _spaces.sort((a, b) => (b.createdAt ?? DateTime.now())
-            .compareTo(a.createdAt ?? DateTime.now()));
-      },
-    );
+
+    result.fold((failure) => _setError(_getErrorMessage(failure)), (spaces) {
+      _spaces = spaces;
+      _spaces.sort(
+        (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+          a.createdAt ?? DateTime.now(),
+        ),
+      );
+    });
 
     _setLoading(false);
   }
@@ -57,7 +56,7 @@ class SpacesProvider extends ChangeNotifier {
   // Get space by ID
   Future<Space?> getSpaceById(String id) async {
     final result = await _getSpaceByIdUseCase.call(id);
-    
+
     return result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -77,7 +76,7 @@ class SpacesProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _addSpaceUseCase.call(params);
-    
+
     final success = result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -99,7 +98,7 @@ class SpacesProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _updateSpaceUseCase.call(params);
-    
+
     final success = result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -110,12 +109,12 @@ class SpacesProvider extends ChangeNotifier {
         if (index != -1) {
           _spaces[index] = updatedSpace;
         }
-        
+
         // Update selected space if it's the same
         if (_selectedSpace?.id == updatedSpace.id) {
           _selectedSpace = updatedSpace;
         }
-        
+
         return true;
       },
     );
@@ -130,7 +129,7 @@ class SpacesProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _deleteSpaceUseCase.call(id);
-    
+
     final success = result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -138,12 +137,12 @@ class SpacesProvider extends ChangeNotifier {
       },
       (_) {
         _spaces.removeWhere((space) => space.id == id);
-        
+
         // Clear selected space if it was deleted
         if (_selectedSpace?.id == id) {
           _selectedSpace = null;
         }
-        
+
         return true;
       },
     );
@@ -169,7 +168,9 @@ class SpacesProvider extends ChangeNotifier {
   // Find space by name
   Space? findSpaceByName(String name) {
     try {
-      return _spaces.firstWhere((space) => space.name.toLowerCase() == name.toLowerCase());
+      return _spaces.firstWhere(
+        (space) => space.name.toLowerCase() == name.toLowerCase(),
+      );
     } catch (e) {
       return null;
     }
@@ -177,7 +178,9 @@ class SpacesProvider extends ChangeNotifier {
 
   // Get spaces with specific light condition
   List<Space> getSpacesByLightCondition(String lightCondition) {
-    return _spaces.where((space) => space.lightCondition == lightCondition).toList();
+    return _spaces
+        .where((space) => space.lightCondition == lightCondition)
+        .toList();
   }
 
   // Private methods
@@ -198,21 +201,21 @@ class SpacesProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure:
+      case ValidationFailure _:
         return failure.message;
-      case CacheFailure:
+      case CacheFailure _:
         return failure.message;
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Sem conexão com a internet';
-      case ServerFailure:
+      case ServerFailure _:
         // Check if it's specifically an auth error
-        if (failure.message.contains('não autenticado') || 
+        if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
           return 'Erro de autenticação. Tente fazer login novamente.';
         }
         return failure.message;
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return failure.message;
       default:
         return 'Erro inesperado';

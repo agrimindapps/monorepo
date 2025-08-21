@@ -1,15 +1,15 @@
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
-import 'app_error.dart';
+import 'package:core/core.dart';
 
 /// Centralizador para tratamento de erros da aplicação
 /// Responsável por logging, reporting e notificação de erros
 class ErrorHandler {
   static ErrorHandler? _instance;
-  
+
   /// Singleton instance
   static ErrorHandler get instance => _instance ??= ErrorHandler._();
-  
+
   ErrorHandler._();
 
   final List<ErrorListener> _listeners = [];
@@ -30,13 +30,13 @@ class ErrorHandler {
   void handleError(AppError error) {
     // Adiciona ao histórico
     _addToHistory(error);
-    
+
     // Log do erro
     _logError(error);
-    
+
     // Notifica listeners
     _notifyListeners(error);
-    
+
     // Report para serviços externos (Crashlytics, etc.)
     _reportToExternalServices(error);
   }
@@ -49,13 +49,13 @@ class ErrorHandler {
     ErrorSeverity severity = ErrorSeverity.medium,
   }) {
     String message = customMessage ?? 'Erro inesperado';
-    
+
     if (exception is AppError) {
       return exception;
     }
-    
+
     // Mapear exceções conhecidas para tipos específicos de erro
-    if (exception is ArgumentError || 
+    if (exception is ArgumentError ||
         exception is FormatException ||
         exception is RangeError) {
       return ValidationError(
@@ -65,7 +65,7 @@ class ErrorHandler {
         severity: severity,
       );
     }
-    
+
     if (exception is StateError) {
       return BusinessError(
         message: customMessage ?? 'Estado inválido: ${exception.toString()}',
@@ -74,7 +74,7 @@ class ErrorHandler {
         severity: severity,
       );
     }
-    
+
     // Erro genérico
     return UnknownError(
       message: '$message: ${exception.toString()}',
@@ -88,7 +88,7 @@ class ErrorHandler {
   /// Reporta um erro para análise posterior
   void reportError(AppError error) {
     handleError(error);
-    
+
     // Pode ser expandido para enviar relatórios específicos
     if (kDebugMode) {
       developer.log(
@@ -114,18 +114,20 @@ class ErrorHandler {
     final now = DateTime.now();
     final last24h = now.subtract(const Duration(hours: 24));
     final last7days = now.subtract(const Duration(days: 7));
-    
-    final recent24h = _errorHistory.where((e) => e.timestamp.isAfter(last24h)).length;
-    final recent7days = _errorHistory.where((e) => e.timestamp.isAfter(last7days)).length;
-    
+
+    final recent24h =
+        _errorHistory.where((e) => e.timestamp.isAfter(last24h)).length;
+    final recent7days =
+        _errorHistory.where((e) => e.timestamp.isAfter(last7days)).length;
+
     final byCategory = <ErrorCategory, int>{};
     final bySeverity = <ErrorSeverity, int>{};
-    
+
     for (final error in _errorHistory) {
       byCategory[error.category] = (byCategory[error.category] ?? 0) + 1;
       bySeverity[error.severity] = (bySeverity[error.severity] ?? 0) + 1;
     }
-    
+
     return ErrorStatistics(
       totalErrors: _errorHistory.length,
       errorsLast24h: recent24h,
@@ -138,7 +140,7 @@ class ErrorHandler {
 
   void _addToHistory(AppError error) {
     _errorHistory.add(error);
-    
+
     // Limita o tamanho do histórico
     if (_errorHistory.length > _maxHistorySize) {
       _errorHistory.removeAt(0);
@@ -146,8 +148,9 @@ class ErrorHandler {
   }
 
   void _logError(AppError error) {
-    final logMessage = '[${error.category.name.toUpperCase()}] ${error.message}';
-    
+    final logMessage =
+        '[${error.category.name.toUpperCase()}] ${error.message}';
+
     switch (error.severity) {
       case ErrorSeverity.low:
         developer.log(logMessage, level: 500); // INFO
@@ -167,13 +170,10 @@ class ErrorHandler {
         );
         break;
     }
-    
+
     // Debug log detalhado
     if (kDebugMode) {
-      developer.log(
-        'Error Details: ${error.toMap()}',
-        name: 'ErrorHandler',
-      );
+      developer.log('Error Details: ${error.toMap()}', name: 'ErrorHandler');
     }
   }
 
@@ -238,10 +238,9 @@ class NotificationErrorListener implements ErrorListener {
   @override
   void onError(AppError error) {
     // Só mostra notificação para erros de severidade média ou alta
-    if (error.severity == ErrorSeverity.medium || 
+    if (error.severity == ErrorSeverity.medium ||
         error.severity == ErrorSeverity.high ||
         error.severity == ErrorSeverity.critical) {
-      
       String message = _getUserFriendlyMessage(error);
       showNotification(message, isError: true);
     }
@@ -264,7 +263,6 @@ class NotificationErrorListener implements ErrorListener {
       case ErrorCategory.external:
         return 'Serviço temporariamente indisponível.';
       case ErrorCategory.general:
-      default:
         return 'Ops! Algo inesperado aconteceu.';
     }
   }

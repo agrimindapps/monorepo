@@ -465,7 +465,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
   Widget _buildItemBackground(Map<String, dynamic> suggestion) {
     final theme = Theme.of(context);
     
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: PragaImageWidget(

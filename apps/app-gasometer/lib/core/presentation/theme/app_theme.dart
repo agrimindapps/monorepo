@@ -72,7 +72,7 @@ class AppColors {
   Color get onSurfaceVariant => Colors.black54;
 
   // Cores de container de erro
-  Color get errorContainer => GasometerColors.danger.withOpacity(0.1);
+  Color get errorContainer => GasometerColors.danger.withValues(alpha: 0.1);
   Color get onErrorContainer => GasometerColors.danger;
 
   // Cores de outline

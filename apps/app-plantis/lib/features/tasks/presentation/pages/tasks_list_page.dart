@@ -11,10 +11,7 @@ class TaskDateGroup {
   final String dateKey;
   final List<task_entity.Task> tasks;
 
-  TaskDateGroup({
-    required this.dateKey,
-    required this.tasks,
-  });
+  TaskDateGroup({required this.dateKey, required this.tasks});
 
   DateTime get date {
     final parts = dateKey.split('-');
@@ -37,7 +34,7 @@ class _TasksListPageState extends State<TasksListPage> {
   @override
   void initState() {
     super.initState();
-    
+
     // Carregar tarefas ao inicializar com delay para garantir que auth está pronto
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TasksProvider>().loadTasks();
@@ -50,9 +47,10 @@ class _TasksListPageState extends State<TasksListPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+      backgroundColor:
+          isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
       appBar: const TasksAppBar(),
       body: Consumer<TasksProvider>(
         builder: (context, provider, child) {
@@ -98,7 +96,7 @@ class _TasksListPageState extends State<TasksListPage> {
 
   List<TaskDateGroup> _groupTasksByDate(List<task_entity.Task> tasks) {
     final Map<String, List<task_entity.Task>> grouped = {};
-    
+
     for (final task in tasks) {
       final dateKey = _getDateKey(task.dueDate);
       if (!grouped.containsKey(dateKey)) {
@@ -107,10 +105,10 @@ class _TasksListPageState extends State<TasksListPage> {
       grouped[dateKey]!.add(task);
     }
 
-    return grouped.entries.map((entry) => TaskDateGroup(
-      dateKey: entry.key,
-      tasks: entry.value,
-    )).toList()..sort((a, b) => a.date.compareTo(b.date));
+    return grouped.entries
+        .map((entry) => TaskDateGroup(dateKey: entry.key, tasks: entry.value))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
   }
 
   String _getDateKey(DateTime date) {
@@ -158,12 +156,15 @@ class _TasksListPageState extends State<TasksListPage> {
   Widget _buildTaskCard(task_entity.Task task) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surfaceContainerHighest,
+        color:
+            isDark
+                ? const Color(0xFF1C1C1E)
+                : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -176,11 +177,7 @@ class _TasksListPageState extends State<TasksListPage> {
               color: theme.colorScheme.secondary,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              _getTaskIcon(task.type),
-              color: Colors.black,
-              size: 20,
-            ),
+            child: Icon(_getTaskIcon(task.type), color: Colors.black, size: 20),
           ),
           const SizedBox(width: 16),
           // Informações da tarefa
@@ -217,11 +214,7 @@ class _TasksListPageState extends State<TasksListPage> {
                 color: theme.colorScheme.secondary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.black,
-                size: 20,
-              ),
+              child: const Icon(Icons.check, color: Colors.black, size: 20),
             ),
           ),
         ],
@@ -260,26 +253,35 @@ class _TasksListPageState extends State<TasksListPage> {
     } else {
       final weekdays = [
         'Segunda-feira',
-        'Terça-feira', 
+        'Terça-feira',
         'Quarta-feira',
         'Quinta-feira',
         'Sexta-feira',
         'Sábado',
-        'Domingo'
+        'Domingo',
       ];
       final months = [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro',
       ];
-      
+
       final weekday = weekdays[date.weekday - 1];
       final day = date.day;
       final month = months[date.month - 1];
-      
+
       return '$weekday, $day de $month';
     }
   }
-
 
   void _showAddTaskDialog(BuildContext context) {
     // TODO: Implementar dialog/página de criação de tarefa
@@ -289,7 +291,6 @@ class _TasksListPageState extends State<TasksListPage> {
       ),
     );
   }
-
 
   // ignore: unused_element
   String _formatDate(DateTime date) {

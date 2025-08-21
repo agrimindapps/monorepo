@@ -1,4 +1,4 @@
-library core;
+library;
 
 // ========== DOMAIN LAYER ==========
 // Entities
@@ -31,6 +31,7 @@ export 'src/domain/repositories/i_notification_repository.dart';
 export 'src/domain/repositories/i_security_repository.dart';
 export 'src/domain/repositories/i_file_repository.dart';
 export 'src/domain/repositories/i_performance_repository.dart';
+export 'src/domain/repositories/i_encrypted_storage_repository.dart';
 
 // Use Cases
 export 'src/domain/usecases/base_usecase.dart';
@@ -57,6 +58,10 @@ export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/file_manager_service.dart';
 export 'src/infrastructure/services/performance_service.dart';
 export 'src/infrastructure/services/selective_sync_service.dart';
+export 'src/infrastructure/services/image_service.dart';
+
+// Hive Storage Infrastructure
+export 'src/infrastructure/storage/hive/hive_storage.dart';
 
 // Helpers
 export 'src/infrastructure/helpers/notification_helper.dart';
@@ -65,6 +70,7 @@ export 'src/infrastructure/helpers/notification_helper.dart';
 // Widgets
 export 'src/presentation/widgets/loading_widget.dart';
 export 'src/presentation/widgets/error_widget.dart';
+export 'src/presentation/widgets/image_widgets.dart';
 
 // Theme System
 export 'src/presentation/theme/providers/theme_provider.dart';
@@ -81,6 +87,9 @@ export 'src/shared/di/injection_container.dart';
 
 // Utils
 export 'src/shared/utils/failure.dart';
+export 'src/shared/utils/app_error.dart';
+export 'src/shared/utils/result.dart';
+export 'src/shared/utils/error_adapter.dart';
 
 // Enums
 export 'src/shared/enums/log_level.dart';

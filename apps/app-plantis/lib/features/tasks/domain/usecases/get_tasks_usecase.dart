@@ -14,29 +14,36 @@ class GetTasksUseCase implements UseCase<List<task_entity.Task>, NoParams> {
   }
 }
 
-class GetTasksByPlantIdUseCase implements UseCase<List<task_entity.Task>, GetTasksByPlantIdParams> {
+class GetTasksByPlantIdUseCase
+    implements UseCase<List<task_entity.Task>, GetTasksByPlantIdParams> {
   final TasksRepository repository;
 
   GetTasksByPlantIdUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<task_entity.Task>>> call(GetTasksByPlantIdParams params) async {
+  Future<Either<Failure, List<task_entity.Task>>> call(
+    GetTasksByPlantIdParams params,
+  ) async {
     return await repository.getTasksByPlantId(params.plantId);
   }
 }
 
-class GetTasksByStatusUseCase implements UseCase<List<task_entity.Task>, GetTasksByStatusParams> {
+class GetTasksByStatusUseCase
+    implements UseCase<List<task_entity.Task>, GetTasksByStatusParams> {
   final TasksRepository repository;
 
   GetTasksByStatusUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<task_entity.Task>>> call(GetTasksByStatusParams params) async {
+  Future<Either<Failure, List<task_entity.Task>>> call(
+    GetTasksByStatusParams params,
+  ) async {
     return await repository.getTasksByStatus(params.status);
   }
 }
 
-class GetOverdueTasksUseCase implements UseCase<List<task_entity.Task>, NoParams> {
+class GetOverdueTasksUseCase
+    implements UseCase<List<task_entity.Task>, NoParams> {
   final TasksRepository repository;
 
   GetOverdueTasksUseCase(this.repository);
@@ -47,7 +54,8 @@ class GetOverdueTasksUseCase implements UseCase<List<task_entity.Task>, NoParams
   }
 }
 
-class GetTodayTasksUseCase implements UseCase<List<task_entity.Task>, NoParams> {
+class GetTodayTasksUseCase
+    implements UseCase<List<task_entity.Task>, NoParams> {
   final TasksRepository repository;
 
   GetTodayTasksUseCase(this.repository);
@@ -58,7 +66,8 @@ class GetTodayTasksUseCase implements UseCase<List<task_entity.Task>, NoParams> 
   }
 }
 
-class GetUpcomingTasksUseCase implements UseCase<List<task_entity.Task>, NoParams> {
+class GetUpcomingTasksUseCase
+    implements UseCase<List<task_entity.Task>, NoParams> {
   final TasksRepository repository;
 
   GetUpcomingTasksUseCase(this.repository);

@@ -35,9 +35,7 @@ class VehiclesProvider extends ChangeNotifier {
         _addVehicle = addVehicle,
         _updateVehicle = updateVehicle,
         _deleteVehicle = deleteVehicle,
-        _searchVehicles = searchVehicles {
-    _initialize();
-  }
+        _searchVehicles = searchVehicles;
   
   List<VehicleEntity> get vehicles => _vehicles;
   List<VehicleEntity> get activeVehicles => _vehicles.where((v) => v.isActive).toList();
@@ -47,6 +45,13 @@ class VehiclesProvider extends ChangeNotifier {
   bool get hasVehicles => _vehicles.isNotEmpty;
   int get vehicleCount => _vehicles.length;
   int get activeVehicleCount => activeVehicles.length;
+  
+  /// Inicializa o provider carregando os veículos.
+  /// Deve ser chamado explicitamente após a criação do provider.
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+    await _initialize();
+  }
   
   Future<void> _initialize() async {
     try {

@@ -7,14 +7,16 @@ import '../utils/navigation_service.dart';
 
 /// Serviço de notificações específico do Plantis
 class PlantisNotificationService {
-  static final PlantisNotificationService _instance = PlantisNotificationService._internal();
+  static final PlantisNotificationService _instance =
+      PlantisNotificationService._internal();
   factory PlantisNotificationService() => _instance;
   PlantisNotificationService._internal();
 
   static const String _appName = 'Plantis';
   static const int _primaryColor = 0xFF4CAF50; // Verde plantas
 
-  final INotificationRepository _notificationRepository = LocalNotificationService();
+  final INotificationRepository _notificationRepository =
+      LocalNotificationService();
   bool _isInitialized = false;
 
   /// Inicializa o serviço de notificações do Plantis
@@ -43,8 +45,12 @@ class PlantisNotificationService {
       );
 
       // Define callbacks
-      _notificationRepository.setNotificationTapCallback(_handleNotificationTap);
-      _notificationRepository.setNotificationActionCallback(_handleNotificationAction);
+      _notificationRepository.setNotificationTapCallback(
+        _handleNotificationTap,
+      );
+      _notificationRepository.setNotificationActionCallback(
+        _handleNotificationAction,
+      );
 
       _isInitialized = result;
       return result;
@@ -85,9 +91,12 @@ class PlantisNotificationService {
   }) async {
     final notification = NotificationHelper.createReminderNotification(
       appName: _appName,
-      id: _notificationRepository.generateNotificationId('task_reminder_$taskName'),
+      id: _notificationRepository.generateNotificationId(
+        'task_reminder_$taskName',
+      ),
       title: '🌱 Lembrete de Tarefa',
-      body: '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
+      body:
+          '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
       payload: jsonEncode({
         'type': 'task_reminder',
         'task_name': taskName,
@@ -111,9 +120,12 @@ class PlantisNotificationService {
   }) async {
     final notification = NotificationHelper.createAlertNotification(
       appName: _appName,
-      id: _notificationRepository.generateNotificationId('overdue_task_$taskName'),
+      id: _notificationRepository.generateNotificationId(
+        'overdue_task_$taskName',
+      ),
       title: '🚨 Tarefa Atrasada!',
-      body: '$taskName para $plantName está $daysOverdue dia${daysOverdue > 1 ? 's' : ''} atrasada.',
+      body:
+          '$taskName para $plantName está $daysOverdue dia${daysOverdue > 1 ? 's' : ''} atrasada.',
       payload: jsonEncode({
         'type': 'overdue_task',
         'task_name': taskName,
@@ -134,7 +146,9 @@ class PlantisNotificationService {
   }) async {
     final notification = NotificationHelper.createPromotionNotification(
       appName: _appName,
-      id: _notificationRepository.generateNotificationId('new_plant_$plantName'),
+      id: _notificationRepository.generateNotificationId(
+        'new_plant_$plantName',
+      ),
       title: '🌿 Nova Planta Adicionada!',
       body: '$plantName ($plantType) foi adicionada com sucesso.',
       payload: jsonEncode({
@@ -167,7 +181,10 @@ class PlantisNotificationService {
       color: _primaryColor,
     );
 
-    await _notificationRepository.schedulePeriodicNotification(notification, interval);
+    await _notificationRepository.schedulePeriodicNotification(
+      notification,
+      interval,
+    );
   }
 
   /// Mostra notificação de dica de jardinagem
@@ -294,7 +311,9 @@ class PlantisNotificationService {
       final plantName = data['plant_name'] as String?;
       if (plantName != null) {
         // Navegar para lista de plantas (pode ser filtrada pelo nome)
-        Navigator.of(context).pushNamed('/plants', arguments: {'filter': plantName});
+        Navigator.of(
+          context,
+        ).pushNamed('/plants', arguments: {'filter': plantName});
       } else {
         Navigator.of(context).pushNamed('/plants');
       }
@@ -348,19 +367,25 @@ class PlantisNotificationService {
   }
 
   /// Reagendar lembrete de tarefa
-  Future<void> _rescheduleTaskReminder(Map<String, dynamic> data, Duration delay) async {
+  Future<void> _rescheduleTaskReminder(
+    Map<String, dynamic> data,
+    Duration delay,
+  ) async {
     try {
       final taskName = data['task_name'] as String? ?? '';
       final plantName = data['plant_name'] as String? ?? '';
       final taskDescription = data['task_description'] as String?;
-      
+
       final scheduledDate = DateTime.now().add(delay);
-      
+
       final notification = NotificationHelper.createReminderNotification(
         appName: _appName,
-        id: _notificationRepository.generateNotificationId('task_reminder_${taskName}_rescheduled'),
+        id: _notificationRepository.generateNotificationId(
+          'task_reminder_${taskName}_rescheduled',
+        ),
         title: '🌱 Lembrete de Tarefa (Reagendado)',
-        body: '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
+        body:
+            '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
         scheduledDate: scheduledDate,
         payload: jsonEncode({
           'type': 'task_reminder',
@@ -382,14 +407,15 @@ class PlantisNotificationService {
   /// Reagendar lembrete diário de cuidados
   Future<void> _rescheduleDailyCareReminder(Map<String, dynamic> data) async {
     try {
-      final message = data['message'] as String? ?? 'Hora de cuidar das suas plantas!';
+      final message =
+          data['message'] as String? ?? 'Hora de cuidar das suas plantas!';
       final intervalHours = data['interval'] as int? ?? 24;
-      
+
       await scheduleDailyCareReminder(
         message: message,
         interval: Duration(hours: intervalHours),
       );
-      
+
       debugPrint('✅ Daily care reminder rescheduled');
     } catch (e) {
       debugPrint('❌ Error rescheduling daily care reminder: $e');
@@ -406,11 +432,11 @@ class PlantisNotificationService {
       // TODO: Integrar com TasksRepository para buscar tarefas pendentes
       // final tasksRepository = sl<ITasksRepository>();
       // final pendingTasks = await tasksRepository.getPendingTasks();
-      
+
       // for (final task in pendingTasks) {
       //   await scheduleTaskReminder(task);
       // }
-      
+
       debugPrint('📅 Scheduled notifications for pending tasks');
     } catch (e) {
       debugPrint('❌ Error scheduling notifications for pending tasks: $e');
@@ -427,13 +453,17 @@ class PlantisNotificationService {
     DateTime? dueDate,
   }) async {
     try {
-      final scheduledDate = dueDate ?? DateTime.now().add(const Duration(hours: 1));
-      
+      final scheduledDate =
+          dueDate ?? DateTime.now().add(const Duration(hours: 1));
+
       final notification = NotificationHelper.createReminderNotification(
         appName: _appName,
-        id: _notificationRepository.generateNotificationId('task_reminder_$taskId'),
+        id: _notificationRepository.generateNotificationId(
+          'task_reminder_$taskId',
+        ),
         title: '🌱 Lembrete de Tarefa',
-        body: '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
+        body:
+            '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
         scheduledDate: scheduledDate,
         payload: jsonEncode({
           'type': 'task_reminder',
@@ -448,7 +478,9 @@ class PlantisNotificationService {
       );
 
       await _notificationRepository.scheduleNotification(notification);
-      debugPrint('✅ Task reminder scheduled for $taskName at ${scheduledDate.toString()}');
+      debugPrint(
+        '✅ Task reminder scheduled for $taskName at ${scheduledDate.toString()}',
+      );
     } catch (e) {
       debugPrint('❌ Error scheduling task reminder: $e');
     }
@@ -471,7 +503,7 @@ class PlantisNotificationService {
       // TODO: Integrar com TasksRepository para buscar tarefas atrasadas
       // final tasksRepository = sl<ITasksRepository>();
       // final overdueTasks = await tasksRepository.getOverdueTasks();
-      
+
       // for (final task in overdueTasks) {
       //   final daysOverdue = DateTime.now().difference(task.dueDate).inDays;
       //   await showOverdueTaskNotification(
@@ -480,7 +512,7 @@ class PlantisNotificationService {
       //     daysOverdue: daysOverdue,
       //   );
       // }
-      
+
       debugPrint('🔍 Checked and notified overdue tasks');
     } catch (e) {
       debugPrint('❌ Error checking overdue tasks: $e');
@@ -493,13 +525,13 @@ class PlantisNotificationService {
       // TODO: Integrar com PlantsRepository para buscar plantas ativas
       // final plantsRepository = sl<IPlantsRepository>();
       // final activePlants = await plantsRepository.getActivePlants();
-      
+
       // Agenda lembrete diário geral
       await scheduleDailyCareReminder(
         message: 'Hora de verificar suas plantas! 🌿',
         interval: const Duration(days: 1),
       );
-      
+
       debugPrint('🌱 Scheduled daily care reminders for all plants');
     } catch (e) {
       debugPrint('❌ Error scheduling daily care reminders: $e');

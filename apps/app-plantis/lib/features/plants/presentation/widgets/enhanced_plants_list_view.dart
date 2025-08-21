@@ -25,9 +25,12 @@ class EnhancedPlantsListView extends StatefulWidget {
   State<EnhancedPlantsListView> createState() => _EnhancedPlantsListViewState();
 }
 
-class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView> 
-    implements ISearchDelegate, IViewModeDelegate, IPlantCardActions, ITaskDataProvider {
-  
+class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
+    implements
+        ISearchDelegate,
+        IViewModeDelegate,
+        IPlantCardActions,
+        ITaskDataProvider {
   late PlantsProvider _plantsProvider;
   final ScrollController _scrollController = ScrollController();
 
@@ -35,7 +38,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void initState() {
     super.initState();
     _plantsProvider = di.sl<PlantsProvider>();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -65,7 +68,9 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   // IViewModeDelegate implementation
   @override
   void onViewModeChanged(AppBarViewMode mode) {
-    _plantsProvider.setViewMode(mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list);
+    _plantsProvider.setViewMode(
+      mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
+    );
   }
 
   // IPlantCardActions implementation
@@ -113,10 +118,11 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ChangeNotifierProvider(
-        create: (_) => di.sl<PlantFormProvider>(),
-        child: const PlantFormModal(),
-      ),
+      builder:
+          (context) => ChangeNotifierProvider(
+            create: (_) => di.sl<PlantFormProvider>(),
+            child: const PlantFormModal(),
+          ),
     );
   }
 
@@ -125,55 +131,57 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ChangeNotifierProvider(
-        create: (_) => di.sl<PlantFormProvider>(),
-        child: PlantFormModal(plantId: plant.id),
-      ),
+      builder:
+          (context) => ChangeNotifierProvider(
+            create: (_) => di.sl<PlantFormProvider>(),
+            child: PlantFormModal(plantId: plant.id),
+          ),
     );
   }
 
   void _showRemoveConfirmation(Plant plant) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remover Planta'),
-        content: Text(
-          'Tem certeza que deseja remover "${plant.name}"? '
-          'Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _plantsProvider.deletePlant(plant.id);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${plant.name} foi removida'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Remover Planta'),
+            content: Text(
+              'Tem certeza que deseja remover "${plant.name}"? '
+              'Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Remover'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _plantsProvider.deletePlant(plant.id);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${plant.name} foi removida'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Remover'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return ChangeNotifierProvider.value(
       value: _plantsProvider,
       child: Scaffold(
@@ -187,38 +195,42 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                   return EnhancedPlantsAppBar(
                     plantsCount: plantsProvider.plantsCount,
                     searchQuery: plantsProvider.searchQuery,
-                    viewMode: plantsProvider.viewMode == ViewMode.grid 
-                        ? AppBarViewMode.grid 
-                        : AppBarViewMode.list,
+                    viewMode:
+                        plantsProvider.viewMode == ViewMode.grid
+                            ? AppBarViewMode.grid
+                            : AppBarViewMode.list,
                     searchDelegate: this,
                     viewModeDelegate: this,
                     showSearchBar: true,
                   );
                 },
               ),
-              
+
               // Content Area
               Expanded(
                 child: Consumer<PlantsProvider>(
                   builder: (context, plantsProvider, child) {
                     // Loading state
-                    if (plantsProvider.isLoading && plantsProvider.plants.isEmpty) {
+                    if (plantsProvider.isLoading &&
+                        plantsProvider.plants.isEmpty) {
                       return const PlantsLoadingWidget();
                     }
-                    
+
                     // Error state
-                    if (plantsProvider.error != null && plantsProvider.plants.isEmpty) {
+                    if (plantsProvider.error != null &&
+                        plantsProvider.plants.isEmpty) {
                       return PlantsErrorWidget(
                         error: plantsProvider.error!,
                         onRetry: _loadInitialData,
                       );
                     }
-                    
+
                     // Determine which plants to show
-                    final plantsToShow = plantsProvider.searchQuery.isNotEmpty
-                        ? plantsProvider.searchResults
-                        : plantsProvider.plants;
-                    
+                    final plantsToShow =
+                        plantsProvider.searchQuery.isNotEmpty
+                            ? plantsProvider.searchResults
+                            : plantsProvider.plants;
+
                     // Empty state
                     if (plantsToShow.isEmpty) {
                       return EmptyPlantsWidget(
@@ -228,7 +240,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                         onAddPlant: _showAddPlantModal,
                       );
                     }
-                    
+
                     // Plants list with RefreshIndicator
                     return RefreshIndicator(
                       onRefresh: _onRefresh,
@@ -246,7 +258,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
             ],
           ),
         ),
-        
+
         // Enhanced FAB
         floatingActionButton: _EnhancedFAB(
           onAddPlant: _showAddPlantModal,
@@ -326,10 +338,7 @@ class _EnhancedFAB extends StatelessWidget {
   final VoidCallback onAddPlant;
   final VoidCallback onScrollToTop;
 
-  const _EnhancedFAB({
-    required this.onAddPlant,
-    required this.onScrollToTop,
-  });
+  const _EnhancedFAB({required this.onAddPlant, required this.onScrollToTop});
 
   @override
   Widget build(BuildContext context) {
@@ -343,10 +352,7 @@ class _EnhancedFAB extends StatelessWidget {
       icon: const Icon(Icons.add, size: 24),
       label: const Text(
         'Nova Planta',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
       ),
     );
   }

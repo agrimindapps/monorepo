@@ -11,30 +11,47 @@ part 'planta_model.g.dart';
 class PlantaModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
-  @HiveField(0) final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
   @override
-  @HiveField(4) final bool isDirty;
+  @HiveField(4)
+  final bool isDirty;
   @override
-  @HiveField(5) final bool isDeleted;
+  @HiveField(5)
+  final bool isDeleted;
   @override
-  @HiveField(6) final int version;
+  @HiveField(6)
+  final int version;
   @override
-  @HiveField(7) final String? userId;
+  @HiveField(7)
+  final String? userId;
   @override
-  @HiveField(8) final String? moduleName;
+  @HiveField(8)
+  final String? moduleName;
 
   // Planta specific fields
-  @HiveField(10) final String? nome;
-  @HiveField(11) final String? especie;
-  @HiveField(12) final String? espacoId;
-  @HiveField(13) final List<String>? imagePaths;
-  @HiveField(14) final String? observacoes;
-  @HiveField(15) final List<ComentarioModel>? comentarios;
-  @HiveField(16) final DateTime? dataCadastro;
-  @HiveField(17) final String? fotoBase64;
+  @HiveField(10)
+  final String? nome;
+  @HiveField(11)
+  final String? especie;
+  @HiveField(12)
+  final String? espacoId;
+  @HiveField(13)
+  final List<String>? imagePaths;
+  @HiveField(14)
+  final String? observacoes;
+  @HiveField(15)
+  final List<ComentarioModel>? comentarios;
+  @HiveField(16)
+  final DateTime? dataCadastro;
+  @HiveField(17)
+  final String? fotoBase64;
 
   PlantaModel({
     required this.id,
@@ -55,20 +72,35 @@ class PlantaModel extends BaseSyncModel {
     this.dataCadastro,
     this.fotoBase64,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        ) {
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         lastSyncAt:
+             lastSyncAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+                 : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       ) {
     // Assertions para validar invariants críticos
     assert(id.isNotEmpty, 'PlantaModel ID não pode ser vazio');
-    assert(createdAtMs == null || createdAtMs! > 0, 'createdAtMs deve ser um timestamp válido ou nulo');
-    assert(updatedAtMs == null || updatedAtMs! > 0, 'updatedAtMs deve ser um timestamp válido ou nulo');
+    assert(
+      createdAtMs == null || createdAtMs! > 0,
+      'createdAtMs deve ser um timestamp válido ou nulo',
+    );
+    assert(
+      updatedAtMs == null || updatedAtMs! > 0,
+      'updatedAtMs deve ser um timestamp válido ou nulo',
+    );
   }
 
   @override
@@ -89,7 +121,7 @@ class PlantaModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final plantaId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return PlantaModel(
       id: plantaId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -110,7 +142,7 @@ class PlantaModel extends BaseSyncModel {
   /// Create from Hive map
   factory PlantaModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return PlantaModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -124,18 +156,21 @@ class PlantaModel extends BaseSyncModel {
       nome: map['nome']?.toString(),
       especie: map['especie']?.toString(),
       espacoId: map['espacoId']?.toString(),
-      imagePaths: map['imagePaths'] != null
-          ? List<String>.from(map['imagePaths'])
-          : null,
+      imagePaths:
+          map['imagePaths'] != null
+              ? List<String>.from(map['imagePaths'])
+              : null,
       observacoes: map['observacoes']?.toString(),
-      comentarios: map['comentarios'] != null
-          ? (map['comentarios'] as List)
-              .map((c) => ComentarioModel.fromHiveMap(c))
-              .toList()
-          : null,
-      dataCadastro: map['dataCadastro'] != null
-          ? DateTime.parse(map['dataCadastro'])
-          : null,
+      comentarios:
+          map['comentarios'] != null
+              ? (map['comentarios'] as List)
+                  .map((c) => ComentarioModel.fromHiveMap(c))
+                  .toList()
+              : null,
+      dataCadastro:
+          map['dataCadastro'] != null
+              ? DateTime.parse(map['dataCadastro'])
+              : null,
       fotoBase64: map['fotoBase64']?.toString(),
     );
   }
@@ -143,17 +178,16 @@ class PlantaModel extends BaseSyncModel {
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'nome': nome,
-        'especie': especie,
-        'espacoId': espacoId,
-        'imagePaths': imagePaths,
-        'observacoes': observacoes,
-        'comentarios': comentarios?.map((c) => c.toHiveMap()).toList(),
-        'dataCadastro': dataCadastro?.toIso8601String(),
-        'fotoBase64': fotoBase64,
-      });
+    return super.toHiveMap()..addAll({
+      'nome': nome,
+      'especie': especie,
+      'espacoId': espacoId,
+      'imagePaths': imagePaths,
+      'observacoes': observacoes,
+      'comentarios': comentarios?.map((c) => c.toHiveMap()).toList(),
+      'dataCadastro': dataCadastro?.toIso8601String(),
+      'fotoBase64': fotoBase64,
+    });
   }
 
   /// Convert to Firebase map
@@ -177,7 +211,7 @@ class PlantaModel extends BaseSyncModel {
   factory PlantaModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return PlantaModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -191,18 +225,21 @@ class PlantaModel extends BaseSyncModel {
       nome: map['nome']?.toString(),
       especie: map['especie']?.toString(),
       espacoId: map['espaco_id']?.toString(),
-      imagePaths: map['image_paths'] != null
-          ? List<String>.from(map['image_paths'])
-          : null,
+      imagePaths:
+          map['image_paths'] != null
+              ? List<String>.from(map['image_paths'])
+              : null,
       observacoes: map['observacoes']?.toString(),
-      comentarios: map['comentarios'] != null
-          ? (map['comentarios'] as List)
-              .map((c) => ComentarioModel.fromFirebaseMap(c))
-              .toList()
-          : null,
-      dataCadastro: map['data_cadastro'] != null
-          ? DateTime.parse(map['data_cadastro'])
-          : null,
+      comentarios:
+          map['comentarios'] != null
+              ? (map['comentarios'] as List)
+                  .map((c) => ComentarioModel.fromFirebaseMap(c))
+                  .toList()
+              : null,
+      dataCadastro:
+          map['data_cadastro'] != null
+              ? DateTime.parse(map['data_cadastro'])
+              : null,
       fotoBase64: map['foto_base64']?.toString(),
     );
   }
@@ -253,8 +290,10 @@ class PlantaModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();
-  factory PlantaModel.fromMap(Map<String, dynamic> map) => PlantaModel.fromHiveMap(map);
-  factory PlantaModel.fromJson(Map<String, dynamic> json) => PlantaModel.fromHiveMap(json);
+  factory PlantaModel.fromMap(Map<String, dynamic> map) =>
+      PlantaModel.fromHiveMap(map);
+  factory PlantaModel.fromJson(Map<String, dynamic> json) =>
+      PlantaModel.fromHiveMap(json);
 
   // ========================================
   // NULL OBJECT PATTERN METHODS
@@ -298,19 +337,19 @@ class PlantaModel extends BaseSyncModel {
   /// Retorna combinação de nome e espécie ou observações como descrição
   String get descricao {
     final parts = <String>[];
-    
+
     if (hasValidNome) {
       parts.add(nome!);
     }
-    
+
     if (especie != null && especie!.trim().isNotEmpty) {
       parts.add('($especie)');
     }
-    
+
     if (parts.isEmpty && hasObservacoes) {
       return observacoes!.trim();
     }
-    
+
     return parts.join(' ').trim();
   }
 

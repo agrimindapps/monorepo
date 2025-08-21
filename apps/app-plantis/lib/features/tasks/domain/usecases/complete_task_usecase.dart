@@ -3,17 +3,17 @@ import 'package:core/core.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 
-class CompleteTaskUseCase implements UseCase<task_entity.Task, CompleteTaskParams> {
+class CompleteTaskUseCase
+    implements UseCase<task_entity.Task, CompleteTaskParams> {
   final TasksRepository repository;
 
   CompleteTaskUseCase(this.repository);
 
   @override
-  Future<Either<Failure, task_entity.Task>> call(CompleteTaskParams params) async {
-    return await repository.completeTask(
-      params.taskId,
-      notes: params.notes,
-    );
+  Future<Either<Failure, task_entity.Task>> call(
+    CompleteTaskParams params,
+  ) async {
+    return await repository.completeTask(params.taskId, notes: params.notes);
   }
 }
 
@@ -32,10 +32,7 @@ class CompleteTaskParams {
   final String taskId;
   final String? notes;
 
-  CompleteTaskParams({
-    required this.taskId,
-    this.notes,
-  });
+  CompleteTaskParams({required this.taskId, this.notes});
 }
 
 class DeleteTaskParams {

@@ -157,6 +157,7 @@ class ConnectivityService implements IConnectivityRepository {
         case ConnectivityResult.bluetooth:
           return ConnectivityType.bluetooth;
         case ConnectivityResult.vpn:
+          return ConnectivityType.vpn;
         case ConnectivityResult.other:
           return ConnectivityType.other;
         case ConnectivityResult.none:
@@ -165,6 +166,49 @@ class ConnectivityService implements IConnectivityRepository {
     }
     
     return ConnectivityType.none;
+  }
+
+  /// Compatibility method: getCurrentNetworkStatus (from app-plantis)
+  /// Retorna um tipo que mapeia para o antigo NetworkStatus
+  Future<Either<Failure, ConnectivityType>> getCurrentNetworkStatus() async {
+    try {
+      final result = await _connectivity.checkConnectivity();
+      final type = _mapConnectivityType(result);
+      
+      // Mapeia para compatibilidade com app-plantis
+      final compatibleType = _mapToCompatibleType(type);
+      return Right(compatibleType);
+    } catch (e) {
+      return Left(NetworkFailure('Erro ao obter status de rede atual: $e'));
+    }
+  }
+
+  /// Mapeia tipos para compatibilidade com app-plantis NetworkStatus
+  ConnectivityType _mapToCompatibleType(ConnectivityType type) {
+    switch (type) {
+      case ConnectivityType.none:
+        return ConnectivityType.offline;
+      case ConnectivityType.wifi:
+        return ConnectivityType.wifi;
+      case ConnectivityType.mobile:
+        return ConnectivityType.mobile;
+      case ConnectivityType.ethernet:
+      case ConnectivityType.vpn:
+      case ConnectivityType.other:
+      case ConnectivityType.bluetooth:
+        return ConnectivityType.online;
+      case ConnectivityType.offline:
+        return ConnectivityType.offline;
+      case ConnectivityType.online:
+        return ConnectivityType.online;
+    }
+  }
+
+  /// Stream de conectividade compatível com app-plantis NetworkStatus
+  Stream<ConnectivityType> get networkStatusStream {
+    return _connectivityController.stream.map((isOnline) {
+      return isOnline ? ConnectivityType.online : ConnectivityType.offline;
+    });
   }
 
   /// Obtém informações detalhadas de conectividade

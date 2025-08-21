@@ -11,8 +11,7 @@ class AppTheme {
         brightness: Brightness.light,
         primary: AppColors.primaryColor,
         secondary: AppColors.secondary,
-        surface: AppColors.surface,
-        background: AppColors.background,
+        surface: AppColors.background,
         error: AppColors.error,
       ),
       
@@ -237,7 +236,7 @@ class AppTheme {
       ),
       
       // Scaffold Background
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: AppColors.surface,
       
       // Icon Theme
       iconTheme: const IconThemeData(

@@ -76,7 +76,7 @@ abstract class IStorageRepository {
   });
 
   /// Upload com diferentes formatos de imagem
-  Future<Either<Failure, ImageUploadResult>> uploadImageWithVariants({
+  Future<Either<Failure, StorageImageUploadResult>> uploadImageWithVariants({
     required File imageFile,
     required String basePath,
     List<ImageVariant>? variants,
@@ -203,8 +203,8 @@ class ImageVariant {
 }
 
 /// Resultado do upload de imagem com variantes
-class ImageUploadResult {
-  const ImageUploadResult({
+class StorageImageUploadResult {
+  const StorageImageUploadResult({
     required this.originalUrl,
     required this.variants,
   });

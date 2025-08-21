@@ -13,7 +13,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
-    final userDisplayName = authState.value?.name ?? 'Usuário';
+    final userDisplayName = authState.value?.displayName ?? 'Usuário';
 
     return Scaffold(
       appBar: AppBar(
@@ -240,41 +240,6 @@ class SettingsPage extends ConsumerWidget {
           ),
           ...children,
           const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  void _showProfileDialog(BuildContext context, String currentName) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Perfil'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.person,
-              size: 64,
-              color: AppColors.primaryColor,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              currentName,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text('Usuário do Task Manager'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
         ],
       ),
     );

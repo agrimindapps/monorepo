@@ -51,6 +51,7 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }) : _notificationRepository = notificationRepository ?? LocalNotificationService();
 
   /// Inicializa o serviço de notificações do ReceitaAgro
+  @override
   Future<bool> initialize() async {
     if (_isInitialized) return true;
 
@@ -88,23 +89,27 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }
 
   /// Verifica se as notificações estão habilitadas
+  @override
   Future<bool> areNotificationsEnabled() async {
     final permission = await _notificationRepository.getPermissionStatus();
     return permission.isGranted;
   }
 
   /// Solicita permissão para notificações
+  @override
   Future<bool> requestNotificationPermission() async {
     final permission = await _notificationRepository.requestPermission();
     return permission.isGranted;
   }
 
   /// Abre configurações de notificação
+  @override
   Future<bool> openNotificationSettings() async {
     return await _notificationRepository.openNotificationSettings();
   }
 
   /// Mostra notificação de nova praga detectada
+  @override
   Future<void> showPestDetectedNotification({
     required String pestName,
     required String plantName,
@@ -128,6 +133,7 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }
 
   /// Mostra notificação de lembrete de aplicação
+  @override
   Future<void> showApplicationReminderNotification({
     required String defensiveName,
     required String plantName,
@@ -152,6 +158,7 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }
 
   /// Mostra notificação de nova receita disponível
+  @override
   Future<void> showNewRecipeNotification({
     required String recipeName,
     required String category,
@@ -173,6 +180,7 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }
 
   /// Mostra notificação de clima favorável para aplicação
+  @override
   Future<void> showWeatherAlertNotification({
     required String message,
     required String recommendation,
@@ -194,6 +202,7 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }
 
   /// Agenda lembrete recorrente para monitoramento
+  @override
   Future<void> scheduleMonitoringReminder({
     required String fieldName,
     required Duration interval,
@@ -215,22 +224,26 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
   }
 
   /// Cancela notificação específica
+  @override
   Future<bool> cancelNotification(String identifier) async {
     final id = _notificationRepository.generateNotificationId(identifier);
     return await _notificationRepository.cancelNotification(id);
   }
 
   /// Cancela todas as notificações
+  @override
   Future<bool> cancelAllNotifications() async {
     return await _notificationRepository.cancelAllNotifications();
   }
 
   /// Lista notificações pendentes
+  @override
   Future<List<PendingNotificationEntity>> getPendingNotifications() async {
     return await _notificationRepository.getPendingNotifications();
   }
 
   /// Verifica se uma notificação específica está agendada
+  @override
   Future<bool> isNotificationScheduled(String identifier) async {
     final id = _notificationRepository.generateNotificationId(identifier);
     return await _notificationRepository.isNotificationScheduled(id);

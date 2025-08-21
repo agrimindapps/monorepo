@@ -5,15 +5,12 @@ import '../../../../core/theme/colors.dart';
 class PlantDetailsCare extends StatelessWidget {
   final Plant plant;
 
-  const PlantDetailsCare({
-    super.key,
-    required this.plant,
-  });
+  const PlantDetailsCare({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -90,24 +87,18 @@ class PlantDetailsCare extends StatelessWidget {
     DateTime? nextDate,
   }) {
     final theme = Theme.of(context);
-    
+
     if (interval == null) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.grey.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: Colors.grey[400],
-              size: 24,
-            ),
+            Icon(icon, color: Colors.grey[400], size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -134,14 +125,15 @@ class PlantDetailsCare extends StatelessWidget {
     }
 
     final daysUntilNext = nextDate?.difference(DateTime.now()).inDays;
-    
+
     final isOverdue = daysUntilNext != null && daysUntilNext < 0;
     final isToday = daysUntilNext == 0;
-    final isSoon = daysUntilNext != null && daysUntilNext <= 2 && daysUntilNext > 0;
-    
+    final isSoon =
+        daysUntilNext != null && daysUntilNext <= 2 && daysUntilNext > 0;
+
     Color statusColor = color;
     String statusText = '';
-    
+
     if (isOverdue) {
       statusColor = Colors.red;
       statusText = '${(-daysUntilNext)} dias atrás';
@@ -155,15 +147,13 @@ class PlantDetailsCare extends StatelessWidget {
       statusColor = Colors.green;
       statusText = 'Em $daysUntilNext dias';
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: statusColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -173,11 +163,7 @@ class PlantDetailsCare extends StatelessWidget {
               color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: statusColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: statusColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -203,10 +189,7 @@ class PlantDetailsCare extends StatelessWidget {
           ),
           if (statusText.isNotEmpty)
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: statusColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
@@ -225,38 +208,50 @@ class PlantDetailsCare extends StatelessWidget {
   }
 
   DateTime? _calculateNextWatering() {
-    if (plant.config?.wateringIntervalDays == null || plant.plantingDate == null) {
+    if (plant.config?.wateringIntervalDays == null ||
+        plant.plantingDate == null) {
       return null;
     }
-    
+
     final interval = plant.config!.wateringIntervalDays!;
-    final daysSincePlanting = DateTime.now().difference(plant.plantingDate!).inDays;
+    final daysSincePlanting =
+        DateTime.now().difference(plant.plantingDate!).inDays;
     final cyclesSincePlanting = (daysSincePlanting / interval).floor();
-    
-    return plant.plantingDate!.add(Duration(days: (cyclesSincePlanting + 1) * interval));
+
+    return plant.plantingDate!.add(
+      Duration(days: (cyclesSincePlanting + 1) * interval),
+    );
   }
 
   DateTime? _calculateNextFertilizing() {
-    if (plant.config?.fertilizingIntervalDays == null || plant.plantingDate == null) {
+    if (plant.config?.fertilizingIntervalDays == null ||
+        plant.plantingDate == null) {
       return null;
     }
-    
+
     final interval = plant.config!.fertilizingIntervalDays!;
-    final daysSincePlanting = DateTime.now().difference(plant.plantingDate!).inDays;
+    final daysSincePlanting =
+        DateTime.now().difference(plant.plantingDate!).inDays;
     final cyclesSincePlanting = (daysSincePlanting / interval).floor();
-    
-    return plant.plantingDate!.add(Duration(days: (cyclesSincePlanting + 1) * interval));
+
+    return plant.plantingDate!.add(
+      Duration(days: (cyclesSincePlanting + 1) * interval),
+    );
   }
 
   DateTime? _calculateNextPruning() {
-    if (plant.config?.pruningIntervalDays == null || plant.plantingDate == null) {
+    if (plant.config?.pruningIntervalDays == null ||
+        plant.plantingDate == null) {
       return null;
     }
-    
+
     final interval = plant.config!.pruningIntervalDays!;
-    final daysSincePlanting = DateTime.now().difference(plant.plantingDate!).inDays;
+    final daysSincePlanting =
+        DateTime.now().difference(plant.plantingDate!).inDays;
     final cyclesSincePlanting = (daysSincePlanting / interval).floor();
-    
-    return plant.plantingDate!.add(Duration(days: (cyclesSincePlanting + 1) * interval));
+
+    return plant.plantingDate!.add(
+      Duration(days: (cyclesSincePlanting + 1) * interval),
+    );
   }
 }

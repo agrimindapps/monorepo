@@ -11,7 +11,7 @@ import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 class ExpensesProvider extends ChangeNotifier {
   final ExpensesRepository _repository;
   final VehiclesProvider _vehiclesProvider;
-  final ExpenseValidationService _validator = ExpenseValidationService();
+  final ExpenseValidationService _validator = const ExpenseValidationService();
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
 
   // Estado da listagem de despesas

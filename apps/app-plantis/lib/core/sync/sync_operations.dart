@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
-import '../services/connectivity_service.dart';
 import '../data/models/sync_queue_item.dart';
 import 'sync_queue.dart';
 
@@ -11,7 +11,7 @@ class SyncOperations {
   final SyncQueue _syncQueue;
   final ConnectivityService _connectivityService;
 
-  late StreamSubscription<NetworkStatus> _networkSubscription;
+  late StreamSubscription<ConnectivityType> _networkSubscription;
   bool _isProcessingSync = false;
 
   SyncOperations(this._syncQueue, this._connectivityService) {
@@ -19,8 +19,10 @@ class SyncOperations {
   }
 
   void _initializeNetworkListener() {
-    _networkSubscription = _connectivityService.networkStatusStream.listen((status) {
-      if (status != NetworkStatus.offline) {
+    _networkSubscription = _connectivityService.networkStatusStream.listen((
+      status,
+    ) {
+      if (status != ConnectivityType.offline && status != ConnectivityType.none) {
         processOfflineQueue();
       }
     });
@@ -33,7 +35,7 @@ class SyncOperations {
 
     try {
       final pendingItems = _syncQueue.getPendingItems();
-      
+
       // Priority order: Create > Update > Delete
       final prioritizedItems = _prioritizeItems(pendingItems);
 
@@ -44,7 +46,7 @@ class SyncOperations {
           if (kDebugMode) {
             print('Error syncing item ${item.id}: $e');
           }
-          
+
           // Increment retry count or skip if too many retries
           if (item.retryCount < 3) {
             await _syncQueue.incrementRetryCount(item.id);
@@ -79,9 +81,9 @@ class SyncOperations {
 
       // Sort by priority (descending) and then by timestamp
       final priorityComparison = getPriority(b).compareTo(getPriority(a));
-      return priorityComparison != 0 
-        ? priorityComparison 
-        : a.timestamp.compareTo(b.timestamp);
+      return priorityComparison != 0
+          ? priorityComparison
+          : a.timestamp.compareTo(b.timestamp);
     });
 
     return items;

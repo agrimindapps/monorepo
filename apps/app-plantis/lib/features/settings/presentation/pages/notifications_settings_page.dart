@@ -6,7 +6,8 @@ class NotificationsSettingsPage extends StatefulWidget {
   const NotificationsSettingsPage({super.key});
 
   @override
-  State<NotificationsSettingsPage> createState() => _NotificationsSettingsPageState();
+  State<NotificationsSettingsPage> createState() =>
+      _NotificationsSettingsPageState();
 }
 
 class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
@@ -21,7 +22,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configurações de Notificações'),
@@ -30,9 +31,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
       body: Consumer<NotificationsSettingsProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           return SingleChildScrollView(
@@ -42,24 +41,24 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
               children: [
                 // Status das notificações
                 _buildNotificationStatusCard(context, provider),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Configurações gerais
                 _buildGeneralSettings(context, provider),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Configurações de horários
                 _buildTimeSettings(context, provider),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Configurações por tipo de tarefa
                 _buildTaskTypeSettings(context, provider),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Ações
                 _buildActions(context, provider),
               ],
@@ -70,9 +69,12 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     );
   }
 
-  Widget _buildNotificationStatusCard(BuildContext context, NotificationsSettingsProvider provider) {
+  Widget _buildNotificationStatusCard(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -82,12 +84,13 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
             Row(
               children: [
                 Icon(
-                  provider.areNotificationsEnabled 
+                  provider.areNotificationsEnabled
                       ? Icons.notifications_active
                       : Icons.notifications_off,
-                  color: provider.areNotificationsEnabled 
-                      ? Colors.green 
-                      : Colors.red,
+                  color:
+                      provider.areNotificationsEnabled
+                          ? Colors.green
+                          : Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -98,20 +101,21 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             Text(
               provider.areNotificationsEnabled
                   ? 'As notificações estão habilitadas para este aplicativo'
                   : 'As notificações estão desabilitadas. Habilite nas configurações do dispositivo para receber lembretes.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: provider.areNotificationsEnabled 
-                    ? Colors.green.shade700
-                    : Colors.red.shade700,
+                color:
+                    provider.areNotificationsEnabled
+                        ? Colors.green.shade700
+                        : Colors.red.shade700,
               ),
             ),
-            
+
             if (!provider.areNotificationsEnabled) ...[
               const SizedBox(height: 12),
               ElevatedButton.icon(
@@ -130,9 +134,12 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     );
   }
 
-  Widget _buildGeneralSettings(BuildContext context, NotificationsSettingsProvider provider) {
+  Widget _buildGeneralSettings(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -145,36 +152,43 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             SwitchListTile(
               title: const Text('Lembretes de Tarefas'),
-              subtitle: const Text('Receber notificações antes das tarefas vencerem'),
+              subtitle: const Text(
+                'Receber notificações antes das tarefas vencerem',
+              ),
               value: provider.taskRemindersEnabled,
-              onChanged: provider.areNotificationsEnabled
-                  ? provider.toggleTaskReminders
-                  : null,
+              onChanged:
+                  provider.areNotificationsEnabled
+                      ? provider.toggleTaskReminders
+                      : null,
               secondary: const Icon(Icons.task_alt),
             ),
-            
+
             SwitchListTile(
               title: const Text('Tarefas em Atraso'),
-              subtitle: const Text('Notificações para tarefas que passaram do prazo'),
+              subtitle: const Text(
+                'Notificações para tarefas que passaram do prazo',
+              ),
               value: provider.overdueNotificationsEnabled,
-              onChanged: provider.areNotificationsEnabled
-                  ? provider.toggleOverdueNotifications
-                  : null,
+              onChanged:
+                  provider.areNotificationsEnabled
+                      ? provider.toggleOverdueNotifications
+                      : null,
               secondary: const Icon(Icons.warning),
             ),
-            
+
             SwitchListTile(
               title: const Text('Resumo Diário'),
               subtitle: const Text('Resumo matinal das tarefas do dia'),
               value: provider.dailySummaryEnabled,
-              onChanged: provider.areNotificationsEnabled
-                  ? provider.toggleDailySummary
-                  : null,
+              onChanged:
+                  provider.areNotificationsEnabled
+                      ? provider.toggleDailySummary
+                      : null,
               secondary: const Icon(Icons.today),
             ),
           ],
@@ -183,9 +197,12 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     );
   }
 
-  Widget _buildTimeSettings(BuildContext context, NotificationsSettingsProvider provider) {
+  Widget _buildTimeSettings(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -198,29 +215,32 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             ListTile(
               leading: const Icon(Icons.access_time),
               title: const Text('Antecedência dos Lembretes'),
               subtitle: Text('${provider.reminderMinutesBefore} minutos antes'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: provider.areNotificationsEnabled
-                  ? () => _showReminderTimeDialog(context, provider)
-                  : null,
+              onTap:
+                  provider.areNotificationsEnabled
+                      ? () => _showReminderTimeDialog(context, provider)
+                      : null,
             ),
-            
+
             const Divider(),
-            
+
             ListTile(
               leading: const Icon(Icons.schedule),
               title: const Text('Horário do Resumo Diário'),
               subtitle: Text(provider.dailySummaryTime.format(context)),
               trailing: const Icon(Icons.chevron_right),
-              onTap: provider.areNotificationsEnabled && provider.dailySummaryEnabled
-                  ? () => _showDailySummaryTimeDialog(context, provider)
-                  : null,
+              onTap:
+                  provider.areNotificationsEnabled &&
+                          provider.dailySummaryEnabled
+                      ? () => _showDailySummaryTimeDialog(context, provider)
+                      : null,
             ),
           ],
         ),
@@ -228,9 +248,12 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     );
   }
 
-  Widget _buildTaskTypeSettings(BuildContext context, NotificationsSettingsProvider provider) {
+  Widget _buildTaskTypeSettings(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -243,16 +266,17 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             ...provider.taskTypeSettings.entries.map((entry) {
               return SwitchListTile(
                 title: Text(entry.key),
                 value: entry.value,
-                onChanged: provider.areNotificationsEnabled
-                    ? (value) => provider.toggleTaskType(entry.key, value)
-                    : null,
+                onChanged:
+                    provider.areNotificationsEnabled
+                        ? (value) => provider.toggleTaskType(entry.key, value)
+                        : null,
                 secondary: _getTaskTypeIcon(entry.key),
               );
             }),
@@ -262,17 +286,21 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     );
   }
 
-  Widget _buildActions(BuildContext context, NotificationsSettingsProvider provider) {
+  Widget _buildActions(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Column(
       children: [
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: provider.areNotificationsEnabled
-                ? () => _showTestNotification(context, provider)
-                : null,
+            onPressed:
+                provider.areNotificationsEnabled
+                    ? () => _showTestNotification(context, provider)
+                    : null,
             icon: const Icon(Icons.notifications_active),
             label: const Text('Testar Notificação'),
             style: ElevatedButton.styleFrom(
@@ -282,9 +310,9 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
             ),
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -323,32 +351,40 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     }
   }
 
-  void _showReminderTimeDialog(BuildContext context, NotificationsSettingsProvider provider) {
+  void _showReminderTimeDialog(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Antecedência dos Lembretes'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [15, 30, 60, 120, 180].map((minutes) {
-            return RadioListTile<int>(
-              title: Text('$minutes minutos'),
-              value: minutes,
-              groupValue: provider.reminderMinutesBefore,
-              onChanged: (value) {
-                if (value != null) {
-                  provider.setReminderMinutesBefore(value);
-                  Navigator.of(context).pop();
-                }
-              },
-            );
-          }).toList(),
-        ),
-      ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Antecedência dos Lembretes'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  [15, 30, 60, 120, 180].map((minutes) {
+                    return RadioListTile<int>(
+                      title: Text('$minutes minutos'),
+                      value: minutes,
+                      groupValue: provider.reminderMinutesBefore,
+                      onChanged: (value) {
+                        if (value != null) {
+                          provider.setReminderMinutesBefore(value);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
     );
   }
 
-  void _showDailySummaryTimeDialog(BuildContext context, NotificationsSettingsProvider provider) async {
+  void _showDailySummaryTimeDialog(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) async {
     final TimeOfDay? time = await showTimePicker(
       context: context,
       initialTime: provider.dailySummaryTime,
@@ -359,7 +395,10 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     }
   }
 
-  void _showTestNotification(BuildContext context, NotificationsSettingsProvider provider) {
+  void _showTestNotification(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     provider.sendTestNotification();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -369,33 +408,37 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     );
   }
 
-  void _showClearNotificationsDialog(BuildContext context, NotificationsSettingsProvider provider) {
+  void _showClearNotificationsDialog(
+    BuildContext context,
+    NotificationsSettingsProvider provider,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Limpar Notificações'),
-        content: const Text(
-          'Isso cancelará todas as notificações agendadas. Deseja continuar?'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Limpar Notificações'),
+            content: const Text(
+              'Isso cancelará todas as notificações agendadas. Deseja continuar?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  provider.clearAllNotifications();
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Todas as notificações foram canceladas'),
+                    ),
+                  );
+                },
+                child: const Text('Limpar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              provider.clearAllNotifications();
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Todas as notificações foram canceladas'),
-                ),
-              );
-            },
-            child: const Text('Limpar'),
-          ),
-        ],
-      ),
     );
   }
 }

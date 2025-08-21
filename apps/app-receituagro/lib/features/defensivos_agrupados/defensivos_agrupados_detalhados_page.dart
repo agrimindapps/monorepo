@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/services/diagnostico_integration_service.dart';
 import '../../core/extensions/diagnostico_detalhado_extension.dart';
@@ -36,7 +35,7 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
   // Dados
   List<DefensivoCompleto> _defensivos = [];
   List<DefensivoCompleto> _defensivosFiltrados = [];
-  List<DefensivoCompleto> _defensivosSelecionados = [];
+  final List<DefensivoCompleto> _defensivosSelecionados = [];
   
   // View mode
   bool _modoComparacao = false;
@@ -498,7 +497,7 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => Container(
+      builder: (context) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.8,
         child: ComparacaoDefensivosWidget(
           defensivos: _defensivosSelecionados,

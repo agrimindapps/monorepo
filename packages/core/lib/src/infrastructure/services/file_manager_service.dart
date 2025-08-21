@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -536,11 +535,11 @@ class FileManagerService implements IFileRepository {
       switch (compressionType) {
         case domain.CompressionType.zip:
           final encoder = ZipEncoder();
-          compressedData = encoder.encode(archive)!;
+          compressedData = encoder.encode(archive);
           break;
         case domain.CompressionType.gzip:
           final encoder = GZipEncoder();
-          compressedData = encoder.encode(archive.files.first.content as List<int>)!;
+          compressedData = encoder.encode(archive.files.first.content as List<int>);
           break;
         default:
           throw UnsupportedError('Compression type not supported: $compressionType');

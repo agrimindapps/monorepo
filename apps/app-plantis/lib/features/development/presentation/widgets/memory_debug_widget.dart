@@ -7,7 +7,7 @@ import '../../../../core/services/memory_monitoring_service.dart';
 class MemoryDebugWidget extends StatefulWidget {
   final Widget child;
   final bool showMemoryOverlay;
-  
+
   const MemoryDebugWidget({
     super.key,
     required this.child,
@@ -19,25 +19,26 @@ class MemoryDebugWidget extends StatefulWidget {
 }
 
 class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
-  final MemoryMonitoringService _memoryService = MemoryMonitoringService.instance;
+  final MemoryMonitoringService _memoryService =
+      MemoryMonitoringService.instance;
   MemoryReport? _currentReport;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     if (kDebugMode) {
       _memoryService.startMonitoring();
-      
+
       // Update report every 30 seconds
       Future.delayed(const Duration(seconds: 2), _updateReport);
       _startPeriodicUpdate();
     }
   }
-  
+
   void _startPeriodicUpdate() {
     if (!kDebugMode) return;
-    
+
     Future.delayed(const Duration(seconds: 30), () {
       if (mounted) {
         _updateReport();
@@ -45,15 +46,15 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
       }
     });
   }
-  
+
   void _updateReport() {
     if (!mounted) return;
-    
+
     setState(() {
       _currentReport = _memoryService.getMemoryReport();
     });
   }
-  
+
   @override
   void dispose() {
     if (kDebugMode) {
@@ -67,15 +68,10 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
     if (!kDebugMode || !widget.showMemoryOverlay) {
       return widget.child;
     }
-    
-    return Stack(
-      children: [
-        widget.child,
-        _buildMemoryOverlay(),
-      ],
-    );
+
+    return Stack(children: [widget.child, _buildMemoryOverlay()]);
   }
-  
+
   Widget _buildMemoryOverlay() {
     return Positioned(
       top: MediaQuery.of(context).padding.top + 10,
@@ -92,11 +88,7 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.memory,
-                size: 16,
-                color: Colors.white,
-              ),
+              Icon(Icons.memory, size: 16, color: Colors.white),
               const SizedBox(width: 4),
               Text(
                 _getMemoryText(),
@@ -112,23 +104,23 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
       ),
     );
   }
-  
+
   Color _getMemoryStatusColor() {
     final currentMemory = _currentReport?.currentSnapshot?.usedMemoryMB;
     if (currentMemory == null) return Colors.blue;
-    
+
     if (currentMemory > 200) return Colors.red;
     if (currentMemory > 100) return Colors.orange;
     return Colors.green;
   }
-  
+
   String _getMemoryText() {
     final currentMemory = _currentReport?.currentSnapshot?.usedMemoryMB;
     if (currentMemory == null) return 'Mem: --';
-    
+
     return 'Mem: ${currentMemory}MB';
   }
-  
+
   void _showMemoryDialog() {
     showDialog(
       context: context,
@@ -139,7 +131,7 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
 
 class _MemoryReportDialog extends StatelessWidget {
   final MemoryReport? report;
-  
+
   const _MemoryReportDialog({required this.report});
 
   @override
@@ -154,9 +146,10 @@ class _MemoryReportDialog extends StatelessWidget {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: report == null 
-            ? const Text('No memory data available')
-            : _buildReportContent(),
+        child:
+            report == null
+                ? const Text('No memory data available')
+                : _buildReportContent(),
       ),
       actions: [
         TextButton(
@@ -173,11 +166,11 @@ class _MemoryReportDialog extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildReportContent() {
     final report = this.report!;
     final snapshot = report.currentSnapshot;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,59 +181,61 @@ class _MemoryReportDialog extends StatelessWidget {
           if (snapshot?.heapMemoryMB != null)
             _buildInfoRow('Heap Capacity', '${snapshot!.heapMemoryMB}MB'),
         ]),
-        
+
         const SizedBox(height: 16),
-        
+
         _buildSection('Averages', [
           if (report.averageMemoryMB != null)
-            _buildInfoRow('Average Memory', '${report.averageMemoryMB!.toStringAsFixed(1)}MB'),
+            _buildInfoRow(
+              'Average Memory',
+              '${report.averageMemoryMB!.toStringAsFixed(1)}MB',
+            ),
           if (report.peakMemoryMB != null)
             _buildInfoRow('Peak Memory', '${report.peakMemoryMB}MB'),
           _buildInfoRow('Trend', _getTrendText(report.memoryTrend)),
         ]),
-        
+
         const SizedBox(height: 16),
-        
+
         _buildSection('Caches', [
           _buildInfoRow(
-            'Image Cache', 
-            '${snapshot?.imageCacheStats['cachedImages']} images (${snapshot?.imageCacheStats['totalSizeMB']}MB)'
+            'Image Cache',
+            '${snapshot?.imageCacheStats['cachedImages']} images (${snapshot?.imageCacheStats['totalSizeMB']}MB)',
           ),
           _buildInfoRow(
-            'Search Cache', 
-            '${snapshot?.searchCacheStats['cacheSize']} queries'
+            'Search Cache',
+            '${snapshot?.searchCacheStats['cacheSize']} queries',
           ),
         ]),
-        
+
         const SizedBox(height: 16),
-        
-        _buildSection('Recommendations', 
-          report.recommendations.map((rec) => Text(
-            '• $rec',
-            style: const TextStyle(fontSize: 14),
-          )).toList(),
+
+        _buildSection(
+          'Recommendations',
+          report.recommendations
+              .map(
+                (rec) => Text('• $rec', style: const TextStyle(fontSize: 14)),
+              )
+              .toList(),
         ),
       ],
     );
   }
-  
+
   Widget _buildSection(String title, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 8),
         ...children,
       ],
     );
   }
-  
+
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -248,15 +243,12 @@ class _MemoryReportDialog extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
-  
+
   String _getTrendText(MemoryTrend trend) {
     switch (trend) {
       case MemoryTrend.increasing:

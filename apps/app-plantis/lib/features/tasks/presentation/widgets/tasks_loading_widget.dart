@@ -32,18 +32,18 @@ class TasksLoadingWidget extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Text(
             'Carregando tarefas...',
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             'Verificando cuidados necessários para suas plantas',
             style: theme.textTheme.bodyMedium?.copyWith(

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart' hide UserEntity;
-import 'package:core/core.dart' as core show UserEntity;
+import 'package:core/core.dart' show UserEntity, AuthProvider;
 
 import '../../core/theme/app_colors.dart';
 import '../providers/auth_providers.dart';
 import '../providers/subscription_providers.dart';
-import '../providers/notification_providers.dart';
+import '../../domain/entities/subscription_status.dart';
 import '../pages/premium_page.dart';
 import '../pages/notification_settings_page.dart';
 
@@ -28,8 +27,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(taskManagerAuthNotifierProvider);
-    final subscriptionState = ref.watch(subscriptionStatusProvider);
+    final authState = ref.watch(authNotifierProvider);
+    final subscriptionState = ref.watch(Subscription.subscriptionStatusProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +51,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   Widget _buildAccountContent(
     BuildContext context, 
-    core.UserEntity user, 
+    UserEntity user, 
     AsyncValue<SubscriptionStatus> subscriptionState
   ) {
     return SingleChildScrollView(
@@ -87,7 +86,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildUserHeader(core.UserEntity user) {
+  Widget _buildUserHeader(UserEntity user) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -149,7 +148,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                           Icons.warning,
                         ),
                       
-                      if (user.isAnonymous)
+                      if (user.provider == AuthProvider.anonymous)
                         _buildStatusChip(
                           'Conta temporária',
                           AppColors.info,
@@ -265,7 +264,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildAccountSection(core.UserEntity user) {
+  Widget _buildAccountSection(UserEntity user) {
     return Card(
       child: Column(
         children: [
@@ -277,7 +276,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             onTap: () => _showEditProfileDialog(user),
           ),
           
-          if (!user.emailVerified && !user.isAnonymous) ...[
+          if (!user.isEmailVerified && user.provider != AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.email, color: AppColors.warning),
@@ -288,7 +287,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             ),
           ],
           
-          if (user.isAnonymous) ...[
+          if (user.provider == AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.upgrade, color: AppColors.info),
@@ -368,7 +367,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildAccountActions(core.UserEntity user) {
+  Widget _buildAccountActions(UserEntity user) {
     return Card(
       child: Column(
         children: [
@@ -394,7 +393,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             onTap: () => _showLogoutDialog(),
           ),
           
-          if (!user.isAnonymous) ...[
+          if (user.provider != AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.delete_forever, color: AppColors.error),
@@ -436,8 +435,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   // Dialog methods
-  void _showEditProfileDialog(core.UserEntity user) {
-    _displayNameController.text = user.name ?? '';
+  void _showEditProfileDialog(UserEntity user) {
+    _displayNameController.text = user.displayName;
     
     showDialog(
       context: context,
@@ -494,7 +493,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await ref.read(taskManagerAuthNotifierProvider.notifier).signOut();
+              await ref.read(authNotifierProvider.notifier).signOut();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,

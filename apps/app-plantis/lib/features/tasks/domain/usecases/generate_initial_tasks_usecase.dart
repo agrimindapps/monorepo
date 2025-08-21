@@ -6,23 +6,26 @@ import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 
 /// Use case para gerar tarefas iniciais quando uma nova planta é cadastrada
-/// 
+///
 /// Este use case é responsável por:
 /// - Gerar tarefas baseado na configuração da planta
 /// - Salvar as tarefas no repositório
 /// - Manter atomicidade da operação
 /// - Integrar com o sistema de sync offline-first
-class GenerateInitialTasksUseCase implements UseCase<List<task_entity.Task>, GenerateInitialTasksParams> {
+class GenerateInitialTasksUseCase
+    implements UseCase<List<task_entity.Task>, GenerateInitialTasksParams> {
   final TasksRepository tasksRepository;
   final TaskGenerationService taskGenerationService;
-  
+
   GenerateInitialTasksUseCase({
     required this.tasksRepository,
     required this.taskGenerationService,
   });
-  
+
   @override
-  Future<Either<Failure, List<task_entity.Task>>> call(GenerateInitialTasksParams params) async {
+  Future<Either<Failure, List<task_entity.Task>>> call(
+    GenerateInitialTasksParams params,
+  ) async {
     try {
       // Validação dos parâmetros
       final validationResult = _validateParams(params);
@@ -39,13 +42,21 @@ class GenerateInitialTasksUseCase implements UseCase<List<task_entity.Task>, Gen
       );
 
       if (generationResult.isLeft()) {
-        return Left(generationResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          generationResult.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
-      final tarefaModels = generationResult.fold((_) => <dynamic>[], (tasks) => tasks);
-      
+      final tarefaModels = generationResult.fold(
+        (_) => <dynamic>[],
+        (tasks) => tasks,
+      );
+
       // Converter models para entities
-      final taskEntities = tarefaModels.map((model) => task_entity.Task.fromModel(model)).toList();
+      final taskEntities =
+          tarefaModels
+              .map((model) => task_entity.Task.fromModel(model))
+              .toList();
 
       // Salvar todas as tarefas de forma atômica
       final saveResults = await Future.wait(
@@ -56,19 +67,25 @@ class GenerateInitialTasksUseCase implements UseCase<List<task_entity.Task>, Gen
       final failures = saveResults.where((result) => result.isLeft()).toList();
       if (failures.isNotEmpty) {
         // Se alguma tarefa falhou, retornar primeira falha encontrada
-        return Left(failures.first.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          failures.first.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
       // Todas as tarefas foram salvas com sucesso
-      final savedTasks = saveResults
-          .map((result) => result.fold((_) => null, (task) => task))
-          .whereType<task_entity.Task>()
-          .toList();
+      final savedTasks =
+          saveResults
+              .map((result) => result.fold((_) => null, (task) => task))
+              .whereType<task_entity.Task>()
+              .toList();
 
       return Right(savedTasks);
-      
     } catch (e) {
-      return Left(ServerFailure('Erro inesperado ao gerar tarefas iniciais: ${e.toString()}'));
+      return Left(
+        ServerFailure(
+          'Erro inesperado ao gerar tarefas iniciais: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -79,7 +96,9 @@ class GenerateInitialTasksUseCase implements UseCase<List<task_entity.Task>, Gen
     }
 
     if (params.config.activeCareTypes.isEmpty) {
-      return const ValidationFailure('Planta deve ter pelo menos um tipo de cuidado ativo');
+      return const ValidationFailure(
+        'Planta deve ter pelo menos um tipo de cuidado ativo',
+      );
     }
 
     // Validar se todos os tipos de cuidado são suportados
@@ -99,7 +118,7 @@ class GenerateInitialTasksParams {
   final PlantaConfigModel config;
   final DateTime? plantingDate;
   final String? userId;
-  
+
   const GenerateInitialTasksParams({
     required this.plantaId,
     required this.config,

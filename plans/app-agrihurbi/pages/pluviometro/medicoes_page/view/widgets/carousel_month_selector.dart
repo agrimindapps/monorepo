@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import '../../theme/medicoes_theme.dart';
-import '../../utils/string_extensions.dart';
 
 class CarouselMonthSelector extends StatelessWidget {
   final List<DateTime> months;

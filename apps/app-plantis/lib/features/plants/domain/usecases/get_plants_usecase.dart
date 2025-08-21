@@ -5,9 +5,9 @@ import '../repositories/plants_repository.dart';
 
 class GetPlantsUseCase implements UseCase<List<Plant>, NoParams> {
   final PlantsRepository repository;
-  
+
   GetPlantsUseCase(this.repository);
-  
+
   @override
   Future<Either<Failure, List<Plant>>> call(NoParams params) {
     return repository.getPlants();
@@ -16,13 +16,15 @@ class GetPlantsUseCase implements UseCase<List<Plant>, NoParams> {
 
 class GetPlantByIdUseCase implements UseCase<Plant, String> {
   final PlantsRepository repository;
-  
+
   GetPlantByIdUseCase(this.repository);
-  
+
   @override
   Future<Either<Failure, Plant>> call(String id) {
     if (id.trim().isEmpty) {
-      return Future.value(Left(ValidationFailure('ID da planta é obrigatório')));
+      return Future.value(
+        Left(ValidationFailure('ID da planta é obrigatório')),
+      );
     }
     return repository.getPlantById(id);
   }
@@ -30,9 +32,9 @@ class GetPlantByIdUseCase implements UseCase<Plant, String> {
 
 class SearchPlantsUseCase implements UseCase<List<Plant>, SearchPlantsParams> {
   final PlantsRepository repository;
-  
+
   SearchPlantsUseCase(this.repository);
-  
+
   @override
   Future<Either<Failure, List<Plant>>> call(SearchPlantsParams params) {
     if (params.query.trim().isEmpty) {
@@ -44,6 +46,6 @@ class SearchPlantsUseCase implements UseCase<List<Plant>, SearchPlantsParams> {
 
 class SearchPlantsParams {
   final String query;
-  
+
   const SearchPlantsParams(this.query);
 }

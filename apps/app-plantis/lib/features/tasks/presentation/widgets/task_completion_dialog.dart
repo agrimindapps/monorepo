@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/task.dart';
 
 /// Dialog para confirmação de conclusão de tarefa
-/// 
+///
 /// Features:
 /// - Confirmação visual da tarefa a ser marcada como concluída
 /// - Campo opcional para observações
@@ -91,17 +91,17 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
             children: [
               // Informações da tarefa
               _buildTaskInfo(),
-              
+
               const SizedBox(height: 20),
-              
+
               // Data da conclusão
               _buildCompletionDateField(),
-              
+
               const SizedBox(height: 16),
-              
+
               // Campo de observações
               _buildNotesField(),
-              
+
               if (widget.nextTaskDate != null) ...[
                 const SizedBox(height: 20),
                 _buildNextTaskPreview(),
@@ -111,10 +111,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _handleCancel,
-          child: const Text('Cancelar'),
-        ),
+        TextButton(onPressed: _handleCancel, child: const Text('Cancelar')),
         ElevatedButton(
           onPressed: _handleConfirm,
           child: const Text('Confirmar'),
@@ -125,13 +122,15 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
 
   Widget _buildTaskInfo() {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,10 +162,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
           ),
           if (widget.task.description != null) ...[
             const SizedBox(height: 8),
-            Text(
-              widget.task.description!,
-              style: theme.textTheme.bodySmall,
-            ),
+            Text(widget.task.description!, style: theme.textTheme.bodySmall),
           ],
         ],
       ),
@@ -175,7 +171,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
 
   Widget _buildCompletionDateField() {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -234,9 +230,9 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       children: [
         Text(
           'Observações (opcional)',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -254,7 +250,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
 
   Widget _buildNextTaskPreview() {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -269,11 +265,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.schedule,
-                color: theme.colorScheme.primary,
-                size: 18,
-              ),
+              Icon(Icons.schedule, color: theme.colorScheme.primary, size: 18),
               const SizedBox(width: 8),
               Text(
                 'Próxima Tarefa',
@@ -389,7 +381,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       _completionDate.month,
       _completionDate.day,
     );
-    
+
     return completionDay.isAfter(today);
   }
 }
@@ -399,10 +391,7 @@ class TaskCompletionResult {
   final DateTime completionDate;
   final String? notes;
 
-  const TaskCompletionResult({
-    required this.completionDate,
-    this.notes,
-  });
+  const TaskCompletionResult({required this.completionDate, this.notes});
 
   @override
   bool operator ==(Object other) {

@@ -2,7 +2,6 @@
 import 'dart:async';
 
 // Project imports:
-import '../core/extensions/datetime_extensions.dart';
 import '../core/filtering/date_criteria_strategy.dart';
 import '../core/filtering/tarefa_filter_service.dart';
 import '../core/interfaces/i_tarefa_repository.dart';

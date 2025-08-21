@@ -20,22 +20,22 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   static const String _collection = 'tasks';
 
   TasksRemoteDataSourceImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<List<TaskModel>> getTasks() async {
     try {
-      final querySnapshot = await _firestore
-          .collection(_collection)
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('due_date')
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection(_collection)
+              .where('is_deleted', isEqualTo: false)
+              .orderBy('due_date')
+              .get();
 
       return querySnapshot.docs
-          .map((doc) => TaskModel.fromFirebaseMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({'id': doc.id, ...doc.data()}),
+          )
           .toList();
     } catch (e) {
       throw Exception('Erro ao buscar tarefas remotas: $e');
@@ -45,18 +45,18 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   @override
   Future<List<TaskModel>> getTasksByPlantId(String plantId) async {
     try {
-      final querySnapshot = await _firestore
-          .collection(_collection)
-          .where('plant_id', isEqualTo: plantId)
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('due_date')
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection(_collection)
+              .where('plant_id', isEqualTo: plantId)
+              .where('is_deleted', isEqualTo: false)
+              .orderBy('due_date')
+              .get();
 
       return querySnapshot.docs
-          .map((doc) => TaskModel.fromFirebaseMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({'id': doc.id, ...doc.data()}),
+          )
           .toList();
     } catch (e) {
       throw Exception('Erro ao buscar tarefas por planta: $e');
@@ -66,18 +66,18 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   @override
   Future<List<TaskModel>> getTasksByStatus(TaskStatus status) async {
     try {
-      final querySnapshot = await _firestore
-          .collection(_collection)
-          .where('status', isEqualTo: status.key)
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('due_date')
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection(_collection)
+              .where('status', isEqualTo: status.key)
+              .where('is_deleted', isEqualTo: false)
+              .orderBy('due_date')
+              .get();
 
       return querySnapshot.docs
-          .map((doc) => TaskModel.fromFirebaseMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({'id': doc.id, ...doc.data()}),
+          )
           .toList();
     } catch (e) {
       throw Exception('Erro ao buscar tarefas por status: $e');
@@ -88,19 +88,19 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   Future<List<TaskModel>> getOverdueTasks() async {
     try {
       final now = Timestamp.now();
-      final querySnapshot = await _firestore
-          .collection(_collection)
-          .where('status', isEqualTo: TaskStatus.pending.key)
-          .where('due_date', isLessThan: now)
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('due_date')
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection(_collection)
+              .where('status', isEqualTo: TaskStatus.pending.key)
+              .where('due_date', isLessThan: now)
+              .where('is_deleted', isEqualTo: false)
+              .orderBy('due_date')
+              .get();
 
       return querySnapshot.docs
-          .map((doc) => TaskModel.fromFirebaseMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({'id': doc.id, ...doc.data()}),
+          )
           .toList();
     } catch (e) {
       throw Exception('Erro ao buscar tarefas atrasadas: $e');
@@ -114,20 +114,26 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final startOfDay = DateTime(today.year, today.month, today.day);
       final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
 
-      final querySnapshot = await _firestore
-          .collection(_collection)
-          .where('status', isEqualTo: TaskStatus.pending.key)
-          .where('due_date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-          .where('due_date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('due_date')
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection(_collection)
+              .where('status', isEqualTo: TaskStatus.pending.key)
+              .where(
+                'due_date',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+              )
+              .where(
+                'due_date',
+                isLessThanOrEqualTo: Timestamp.fromDate(endOfDay),
+              )
+              .where('is_deleted', isEqualTo: false)
+              .orderBy('due_date')
+              .get();
 
       return querySnapshot.docs
-          .map((doc) => TaskModel.fromFirebaseMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({'id': doc.id, ...doc.data()}),
+          )
           .toList();
     } catch (e) {
       throw Exception('Erro ao buscar tarefas de hoje: $e');
@@ -140,20 +146,23 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final now = DateTime.now();
       final nextWeek = now.add(const Duration(days: 7));
 
-      final querySnapshot = await _firestore
-          .collection(_collection)
-          .where('status', isEqualTo: TaskStatus.pending.key)
-          .where('due_date', isGreaterThan: Timestamp.fromDate(now))
-          .where('due_date', isLessThanOrEqualTo: Timestamp.fromDate(nextWeek))
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('due_date')
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection(_collection)
+              .where('status', isEqualTo: TaskStatus.pending.key)
+              .where('due_date', isGreaterThan: Timestamp.fromDate(now))
+              .where(
+                'due_date',
+                isLessThanOrEqualTo: Timestamp.fromDate(nextWeek),
+              )
+              .where('is_deleted', isEqualTo: false)
+              .orderBy('due_date')
+              .get();
 
       return querySnapshot.docs
-          .map((doc) => TaskModel.fromFirebaseMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({'id': doc.id, ...doc.data()}),
+          )
           .toList();
     } catch (e) {
       throw Exception('Erro ao buscar tarefas próximas: $e');
@@ -163,10 +172,8 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   @override
   Future<TaskModel?> getTaskById(String id) async {
     try {
-      final docSnapshot = await _firestore
-          .collection(_collection)
-          .doc(id)
-          .get();
+      final docSnapshot =
+          await _firestore.collection(_collection).doc(id).get();
 
       if (!docSnapshot.exists) return null;
 
@@ -185,9 +192,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final taskData = task.toFirebaseMap();
       taskData.remove('id'); // Remove ID pois será gerado pelo Firestore
 
-      final docRef = await _firestore
-          .collection(_collection)
-          .add(taskData);
+      final docRef = await _firestore.collection(_collection).add(taskData);
 
       final createdTask = task.copyWith(
         id: docRef.id,
@@ -207,10 +212,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final taskData = task.toFirebaseMap();
       taskData['updated_at'] = Timestamp.now().toDate().toIso8601String();
 
-      await _firestore
-          .collection(_collection)
-          .doc(task.id)
-          .update(taskData);
+      await _firestore.collection(_collection).doc(task.id).update(taskData);
 
       return task.copyWith(
         lastSyncAt: DateTime.now(),
@@ -225,13 +227,10 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   @override
   Future<void> deleteTask(String id) async {
     try {
-      await _firestore
-          .collection(_collection)
-          .doc(id)
-          .update({
-            'is_deleted': true,
-            'updated_at': Timestamp.now().toDate().toIso8601String(),
-          });
+      await _firestore.collection(_collection).doc(id).update({
+        'is_deleted': true,
+        'updated_at': Timestamp.now().toDate().toIso8601String(),
+      });
     } catch (e) {
       throw Exception('Erro ao deletar tarefa remota: $e');
     }

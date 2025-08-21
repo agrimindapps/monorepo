@@ -1,5 +1,5 @@
 /// Calculadora avançada para agendamento de tarefas
-/// 
+///
 /// Responsável por calcular datas futuras para tarefas considerando:
 /// - Frequências diárias, semanais, mensais e personalizadas
 /// - Fins de semana e feriados (opcional)
@@ -9,7 +9,7 @@
 class TaskScheduleCalculator {
   static const int _defaultTaskHour = 9; // 9h da manhã
   static const int _defaultTaskMinute = 0;
-  
+
   // Limites de intervalo por tipo de cuidado (em dias)
   static const Map<String, TaskIntervalLimits> _careTypeLimits = {
     'agua': TaskIntervalLimits(minDays: 1, maxDays: 14),
@@ -21,7 +21,7 @@ class TaskScheduleCalculator {
   };
 
   /// Calcula a próxima data de tarefa baseado no intervalo
-  /// 
+  ///
   /// [baseDate] - Data base para o cálculo (normalmente data de conclusão da tarefa anterior)
   /// [intervalDays] - Intervalo em dias
   /// [careType] - Tipo de cuidado para aplicar regras específicas
@@ -37,15 +37,18 @@ class TaskScheduleCalculator {
     int? customMinute,
   }) {
     // Validar intervalo
-    final validatedInterval = _validateAndAdjustInterval(intervalDays, careType);
-    
+    final validatedInterval = _validateAndAdjustInterval(
+      intervalDays,
+      careType,
+    );
+
     // Calcular data base
     var nextDate = baseDate.add(Duration(days: validatedInterval));
-    
+
     // Definir horário padrão
     final hour = customHour ?? _getDefaultHourForCareType(careType);
     final minute = customMinute ?? _defaultTaskMinute;
-    
+
     nextDate = DateTime(
       nextDate.year,
       nextDate.month,
@@ -53,20 +56,20 @@ class TaskScheduleCalculator {
       hour,
       minute,
     );
-    
+
     // Ajustar para pular fins de semana se solicitado
     if (skipWeekends) {
       nextDate = _skipWeekends(nextDate);
     }
-    
+
     // Aplicar ajustes específicos por tipo de cuidado
     nextDate = _applyCareTypeAdjustments(nextDate, careType);
-    
+
     return nextDate;
   }
 
   /// Calcula múltiplas datas futuras
-  /// 
+  ///
   /// Útil para gerar cronograma de tarefas ou preview
   static List<DateTime> calculateMultipleDates({
     required DateTime baseDate,
@@ -79,7 +82,7 @@ class TaskScheduleCalculator {
   }) {
     final dates = <DateTime>[];
     var currentBase = baseDate;
-    
+
     for (int i = 0; i < count; i++) {
       final nextDate = calculateNextDate(
         baseDate: currentBase,
@@ -89,22 +92,23 @@ class TaskScheduleCalculator {
         customHour: customHour,
         customMinute: customMinute,
       );
-      
+
       dates.add(nextDate);
       currentBase = nextDate;
     }
-    
+
     return dates;
   }
 
   /// Calcula o próximo dia útil (segunda a sexta)
   static DateTime getNextBusinessDay(DateTime date) {
     var nextDay = date;
-    
-    while (nextDay.weekday > 5) { // 6 = sábado, 7 = domingo
+
+    while (nextDay.weekday > 5) {
+      // 6 = sábado, 7 = domingo
       nextDay = nextDay.add(const Duration(days: 1));
     }
-    
+
     return nextDay;
   }
 
@@ -122,7 +126,7 @@ class TaskScheduleCalculator {
     final tasksPerPeriod = (periodDays / intervalDays).ceil();
     final averageDaysBetween = intervalDays.toDouble();
     final limits = _careTypeLimits[careType];
-    
+
     return TaskFrequencyStats(
       intervalDays: intervalDays,
       tasksPerPeriod: tasksPerPeriod,
@@ -141,24 +145,26 @@ class TaskScheduleCalculator {
   }) {
     final now = currentDate ?? DateTime.now();
     final limits = _careTypeLimits[careType];
-    
+
     if (limits == null) {
       return 7; // Padrão semanal
     }
-    
+
     // Ajustar baseado na estação (simplificado para Brasil)
     final isWinter = _isWinter(now);
     final isSummer = _isSummer(now);
-    
+
     int baseInterval = _getBaseIntervalForCareType(careType);
-    
+
     // Ajustes sazonais
     switch (careType) {
       case 'agua':
         if (isSummer) {
-          baseInterval = (baseInterval * 0.8).round(); // 20% mais frequente no verão
+          baseInterval =
+              (baseInterval * 0.8).round(); // 20% mais frequente no verão
         } else if (isWinter) {
-          baseInterval = (baseInterval * 1.3).round(); // 30% menos frequente no inverno
+          baseInterval =
+              (baseInterval * 1.3).round(); // 30% menos frequente no inverno
         }
         break;
       case 'adubo':
@@ -168,11 +174,14 @@ class TaskScheduleCalculator {
         break;
       case 'banho_sol':
         if (isWinter) {
-          baseInterval = Math.max(1, (baseInterval * 0.7).round()); // Mais sol no inverno
+          baseInterval = Math.max(
+            1,
+            (baseInterval * 0.7).round(),
+          ); // Mais sol no inverno
         }
         break;
     }
-    
+
     // Garantir que está dentro dos limites
     return limits.clampToLimits(baseInterval);
   }
@@ -194,12 +203,12 @@ class TaskScheduleCalculator {
     if (intervalDays <= 0) {
       throw ArgumentError('Intervalo deve ser maior que zero');
     }
-    
+
     final limits = _careTypeLimits[careType];
     if (limits != null) {
       return limits.clampToLimits(intervalDays);
     }
-    
+
     return intervalDays;
   }
 
@@ -244,7 +253,7 @@ class TaskScheduleCalculator {
         }
         break;
     }
-    
+
     return date;
   }
 
@@ -283,10 +292,7 @@ class TaskIntervalLimits {
   final int minDays;
   final int maxDays;
 
-  const TaskIntervalLimits({
-    required this.minDays,
-    required this.maxDays,
-  });
+  const TaskIntervalLimits({required this.minDays, required this.maxDays});
 
   bool isWithinLimits(int days) {
     return days >= minDays && days <= maxDays;

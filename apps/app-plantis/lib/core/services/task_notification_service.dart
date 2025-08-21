@@ -5,12 +5,14 @@ import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import 'plantis_notification_service.dart';
 
 class TaskNotificationService {
-  static final TaskNotificationService _instance = TaskNotificationService._internal();
+  static final TaskNotificationService _instance =
+      TaskNotificationService._internal();
   factory TaskNotificationService() => _instance;
   TaskNotificationService._internal();
 
-  final PlantisNotificationService _notificationService = PlantisNotificationService();
-  
+  final PlantisNotificationService _notificationService =
+      PlantisNotificationService();
+
   /// Método temporário para compatibilidade - usar até definir regras de negócio
   Future<void> _showCompatibilityNotification({
     required int id,
@@ -19,7 +21,8 @@ class TaskNotificationService {
     String? payload,
   }) async {
     // Usar o método básico do core até implementar a lógica específica
-    final notificationRepository = (_notificationService as dynamic)._notificationRepository;
+    final notificationRepository =
+        (_notificationService as dynamic)._notificationRepository;
     final notification = NotificationHelper.createReminderNotification(
       appName: 'Plantis',
       id: id,
@@ -39,14 +42,19 @@ class TaskNotificationService {
       if (!enabled) return;
 
       // Calcular horário da notificação (1 hora antes do vencimento)
-      final DateTime notificationTime = task.dueDate.subtract(const Duration(hours: 1));
-      
+      final DateTime notificationTime = task.dueDate.subtract(
+        const Duration(hours: 1),
+      );
+
       // Não agendar se já passou do horário
       if (notificationTime.isBefore(DateTime.now())) return;
 
       final String title = _getNotificationTitle(task);
       final String body = _getNotificationBody(task);
-      final String payload = _createNotificationPayload(task, PlantisNotificationType.taskReminder);
+      final String payload = _createNotificationPayload(
+        task,
+        PlantisNotificationType.taskReminder,
+      );
 
       final int notificationId = _createNotificationId('${task.id}_reminder');
 
@@ -69,7 +77,10 @@ class TaskNotificationService {
 
       final String title = 'Tarefa em Atraso! 🚨';
       final String body = '${task.title} para ${task.plantName} está atrasada';
-      final String payload = _createNotificationPayload(task, PlantisNotificationType.overdueTask);
+      final String payload = _createNotificationPayload(
+        task,
+        PlantisNotificationType.overdueTask,
+      );
 
       final int notificationId = _createNotificationId('${task.id}_overdue');
 
@@ -85,7 +96,9 @@ class TaskNotificationService {
   }
 
   /// Agendar notificação diária com resumo das tarefas
-  Future<void> scheduleDailySummaryNotification(List<task_entity.Task> todayTasks) async {
+  Future<void> scheduleDailySummaryNotification(
+    List<task_entity.Task> todayTasks,
+  ) async {
     try {
       final bool enabled = await _notificationService.areNotificationsEnabled();
       if (!enabled) return;
@@ -178,9 +191,10 @@ class TaskNotificationService {
   /// Gerar corpo do resumo diário
   String _getDailySummaryBody(List<task_entity.Task> todayTasks) {
     final int totalTasks = todayTasks.length;
-    final int urgentTasks = todayTasks
-        .where((t) => t.priority == task_entity.TaskPriority.urgent)
-        .length;
+    final int urgentTasks =
+        todayTasks
+            .where((t) => t.priority == task_entity.TaskPriority.urgent)
+            .length;
 
     if (totalTasks == 1) {
       return 'Você tem 1 tarefa para hoje: ${todayTasks.first.title}';
@@ -197,7 +211,10 @@ class TaskNotificationService {
     return identifier.hashCode.abs() % 2147483647;
   }
 
-  String _createNotificationPayload(task_entity.Task task, PlantisNotificationType type) {
+  String _createNotificationPayload(
+    task_entity.Task task,
+    PlantisNotificationType type,
+  ) {
     final Map<String, dynamic> payload = {
       'type': type.value,
       'taskId': task.id,
@@ -222,7 +239,7 @@ class TaskNotificationService {
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
       final String type = data['type'] ?? '';
-      
+
       switch (type) {
         case 'task_reminder':
         case 'task_overdue':
@@ -244,11 +261,14 @@ class TaskNotificationService {
   Future<void> checkOverdueTasks(List<task_entity.Task> allTasks) async {
     try {
       final DateTime now = DateTime.now();
-      final List<task_entity.Task> overdueTasks = allTasks
-          .where((task) => 
-              task.status == task_entity.TaskStatus.pending && 
-              task.dueDate.isBefore(now))
-          .toList();
+      final List<task_entity.Task> overdueTasks =
+          allTasks
+              .where(
+                (task) =>
+                    task.status == task_entity.TaskStatus.pending &&
+                    task.dueDate.isBefore(now),
+              )
+              .toList();
 
       for (final task in overdueTasks) {
         await scheduleOverdueNotification(task);
@@ -259,15 +279,18 @@ class TaskNotificationService {
   }
 
   /// Reagendar notificações após completar uma tarefa
-  Future<void> rescheduleTaskNotifications(List<task_entity.Task> allTasks) async {
+  Future<void> rescheduleTaskNotifications(
+    List<task_entity.Task> allTasks,
+  ) async {
     try {
       // Cancelar todas as notificações existentes
       await cancelAllTaskNotifications();
 
       // Reagendar para tarefas pendentes
-      final List<task_entity.Task> pendingTasks = allTasks
-          .where((task) => task.status == task_entity.TaskStatus.pending)
-          .toList();
+      final List<task_entity.Task> pendingTasks =
+          allTasks
+              .where((task) => task.status == task_entity.TaskStatus.pending)
+              .toList();
 
       for (final task in pendingTasks) {
         await scheduleTaskNotification(task);

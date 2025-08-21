@@ -409,6 +409,12 @@ abstract class RegisterModule {
   
   @singleton
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
+  
+  @singleton
+  Connectivity get connectivity => Connectivity();
+  
+  @singleton
+  core.ISubscriptionRepository get subscriptionRepository => core.RevenueCatService();
 }
 
 // Extension para facilitar o acesso

@@ -6,7 +6,7 @@ import '../../../../core/theme/colors.dart';
 
 class AuthPage extends StatefulWidget {
   final int initialTab; // 0 = login, 1 = register
-  
+
   const AuthPage({super.key, this.initialTab = 0});
 
   @override
@@ -18,14 +18,14 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   late Animation<double> _slideAnimation;
-  
+
   // Login controllers
   final _loginFormKey = GlobalKey<FormState>();
   final _loginEmailController = TextEditingController();
   final _loginPasswordController = TextEditingController();
   bool _obscureLoginPassword = true;
   bool _rememberMe = false;
-  
+
   // Register controllers
   final _registerFormKey = GlobalKey<FormState>();
   final _registerNameController = TextEditingController();
@@ -34,7 +34,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   final _registerConfirmPasswordController = TextEditingController();
   bool _obscureRegisterPassword = true;
   bool _obscureRegisterConfirmPassword = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -43,31 +43,29 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       vsync: this,
       initialIndex: widget.initialTab,
     );
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
-    _fadeInAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
-    
-    _slideAnimation = Tween<double>(
-      begin: 30.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.2, 0.8, curve: Curves.easeOut),
-    ));
-    
+
+    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 0.8, curve: Curves.easeOut),
+      ),
+    );
+
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -80,7 +78,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
     _registerConfirmPasswordController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _handleLogin() async {
     if (_loginFormKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
@@ -88,13 +86,13 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         _loginEmailController.text,
         _loginPasswordController.text,
       );
-      
+
       if (authProvider.isAuthenticated && mounted) {
         context.go('/plants');
       }
     }
   }
-  
+
   Future<void> _handleRegister() async {
     if (_registerFormKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
@@ -103,7 +101,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         _registerPasswordController.text,
         _registerNameController.text,
       );
-      
+
       if (authProvider.isAuthenticated && mounted) {
         context.go('/plants');
       }
@@ -127,7 +125,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 size: 24,
               ),
             ),
-            
+
             // Main content
             Center(
               child: SingleChildScrollView(
@@ -165,7 +163,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                 const SizedBox(width: 8),
                                 Text(
                                   'PlantApp',
-                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.headlineSmall?.copyWith(
                                     color: PlantisColors.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -175,12 +175,14 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             const SizedBox(height: 8),
                             Text(
                               'Cuidado de Plantas',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
                                 color: PlantisColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 32),
-                            
+
                             // Custom Tab Bar
                             AnimatedBuilder(
                               animation: _fadeInAnimation,
@@ -198,17 +200,21 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                         controller: _tabController,
                                         indicator: BoxDecoration(
                                           color: PlantisColors.primary,
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: PlantisColors.primary.withValues(alpha: 0.3),
+                                              color: PlantisColors.primary
+                                                  .withValues(alpha: 0.3),
                                               blurRadius: 8,
                                               offset: const Offset(0, 2),
                                             ),
                                           ],
                                         ),
                                         labelColor: Colors.white,
-                                        unselectedLabelColor: Colors.grey.shade600,
+                                        unselectedLabelColor:
+                                            Colors.grey.shade600,
                                         labelStyle: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
@@ -217,7 +223,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
                                         ),
-                                        indicatorPadding: const EdgeInsets.all(4),
+                                        indicatorPadding: const EdgeInsets.all(
+                                          4,
+                                        ),
                                         dividerColor: Colors.transparent,
                                         tabs: const [
                                           Tab(text: 'Entrar'),
@@ -232,7 +240,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      
+
                       // Tab Content
                       Container(
                         height: 600,
@@ -243,10 +251,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         child: TabBarView(
                           controller: _tabController,
-                          children: [
-                            _buildLoginTab(),
-                            _buildRegisterTab(),
-                          ],
+                          children: [_buildLoginTab(), _buildRegisterTab()],
                         ),
                       ),
                     ],
@@ -254,7 +259,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            
+
             // Copyright footer
             Positioned(
               bottom: 16,
@@ -274,7 +279,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       ),
     );
   }
-  
+
   Widget _buildLoginTab() {
     return AnimatedBuilder(
       animation: _fadeInAnimation,
@@ -290,7 +295,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 24),
-                    
+
                     // Email field
                     TextFormField(
                       controller: _loginEmailController,
@@ -328,9 +333,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -355,7 +358,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Password field
                     TextFormField(
                       controller: _loginPasswordController,
@@ -404,15 +407,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -437,7 +436,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Remember me and forgot password
                     Row(
                       children: [
@@ -453,7 +452,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             activeColor: PlantisColors.primary,
                             checkColor: Colors.white,
                             side: BorderSide(
-                              color: PlantisColors.primary.withValues(alpha: 0.5),
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.5,
+                              ),
                               width: 1.5,
                             ),
                             shape: RoundedRectangleBorder(
@@ -475,7 +476,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             // TODO: Implement forgot password
                           },
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
@@ -491,7 +495,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Error message
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
@@ -525,14 +529,15 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         return const SizedBox.shrink();
                       },
                     ),
-                    
+
                     // Login button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
                         return SizedBox(
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: authProvider.isLoading ? null : _handleLogin,
+                            onPressed:
+                                authProvider.isLoading ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: PlantisColors.primary,
                               foregroundColor: Colors.white,
@@ -540,30 +545,36 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               elevation: 2,
-                              shadowColor: PlantisColors.primary.withValues(alpha: 0.3),
+                              shadowColor: PlantisColors.primary.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
-                            child: authProvider.isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            child:
+                                authProvider.isLoading
+                                    ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Entrar',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  )
-                                : const Text(
-                                    'Entrar',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
                           ),
                         );
                       },
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Or continue with
                     Text(
                       'ou continue com',
@@ -574,60 +585,47 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Social login buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildSocialButton(
-                          'G',
-                          'Google',
-                          Colors.red,
-                          () {
-                            // TODO: Implement Google login
-                          },
-                        ),
-                        _buildSocialButton(
-                          '',
-                          'Apple',
-                          Colors.black,
-                          () {
-                            // TODO: Implement Apple login
-                          },
-                          icon: Icons.apple,
-                        ),
-                        _buildSocialButton(
-                          '',
-                          'Microsoft',
-                          Colors.blue,
-                          () {
-                            // TODO: Implement Microsoft login
-                          },
-                          icon: Icons.window,
-                        ),
+                        _buildSocialButton('G', 'Google', Colors.red, () {
+                          // TODO: Implement Google login
+                        }),
+                        _buildSocialButton('', 'Apple', Colors.black, () {
+                          // TODO: Implement Apple login
+                        }, icon: Icons.apple),
+                        _buildSocialButton('', 'Microsoft', Colors.blue, () {
+                          // TODO: Implement Microsoft login
+                        }, icon: Icons.window),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Anonymous login button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
                         return SizedBox(
                           height: 48,
                           child: OutlinedButton(
-                            onPressed: authProvider.isLoading
-                                ? null
-                                : () async {
-                                    await authProvider.signInAnonymously();
-                                    if (authProvider.isAuthenticated && mounted) {
-                                      // ignore: use_build_context_synchronously
-                                      context.go('/plants');
-                                    }
-                                  },
+                            onPressed:
+                                authProvider.isLoading
+                                    ? null
+                                    : () async {
+                                      await authProvider.signInAnonymously();
+                                      if (authProvider.isAuthenticated &&
+                                          mounted) {
+                                        // ignore: use_build_context_synchronously
+                                        context.go('/plants');
+                                      }
+                                    },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: PlantisColors.primary,
                               side: BorderSide(
-                                color: PlantisColors.primary.withValues(alpha: 0.3),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(
@@ -636,36 +634,39 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                               elevation: 1,
                               shadowColor: Colors.black.withValues(alpha: 0.1),
                             ),
-                            child: authProvider.isLoading
-                                ? SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        PlantisColors.primary,
+                            child:
+                                authProvider.isLoading
+                                    ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              PlantisColors.primary,
+                                            ),
                                       ),
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.person_outline,
-                                        size: 20,
-                                        color: PlantisColors.primary,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Continuar sem conta',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
+                                    )
+                                    : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.person_outline,
+                                          size: 20,
                                           color: PlantisColors.primary,
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Continuar sem conta',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: PlantisColors.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                           ),
                         );
                       },
@@ -679,7 +680,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       },
     );
   }
-  
+
   Widget _buildRegisterTab() {
     return AnimatedBuilder(
       animation: _fadeInAnimation,
@@ -695,7 +696,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 16),
-                    
+
                     // Name field
                     TextFormField(
                       controller: _registerNameController,
@@ -726,15 +727,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -759,7 +756,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Email field
                     TextFormField(
                       controller: _registerEmailController,
@@ -791,15 +788,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -824,7 +817,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Password field
                     TextFormField(
                       controller: _registerPasswordController,
@@ -864,7 +857,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureRegisterPassword = !_obscureRegisterPassword;
+                                _obscureRegisterPassword =
+                                    !_obscureRegisterPassword;
                               });
                             },
                           ),
@@ -873,15 +867,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -902,14 +892,16 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         if (value.length < 8) {
                           return 'A senha deve ter pelo menos 8 caracteres';
                         }
-                        if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)').hasMatch(value)) {
+                        if (!RegExp(
+                          r'^(?=.*[a-zA-Z])(?=.*\d)',
+                        ).hasMatch(value)) {
                           return 'A senha deve conter letras e números';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Confirm Password field
                     TextFormField(
                       controller: _registerConfirmPasswordController,
@@ -949,7 +941,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureRegisterConfirmPassword = !_obscureRegisterConfirmPassword;
+                                _obscureRegisterConfirmPassword =
+                                    !_obscureRegisterConfirmPassword;
                               });
                             },
                           ),
@@ -958,15 +951,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -991,7 +980,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       },
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Error message
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
@@ -1025,14 +1014,15 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         return const SizedBox.shrink();
                       },
                     ),
-                    
+
                     // Register button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
                         return SizedBox(
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: authProvider.isLoading ? null : _handleRegister,
+                            onPressed:
+                                authProvider.isLoading ? null : _handleRegister,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: PlantisColors.primary,
                               foregroundColor: Colors.white,
@@ -1041,28 +1031,32 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                               ),
                               elevation: 2,
                             ),
-                            child: authProvider.isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            child:
+                                authProvider.isLoading
+                                    ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Criar Conta',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  )
-                                : const Text(
-                                    'Criar Conta',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
                           ),
                         );
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Terms text
                     Text(
                       'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
@@ -1081,7 +1075,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       },
     );
   }
-  
+
   Widget _buildSocialButton(
     String text,
     String label,
@@ -1101,20 +1095,19 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         onPressed: onPressed,
         style: TextButton.styleFrom(
           padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: icon != null
-            ? Icon(icon, color: color, size: 20)
-            : Text(
-                text,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+        child:
+            icon != null
+                ? Icon(icon, color: color, size: 20)
+                : Text(
+                  text,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
       ),
     );
   }

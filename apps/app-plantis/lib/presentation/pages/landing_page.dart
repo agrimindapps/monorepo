@@ -20,27 +20,28 @@ class _LandingPageState extends State<LandingPage>
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
+      ),
+    );
 
     _animationController.forward();
 
@@ -52,7 +53,7 @@ class _LandingPageState extends State<LandingPage>
 
   void _checkUserLoginStatus() {
     final authProvider = context.read<AuthProvider>();
-    
+
     // Se já está inicializado e autenticado, redireciona instantaneamente
     if (authProvider.isInitialized && authProvider.isAuthenticated) {
       // Removed artificial delay - redirect immediately for better UX
@@ -114,11 +115,7 @@ class _LandingPageState extends State<LandingPage>
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                Icons.eco,
-                size: 80,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.eco, size: 80, color: Colors.white),
             ),
             const SizedBox(height: 24),
             const CircularProgressIndicator(
@@ -153,11 +150,7 @@ class _LandingPageState extends State<LandingPage>
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                Icons.eco,
-                size: 80,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.eco, size: 80, color: Colors.white),
             ),
             const SizedBox(height: 24),
             Text(
@@ -217,11 +210,7 @@ class _LandingPageState extends State<LandingPage>
           // Logo
           Row(
             children: [
-              Icon(
-                Icons.eco,
-                size: 32,
-                color: Colors.white,
-              ),
+              Icon(Icons.eco, size: 32, color: Colors.white),
               const SizedBox(width: 12),
               Text(
                 'Plantis',
@@ -234,7 +223,7 @@ class _LandingPageState extends State<LandingPage>
             ],
           ),
           const Spacer(),
-          
+
           // Login button
           ElevatedButton(
             onPressed: () => context.go('/login'),
@@ -249,10 +238,7 @@ class _LandingPageState extends State<LandingPage>
             ),
             child: Text(
               'Entrar',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
           ),
         ],
@@ -285,7 +271,7 @@ class _LandingPageState extends State<LandingPage>
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Main title
                   Text(
                     'Cuide das Suas Plantas\ncom Amor e Tecnologia',
@@ -298,7 +284,7 @@ class _LandingPageState extends State<LandingPage>
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Subtitle
                   Text(
                     'O aplicativo que transforma você em um jardineiro expert.\nLembretes inteligentes, dicas personalizadas e muito mais.',
@@ -310,7 +296,7 @@ class _LandingPageState extends State<LandingPage>
                     ),
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // CTA Button
                   SizedBox(
                     width: double.infinity,
@@ -360,13 +346,10 @@ class _LandingPageState extends State<LandingPage>
           Text(
             'Recursos pensados para transformar sua experiência com plantas',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: PlantisColors.textSecondary,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: PlantisColors.textSecondary, fontSize: 16),
           ),
           const SizedBox(height: 40),
-          
+
           // Features grid
           _buildFeatureItem(
             Icons.schedule,
@@ -375,7 +358,7 @@ class _LandingPageState extends State<LandingPage>
             Colors.blue,
           ),
           const SizedBox(height: 32),
-          
+
           _buildFeatureItem(
             Icons.photo_camera,
             'Diário Visual',
@@ -383,7 +366,7 @@ class _LandingPageState extends State<LandingPage>
             Colors.green,
           ),
           const SizedBox(height: 32),
-          
+
           _buildFeatureItem(
             Icons.lightbulb_outline,
             'Dicas Personalizadas',
@@ -391,7 +374,7 @@ class _LandingPageState extends State<LandingPage>
             Colors.orange,
           ),
           const SizedBox(height: 32),
-          
+
           _buildFeatureItem(
             Icons.group,
             'Organize por Espaços',
@@ -403,7 +386,12 @@ class _LandingPageState extends State<LandingPage>
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String title, String description, Color color) {
+  Widget _buildFeatureItem(
+    IconData icon,
+    String title,
+    String description,
+    Color color,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -413,11 +401,7 @@ class _LandingPageState extends State<LandingPage>
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            size: 32,
-            color: color,
-          ),
+          child: Icon(icon, size: 32, color: color),
         ),
         const SizedBox(width: 20),
         Expanded(
@@ -470,11 +454,7 @@ class _LandingPageState extends State<LandingPage>
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.eco,
-            size: 60,
-            color: Colors.white,
-          ),
+          Icon(Icons.eco, size: 60, color: Colors.white),
           const SizedBox(height: 24),
           Text(
             'Pronto para começar sua jornada verde?',
@@ -511,10 +491,7 @@ class _LandingPageState extends State<LandingPage>
               ),
               child: Text(
                 'Começar Gratuitamente',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -540,11 +517,7 @@ class _LandingPageState extends State<LandingPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.eco,
-                size: 24,
-                color: PlantisColors.primary,
-              ),
+              Icon(Icons.eco, size: 24, color: PlantisColors.primary),
               const SizedBox(width: 8),
               Text(
                 'Plantis',
@@ -560,19 +533,13 @@ class _LandingPageState extends State<LandingPage>
           Text(
             'Cuidando das suas plantas com tecnologia e carinho.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: PlantisColors.textSecondary,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: PlantisColors.textSecondary, fontSize: 14),
           ),
           const SizedBox(height: 24),
           Text(
             '© 2025 Plantis - Todos os direitos reservados',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
           ),
         ],
       ),

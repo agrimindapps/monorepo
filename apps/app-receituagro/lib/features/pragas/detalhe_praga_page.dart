@@ -62,7 +62,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   bool _isLoadingComments = false;
   final ComentariosService _comentariosService = sl<ComentariosService>();
   bool _hasReachedMaxComments = false;
-  int _maxComentarios = 5; // default valor
+  final int _maxComentarios = 5; // default valor
   
   // Dados para defensivo relacionado
   Map<String, dynamic>? _defensivoData;

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/expense_form_provider.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../../../core/presentation/theme/app_theme.dart';
-import '../../../../core/presentation/widgets/custom_text_field.dart';
+import '../../../../core/presentation/widgets/validated_text_field.dart';
 import 'expense_type_selector.dart';
 import 'receipt_image_picker.dart';
 
@@ -53,15 +53,18 @@ class ExpenseFormView extends StatelessWidget {
                     
                     const SizedBox(height: ExpenseConstants.fieldSpacing),
 
-                    // Descrição
-                    CustomTextField(
+                    // Descrição com validação em tempo real
+                    ValidatedTextField(
                       controller: provider.descriptionController,
                       label: 'Descrição *',
                       hint: ExpenseConstants.descriptionPlaceholder,
                       maxLength: ExpenseConstants.maxDescriptionLength,
-                      textCapitalization: TextCapitalization.sentences,
+                      required: true,
+                      showCharacterCount: true,
+                      prefixIcon: Icons.description,
                       validator: (value) => provider.validateField('description', value),
-                      errorText: provider.formModel.getFieldError('description'),
+                      // onChanged será tratado automaticamente pelo controller
+                      debounceDuration: const Duration(milliseconds: 300),
                     ),
 
                     const SizedBox(height: ExpenseConstants.fieldSpacing),
@@ -80,17 +83,19 @@ class ExpenseFormView extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        // Valor
+                        // Valor com validação monetária
                         Expanded(
                           flex: 2,
-                          child: CustomTextField(
+                          child: ValidatedTextField(
                             controller: provider.amountController,
                             label: 'Valor *',
                             hint: ExpenseConstants.amountPlaceholder,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            prefixIcon: const Icon(Icons.attach_money),
-                            validator: (value) => provider.validateField('amount', value),
-                            errorText: provider.formModel.getFieldError('amount'),
+                            prefixIcon: Icons.attach_money,
+                            required: true,
+                            validator: CommonValidators.moneyValidator,
+                            // onChanged será tratado automaticamente pelo controller
+                            debounceDuration: const Duration(milliseconds: 500),
                           ),
                         ),
 
@@ -99,14 +104,24 @@ class ExpenseFormView extends StatelessWidget {
                         // Odômetro
                         Expanded(
                           flex: 2,
-                          child: CustomTextField(
+                          child: ValidatedTextField(
                             controller: provider.odometerController,
                             label: 'Odômetro *',
                             hint: ExpenseConstants.odometerPlaceholder,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            suffixText: ExpenseConstants.kilometerUnit,
-                            validator: (value) => provider.validateField('odometer', value),
-                            errorText: provider.formModel.getFieldError('odometer'),
+                            prefixIcon: Icons.speed,
+                            suffix: Text(
+                              ExpenseConstants.kilometerUnit,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            required: true,
+                            validator: (value) => CommonValidators.intValidator(
+                              value,
+                              min: 0,
+                              max: 999999,
+                            ),
+                            // onChanged será tratado automaticamente pelo controller
+                            debounceDuration: const Duration(milliseconds: 400),
                           ),
                         ),
                       ],
@@ -115,15 +130,21 @@ class ExpenseFormView extends StatelessWidget {
                     const SizedBox(height: ExpenseConstants.fieldSpacing),
 
                     // Localização (opcional)
-                    CustomTextField(
+                    ValidatedTextField(
                       controller: provider.locationController,
                       label: 'Localização',
                       hint: ExpenseConstants.locationPlaceholder,
                       maxLength: ExpenseConstants.maxLocationLength,
-                      prefixIcon: const Icon(Icons.location_on),
-                      textCapitalization: TextCapitalization.words,
-                      validator: (value) => provider.validateField('location', value),
-                      errorText: provider.formModel.getFieldError('location'),
+                      prefixIcon: Icons.location_on,
+                      showCharacterCount: true,
+                      validator: (value) {
+                        if (value != null && value.length > ExpenseConstants.maxLocationLength) {
+                          return 'Localização muito longa';
+                        }
+                        return null;
+                      },
+                      // onChanged será tratado automaticamente pelo controller
+                      debounceDuration: const Duration(milliseconds: 600),
                     ),
                   ],
                 ),
@@ -146,15 +167,22 @@ class ExpenseFormView extends StatelessWidget {
                     const SizedBox(height: ExpenseConstants.fieldSpacing),
 
                     // Observações
-                    CustomTextField(
+                    ValidatedTextField(
                       controller: provider.notesController,
                       label: 'Observações',
                       hint: ExpenseConstants.notesPlaceholder,
                       maxLines: 3,
                       maxLength: ExpenseConstants.maxNotesLength,
-                      textCapitalization: TextCapitalization.sentences,
-                      validator: (value) => provider.validateField('notes', value),
-                      errorText: provider.formModel.getFieldError('notes'),
+                      prefixIcon: Icons.note_alt,
+                      showCharacterCount: true,
+                      validator: (value) {
+                        if (value != null && value.length > ExpenseConstants.maxNotesLength) {
+                          return 'Observação muito longa';
+                        }
+                        return null;
+                      },
+                      // onChanged será tratado automaticamente pelo controller
+                      debounceDuration: const Duration(milliseconds: 800),
                     ),
                   ],
                 ),
@@ -247,7 +275,7 @@ class ExpenseFormView extends StatelessWidget {
     final model = provider.formModel;
     
     return Card(
-      color: AppTheme.colors.primaryLight.withOpacity(0.3),
+      color: AppTheme.colors.primaryLight.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -308,8 +336,8 @@ class ExpenseFormView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: model.canSubmit 
-                        ? Colors.green.withOpacity(0.2) 
-                        : Colors.orange.withOpacity(0.2),
+                        ? Colors.green.withValues(alpha: 0.2) 
+                        : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -338,7 +366,7 @@ class ExpenseFormView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: Colors.blue.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -366,7 +394,7 @@ class ExpenseFormView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.2),
+                      color: Colors.purple.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(

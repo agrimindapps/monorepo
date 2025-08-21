@@ -25,17 +25,14 @@ class PlantsGridView extends StatelessWidget {
       itemCount: plants.length,
       itemBuilder: (context, index) {
         final plant = plants[index];
-        return PlantCard(
-          plant: plant,
-          key: ValueKey(plant.id),
-        );
+        return PlantCard(plant: plant, key: ValueKey(plant.id));
       },
     );
   }
 
   int _getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    
+
     // Responsivo baseado no tamanho da tela
     if (width < 600) {
       return 2; // Telefones

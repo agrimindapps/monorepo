@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Serviço responsável por gerenciar dados locais
 /// Usado especialmente para o modo anônimo onde os dados não são sincronizados com o Firebase
+@singleton
 class LocalDataService {
   static const String _vehiclesBoxName = 'vehicles_local';
   static const String _fuelRecordsBoxName = 'fuel_records_local';

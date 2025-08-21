@@ -63,6 +63,10 @@ dependencies:
   device_info_plus: ^11.5.0
   firebase_performance: ^0.11.0
   
+  # Image Handling
+  image_picker: ^1.1.2
+  uuid: ^4.5.1
+  
   # State Management & Utils
   flutter_bloc: ^9.1.1
   get_it: ^8.2.0

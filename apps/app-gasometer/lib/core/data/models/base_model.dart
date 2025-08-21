@@ -13,7 +13,7 @@ abstract class BaseModel extends HiveObject {
   int? updatedAt;
 
   @HiveField(3)
-  bool isDeleted;
+  bool isDeleted = false;
 
   @HiveField(4)
   bool needsSync;
@@ -22,16 +22,16 @@ abstract class BaseModel extends HiveObject {
   int? lastSyncAt;
 
   @HiveField(6)
-  int version;
+  int version = 1;
 
   BaseModel({
     this.id,
     this.createdAt,
     this.updatedAt,
-    this.isDeleted = false,
+    isDeleted = false,
     this.needsSync = true,
     this.lastSyncAt,
-    this.version = 1,
+    version = 1,
   }) {
     id ??= DateTime.now().millisecondsSinceEpoch.toString();
     createdAt ??= DateTime.now().millisecondsSinceEpoch;

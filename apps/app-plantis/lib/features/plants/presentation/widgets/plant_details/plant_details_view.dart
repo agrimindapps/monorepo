@@ -16,10 +16,7 @@ import '../../../../../core/theme/colors.dart';
 class PlantDetailsView extends StatefulWidget {
   final String plantId;
 
-  const PlantDetailsView({
-    super.key,
-    required this.plantId,
-  });
+  const PlantDetailsView({super.key, required this.plantId});
 
   @override
   State<PlantDetailsView> createState() => _PlantDetailsViewState();
@@ -34,7 +31,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     // Inicializar controller
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<PlantDetailsProvider>();
@@ -55,11 +52,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      backgroundColor: theme.brightness == Brightness.dark 
-        ? const Color(0xFF1C1C1E) 
-        : theme.colorScheme.surface,
+      backgroundColor:
+          theme.brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : theme.colorScheme.surface,
       body: Consumer<PlantDetailsProvider>(
         builder: (context, provider, child) {
           // Estados de loading e erro
@@ -83,14 +81,11 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       floatingActionButton: Consumer<PlantDetailsProvider>(
         builder: (context, provider, child) {
           if (provider.plant == null) return const SizedBox.shrink();
-          
+
           return FloatingActionButton(
             onPressed: () => _controller.showEditOptions(provider.plant!),
             backgroundColor: PlantisColors.primary,
-            child: const Icon(
-              Icons.edit,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.edit, color: Colors.white),
           );
         },
       ),
@@ -112,18 +107,14 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildErrorState(BuildContext context, String? errorMessage) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar planta',
@@ -193,7 +184,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildAppBar(BuildContext context, Plant plant) {
     final theme = Theme.of(context);
-    
+
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
@@ -205,20 +196,17 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withOpacity(0.9),
+            color: theme.colorScheme.surface.withValues(alpha: 0.9),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.shadow.withOpacity(0.1),
+                color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          child: Icon(
-            Icons.arrow_back,
-            color: theme.colorScheme.onSurface,
-          ),
+          child: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
         ),
       ),
       actions: [
@@ -227,20 +215,17 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withOpacity(0.9),
+              color: theme.colorScheme.surface.withValues(alpha: 0.9),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.1),
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Icon(
-              Icons.more_vert,
-              color: theme.colorScheme.onSurface,
-            ),
+            child: Icon(Icons.more_vert, color: theme.colorScheme.onSurface),
           ),
         ),
         const SizedBox(width: 8),
@@ -258,20 +243,19 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildTabBar(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -280,33 +264,18 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       child: TabBar(
         controller: _tabController,
         tabs: const [
-          Tab(
-            icon: Icon(Icons.info_outline),
-            text: 'Visão Geral',
-          ),
-          Tab(
-            icon: Icon(Icons.task_alt),
-            text: 'Tarefas',
-          ),
-          Tab(
-            icon: Icon(Icons.spa),
-            text: 'Cuidados',
-          ),
-          Tab(
-            icon: Icon(Icons.comment),
-            text: 'Observações',
-          ),
+          Tab(icon: Icon(Icons.info_outline), text: 'Visão Geral'),
+          Tab(icon: Icon(Icons.task_alt), text: 'Tarefas'),
+          Tab(icon: Icon(Icons.spa), text: 'Cuidados'),
+          Tab(icon: Icon(Icons.comment), text: 'Observações'),
         ],
         indicator: BoxDecoration(
-          color: PlantisColors.primary.withOpacity(0.1),
+          color: PlantisColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         labelColor: PlantisColors.primary,
         unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.normal,

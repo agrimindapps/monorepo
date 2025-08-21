@@ -3,29 +3,23 @@ import 'package:provider/provider.dart';
 import '../../../domain/entities/plant.dart';
 import '../../../domain/entities/plant_task.dart';
 import '../../providers/plant_task_provider.dart';
-import '../../../../core/theme/colors.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
 class PlantTasksSection extends StatelessWidget {
   final Plant plant;
 
-  const PlantTasksSection({
-    super.key,
-    required this.plant,
-  });
+  const PlantTasksSection({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PlantTaskProvider>(
       builder: (context, taskProvider, child) {
         if (taskProvider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         final tasks = taskProvider.getTasksForPlant(plant.id);
-        
+
         if (tasks.isEmpty) {
           return _buildEmptyTasksState(context);
         }
@@ -37,25 +31,24 @@ class PlantTasksSection extends StatelessWidget {
 
   Widget _buildEmptyTasksState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
           Icon(
             Icons.task_alt_outlined,
             size: 64,
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -86,23 +79,40 @@ class PlantTasksSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTasksList(BuildContext context, List<PlantTask> tasks, PlantTaskProvider taskProvider) {
-    final theme = Theme.of(context);
-    
+  Widget _buildTasksList(
+    BuildContext context,
+    List<PlantTask> tasks,
+    PlantTaskProvider taskProvider,
+  ) {
     // Organizar tarefas por status
     final overdueTasks = tasks.where((task) => task.isOverdue).toList();
-    final upcomingTasks = tasks.where((task) => task.isDueToday || task.isDueSoon).toList();
-    final pendingTasks = tasks.where((task) => !task.isCompleted && !task.isOverdue && !task.isDueToday && !task.isDueSoon).toList();
+    final upcomingTasks =
+        tasks.where((task) => task.isDueToday || task.isDueSoon).toList();
+    final pendingTasks =
+        tasks
+            .where(
+              (task) =>
+                  !task.isCompleted &&
+                  !task.isOverdue &&
+                  !task.isDueToday &&
+                  !task.isDueSoon,
+            )
+            .toList();
     final completedTasks = tasks.where((task) => task.isCompleted).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Resumo das tarefas
-        _buildTaskSummaryCards(context, overdueTasks, upcomingTasks, pendingTasks),
-        
+        _buildTaskSummaryCards(
+          context,
+          overdueTasks,
+          upcomingTasks,
+          pendingTasks,
+        ),
+
         const SizedBox(height: 24),
-        
+
         // Tarefas em atraso
         if (overdueTasks.isNotEmpty) ...[
           _buildTaskSection(
@@ -114,7 +124,7 @@ class PlantTasksSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
         ],
-        
+
         // Tarefas para hoje/próximas
         if (upcomingTasks.isNotEmpty) ...[
           _buildTaskSection(
@@ -126,7 +136,7 @@ class PlantTasksSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
         ],
-        
+
         // Tarefas pendentes
         if (pendingTasks.isNotEmpty) ...[
           _buildTaskSection(
@@ -138,7 +148,7 @@ class PlantTasksSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
         ],
-        
+
         // Tarefas concluídas (últimas 5)
         if (completedTasks.isNotEmpty) ...[
           _buildTaskSection(
@@ -203,23 +213,17 @@ class PlantTasksSection extends StatelessWidget {
     required IconData icon,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             count,
@@ -250,7 +254,7 @@ class PlantTasksSection extends StatelessWidget {
     bool isCompleted = false,
   }) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -279,33 +283,41 @@ class PlantTasksSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...tasks.map((task) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: _buildTaskCard(context, task, taskProvider),
-        )),
+        ...tasks.map(
+          (task) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildTaskCard(context, task, taskProvider),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildTaskCard(BuildContext context, PlantTask task, PlantTaskProvider taskProvider) {
+  Widget _buildTaskCard(
+    BuildContext context,
+    PlantTask task,
+    PlantTaskProvider taskProvider,
+  ) {
     final theme = Theme.of(context);
     final color = _getTaskColor(task);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E)
-          : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: task.isCompleted 
-            ? Colors.green.withOpacity(0.3)
-            : color.withOpacity(0.2),
+          color:
+              task.isCompleted
+                  ? Colors.green.withValues(alpha: 0.3)
+                  : color.withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -327,34 +339,27 @@ class PlantTasksSection extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: task.isCompleted
-                ? const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 16,
-                  )
-                : null,
+              child:
+                  task.isCompleted
+                      ? const Icon(Icons.check, color: Colors.white, size: 16)
+                      : null,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Ícone da tarefa
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              _getTaskIcon(task.type),
-              color: color,
-              size: 20,
-            ),
+            child: Icon(_getTaskIcon(task.type), color: color, size: 20),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Informações da tarefa
           Expanded(
             child: Column(
@@ -364,10 +369,12 @@ class PlantTasksSection extends StatelessWidget {
                   task.title,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: task.isCompleted 
-                      ? theme.colorScheme.onSurfaceVariant
-                      : theme.colorScheme.onSurface,
-                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                    color:
+                        task.isCompleted
+                            ? theme.colorScheme.onSurfaceVariant
+                            : theme.colorScheme.onSurface,
+                    decoration:
+                        task.isCompleted ? TextDecoration.lineThrough : null,
                   ),
                 ),
                 if (task.description?.isNotEmpty == true) ...[
@@ -400,7 +407,7 @@ class PlantTasksSection extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Menu de ações
           PopupMenuButton<String>(
             icon: Icon(
@@ -408,34 +415,40 @@ class PlantTasksSection extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
               size: 18,
             ),
-            onSelected: (action) => _handleTaskAction(context, action, task, taskProvider),
-            itemBuilder: (context) => [
-              if (!task.isCompleted)
-                const PopupMenuItem(
-                  value: 'complete',
-                  child: ListTile(
-                    leading: Icon(Icons.check_circle_outline),
-                    title: Text('Marcar como concluída'),
-                    contentPadding: EdgeInsets.zero,
+            onSelected:
+                (action) =>
+                    _handleTaskAction(context, action, task, taskProvider),
+            itemBuilder:
+                (context) => [
+                  if (!task.isCompleted)
+                    const PopupMenuItem(
+                      value: 'complete',
+                      child: ListTile(
+                        leading: Icon(Icons.check_circle_outline),
+                        title: Text('Marcar como concluída'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: ListTile(
+                      leading: Icon(Icons.edit_outlined),
+                      title: Text('Editar'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
-              const PopupMenuItem(
-                value: 'edit',
-                child: ListTile(
-                  leading: Icon(Icons.edit_outlined),
-                  title: Text('Editar'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                  leading: Icon(Icons.delete_outline, color: Colors.red),
-                  title: Text('Excluir', style: TextStyle(color: Colors.red)),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(Icons.delete_outline, color: Colors.red),
+                      title: Text(
+                        'Excluir',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -464,15 +477,13 @@ class PlantTasksSection extends StatelessWidget {
         return Icons.bug_report;
       case TaskType.replanting:
         return Icons.change_circle;
-      default:
-        return Icons.task_alt;
     }
   }
 
   String _formatDueDate(DateTime dueDate) {
     final now = DateTime.now();
     final difference = dueDate.difference(now).inDays;
-    
+
     if (difference < 0) {
       return '${-difference} dia${-difference != 1 ? 's' : ''} em atraso';
     } else if (difference == 0) {
@@ -486,7 +497,12 @@ class PlantTasksSection extends StatelessWidget {
     }
   }
 
-  void _handleTaskAction(BuildContext context, String action, PlantTask task, PlantTaskProvider taskProvider) {
+  void _handleTaskAction(
+    BuildContext context,
+    String action,
+    PlantTask task,
+    PlantTaskProvider taskProvider,
+  ) {
     switch (action) {
       case 'complete':
         taskProvider.toggleTaskCompletion(plant.id, task.id);
@@ -503,35 +519,40 @@ class PlantTasksSection extends StatelessWidget {
     }
   }
 
-  void _confirmDeleteTask(BuildContext context, PlantTask task, PlantTaskProvider taskProvider) {
+  void _confirmDeleteTask(
+    BuildContext context,
+    PlantTask task,
+    PlantTaskProvider taskProvider,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir tarefa'),
-        content: Text('Tem certeza que deseja excluir a tarefa "${task.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              taskProvider.deleteTask(plant.id, task.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tarefa excluída'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Excluir tarefa'),
+            content: Text(
+              'Tem certeza que deseja excluir a tarefa "${task.title}"?',
             ),
-            child: const Text('Excluir'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  taskProvider.deleteTask(plant.id, task.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tarefa excluída'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

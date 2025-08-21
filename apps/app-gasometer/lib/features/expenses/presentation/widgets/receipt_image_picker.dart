@@ -55,9 +55,9 @@ class ReceiptImagePicker extends StatelessWidget {
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: AppTheme.colors.surfaceVariant.withOpacity(0.3),
+          color: AppTheme.colors.surfaceVariant.withValues(alpha: 0.3),
           border: Border.all(
-            color: AppTheme.colors.outline.withOpacity(0.3),
+            color: AppTheme.colors.outline.withValues(alpha: 0.3),
             style: BorderStyle.solid,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -81,7 +81,7 @@ class ReceiptImagePicker extends StatelessWidget {
             Text(
               'Toque para abrir a câmera',
               style: AppTheme.textStyles.labelSmall?.copyWith(
-                color: AppTheme.colors.onSurfaceVariant.withOpacity(0.7),
+                color: AppTheme.colors.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -97,7 +97,7 @@ class ReceiptImagePicker extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.colors.outline.withOpacity(0.3),
+          color: AppTheme.colors.outline.withValues(alpha: 0.3),
         ),
       ),
       child: ClipRRect(
@@ -105,7 +105,7 @@ class ReceiptImagePicker extends StatelessWidget {
         child: Stack(
           children: [
             // Imagem
-            Container(
+            SizedBox(
               width: double.infinity,
               height: double.infinity,
               child: Image.file(
@@ -143,10 +143,10 @@ class ReceiptImagePicker extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.7),
+                    Colors.black.withValues(alpha: 0.7),
                     Colors.transparent,
                     Colors.transparent,
-                    Colors.black.withOpacity(0.7),
+                    Colors.black.withValues(alpha: 0.7),
                   ],
                   stops: const [0.0, 0.3, 0.7, 1.0],
                 ),
@@ -187,7 +187,7 @@ class ReceiptImagePicker extends StatelessWidget {
                 icon: const Icon(Icons.camera_alt, size: 18),
                 label: const Text('Trocar foto'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   foregroundColor: Colors.black87,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -203,7 +203,7 @@ class ReceiptImagePicker extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.9),
+                  color: Colors.green.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -240,7 +240,7 @@ class ReceiptImagePicker extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.white.withOpacity(0.9),
+        color: backgroundColor ?? Colors.white.withValues(alpha: 0.9),
         shape: BoxShape.circle,
       ),
       child: IconButton(
@@ -289,7 +289,7 @@ class ReceiptImagePicker extends StatelessWidget {
               right: 20,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(

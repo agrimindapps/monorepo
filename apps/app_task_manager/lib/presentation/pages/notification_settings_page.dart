@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
 import '../providers/notification_providers.dart';
+import '../../domain/entities/notification_stats.dart' as local;
 
 class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({super.key});
@@ -36,9 +37,9 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
 
   Widget _buildContent(
     BuildContext context,
-    NotificationPermissionEntity permission,
+    core.NotificationPermissionEntity permission,
     NotificationSettings settings,
-    AsyncValue<NotificationStats> statsAsync,
+    AsyncValue<local.NotificationStats> statsAsync,
   ) {
     if (!permission.isGranted) {
       return _buildPermissionRequiredView(context, permission);
@@ -68,7 +69,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
     );
   }
 
-  Widget _buildPermissionRequiredView(BuildContext context, NotificationPermissionEntity permission) {
+  Widget _buildPermissionRequiredView(BuildContext context, core.NotificationPermissionEntity permission) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -134,7 +135,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
     );
   }
 
-  Widget _buildStatusCard(NotificationPermissionEntity permission, AsyncValue<NotificationStats> statsAsync) {
+  Widget _buildStatusCard(core.NotificationPermissionEntity permission, AsyncValue<local.NotificationStats> statsAsync) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

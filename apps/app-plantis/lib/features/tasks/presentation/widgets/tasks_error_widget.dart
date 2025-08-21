@@ -34,9 +34,9 @@ class TasksErrorWidget extends StatelessWidget {
                 size: 40,
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Título do erro
             Text(
               'Ops! Algo deu errado',
@@ -46,9 +46,9 @@ class TasksErrorWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Mensagem do erro
             Text(
               message,
@@ -57,9 +57,9 @@ class TasksErrorWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Botões de ação
             Column(
               children: [
@@ -80,9 +80,9 @@ class TasksErrorWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Texto de suporte
                 Text(
                   'Se o problema persistir, verifique sua conexão com a internet',

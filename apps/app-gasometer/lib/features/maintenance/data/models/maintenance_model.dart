@@ -7,17 +7,18 @@ part 'maintenance_model.g.dart';
 /// Maintenance (Manutenção) model with Firebase sync support
 /// TypeId: 4 - New sequential numbering
 @HiveType(typeId: 4)
+// ignore: must_be_immutable
 class MaintenanceModel extends BaseSyncModel {
   // Base sync fields (required for Hive generation)
-  @HiveField(0) final String id;
+  @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) final bool isDirty;
-  @HiveField(5) final bool isDeleted;
-  @HiveField(6) final int version;
-  @HiveField(7) final String? userId;
-  @HiveField(8) final String? moduleName;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Maintenance specific fields
   @HiveField(10) final String veiculoId;
@@ -39,12 +40,12 @@ class MaintenanceModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    required this.veiculoId,
-    required this.tipo,
-    required this.descricao,
-    required this.valor,
-    required this.data,
-    required this.odometro,
+    this.veiculoId = '',
+    this.tipo = '',
+    this.descricao = '',
+    this.valor = 0.0,
+    this.data = 0,
+    this.odometro = 0,
     this.proximaRevisao,
     this.concluida = false,
   }) : super(
@@ -202,9 +203,9 @@ class MaintenanceModel extends BaseSyncModel {
   }) {
     return MaintenanceModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

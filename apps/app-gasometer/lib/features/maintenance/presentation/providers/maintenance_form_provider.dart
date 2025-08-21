@@ -36,7 +36,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   // Estado do formulário
   MaintenanceFormModel _formModel;
   bool _isInitialized = false;
-  bool _isUpdating = false;
+  final bool _isUpdating = false;
 
   MaintenanceFormProvider(this._vehiclesProvider, {String? initialVehicleId, String? userId}) 
       : _formModel = MaintenanceFormModel.initial(initialVehicleId ?? '', userId ?? '') {

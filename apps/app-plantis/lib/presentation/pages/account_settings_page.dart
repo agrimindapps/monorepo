@@ -16,7 +16,7 @@ class AccountSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -44,7 +44,7 @@ class AccountSettingsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Profile Card
             UserProfileCard(
               name: 'Lucinei Robson Lo...',
@@ -92,14 +92,16 @@ class AccountSettingsPage extends StatelessWidget {
                     return SettingsItem(
                       icon: Icons.dark_mode,
                       title: 'Tema',
-                      subtitle: themeProvider.isDarkMode 
-                          ? 'Tema escuro ativo' 
-                          : themeProvider.isLightMode 
-                              ? 'Tema claro ativo' 
+                      subtitle:
+                          themeProvider.isDarkMode
+                              ? 'Tema escuro ativo'
+                              : themeProvider.isLightMode
+                              ? 'Tema claro ativo'
                               : 'Seguir sistema',
-                      iconColor: themeProvider.isDarkMode 
-                          ? theme.colorScheme.secondary 
-                          : theme.colorScheme.primary,
+                      iconColor:
+                          themeProvider.isDarkMode
+                              ? theme.colorScheme.secondary
+                              : theme.colorScheme.primary,
                       isLast: true,
                       trailing: Switch(
                         value: themeProvider.isDarkMode,
@@ -273,10 +275,7 @@ class AccountSettingsPage extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         currentIndex: 2, // Account tab selected
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.task_alt),
-            label: 'Tarefas',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.task_alt), label: 'Tarefas'),
           BottomNavigationBarItem(
             icon: Icon(Icons.eco),
             label: 'Minhas plantas',
@@ -308,62 +307,92 @@ class AccountSettingsPage extends StatelessWidget {
   void _showSubscriptionDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Assinar Premium',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Text(
-          'Deseja ativar o plano premium para acessar todos os recursos?',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Assinar Premium',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            ),
+            content: Text(
+              'Deseja ativar o plano premium para acessar todos os recursos?',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Handle subscription
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text(
+                  'Assinar',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Handle subscription
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-            child: Text('Assinar', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
-          ),
-        ],
-      ),
     );
   }
 
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Sobre o App',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Plantis - Gerenciamento de Plantas', 
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Versão: 1.0.0', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-            Text('Build: 1', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-            const SizedBox(height: 12),
-            Text('Sistema de cuidados e lembretes para suas plantas',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Sobre o App',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Plantis - Gerenciamento de Plantas',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Versão: 1.0.0',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  'Build: 1',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Sistema de cuidados e lembretes para suas plantas',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -371,216 +400,264 @@ class AccountSettingsPage extends StatelessWidget {
     // Primeiro, obter estatísticas dos dados
     final dataCleanerService = di.sl<DataCleanerService>();
     final stats = await dataCleanerService.getDataStats();
-    
+
     if (!context.mounted) return;
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Limpar Todos os Dados',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Esta ação irá remover permanentemente:',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Limpar Todos os Dados',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-            const SizedBox(height: 12),
-            if (stats.hasData) ...[
-              Text(
-                '• ${stats.plantsCount} plantas',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-              Text(
-                '• ${stats.tasksCount} tarefas',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Esta ação não pode ser desfeita. Continuar?',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.bold,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Esta ação irá remover permanentemente:',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
+                const SizedBox(height: 12),
+                if (stats.hasData) ...[
+                  Text(
+                    '• ${stats.plantsCount} plantas',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    '• ${stats.tasksCount} tarefas',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Esta ação não pode ser desfeita. Continuar?',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ] else ...[
+                  Text(
+                    'Não há dados para limpar.',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
               ),
-            ] else ...[
-              Text(
-                'Não há dados para limpar.',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          if (stats.hasData)
-            ElevatedButton(
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                final theme = Theme.of(context);
-                
-                navigator.pop();
-                
-                // Show loading
-                _showLoadingDialog(context, 'Limpando dados...');
-                
-                try {
-                  final result = await dataCleanerService.clearAllData();
-                  
-                  navigator.pop(); // Close loading
-                  
-                  result.fold(
-                    (failure) {
+              if (stats.hasData)
+                ElevatedButton(
+                  onPressed: () async {
+                    final navigator = Navigator.of(context);
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    final theme = Theme.of(context);
+
+                    navigator.pop();
+
+                    // Show loading
+                    _showLoadingDialog(context, 'Limpando dados...');
+
+                    try {
+                      final result = await dataCleanerService.clearAllData();
+
+                      navigator.pop(); // Close loading
+
+                      result.fold(
+                        (failure) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Erro: ${failure.message}'),
+                              backgroundColor: theme.colorScheme.error,
+                            ),
+                          );
+                        },
+                        (_) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${stats.totalItems} itens removidos com sucesso',
+                              ),
+                              backgroundColor: theme.colorScheme.primary,
+                            ),
+                          );
+                        },
+                      );
+                    } catch (e) {
+                      navigator.pop(); // Close loading
+
                       scaffoldMessenger.showSnackBar(
                         SnackBar(
-                          content: Text('Erro: ${failure.message}'),
+                          content: Text('Erro inesperado: $e'),
                           backgroundColor: theme.colorScheme.error,
                         ),
                       );
-                    },
-                    (_) {
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text('${stats.totalItems} itens removidos com sucesso'),
-                          backgroundColor: theme.colorScheme.primary,
-                        ),
-                      );
-                    },
-                  );
-                } catch (e) {
-                  navigator.pop(); // Close loading
-                  
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Erro inesperado: $e'),
-                      backgroundColor: theme.colorScheme.error,
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                  child: Text(
+                    'Limpar Tudo',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onError,
                     ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-              child: Text('Limpar Tudo', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
-            ),
-        ],
-      ),
+                  ),
+                ),
+            ],
+          ),
     );
   }
 
   void _showGenerateTestDataDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Gerar Dados de Teste',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Text(
-          'Isso criará plantas e tarefas fictícias para testar a interface. Continuar?',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final navigator = Navigator.of(context);
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              final theme = Theme.of(context);
-              
-              navigator.pop();
-              
-              // Show loading
-              _showLoadingDialog(context);
-              
-              try {
-                final testDataService = di.sl<TestDataGeneratorService>();
-                await testDataService.generateTestData();
-                
-                navigator.pop(); // Close loading
-                
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: const Text('Dados de teste gerados com sucesso!'),
-                    backgroundColor: theme.colorScheme.primary,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Gerar Dados de Teste',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            ),
+            content: Text(
+              'Isso criará plantas e tarefas fictícias para testar a interface. Continuar?',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final theme = Theme.of(context);
+
+                  navigator.pop();
+
+                  // Show loading
+                  _showLoadingDialog(context);
+
+                  try {
+                    final testDataService = di.sl<TestDataGeneratorService>();
+                    await testDataService.generateTestData();
+
+                    navigator.pop(); // Close loading
+
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          'Dados de teste gerados com sucesso!',
+                        ),
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
+                    );
+                  } catch (e) {
+                    navigator.pop(); // Close loading
+
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Erro ao gerar dados: $e'),
+                        backgroundColor: theme.colorScheme.error,
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text(
+                  'Gerar',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
-                );
-              } catch (e) {
-                navigator.pop(); // Close loading
-                
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: Text('Erro ao gerar dados: $e'),
-                    backgroundColor: theme.colorScheme.error,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-            child: Text('Gerar', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
-  void _showLoadingDialog(BuildContext context, [String message = 'Gerando dados de teste...']) {
+  void _showLoadingDialog(
+    BuildContext context, [
+    String message = 'Gerando dados de teste...',
+  ]) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      builder:
+          (context) => AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Sair do App',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Text(
-          'Tem certeza que deseja sair?',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Sair do App',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            ),
+            content: Text(
+              'Tem certeza que deseja sair?',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Handle logout
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text(
+                  'Sair',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
+                ),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Handle logout
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: Text('Sair', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
-          ),
-        ],
-      ),
     );
   }
 }

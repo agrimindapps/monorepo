@@ -14,6 +14,7 @@ import 'core/services/receituagro_storage_service.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/startup_optimization_service.dart';
+import 'core/services/revenuecat_service.dart' as local_rc;
 import 'core/providers/preferences_provider.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
@@ -94,6 +95,21 @@ void main() async {
   // Initialize notifications
   final notificationService = di.sl<IReceitaAgroNotificationService>();
   await notificationService.initialize();
+
+  // Initialize RevenueCat
+  try {
+    await local_rc.RevenueCatService.initialize();
+  } catch (e) {
+    // Log error but don't block app startup
+    if (EnvironmentConfig.enableAnalytics) {
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        StackTrace.current,
+        reason: 'Failed to initialize RevenueCat',
+        fatal: false,
+      );
+    }
+  }
 
   // Initialize data system
   final dataManager = di.sl<IAppDataManager>();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_error.dart';
+import 'package:core/core.dart';
 import 'error_handler.dart';
 
 /// Widget que captura e trata erros não tratados na árvore de widgets
@@ -29,8 +29,8 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   @override
   Widget build(BuildContext context) {
     if (_hasError && _error != null) {
-      return widget.errorWidgetBuilder?.call(_error!) ?? 
-             _buildDefaultErrorWidget(context, _error!);
+      return widget.errorWidgetBuilder?.call(_error!) ??
+          _buildDefaultErrorWidget(context, _error!);
     }
 
     return widget.child;
@@ -39,19 +39,22 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Captura erros de widgets em debug mode se habilitado
     if (widget.enableInDebugMode) {
       ErrorWidget.builder = (FlutterErrorDetails details) {
         _handleError(details);
-        return _buildDefaultErrorWidget(context, _createErrorFromDetails(details));
+        return _buildDefaultErrorWidget(
+          context,
+          _createErrorFromDetails(details),
+        );
       };
     }
   }
 
   void _handleError(FlutterErrorDetails details) {
     final error = _createErrorFromDetails(details);
-    
+
     setState(() {
       _error = error;
       _hasError = true;
@@ -59,7 +62,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
 
     // Chama o callback de erro se fornecido
     widget.onError?.call(error);
-    
+
     // Log do erro
     ErrorHandler.instance.handleError(error);
   }
@@ -76,7 +79,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
 
   Widget _buildDefaultErrorWidget(BuildContext context, AppError error) {
     final theme = Theme.of(context);
-    
+
     return Material(
       child: Container(
         width: double.infinity,
@@ -86,11 +89,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 24),
             Text(
               'Oops! Algo deu errado',
@@ -133,7 +132,8 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -163,7 +163,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   void _reportError() {
     if (_error != null) {
       ErrorHandler.instance.reportError(_error!);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Erro reportado. Obrigado pelo feedback!'),

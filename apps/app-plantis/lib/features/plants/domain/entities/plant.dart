@@ -10,7 +10,7 @@ class Plant extends BaseSyncEntity {
   final DateTime? plantingDate;
   final String? notes;
   final PlantConfig? config;
-  
+
   const Plant({
     required super.id,
     required this.name,
@@ -30,19 +30,19 @@ class Plant extends BaseSyncEntity {
     super.userId,
     super.moduleName,
   });
-  
-  bool get hasImage => imageUrls.isNotEmpty || (imageBase64 != null && imageBase64!.isNotEmpty);
-  
+
+  bool get hasImage =>
+      imageUrls.isNotEmpty || (imageBase64 != null && imageBase64!.isNotEmpty);
+
   String? get primaryImageUrl => imageUrls.isNotEmpty ? imageUrls.first : null;
-  
+
   int get imagesCount => imageUrls.length;
-  
+
   String get displayName => name.trim().isEmpty ? 'Planta sem nome' : name;
-  
-  String get displaySpecies => species?.trim().isEmpty ?? true 
-      ? 'Espécie não informada' 
-      : species!;
-  
+
+  String get displaySpecies =>
+      species?.trim().isEmpty ?? true ? 'Espécie não informada' : species!;
+
   int get ageInDays {
     if (plantingDate == null) return 0;
     return DateTime.now().difference(plantingDate!).inDays;
@@ -81,19 +81,24 @@ class Plant extends BaseSyncEntity {
       'image_urls': imageUrls,
       'planting_date': plantingDate?.toIso8601String(),
       'notes': notes,
-      'config': config != null ? {
-        'watering_interval_days': config!.wateringIntervalDays,
-        'fertilizing_interval_days': config!.fertilizingIntervalDays,
-        'pruning_interval_days': config!.pruningIntervalDays,
-        'sunlight_check_interval_days': config!.sunlightCheckIntervalDays,
-        'pest_inspection_interval_days': config!.pestInspectionIntervalDays,
-        'replanting_interval_days': config!.replantingIntervalDays,
-        'light_requirement': config!.lightRequirement,
-        'water_amount': config!.waterAmount,
-        'soil_type': config!.soilType,
-        'ideal_temperature': config!.idealTemperature,
-        'ideal_humidity': config!.idealHumidity,
-      } : null,
+      'config':
+          config != null
+              ? {
+                'watering_interval_days': config!.wateringIntervalDays,
+                'fertilizing_interval_days': config!.fertilizingIntervalDays,
+                'pruning_interval_days': config!.pruningIntervalDays,
+                'sunlight_check_interval_days':
+                    config!.sunlightCheckIntervalDays,
+                'pest_inspection_interval_days':
+                    config!.pestInspectionIntervalDays,
+                'replanting_interval_days': config!.replantingIntervalDays,
+                'light_requirement': config!.lightRequirement,
+                'water_amount': config!.waterAmount,
+                'soil_type': config!.soilType,
+                'ideal_temperature': config!.idealTemperature,
+                'ideal_humidity': config!.idealHumidity,
+              }
+              : null,
     };
   }
 
@@ -104,19 +109,12 @@ class Plant extends BaseSyncEntity {
 
   @override
   Plant markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   Plant markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
@@ -133,7 +131,7 @@ class Plant extends BaseSyncEntity {
   Plant withModule(String moduleName) {
     return copyWith(moduleName: moduleName);
   }
-  
+
   @override
   Plant copyWith({
     String? id,
@@ -174,7 +172,7 @@ class Plant extends BaseSyncEntity {
       moduleName: moduleName ?? this.moduleName,
     );
   }
-  
+
   @override
   List<Object?> get props => [
     ...super.props,
@@ -201,7 +199,7 @@ class PlantConfig extends Equatable {
   final String? soilType;
   final double? idealTemperature;
   final double? idealHumidity;
-  
+
   const PlantConfig({
     this.wateringIntervalDays,
     this.fertilizingIntervalDays,
@@ -215,14 +213,20 @@ class PlantConfig extends Equatable {
     this.idealTemperature,
     this.idealHumidity,
   });
-  
-  bool get hasWateringSchedule => wateringIntervalDays != null && wateringIntervalDays! > 0;
-  bool get hasFertilizingSchedule => fertilizingIntervalDays != null && fertilizingIntervalDays! > 0;
-  bool get hasPruningSchedule => pruningIntervalDays != null && pruningIntervalDays! > 0;
-  bool get hasSunlightCheckSchedule => sunlightCheckIntervalDays != null && sunlightCheckIntervalDays! > 0;
-  bool get hasPestInspectionSchedule => pestInspectionIntervalDays != null && pestInspectionIntervalDays! > 0;
-  bool get hasReplantingSchedule => replantingIntervalDays != null && replantingIntervalDays! > 0;
-  
+
+  bool get hasWateringSchedule =>
+      wateringIntervalDays != null && wateringIntervalDays! > 0;
+  bool get hasFertilizingSchedule =>
+      fertilizingIntervalDays != null && fertilizingIntervalDays! > 0;
+  bool get hasPruningSchedule =>
+      pruningIntervalDays != null && pruningIntervalDays! > 0;
+  bool get hasSunlightCheckSchedule =>
+      sunlightCheckIntervalDays != null && sunlightCheckIntervalDays! > 0;
+  bool get hasPestInspectionSchedule =>
+      pestInspectionIntervalDays != null && pestInspectionIntervalDays! > 0;
+  bool get hasReplantingSchedule =>
+      replantingIntervalDays != null && replantingIntervalDays! > 0;
+
   PlantConfig copyWith({
     int? wateringIntervalDays,
     int? fertilizingIntervalDays,
@@ -238,11 +242,15 @@ class PlantConfig extends Equatable {
   }) {
     return PlantConfig(
       wateringIntervalDays: wateringIntervalDays ?? this.wateringIntervalDays,
-      fertilizingIntervalDays: fertilizingIntervalDays ?? this.fertilizingIntervalDays,
+      fertilizingIntervalDays:
+          fertilizingIntervalDays ?? this.fertilizingIntervalDays,
       pruningIntervalDays: pruningIntervalDays ?? this.pruningIntervalDays,
-      sunlightCheckIntervalDays: sunlightCheckIntervalDays ?? this.sunlightCheckIntervalDays,
-      pestInspectionIntervalDays: pestInspectionIntervalDays ?? this.pestInspectionIntervalDays,
-      replantingIntervalDays: replantingIntervalDays ?? this.replantingIntervalDays,
+      sunlightCheckIntervalDays:
+          sunlightCheckIntervalDays ?? this.sunlightCheckIntervalDays,
+      pestInspectionIntervalDays:
+          pestInspectionIntervalDays ?? this.pestInspectionIntervalDays,
+      replantingIntervalDays:
+          replantingIntervalDays ?? this.replantingIntervalDays,
       lightRequirement: lightRequirement ?? this.lightRequirement,
       waterAmount: waterAmount ?? this.waterAmount,
       soilType: soilType ?? this.soilType,
@@ -250,7 +258,7 @@ class PlantConfig extends Equatable {
       idealHumidity: idealHumidity ?? this.idealHumidity,
     );
   }
-  
+
   @override
   List<Object?> get props => [
     wateringIntervalDays,

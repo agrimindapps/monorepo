@@ -1,11 +1,10 @@
-import 'package:equatable/equatable.dart';
 import 'base_entity.dart';
 
 /// Entidade de assinatura compartilhada entre os apps
 /// Representa o status de assinatura do usuário via RevenueCat
 class SubscriptionEntity extends BaseEntity {
   const SubscriptionEntity({
-    required String id,
+    required super.id,
     required this.userId,
     required this.productId,
     required this.status,
@@ -19,13 +18,9 @@ class SubscriptionEntity extends BaseEntity {
     this.store = Store.appStore,
     this.isInTrial = false,
     this.isSandbox = false,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-        );
+    super.createdAt,
+    super.updatedAt,
+  });
 
   /// ID do usuário proprietário da assinatura
   final String userId;

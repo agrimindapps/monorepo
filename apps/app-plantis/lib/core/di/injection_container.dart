@@ -8,7 +8,7 @@ import '../interfaces/network_info.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/notification_manager.dart';
-import '../services/image_service.dart';
+import '../services/image_service.dart' as local;
 import '../services/test_data_generator_service.dart';
 import '../services/data_cleaner_service.dart';
 import '../utils/navigation_service.dart';
@@ -16,11 +16,11 @@ import '../providers/analytics_provider.dart';
 import '../providers/sync_status_provider.dart';
 import 'modules/plants_module.dart';
 import 'modules/tasks_module.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
+import '../../features/auth/presentation/providers/auth_provider.dart'
+    as providers;
 import '../../features/premium/presentation/providers/premium_provider.dart';
 
 // Sync dependencies
-import '../services/connectivity_service.dart' as local_connectivity;
 import '../sync/sync_queue.dart';
 import '../sync/sync_operations.dart';
 
@@ -29,17 +29,17 @@ final sl = GetIt.instance;
 Future<void> init() async {
   // External dependencies
   await _initExternal();
-  
+
   // Core services from package
   _initCoreServices();
-  
+
   // Features
   _initAuth();
   _initPlants();
   _initTasks();
   _initComments();
   _initPremium();
-  
+
   // App services
   _initAppServices();
 }
@@ -48,12 +48,12 @@ Future<void> _initExternal() async {
   // Shared Preferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
-  
+
   // Connectivity
   sl.registerLazySingleton(() => Connectivity());
-  
-  // Network Services
-  sl.registerLazySingleton(() => local_connectivity.ConnectivityService());
+
+  // Network Services (usando ConnectivityService do core)
+  sl.registerLazySingleton(() => ConnectivityService.instance);
   sl.registerLazySingleton(() => SyncQueue(sl()));
   sl.registerLazySingleton(() => SyncOperations(sl(), sl()));
 }
@@ -61,42 +61,49 @@ Future<void> _initExternal() async {
 void _initCoreServices() {
   // Firebase
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
-  
+
   // Network Info
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-  
+
   // Auth Repository
   sl.registerLazySingleton<IAuthRepository>(() => FirebaseAuthService());
-  
+
   // Analytics Repository
-  sl.registerLazySingleton<IAnalyticsRepository>(() => FirebaseAnalyticsService());
-  
+  sl.registerLazySingleton<IAnalyticsRepository>(
+    () => FirebaseAnalyticsService(),
+  );
+
   // Crashlytics Repository
-  sl.registerLazySingleton<ICrashlyticsRepository>(() => FirebaseCrashlyticsService());
-  
+  sl.registerLazySingleton<ICrashlyticsRepository>(
+    () => FirebaseCrashlyticsService(),
+  );
+
   // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService());
-  
+
   // App Rating Repository
-  sl.registerLazySingleton<IAppRatingRepository>(() => AppRatingService(
-    appStoreId: '123456789', // TODO: Replace with actual App Store ID
-    googlePlayId: 'br.com.agrimsolution.plantis', // TODO: Replace with actual Play Store ID
-    minDays: 3,
-    minLaunches: 5,
-    remindDays: 7,
-    remindLaunches: 10,
-  ));
-  
+  sl.registerLazySingleton<IAppRatingRepository>(
+    () => AppRatingService(
+      appStoreId: '123456789', // TODO: Replace with actual App Store ID
+      googlePlayId:
+          'br.com.agrimsolution.plantis', // TODO: Replace with actual Play Store ID
+      minDays: 3,
+      minLaunches: 5,
+      remindDays: 7,
+      remindLaunches: 10,
+    ),
+  );
+
   // Notification Services
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
-  
+
   // Notification Manager
   sl.registerLazySingleton(() => NotificationManager());
-  
+
   // Image Service
-  sl.registerLazySingleton(() => ImageService());
-  
+  sl.registerLazySingleton(() => local.ImageService());
+
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl(), sl()));
@@ -104,18 +111,19 @@ void _initCoreServices() {
 
 void _initAuth() {
   // Auth Provider
-  sl.registerLazySingleton(() => providers.AuthProvider(
-    loginUseCase: sl(),
-    logoutUseCase: sl(),
-    authRepository: sl(),
-    subscriptionRepository: sl<ISubscriptionRepository>(),
-  ));
+  sl.registerLazySingleton(
+    () => providers.AuthProvider(
+      loginUseCase: sl(),
+      logoutUseCase: sl(),
+      authRepository: sl(),
+      subscriptionRepository: sl<ISubscriptionRepository>(),
+    ),
+  );
 }
 
 void _initPlants() {
   PlantsDIModule.init(sl);
 }
-
 
 void _initTasks() {
   TasksModule.init(sl);
@@ -127,45 +135,45 @@ void _initComments() {
 
 void _initPremium() {
   // Repository
-  sl.registerLazySingleton<ISubscriptionRepository>(
-    () => RevenueCatService(),
-  );
-  
+  sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
+
   // Provider
   sl.registerFactory(
-    () => PremiumProvider(
-      subscriptionRepository: sl(),
-      authRepository: sl(),
-    ),
+    () => PremiumProvider(subscriptionRepository: sl(), authRepository: sl()),
   );
 }
 
 void _initAppServices() {
   // Navigation Service
   sl.registerLazySingleton(() => NavigationService.instance);
-  
+
   // Analytics Provider
-  sl.registerLazySingleton<AnalyticsProvider>(() => AnalyticsProvider(
-    analyticsRepository: sl<IAnalyticsRepository>(),
-    crashlyticsRepository: sl<ICrashlyticsRepository>(),
-  ));
-  
+  sl.registerLazySingleton<AnalyticsProvider>(
+    () => AnalyticsProvider(
+      analyticsRepository: sl<IAnalyticsRepository>(),
+      crashlyticsRepository: sl<ICrashlyticsRepository>(),
+    ),
+  );
+
   // Theme Provider
   sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
-  
+
   // Sync Status Provider
-  sl.registerLazySingleton<SyncStatusProvider>(() => SyncStatusProvider(sl(), sl()));
-  
+  sl.registerLazySingleton<SyncStatusProvider>(
+    () => SyncStatusProvider(sl(), sl()),
+  );
+
   // Test Data Generator Service
-  sl.registerLazySingleton<TestDataGeneratorService>(() => TestDataGeneratorService(
-    addPlantUseCase: sl(),
-    addTaskUseCase: sl(),
-  ));
-  
+  sl.registerLazySingleton<TestDataGeneratorService>(
+    () => TestDataGeneratorService(addPlantUseCase: sl(), addTaskUseCase: sl()),
+  );
+
   // Data Cleaner Service
-  sl.registerLazySingleton<DataCleanerService>(() => DataCleanerService(
-    plantsRepository: sl(),
-    tasksRepository: sl(),
-    deletePlantUseCase: sl(),
-  ));
+  sl.registerLazySingleton<DataCleanerService>(
+    () => DataCleanerService(
+      plantsRepository: sl(),
+      tasksRepository: sl(),
+      deletePlantUseCase: sl(),
+    ),
+  );
 }

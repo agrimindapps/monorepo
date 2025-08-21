@@ -19,7 +19,7 @@ abstract class PlantsLocalDatasource {
 class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   static const String _boxName = 'plants';
   Box<String>? _box;
-  
+
   // Cache for performance optimization
   List<Plant>? _cachedPlants;
   DateTime? _cacheTimestamp;
@@ -46,7 +46,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       moduleName: plant.moduleName,
     );
   }
-  
+
   final PlantsSearchService _searchService = PlantsSearchService.instance;
 
   Future<Box<String>> get box async {
@@ -64,10 +64,10 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           return _cachedPlants!;
         }
       }
-      
+
       final hiveBox = await box;
       final plants = <Plant>[];
-      
+
       for (final key in hiveBox.keys) {
         final plantJson = hiveBox.get(key);
         if (plantJson != null) {
@@ -79,21 +79,26 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           }
         }
       }
-      
+
       // Sort by creation date (newest first)
-      plants.sort((a, b) => (b.createdAt ?? DateTime.now())
-          .compareTo(a.createdAt ?? DateTime.now()));
-      
+      plants.sort(
+        (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+          a.createdAt ?? DateTime.now(),
+        ),
+      );
+
       // Update cache
       _cachedPlants = plants;
       _cacheTimestamp = DateTime.now();
-      
+
       // Update search index
       await _searchService.updateSearchIndexFromPlants(plants);
-      
+
       return plants;
     } catch (e) {
-      throw CacheFailure('Erro ao buscar plantas do cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao buscar plantas do cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -102,18 +107,20 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
     try {
       final hiveBox = await box;
       final plantJson = hiveBox.get(id);
-      
+
       if (plantJson == null) {
         return null;
       }
-      
+
       final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
       final plantaModel = PlantaModel.fromJson(plantData);
       final plant = Plant.fromPlantaModel(plantaModel);
-      
+
       return plant.isDeleted ? null : plant;
     } catch (e) {
-      throw CacheFailure('Erro ao buscar planta do cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao buscar planta do cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -124,11 +131,13 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final plantaModel = _plantToPlantaModel(plant);
       final plantJson = jsonEncode(plantaModel.toJson());
       await hiveBox.put(plant.id, plantJson);
-      
+
       // Invalidate cache
       _invalidateCache();
     } catch (e) {
-      throw CacheFailure('Erro ao salvar planta no cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao salvar planta no cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -139,11 +148,13 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final plantaModel = _plantToPlantaModel(plant);
       final plantJson = jsonEncode(plantaModel.toJson());
       await hiveBox.put(plant.id, plantJson);
-      
+
       // Invalidate cache
       _invalidateCache();
     } catch (e) {
-      throw CacheFailure('Erro ao atualizar planta no cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao atualizar planta no cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -151,30 +162,32 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<void> deletePlant(String id) async {
     try {
       final hiveBox = await box;
-      
+
       // Get existing plant first
       final plantJson = hiveBox.get(id);
       if (plantJson != null) {
         final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
         final plantaModel = PlantaModel.fromJson(plantData);
         final plant = Plant.fromPlantaModel(plantaModel);
-        
+
         // Soft delete - mark as deleted
         final deletedPlant = plant.copyWith(
           isDeleted: true,
           updatedAt: DateTime.now(),
           isDirty: true,
         );
-        
+
         final deletedPlantaModel = _plantToPlantaModel(deletedPlant);
         final updatedJson = jsonEncode(deletedPlantaModel.toJson());
         await hiveBox.put(id, updatedJson);
-        
+
         // Invalidate cache
         _invalidateCache();
       }
     } catch (e) {
-      throw CacheFailure('Erro ao deletar planta do cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao deletar planta do cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -186,26 +199,30 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         query,
         const Duration(milliseconds: 300),
       );
-      
+
       // Convert PlantaModel to Plant
-      return plantaModels.map((plantaModel) => Plant.fromPlantaModel(plantaModel)).toList();
+      return plantaModels
+          .map((plantaModel) => Plant.fromPlantaModel(plantaModel))
+          .toList();
     } catch (e) {
       // Fallback to basic search if search service fails
       try {
         final allPlants = await getPlants();
         final searchQuery = query.toLowerCase().trim();
-        
+
         return allPlants.where((plant) {
           final name = plant.name.toLowerCase();
           final species = (plant.species ?? '').toLowerCase();
           final notes = (plant.notes ?? '').toLowerCase();
-          
-          return name.contains(searchQuery) || 
-                 species.contains(searchQuery) || 
-                 notes.contains(searchQuery);
+
+          return name.contains(searchQuery) ||
+              species.contains(searchQuery) ||
+              notes.contains(searchQuery);
         }).toList();
       } catch (fallbackError) {
-        throw CacheFailure('Erro ao buscar plantas no cache local: ${fallbackError.toString()}');
+        throw CacheFailure(
+          'Erro ao buscar plantas no cache local: ${fallbackError.toString()}',
+        );
       }
     }
   }
@@ -216,7 +233,9 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final allPlants = await getPlants();
       return allPlants.where((plant) => plant.spaceId == spaceId).toList();
     } catch (e) {
-      throw CacheFailure('Erro ao buscar plantas por espaço no cache local: ${e.toString()}');
+      throw CacheFailure(
+        'Erro ao buscar plantas por espaço no cache local: ${e.toString()}',
+      );
     }
   }
 
@@ -225,7 +244,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
     try {
       final hiveBox = await box;
       await hiveBox.clear();
-      
+
       // Clear all caches
       _invalidateCache();
       _searchService.clearCache();
@@ -233,23 +252,24 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
     }
   }
-  
+
   /// Invalidate memory cache and search cache
   void _invalidateCache() {
     _cachedPlants = null;
     _cacheTimestamp = null;
     _searchService.clearCache();
   }
-  
+
   /// Get cache statistics for monitoring
   Map<String, dynamic> getCacheStats() {
     return {
       'plantsCache': {
         'cached': _cachedPlants != null,
         'cacheSize': _cachedPlants?.length ?? 0,
-        'cacheAge': _cacheTimestamp != null 
-            ? DateTime.now().difference(_cacheTimestamp!).inMinutes 
-            : null,
+        'cacheAge':
+            _cacheTimestamp != null
+                ? DateTime.now().difference(_cacheTimestamp!).inMinutes
+                : null,
       },
       'searchCache': _searchService.getCacheStats(),
     };

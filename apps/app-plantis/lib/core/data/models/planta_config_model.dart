@@ -10,35 +10,57 @@ part 'planta_config_model.g.dart';
 class PlantaConfigModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
-  @HiveField(0) final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
   @override
-  @HiveField(4) final bool isDirty;
+  @HiveField(4)
+  final bool isDirty;
   @override
-  @HiveField(5) final bool isDeleted;
+  @HiveField(5)
+  final bool isDeleted;
   @override
-  @HiveField(6) final int version;
+  @HiveField(6)
+  final int version;
   @override
-  @HiveField(7) final String? userId;
+  @HiveField(7)
+  final String? userId;
   @override
-  @HiveField(8) final String? moduleName;
+  @HiveField(8)
+  final String? moduleName;
 
   // PlantaConfig specific fields
-  @HiveField(10) final String plantaId;
-  @HiveField(11) final bool aguaAtiva;
-  @HiveField(12) final int intervaloRegaDias;
-  @HiveField(13) final bool aduboAtivo;
-  @HiveField(14) final int intervaloAdubacaoDias;
-  @HiveField(15) final bool banhoSolAtivo;
-  @HiveField(16) final int intervaloBanhoSolDias;
-  @HiveField(17) final bool inspecaoPragasAtiva;
-  @HiveField(18) final int intervaloInspecaoPragasDias;
-  @HiveField(19) final bool podaAtiva;
-  @HiveField(20) final int intervaloPodaDias;
-  @HiveField(21) final bool replantarAtivo;
-  @HiveField(22) final int intervaloReplantarDias;
+  @HiveField(10)
+  final String plantaId;
+  @HiveField(11)
+  final bool aguaAtiva;
+  @HiveField(12)
+  final int intervaloRegaDias;
+  @HiveField(13)
+  final bool aduboAtivo;
+  @HiveField(14)
+  final int intervaloAdubacaoDias;
+  @HiveField(15)
+  final bool banhoSolAtivo;
+  @HiveField(16)
+  final int intervaloBanhoSolDias;
+  @HiveField(17)
+  final bool inspecaoPragasAtiva;
+  @HiveField(18)
+  final int intervaloInspecaoPragasDias;
+  @HiveField(19)
+  final bool podaAtiva;
+  @HiveField(20)
+  final int intervaloPodaDias;
+  @HiveField(21)
+  final bool replantarAtivo;
+  @HiveField(22)
+  final int intervaloReplantarDias;
 
   PlantaConfigModel({
     required this.id,
@@ -64,16 +86,25 @@ class PlantaConfigModel extends BaseSyncModel {
     this.replantarAtivo = true,
     this.intervaloReplantarDias = 180,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         lastSyncAt:
+             lastSyncAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+                 : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
   @override
   String get collectionName => 'planta_configs';
@@ -98,7 +129,7 @@ class PlantaConfigModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final configId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return PlantaConfigModel(
       id: configId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -124,7 +155,7 @@ class PlantaConfigModel extends BaseSyncModel {
   /// Create from Hive map
   factory PlantaConfigModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return PlantaConfigModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -143,7 +174,8 @@ class PlantaConfigModel extends BaseSyncModel {
       banhoSolAtivo: map['banhoSolAtivo'] ?? true,
       intervaloBanhoSolDias: map['intervaloBanhoSolDias']?.toInt() ?? 1,
       inspecaoPragasAtiva: map['inspecaoPragasAtiva'] ?? true,
-      intervaloInspecaoPragasDias: map['intervaloInspecaoPragasDias']?.toInt() ?? 7,
+      intervaloInspecaoPragasDias:
+          map['intervaloInspecaoPragasDias']?.toInt() ?? 7,
       podaAtiva: map['podaAtiva'] ?? true,
       intervaloPodaDias: map['intervaloPodaDias']?.toInt() ?? 30,
       replantarAtivo: map['replantarAtivo'] ?? true,
@@ -154,22 +186,21 @@ class PlantaConfigModel extends BaseSyncModel {
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'plantaId': plantaId,
-        'aguaAtiva': aguaAtiva,
-        'intervaloRegaDias': intervaloRegaDias,
-        'aduboAtivo': aduboAtivo,
-        'intervaloAdubacaoDias': intervaloAdubacaoDias,
-        'banhoSolAtivo': banhoSolAtivo,
-        'intervaloBanhoSolDias': intervaloBanhoSolDias,
-        'inspecaoPragasAtiva': inspecaoPragasAtiva,
-        'intervaloInspecaoPragasDias': intervaloInspecaoPragasDias,
-        'podaAtiva': podaAtiva,
-        'intervaloPodaDias': intervaloPodaDias,
-        'replantarAtivo': replantarAtivo,
-        'intervaloReplantarDias': intervaloReplantarDias,
-      });
+    return super.toHiveMap()..addAll({
+      'plantaId': plantaId,
+      'aguaAtiva': aguaAtiva,
+      'intervaloRegaDias': intervaloRegaDias,
+      'aduboAtivo': aduboAtivo,
+      'intervaloAdubacaoDias': intervaloAdubacaoDias,
+      'banhoSolAtivo': banhoSolAtivo,
+      'intervaloBanhoSolDias': intervaloBanhoSolDias,
+      'inspecaoPragasAtiva': inspecaoPragasAtiva,
+      'intervaloInspecaoPragasDias': intervaloInspecaoPragasDias,
+      'podaAtiva': podaAtiva,
+      'intervaloPodaDias': intervaloPodaDias,
+      'replantarAtivo': replantarAtivo,
+      'intervaloReplantarDias': intervaloReplantarDias,
+    });
   }
 
   /// Convert to Firebase map
@@ -198,7 +229,7 @@ class PlantaConfigModel extends BaseSyncModel {
   factory PlantaConfigModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return PlantaConfigModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -217,7 +248,8 @@ class PlantaConfigModel extends BaseSyncModel {
       banhoSolAtivo: map['banho_sol_ativo'] ?? true,
       intervaloBanhoSolDias: map['intervalo_banho_sol_dias']?.toInt() ?? 1,
       inspecaoPragasAtiva: map['inspecao_pragas_ativa'] ?? true,
-      intervaloInspecaoPragasDias: map['intervalo_inspecao_pragas_dias']?.toInt() ?? 7,
+      intervaloInspecaoPragasDias:
+          map['intervalo_inspecao_pragas_dias']?.toInt() ?? 7,
       podaAtiva: map['poda_ativa'] ?? true,
       intervaloPodaDias: map['intervalo_poda_dias']?.toInt() ?? 30,
       replantarAtivo: map['replantar_ativo'] ?? true,
@@ -265,15 +297,19 @@ class PlantaConfigModel extends BaseSyncModel {
       aguaAtiva: aguaAtiva ?? this.aguaAtiva,
       intervaloRegaDias: intervaloRegaDias ?? this.intervaloRegaDias,
       aduboAtivo: aduboAtivo ?? this.aduboAtivo,
-      intervaloAdubacaoDias: intervaloAdubacaoDias ?? this.intervaloAdubacaoDias,
+      intervaloAdubacaoDias:
+          intervaloAdubacaoDias ?? this.intervaloAdubacaoDias,
       banhoSolAtivo: banhoSolAtivo ?? this.banhoSolAtivo,
-      intervaloBanhoSolDias: intervaloBanhoSolDias ?? this.intervaloBanhoSolDias,
+      intervaloBanhoSolDias:
+          intervaloBanhoSolDias ?? this.intervaloBanhoSolDias,
       inspecaoPragasAtiva: inspecaoPragasAtiva ?? this.inspecaoPragasAtiva,
-      intervaloInspecaoPragasDias: intervaloInspecaoPragasDias ?? this.intervaloInspecaoPragasDias,
+      intervaloInspecaoPragasDias:
+          intervaloInspecaoPragasDias ?? this.intervaloInspecaoPragasDias,
       podaAtiva: podaAtiva ?? this.podaAtiva,
       intervaloPodaDias: intervaloPodaDias ?? this.intervaloPodaDias,
       replantarAtivo: replantarAtivo ?? this.replantarAtivo,
-      intervaloReplantarDias: intervaloReplantarDias ?? this.intervaloReplantarDias,
+      intervaloReplantarDias:
+          intervaloReplantarDias ?? this.intervaloReplantarDias,
     );
   }
 
@@ -281,8 +317,10 @@ class PlantaConfigModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();
-  factory PlantaConfigModel.fromMap(Map<String, dynamic> map) => PlantaConfigModel.fromHiveMap(map);
-  factory PlantaConfigModel.fromJson(Map<String, dynamic> json) => PlantaConfigModel.fromHiveMap(json);
+  factory PlantaConfigModel.fromMap(Map<String, dynamic> map) =>
+      PlantaConfigModel.fromHiveMap(map);
+  factory PlantaConfigModel.fromJson(Map<String, dynamic> json) =>
+      PlantaConfigModel.fromHiveMap(json);
 
   /// Obtém o intervalo em dias para um tipo de cuidado específico
   int getIntervalForCareType(String tipoCuidado) {

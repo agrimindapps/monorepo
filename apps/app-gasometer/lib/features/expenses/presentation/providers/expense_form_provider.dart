@@ -32,7 +32,7 @@ class ExpenseFormProvider extends ChangeNotifier {
   // Estado do formulário
   ExpenseFormModel _formModel;
   bool _isInitialized = false;
-  bool _isUpdating = false;
+  final bool _isUpdating = false;
 
   ExpenseFormProvider(this._vehiclesProvider, {String? initialVehicleId, String? userId}) 
       : _formModel = ExpenseFormModel.initial(initialVehicleId ?? '', userId ?? '') {
@@ -56,10 +56,20 @@ class ExpenseFormProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Cancelar timers
+    // Cancelar timers de forma segura
     _amountDebounceTimer?.cancel();
+    _amountDebounceTimer = null;
     _odometerDebounceTimer?.cancel();
+    _odometerDebounceTimer = null;
     _descriptionDebounceTimer?.cancel();
+    _descriptionDebounceTimer = null;
+
+    // Remover listeners antes do dispose para evitar callbacks órfãos
+    descriptionController.removeListener(_onDescriptionChanged);
+    amountController.removeListener(_onAmountChanged);
+    odometerController.removeListener(_onOdometerChanged);
+    locationController.removeListener(_onLocationChanged);
+    notesController.removeListener(_onNotesChanged);
 
     // Dispose controllers
     descriptionController.dispose();
@@ -168,6 +178,9 @@ class ExpenseFormProvider extends ChangeNotifier {
     _descriptionDebounceTimer = Timer(
       Duration(milliseconds: ExpenseConstants.descriptionDebounceMs),
       () {
+        // Verificar se o provider ainda está ativo
+        if (_descriptionDebounceTimer == null) return;
+        
         final sanitized = _formatter.sanitizeInput(descriptionController.text);
         _updateDescription(sanitized);
         
@@ -187,6 +200,9 @@ class ExpenseFormProvider extends ChangeNotifier {
     _amountDebounceTimer = Timer(
       Duration(milliseconds: ExpenseConstants.amountDebounceMs),
       () {
+        // Verificar se o provider ainda está ativo
+        if (_amountDebounceTimer == null) return;
+        
         final value = _formatter.parseFormattedAmount(amountController.text);
         _updateAmount(value);
       },
@@ -198,6 +214,9 @@ class ExpenseFormProvider extends ChangeNotifier {
     _odometerDebounceTimer = Timer(
       Duration(milliseconds: ExpenseConstants.odometerDebounceMs),
       () {
+        // Verificar se o provider ainda está ativo
+        if (_odometerDebounceTimer == null) return;
+        
         final value = _formatter.parseFormattedOdometer(odometerController.text);
         _updateOdometer(value);
       },

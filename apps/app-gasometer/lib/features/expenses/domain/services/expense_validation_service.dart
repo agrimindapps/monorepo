@@ -1,12 +1,16 @@
+import 'package:injectable/injectable.dart';
 import '../entities/expense_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/expense_constants.dart';
 
 /// Serviço avançado para validação contextual de registros de despesas
+/// 
+/// Este serviço é stateless e pode ser injetado como dependency normal.
+/// Não utiliza singleton pattern pois não mantém estado interno.
+@injectable
 class ExpenseValidationService {
-  static final ExpenseValidationService _instance = ExpenseValidationService._internal();
-  factory ExpenseValidationService() => _instance;
-  ExpenseValidationService._internal();
+  /// Cria uma nova instância do serviço de validação
+  const ExpenseValidationService();
 
   /// Valida consistência entre registros de despesas
   ValidationResult validateExpenseRecord(
@@ -317,7 +321,7 @@ class ExpenseValidationService {
           anomalies.add(ExpenseAnomaly(
             expenseId: typeExpenses[i].id,
             type: AnomalyType.frequencyAnomaly,
-            description: 'Despesa recorrente registrada muito cedo (${monthsDiff} meses)',
+            description: 'Despesa recorrente registrada muito cedo ($monthsDiff meses)',
             severity: AnomalySeverity.medium,
           ));
         }

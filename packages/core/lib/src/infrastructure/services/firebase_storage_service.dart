@@ -351,7 +351,7 @@ class FirebaseStorageService implements IStorageRepository {
   }
 
   @override
-  Future<Either<Failure, ImageUploadResult>> uploadImageWithVariants({
+  Future<Either<Failure, StorageImageUploadResult>> uploadImageWithVariants({
     required File imageFile,
     required String basePath,
     List<ImageVariant>? variants,
@@ -402,7 +402,7 @@ class FirebaseStorageService implements IStorageRepository {
             }
           }
 
-          return Right(ImageUploadResult(
+          return Right(StorageImageUploadResult(
             originalUrl: originalUrl,
             variants: variantUrls,
           ));

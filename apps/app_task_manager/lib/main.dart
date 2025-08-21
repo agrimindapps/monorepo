@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 
 import 'core/database/hive_config.dart';
 import 'core/di/injection_container.dart' as di;
@@ -19,7 +20,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inicializar Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Configurar Crashlytics para capturar erros Flutter
   if (!kIsWeb) {

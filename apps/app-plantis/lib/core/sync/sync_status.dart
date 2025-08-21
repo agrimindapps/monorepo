@@ -13,5 +13,5 @@ enum SyncStatus {
   markedForDeletion,
 
   /// Synchronization failed
-  failed
+  failed,
 }

@@ -14,7 +14,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   final _nameController = TextEditingController();
   final _speciesController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
@@ -43,9 +43,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
         children: [
           // Image section
           _buildImageSection(context),
-          
+
           const SizedBox(height: 32),
-          
+
           // Basic information form
           _buildBasicInfoForm(context),
         ],
@@ -64,9 +64,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               _buildSingleImage(context, provider)
             else
               _buildEmptyImageArea(context, provider),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botões de ação
             _buildImageActionButtons(context, provider),
           ],
@@ -81,9 +81,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       children: [
         Text(
           'Foto da Planta',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         Stack(
@@ -122,9 +122,12 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     );
   }
 
-  Widget _buildEmptyImageArea(BuildContext context, PlantFormProvider provider) {
+  Widget _buildEmptyImageArea(
+    BuildContext context,
+    PlantFormProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: double.infinity,
       height: 200,
@@ -164,39 +167,46 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     );
   }
 
-  Widget _buildImageActionButtons(BuildContext context, PlantFormProvider provider) {
+  Widget _buildImageActionButtons(
+    BuildContext context,
+    PlantFormProvider provider,
+  ) {
     final hasNoImage = !provider.hasImages;
-    
+
     return Row(
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: hasNoImage && !provider.isUploadingImages
-                ? () => provider.addImageFromCamera()
-                : null,
-            icon: provider.isUploadingImages 
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Icon(Icons.camera_alt),
+            onPressed:
+                hasNoImage && !provider.isUploadingImages
+                    ? () => provider.addImageFromCamera()
+                    : null,
+            icon:
+                provider.isUploadingImages
+                    ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : Icon(Icons.camera_alt),
             label: Text('Câmera'),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: hasNoImage && !provider.isUploadingImages
-                ? () => provider.addImageFromGallery()
-                : null,
-            icon: provider.isUploadingImages 
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Icon(Icons.photo_library),
+            onPressed:
+                hasNoImage && !provider.isUploadingImages
+                    ? () => provider.addImageFromGallery()
+                    : null,
+            icon:
+                provider.isUploadingImages
+                    ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : Icon(Icons.photo_library),
             label: Text('Galeria'),
           ),
         ),
@@ -204,36 +214,42 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     );
   }
 
-  void _showRemoveImageDialog(BuildContext context, PlantFormProvider provider, int index) {
+  void _showRemoveImageDialog(
+    BuildContext context,
+    PlantFormProvider provider,
+    int index,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Remover Imagem'),
-        content: Text('Deseja remover esta imagem?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Remover Imagem'),
+            content: Text('Deseja remover esta imagem?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  provider.removeImage(index);
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text('Remover'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              provider.removeImage(index);
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            child: Text('Remover'),
-          ),
-        ],
-      ),
     );
   }
-
 
   Widget _buildBasicInfoForm(BuildContext context) {
     return Consumer<PlantFormProvider>(
       builder: (context, provider, child) {
         final fieldErrors = provider.fieldErrors;
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -247,9 +263,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               onChanged: provider.setName,
               icon: Icons.local_florist,
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Plant species (optional)
             _buildTextField(
               controller: _speciesController,
@@ -258,9 +274,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               onChanged: provider.setSpecies,
               icon: Icons.science,
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Planting date (optional)
             _buildDateField(
               context: context,
@@ -269,9 +285,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               onChanged: provider.setPlantingDate,
               icon: Icons.event,
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Notes (optional)
             _buildTextField(
               controller: _notesController,
@@ -298,17 +314,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     int maxLines = 1,
   }) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(icon, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               label,
@@ -336,23 +348,36 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             hintText: hint,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+              borderSide: BorderSide(
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+              borderSide: BorderSide(
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
+                width: 2,
+              ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
+                width: 2,
+              ),
             ),
             filled: true,
             fillColor: theme.colorScheme.surface,
@@ -372,17 +397,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     required IconData icon,
   }) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(icon, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               label,
@@ -412,7 +433,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 );
               },
             );
-            
+
             if (date != null) {
               onChanged(date);
             }
@@ -421,7 +442,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+              ),
               borderRadius: BorderRadius.circular(12),
               color: theme.colorScheme.surface,
             ),
@@ -433,9 +456,10 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                         ? _formatDate(value)
                         : 'Selecionar data (opcional)',
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: value != null
-                          ? theme.colorScheme.onSurface
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      color:
+                          value != null
+                              ? theme.colorScheme.onSurface
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -454,10 +478,20 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
-    
+
     return '${date.day} de ${months[date.month - 1]} de ${date.year}';
   }
 }

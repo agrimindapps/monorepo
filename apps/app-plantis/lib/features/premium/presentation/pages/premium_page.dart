@@ -93,9 +93,10 @@ class _PremiumPageState extends State<PremiumPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isPremium 
-              ? [Colors.teal.shade600, Colors.teal.shade400]
-              : [Colors.grey.shade800, Colors.grey.shade700],
+          colors:
+              isPremium
+                  ? [Colors.teal.shade600, Colors.teal.shade400]
+                  : [Colors.grey.shade800, Colors.grey.shade700],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -227,11 +228,13 @@ class _PremiumPageState extends State<PremiumPage> {
           ),
         ),
         const SizedBox(height: 16),
-        ...features.map((feature) => _buildFeatureItem(
-          feature['icon'] as IconData,
-          feature['title'] as String,
-          feature['description'] as String,
-        )),
+        ...features.map(
+          (feature) => _buildFeatureItem(
+            feature['icon'] as IconData,
+            feature['title'] as String,
+            feature['description'] as String,
+          ),
+        ),
       ],
     );
   }
@@ -247,11 +250,7 @@ class _PremiumPageState extends State<PremiumPage> {
               color: Colors.teal.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              color: Colors.teal,
-              size: 24,
-            ),
+            child: Icon(icon, color: Colors.teal, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -269,10 +268,7 @@ class _PremiumPageState extends State<PremiumPage> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                 ),
               ],
             ),
@@ -284,7 +280,7 @@ class _PremiumPageState extends State<PremiumPage> {
 
   Widget _buildPlansSection(PremiumProvider provider) {
     final products = provider.availableProducts;
-    
+
     if (products.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -309,15 +305,13 @@ class _PremiumPageState extends State<PremiumPage> {
   Widget _buildPlanCard(ProductInfo product, PremiumProvider provider) {
     final isMonthly = product.productId.contains('monthly');
     final isPopular = !isMonthly; // Anual é mais popular
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.grey.shade900,
         borderRadius: BorderRadius.circular(16),
-        border: isPopular 
-            ? Border.all(color: Colors.teal, width: 2)
-            : null,
+        border: isPopular ? Border.all(color: Colors.teal, width: 2) : null,
       ),
       child: Stack(
         children: [
@@ -326,7 +320,10 @@ class _PremiumPageState extends State<PremiumPage> {
               top: 0,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: const BoxDecoration(
                   color: Colors.teal,
                   borderRadius: BorderRadius.only(
@@ -399,11 +396,14 @@ class _PremiumPageState extends State<PremiumPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: provider.isLoading 
-                        ? null 
-                        : () => _purchaseProduct(product.productId, provider),
+                    onPressed:
+                        provider.isLoading
+                            ? null
+                            : () =>
+                                _purchaseProduct(product.productId, provider),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isPopular ? Colors.teal : Colors.grey.shade800,
+                      backgroundColor:
+                          isPopular ? Colors.teal : Colors.grey.shade800,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -433,7 +433,8 @@ class _PremiumPageState extends State<PremiumPage> {
           SizedBox(
             width: double.infinity,
             child: TextButton(
-              onPressed: provider.isLoading ? null : () => _restorePurchases(provider),
+              onPressed:
+                  provider.isLoading ? null : () => _restorePurchases(provider),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -447,7 +448,7 @@ class _PremiumPageState extends State<PremiumPage> {
               ),
             ),
           ),
-        
+
         if (provider.isPremium)
           SizedBox(
             width: double.infinity,
@@ -531,10 +532,13 @@ class _PremiumPageState extends State<PremiumPage> {
     );
   }
 
-  Future<void> _purchaseProduct(String productId, PremiumProvider provider) async {
+  Future<void> _purchaseProduct(
+    String productId,
+    PremiumProvider provider,
+  ) async {
     try {
       final success = await provider.purchaseProduct(productId);
-      
+
       if (success && mounted) {
         _showSuccessDialog();
       } else if (provider.errorMessage != null && mounted) {
@@ -549,7 +553,7 @@ class _PremiumPageState extends State<PremiumPage> {
 
   Future<void> _restorePurchases(PremiumProvider provider) async {
     final success = await provider.restorePurchases();
-    
+
     if (mounted) {
       if (success) {
         if (provider.isPremium) {
@@ -574,78 +578,82 @@ class _PremiumPageState extends State<PremiumPage> {
   void _showSuccessDialog({String? message}) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.teal, size: 28),
-            SizedBox(width: 12),
-            Text('Sucesso!', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        content: Text(
-          message ?? 'Bem-vindo ao Premium! Aproveite todos os recursos exclusivos.',
-          style: TextStyle(color: Colors.grey.shade300),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK', style: TextStyle(color: Colors.teal)),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.grey.shade900,
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.teal, size: 28),
+                SizedBox(width: 12),
+                Text('Sucesso!', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            content: Text(
+              message ??
+                  'Bem-vindo ao Premium! Aproveite todos os recursos exclusivos.',
+              style: TextStyle(color: Colors.grey.shade300),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK', style: TextStyle(color: Colors.teal)),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Row(
-          children: [
-            Icon(Icons.error_outline, color: Colors.red, size: 28),
-            SizedBox(width: 12),
-            Text('Erro', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        content: Text(
-          message,
-          style: TextStyle(color: Colors.grey.shade300),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK', style: TextStyle(color: Colors.teal)),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.grey.shade900,
+            title: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red, size: 28),
+                SizedBox(width: 12),
+                Text('Erro', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            content: Text(
+              message,
+              style: TextStyle(color: Colors.grey.shade300),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK', style: TextStyle(color: Colors.teal)),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showInfoDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        title: const Row(
-          children: [
-            Icon(Icons.info_outline, color: Colors.blue, size: 28),
-            SizedBox(width: 12),
-            Text('Informação', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        content: Text(
-          message,
-          style: TextStyle(color: Colors.grey.shade300),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK', style: TextStyle(color: Colors.teal)),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.grey.shade900,
+            title: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue, size: 28),
+                SizedBox(width: 12),
+                Text('Informação', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            content: Text(
+              message,
+              style: TextStyle(color: Colors.grey.shade300),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK', style: TextStyle(color: Colors.teal)),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 

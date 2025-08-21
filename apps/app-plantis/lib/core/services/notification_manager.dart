@@ -22,17 +22,17 @@ class NotificationManager {
     try {
       // Obtém o serviço do DI
       _notificationService = sl<PlantisNotificationService>();
-      
+
       // Inicializa o serviço de notificações
       final result = await _notificationService!.initialize();
-      
+
       if (result) {
         // Programa todas as notificações iniciais
         await _notificationService!.initializeAllNotifications();
-        
+
         // Verifica tarefas atrasadas na inicialização
         await _notificationService!.checkAndNotifyOverdueTasks();
-        
+
         _isInitialized = true;
         debugPrint('✅ NotificationManager initialized successfully');
         return true;
@@ -74,7 +74,7 @@ class NotificationManager {
     DateTime? dueDate,
   }) async {
     if (_notificationService == null) return;
-    
+
     await _notificationService!.scheduleTaskReminder(
       taskId: taskId,
       taskName: taskName,
@@ -97,7 +97,7 @@ class NotificationManager {
     required String plantType,
   }) async {
     if (_notificationService == null) return;
-    
+
     await _notificationService!.showNewPlantNotification(
       plantName: plantName,
       plantType: plantType,
@@ -111,7 +111,7 @@ class NotificationManager {
     required int daysOverdue,
   }) async {
     if (_notificationService == null) return;
-    
+
     await _notificationService!.showOverdueTaskNotification(
       taskName: taskName,
       plantName: plantName,

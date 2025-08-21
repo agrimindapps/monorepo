@@ -43,17 +43,17 @@ class TasksProvider extends ChangeNotifier {
     required CompleteTaskUseCase completeTaskUseCase,
     // required DeleteTaskUseCase deleteTaskUseCase,
     TaskNotificationService? notificationService,
-  })  : _getTasksUseCase = getTasksUseCase,
-        // _getTasksByPlantIdUseCase = getTasksByPlantIdUseCase,
-        // _getTasksByStatusUseCase = getTasksByStatusUseCase,
-        // _getOverdueTasksUseCase = getOverdueTasksUseCase,
-        // _getTodayTasksUseCase = getTodayTasksUseCase,
-        // _getUpcomingTasksUseCase = getUpcomingTasksUseCase,
-        _addTaskUseCase = addTaskUseCase,
-        // _updateTaskUseCase = updateTaskUseCase,
-        _completeTaskUseCase = completeTaskUseCase,
-        // _deleteTaskUseCase = deleteTaskUseCase,
-        _notificationService = notificationService ?? TaskNotificationService();
+  }) : _getTasksUseCase = getTasksUseCase,
+       // _getTasksByPlantIdUseCase = getTasksByPlantIdUseCase,
+       // _getTasksByStatusUseCase = getTasksByStatusUseCase,
+       // _getOverdueTasksUseCase = getOverdueTasksUseCase,
+       // _getTodayTasksUseCase = getTodayTasksUseCase,
+       // _getUpcomingTasksUseCase = getUpcomingTasksUseCase,
+       _addTaskUseCase = addTaskUseCase,
+       // _updateTaskUseCase = updateTaskUseCase,
+       _completeTaskUseCase = completeTaskUseCase,
+       // _deleteTaskUseCase = deleteTaskUseCase,
+       _notificationService = notificationService ?? TaskNotificationService();
 
   // Estado
   List<task_entity.Task> _allTasks = [];
@@ -77,35 +77,62 @@ class TasksProvider extends ChangeNotifier {
 
   // Estatísticas
   int get totalTasks => _allTasks.length;
-  int get completedTasks => _allTasks.where((t) => t.status == task_entity.TaskStatus.completed).length;
-  int get pendingTasks => _allTasks.where((t) => t.status == task_entity.TaskStatus.pending).length;
-  int get overdueTasks => _allTasks.where((t) => t.isOverdue && t.status == task_entity.TaskStatus.pending).length;
-  int get todayTasks => _allTasks.where((t) => t.isDueToday && t.status == task_entity.TaskStatus.pending).length;
+  int get completedTasks =>
+      _allTasks
+          .where((t) => t.status == task_entity.TaskStatus.completed)
+          .length;
+  int get pendingTasks =>
+      _allTasks.where((t) => t.status == task_entity.TaskStatus.pending).length;
+  int get overdueTasks =>
+      _allTasks
+          .where(
+            (t) => t.isOverdue && t.status == task_entity.TaskStatus.pending,
+          )
+          .length;
+  int get todayTasks =>
+      _allTasks
+          .where(
+            (t) => t.isDueToday && t.status == task_entity.TaskStatus.pending,
+          )
+          .length;
   int get upcomingTasksCount {
     final now = DateTime.now();
     final nextWeek = now.add(const Duration(days: 7));
-    return _allTasks.where((t) => 
-      t.status == task_entity.TaskStatus.pending &&
-      t.dueDate.isAfter(now) &&
-      t.dueDate.isBefore(nextWeek)
-    ).length;
+    return _allTasks
+        .where(
+          (t) =>
+              t.status == task_entity.TaskStatus.pending &&
+              t.dueDate.isAfter(now) &&
+              t.dueDate.isBefore(nextWeek),
+        )
+        .length;
   }
 
   // Tarefas por prioridade
-  List<task_entity.Task> get highPriorityTasks => _filteredTasks.where((t) => 
-      t.priority == task_entity.TaskPriority.high || t.priority == task_entity.TaskPriority.urgent).toList();
-  
-  List<task_entity.Task> get mediumPriorityTasks => _filteredTasks.where((t) => 
-      t.priority == task_entity.TaskPriority.medium).toList();
-  
-  List<task_entity.Task> get lowPriorityTasks => _filteredTasks.where((t) => 
-      t.priority == task_entity.TaskPriority.low).toList();
+  List<task_entity.Task> get highPriorityTasks =>
+      _filteredTasks
+          .where(
+            (t) =>
+                t.priority == task_entity.TaskPriority.high ||
+                t.priority == task_entity.TaskPriority.urgent,
+          )
+          .toList();
+
+  List<task_entity.Task> get mediumPriorityTasks =>
+      _filteredTasks
+          .where((t) => t.priority == task_entity.TaskPriority.medium)
+          .toList();
+
+  List<task_entity.Task> get lowPriorityTasks =>
+      _filteredTasks
+          .where((t) => t.priority == task_entity.TaskPriority.low)
+          .toList();
 
   // Carregar tarefas
   Future<void> loadTasks() async {
     // Só mostrar loading se não temos tarefas ainda
     final shouldShowLoading = _allTasks.isEmpty;
-    
+
     if (shouldShowLoading) {
       _setLoading(true);
     }
@@ -113,18 +140,17 @@ class TasksProvider extends ChangeNotifier {
 
     try {
       final result = await _getTasksUseCase(NoParams());
-      
-      result.fold(
-        (failure) => _setError(_mapFailureToMessage(failure)),
-        (tasks) {
-          _allTasks = tasks;
-          _applyFilters();
-          // Verificar tarefas em atraso e enviar notificações
-          _notificationService.checkOverdueTasks(tasks);
-          // Reagendar todas as notificações
-          _notificationService.rescheduleTaskNotifications(tasks);
-        },
-      );
+
+      result.fold((failure) => _setError(_mapFailureToMessage(failure)), (
+        tasks,
+      ) {
+        _allTasks = tasks;
+        _applyFilters();
+        // Verificar tarefas em atraso e enviar notificações
+        _notificationService.checkOverdueTasks(tasks);
+        // Reagendar todas as notificações
+        _notificationService.rescheduleTaskNotifications(tasks);
+      });
     } catch (e) {
       _setError('Erro inesperado ao carregar tarefas');
     } finally {
@@ -140,7 +166,7 @@ class TasksProvider extends ChangeNotifier {
 
     try {
       final result = await _addTaskUseCase(AddTaskParams(task: task));
-      
+
       return result.fold(
         (failure) {
           _setError(_mapFailureToMessage(failure));
@@ -168,7 +194,7 @@ class TasksProvider extends ChangeNotifier {
       final result = await _completeTaskUseCase(
         CompleteTaskParams(taskId: taskId, notes: notes),
       );
-      
+
       return result.fold(
         (failure) {
           _setError(_mapFailureToMessage(failure));
@@ -241,7 +267,14 @@ class TasksProvider extends ChangeNotifier {
       case TasksFilterType.all:
         break;
       case TasksFilterType.today:
-        tasks = tasks.where((t) => t.isDueToday && t.status == task_entity.TaskStatus.pending).toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.isDueToday &&
+                      t.status == task_entity.TaskStatus.pending,
+                )
+                .toList();
         break;
       case TasksFilterType.overdue:
         tasks = tasks.where((t) => t.isOverdue).toList();
@@ -249,14 +282,21 @@ class TasksProvider extends ChangeNotifier {
       case TasksFilterType.upcoming:
         final now = DateTime.now();
         final nextWeek = now.add(const Duration(days: 7));
-        tasks = tasks.where((t) => 
-          t.status == task_entity.TaskStatus.pending &&
-          t.dueDate.isAfter(now) &&
-          t.dueDate.isBefore(nextWeek)
-        ).toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now) &&
+                      t.dueDate.isBefore(nextWeek),
+                )
+                .toList();
         break;
       case TasksFilterType.completed:
-        tasks = tasks.where((t) => t.status == task_entity.TaskStatus.completed).toList();
+        tasks =
+            tasks
+                .where((t) => t.status == task_entity.TaskStatus.completed)
+                .toList();
         break;
       case TasksFilterType.byPlant:
         if (_selectedPlantId != null) {
@@ -267,11 +307,13 @@ class TasksProvider extends ChangeNotifier {
 
     // Aplicar busca
     if (_searchQuery.isNotEmpty) {
-      tasks = tasks.where((task) {
-        return task.title.toLowerCase().contains(_searchQuery) ||
-               task.plantName.toLowerCase().contains(_searchQuery) ||
-               (task.description?.toLowerCase().contains(_searchQuery) ?? false);
-      }).toList();
+      tasks =
+          tasks.where((task) {
+            return task.title.toLowerCase().contains(_searchQuery) ||
+                task.plantName.toLowerCase().contains(_searchQuery) ||
+                (task.description?.toLowerCase().contains(_searchQuery) ??
+                    false);
+          }).toList();
     }
 
     // Ordenar por prioridade e data
@@ -283,10 +325,16 @@ class TasksProvider extends ChangeNotifier {
       }
 
       // Depois por prioridade
-      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(a.priority);
-      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(b.priority);
+      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        a.priority,
+      );
+      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        b.priority,
+      );
       if (aPriorityIndex != bPriorityIndex) {
-        return bPriorityIndex.compareTo(aPriorityIndex); // Maior prioridade primeiro
+        return bPriorityIndex.compareTo(
+          aPriorityIndex,
+        ); // Maior prioridade primeiro
       }
 
       // Por último por data de vencimento
@@ -300,5 +348,4 @@ class TasksProvider extends ChangeNotifier {
   String _mapFailureToMessage(Failure failure) {
     return failure.userMessage;
   }
-
 }

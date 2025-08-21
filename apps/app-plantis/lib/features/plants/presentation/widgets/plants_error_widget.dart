@@ -5,16 +5,12 @@ class PlantsErrorWidget extends StatelessWidget {
   final String error;
   final VoidCallback? onRetry;
 
-  const PlantsErrorWidget({
-    super.key,
-    required this.error,
-    this.onRetry,
-  });
+  const PlantsErrorWidget({super.key, required this.error, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -34,9 +30,9 @@ class PlantsErrorWidget extends StatelessWidget {
                 color: theme.colorScheme.onErrorContainer,
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Título
             Text(
               'Ops! Algo deu errado',
@@ -46,9 +42,9 @@ class PlantsErrorWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Mensagem de erro
             Text(
               error,
@@ -57,9 +53,9 @@ class PlantsErrorWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Botão de retry
             if (onRetry != null) ...[
               ElevatedButton.icon(

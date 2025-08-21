@@ -6,21 +6,22 @@ part 'category_model.g.dart';
 /// Category model with Firebase sync support
 /// TypeId: 5 - New sequential numbering
 @HiveType(typeId: 5)
+// ignore: must_be_immutable
 class CategoryModel extends BaseSyncModel {
   @override
   void removeFromHive() {
     // Stub implementation to satisfy HiveObjectMixin
   }
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
-  @HiveField(0) final String id;
+  @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) final bool isDirty;
-  @HiveField(5) final bool isDeleted;
-  @HiveField(6) final int version;
-  @HiveField(7) final String? userId;
-  @HiveField(8) final String? moduleName;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Category specific fields
   @HiveField(10) final int categoria;
@@ -36,8 +37,8 @@ class CategoryModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    required this.categoria,
-    required this.descricao,
+    this.categoria = 0,
+    this.descricao = '',
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -94,6 +95,7 @@ class CategoryModel extends BaseSyncModel {
   }
 
   /// Convert to Hive map
+  @override
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
@@ -150,9 +152,9 @@ class CategoryModel extends BaseSyncModel {
   }) {
     return CategoryModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

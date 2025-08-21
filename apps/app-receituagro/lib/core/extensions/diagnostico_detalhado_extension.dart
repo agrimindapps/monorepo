@@ -1,5 +1,4 @@
 import '../services/diagnostico_integration_service.dart';
-import '../models/diagnostico_hive.dart';
 
 /// Extensions para facilitar o trabalho com dados relacionais
 extension DiagnosticoDetalhadoExtension on DiagnosticoDetalhado {

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
@@ -22,12 +21,12 @@ class PlantsProvider extends ChangeNotifier {
     required AddPlantUseCase addPlantUseCase,
     required UpdatePlantUseCase updatePlantUseCase,
     required DeletePlantUseCase deletePlantUseCase,
-  })  : _getPlantsUseCase = getPlantsUseCase,
-        _getPlantByIdUseCase = getPlantByIdUseCase,
-        _searchPlantsUseCase = searchPlantsUseCase,
-        _addPlantUseCase = addPlantUseCase,
-        _updatePlantUseCase = updatePlantUseCase,
-        _deletePlantUseCase = deletePlantUseCase;
+  }) : _getPlantsUseCase = getPlantsUseCase,
+       _getPlantByIdUseCase = getPlantByIdUseCase,
+       _searchPlantsUseCase = searchPlantsUseCase,
+       _addPlantUseCase = addPlantUseCase,
+       _updatePlantUseCase = updatePlantUseCase,
+       _deletePlantUseCase = deletePlantUseCase;
 
   List<Plant> _plants = [];
   List<Plant> get plants => _plants;
@@ -63,21 +62,18 @@ class PlantsProvider extends ChangeNotifier {
   Future<void> loadPlants() async {
     // Only show loading if no plants exist yet (first load)
     final shouldShowLoading = _plants.isEmpty;
-    
+
     if (shouldShowLoading) {
       _setLoading(true);
     }
     _clearError();
 
     final result = await _getPlantsUseCase.call(NoParams());
-    
-    result.fold(
-      (failure) => _setError(_getErrorMessage(failure)),
-      (plants) {
-        _plants = _sortPlants(plants);
-        _applyFilters();
-      },
-    );
+
+    result.fold((failure) => _setError(_getErrorMessage(failure)), (plants) {
+      _plants = _sortPlants(plants);
+      _applyFilters();
+    });
 
     if (shouldShowLoading) {
       _setLoading(false);
@@ -87,7 +83,7 @@ class PlantsProvider extends ChangeNotifier {
   // Get plant by ID
   Future<Plant?> getPlantById(String id) async {
     final result = await _getPlantByIdUseCase.call(id);
-    
+
     return result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -104,7 +100,7 @@ class PlantsProvider extends ChangeNotifier {
   // Search plants
   Future<void> searchPlants(String query) async {
     _searchQuery = query;
-    
+
     if (query.trim().isEmpty) {
       _searchResults = [];
       _isSearching = false;
@@ -116,15 +112,12 @@ class PlantsProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _searchPlantsUseCase.call(SearchPlantsParams(query));
-    
-    result.fold(
-      (failure) => _setError(_getErrorMessage(failure)),
-      (results) {
-        _searchResults = _sortPlants(results);
-        _isSearching = false;
-      },
-    );
-    
+
+    result.fold((failure) => _setError(_getErrorMessage(failure)), (results) {
+      _searchResults = _sortPlants(results);
+      _isSearching = false;
+    });
+
     notifyListeners();
   }
 
@@ -134,7 +127,7 @@ class PlantsProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _addPlantUseCase.call(params);
-    
+
     final success = result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -157,7 +150,7 @@ class PlantsProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _updatePlantUseCase.call(params);
-    
+
     final success = result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -170,12 +163,12 @@ class PlantsProvider extends ChangeNotifier {
           _plants = _sortPlants(_plants);
           _applyFilters();
         }
-        
+
         // Update selected plant if it's the same
         if (_selectedPlant?.id == updatedPlant.id) {
           _selectedPlant = updatedPlant;
         }
-        
+
         return true;
       },
     );
@@ -190,7 +183,7 @@ class PlantsProvider extends ChangeNotifier {
     _clearError();
 
     final result = await _deletePlantUseCase.call(id);
-    
+
     final success = result.fold(
       (failure) {
         _setError(_getErrorMessage(failure));
@@ -199,12 +192,12 @@ class PlantsProvider extends ChangeNotifier {
       (_) {
         _plants.removeWhere((plant) => plant.id == id);
         _searchResults.removeWhere((plant) => plant.id == id);
-        
+
         // Clear selected plant if it was deleted
         if (_selectedPlant?.id == id) {
           _selectedPlant = null;
         }
-        
+
         _applyFilters();
         return true;
       },
@@ -275,35 +268,36 @@ class PlantsProvider extends ChangeNotifier {
   List<Plant> getPlantsNeedingWater() {
     final now = DateTime.now();
     final threshold = now.add(const Duration(days: 2));
-    
+
     return _plants.where((plant) {
       if (plant.config?.wateringIntervalDays == null) return false;
-      
+
       final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
       final nextWatering = lastWatering.add(
         Duration(days: plant.config!.wateringIntervalDays!),
       );
-      
-      return nextWatering.isBefore(threshold) || nextWatering.isAtSameMomentAs(threshold);
+
+      return nextWatering.isBefore(threshold) ||
+          nextWatering.isAtSameMomentAs(threshold);
     }).toList();
   }
 
   // Get plants by care status
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     final now = DateTime.now();
-    
+
     return _plants.where((plant) {
       if (plant.config?.wateringIntervalDays == null) {
         return status == CareStatus.unknown;
       }
-      
+
       final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
       final nextWatering = lastWatering.add(
         Duration(days: plant.config!.wateringIntervalDays!),
       );
-      
+
       final daysDifference = nextWatering.difference(now).inDays;
-      
+
       switch (status) {
         case CareStatus.needsWater:
           return daysDifference <= 0;
@@ -341,55 +335,64 @@ class PlantsProvider extends ChangeNotifier {
 
   List<Plant> _sortPlants(List<Plant> plants) {
     final sortedPlants = List<Plant>.from(plants);
-    
+
     switch (_sortBy) {
       case SortBy.newest:
-        sortedPlants.sort((a, b) => (b.createdAt ?? DateTime.now())
-            .compareTo(a.createdAt ?? DateTime.now()));
+        sortedPlants.sort(
+          (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+            a.createdAt ?? DateTime.now(),
+          ),
+        );
         break;
       case SortBy.oldest:
-        sortedPlants.sort((a, b) => (a.createdAt ?? DateTime.now())
-            .compareTo(b.createdAt ?? DateTime.now()));
+        sortedPlants.sort(
+          (a, b) => (a.createdAt ?? DateTime.now()).compareTo(
+            b.createdAt ?? DateTime.now(),
+          ),
+        );
         break;
       case SortBy.name:
         sortedPlants.sort((a, b) => a.name.compareTo(b.name));
         break;
       case SortBy.species:
-        sortedPlants.sort((a, b) => (a.species ?? '').compareTo(b.species ?? ''));
+        sortedPlants.sort(
+          (a, b) => (a.species ?? '').compareTo(b.species ?? ''),
+        );
         break;
     }
-    
+
     return sortedPlants;
   }
 
   void _applyFilters() {
     List<Plant> filtered = List.from(_plants);
-    
+
     if (_filterBySpace != null) {
-      filtered = filtered.where((plant) => plant.spaceId == _filterBySpace).toList();
+      filtered =
+          filtered.where((plant) => plant.spaceId == _filterBySpace).toList();
     }
-    
+
     _plants = filtered;
     notifyListeners();
   }
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure:
+      case ValidationFailure _:
         return failure.message;
-      case CacheFailure:
+      case CacheFailure _:
         return failure.message;
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Sem conexão com a internet';
-      case ServerFailure:
+      case ServerFailure _:
         // Check if it's specifically an auth error
-        if (failure.message.contains('não autenticado') || 
+        if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
           return 'Erro de autenticação. Tente fazer login novamente.';
         }
         return failure.message;
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return failure.message;
       default:
         return 'Erro inesperado';

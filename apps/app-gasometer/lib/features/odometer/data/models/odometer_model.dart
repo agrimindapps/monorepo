@@ -7,17 +7,18 @@ part 'odometer_model.g.dart';
 /// Odometer model with Firebase sync support
 /// TypeId: 2 - New sequential numbering
 @HiveType(typeId: 2)
+// ignore: must_be_immutable
 class OdometerModel extends BaseSyncModel {
   // Base sync fields (required for Hive generation)
-  @HiveField(0) final String id;
+  @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) final bool isDirty;
-  @HiveField(5) final bool isDeleted;
-  @HiveField(6) final int version;
-  @HiveField(7) final String? userId;
-  @HiveField(8) final String? moduleName;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Odometer specific fields
   @HiveField(10) final String idVeiculo;
@@ -36,10 +37,10 @@ class OdometerModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    required this.idVeiculo,
-    required this.data,
-    required this.odometro,
-    required this.descricao,
+    this.idVeiculo = '',
+    this.data = 0,
+    this.odometro = 0.0,
+    this.descricao = '',
     this.tipoRegistro,
   }) : super(
           id: id,
@@ -175,9 +176,9 @@ class OdometerModel extends BaseSyncModel {
   }) {
     return OdometerModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

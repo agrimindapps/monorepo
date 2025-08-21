@@ -1,23 +1,23 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:core/core.dart';
 
-import '../services/connectivity_service.dart';
 import '../sync/sync_queue.dart';
 import '../data/models/sync_queue_item.dart';
 
 enum SyncState {
-  idle,    // No sync operations
+  idle, // No sync operations
   syncing, // Currently syncing
   offline, // No network connection
-  error    // Sync encountered an error
+  error, // Sync encountered an error
 }
 
 class SyncStatusProvider with ChangeNotifier {
   final ConnectivityService _connectivityService;
   final SyncQueue _syncQueue;
-  
+
   // Stream subscriptions for proper disposal
-  StreamSubscription<NetworkStatus>? _networkSubscription;
+  StreamSubscription<ConnectivityType>? _networkSubscription;
   StreamSubscription<List<SyncQueueItem>>? _queueSubscription;
 
   SyncState _currentState = SyncState.idle;
@@ -34,23 +34,30 @@ class SyncStatusProvider with ChangeNotifier {
 
   void _initializeListeners() {
     // Listen to network status changes
-    _networkSubscription = _connectivityService.networkStatusStream.listen((status) {
+    _networkSubscription = _connectivityService.networkStatusStream.listen((
+      status,
+    ) {
       switch (status) {
-        case NetworkStatus.offline:
+        case ConnectivityType.offline:
+        case ConnectivityType.none:
           _updateSyncState(SyncState.offline);
           break;
-        case NetworkStatus.mobile:
-        case NetworkStatus.wifi:
-        case NetworkStatus.online:
+        case ConnectivityType.mobile:
+        case ConnectivityType.wifi:
+        case ConnectivityType.online:
+        case ConnectivityType.ethernet:
+        case ConnectivityType.vpn:
+        case ConnectivityType.other:
+        case ConnectivityType.bluetooth:
           _updateSyncState(SyncState.idle);
           break;
       }
     });
 
-    // Listen to sync queue changes  
+    // Listen to sync queue changes
     _queueSubscription = _syncQueue.queueStream.listen((items) {
       _pendingItems = items;
-      
+
       if (items.isEmpty) {
         _updateSyncState(SyncState.idle);
       } else {
@@ -68,19 +75,24 @@ class SyncStatusProvider with ChangeNotifier {
 
   // Method to manually trigger sync or check sync status
   Future<void> checkSyncStatus() async {
-    final networkStatus = await _connectivityService.getCurrentNetworkStatus();
+    final networkStatusResult = await _connectivityService.getCurrentNetworkStatus();
     
-    if (networkStatus == NetworkStatus.offline) {
-      _updateSyncState(SyncState.offline);
-    } else {
-      final pendingItems = _syncQueue.getPendingItems();
-      
-      if (pendingItems.isEmpty) {
-        _updateSyncState(SyncState.idle);
-      } else {
-        _updateSyncState(SyncState.syncing);
-      }
-    }
+    networkStatusResult.fold(
+      (failure) => _updateSyncState(SyncState.error),
+      (networkStatus) {
+        if (networkStatus == ConnectivityType.offline || networkStatus == ConnectivityType.none) {
+          _updateSyncState(SyncState.offline);
+        } else {
+          final pendingItems = _syncQueue.getPendingItems();
+
+          if (pendingItems.isEmpty) {
+            _updateSyncState(SyncState.idle);
+          } else {
+            _updateSyncState(SyncState.syncing);
+          }
+        }
+      },
+    );
   }
 
   // Helper method to get a user-friendly status message
@@ -96,7 +108,7 @@ class SyncStatusProvider with ChangeNotifier {
         return 'Sync Error';
     }
   }
-  
+
   @override
   void dispose() {
     // Cancel stream subscriptions to prevent memory leaks

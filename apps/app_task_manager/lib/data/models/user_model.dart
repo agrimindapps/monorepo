@@ -16,6 +16,7 @@ class UserModel extends UserEntity {
     required super.createdAt,
     required super.updatedAt,
     super.isActive,
+    super.emailVerified = false,
   });
 
   @HiveField(0)
@@ -46,6 +47,10 @@ class UserModel extends UserEntity {
   @override
   bool get isActive => super.isActive;
 
+  @HiveField(7)
+  @override
+  bool get emailVerified => super.emailVerified;
+
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
@@ -72,6 +77,7 @@ class UserModel extends UserEntity {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
+    bool? emailVerified,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -81,6 +87,7 @@ class UserModel extends UserEntity {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,
+      emailVerified: emailVerified ?? this.emailVerified,
     );
   }
 }

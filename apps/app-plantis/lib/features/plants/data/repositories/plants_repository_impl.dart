@@ -39,42 +39,50 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       // ALWAYS return local data first for instant UI response
       final localPlants = await localDatasource.getPlants();
-      
-      // Start background sync immediately (fire and forget) 
+
+      // Start background sync immediately (fire and forget)
       // This ensures local-first approach with background updates
       if (await networkInfo.isConnected) {
         _syncPlantsInBackground(userId);
       }
-      
+
       // Return local data immediately (empty list is fine)
       return Right(localPlants);
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'),
+      );
     }
   }
 
   // Background sync method (fire and forget)
   void _syncPlantsInBackground(String userId) {
-    remoteDatasource.getPlants(userId).then((remotePlants) {
-      // Update local cache with remote data
-      for (final plant in remotePlants) {
-        localDatasource.updatePlant(plant);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDatasource
+        .getPlants(userId)
+        .then((remotePlants) {
+          // Update local cache with remote data
+          for (final plant in remotePlants) {
+            localDatasource.updatePlant(plant);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   // Background sync method for single plant (fire and forget)
   void _syncSinglePlantInBackground(String plantId, String userId) {
-    remoteDatasource.getPlantById(plantId, userId).then((remotePlant) {
-      // Update local cache with remote data
-      localDatasource.updatePlant(remotePlant);
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDatasource
+        .getPlantById(plantId, userId)
+        .then((remotePlant) {
+          // Update local cache with remote data
+          localDatasource.updatePlant(remotePlant);
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
@@ -87,12 +95,12 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       // ALWAYS get from local first for instant response
       final localPlant = await localDatasource.getPlantById(id);
-      
+
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
         _syncSinglePlantInBackground(id, userId);
       }
-      
+
       // Return local data immediately (or error if not found)
       if (localPlant != null) {
         return Right(localPlant);
@@ -102,7 +110,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao buscar planta: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao buscar planta: ${e.toString()}'),
+      );
     }
   }
 
@@ -115,18 +125,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       final plantModel = PlantModel.fromEntity(plant);
-      
+
       // Always save locally first
       await localDatasource.addPlant(plantModel);
-      
+
       if (await networkInfo.isConnected) {
         try {
           // Try to save remotely
-          final remotePlant = await remoteDatasource.addPlant(plantModel, userId);
-          
+          final remotePlant = await remoteDatasource.addPlant(
+            plantModel,
+            userId,
+          );
+
           // Update local with remote ID and sync status
           await localDatasource.updatePlant(remotePlant);
-          
+
           return Right(remotePlant);
         } catch (e) {
           // If remote fails, return local version (will sync later)
@@ -139,7 +152,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao adicionar planta: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao adicionar planta: ${e.toString()}'),
+      );
     }
   }
 
@@ -152,18 +167,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       final plantModel = PlantModel.fromEntity(plant);
-      
+
       // Always save locally first
       await localDatasource.updatePlant(plantModel);
-      
+
       if (await networkInfo.isConnected) {
         try {
           // Try to update remotely
-          final remotePlant = await remoteDatasource.updatePlant(plantModel, userId);
-          
+          final remotePlant = await remoteDatasource.updatePlant(
+            plantModel,
+            userId,
+          );
+
           // Update local with sync status
           await localDatasource.updatePlant(remotePlant);
-          
+
           return Right(remotePlant);
         } catch (e) {
           // If remote fails, return local version (will sync later)
@@ -176,7 +194,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao atualizar planta: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao atualizar planta: ${e.toString()}'),
+      );
     }
   }
 
@@ -190,7 +210,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       // Always delete locally first
       await localDatasource.deletePlant(id);
-      
+
       if (await networkInfo.isConnected) {
         try {
           // Try to delete remotely
@@ -199,12 +219,14 @@ class PlantsRepositoryImpl implements PlantsRepository {
           // If remote fails, the local soft delete will sync later
         }
       }
-      
+
       return const Right(null);
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao deletar planta: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao deletar planta: ${e.toString()}'),
+      );
     }
   }
 
@@ -219,13 +241,16 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (await networkInfo.isConnected) {
         try {
           // Try to search remotely first
-          final remotePlants = await remoteDatasource.searchPlants(query, userId);
-          
+          final remotePlants = await remoteDatasource.searchPlants(
+            query,
+            userId,
+          );
+
           // Cache results locally
           for (final plant in remotePlants) {
             await localDatasource.updatePlant(plant);
           }
-          
+
           return Right(remotePlants);
         } catch (e) {
           // If remote fails, fallback to local search
@@ -240,7 +265,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'),
+      );
     }
   }
 
@@ -255,13 +282,16 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (await networkInfo.isConnected) {
         try {
           // Try to get from remote first
-          final remotePlants = await remoteDatasource.getPlantsBySpace(spaceId, userId);
-          
+          final remotePlants = await remoteDatasource.getPlantsBySpace(
+            spaceId,
+            userId,
+          );
+
           // Cache locally
           for (final plant in remotePlants) {
             await localDatasource.updatePlant(plant);
           }
-          
+
           return Right(remotePlants);
         } catch (e) {
           // If remote fails, fallback to local
@@ -276,7 +306,11 @@ class PlantsRepositoryImpl implements PlantsRepository {
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao buscar plantas por espaço: ${e.toString()}'));
+      return Left(
+        UnknownFailure(
+          'Erro inesperado ao buscar plantas por espaço: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -289,7 +323,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
         (plants) => Right(plants.length),
       );
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao contar plantas: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao contar plantas: ${e.toString()}'),
+      );
     }
   }
 
@@ -298,8 +334,11 @@ class PlantsRepositoryImpl implements PlantsRepository {
     // For now, return a simple stream that emits current plants
     // In a more advanced implementation, you might use Firestore snapshots
     // or a local database with reactive queries
-    return Stream.fromFuture(getPlants().then((result) => 
-        result.fold((failure) => <Plant>[], (plants) => plants)));
+    return Stream.fromFuture(
+      getPlants().then(
+        (result) => result.fold((failure) => <Plant>[], (plants) => plants),
+      ),
+    );
   }
 
   @override
@@ -317,26 +356,33 @@ class PlantsRepositoryImpl implements PlantsRepository {
       // Get all local plants that need sync
       final localPlants = await localDatasource.getPlants();
       final plantsToSync = localPlants.where((plant) => plant.isDirty).toList();
-      
+
       if (plantsToSync.isNotEmpty) {
         try {
-          await remoteDatasource.syncPlants(plantsToSync, userId);
-          
+          await remoteDatasource.syncPlants(
+            plantsToSync.map((plant) => PlantModel.fromEntity(plant)).toList(), 
+            userId
+          );
+
           // Update local plants to mark as synced
           for (final plant in plantsToSync) {
             final syncedPlant = plant.copyWith(isDirty: false);
             await localDatasource.updatePlant(syncedPlant);
           }
         } catch (e) {
-          return Left(ServerFailure('Erro ao sincronizar mudanças: ${e.toString()}'));
+          return Left(
+            ServerFailure('Erro ao sincronizar mudanças: ${e.toString()}'),
+          );
         }
       }
-      
+
       return const Right(null);
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(UnknownFailure('Erro inesperado ao sincronizar: ${e.toString()}'));
+      return Left(
+        UnknownFailure('Erro inesperado ao sincronizar: ${e.toString()}'),
+      );
     }
   }
 }

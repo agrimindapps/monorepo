@@ -9,11 +9,7 @@ enum TaskType {
   replanting,
 }
 
-enum TaskStatus {
-  pending,
-  completed,
-  overdue,
-}
+enum TaskStatus { pending, completed, overdue }
 
 class PlantTask extends Equatable {
   final String id;
@@ -55,7 +51,11 @@ class PlantTask extends Equatable {
     if (status == TaskStatus.completed) return false;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final taskDate = DateTime(scheduledDate.year, scheduledDate.month, scheduledDate.day);
+    final taskDate = DateTime(
+      scheduledDate.year,
+      scheduledDate.month,
+      scheduledDate.day,
+    );
     return taskDate == today;
   }
 
@@ -118,7 +118,7 @@ class PlantTask extends Equatable {
 
   PlantTask updateStatus() {
     if (status == TaskStatus.completed) return this;
-    
+
     final newStatus = isOverdue ? TaskStatus.overdue : TaskStatus.pending;
     return copyWith(status: newStatus);
   }

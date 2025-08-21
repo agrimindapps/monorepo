@@ -2,12 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../data/models/base_sync_model.dart';
-import '../data/models/sync_queue_item.dart';
 import './sync_queue.dart';
 import './sync_operations.dart';
 import 'interfaces/i_sync_repository.dart';
 import 'interfaces/i_conflict_resolver.dart';
-import 'sync_status.dart';
 
 /// Service responsible for synchronization operations
 @singleton
@@ -22,10 +20,10 @@ class SyncService<T extends BaseSyncModel> {
     required IConflictResolver<T> conflictResolver,
     required SyncQueue syncQueue,
     required SyncOperations syncOperations,
-  })  : _repository = repository,
-        _conflictResolver = conflictResolver,
-        _syncQueue = syncQueue,
-        _syncOperations = syncOperations {
+  }) : _repository = repository,
+       _conflictResolver = conflictResolver,
+       _syncQueue = syncQueue,
+       _syncOperations = syncOperations {
     // Initialize sync operations when service is created
     _initializeSyncQueue();
   }
@@ -59,10 +57,10 @@ class SyncService<T extends BaseSyncModel> {
           // Conflict detection and resolution
           if (_hasConflict(localEntity, remoteEntity)) {
             final resolvedEntity = _resolveConflict(localEntity, remoteEntity);
-            
+
             // Add resolved entity to sync queue
             _addToSyncQueue(resolvedEntity, 'update');
-            
+
             final syncResult = await _repository.sync(resolvedEntity);
             return syncResult.fold(
               (syncFailure) => Left(Exception(syncFailure.toString())),

@@ -107,7 +107,7 @@ class PragaCardWidget extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Container(
+        child: SizedBox(
           width: customWidth ?? 180,
           height: customHeight ?? 240,
           child: Column(
@@ -189,7 +189,7 @@ class PragaCardWidget extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
-        child: Container(
+        child: SizedBox(
           height: customHeight ?? 160,
           child: Row(
             children: [

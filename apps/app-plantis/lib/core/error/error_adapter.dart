@@ -1,63 +1,61 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
-import 'app_error.dart';
-import 'result.dart';
 
-/// Adaptador para converter entre o sistema antigo (Either<Failure, T>) e o novo (Result<T>)
+/// Adaptador para converter entre o sistema antigo (`Either<Failure, T>`) e o novo (`Result<T>`)
 /// Facilita a migração gradual do sistema de erros
 class ErrorAdapter {
   /// Converte Failure para AppError
   static AppError failureToAppError(Failure failure) {
     switch (failure.runtimeType) {
-      case NetworkFailure:
+      case NetworkFailure _:
         return NetworkError(
-          message: failure.message ?? 'Erro de rede',
+          message: failure.message,
           code: 'NETWORK_ERROR',
           details: failure.toString(),
         );
-        
-      case ServerFailure:
+
+      case ServerFailure _:
         return ExternalServiceError(
-          message: failure.message ?? 'Erro no servidor',
+          message: failure.message,
           code: 'SERVER_ERROR',
           details: failure.toString(),
           serviceName: 'API',
         );
-        
-      case CacheFailure:
+
+      case CacheFailure _:
         return StorageError(
-          message: failure.message ?? 'Erro no cache local',
+          message: failure.message,
           code: 'CACHE_ERROR',
           details: failure.toString(),
         );
-        
-      case NotFoundFailure:
+
+      case NotFoundFailure _:
         return BusinessError(
-          message: failure.message ?? 'Recurso não encontrado',
+          message: failure.message,
           code: 'NOT_FOUND',
           details: failure.toString(),
           businessRule: 'RESOURCE_NOT_FOUND',
         );
-        
-      case AuthFailure:
+
+      case AuthFailure _:
         return AuthenticationError(
-          message: failure.message ?? 'Não autorizado',
+          message: failure.message,
           code: 'UNAUTHORIZED',
           details: failure.toString(),
         );
-        
-      case ValidationFailure:
+
+      case ValidationFailure _:
         return ValidationError(
-          message: failure.message ?? 'Erro de validação',
+          message: failure.message,
           code: 'VALIDATION_ERROR',
           details: failure.toString(),
         );
-        
-      case UnknownFailure:
+
+      case UnknownFailure _:
       default:
         return UnknownError(
-          message: failure.message ?? 'Erro desconhecido',
+          message: failure.message,
           code: 'UNKNOWN_ERROR',
           details: failure.toString(),
           originalError: failure,
@@ -70,33 +68,33 @@ class ErrorAdapter {
     switch (error.category) {
       case ErrorCategory.network:
         return NetworkFailure(error.message);
-        
+
       case ErrorCategory.external:
         return ServerFailure(error.message);
-        
+
       case ErrorCategory.storage:
         return CacheFailure(error.message);
-        
+
       case ErrorCategory.authentication:
         return AuthFailure(error.message);
-        
+
       case ErrorCategory.validation:
         return ValidationFailure(error.message);
-        
+
       case ErrorCategory.business:
-        if (error is BusinessError && error.businessRule == 'RESOURCE_NOT_FOUND') {
+        if (error is BusinessError &&
+            error.businessRule == 'RESOURCE_NOT_FOUND') {
           return NotFoundFailure(error.message);
         }
         return UnknownFailure(error.message);
-        
+
       case ErrorCategory.permission:
       case ErrorCategory.general:
-      default:
         return UnknownFailure(error.message);
     }
   }
 
-  /// Converte Either<Failure, T> para Result<T>
+  /// Converte `Either<Failure, T>` para `Result<T>`
   static Result<T> eitherToResult<T>(Either<Failure, T> either) {
     return either.fold(
       (failure) => Result.error(failureToAppError(failure)),
@@ -104,7 +102,7 @@ class ErrorAdapter {
     );
   }
 
-  /// Converte Result<T> para Either<Failure, T>
+  /// Converte `Result<T>` para `Either<Failure, T>`
   static Either<Failure, T> resultToEither<T>(Result<T> result) {
     return result.fold(
       (error) => Left(appErrorToFailure(error)),
@@ -112,38 +110,33 @@ class ErrorAdapter {
     );
   }
 
-  /// Converte Future<Either<Failure, T>> para Future<Result<T>>
-  static Future<Result<T>> futureEitherToResult<T>(Future<Either<Failure, T>> futureEither) async {
+  /// Converte `Future<Either<Failure, T>>` para `Future<Result<T>>`
+  static Future<Result<T>> futureEitherToResult<T>(
+    Future<Either<Failure, T>> futureEither,
+  ) async {
     final either = await futureEither;
     return eitherToResult(either);
   }
 
-  /// Converte Future<Result<T>> para Future<Either<Failure, T>>
-  static Future<Either<Failure, T>> futureResultToEither<T>(Future<Result<T>> futureResult) async {
+  /// Converte `Future<Result<T>>` para `Future<Either<Failure, T>>`
+  static Future<Either<Failure, T>> futureResultToEither<T>(
+    Future<Result<T>> futureResult,
+  ) async {
     final result = await futureResult;
     return resultToEither(result);
   }
 }
 
 /// Extensões para facilitar a conversão
-extension EitherToResultExtension<L extends Failure, R> on Either<L, R> {
-  /// Converte Either para Result
-  Result<R> toResult() => ErrorAdapter.eitherToResult(this);
-}
-
 extension ResultToEitherExtension<T> on Result<T> {
   /// Converte Result para Either
   Either<Failure, T> toEither() => ErrorAdapter.resultToEither(this);
 }
 
-extension FutureEitherToResultExtension<L extends Failure, R> on Future<Either<L, R>> {
-  /// Converte Future<Either> para Future<Result>
-  Future<Result<R>> toResult() => ErrorAdapter.futureEitherToResult(this);
-}
-
 extension FutureResultToEitherExtension<T> on Future<Result<T>> {
-  /// Converte Future<Result> para Future<Either>
-  Future<Either<Failure, T>> toEither() => ErrorAdapter.futureResultToEither(this);
+  /// Converte `Future<Result>` para `Future<Either>`
+  Future<Either<Failure, T>> toEither() =>
+      ErrorAdapter.futureResultToEither(this);
 }
 
 /// Wrapper para repositórios antigos que ainda usam Either
@@ -156,13 +149,15 @@ class RepositoryWrapper<T> {
   Future<Result<T>> execute() async {
     try {
       final either = await _operation();
-      return either.toResult();
+      return ErrorAdapter.eitherToResult(either);
     } catch (error, stackTrace) {
-      return Result.error(UnknownError(
-        message: 'Erro na operação do repositório: ${error.toString()}',
-        originalError: error,
-        stackTrace: stackTrace,
-      ));
+      return Result.error(
+        UnknownError(
+          message: 'Erro na operação do repositório: ${error.toString()}',
+          originalError: error,
+          stackTrace: stackTrace,
+        ),
+      );
     }
   }
 }
@@ -206,23 +201,22 @@ mixin ErrorHandlingMixin on ChangeNotifier {
   /// Executa uma operação e trata erros automaticamente
   Future<T?> handleOperation<T>(Future<Result<T>> Function() operation) async {
     clearError();
-    
+
     final result = await operation();
-    
-    return result.fold(
-      (error) {
-        setError(error);
-        return null;
-      },
-      (data) => data,
-    );
+
+    return result.fold((error) {
+      setError(error);
+      return null;
+    }, (data) => data);
   }
 
   /// Executa uma operação Either e converte para Result
-  Future<T?> handleEitherOperation<T>(Future<Either<Failure, T>> Function() operation) async {
+  Future<T?> handleEitherOperation<T>(
+    Future<Either<Failure, T>> Function() operation,
+  ) async {
     return handleOperation(() async {
       final either = await operation();
-      return either.toResult();
+      return ErrorAdapter.eitherToResult(either);
     });
   }
 }

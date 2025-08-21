@@ -150,14 +150,19 @@ enum SyncStatus {
   conflict,
 }
 
-/// Tipos de conectividade
+/// Tipos de conectividade expandido para compatibilidade
 enum ConnectivityType {
   none,
   wifi,
   mobile,
   ethernet,
   bluetooth,
+  vpn,
   other,
+  
+  // Aliases para compatibilidade com app-plantis NetworkStatus
+  offline, // = none
+  online,  // = wifi/mobile/ethernet (usado genericamente)
 }
 
 /// Configuração de sincronização

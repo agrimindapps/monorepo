@@ -13,7 +13,7 @@ class PlantFormCareConfig extends StatefulWidget {
 class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
   final List<String> _intervalOptions = [
     '1 dia',
-    '2 dias', 
+    '2 dias',
     '3 dias',
     '1 semana',
     '2 semanas',
@@ -21,39 +21,61 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     '2 meses',
     '3 meses',
     '6 meses',
-    '1 ano'
+    '1 ano',
   ];
 
   int _getIntervalDays(String interval) {
     switch (interval) {
-      case '1 dia': return 1;
-      case '2 dias': return 2;
-      case '3 dias': return 3;
-      case '1 semana': return 7;
-      case '2 semanas': return 14;
-      case '1 mês': return 30;
-      case '2 meses': return 60;
-      case '3 meses': return 90;
-      case '6 meses': return 180;
-      case '1 ano': return 365;
-      default: return 7;
+      case '1 dia':
+        return 1;
+      case '2 dias':
+        return 2;
+      case '3 dias':
+        return 3;
+      case '1 semana':
+        return 7;
+      case '2 semanas':
+        return 14;
+      case '1 mês':
+        return 30;
+      case '2 meses':
+        return 60;
+      case '3 meses':
+        return 90;
+      case '6 meses':
+        return 180;
+      case '1 ano':
+        return 365;
+      default:
+        return 7;
     }
   }
 
   String _getIntervalText(int? days) {
     if (days == null) return _intervalOptions[3]; // Default: 1 semana
     switch (days) {
-      case 1: return '1 dia';
-      case 2: return '2 dias';
-      case 3: return '3 dias';
-      case 7: return '1 semana';
-      case 14: return '2 semanas';
-      case 30: return '1 mês';
-      case 60: return '2 meses';
-      case 90: return '3 meses';
-      case 180: return '6 meses';
-      case 365: return '1 ano';
-      default: return '1 semana';
+      case 1:
+        return '1 dia';
+      case 2:
+        return '2 dias';
+      case 3:
+        return '3 dias';
+      case 7:
+        return '1 semana';
+      case 14:
+        return '2 semanas';
+      case 30:
+        return '1 mês';
+      case 60:
+        return '2 meses';
+      case 90:
+        return '3 meses';
+      case 180:
+        return '6 meses';
+      case 365:
+        return '1 ano';
+      default:
+        return '1 semana';
     }
   }
 
@@ -77,9 +99,9 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               lastDate: provider.lastSunlightDate,
               onDateChanged: (date) => provider.setLastSunlightDate(date),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Pest Inspection Section
             _buildCareSection(
               title: 'Verificação de pragas',
@@ -94,9 +116,9 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               lastDate: provider.lastPestInspectionDate,
               onDateChanged: (date) => provider.setLastPestInspectionDate(date),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Pruning Section
             _buildCareSection(
               title: 'Poda',
@@ -111,9 +133,9 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               lastDate: provider.lastPruningDate,
               onDateChanged: (date) => provider.setLastPruningDate(date),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Replanting Section
             _buildCareSection(
               title: 'Replantio',
@@ -146,14 +168,15 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     required ValueChanged<DateTime?> onDateChanged,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isEnabled ? iconColor.withValues(alpha: 0.3) : Colors.grey[300]!,
+          color:
+              isEnabled ? iconColor.withValues(alpha: 0.3) : Colors.grey[300]!,
           width: 1.5,
         ),
         boxShadow: [
@@ -175,11 +198,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
                   color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 20,
-                ),
+                child: Icon(icon, color: iconColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -199,7 +218,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               ),
             ],
           ),
-          
+
           // Expanded content when enabled
           if (isEnabled) ...[
             const SizedBox(height: 16),
@@ -232,9 +251,9 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
           onChanged: onIntervalChanged,
           iconColor: iconColor,
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Last date selector
         _buildDateSelector(
           label: 'Última vez',
@@ -253,24 +272,17 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     required Color iconColor,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: iconColor.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: iconColor.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.schedule,
-            color: iconColor,
-            size: 16,
-          ),
+          Icon(Icons.schedule, color: iconColor, size: 16),
           const SizedBox(width: 8),
           Text(
             label,
@@ -303,11 +315,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(
-                    Icons.edit,
-                    color: iconColor,
-                    size: 14,
-                  ),
+                  Icon(Icons.edit, color: iconColor, size: 14),
                 ],
               ),
             ),
@@ -324,24 +332,17 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     required Color iconColor,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: iconColor.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: iconColor.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.calendar_today,
-            color: iconColor,
-            size: 16,
-          ),
+          Icon(Icons.calendar_today, color: iconColor, size: 16),
           const SizedBox(width: 8),
           Text(
             label,
@@ -374,11 +375,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(
-                    Icons.calendar_today,
-                    color: iconColor,
-                    size: 14,
-                  ),
+                  Icon(Icons.calendar_today, color: iconColor, size: 14),
                 ],
               ),
             ),
@@ -388,54 +385,61 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     );
   }
 
-  void _showIntervalPicker(String currentValue, ValueChanged<String> onChanged) {
+  void _showIntervalPicker(
+    String currentValue,
+    ValueChanged<String> onChanged,
+  ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        height: 300,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              'Selecionar Intervalo',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _intervalOptions.length,
-                itemBuilder: (context, index) {
-                  final option = _intervalOptions[index];
-                  final isSelected = option == currentValue;
-                  
-                  return ListTile(
-                    title: Text(option),
-                    trailing: isSelected ? const Icon(Icons.check) : null,
-                    selected: isSelected,
-                    onTap: () {
-                      onChanged(option);
-                      Navigator.of(context).pop();
+      builder:
+          (context) => Container(
+            height: 300,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  'Selecionar Intervalo',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _intervalOptions.length,
+                    itemBuilder: (context, index) {
+                      final option = _intervalOptions[index];
+                      final isSelected = option == currentValue;
+
+                      return ListTile(
+                        title: Text(option),
+                        trailing: isSelected ? const Icon(Icons.check) : null,
+                        selected: isSelected,
+                        onTap: () {
+                          onChanged(option);
+                          Navigator.of(context).pop();
+                        },
+                      );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
-  void _showDatePicker(DateTime? currentValue, ValueChanged<DateTime?> onChanged) async {
+  void _showDatePicker(
+    DateTime? currentValue,
+    ValueChanged<DateTime?> onChanged,
+  ) async {
     final date = await showDatePicker(
       context: context,
       initialDate: currentValue ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    
+
     if (date != null) {
       onChanged(date);
     }
@@ -445,21 +449,31 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dateOnly = DateTime(date.year, date.month, date.day);
-    
+
     if (dateOnly == today) {
       return 'Hoje';
     }
-    
+
     final yesterday = today.subtract(const Duration(days: 1));
     if (dateOnly == yesterday) {
       return 'Ontem';
     }
-    
+
     final months = [
-      'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez',
     ];
-    
+
     return '${date.day} ${months[date.month - 1]}';
   }
 }

@@ -5,18 +5,16 @@ import '../providers/tasks_provider.dart';
 class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<TasksFilterType>? onFilterChanged;
 
-  const TasksAppBar({
-    super.key,
-    this.onFilterChanged,
-  });
+  const TasksAppBar({super.key, this.onFilterChanged});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return AppBar(
-      backgroundColor: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+      backgroundColor:
+          isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
       elevation: 0,
       title: Consumer<TasksProvider>(
         builder: (context, provider, child) {
@@ -33,7 +31,10 @@ class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
               const Spacer(),
               // Badge with total tasks
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.secondary),
                   borderRadius: BorderRadius.circular(20),
@@ -65,15 +66,25 @@ class TasksAppBar extends StatelessWidget implements PreferredSizeWidget {
                       // Para hoje button
                       _FilterButton(
                         text: 'Para hoje',
-                        isSelected: provider.currentFilter == TasksFilterType.today,
-                        onTap: () => _handleFilterChange(context, TasksFilterType.today),
+                        isSelected:
+                            provider.currentFilter == TasksFilterType.today,
+                        onTap:
+                            () => _handleFilterChange(
+                              context,
+                              TasksFilterType.today,
+                            ),
                       ),
                       const SizedBox(width: 16),
                       // Próximas button
                       _FilterButton(
                         text: 'Próximas ${provider.upcomingTasksCount}',
-                        isSelected: provider.currentFilter == TasksFilterType.upcoming,
-                        onTap: () => _handleFilterChange(context, TasksFilterType.upcoming),
+                        isSelected:
+                            provider.currentFilter == TasksFilterType.upcoming,
+                        onTap:
+                            () => _handleFilterChange(
+                              context,
+                              TasksFilterType.upcoming,
+                            ),
                         showBadge: true,
                         badgeCount: provider.upcomingTasksCount,
                       ),
@@ -116,7 +127,7 @@ class _FilterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accentColor = theme.colorScheme.secondary;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(

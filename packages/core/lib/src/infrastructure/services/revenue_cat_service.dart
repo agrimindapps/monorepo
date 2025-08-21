@@ -388,7 +388,7 @@ class RevenueCatService implements ISubscriptionRepository {
   core_entities.SubscriptionEntity? _mapEntitlementToSubscription(EntitlementInfo entitlement) {
     return core_entities.SubscriptionEntity(
       id: entitlement.identifier,
-      userId: entitlement.originalPurchaseDate?.toString() ?? 'unknown',
+      userId: entitlement.originalPurchaseDate.toString() ?? 'unknown',
       productId: entitlement.productIdentifier,
       status: entitlement.isActive 
           ? core_entities.SubscriptionStatus.active 

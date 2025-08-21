@@ -10,26 +10,39 @@ part 'espaco_model.g.dart';
 class EspacoModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
-  @HiveField(0) final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
   @override
-  @HiveField(4) final bool isDirty;
+  @HiveField(4)
+  final bool isDirty;
   @override
-  @HiveField(5) final bool isDeleted;
+  @HiveField(5)
+  final bool isDeleted;
   @override
-  @HiveField(6) final int version;
+  @HiveField(6)
+  final int version;
   @override
-  @HiveField(7) final String? userId;
+  @HiveField(7)
+  final String? userId;
   @override
-  @HiveField(8) final String? moduleName;
+  @HiveField(8)
+  final String? moduleName;
 
   // Espaco specific fields
-  @HiveField(10) final String nome;
-  @HiveField(11) final String? descricao;
-  @HiveField(12) final bool ativo;
-  @HiveField(13) final DateTime? dataCriacao;
+  @HiveField(10)
+  final String nome;
+  @HiveField(11)
+  final String? descricao;
+  @HiveField(12)
+  final bool ativo;
+  @HiveField(13)
+  final DateTime? dataCriacao;
 
   EspacoModel({
     required this.id,
@@ -46,16 +59,25 @@ class EspacoModel extends BaseSyncModel {
     this.ativo = true,
     this.dataCriacao,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         lastSyncAt:
+             lastSyncAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+                 : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
   @override
   String get collectionName => 'espacos';
@@ -71,7 +93,7 @@ class EspacoModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final espacoId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return EspacoModel(
       id: espacoId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -88,7 +110,7 @@ class EspacoModel extends BaseSyncModel {
   /// Create from Hive map
   factory EspacoModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return EspacoModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -102,22 +124,22 @@ class EspacoModel extends BaseSyncModel {
       nome: map['nome']?.toString() ?? '',
       descricao: map['descricao']?.toString(),
       ativo: map['ativo'] ?? true,
-      dataCriacao: map['dataCriacao'] != null
-          ? DateTime.parse(map['dataCriacao'])
-          : null,
+      dataCriacao:
+          map['dataCriacao'] != null
+              ? DateTime.parse(map['dataCriacao'])
+              : null,
     );
   }
 
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'nome': nome,
-        'descricao': descricao,
-        'ativo': ativo,
-        'dataCriacao': dataCriacao?.toIso8601String(),
-      });
+    return super.toHiveMap()..addAll({
+      'nome': nome,
+      'descricao': descricao,
+      'ativo': ativo,
+      'dataCriacao': dataCriacao?.toIso8601String(),
+    });
   }
 
   /// Convert to Firebase map
@@ -137,7 +159,7 @@ class EspacoModel extends BaseSyncModel {
   factory EspacoModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return EspacoModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -151,9 +173,10 @@ class EspacoModel extends BaseSyncModel {
       nome: map['nome']?.toString() ?? '',
       descricao: map['descricao']?.toString(),
       ativo: map['ativo'] ?? true,
-      dataCriacao: map['data_criacao'] != null
-          ? DateTime.parse(map['data_criacao'])
-          : null,
+      dataCriacao:
+          map['data_criacao'] != null
+              ? DateTime.parse(map['data_criacao'])
+              : null,
     );
   }
 
@@ -195,8 +218,10 @@ class EspacoModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();
-  factory EspacoModel.fromMap(Map<String, dynamic> map) => EspacoModel.fromHiveMap(map);
-  factory EspacoModel.fromJson(Map<String, dynamic> json) => EspacoModel.fromHiveMap(json);
+  factory EspacoModel.fromMap(Map<String, dynamic> map) =>
+      EspacoModel.fromHiveMap(map);
+  factory EspacoModel.fromJson(Map<String, dynamic> json) =>
+      EspacoModel.fromHiveMap(json);
 
   @override
   bool operator ==(Object other) {

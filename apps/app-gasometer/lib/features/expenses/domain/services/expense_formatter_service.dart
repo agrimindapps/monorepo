@@ -4,13 +4,12 @@ import 'package:intl/intl.dart';
 /// Serviço especializado para formatação de campos de despesas
 /// Implementa formatação brasileira com vírgula decimal e cache para performance
 class ExpenseFormatterService {
-  static final ExpenseFormatterService _instance = ExpenseFormatterService._internal();
-  factory ExpenseFormatterService() => _instance;
-  ExpenseFormatterService._internal();
-
   // Cache para formatações recentes (memoização)
-  final Map<String, String> _formatCache = {};
+  final Map<String, String> _formatCache = <String, String>{};
   static const int _maxCacheSize = 100;
+  
+  /// Cria uma nova instância do serviço de formatação
+  ExpenseFormatterService();
 
   // Formatadores brasileiros
   final _currencyFormatter = NumberFormat.currency(

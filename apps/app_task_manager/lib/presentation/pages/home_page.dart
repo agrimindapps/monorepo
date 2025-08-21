@@ -7,7 +7,6 @@ import '../../domain/entities/task_entity.dart';
 import '../providers/task_providers.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/task_list_widget.dart';
-import '../widgets/create_task_dialog.dart';
 import '../widgets/task_detail_drawer.dart';
 import '../widgets/bottom_input_bar.dart';
 import '../widgets/filter_side_panel.dart';
@@ -164,7 +163,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
-    final userDisplayName = authState.value?.name ?? 'Usuário';
+    final userDisplayName = authState.value?.displayName ?? 'Usuário';
 
     return Scaffold(
       body: Stack(

@@ -2,32 +2,39 @@ import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../../../core/services/task_generation_service.dart';
 import '../../../../core/data/models/planta_config_model.dart';
-import '../../data/models/task_model.dart';
+import '../../../../core/data/models/legacy/tarefa_model.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 import '../../../plants/domain/repositories/plants_repository.dart';
 
 /// Use case para completar uma tarefa e gerar automaticamente a próxima
-/// 
+///
 /// Este use case é responsável por:
 /// - Marcar a tarefa atual como concluída
 /// - Gerar a próxima tarefa baseado na configuração da planta
 /// - Manter atomicidade da operação
 /// - Integrar com o sistema de sync offline-first
 /// - Calcular próxima data baseado na frequência original
-class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithRegenerationResult, CompleteTaskWithRegenerationParams> {
+class CompleteTaskWithRegenerationUseCase
+    implements
+        UseCase<
+          TaskCompletionWithRegenerationResult,
+          CompleteTaskWithRegenerationParams
+        > {
   final TasksRepository tasksRepository;
   final PlantsRepository plantsRepository;
   final TaskGenerationService taskGenerationService;
-  
+
   CompleteTaskWithRegenerationUseCase({
     required this.tasksRepository,
     required this.plantsRepository,
     required this.taskGenerationService,
   });
-  
+
   @override
-  Future<Either<Failure, TaskCompletionWithRegenerationResult>> call(CompleteTaskWithRegenerationParams params) async {
+  Future<Either<Failure, TaskCompletionWithRegenerationResult>> call(
+    CompleteTaskWithRegenerationParams params,
+  ) async {
     try {
       // Validação dos parâmetros
       final validationResult = _validateParams(params);
@@ -36,21 +43,38 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
       }
 
       // Buscar tarefa atual
-      final currentTaskResult = await tasksRepository.getTaskById(params.taskId);
+      final currentTaskResult = await tasksRepository.getTaskById(
+        params.taskId,
+      );
       if (currentTaskResult.isLeft()) {
-        return Left(currentTaskResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          currentTaskResult.fold(
+            (failure) => failure,
+            (_) => throw Exception(),
+          ),
+        );
       }
 
-      final currentTask = currentTaskResult.fold((_) => throw Exception(), (task) => task);
-      
+      final currentTask = currentTaskResult.fold(
+        (_) => throw Exception(),
+        (task) => task,
+      );
+
       // Buscar dados da planta para obter configuração
-      final plantResult = await plantsRepository.getPlantById(currentTask.plantId);
+      final plantResult = await plantsRepository.getPlantById(
+        currentTask.plantId,
+      );
       if (plantResult.isLeft()) {
-        return Left(plantResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          plantResult.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
-      final plant = plantResult.fold((_) => throw Exception(), (plant) => plant);
-      
+      final plant = plantResult.fold(
+        (_) => throw Exception(),
+        (plant) => plant,
+      );
+
       // Marcar tarefa atual como concluída
       final completedTask = currentTask.copyWithTaskData(
         status: task_entity.TaskStatus.completed,
@@ -60,58 +84,82 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
 
       final updateResult = await tasksRepository.updateTask(completedTask);
       if (updateResult.isLeft()) {
-        return Left(updateResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          updateResult.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
-      final savedCompletedTask = updateResult.fold((_) => throw Exception(), (task) => task);
+      final savedCompletedTask = updateResult.fold(
+        (_) => throw Exception(),
+        (task) => task,
+      );
 
       // Gerar próxima tarefa se a planta tem configuração
       task_entity.Task? nextTask;
-      if (plant.config != null && _shouldGenerateNextTask(currentTask, plant.config!)) {
-        final nextTaskResult = await _generateNextTask(currentTask, params.completionDate, plant);
+      if (plant.config != null &&
+          _shouldGenerateNextTask(currentTask, plant.config!)) {
+        final nextTaskResult = await _generateNextTask(
+          currentTask,
+          params.completionDate,
+          plant,
+        );
         if (nextTaskResult.isRight()) {
           nextTask = nextTaskResult.fold((_) => null, (task) => task);
         }
       }
 
-      return Right(TaskCompletionWithRegenerationResult(
-        completedTask: savedCompletedTask,
-        nextTask: nextTask,
-        regenerationSuccessful: nextTask != null,
-      ));
-      
+      return Right(
+        TaskCompletionWithRegenerationResult(
+          completedTask: savedCompletedTask,
+          nextTask: nextTask,
+          regenerationSuccessful: nextTask != null,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure('Erro inesperado ao completar tarefa: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro inesperado ao completar tarefa: ${e.toString()}'),
+      );
     }
   }
 
   /// Valida os parâmetros de entrada
-  ValidationFailure? _validateParams(CompleteTaskWithRegenerationParams params) {
+  ValidationFailure? _validateParams(
+    CompleteTaskWithRegenerationParams params,
+  ) {
     if (params.taskId.trim().isEmpty) {
       return const ValidationFailure('ID da tarefa é obrigatório');
     }
 
     final now = DateTime.now();
     final maxFutureDate = now.add(const Duration(days: 1));
-    
+
     if (params.completionDate.isAfter(maxFutureDate)) {
-      return const ValidationFailure('Data de conclusão não pode ser mais de 1 dia no futuro');
+      return const ValidationFailure(
+        'Data de conclusão não pode ser mais de 1 dia no futuro',
+      );
     }
 
     final minPastDate = now.subtract(const Duration(days: 90));
     if (params.completionDate.isBefore(minPastDate)) {
-      return const ValidationFailure('Data de conclusão não pode ser mais de 90 dias no passado');
+      return const ValidationFailure(
+        'Data de conclusão não pode ser mais de 90 dias no passado',
+      );
     }
 
     if (params.notes != null && params.notes!.length > 500) {
-      return const ValidationFailure('Observações não podem ter mais de 500 caracteres');
+      return const ValidationFailure(
+        'Observações não podem ter mais de 500 caracteres',
+      );
     }
 
     return null;
   }
 
   /// Determina se deve gerar próxima tarefa baseado na configuração
-  bool _shouldGenerateNextTask(task_entity.Task currentTask, dynamic plantConfig) {
+  bool _shouldGenerateNextTask(
+    task_entity.Task currentTask,
+    dynamic plantConfig,
+  ) {
     // Converter tipo de task para tipo de cuidado
     final careType = _mapTaskTypeToCareType(currentTask.type);
     if (careType == null) return false;
@@ -126,11 +174,15 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
   }
 
   /// Gera próxima tarefa
-  Future<Either<Failure, task_entity.Task>> _generateNextTask(task_entity.Task currentTask, DateTime completionDate, dynamic plant) async {
+  Future<Either<Failure, task_entity.Task>> _generateNextTask(
+    task_entity.Task currentTask,
+    DateTime completionDate,
+    dynamic plant,
+  ) async {
     try {
       // Converter PlantConfig para PlantaConfigModel
       final configModel = _convertToPlantaConfigModel(plant);
-      
+
       // Converter Task para TaskModel para compatibilidade com o service
       final taskModel = _convertToTaskModel(currentTask);
 
@@ -142,7 +194,9 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
       );
 
       if (generationResult.isLeft()) {
-        return Left(generationResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          generationResult.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
       final nextTaskModel = generationResult.fold((_) => null, (task) => task);
@@ -151,14 +205,18 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
       }
 
       // Converter de volta para Task entity
-      final nextTask = task_entity.Task.fromModel(nextTaskModel, plantName: plant.name);
+      final nextTask = task_entity.Task.fromModel(
+        nextTaskModel,
+        plantName: plant.name,
+      );
 
       // Salvar próxima tarefa
       final saveResult = await tasksRepository.addTask(nextTask);
       return saveResult;
-
     } catch (e) {
-      return Left(ServerFailure('Erro ao gerar próxima tarefa: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro ao gerar próxima tarefa: ${e.toString()}'),
+      );
     }
   }
 
@@ -182,27 +240,48 @@ class CompleteTaskWithRegenerationUseCase implements UseCase<TaskCompletionWithR
     }
   }
 
-  /// Converte Task para TaskModel
-  TaskModel _convertToTaskModel(task_entity.Task task) {
-    return TaskModel.fromEntity(task);
+  /// Converte Task para TarefaModel (legacy compatibility)
+  TarefaModel _convertToTaskModel(task_entity.Task task) {
+    // Converter TaskType para string de cuidado
+    final tipoCuidado = _mapTaskTypeToCareType(task.type) ?? 'agua';
+
+    return TarefaModel.create(
+      id: task.id,
+      userId: task.userId,
+      plantaId: task.plantId,
+      tipoCuidado: tipoCuidado,
+      dataExecucao: task.dueDate,
+      concluida: task.status == task_entity.TaskStatus.completed,
+      observacoes: task.completionNotes,
+      dataConclusao: task.completedAt,
+    );
   }
 
   /// Converte PlantConfig entity para PlantaConfigModel
   PlantaConfigModel _convertToPlantaConfigModel(dynamic plant) {
     final config = plant.config;
-    
+
     return PlantaConfigModel.create(
       plantaId: plant.id,
       userId: plant.userId,
-      aguaAtiva: config?.wateringIntervalDays != null && config.wateringIntervalDays > 0,
+      aguaAtiva:
+          config?.wateringIntervalDays != null &&
+          config.wateringIntervalDays > 0,
       intervaloRegaDias: config?.wateringIntervalDays ?? 3,
-      aduboAtivo: config?.fertilizingIntervalDays != null && config.fertilizingIntervalDays > 0,
+      aduboAtivo:
+          config?.fertilizingIntervalDays != null &&
+          config.fertilizingIntervalDays > 0,
       intervaloAdubacaoDias: config?.fertilizingIntervalDays ?? 14,
-      podaAtiva: config?.pruningIntervalDays != null && config.pruningIntervalDays > 0,
+      podaAtiva:
+          config?.pruningIntervalDays != null && config.pruningIntervalDays > 0,
       intervaloPodaDias: config?.pruningIntervalDays ?? 30,
-      banhoSolAtivo: config?.sunlightIntervalDays != null && config.sunlightIntervalDays > 0,
+      banhoSolAtivo:
+          config?.sunlightIntervalDays != null &&
+          config.sunlightIntervalDays > 0,
       intervaloBanhoSolDias: config?.sunlightIntervalDays ?? 1,
-      inspecaoPragasAtiva: config?.pestInspectionIntervalDays != null && config.pestInspectionIntervalDays > 0,
+      inspecaoPragasAtiva:
+          config?.pestInspectionIntervalDays != null &&
+          config.pestInspectionIntervalDays > 0,
       intervaloInspecaoPragasDias: config?.pestInspectionIntervalDays ?? 7,
       replantarAtivo: true,
       intervaloReplantarDias: 180,
@@ -215,7 +294,7 @@ class CompleteTaskWithRegenerationParams {
   final String taskId;
   final DateTime completionDate;
   final String? notes;
-  
+
   const CompleteTaskWithRegenerationParams({
     required this.taskId,
     required this.completionDate,
@@ -264,7 +343,7 @@ class TaskCompletionWithRegenerationResult {
   final task_entity.Task completedTask;
   final task_entity.Task? nextTask;
   final bool regenerationSuccessful;
-  
+
   const TaskCompletionWithRegenerationResult({
     required this.completedTask,
     this.nextTask,

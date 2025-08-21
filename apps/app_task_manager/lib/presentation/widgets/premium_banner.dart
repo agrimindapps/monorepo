@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../providers/subscription_providers.dart';
 import '../pages/premium_page.dart';
+import '../../domain/entities/user_limits.dart' as local;
+import '../../domain/entities/usage_stats.dart' as local_stats;
 
 class PremiumBanner extends ConsumerWidget {
   final VoidCallback? onUpgradePressed;
@@ -133,6 +136,8 @@ class _UpgradeBanner extends ConsumerWidget {
           currentTasks: stats.totalTasks,
           currentSubtasks: stats.totalSubtasks,
           currentTags: stats.totalTags,
+          completedTasks: stats.completedTasks,
+          completedSubtasks: stats.totalCompletedSubtasks,
         )));
         
         return userLimitsAsync.when(
@@ -146,7 +151,7 @@ class _UpgradeBanner extends ConsumerWidget {
     );
   }
 
-  Widget _buildUpgradeBanner(BuildContext context, UsageStats stats, UserLimits limits) {
+  Widget _buildUpgradeBanner(BuildContext context, local_stats.UsageStats stats, local.UserLimits limits) {
     final isNearLimit = _isNearAnyLimit(limits);
     
     if (!isNearLimit) {
@@ -200,8 +205,9 @@ class _UpgradeBanner extends ConsumerWidget {
     );
   }
 
-  bool _isNearAnyLimit(UserLimits limits) {
-    if (limits.isPremium) return false;
+  bool _isNearAnyLimit(local.UserLimits? limits) {
+    if (limits == null) return false;
+    if (limits.isPremium == true) return false;
     
     const threshold = 0.8; // 80% do limite
     
@@ -210,8 +216,10 @@ class _UpgradeBanner extends ConsumerWidget {
            (limits.remainingTags / limits.maxTags) <= (1 - threshold);
   }
 
-  List<Widget> _buildLimitWarnings(UserLimits limits) {
+  List<Widget> _buildLimitWarnings(local.UserLimits? limits) {
     final warnings = <Widget>[];
+    
+    if (limits == null) return warnings;
     
     if (limits.remainingTasks <= 10) {
       warnings.add(_buildLimitWarning(

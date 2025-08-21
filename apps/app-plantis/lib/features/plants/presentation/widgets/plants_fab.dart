@@ -19,17 +19,18 @@ class PlantsFab extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ChangeNotifierProvider(
-        create: (_) => di.sl<PlantFormProvider>(),
-        child: const PlantFormModal(),
-      ),
+      builder:
+          (context) => ChangeNotifierProvider(
+            create: (_) => di.sl<PlantFormProvider>(),
+            child: const PlantFormModal(),
+          ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: 56,
       height: 56,
@@ -42,11 +43,7 @@ class PlantsFab extends StatelessWidget {
         child: InkWell(
           onTap: () => _onAddPlant(context),
           borderRadius: BorderRadius.circular(28),
-          child: const Icon(
-            Icons.add,
-            color: Colors.black,
-            size: 28,
-          ),
+          child: const Icon(Icons.add, color: Colors.black, size: 28),
         ),
       ),
     );

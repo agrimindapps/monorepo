@@ -49,15 +49,15 @@ class EnhancedPlantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return isGridView
         ? _PlantGridCard(
-            plant: plant,
-            actions: actions,
-            taskProvider: taskProvider,
-          )
+          plant: plant,
+          actions: actions,
+          taskProvider: taskProvider,
+        )
         : _PlantListCard(
-            plant: plant,
-            actions: actions,
-            taskProvider: taskProvider,
-          );
+          plant: plant,
+          actions: actions,
+          taskProvider: taskProvider,
+        );
   }
 }
 
@@ -80,9 +80,7 @@ class _PlantListCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Card(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
           onTap: () => actions.onTap(plant),
           borderRadius: BorderRadius.circular(16),
@@ -91,11 +89,7 @@ class _PlantListCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _PlantHeader(
-                  plant: plant,
-                  actions: actions,
-                  theme: theme,
-                ),
+                _PlantHeader(plant: plant, actions: actions, theme: theme),
                 const SizedBox(height: 12),
                 _TaskStatusSection(
                   plant: plant,
@@ -128,9 +122,7 @@ class _PlantGridCard extends StatelessWidget {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => actions.onTap(plant),
         borderRadius: BorderRadius.circular(16),
@@ -150,14 +142,11 @@ class _PlantGridCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               // Plant illustration
               Expanded(
                 child: Center(
-                  child: _PlantIllustration(
-                    plant: plant,
-                    size: 60,
-                  ),
+                  child: _PlantIllustration(plant: plant, size: 60),
                 ),
               ),
 
@@ -221,10 +210,7 @@ class _PlantHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _PlantIllustration(
-          plant: plant,
-          size: 50,
-        ),
+        _PlantIllustration(plant: plant, size: 50),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -275,11 +261,7 @@ class _PlantHeader extends StatelessWidget {
             ],
           ),
         ),
-        _PlantActionsMenu(
-          plant: plant,
-          actions: actions,
-          theme: theme,
-        ),
+        _PlantActionsMenu(plant: plant, actions: actions, theme: theme),
       ],
     );
   }
@@ -289,10 +271,7 @@ class _PlantIllustration extends StatelessWidget {
   final Plant plant;
   final double size;
 
-  const _PlantIllustration({
-    required this.plant,
-    required this.size,
-  });
+  const _PlantIllustration({required this.plant, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -307,20 +286,21 @@ class _PlantIllustration extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: plant.primaryImageUrl != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(size / 2),
-              child: Image.network(
-                plant.primaryImageUrl!,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _DefaultPlantIcon(size: size);
-                },
-              ),
-            )
-          : _DefaultPlantIcon(size: size),
+      child:
+          plant.primaryImageUrl != null
+              ? ClipRRect(
+                borderRadius: BorderRadius.circular(size / 2),
+                child: Image.network(
+                  plant.primaryImageUrl!,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return _DefaultPlantIcon(size: size);
+                  },
+                ),
+              )
+              : _DefaultPlantIcon(size: size),
     );
   }
 }
@@ -356,10 +336,7 @@ class _PlantActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
+      icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurfaceVariant),
       onSelected: (value) {
         switch (value) {
           case 'edit':
@@ -370,28 +347,29 @@ class _PlantActionsMenu extends StatelessWidget {
             break;
         }
       },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: [
-              Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
-              const SizedBox(width: 12),
-              const Text('Editar'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'remove',
-          child: Row(
-            children: [
-              Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
-              const SizedBox(width: 12),
-              const Text('Remover'),
-            ],
-          ),
-        ),
-      ],
+      itemBuilder:
+          (context) => [
+            PopupMenuItem(
+              value: 'edit',
+              child: Row(
+                children: [
+                  Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
+                  const SizedBox(width: 12),
+                  const Text('Editar'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'remove',
+              child: Row(
+                children: [
+                  Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
+                  const SizedBox(width: 12),
+                  const Text('Remover'),
+                ],
+              ),
+            ),
+          ],
     );
   }
 }
@@ -413,7 +391,7 @@ class _TaskStatusSection extends StatelessWidget {
       future: taskProvider.getPendingTasks(plant.id),
       builder: (context, snapshot) {
         final tasks = snapshot.data ?? [];
-        
+
         if (tasks.isEmpty) {
           return _StatusBadge(
             icon: Icons.check_circle,
@@ -469,7 +447,7 @@ class _CompactTaskStatus extends StatelessWidget {
       future: taskProvider.getPendingTasks(plant.id),
       builder: (context, snapshot) {
         final tasks = snapshot.data ?? [];
-        
+
         if (tasks.isEmpty) {
           return _StatusBadge(
             icon: Icons.check_circle,
@@ -519,26 +497,19 @@ class _StatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: isCompact ? 14 : 16,
-          ),
+          Icon(icon, color: color, size: isCompact ? 14 : 16),
           SizedBox(width: isCompact ? 4 : 6),
           Text(
             text,
-            style: (isCompact ? theme.textTheme.bodySmall : theme.textTheme.bodyMedium)?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: (isCompact
+                    ? theme.textTheme.bodySmall
+                    : theme.textTheme.bodyMedium)
+                ?.copyWith(color: color, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -551,16 +522,14 @@ class PlantIllustrationPainter extends CustomPainter {
   final Color leafColor;
   final Color stemColor;
 
-  PlantIllustrationPainter({
-    required this.leafColor,
-    required this.stemColor,
-  });
+  PlantIllustrationPainter({required this.leafColor, required this.stemColor});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.fill
+          ..strokeWidth = 2;
 
     final center = Offset(size.width / 2, size.height / 2);
 

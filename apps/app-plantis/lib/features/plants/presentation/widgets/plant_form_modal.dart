@@ -7,10 +7,7 @@ import 'plant_form_care_config.dart';
 class PlantFormModal extends StatefulWidget {
   final String? plantId;
 
-  const PlantFormModal({
-    super.key,
-    this.plantId,
-  });
+  const PlantFormModal({super.key, this.plantId});
 
   @override
   State<PlantFormModal> createState() => _PlantFormModalState();
@@ -23,7 +20,7 @@ class _PlantFormModalState extends State<PlantFormModal> {
   void initState() {
     super.initState();
     _provider = context.read<PlantFormProvider>();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.plantId != null) {
         _provider.initializeForEdit(widget.plantId!);
@@ -56,7 +53,7 @@ class _PlantFormModalState extends State<PlantFormModal> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Header
           Padding(
             padding: const EdgeInsets.all(16),
@@ -78,41 +75,44 @@ class _PlantFormModalState extends State<PlantFormModal> {
                 Consumer<PlantFormProvider>(
                   builder: (context, provider, child) {
                     if (provider.isLoading) return const SizedBox(width: 48);
-                    
+
                     return TextButton(
-                      onPressed: provider.isValid ? () => _savePlant(context) : null,
-                      child: provider.isSaving
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(
-                              'Salvar',
-                              style: TextStyle(
-                                color: provider.isValid
-                                    ? theme.colorScheme.primary
-                                    : theme.disabledColor,
-                                fontWeight: FontWeight.w600,
+                      onPressed:
+                          provider.isValid ? () => _savePlant(context) : null,
+                      child:
+                          provider.isSaving
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Text(
+                                'Salvar',
+                                style: TextStyle(
+                                  color:
+                                      provider.isValid
+                                          ? theme.colorScheme.primary
+                                          : theme.disabledColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
                     );
                   },
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Content
           Expanded(
             child: Consumer<PlantFormProvider>(
               builder: (context, provider, child) {
                 if (provider.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 if (provider.hasError && !isEditing) {
@@ -156,12 +156,12 @@ class _PlantFormModalState extends State<PlantFormModal> {
                     children: [
                       _buildSectionTitle('Informações Básicas'),
                       const PlantFormBasicInfo(),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       _buildSectionTitle('Configurações de Cuidado'),
                       const PlantFormCareConfig(),
-                      
+
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -169,7 +169,7 @@ class _PlantFormModalState extends State<PlantFormModal> {
               },
             ),
           ),
-          
+
           // Bottom Button
           Container(
             padding: const EdgeInsets.all(16),
@@ -178,19 +178,23 @@ class _PlantFormModalState extends State<PlantFormModal> {
                 return SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: provider.isValid && !provider.isSaving 
-                        ? () => _savePlant(context)
-                        : null,
-                    child: provider.isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    onPressed:
+                        provider.isValid && !provider.isSaving
+                            ? () => _savePlant(context)
+                            : null,
+                    child:
+                        provider.isSaving
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : Text(
+                              isEditing ? 'Atualizar Planta' : 'Salvar Planta',
                             ),
-                          )
-                        : Text(isEditing ? 'Atualizar Planta' : 'Salvar Planta'),
                   ),
                 );
               },
@@ -203,7 +207,7 @@ class _PlantFormModalState extends State<PlantFormModal> {
 
   Widget _buildSectionTitle(String title) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
@@ -218,14 +222,14 @@ class _PlantFormModalState extends State<PlantFormModal> {
 
   Future<void> _savePlant(BuildContext context) async {
     final success = await _provider.savePlant();
-    
+
     if (!mounted) return;
-    
+
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            widget.plantId != null 
+            widget.plantId != null
                 ? 'Planta atualizada com sucesso!'
                 : 'Planta adicionada com sucesso!',
           ),
@@ -237,9 +241,7 @@ class _PlantFormModalState extends State<PlantFormModal> {
       final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            _provider.errorMessage ?? 'Erro ao salvar planta',
-          ),
+          content: Text(_provider.errorMessage ?? 'Erro ao salvar planta'),
           backgroundColor: theme.colorScheme.error,
         ),
       );
@@ -248,32 +250,31 @@ class _PlantFormModalState extends State<PlantFormModal> {
 
   Future<void> _handleClose(BuildContext context) async {
     final hasChanges = _provider.isValid && _provider.name.isNotEmpty;
-    
+
     if (hasChanges) {
       final shouldDiscard = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Descartar alterações?'),
-          content: const Text(
-            'Você tem alterações não salvas. '
-            'Deseja realmente sair sem salvar?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Descartar alterações?'),
+              content: const Text(
+                'Você tem alterações não salvas. '
+                'Deseja realmente sair sem salvar?',
               ),
-              child: const Text('Descartar'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Descartar'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
-      
+
       if (shouldDiscard == true && mounted) {
         Navigator.of(context).pop();
       }

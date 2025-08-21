@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
+import '../../domain/entities/notification_stats.dart' as local_stats;
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/notification_service.dart';
 
@@ -9,31 +10,31 @@ final notificationServiceProvider = Provider<TaskManagerNotificationService>((re
 });
 
 // Provider para status de permissões
-final notificationPermissionProvider = FutureProvider<NotificationPermissionEntity>((ref) async {
+final notificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getPermissionStatus();
 });
 
 // Provider para solicitar permissões
-final requestNotificationPermissionProvider = FutureProvider<NotificationPermissionEntity>((ref) async {
+final requestNotificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.requestPermissions();
 });
 
 // Provider para notificações pendentes
-final pendingNotificationsProvider = FutureProvider<List<PendingNotificationEntity>>((ref) async {
+final pendingNotificationsProvider = FutureProvider<List<core.PendingNotificationEntity>>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getPendingNotifications();
 });
 
 // Provider para notificações ativas
-final activeNotificationsProvider = FutureProvider<List<PendingNotificationEntity>>((ref) async {
+final activeNotificationsProvider = FutureProvider<List<core.PendingNotificationEntity>>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getActiveNotifications();
 });
 
 // Provider para estatísticas de notificações
-final notificationStatsProvider = FutureProvider<NotificationStats>((ref) async {
+final notificationStatsProvider = FutureProvider<local_stats.NotificationStats>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getNotificationStats();
 });
@@ -294,7 +295,7 @@ class NotificationActions {
   }
 
   /// Solicita permissões de notificação
-  Future<NotificationPermissionEntity> requestPermissions() async {
+  Future<core.NotificationPermissionEntity> requestPermissions() async {
     final permission = await _notificationService.requestPermissions();
     
     // Invalidar provider de permissões

@@ -393,7 +393,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         if (searchFields != null) {
           // Buscar apenas nos campos especificados
           for (final field in searchFields) {
-            final value = itemMap[field]?.toString()?.toLowerCase() ?? '';
+            final value = itemMap[field]?.toString().toLowerCase() ?? '';
             if (value.contains(queryLower)) {
               matches = true;
               break;

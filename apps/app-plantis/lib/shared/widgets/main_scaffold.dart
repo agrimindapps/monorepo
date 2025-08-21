@@ -4,10 +4,7 @@ import 'package:go_router/go_router.dart';
 class MainScaffold extends StatefulWidget {
   final Widget child;
 
-  const MainScaffold({
-    super.key,
-    required this.child,
-  });
+  const MainScaffold({super.key, required this.child});
 
   @override
   State<MainScaffold> createState() => _MainScaffoldState();
@@ -16,11 +13,11 @@ class MainScaffold extends StatefulWidget {
 class _MainScaffoldState extends State<MainScaffold> {
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
-    
+
     if (location.startsWith('/tasks')) return 0;
     if (location.startsWith('/plants')) return 1;
     if (location.startsWith('/profile')) return 2;
-    
+
     return 0;
   }
 

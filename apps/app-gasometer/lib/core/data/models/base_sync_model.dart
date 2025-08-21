@@ -3,8 +3,8 @@ import 'package:core/core.dart';
 
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
+// ignore: must_be_immutable
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
-  @override
   void removeFromHive() {
     // Stub implementation to satisfy HiveObjectMixin
   }
@@ -65,6 +65,7 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
   }
 
   /// Mark as synced with Firebase
+  @override
   BaseSyncModel markAsSynced({DateTime? syncTime}) {
     return copyWith(
       lastSyncAt: syncTime ?? DateTime.now(),

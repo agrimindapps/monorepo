@@ -4,6 +4,7 @@ import 'base_sync_model.dart';
 part 'conflict_history_model.g.dart';
 
 @HiveType(typeId: 10)
+// ignore: must_be_immutable
 class ConflictHistoryModel extends BaseSyncModel {
   @override
   @HiveField(0)
@@ -48,16 +49,21 @@ class ConflictHistoryModel extends BaseSyncModel {
     required this.resolvedData,
     this.autoResolved = false,
     int? version,
-    String? userId,
+    super.userId,
     String? moduleName,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          version: version ?? 1,
-          userId: userId,
-          moduleName: moduleName ?? 'plantis',
-        );
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         version: version ?? 1,
+         moduleName: moduleName ?? 'plantis',
+       );
 
   factory ConflictHistoryModel.create({
     String? id,
@@ -87,15 +93,15 @@ class ConflictHistoryModel extends BaseSyncModel {
   }
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'modelType': modelType,
-        'modelId': modelId,
-        'resolutionStrategy': resolutionStrategy,
-        'localData': localData,
-        'remoteData': remoteData,
-        'resolvedData': resolvedData,
-        'autoResolved': autoResolved,
-      };
+    'id': id,
+    'modelType': modelType,
+    'modelId': modelId,
+    'resolutionStrategy': resolutionStrategy,
+    'localData': localData,
+    'remoteData': remoteData,
+    'resolvedData': resolvedData,
+    'autoResolved': autoResolved,
+  };
 
   @override
   String get collectionName => 'conflict_history';

@@ -47,12 +47,12 @@ class TaskGenerationService {
   };
 
   /// Gera tarefas iniciais para uma planta recém-cadastrada
-  /// 
+  ///
   /// [plantaId] - ID da planta para qual gerar as tarefas
   /// [config] - Configuração de cuidados da planta
   /// [plantingDate] - Data de plantio/cadastro (opcional, usa data atual se null)
   /// [userId] - ID do usuário proprietário
-  /// 
+  ///
   /// Retorna lista de tarefas geradas ou falha em caso de erro
   Either<Failure, List<TarefaModel>> generateInitialTasks({
     required String plantaId,
@@ -68,7 +68,7 @@ class TaskGenerationService {
       for (final careType in config.activeCareTypes) {
         final interval = config.getIntervalForCareType(careType);
         final careInfo = careTypeInfo[careType];
-        
+
         if (careInfo == null) continue;
 
         final taskDate = calculateNextTaskDate(
@@ -89,16 +89,18 @@ class TaskGenerationService {
 
       return Right(tasks);
     } catch (e) {
-      return Left(ServerFailure('Erro ao gerar tarefas iniciais: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro ao gerar tarefas iniciais: ${e.toString()}'),
+      );
     }
   }
 
   /// Gera próxima tarefa após conclusão de uma tarefa existente
-  /// 
+  ///
   /// [completedTask] - Tarefa que foi concluída
   /// [completionDate] - Data em que a tarefa foi concluída
   /// [config] - Configuração atual da planta
-  /// 
+  ///
   /// Retorna nova tarefa ou falha em caso de erro
   Either<Failure, TarefaModel?> generateNextTask({
     required TarefaModel completedTask,
@@ -107,7 +109,7 @@ class TaskGenerationService {
   }) {
     try {
       final careType = completedTask.tipoCuidado;
-      
+
       // Verifica se o tipo de cuidado ainda está ativo
       if (!config.isCareTypeActive(careType)) {
         return const Right(null); // Não gera nova tarefa se desabilitado
@@ -115,7 +117,7 @@ class TaskGenerationService {
 
       final interval = config.getIntervalForCareType(careType);
       final careInfo = careTypeInfo[careType];
-      
+
       if (careInfo == null) {
         return Left(ValidationFailure('Tipo de cuidado inválido: $careType'));
       }
@@ -135,16 +137,18 @@ class TaskGenerationService {
 
       return Right(nextTask);
     } catch (e) {
-      return Left(ServerFailure('Erro ao gerar próxima tarefa: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro ao gerar próxima tarefa: ${e.toString()}'),
+      );
     }
   }
 
   /// Calcula a próxima data para uma tarefa baseado no intervalo
-  /// 
+  ///
   /// [baseDate] - Data base para o cálculo
   /// [intervalDays] - Intervalo em dias
   /// [careType] - Tipo de cuidado (opcional para ajustes específicos)
-  /// 
+  ///
   /// Retorna a próxima data calculada
   DateTime calculateNextTaskDate({
     required DateTime baseDate,
@@ -165,11 +169,11 @@ class TaskGenerationService {
   }
 
   /// Valida se uma tarefa pode ser gerada para determinada configuração
-  /// 
+  ///
   /// [plantaId] - ID da planta
   /// [config] - Configuração da planta
   /// [careType] - Tipo de cuidado
-  /// 
+  ///
   /// Retorna true se válida ou falha com detalhes do erro
   Either<Failure, bool> validateTaskGeneration({
     required String plantaId,
@@ -190,17 +194,19 @@ class TaskGenerationService {
 
     final interval = config.getIntervalForCareType(careType);
     if (interval <= 0) {
-      return Left(ValidationFailure('Intervalo inválido para $careType: $interval'));
+      return Left(
+        ValidationFailure('Intervalo inválido para $careType: $interval'),
+      );
     }
 
     return const Right(true);
   }
 
   /// Calcula estatísticas de tarefas que serão geradas
-  /// 
+  ///
   /// [config] - Configuração da planta
   /// [periodDays] - Período em dias para calcular (padrão 30 dias)
-  /// 
+  ///
   /// Retorna mapa com estatísticas por tipo de cuidado
   Map<String, int> calculateTaskStatistics({
     required PlantaConfigModel config,
@@ -220,9 +226,9 @@ class TaskGenerationService {
   }
 
   /// Obtém informações de exibição para um tipo de cuidado
-  /// 
+  ///
   /// [careType] - Tipo de cuidado
-  /// 
+  ///
   /// Retorna informações ou null se não encontrado
   Map<String, dynamic>? getCareTypeInfo(String careType) {
     return careTypeInfo[careType];

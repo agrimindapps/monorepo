@@ -34,15 +34,13 @@ class RegisterPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.eco,
-                        size: 32,
-                        color: PlantisColors.primary,
-                      ),
+                      Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
                         'PlantApp',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
                           color: PlantisColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -57,7 +55,7 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Tab navigation
                   Row(
                     children: [
@@ -74,10 +72,7 @@ class RegisterPage extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Container(
-                                height: 3,
-                                color: Colors.grey.shade300,
-                              ),
+                              Container(height: 3, color: Colors.grey.shade300),
                             ],
                           ),
                         ),
@@ -108,7 +103,7 @@ class RegisterPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Progress indicator
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -136,7 +131,7 @@ class RegisterPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 48),
-                  
+
                   // Leaf icon
                   Container(
                     width: 80,
@@ -152,7 +147,7 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Title
                   Text(
                     'Criar Nova Conta',
@@ -162,41 +157,24 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Social login buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildSocialButton(
-                        'G',
-                        'Google',
-                        Colors.red,
-                        () {
-                          // TODO: Implement Google login
-                        },
-                      ),
-                      _buildSocialButton(
-                        '',
-                        'Apple',
-                        Colors.black,
-                        () {
-                          // TODO: Implement Apple login
-                        },
-                        icon: Icons.apple,
-                      ),
-                      _buildSocialButton(
-                        '',
-                        'Microsoft',
-                        Colors.blue,
-                        () {
-                          // TODO: Implement Microsoft login
-                        },
-                        icon: Icons.window,
-                      ),
+                      _buildSocialButton('G', 'Google', Colors.red, () {
+                        // TODO: Implement Google login
+                      }),
+                      _buildSocialButton('', 'Apple', Colors.black, () {
+                        // TODO: Implement Apple login
+                      }, icon: Icons.apple),
+                      _buildSocialButton('', 'Microsoft', Colors.blue, () {
+                        // TODO: Implement Microsoft login
+                      }, icon: Icons.window),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Or text
                   Text(
                     'ou',
@@ -206,7 +184,7 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Continue button
                   SizedBox(
                     width: double.infinity,
@@ -232,7 +210,7 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Terms text
                   Text(
                     'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
@@ -250,7 +228,7 @@ class RegisterPage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildSocialButton(
     String text,
     String label,
@@ -270,20 +248,19 @@ class RegisterPage extends StatelessWidget {
         onPressed: onPressed,
         style: TextButton.styleFrom(
           padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: icon != null
-            ? Icon(icon, color: color, size: 20)
-            : Text(
-                text,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+        child:
+            icon != null
+                ? Icon(icon, color: color, size: 20)
+                : Text(
+                  text,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
       ),
     );
   }

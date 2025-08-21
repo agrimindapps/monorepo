@@ -96,7 +96,7 @@ class CustomDropdown<T> extends StatelessWidget {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         width: 1,
       ),
     );
@@ -327,7 +327,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
       child: AbsorbPointer(
         child: TextFormField(
           controller: TextEditingController(
-            text: widget.value != null ? widget.getLabel(widget.value!) : '',
+            text: widget.value != null ? widget.getLabel(widget.value as T) : '',
           ),
           decoration: InputDecoration(
             labelText: widget.label,

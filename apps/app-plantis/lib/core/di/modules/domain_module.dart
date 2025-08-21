@@ -4,11 +4,13 @@ import '../../../features/auth/presentation/providers/auth_provider.dart';
 class AuthModule {
   static void init(GetIt sl) {
     // Providers
-    sl.registerFactory(() => AuthProvider(
-      loginUseCase: sl(),
-      logoutUseCase: sl(),
-      authRepository: sl(),
-    ));
+    sl.registerFactory(
+      () => AuthProvider(
+        loginUseCase: sl(),
+        logoutUseCase: sl(),
+        authRepository: sl(),
+      ),
+    );
   }
 }
 
@@ -23,7 +25,6 @@ class SpacesModule {
     // Implementation moved to dedicated module file
   }
 }
-
 
 class CommentsModule {
   static void init(GetIt sl) {

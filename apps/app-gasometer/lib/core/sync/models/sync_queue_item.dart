@@ -32,7 +32,7 @@ class SyncQueueItem extends HiveObject {
   bool isSynced;
 
   @HiveField(7)
-  final String? userId;
+  final String userId;
 
   @HiveField(8)
   final int priority;
@@ -51,7 +51,7 @@ class SyncQueueItem extends HiveObject {
     DateTime? timestamp,
     this.retryCount = 0,
     this.isSynced = false,
-    this.userId,
+    required this.userId,
     this.priority = 0,
     this.lastRetryAt,
     this.errorMessage,
@@ -66,7 +66,7 @@ class SyncQueueItem extends HiveObject {
       timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int),
       retryCount: json['retryCount'] as int? ?? 0,
       isSynced: json['isSynced'] as bool? ?? false,
-      userId: json['userId'] as String?,
+      userId: json['userId'] as String? ?? '',
       priority: json['priority'] as int? ?? 0,
       lastRetryAt: json['lastRetryAt'] != null 
           ? DateTime.fromMillisecondsSinceEpoch(json['lastRetryAt'] as int)

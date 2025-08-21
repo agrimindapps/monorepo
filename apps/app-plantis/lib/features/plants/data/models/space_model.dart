@@ -41,12 +41,14 @@ class SpaceModel extends Space {
       lightCondition: json['lightCondition'] as String?,
       humidity: (json['humidity'] as num?)?.toDouble(),
       averageTemperature: (json['averageTemperature'] as num?)?.toDouble(),
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : null,
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'] as String)
+              : null,
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'] as String)
+              : null,
       isDeleted: json['isDeleted'] as bool? ?? false,
       isDirty: json['isDirty'] as bool? ?? false,
     );

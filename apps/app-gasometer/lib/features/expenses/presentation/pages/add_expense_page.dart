@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/expense_form_provider.dart';
@@ -7,7 +8,33 @@ import '../widgets/expense_form_view.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../../../core/presentation/widgets/common_app_bar.dart';
 import '../../../../core/presentation/widgets/loading_overlay.dart';
+import '../../../../core/presentation/widgets/error_boundary.dart';
 import '../../../../core/presentation/theme/app_theme.dart';
+
+/// Exceção específica para erros de inicialização
+class InitializationException implements Exception {
+  final String message;
+  final dynamic originalError;
+  final StackTrace? stackTrace;
+  final Map<String, dynamic> context;
+  final DateTime timestamp;
+
+  InitializationException({
+    required this.message,
+    this.originalError,
+    this.stackTrace,
+    this.context = const {},
+  }) : timestamp = DateTime.now();
+
+  @override
+  String toString() {
+    final buffer = StringBuffer('InitializationException: $message');
+    if (originalError != null) {
+      buffer.write('\nCaused by: $originalError');
+    }
+    return buffer.toString();
+  }
+}
 
 /// Página para adicionar/editar despesas
 class AddExpensePage extends StatefulWidget {
@@ -19,7 +46,7 @@ class AddExpensePage extends StatefulWidget {
   const AddExpensePage({
     super.key,
     this.vehicleId,
-    this.userId,
+    required this.userId,
     this.expenseToEdit,
     this.title,
   });
@@ -29,95 +56,205 @@ class AddExpensePage extends StatefulWidget {
 }
 
 class _AddExpensePageState extends State<AddExpensePage> {
-  late ExpenseFormProvider _formProvider;
-  bool _isInitialized = false;
-  String? _initializationError;
-
+  ExpenseFormProvider? _formProvider;
+  late Future<ExpenseFormProvider> _initializationFuture;
+  
   @override
   void initState() {
     super.initState();
-    _initializeProvider();
+    // Inicializar usando Future em vez de void async pattern
+    _initializationFuture = _initializeProvider();
   }
 
-  void _initializeProvider() async {
+  /// Inicializa o provider de forma assíncrona e retórna o provider configurado
+  Future<ExpenseFormProvider> _initializeProvider() async {
     try {
+      debugPrint('🚀 Iniciando inicialização do AddExpensePage...');
+      
+      // Verificar se o widget ainda está montado
+      if (!mounted) {
+        throw StateError('Widget was disposed during initialization');
+      }
+      
       final vehiclesProvider = context.read<VehiclesProvider>();
-      _formProvider = ExpenseFormProvider(
+      
+      // Verificar se o VehiclesProvider foi inicializado
+      if (!vehiclesProvider.isInitialized) {
+        debugPrint('🚗 Inicializando VehiclesProvider...');
+        await vehiclesProvider.initialize();
+      }
+      
+      // Criar o FormProvider
+      final formProvider = ExpenseFormProvider(
         vehiclesProvider,
         initialVehicleId: widget.vehicleId,
         userId: widget.userId,
       );
 
+      // Verificar novamente se o widget ainda está montado após operações assíncronas
+      if (!mounted) {
+        formProvider.dispose();
+        throw StateError('Widget was disposed during provider initialization');
+      }
+
       // Inicializar com dados existentes se for edição
       if (widget.expenseToEdit != null) {
-        await _formProvider.initializeWithExpense(widget.expenseToEdit!);
+        debugPrint('✏️ Inicializando para edição...');
+        await formProvider.initializeWithExpense(widget.expenseToEdit!);
       } else {
-        await _formProvider.initialize(
+        debugPrint('➕ Inicializando para nova despesa...');
+        await formProvider.initialize(
           vehicleId: widget.vehicleId,
           userId: widget.userId,
         );
       }
 
-      setState(() {
-        _isInitialized = true;
-      });
-    } catch (e) {
-      setState(() {
-        _initializationError = e.toString();
-      });
+      // Verificar mais uma vez se o widget ainda está montado
+      if (!mounted) {
+        formProvider.dispose();
+        throw StateError('Widget was disposed during form initialization');
+      }
+      
+      debugPrint('✅ Inicialização do AddExpensePage concluída com sucesso');
+      _formProvider = formProvider;
+      return formProvider;
+      
+    } catch (e, stackTrace) {
+      // Log do erro completo para debugging
+      debugPrint('❌ Erro na inicialização do AddExpensePage: $e');
+      debugPrint('Stack trace: $stackTrace');
+      
+      // Re-throw com contexto adicional
+      throw InitializationException(
+        message: _getFormattedError(e),
+        originalError: e,
+        stackTrace: stackTrace,
+        context: {
+          'widget_mounted': mounted,
+          'vehicle_id': widget.vehicleId,
+          'user_id': widget.userId,
+          'is_editing': widget.expenseToEdit != null,
+        },
+      );
+    }
+  }
+  
+  /// Formata erro de forma mais amigável para o usuário
+  String _getFormattedError(dynamic error) {
+    final errorString = error.toString();
+    
+    if (errorString.contains('Nenhum veículo selecionado')) {
+      return 'Nenhum veículo foi selecionado. Por favor, selecione um veículo.';
+    } else if (errorString.contains('Veículo não encontrado')) {
+      return 'O veículo selecionado não foi encontrado. Tente novamente.';
+    } else if (errorString.contains('network')) {
+      return 'Erro de conexão. Verifique sua internet e tente novamente.';
+    } else if (errorString.contains('auth')) {
+      return 'Erro de autenticação. Faça login novamente.';
+    } else {
+      return 'Erro inesperado: $errorString';
     }
   }
 
   @override
   void dispose() {
-    if (_isInitialized) {
-      _formProvider.dispose();
-    }
+    _formProvider?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return Scaffold(
-        appBar: CommonAppBar(
-          title: _getPageTitle(),
-          showBackButton: true,
-        ),
-        body: _buildLoadingOrError(),
-      );
-    }
+    return FutureBuilder<ExpenseFormProvider>(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        return Scaffold(
+          appBar: CommonAppBar(
+            title: _getPageTitle(),
+            showBackButton: true,
+            actions: [
+              // Mostrar ações apenas quando inicializado com sucesso
+              if (snapshot.hasData && snapshot.data!.formModel.hasChanges)
+                TextButton(
+                  onPressed: () => _handleSave(snapshot.data!),
+                  child: const Text('Salvar'),
+                ),
+            ],
+          ),
+          body: _buildAsyncBody(snapshot),
+        );
+      },
+    );
+  }
 
-    return ChangeNotifierProvider.value(
-      value: _formProvider,
-      child: Consumer2<ExpenseFormProvider, ExpensesProvider>(
-        builder: (context, formProvider, expensesProvider, child) {
-          return LoadingOverlay(
-            isLoading: formProvider.isUpdating || expensesProvider.isLoading,
-            child: Scaffold(
-              appBar: CommonAppBar(
-                title: _getPageTitle(),
-                showBackButton: true,
-                actions: [
-                  if (formProvider.formModel.hasChanges)
-                    TextButton(
-                      onPressed: _handleSave,
-                      child: const Text('Salvar'),
-                    ),
+  /// Constrói o corpo da página baseado no estado do Future
+  Widget _buildAsyncBody(AsyncSnapshot<ExpenseFormProvider> snapshot) {
+    // Loading state
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return _buildLoadingState();
+    }
+    
+    // Error state
+    if (snapshot.hasError) {
+      return _buildErrorState(snapshot.error!);
+    }
+    
+    // Success state
+    if (snapshot.hasData) {
+      final formProvider = snapshot.data!;
+      return ChangeNotifierProvider.value(
+        value: formProvider,
+        child: Consumer2<ExpenseFormProvider, ExpensesProvider>(
+          builder: (context, formProvider, expensesProvider, child) {
+            return LoadingOverlay(
+              isLoading: formProvider.isUpdating || expensesProvider.isLoading,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _buildBody(formProvider, expensesProvider),
+                  ),
+                  _buildBottomActions(formProvider),
                 ],
               ),
-              body: _buildBody(formProvider, expensesProvider),
-              bottomNavigationBar: _buildBottomActions(formProvider),
+            );
+          },
+        ),
+      );
+    }
+    
+    // Fallback state (shouldn't happen)
+    return _buildUnexpectedState();
+  }
+
+  /// Estado de carregamento melhorado com progress indicators
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Inicializando formulário...'),
+          SizedBox(height: 8),
+          Text(
+            'Carregando dados do veículo e configurações',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildLoadingOrError() {
-    if (_initializationError != null) {
-      return Center(
+  /// Estado de erro melhorado com contexto e recovery options
+  Widget _buildErrorState(Object error) {
+    final initError = error is InitializationException ? error : null;
+    final errorMessage = initError?.message ?? _getFormattedError(error);
+    
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -128,38 +265,94 @@ class _AddExpensePageState extends State<AddExpensePage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Erro ao carregar',
+              'Erro ao inicializar',
               style: AppTheme.textStyles.titleMedium,
             ),
             const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                _initializationError!,
-                style: AppTheme.textStyles.bodyMedium?.copyWith(
-                  color: AppTheme.colors.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
+            Text(
+              errorMessage,
+              style: AppTheme.textStyles.bodyMedium?.copyWith(
+                color: AppTheme.colors.onSurfaceVariant,
               ),
+              textAlign: TextAlign.center,
             ),
+            
+            // Mostrar detalhes técnicos em modo debug
+            if (kDebugMode && initError != null) ...[
+              const SizedBox(height: 16),
+              ExpansionTile(
+                title: const Text('Detalhes técnicos'),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Erro original: ${initError.originalError}\n'
+                      'Contexto: ${initError.context}',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            
             const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Voltar'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Voltar'),
+                ),
+                const SizedBox(width: 16),
+                FilledButton.icon(
+                  onPressed: () {
+                    // Reiniciar o Future
+                    setState(() {
+                      _initializationFuture = _initializeProvider();
+                    });
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Tentar Novamente'),
+                ),
+              ],
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    return const Center(
+  /// Estado inesperado (fallback)
+  Widget _buildUnexpectedState() {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Carregando...'),
+          Icon(
+            Icons.help_outline,
+            size: 64,
+            color: AppTheme.colors.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Estado inesperado',
+            style: AppTheme.textStyles.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Algo inesperado aconteceu. Tente voltar e abrir novamente.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Voltar'),
+          ),
         ],
       ),
     );
@@ -180,10 +373,17 @@ class _AddExpensePageState extends State<AddExpensePage> {
             const SizedBox(height: 16),
           ],
 
-          // Formulário principal
-          ExpenseFormView(
-            formProvider: formProvider,
-            showTitle: false, // Título já está na AppBar
+          // Formulário principal com error boundary
+          FormErrorBoundary(
+            formName: widget.expenseToEdit != null ? 'Edição de Despesa' : 'Nova Despesa',
+            onFormError: (error, stackTrace) {
+              debugPrint('🚨 Erro capturado no formulário: $error');
+              // TODO: Enviar erro para analytics se necessário
+            },
+            child: ExpenseFormView(
+              formProvider: formProvider,
+              showTitle: false, // Título já está na AppBar
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -224,7 +424,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             ),
             IconButton(
               onPressed: () {
-                _formProvider.clearError();
+                _formProvider?.clearError();
                 context.read<ExpensesProvider>().clearError();
               },
               icon: Icon(
@@ -300,14 +500,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
 
     return Card(
-      color: AppTheme.colors.surfaceVariant.withOpacity(0.3),
+      color: AppTheme.colors.surfaceVariant.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
             Icon(
               hintIcon,
-              color: AppTheme.colors.primary.withOpacity(0.7),
+              color: AppTheme.colors.primary.withValues(alpha: 0.7),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -332,7 +532,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
         color: AppTheme.colors.surface,
         border: Border(
           top: BorderSide(
-            color: AppTheme.colors.outline.withOpacity(0.12),
+            color: AppTheme.colors.outline.withValues(alpha: 0.12),
           ),
         ),
       ),
@@ -342,7 +542,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             // Botão Limpar
             if (formProvider.formModel.hasChanges) ...[
               OutlinedButton.icon(
-                onPressed: _handleClear,
+                onPressed: () => _handleClear(formProvider),
                 icon: const Icon(Icons.clear_all),
                 label: const Text('Limpar'),
               ),
@@ -352,7 +552,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             // Botão Salvar
             Expanded(
               child: FilledButton.icon(
-                onPressed: formProvider.formModel.canSubmit ? _handleSave : null,
+                onPressed: formProvider.formModel.canSubmit ? () => _handleSave(formProvider) : null,
                 icon: Icon(widget.expenseToEdit != null 
                   ? Icons.save 
                   : Icons.add),
@@ -367,8 +567,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
     );
   }
 
-  Future<void> _handleSave() async {
-    if (!_formProvider.validateForm()) {
+  Future<void> _handleSave(ExpenseFormProvider formProvider) async {
+    if (!formProvider.validateForm()) {
       _showErrorSnackBar('Por favor, corrija os erros do formulário');
       return;
     }
@@ -377,9 +577,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
     
     bool success;
     if (widget.expenseToEdit != null) {
-      success = await expensesProvider.updateExpense(_formProvider.formModel);
+      success = await expensesProvider.updateExpense(formProvider.formModel);
     } else {
-      success = await expensesProvider.addExpense(_formProvider.formModel);
+      success = await expensesProvider.addExpense(formProvider.formModel);
     }
 
     if (success) {
@@ -394,7 +594,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
 
-  void _handleClear() {
+  void _handleClear(ExpenseFormProvider formProvider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -408,7 +608,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
           FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _formProvider.clearForm();
+              formProvider.clearForm();
             },
             child: const Text('Limpar'),
           ),

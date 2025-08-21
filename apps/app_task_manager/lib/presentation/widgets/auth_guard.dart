@@ -14,7 +14,7 @@ class AuthGuard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(taskManagerAuthNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
     return authState.when(
       loading: () => const Scaffold(

@@ -27,7 +27,7 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTasks();
-      
+
       // If we have local data, return it immediately
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
@@ -36,7 +36,7 @@ class TasksRepositoryImpl implements TasksRepository {
         }
         return Right(localTasks.cast<Task>());
       }
-      
+
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
@@ -44,10 +44,14 @@ class TasksRepositoryImpl implements TasksRepository {
           await localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks.cast<Task>());
         } catch (e) {
-          return Right(localTasks.cast<Task>()); // Return empty list if both fail
+          return Right(
+            localTasks.cast<Task>(),
+          ); // Return empty list if both fail
         }
       } else {
-        return Right(localTasks.cast<Task>()); // Return empty list if offline and no cache
+        return Right(
+          localTasks.cast<Task>(),
+        ); // Return empty list if offline and no cache
       }
     } on Exception {
       final localTasks = await localDataSource.getTasks();
@@ -57,12 +61,15 @@ class TasksRepositoryImpl implements TasksRepository {
 
   // Background sync method (fire and forget)
   void _syncTasksInBackground() {
-    remoteDataSource.getTasks().then((remoteTasks) {
-      // Update local cache with remote data
-      localDataSource.cacheTasks(remoteTasks);
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getTasks()
+        .then((remoteTasks) {
+          // Update local cache with remote data
+          localDataSource.cacheTasks(remoteTasks);
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
@@ -70,7 +77,7 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTasksByPlantId(plantId);
-      
+
       // If we have local data, return it immediately
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
@@ -79,7 +86,7 @@ class TasksRepositoryImpl implements TasksRepository {
         }
         return Right(localTasks.cast<Task>());
       }
-      
+
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
@@ -101,26 +108,31 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   void _syncTasksByPlantInBackground(String plantId) {
-    remoteDataSource.getTasksByPlantId(plantId).then((remoteTasks) {
-      for (final task in remoteTasks) {
-        localDataSource.cacheTask(task);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getTasksByPlantId(plantId)
+        .then((remoteTasks) {
+          for (final task in remoteTasks) {
+            localDataSource.cacheTask(task);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
-  Future<Either<Failure, List<Task>>> getTasksByStatus(TaskStatus status) async {
+  Future<Either<Failure, List<Task>>> getTasksByStatus(
+    TaskStatus status,
+  ) async {
     try {
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTasksByStatus(status);
-      
+
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
         _syncTasksByStatusInBackground(status);
       }
-      
+
       // Return local data immediately (empty list is fine)
       return Right(localTasks.cast<Task>());
     } on Exception {
@@ -130,13 +142,16 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   void _syncTasksByStatusInBackground(TaskStatus status) {
-    remoteDataSource.getTasksByStatus(status).then((remoteTasks) {
-      for (final task in remoteTasks) {
-        localDataSource.cacheTask(task);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getTasksByStatus(status)
+        .then((remoteTasks) {
+          for (final task in remoteTasks) {
+            localDataSource.cacheTask(task);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
@@ -144,7 +159,7 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getOverdueTasks();
-      
+
       // If we have local data, return it immediately
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
@@ -153,7 +168,7 @@ class TasksRepositoryImpl implements TasksRepository {
         }
         return Right(localTasks.cast<Task>());
       }
-      
+
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
@@ -175,13 +190,16 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   void _syncOverdueTasksInBackground() {
-    remoteDataSource.getOverdueTasks().then((remoteTasks) {
-      for (final task in remoteTasks) {
-        localDataSource.cacheTask(task);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getOverdueTasks()
+        .then((remoteTasks) {
+          for (final task in remoteTasks) {
+            localDataSource.cacheTask(task);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
@@ -189,7 +207,7 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTodayTasks();
-      
+
       // If we have local data, return it immediately
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
@@ -198,7 +216,7 @@ class TasksRepositoryImpl implements TasksRepository {
         }
         return Right(localTasks.cast<Task>());
       }
-      
+
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
@@ -220,13 +238,16 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   void _syncTodayTasksInBackground() {
-    remoteDataSource.getTodayTasks().then((remoteTasks) {
-      for (final task in remoteTasks) {
-        localDataSource.cacheTask(task);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getTodayTasks()
+        .then((remoteTasks) {
+          for (final task in remoteTasks) {
+            localDataSource.cacheTask(task);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
@@ -234,12 +255,12 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getUpcomingTasks();
-      
+
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
         _syncUpcomingTasksInBackground();
       }
-      
+
       // Return local data immediately (empty list is fine)
       return Right(localTasks.cast<Task>());
     } on Exception {
@@ -249,13 +270,16 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   void _syncUpcomingTasksInBackground() {
-    remoteDataSource.getUpcomingTasks().then((remoteTasks) {
-      for (final task in remoteTasks) {
-        localDataSource.cacheTask(task);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getUpcomingTasks()
+        .then((remoteTasks) {
+          for (final task in remoteTasks) {
+            localDataSource.cacheTask(task);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
@@ -263,12 +287,12 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // Always get from local first for instant response
       final localTask = await localDataSource.getTaskById(id);
-      
+
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
         _syncTaskByIdInBackground(id);
       }
-      
+
       // Return local data immediately (or error if not found)
       if (localTask != null) {
         return Right(localTask);
@@ -285,20 +309,23 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   void _syncTaskByIdInBackground(String id) {
-    remoteDataSource.getTaskById(id).then((remoteTask) {
-      if (remoteTask != null) {
-        localDataSource.cacheTask(remoteTask);
-      }
-    }).catchError((e) {
-      // Ignore sync errors in background
-    });
+    remoteDataSource
+        .getTaskById(id)
+        .then((remoteTask) {
+          if (remoteTask != null) {
+            localDataSource.cacheTask(remoteTask);
+          }
+        })
+        .catchError((e) {
+          // Ignore sync errors in background
+        });
   }
 
   @override
   Future<Either<Failure, Task>> addTask(Task task) async {
     try {
       final taskModel = TaskModel.fromEntity(task);
-      
+
       if (await networkInfo.isConnected) {
         final remoteTask = await remoteDataSource.addTask(taskModel);
         await localDataSource.cacheTask(remoteTask);
@@ -318,7 +345,7 @@ class TasksRepositoryImpl implements TasksRepository {
   Future<Either<Failure, Task>> updateTask(Task task) async {
     try {
       final taskModel = TaskModel.fromEntity(task);
-      
+
       if (await networkInfo.isConnected) {
         final remoteTask = await remoteDataSource.updateTask(taskModel);
         await localDataSource.updateTask(remoteTask);
@@ -344,7 +371,7 @@ class TasksRepositoryImpl implements TasksRepository {
         // Offline: marca como deletado localmente
         await localDataSource.deleteTask(id);
       }
-      
+
       return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure('Erro ao deletar tarefa: ${e.toString()}'));
@@ -355,19 +382,16 @@ class TasksRepositoryImpl implements TasksRepository {
   Future<Either<Failure, Task>> completeTask(String id, {String? notes}) async {
     try {
       final taskResult = await getTaskById(id);
-      
-      return taskResult.fold(
-        (failure) => Left(failure),
-        (task) async {
-          final completedTask = task.copyWithTaskData(
-            status: TaskStatus.completed,
-            completedAt: DateTime.now(),
-            completionNotes: notes,
-          );
-          
-          return await updateTask(completedTask);
-        },
-      );
+
+      return taskResult.fold((failure) => Left(failure), (task) async {
+        final completedTask = task.copyWithTaskData(
+          status: TaskStatus.completed,
+          completedAt: DateTime.now(),
+          completionNotes: notes,
+        );
+
+        return await updateTask(completedTask);
+      });
     } on Exception catch (e) {
       return Left(ServerFailure('Erro ao completar tarefa: ${e.toString()}'));
     }
@@ -377,35 +401,40 @@ class TasksRepositoryImpl implements TasksRepository {
   Future<Either<Failure, void>> markTaskAsOverdue(String id) async {
     try {
       final taskResult = await getTaskById(id);
-      
-      return taskResult.fold(
-        (failure) => Left(failure),
-        (task) async {
-          final overdueTask = task.copyWithTaskData(
-            status: TaskStatus.overdue,
-          );
-          
-          final updateResult = await updateTask(overdueTask);
-          return updateResult.fold(
-            (failure) => Left(failure),
-            (_) => const Right(null),
-          );
-        },
-      );
+
+      return taskResult.fold((failure) => Left(failure), (task) async {
+        final overdueTask = task.copyWithTaskData(status: TaskStatus.overdue);
+
+        final updateResult = await updateTask(overdueTask);
+        return updateResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(null),
+        );
+      });
     } on Exception catch (e) {
-      return Left(ServerFailure('Erro ao marcar tarefa como atrasada: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro ao marcar tarefa como atrasada: ${e.toString()}'),
+      );
     }
   }
 
   @override
   Future<Either<Failure, Task>> createRecurringTask(Task completedTask) async {
     try {
-      if (!completedTask.isRecurring || completedTask.recurringIntervalDays == null) {
-        return Left(ValidationFailure('Tarefa não é recorrente ou não tem intervalo definido'));
+      if (!completedTask.isRecurring ||
+          completedTask.recurringIntervalDays == null) {
+        return Left(
+          ValidationFailure(
+            'Tarefa não é recorrente ou não tem intervalo definido',
+          ),
+        );
       }
 
-      final nextDueDate = completedTask.nextDueDate ?? 
-          completedTask.dueDate.add(Duration(days: completedTask.recurringIntervalDays!));
+      final nextDueDate =
+          completedTask.nextDueDate ??
+          completedTask.dueDate.add(
+            Duration(days: completedTask.recurringIntervalDays!),
+          );
 
       final newTask = Task(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -421,12 +450,16 @@ class TasksRepositoryImpl implements TasksRepository {
         dueDate: nextDueDate,
         isRecurring: true,
         recurringIntervalDays: completedTask.recurringIntervalDays,
-        nextDueDate: nextDueDate.add(Duration(days: completedTask.recurringIntervalDays!)),
+        nextDueDate: nextDueDate.add(
+          Duration(days: completedTask.recurringIntervalDays!),
+        ),
       );
 
       return await addTask(newTask);
     } on Exception catch (e) {
-      return Left(ServerFailure('Erro ao criar tarefa recorrente: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro ao criar tarefa recorrente: ${e.toString()}'),
+      );
     }
   }
 }

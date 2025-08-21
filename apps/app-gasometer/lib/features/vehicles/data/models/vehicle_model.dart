@@ -9,21 +9,22 @@ part 'vehicle_model.g.dart';
 /// Vehicle model with Firebase sync support
 /// TypeId: 0 - New sequential numbering  
 @HiveType(typeId: 0)
+// ignore: must_be_immutable
 class VehicleModel extends BaseSyncModel {
   @override
   void removeFromHive() {
     // Stub implementation to satisfy HiveObjectMixin
   }
   // Base sync fields (required for Hive generation)
-  @HiveField(0) final String id;
+  @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
   @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) final bool isDirty;
-  @HiveField(5) final bool isDeleted;
-  @HiveField(6) final int version;
-  @HiveField(7) final String? userId;
-  @HiveField(8) final String? moduleName;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Vehicle specific fields  
   @HiveField(10) final String marca;
@@ -40,6 +41,11 @@ class VehicleModel extends BaseSyncModel {
   @HiveField(21) final double odometroAtual;
   @HiveField(22) final String? foto;
 
+  // Cache para conversões DateTime
+  DateTime? _cachedCreatedAt;
+  DateTime? _cachedUpdatedAt;
+  DateTime? _cachedLastSyncAt;
+
   VehicleModel({
     required this.id,
     this.createdAtMs,
@@ -50,11 +56,11 @@ class VehicleModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    required this.marca,
-    required this.modelo,
-    required this.ano,
-    required this.placa,
-    required this.odometroInicial,
+    this.marca = '',
+    this.modelo = '',
+    this.ano = 0,
+    this.placa = '',
+    this.odometroInicial = 0.0,
     this.combustivel = 0,
     this.renavan = '',
     this.chassi = '',
@@ -65,9 +71,9 @@ class VehicleModel extends BaseSyncModel {
     this.foto,
   }) : super(
           id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
+          createdAt: null, // Será lazy-loaded
+          updatedAt: null, // Será lazy-loaded
+          lastSyncAt: null, // Será lazy-loaded
           isDirty: isDirty,
           isDeleted: isDeleted,
           version: version,
@@ -77,6 +83,33 @@ class VehicleModel extends BaseSyncModel {
 
   @override
   String get collectionName => 'vehicles';
+
+  /// Lazy-loaded createdAt com cache
+  @override
+  DateTime? get createdAt {
+    if (_cachedCreatedAt == null && createdAtMs != null) {
+      _cachedCreatedAt = DateTime.fromMillisecondsSinceEpoch(createdAtMs!);
+    }
+    return _cachedCreatedAt;
+  }
+
+  /// Lazy-loaded updatedAt com cache  
+  @override
+  DateTime? get updatedAt {
+    if (_cachedUpdatedAt == null && updatedAtMs != null) {
+      _cachedUpdatedAt = DateTime.fromMillisecondsSinceEpoch(updatedAtMs!);
+    }
+    return _cachedUpdatedAt;
+  }
+
+  /// Lazy-loaded lastSyncAt com cache
+  @override
+  DateTime? get lastSyncAt {
+    if (_cachedLastSyncAt == null && lastSyncAtMs != null) {
+      _cachedLastSyncAt = DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!);
+    }
+    return _cachedLastSyncAt;
+  }
 
   /// Factory constructor for creating new vehicle
   factory VehicleModel.create({

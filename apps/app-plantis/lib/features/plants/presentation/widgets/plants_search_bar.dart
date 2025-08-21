@@ -42,7 +42,7 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
@@ -54,34 +54,33 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
-          prefixIcon: widget.isSearching
-              ? Padding(
-                  padding: const EdgeInsets.all(14.0),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(
-                        theme.colorScheme.primary,
+          prefixIcon:
+              widget.isSearching
+                  ? Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(
+                          theme.colorScheme.primary,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : Icon(
-                  Icons.search,
-                  color: theme.colorScheme.primary,
-                ),
-          suffixIcon: widget.searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                  onPressed: _clearSearch,
-                  tooltip: 'Limpar busca',
-                )
-              : null,
+                  )
+                  : Icon(Icons.search, color: theme.colorScheme.primary),
+          suffixIcon:
+              widget.searchQuery.isNotEmpty
+                  ? IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    onPressed: _clearSearch,
+                    tooltip: 'Limpar busca',
+                  )
+                  : null,
           filled: true,
           fillColor: theme.colorScheme.surface,
           border: OutlineInputBorder(
@@ -98,10 +97,7 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: theme.colorScheme.primary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

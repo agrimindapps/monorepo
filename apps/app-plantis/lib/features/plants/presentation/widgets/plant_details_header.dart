@@ -5,15 +5,12 @@ import '../../../../core/theme/colors.dart';
 class PlantDetailsHeader extends StatelessWidget {
   final Plant plant;
 
-  const PlantDetailsHeader({
-    super.key,
-    required this.plant,
-  });
+  const PlantDetailsHeader({super.key, required this.plant});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(24),
@@ -76,7 +73,7 @@ class PlantDetailsHeader extends StatelessWidget {
   Widget _buildCareStatus(BuildContext context) {
     final theme = Theme.of(context);
     final careStatus = _getCareStatus();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -90,11 +87,7 @@ class PlantDetailsHeader extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            careStatus.icon,
-            size: 16,
-            color: careStatus.color,
-          ),
+          Icon(careStatus.icon, size: 16, color: careStatus.color),
           const SizedBox(width: 8),
           Text(
             careStatus.label,
@@ -112,20 +105,14 @@ class PlantDetailsHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final age = DateTime.now().difference(plant.plantingDate!);
     final ageText = _formatAge(age);
-    
+
     return Row(
       children: [
-        Icon(
-          Icons.calendar_today,
-          size: 16,
-          color: Colors.grey[600],
-        ),
+        Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Text(
           'Plantada há $ageText',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
         ),
       ],
     );
@@ -133,17 +120,13 @@ class PlantDetailsHeader extends StatelessWidget {
 
   Widget _buildNotes(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              Icons.note_alt_outlined,
-              size: 16,
-              color: Colors.grey[600],
-            ),
+            Icon(Icons.note_alt_outlined, size: 16, color: Colors.grey[600]),
             const SizedBox(width: 8),
             Text(
               'Observações',
@@ -168,26 +151,19 @@ class PlantDetailsHeader extends StatelessWidget {
 
   ({Color color, IconData icon, String label}) _getCareStatus() {
     if (plant.config?.wateringIntervalDays == null) {
-      return (
-        color: Colors.grey,
-        icon: Icons.help_outline,
-        label: 'Sem info',
-      );
+      return (color: Colors.grey, icon: Icons.help_outline, label: 'Sem info');
     }
 
-    final daysSincePlanting = plant.plantingDate != null
-        ? DateTime.now().difference(plant.plantingDate!).inDays
-        : 0;
+    final daysSincePlanting =
+        plant.plantingDate != null
+            ? DateTime.now().difference(plant.plantingDate!).inDays
+            : 0;
 
     final wateringInterval = plant.config!.wateringIntervalDays!;
     final daysSinceLastWatering = daysSincePlanting % wateringInterval;
-    
+
     if (daysSinceLastWatering >= wateringInterval) {
-      return (
-        color: Colors.red,
-        icon: Icons.water_drop,
-        label: 'Regar agora',
-      );
+      return (color: Colors.red, icon: Icons.water_drop, label: 'Regar agora');
     } else if (daysSinceLastWatering >= (wateringInterval * 0.8).round()) {
       return (
         color: Colors.orange,
@@ -195,17 +171,13 @@ class PlantDetailsHeader extends StatelessWidget {
         label: 'Regar em breve',
       );
     } else {
-      return (
-        color: Colors.green,
-        icon: Icons.check_circle,
-        label: 'Em dia',
-      );
+      return (color: Colors.green, icon: Icons.check_circle, label: 'Em dia');
     }
   }
 
   String _formatAge(Duration age) {
     final days = age.inDays;
-    
+
     if (days < 30) {
       return '$days dias';
     } else if (days < 365) {
@@ -220,7 +192,7 @@ class PlantDetailsHeader extends StatelessWidget {
       final years = (days / 365).floor();
       final remainingDays = days % 365;
       final months = (remainingDays / 30).floor();
-      
+
       if (months == 0) {
         return '$years ${years == 1 ? 'ano' : 'anos'}';
       } else {

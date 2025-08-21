@@ -10,17 +10,18 @@ class DataInspectorPage extends StatefulWidget {
   State<DataInspectorPage> createState() => _DataInspectorPageState();
 }
 
-class _DataInspectorPageState extends State<DataInspectorPage> with SingleTickerProviderStateMixin {
+class _DataInspectorPageState extends State<DataInspectorPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final DatabaseInspectorService _inspector = DatabaseInspectorService.instance;
-  
+
   // Estados
   bool _isLoading = false;
   String? _selectedBox;
   List<DatabaseRecord> _hiveRecords = [];
   List<SharedPreferencesRecord> _sharedPrefsRecords = [];
   Map<String, dynamic> _generalStats = {};
-  
+
   // Filtros
   String _searchQuery = '';
   bool _showJsonView = false;
@@ -82,7 +83,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
       _isLoading = true;
       _selectedBox = boxKey;
     });
-    
+
     try {
       final records = await _inspector.loadHiveBoxData(boxKey);
       setState(() {
@@ -97,7 +98,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
 
   Future<void> _loadSharedPreferences() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final records = await _inspector.loadSharedPreferencesData();
       setState(() {
@@ -113,7 +114,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
   Future<void> _exportData() async {
     try {
       File? exportedFile;
-      
+
       if (_tabController.index == 0 && _selectedBox != null) {
         // Exportar Hive Box
         exportedFile = await _inspector.exportBoxData(_selectedBox!);
@@ -121,7 +122,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
         // Exportar SharedPreferences
         exportedFile = await _inspector.exportSharedPreferencesData();
       }
-      
+
       if (exportedFile != null) {
         _showSuccess('Dados exportados para: ${exportedFile.path}');
       }
@@ -132,10 +133,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -183,7 +181,8 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
             onPressed: () {
               setState(() => _showJsonView = !_showJsonView);
             },
-            tooltip: _showJsonView ? 'Visualização em Tabela' : 'Visualização JSON',
+            tooltip:
+                _showJsonView ? 'Visualização em Tabela' : 'Visualização JSON',
           ),
           IconButton(
             icon: const Icon(Icons.file_download),
@@ -229,7 +228,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
 
   Widget _buildHiveBoxesTab() {
     final availableBoxes = _inspector.customBoxes;
-    
+
     if (availableBoxes.isEmpty) {
       return _buildEmptyState(
         'Nenhuma Hive Box registrada',
@@ -254,23 +253,25 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: availableBoxes.map((box) {
-                  final isSelected = _selectedBox == box.key;
-                  return ChoiceChip(
-                    label: Text(box.displayName),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        _loadHiveBoxData(box.key);
-                      }
-                    },
-                    selectedColor: Colors.teal,
-                    backgroundColor: Colors.grey.shade800,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.grey.shade300,
-                    ),
-                  );
-                }).toList(),
+                children:
+                    availableBoxes.map((box) {
+                      final isSelected = _selectedBox == box.key;
+                      return ChoiceChip(
+                        label: Text(box.displayName),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            _loadHiveBoxData(box.key);
+                          }
+                        },
+                        selectedColor: Colors.teal,
+                        backgroundColor: Colors.grey.shade800,
+                        labelStyle: TextStyle(
+                          color:
+                              isSelected ? Colors.white : Colors.grey.shade300,
+                        ),
+                      );
+                    }).toList(),
               ),
               if (_selectedBox != null) ...[
                 const SizedBox(height: 8),
@@ -282,7 +283,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
             ],
           ),
         ),
-        
+
         // Search Bar
         if (_hiveRecords.isNotEmpty)
           Container(
@@ -303,26 +304,24 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
               ),
             ),
           ),
-        
+
         // Data Display
         Expanded(
-          child: _isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: Colors.teal),
-                )
-              : _selectedBox == null
+          child:
+              _isLoading
+                  ? const Center(
+                    child: CircularProgressIndicator(color: Colors.teal),
+                  )
+                  : _selectedBox == null
                   ? _buildEmptyState(
-                      'Selecione uma box',
-                      'Escolha uma box acima para visualizar os dados',
-                    )
+                    'Selecione uma box',
+                    'Escolha uma box acima para visualizar os dados',
+                  )
                   : _hiveRecords.isEmpty
-                      ? _buildEmptyState(
-                          'Box vazia',
-                          'Esta box não contém dados',
-                        )
-                      : _showJsonView
-                          ? _buildJsonView(_hiveRecords)
-                          : _buildTableView(_hiveRecords),
+                  ? _buildEmptyState('Box vazia', 'Esta box não contém dados')
+                  : _showJsonView
+                  ? _buildJsonView(_hiveRecords)
+                  : _buildTableView(_hiveRecords),
         ),
       ],
     );
@@ -358,18 +357,19 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
               ),
             ),
           ),
-        
+
         // Data Display
         Expanded(
-          child: _isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: Colors.teal),
-                )
-              : _sharedPrefsRecords.isEmpty
+          child:
+              _isLoading
+                  ? const Center(
+                    child: CircularProgressIndicator(color: Colors.teal),
+                  )
+                  : _sharedPrefsRecords.isEmpty
                   ? _buildEmptyState(
-                      'Sem dados',
-                      'SharedPreferences está vazio',
-                    )
+                    'Sem dados',
+                    'SharedPreferences está vazio',
+                  )
                   : _buildSharedPreferencesList(),
         ),
       ],
@@ -378,9 +378,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
 
   Widget _buildStatisticsTab() {
     if (_generalStats.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.teal),
-      );
+      return const Center(child: CircularProgressIndicator(color: Colors.teal));
     }
 
     return SingleChildScrollView(
@@ -388,48 +386,58 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStatsCard(
-            'Estatísticas Gerais',
-            [
-              _buildStatRow('Total de Hive Boxes', '${_generalStats['totalHiveBoxes'] ?? 0}'),
-              _buildStatRow('Total de Registros', '${_generalStats['totalHiveRecords'] ?? 0}'),
-              _buildStatRow('Boxes Customizadas', '${_generalStats['customBoxesRegistered'] ?? 0}'),
-            ],
-          ),
-          
+          _buildStatsCard('Estatísticas Gerais', [
+            _buildStatRow(
+              'Total de Hive Boxes',
+              '${_generalStats['totalHiveBoxes'] ?? 0}',
+            ),
+            _buildStatRow(
+              'Total de Registros',
+              '${_generalStats['totalHiveRecords'] ?? 0}',
+            ),
+            _buildStatRow(
+              'Boxes Customizadas',
+              '${_generalStats['customBoxesRegistered'] ?? 0}',
+            ),
+          ]),
+
           const SizedBox(height: 16),
-          
+
           _buildStatsCard(
             'Boxes Disponíveis',
             (_generalStats['availableBoxes'] as List<dynamic>? ?? [])
-                .map((box) => _buildStatRow(
-                      _inspector.getBoxDisplayName(box.toString()),
-                      box.toString(),
-                    ))
+                .map(
+                  (box) => _buildStatRow(
+                    _inspector.getBoxDisplayName(box.toString()),
+                    box.toString(),
+                  ),
+                )
                 .toList(),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Box Details
           ..._inspector.customBoxes.map((box) {
             final stats = _inspector.getBoxStats(box.key);
             return Container(
               margin: const EdgeInsets.only(bottom: 16),
-              child: _buildStatsCard(
-                box.displayName,
-                [
-                  _buildStatRow('Chave', box.key),
-                  if (box.module != null)
-                    _buildStatRow('Módulo', box.module!),
-                  if (box.description != null) 
-                    _buildStatRow('Descrição', box.description!),
-                  if (stats['totalRecords'] != null)
-                    _buildStatRow('Total de Registros', '${stats['totalRecords']}'),
-                  if (stats['isOpen'] != null)
-                    _buildStatRow('Status', stats['isOpen'] ? 'Aberta' : 'Fechada'),
-                ],
-              ),
+              child: _buildStatsCard(box.displayName, [
+                _buildStatRow('Chave', box.key),
+                if (box.module != null) _buildStatRow('Módulo', box.module!),
+                if (box.description != null)
+                  _buildStatRow('Descrição', box.description!),
+                if (stats['totalRecords'] != null)
+                  _buildStatRow(
+                    'Total de Registros',
+                    '${stats['totalRecords']}',
+                  ),
+                if (stats['isOpen'] != null)
+                  _buildStatRow(
+                    'Status',
+                    stats['isOpen'] ? 'Aberta' : 'Fechada',
+                  ),
+              ]),
             );
           }),
         ],
@@ -438,12 +446,13 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
   }
 
   Widget _buildTableView(List<DatabaseRecord> records) {
-    final filteredRecords = records.where((record) {
-      if (_searchQuery.isEmpty) return true;
-      final searchLower = _searchQuery.toLowerCase();
-      return record.id.toLowerCase().contains(searchLower) ||
-          record.data.toString().toLowerCase().contains(searchLower);
-    }).toList();
+    final filteredRecords =
+        records.where((record) {
+          if (_searchQuery.isEmpty) return true;
+          final searchLower = _searchQuery.toLowerCase();
+          return record.id.toLowerCase().contains(searchLower) ||
+              record.data.toString().toLowerCase().contains(searchLower);
+        }).toList();
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -470,29 +479,30 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: record.data.entries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${entry.key}: ',
-                            style: const TextStyle(
-                              color: Colors.teal,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  children:
+                      record.data.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${entry.key}: ',
+                                style: const TextStyle(
+                                  color: Colors.teal,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  '${entry.value}',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                            ],
                           ),
-                          Expanded(
-                            child: Text(
-                              '${entry.value}',
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
                 ),
               ),
             ],
@@ -503,12 +513,13 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
   }
 
   Widget _buildJsonView(List<DatabaseRecord> records) {
-    final filteredRecords = records.where((record) {
-      if (_searchQuery.isEmpty) return true;
-      final searchLower = _searchQuery.toLowerCase();
-      return record.id.toLowerCase().contains(searchLower) ||
-          record.data.toString().toLowerCase().contains(searchLower);
-    }).toList();
+    final filteredRecords =
+        records.where((record) {
+          if (_searchQuery.isEmpty) return true;
+          final searchLower = _searchQuery.toLowerCase();
+          return record.id.toLowerCase().contains(searchLower) ||
+              record.data.toString().toLowerCase().contains(searchLower);
+        }).toList();
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -516,7 +527,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
       itemBuilder: (context, index) {
         final record = filteredRecords[index];
         final jsonString = _inspector.formatAsJsonString(record.data);
-        
+
         return Card(
           color: Colors.grey.shade900,
           margin: const EdgeInsets.only(bottom: 8),
@@ -569,12 +580,13 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
   }
 
   Widget _buildSharedPreferencesList() {
-    final filteredRecords = _sharedPrefsRecords.where((record) {
-      if (_searchQuery.isEmpty) return true;
-      final searchLower = _searchQuery.toLowerCase();
-      return record.key.toLowerCase().contains(searchLower) ||
-          record.value.toString().toLowerCase().contains(searchLower);
-    }).toList();
+    final filteredRecords =
+        _sharedPrefsRecords.where((record) {
+          if (_searchQuery.isEmpty) return true;
+          final searchLower = _searchQuery.toLowerCase();
+          return record.key.toLowerCase().contains(searchLower) ||
+              record.value.toString().toLowerCase().contains(searchLower);
+        }).toList();
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -616,34 +628,47 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
               icon: const Icon(Icons.more_vert, color: Colors.grey),
               onSelected: (value) async {
                 if (value == 'copy') {
-                  Clipboard.setData(ClipboardData(text: record.value.toString()));
+                  Clipboard.setData(
+                    ClipboardData(text: record.value.toString()),
+                  );
                   _showSuccess('Valor copiado!');
                 } else if (value == 'delete') {
                   final confirmed = await showDialog<bool>(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: Colors.grey.shade900,
-                      title: const Text('Confirmar Exclusão', style: TextStyle(color: Colors.white)),
-                      content: Text(
-                        'Deseja remover a chave "${record.key}"?',
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancelar'),
+                    builder:
+                        (context) => AlertDialog(
+                          backgroundColor: Colors.grey.shade900,
+                          title: const Text(
+                            'Confirmar Exclusão',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          content: Text(
+                            'Deseja remover a chave "${record.key}"?',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancelar'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                              ),
+                              child: const Text(
+                                'Remover',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                          child: const Text('Remover', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    ),
                   );
-                  
+
                   if (confirmed == true) {
-                    final success = await _inspector.removeSharedPreferencesKey(record.key);
+                    final success = await _inspector.removeSharedPreferencesKey(
+                      record.key,
+                    );
                     if (success) {
                       _showSuccess('Chave removida!');
                       _loadSharedPreferences();
@@ -653,28 +678,29 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
                   }
                 }
               },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'copy',
-                  child: Row(
-                    children: [
-                      Icon(Icons.copy, size: 18),
-                      SizedBox(width: 8),
-                      Text('Copiar valor'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, size: 18, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Remover', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-              ],
+              itemBuilder:
+                  (context) => [
+                    const PopupMenuItem(
+                      value: 'copy',
+                      child: Row(
+                        children: [
+                          Icon(Icons.copy, size: 18),
+                          SizedBox(width: 8),
+                          Text('Copiar valor'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 18, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Remover', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
             ),
           ),
         );
@@ -712,10 +738,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.grey.shade400),
-          ),
+          Text(label, style: TextStyle(color: Colors.grey.shade400)),
           Text(
             value,
             style: const TextStyle(
@@ -733,11 +756,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.inbox,
-            size: 64,
-            color: Colors.grey.shade700,
-          ),
+          Icon(Icons.inbox, size: 64, color: Colors.grey.shade700),
           const SizedBox(height: 16),
           Text(
             title,
@@ -750,10 +769,7 @@ class _DataInspectorPageState extends State<DataInspectorPage> with SingleTicker
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
           ),
         ],
       ),

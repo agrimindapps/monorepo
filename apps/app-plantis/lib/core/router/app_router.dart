@@ -14,8 +14,15 @@ import '../../features/plants/presentation/pages/plant_form_page.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
+import '../../features/legal/presentation/pages/terms_of_service_page.dart';
+import '../../features/legal/presentation/pages/privacy_policy_page.dart';
+import '../../features/legal/presentation/pages/promotional_page.dart';
+import '../../features/settings/presentation/pages/notifications_settings_page.dart';
+import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../presentation/pages/landing_page.dart';
+import '../../presentation/pages/settings_page.dart';
+import '../../presentation/pages/account_settings_page.dart';
 import '../utils/navigation_service.dart';
 
 class AppRouter {
@@ -31,6 +38,11 @@ class AppRouter {
   static const String premium = '/premium';
   static const String profile = '/profile';
   static const String settings = '/settings';
+  static const String termsOfService = '/terms-of-service';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String promotional = '/promotional';
+  static const String notificationsSettings = '/notifications-settings';
+  static const String account = '/account';
 
   static GoRouter router(BuildContext context) {
     final authProvider = context.read<AuthProvider>();
@@ -56,6 +68,8 @@ class AppRouter {
           premium,
           profile,
           settings,
+          notificationsSettings,
+          account,
           home,
         ];
 
@@ -195,6 +209,42 @@ class AppRouter {
               name: 'settings',
               builder: (context, state) => const SettingsPage(),
             ),
+
+            // Legal Routes
+            GoRoute(
+              path: termsOfService,
+              name: 'terms-of-service',
+              builder: (context, state) => const TermsOfServicePage(),
+            ),
+            GoRoute(
+              path: privacyPolicy,
+              name: 'privacy-policy',
+              builder: (context, state) => const PrivacyPolicyPage(),
+            ),
+            GoRoute(
+              path: promotional,
+              name: 'promotional',
+              builder: (context, state) => const PromotionalPage(),
+            ),
+
+            // Settings Routes
+            GoRoute(
+              path: notificationsSettings,
+              name: 'notifications-settings',
+              builder: (context, state) {
+                return ChangeNotifierProvider(
+                  create: (context) => sl<NotificationsSettingsProvider>(),
+                  child: const NotificationsSettingsPage(),
+                );
+              },
+            ),
+
+            // Account Route
+            GoRoute(
+              path: account,
+              name: 'account',
+              builder: (context, state) => const AccountSettingsPage(),
+            ),
           ],
         ),
       ],
@@ -241,13 +291,4 @@ class ErrorPage extends StatelessWidget {
 }
 
 // ProfilePage is implemented in features/auth/presentation/pages/
-// SettingsPage remains as placeholder
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Settings Page'));
-  }
-}
+// SettingsPage is implemented in presentation/pages/settings_page.dart

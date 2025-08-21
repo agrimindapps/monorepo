@@ -16,9 +16,11 @@ import '../providers/analytics_provider.dart';
 import '../providers/sync_status_provider.dart';
 import 'modules/plants_module.dart';
 import 'modules/tasks_module.dart';
+import 'modules/spaces_module.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
     as providers;
 import '../../features/premium/presentation/providers/premium_provider.dart';
+import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 
 // Sync dependencies
 import '../sync/sync_queue.dart';
@@ -37,8 +39,10 @@ Future<void> init() async {
   _initAuth();
   _initPlants();
   _initTasks();
+  _initSpaces();
   _initComments();
   _initPremium();
+  _initSettings();
 
   // App services
   _initAppServices();
@@ -129,6 +133,10 @@ void _initTasks() {
   TasksModule.init(sl);
 }
 
+void _initSpaces() {
+  SpacesModule.init(sl);
+}
+
 void _initComments() {
   // TODO: Implement comments module
 }
@@ -140,6 +148,16 @@ void _initPremium() {
   // Provider
   sl.registerFactory(
     () => PremiumProvider(subscriptionRepository: sl(), authRepository: sl()),
+  );
+}
+
+void _initSettings() {
+  // Notifications Settings Provider
+  sl.registerFactory(
+    () => NotificationsSettingsProvider(
+      notificationService: sl<PlantisNotificationService>(),
+      prefs: sl<SharedPreferences>(),
+    ),
   );
 }
 

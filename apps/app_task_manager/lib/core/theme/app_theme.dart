@@ -263,7 +263,6 @@ class AppTheme {
         primary: AppColors.darkPrimary,
         secondary: AppColors.secondary,
         surface: AppColors.darkSurface,
-        background: AppColors.darkBackground,
         error: AppColors.error,
       ),
       

@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:core/core.dart';
 
 import '../interfaces/network_info.dart';
@@ -11,6 +12,10 @@ import '../services/notification_manager.dart';
 import '../services/image_service.dart' as local;
 import '../services/test_data_generator_service.dart';
 import '../services/data_cleaner_service.dart';
+import '../services/backup_service.dart';
+import '../services/backup_scheduler.dart';
+import '../services/secure_storage_service.dart';
+import '../data/repositories/backup_repository.dart';
 import '../utils/navigation_service.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/sync_status_provider.dart';
@@ -21,6 +26,7 @@ import '../../features/auth/presentation/providers/auth_provider.dart'
     as providers;
 import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
+import '../../features/settings/presentation/providers/backup_settings_provider.dart';
 
 // Sync dependencies
 import '../sync/sync_queue.dart';
@@ -43,6 +49,7 @@ Future<void> init() async {
   _initComments();
   _initPremium();
   _initSettings();
+  _initBackup();
 
   // App services
   _initAppServices();
@@ -65,6 +72,7 @@ Future<void> _initExternal() async {
 void _initCoreServices() {
   // Firebase
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton(() => FirebaseStorage.instance);
 
   // Network Info
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
@@ -84,6 +92,9 @@ void _initCoreServices() {
 
   // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService());
+  
+  // Secure Storage Service
+  sl.registerLazySingleton<SecureStorageService>(() => SecureStorageService.instance);
 
   // App Rating Repository
   sl.registerLazySingleton<IAppRatingRepository>(
@@ -157,6 +168,51 @@ void _initSettings() {
     () => NotificationsSettingsProvider(
       notificationService: sl<PlantisNotificationService>(),
       prefs: sl<SharedPreferences>(),
+    ),
+  );
+}
+
+void _initBackup() {
+  // Backup Repository
+  sl.registerLazySingleton<IBackupRepository>(
+    () => BackupRepository(
+      storage: sl<FirebaseStorage>(),
+      authRepository: sl<IAuthRepository>(),
+    ),
+  );
+
+  // Backup Service
+  sl.registerSingleton<BackupService>(
+    BackupService(
+      backupRepository: sl<IBackupRepository>(),
+      authRepository: sl<IAuthRepository>(),
+      plantsRepository: sl(),
+      spacesRepository: sl(),
+      tasksRepository: sl(),
+      storageService: sl<SecureStorageService>(),
+    ),
+  );
+
+  // Backup Scheduler
+  sl.registerSingleton<BackupScheduler>(
+    BackupScheduler(
+      backupService: sl<BackupService>(),
+      subscriptionRepository: sl<ISubscriptionRepository>(),
+      connectivity: sl<Connectivity>(),
+    ),
+  );
+
+  // Backup Scheduler Manager
+  sl.registerSingleton<BackupSchedulerManager>(
+    BackupSchedulerManager(sl<BackupScheduler>()),
+  );
+
+  // Backup Settings Provider
+  sl.registerFactory(
+    () => BackupSettingsProvider(
+      backupService: sl<BackupService>(),
+      subscriptionRepository: sl<ISubscriptionRepository>(),
+      connectivity: sl<Connectivity>(),
     ),
   );
 }

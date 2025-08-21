@@ -1,4 +1,5 @@
 import '../../features/vehicles/data/models/vehicle_model.dart';
+import 'validation_result.dart';
 
 /// Interface for vehicle business operations
 /// Provides contract for vehicle-related business logic
@@ -185,15 +186,3 @@ enum RecommendationPriority {
   urgent,
 }
 
-/// Validation result
-class ValidationResult {
-  final bool isValid;
-  final List<String> errors;
-  final List<String> warnings;
-
-  const ValidationResult({
-    required this.isValid,
-    required this.errors,
-    required this.warnings,
-  });
-}

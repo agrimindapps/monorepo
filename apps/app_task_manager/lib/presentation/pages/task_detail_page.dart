@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/task_entity.dart';
+import '../../core/services/navigation_service.dart';
 import '../providers/task_providers.dart';
 import '../widgets/subtask_list_widget.dart';
 
 class TaskDetailPage extends ConsumerStatefulWidget {
   final TaskEntity task;
+  final TaskDetailFocus? initialFocus;
 
   const TaskDetailPage({
     super.key,
     required this.task,
+    this.initialFocus,
   });
 
   @override

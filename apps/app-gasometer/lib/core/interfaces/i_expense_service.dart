@@ -1,4 +1,5 @@
 import '../../features/expenses/data/models/expense_model.dart';
+import 'validation_result.dart';
 
 /// Interface for expense business operations
 /// Provides contract for expense-related business logic
@@ -119,15 +120,3 @@ class ExpenseReport {
   });
 }
 
-/// Validation result
-class ValidationResult {
-  final bool isValid;
-  final List<String> errors;
-  final List<String> warnings;
-
-  const ValidationResult({
-    required this.isValid,
-    required this.errors,
-    required this.warnings,
-  });
-}

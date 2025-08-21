@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/interfaces/validation_result.dart';
 
 class AddMaintenancePage extends StatefulWidget {
   const AddMaintenancePage({super.key});
@@ -15,6 +18,8 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   final _costController = TextEditingController();
   final _odometerController = TextEditingController();
   final _descriptionController = TextEditingController();
+  
+  final Map<String, ValidationResult> _validationResults = {};
   
   String _selectedVehicle = '';
   String _selectedCategory = 'preventiva';
@@ -215,60 +220,28 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            ValidatedFormField(
               controller: _typeController,
-              decoration: InputDecoration(
-                labelText: 'Tipo de Manutenção',
-                hintText: 'Ex: Troca de óleo, Revisão completa...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              validator: (value) {
-                if (value?.isEmpty ?? true) {
-                  return 'Campo obrigatório';
-                }
-                return null;
-              },
+              label: 'Tipo de Manutenção',
+              hint: 'Ex: Troca de óleo, Revisão completa...',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 3,
+              maxLengthValidation: 100,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'))],
+              onValidationChanged: (result) => _validationResults['type'] = result,
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            ValidatedFormField(
               controller: _workshopController,
-              decoration: InputDecoration(
-                labelText: 'Oficina/Local',
-                hintText: 'Nome da oficina ou local da manutenção',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              validator: (value) {
-                if (value?.isEmpty ?? true) {
-                  return 'Campo obrigatório';
-                }
-                return null;
-              },
+              label: 'Oficina/Local',
+              hint: 'Nome da oficina ou local da manutenção',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 2,
+              maxLengthValidation: 100,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)\/&]'))],
+              onValidationChanged: (result) => _validationResults['workshop'] = result,
             ),
             const SizedBox(height: 16),
             Row(
@@ -359,66 +332,37 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: ValidatedFormField(
                     controller: _costController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Custo (R\$)',
-                      hintText: '0,00',
+                    label: 'Custo',
+                    hint: '0,00',
+                    required: true,
+                    validationType: ValidationType.money,
+                    minValue: 0.0,
+                    maxValue: 999999.99,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
                       prefixText: 'R\$ ',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return 'Campo obrigatório';
-                      }
-                      return null;
-                    },
+                    onValidationChanged: (result) => _validationResults['cost'] = result,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextFormField(
+                  child: ValidatedFormField(
                     controller: _odometerController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Odômetro (km)',
-                      hintText: '0',
+                    label: 'Odômetro',
+                    hint: '0,0',
+                    required: true,
+                    validationType: ValidationType.decimal,
+                    minValue: 0.0,
+                    maxValue: 9999999.0,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
+                    decoration: const InputDecoration(
                       suffixText: 'km',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return 'Campo obrigatório';
-                      }
-                      return null;
-                    },
+                    onValidationChanged: (result) => _validationResults['odometer'] = result,
                   ),
                 ),
               ],
@@ -450,27 +394,18 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            ValidatedFormField(
               controller: _descriptionController,
+              label: 'Detalhes da manutenção',
+              hint: 'Descreva os serviços realizados, peças trocadas, etc.',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 5,
+              maxLengthValidation: 500,
               maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Detalhes da manutenção',
-                hintText: 'Descreva os serviços realizados, peças trocadas, etc.',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
+              maxLength: 500,
+              showCharacterCount: true,
+              onValidationChanged: (result) => _validationResults['description'] = result,
             ),
           ],
         ),
@@ -632,28 +567,38 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
 
   void _saveMaintenance() {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (_selectedVehicle.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Selecione um veículo'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-        return;
-      }
-
-      // Aqui você implementaria a lógica para salvar a manutenção
-      // Por exemplo: chamar um repository, service, etc.
-      
+    // Valida todos os campos primeiro
+    final hasErrors = _validationResults.values.any((result) => !result.isValid);
+    if (hasErrors || !(_formKey.currentState?.validate() ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Manutenção salva com sucesso!'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          content: const Text('Por favor, corrija os erros no formulário'),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
-      
-      context.pop();
+      return;
     }
+    
+    if (_selectedVehicle.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Selecione um veículo'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    // Aqui você implementaria a lógica para salvar a manutenção
+    // Por exemplo: chamar um repository, service, etc.
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Manutenção salva com sucesso!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+    
+    context.pop();
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
 
 import '../../../core/errors/failures.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../providers/auth_providers.dart';
 import '../home_page.dart';
 import 'register_page.dart';
@@ -277,7 +276,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     

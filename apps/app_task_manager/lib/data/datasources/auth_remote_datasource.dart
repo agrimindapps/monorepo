@@ -13,5 +13,7 @@ abstract class AuthRemoteDataSource {
   
   Future<void> updateProfile(UserModel user);
   
+  Future<void> deleteAccount();
+  
   Stream<UserModel?> watchAuthState();
 }

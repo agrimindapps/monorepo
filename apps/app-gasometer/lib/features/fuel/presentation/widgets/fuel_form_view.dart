@@ -4,6 +4,8 @@ import '../providers/fuel_form_provider.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../../core/constants/fuel_constants.dart';
+import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/interfaces/validation_result.dart';
 
 /// Widget principal do formulário de abastecimento
 class FuelFormView extends StatelessWidget {
@@ -295,35 +297,41 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildLitersField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
+    final vehicle = provider.formModel.vehicle;
+    return ValidatedFormField(
       controller: provider.litersController,
-      decoration: InputDecoration(
-        labelText: 'Litros',
-        hintText: '0,000',
-        prefixIcon: const Icon(Icons.local_gas_station),
-        suffixText: 'L',
-        border: const OutlineInputBorder(),
-        errorText: provider.formModel.getFieldError('liters'),
-      ),
+      label: 'Litros',
+      hint: '0,000',
+      prefixIcon: Icons.local_gas_station,
+      required: true,
+      validationType: ValidationType.fuelLiters,
+      tankCapacity: vehicle?.tankCapacity,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().litersFormatter],
-      validator: (value) => provider.validateField('liters', value),
+      decoration: const InputDecoration(
+        suffixText: 'L',
+      ),
+      onValidationChanged: (result) {
+        // Pode adicionar callback se necessário
+      },
     );
   }
 
   Widget _buildPricePerLiterField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
+    return ValidatedFormField(
       controller: provider.pricePerLiterController,
-      decoration: InputDecoration(
-        labelText: 'Preço/Litro',
-        hintText: '0,000',
-        prefixText: 'R\$ ',
-        border: const OutlineInputBorder(),
-        errorText: provider.formModel.getFieldError('pricePerLiter'),
-      ),
+      label: 'Preço/Litro',
+      hint: '0,000',
+      required: true,
+      validationType: ValidationType.fuelPrice,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().priceFormatter],
-      validator: (value) => provider.validateField('pricePerLiter', value),
+      decoration: const InputDecoration(
+        prefixText: 'R\$ ',
+      ),
+      onValidationChanged: (result) {
+        // Pode adicionar callback se necessário
+      },
     );
   }
 
@@ -350,34 +358,41 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildOdometerField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
+    final vehicle = provider.formModel.vehicle;
+    return ValidatedFormField(
       controller: provider.odometerController,
-      decoration: InputDecoration(
-        labelText: 'Odômetro',
-        hintText: '0,0',
-        prefixIcon: const Icon(Icons.speed),
-        suffixText: 'km',
-        border: const OutlineInputBorder(),
-        errorText: provider.formModel.getFieldError('odometer'),
-      ),
+      label: 'Odômetro',
+      hint: '0,0',
+      prefixIcon: Icons.speed,
+      required: true,
+      validationType: ValidationType.decimal, // Usar validação decimal por enquanto
+      currentOdometer: vehicle?.currentOdometer,
+      minValue: 0.0,
+      maxValue: 9999999.0,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().odometerFormatter],
-      validator: (value) => provider.validateField('odometer', value),
+      decoration: const InputDecoration(
+        suffixText: 'km',
+      ),
+      onValidationChanged: (result) {
+        // Pode adicionar callback se necessário
+      },
     );
   }
 
   Widget _buildGasStationField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
+    return ValidatedFormField(
       controller: provider.gasStationController,
-      decoration: InputDecoration(
-        labelText: 'Nome do Posto',
-        hintText: 'Ex: Shell, Petrobras, Ipiranga...',
-        prefixIcon: const Icon(Icons.local_gas_station_outlined),
-        border: const OutlineInputBorder(),
-        errorText: provider.formModel.getFieldError('gasStationName'),
-      ),
-      textCapitalization: TextCapitalization.words,
-      validator: (value) => provider.validateField('gasStationName', value),
+      label: 'Nome do Posto (opcional)',
+      hint: 'Ex: Shell, Petrobras, Ipiranga...',
+      prefixIcon: Icons.local_gas_station_outlined,
+      required: false,
+      validationType: ValidationType.length,
+      minLength: 2,
+      maxLengthValidation: 100,
+      onValidationChanged: (result) {
+        // Pode adicionar callback se necessário
+      },
     );
   }
 
@@ -395,18 +410,20 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildNotesField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
+    return ValidatedFormField(
       controller: provider.notesController,
-      decoration: InputDecoration(
-        labelText: 'Observações (opcional)',
-        hintText: 'Adicione comentários sobre este abastecimento...',
-        prefixIcon: const Icon(Icons.note_add),
-        border: const OutlineInputBorder(),
-        errorText: provider.formModel.getFieldError('notes'),
-      ),
+      label: 'Observações (opcional)',
+      hint: 'Adicione comentários sobre este abastecimento...',
+      prefixIcon: Icons.note_add,
+      required: false,
+      validationType: ValidationType.length,
+      maxLengthValidation: FuelConstants.maxNotesLength,
       maxLines: 3,
       maxLength: FuelConstants.maxNotesLength,
-      validator: (value) => provider.validateField('notes', value),
+      showCharacterCount: true,
+      onValidationChanged: (result) {
+        // Pode adicionar callback se necessário
+      },
     );
   }
 

@@ -9,6 +9,7 @@ import '../../domain/entities/plant.dart';
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_grid_view.dart';
 import '../widgets/plants_list_view.dart';
+import '../widgets/plants_grouped_by_spaces_view.dart';
 import '../widgets/empty_plants_widget.dart';
 import '../widgets/plants_loading_widget.dart';
 import '../widgets/plants_error_widget.dart';
@@ -219,27 +220,44 @@ class _PlantsListPageState extends State<PlantsListPage> {
           );
         }
 
-        // View mode selector for grid/list display
+        // View mode selector for grid/list/grouped display
         return Selector<PlantsProvider, ViewMode>(
           selector: (_, provider) => provider.viewMode,
           builder: (context, viewMode, child) {
             return RefreshIndicator(
               onRefresh: _onRefresh,
-              child:
-                  viewMode == ViewMode.grid
-                      ? PlantsGridView(
-                        plants: displayData.plants,
-                        scrollController: _scrollController,
-                      )
-                      : PlantsListView(
-                        plants: displayData.plants,
-                        scrollController: _scrollController,
-                      ),
+              child: _buildViewForMode(viewMode, displayData),
             );
           },
         );
       },
     );
+  }
+
+  /// Build view based on current view mode
+  Widget _buildViewForMode(ViewMode viewMode, PlantsDisplayData displayData) {
+    switch (viewMode) {
+      case ViewMode.groupedBySpaces:
+        return Consumer<PlantsProvider>(
+          builder: (context, plantsProvider, child) {
+            final groupedPlants = plantsProvider.plantsGroupedBySpaces;
+            return PlantsGroupedBySpacesView(
+              groupedPlants: groupedPlants,
+              scrollController: _scrollController,
+            );
+          },
+        );
+      case ViewMode.grid:
+        return PlantsGridView(
+          plants: displayData.plants,
+          scrollController: _scrollController,
+        );
+      case ViewMode.list:
+        return PlantsListView(
+          plants: displayData.plants,
+          scrollController: _scrollController,
+        );
+    }
   }
 
   /// Efficient list comparison to avoid unnecessary rebuilds

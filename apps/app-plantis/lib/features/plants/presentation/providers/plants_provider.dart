@@ -243,6 +243,41 @@ class PlantsProvider extends ChangeNotifier {
     }
   }
 
+  /// Groups plants by spaces for grouped view
+  Map<String?, List<Plant>> get plantsGroupedBySpaces {
+    final plantsToGroup = _searchQuery.isNotEmpty ? _searchResults : _plants;
+    final Map<String?, List<Plant>> groupedPlants = {};
+    
+    for (final plant in plantsToGroup) {
+      final spaceId = plant.spaceId;
+      if (!groupedPlants.containsKey(spaceId)) {
+        groupedPlants[spaceId] = [];
+      }
+      groupedPlants[spaceId]!.add(plant);
+    }
+    
+    return groupedPlants;
+  }
+  
+  /// Gets the count of plants in each space
+  Map<String?, int> get plantCountsBySpace {
+    final grouped = plantsGroupedBySpaces;
+    return grouped.map((spaceId, plants) => MapEntry(spaceId, plants.length));
+  }
+  
+  /// Toggle between normal view and grouped by spaces view
+  void toggleGroupedView() {
+    if (_viewMode == ViewMode.groupedBySpaces) {
+      _viewMode = ViewMode.list; // Volta para lista normal
+    } else {
+      _viewMode = ViewMode.groupedBySpaces; // Muda para agrupado
+    }
+    notifyListeners();
+  }
+  
+  /// Check if current view is grouped by spaces
+  bool get isGroupedBySpaces => _viewMode == ViewMode.groupedBySpaces;
+
   // Clear selected plant
   void clearSelectedPlant() {
     if (_selectedPlant != null) {
@@ -400,7 +435,7 @@ class PlantsProvider extends ChangeNotifier {
   }
 }
 
-enum ViewMode { grid, list }
+enum ViewMode { grid, list, groupedBySpaces }
 
 enum SortBy { newest, oldest, name, species }
 

@@ -82,7 +82,7 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     }
     
     _isCreating = true;
-    _operationsInProgress.add(task.id ?? 'temp_${DateTime.now().millisecondsSinceEpoch}');
+    _operationsInProgress.add(task.id);
     
     try {
       final result = await _createTask(CreateTaskParams(task: task));

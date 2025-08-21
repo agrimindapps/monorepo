@@ -18,7 +18,9 @@ import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
+import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
+import '../../features/settings/presentation/providers/backup_settings_provider.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
@@ -42,6 +44,7 @@ class AppRouter {
   static const String privacyPolicy = '/privacy-policy';
   static const String promotional = '/promotional';
   static const String notificationsSettings = '/notifications-settings';
+  static const String backupSettings = '/backup-settings';
   static const String account = '/account';
 
   static GoRouter router(BuildContext context) {
@@ -69,6 +72,7 @@ class AppRouter {
           profile,
           settings,
           notificationsSettings,
+          backupSettings,
           account,
           home,
         ];
@@ -235,6 +239,16 @@ class AppRouter {
                 return ChangeNotifierProvider(
                   create: (context) => sl<NotificationsSettingsProvider>(),
                   child: const NotificationsSettingsPage(),
+                );
+              },
+            ),
+            GoRoute(
+              path: backupSettings,
+              name: 'backup-settings',
+              builder: (context, state) {
+                return ChangeNotifierProvider(
+                  create: (context) => sl<BackupSettingsProvider>(),
+                  child: const BackupSettingsPage(),
                 );
               },
             ),

@@ -3,6 +3,9 @@ import '../../interfaces/i_sync_service.dart';
 import '../../interfaces/i_connectivity_service.dart';
 import 'connectivity_indicator.dart';
 import 'real_time_sync_status.dart';
+import 'sync_status_indicator.dart';
+import 'error_state_widget.dart';
+import 'empty_state_widget.dart';
 
 /// Enhanced scaffold with built-in connectivity and sync indicators
 /// Provides consistent UX patterns across all pages

@@ -14,6 +14,8 @@ abstract class AuthRepository {
   
   ResultFuture<void> updateProfile(UserEntity user);
   
+  ResultFuture<void> deleteAccount();
+  
   Stream<UserEntity?> watchAuthState();
   
   ResultFuture<bool> isSignedIn();

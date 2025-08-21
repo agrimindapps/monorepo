@@ -127,15 +127,69 @@ class PlantsAppBar extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
-              // Grid/List toggle button
+              // Grouped by spaces toggle button
               GestureDetector(
                 onTap: () {
-                  final newMode =
-                      viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
+                  final newMode = viewMode == ViewMode.groupedBySpaces 
+                      ? ViewMode.list 
+                      : ViewMode.groupedBySpaces;
                   onViewModeChanged(newMode);
                 },
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: viewMode == ViewMode.groupedBySpaces
+                        ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                        : (isDark
+                            ? const Color(0xFF2C2C2E)
+                            : theme.colorScheme.surface),
+                    borderRadius: BorderRadius.circular(12),
+                    border: viewMode == ViewMode.groupedBySpaces
+                        ? Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3))
+                        : (isDark
+                            ? Border.all(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                            )
+                            : Border.all(
+                              color: theme.colorScheme.outline.withValues(
+                                alpha: 0.3,
+                              ),
+                            )),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            isDark
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.06),
+                        blurRadius: isDark ? 6 : 8,
+                        offset: const Offset(0, 2),
+                        spreadRadius: isDark ? 0 : 1,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.category,
+                    color: viewMode == ViewMode.groupedBySpaces
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.secondary,
+                    size: 20,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Grid/List toggle button (only show when not grouped)
+              if (viewMode != ViewMode.groupedBySpaces)
+                GestureDetector(
+                  onTap: () {
+                    final newMode =
+                        viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
+                    onViewModeChanged(newMode);
+                  },
                 child: Container(
                   width: 44,
                   height: 44,

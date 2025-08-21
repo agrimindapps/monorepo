@@ -1,6 +1,9 @@
 /// Core interfaces barrel file
 /// Exports all service interfaces for dependency injection
 
+// Shared models
+export 'validation_result.dart';
+
 // Service interfaces
 export 'i_sync_service.dart';
 export 'i_expense_service.dart';

@@ -24,7 +24,7 @@ class ExpensesPaginatedList extends StatelessWidget {
     return Selector<ExpensesPaginatedProvider, (bool, String?, String)>(
       selector: (context, provider) => (
         provider.isLoading,
-        provider.errorMessage,
+        provider.error,
         'expenses_${provider.hashCode}',
       ),
       builder: (context, data, child) {
@@ -147,7 +147,7 @@ class ExpensesPaginatedList extends StatelessWidget {
               ],
               
               // Informações adicionais
-              if (showVehicleInfo || expense.establishmentName != null) ...[
+              if (showVehicleInfo || expense.establishmentName?.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -334,8 +334,8 @@ class ExpensesPaginatedFilters extends StatelessWidget {
     // Selector para otimizar rebuilds dos filtros
     return Selector<ExpensesPaginatedProvider, (bool, String)>(
       selector: (context, provider) => (
-        provider.hasFilters,
-        provider.searchText ?? '',
+        provider.hasActiveFilters,
+        provider.filtersConfig.searchQuery ?? '',
       ),
       builder: (context, filterData, child) {
         final (hasActiveFilters, searchQuery) = filterData;

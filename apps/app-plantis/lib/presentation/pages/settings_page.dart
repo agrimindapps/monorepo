@@ -120,6 +120,15 @@ class SettingsPage extends StatelessWidget {
                   },
                 ),
                 SettingsItem(
+                  icon: Icons.cloud_upload,
+                  title: 'Backup na Nuvem',
+                  subtitle: 'Proteja seus dados com backup automático',
+                  iconColor: PlantisColors.primary,
+                  onTap: () {
+                    context.push('/backup-settings');
+                  },
+                ),
+                SettingsItem(
                   icon: Icons.star,
                   title: 'Premium',
                   subtitle: 'Recursos exclusivos e benefícios',

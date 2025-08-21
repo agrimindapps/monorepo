@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user_model.dart';
 import 'auth_remote_datasource.dart';
@@ -103,6 +104,25 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     
     _currentUser = user;
     _authStateController.add(user);
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    
+    if (_currentUser == null) {
+      throw Exception('Nenhum usuário logado para deletar');
+    }
+    
+    // Em uma implementação real, deletaria a conta no servidor
+    // e todos os dados associados
+    final deletedUserId = _currentUser!.id;
+    
+    _currentUser = null;
+    _authStateController.add(null);
+    
+    // Log da exclusão para debug
+    debugPrint('🗑️ Account deleted for user: $deletedUserId');
   }
 
   @override

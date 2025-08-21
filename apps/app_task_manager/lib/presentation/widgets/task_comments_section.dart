@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../providers/auth_providers.dart';
 
-class TaskCommentsSection extends StatefulWidget {
+class TaskCommentsSection extends ConsumerStatefulWidget {
   final String taskId;
 
   const TaskCommentsSection({
@@ -11,12 +13,12 @@ class TaskCommentsSection extends StatefulWidget {
   });
 
   @override
-  State<TaskCommentsSection> createState() => _TaskCommentsSectionState();
+  ConsumerState<TaskCommentsSection> createState() => _TaskCommentsSectionState();
 }
 
-class _TaskCommentsSectionState extends State<TaskCommentsSection> {
+class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
   final TextEditingController _commentController = TextEditingController();
-  final List<TaskComment> _comments = []; // TODO: Implementar com Riverpod
+  final List<TaskComment> _comments = []; // Lista local temporária
 
   @override
   void dispose() {
@@ -33,7 +35,11 @@ class _TaskCommentsSectionState extends State<TaskCommentsSection> {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         taskId: widget.taskId,
         text: text,
-        authorName: 'Você', // TODO: Pegar do usuário atual
+        authorName: ref.read(currentUserProvider).when(
+          data: (user) => user?.displayName ?? 'Usuário',
+          loading: () => 'Usuário',
+          error: (_, __) => 'Usuário',
+        ),
         createdAt: DateTime.now(),
       ));
     });

@@ -499,10 +499,12 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              navigator.pop();
               final success = await ref.read(notificationActionsProvider).cancelAllNotifications();
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                scaffoldMessenger.showSnackBar(
                   SnackBar(
                     content: Text(
                       success 

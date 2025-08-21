@@ -106,6 +106,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  ResultFuture<void> deleteAccount() async {
+    try {
+      // Primeiro deletar conta remotamente
+      await _remoteDataSource.deleteAccount();
+      
+      // Depois limpar dados locais
+      await _localDataSource.clearCache();
+      
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   ResultFuture<bool> isSignedIn() async {
     try {
       final isSignedIn = await _localDataSource.isUserSignedIn();

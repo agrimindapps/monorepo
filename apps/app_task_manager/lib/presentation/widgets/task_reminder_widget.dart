@@ -258,6 +258,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     if (selectedDate == null) return;
     
     // Selecionar hora
+    if (!mounted) return;
     final selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(

@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import '../providers/vehicles_provider.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import 'add_vehicle_page.dart';
 
 class VehiclesPage extends StatefulWidget {
   const VehiclesPage({super.key});
@@ -576,12 +577,30 @@ class _VehicleCardActions extends StatelessWidget {
   }
   
   void _editVehicle(BuildContext context, VehicleEntity vehicle) async {
-    // TODO: Implementar edição de veículo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Editar veículo - Em desenvolvimento'),
+    // Converter VehicleEntity para Map para compatibilidade com AddVehiclePage
+    final vehicleMap = {
+      'id': vehicle.id,
+      'marca': vehicle.brand,
+      'modelo': vehicle.model,
+      'ano': vehicle.year,
+      'cor': vehicle.color,
+      'placa': vehicle.licensePlate,
+      'chassi': vehicle.metadata['chassi'] ?? '',
+      'renavam': vehicle.metadata['renavam'] ?? '',
+      'odometroInicial': vehicle.currentOdometer,
+      'combustivel': vehicle.supportedFuels.isNotEmpty ? vehicle.supportedFuels.first.displayName : 'Gasolina',
+    };
+    
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddVehiclePage(vehicle: vehicleMap),
       ),
     );
+    
+    // Se resultado for true, atualizar lista
+    if (result == true && context.mounted) {
+      await context.read<VehiclesProvider>().loadVehicles();
+    }
   }
   
   void _deleteVehicle(BuildContext context, VehicleEntity vehicle) {
@@ -636,11 +655,15 @@ class _OptimizedFloatingActionButton extends StatelessWidget {
   }
   
   void _addVehicle(BuildContext context) async {
-    // TODO: Implementar adição de veículo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Adicionar veículo - Em desenvolvimento'),
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AddVehiclePage(),
       ),
     );
+    
+    // Se resultado for true, atualizar lista
+    if (result == true && context.mounted) {
+      await context.read<VehiclesProvider>().loadVehicles();
+    }
   }
 }

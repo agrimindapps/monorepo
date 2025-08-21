@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/plant_form_provider.dart';
+import '../providers/spaces_provider.dart';
+import '../../domain/usecases/spaces_usecases.dart';
 import '../../../../core/services/image_service.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import 'space_selector_widget.dart';
 
 class PlantFormBasicInfo extends StatefulWidget {
   const PlantFormBasicInfo({super.key});
@@ -277,6 +281,18 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
             const SizedBox(height: 20),
 
+            // Space selector
+            ChangeNotifierProvider(
+              create: (_) => di.sl<SpacesProvider>(),
+              child: SpaceSelectorWidget(
+                selectedSpaceId: provider.spaceId,
+                onSpaceChanged: (spaceId) => _handleSpaceSelection(provider, spaceId),
+                errorText: fieldErrors['space'],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
             // Planting date (optional)
             _buildDateField(
               context: context,
@@ -493,5 +509,81 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     ];
 
     return '${date.day} de ${months[date.month - 1]} de ${date.year}';
+  }
+
+  /// Handles space selection including creating new spaces
+  Future<void> _handleSpaceSelection(PlantFormProvider plantProvider, String? value) async {
+    if (value == null) {
+      // "Sem espaço" selecionado
+      plantProvider.setSpaceId(null);
+      return;
+    }
+
+    if (value.startsWith('CREATE_NEW:')) {
+      // Criar novo espaço
+      final spaceName = value.substring('CREATE_NEW:'.length);
+      if (spaceName.trim().isEmpty) return;
+
+      try {
+        final spacesProvider = di.sl<SpacesProvider>();
+        await spacesProvider.loadSpaces(); // Garantir que temos a lista atual
+        
+        // Verificar se já existe um espaço com esse nome
+        final existingSpace = spacesProvider.findSpaceByName(spaceName);
+        if (existingSpace != null) {
+          // Usar o espaço existente
+          plantProvider.setSpaceId(existingSpace.id);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Espaço "$spaceName" já existe. Usando espaço existente.'),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+              ),
+            );
+          }
+          return;
+        }
+
+        // Criar novo espaço
+        final success = await spacesProvider.addSpace(AddSpaceParams(name: spaceName));
+        
+        if (success && mounted) {
+          // Buscar o espaço recém-criado
+          await spacesProvider.loadSpaces();
+          final newSpace = spacesProvider.findSpaceByName(spaceName);
+          
+          if (newSpace != null) {
+            plantProvider.setSpaceId(newSpace.id);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Espaço "$spaceName" criado com sucesso!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          }
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao criar espaço. Tente novamente.'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro inesperado: ${e.toString()}'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    } else {
+      // Espaço existente selecionado
+      plantProvider.setSpaceId(value);
+    }
   }
 }

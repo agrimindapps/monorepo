@@ -1,0 +1,32 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../di/injection_container.dart' as di;
+import '../../domain/usecases/update_task.dart';
+import '../../domain/usecases/get_tasks.dart';
+import '../../domain/entities/task_entity.dart';
+import '../../infrastructure/services/notification_service.dart';
+
+/// Provider para UpdateTask use case
+final updateTaskProvider = Provider<UpdateTask>((ref) {
+  return di.sl<UpdateTask>();
+});
+
+/// Provider para GetTasks use case  
+final getTasksProvider = Provider<GetTasks>((ref) {
+  return di.sl<GetTasks>();
+});
+
+/// Provider simplificado para tasks (usando FutureProvider)
+final tasksProvider = FutureProvider<List<TaskEntity>>((ref) async {
+  final getTasks = ref.read(getTasksProvider);
+  final result = await getTasks(const GetTasksParams());
+  
+  return result.fold(
+    (failure) => throw Exception(failure.toString()),
+    (tasks) => tasks,
+  );
+});
+
+/// Provider para NotificationService
+final notificationServiceProvider = Provider<TaskManagerNotificationService>((ref) {
+  return di.sl<TaskManagerNotificationService>();
+});

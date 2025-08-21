@@ -11,6 +11,10 @@ import '../services/analytics_service.dart';
 import '../services/gasometer_notification_service.dart';
 import '../services/platform_service.dart';
 
+// Error handling imports
+import '../error/error_logger.dart';
+import '../error/error_handler.dart';
+
 // Sync imports
 import '../sync/services/sync_queue.dart';
 import '../sync/services/sync_operations.dart';
@@ -123,6 +127,10 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
   sl.registerLazySingleton<GasOMeterNotificationService>(() => GasOMeterNotificationService());
   sl.registerLazySingleton<PlatformService>(() => PlatformService());
+
+  // Error Handling Services
+  sl.registerLazySingleton<ErrorLogger>(() => ErrorLogger());
+  sl.registerLazySingleton<ErrorHandler>(() => ErrorHandler(sl()));
 
   // Core Package Services
   sl.registerLazySingleton<core.ISubscriptionRepository>(() => core.RevenueCatService());

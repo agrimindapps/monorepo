@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../domain/entities/task_entity.dart';
 import '../providers/task_providers.dart';
+import '../providers/auth_providers.dart';
 
 class BottomInputBar extends ConsumerStatefulWidget {
   const BottomInputBar({super.key});
@@ -17,6 +18,8 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isExpanded = false;
+  DateTime? _selectedDueDate;
+  TaskPriority _selectedPriority = TaskPriority.medium;
 
   @override
   void dispose() {
@@ -46,17 +49,26 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
         id: const Uuid().v4(),
         title: title,
         listId: 'default',
-        createdById: 'user1', // TODO: Pegar do auth atual
+        createdById: ref.read(currentUserProvider).when(
+          data: (user) => user?.id ?? 'anonymous',
+          loading: () => 'anonymous',
+          error: (_, __) => 'anonymous',
+        ),
+        dueDate: _selectedDueDate,
+        priority: _selectedPriority,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         status: TaskStatus.pending,
-        priority: TaskPriority.medium,
       );
 
       await ref.read(taskNotifierProvider.notifier).createTask(newTask);
       
       _controller.clear();
       _focusNode.unfocus();
+      setState(() {
+        _selectedDueDate = null;
+        _selectedPriority = TaskPriority.medium;
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -159,14 +171,14 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
             if (_isExpanded) ...[
               const SizedBox(width: 8),
               _buildActionButton(
-                icon: Icons.flag_outlined,
-                color: AppColors.mediumPriority,
+                icon: _selectedPriority == TaskPriority.medium ? Icons.flag_outlined : Icons.flag,
+                color: AppColors.getPriorityColor(_selectedPriority.name),
                 onTap: () => _showPrioritySelector(),
               ),
               const SizedBox(width: 4),
               _buildActionButton(
-                icon: Icons.calendar_today_outlined,
-                color: AppColors.textSecondary,
+                icon: _selectedDueDate != null ? Icons.event : Icons.calendar_today_outlined,
+                color: _selectedDueDate != null ? AppColors.primaryColor : AppColors.textSecondary,
                 onTap: () => _showDatePicker(),
               ),
             ],
@@ -227,7 +239,9 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
               title: Text(_getPriorityName(priority)),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implementar seleção de prioridade
+                setState(() {
+                  _selectedPriority = priority;
+                });
               },
             )),
           ],
@@ -245,7 +259,9 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
     );
     
     if (date != null) {
-      // TODO: Implementar seleção de data
+      setState(() {
+        _selectedDueDate = date;
+      });
     }
   }
 

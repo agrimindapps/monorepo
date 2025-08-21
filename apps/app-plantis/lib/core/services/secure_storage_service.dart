@@ -201,6 +201,65 @@ class SecureStorageService {
     }
   }
 
+  /// Generic methods for simple data types
+  Future<String?> getString(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } catch (e) {
+      debugPrint('❌ Error reading string for key $key: $e');
+      return null;
+    }
+  }
+
+  Future<void> setString(String key, String value) async {
+    try {
+      await _storage.write(key: key, value: value);
+    } catch (e) {
+      debugPrint('❌ Error writing string for key $key: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool?> getBool(String key) async {
+    try {
+      final value = await _storage.read(key: key);
+      if (value == null) return null;
+      return value.toLowerCase() == 'true';
+    } catch (e) {
+      debugPrint('❌ Error reading bool for key $key: $e');
+      return null;
+    }
+  }
+
+  Future<void> setBool(String key, bool value) async {
+    try {
+      await _storage.write(key: key, value: value.toString());
+    } catch (e) {
+      debugPrint('❌ Error writing bool for key $key: $e');
+      rethrow;
+    }
+  }
+
+  Future<int?> getInt(String key) async {
+    try {
+      final value = await _storage.read(key: key);
+      if (value == null) return null;
+      return int.tryParse(value);
+    } catch (e) {
+      debugPrint('❌ Error reading int for key $key: $e');
+      return null;
+    }
+  }
+
+  Future<void> setInt(String key, int value) async {
+    try {
+      await _storage.write(key: key, value: value.toString());
+    } catch (e) {
+      debugPrint('❌ Error writing int for key $key: $e');
+      rethrow;
+    }
+  }
+
   /// Get all keys (for debugging)
   Future<Map<String, String>> getAllSecureData() async {
     if (!kDebugMode) {

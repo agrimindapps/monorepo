@@ -170,13 +170,22 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     );
     
     if (date != null) {
-      // TODO: Implementar atualização da data de vencimento
-      // Isso requereria atualizar a TaskEntity com a nova dueDate
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Data selecionada! (Implementação pendente)'),
-        ),
+      // Atualizar a data de vencimento da tarefa
+      final updatedTask = widget.task.copyWith(
+        dueDate: date,
+        updatedAt: DateTime.now(),
       );
+      
+      await ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('📅 Data de vencimento atualizada!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 

@@ -23,6 +23,8 @@ import '../../domain/usecases/sign_up.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/watch_auth_state.dart';
+import '../../domain/usecases/update_profile.dart';
+import '../../domain/usecases/delete_account.dart';
 import '../../infrastructure/services/analytics_service.dart';
 import '../../infrastructure/services/crashlytics_service.dart';
 import '../../infrastructure/services/performance_service.dart';
@@ -48,6 +50,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SignOut(sl()));
   sl.registerLazySingleton(() => GetCurrentUser(sl()));
   sl.registerLazySingleton(() => WatchAuthState(sl()));
+  sl.registerLazySingleton(() => UpdateProfile(sl()));
+  sl.registerLazySingleton(() => DeleteAccount(sl()));
 
   // Repositories
   sl.registerLazySingleton<TaskRepository>(

@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../core/di/injection_container.dart' as di;
+import '../../domain/usecases/update_profile.dart';
+import '../../domain/usecases/delete_account.dart';
+import '../../domain/entities/user_entity.dart' as local_entities;
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
@@ -11,12 +14,16 @@ class TaskManagerAuthService {
   final IAuthRepository _authRepository;
   late final TaskManagerAnalyticsService _analyticsService;
   late final TaskManagerCrashlyticsService _crashlyticsService;
+  late final UpdateProfile _updateProfile;
+  late final DeleteAccount _deleteAccount;
 
   TaskManagerAuthService({
     required IAuthRepository authRepository,
   }) : _authRepository = authRepository {
     _analyticsService = di.sl<TaskManagerAnalyticsService>();
     _crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
+    _updateProfile = di.sl<UpdateProfile>();
+    _deleteAccount = di.sl<DeleteAccount>();
   }
 
   /// Stream do usuário atual
@@ -247,14 +254,55 @@ class TaskManagerAuthService {
   }
 
   /// Atualizar perfil do usuário
-  Future<Either<Failure, UserEntity>> updateProfile({
+  Future<Either<Failure, local_entities.UserEntity>> updateProfile({
     String? displayName,
     String? photoURL,
   }) async {
     try {
-      // TODO: Implementar updateProfile no core repository se necessário
-      // Por enquanto, vamos retornar erro não implementado
-      return const Left(AuthFailure('Atualização de perfil não implementada'));
+      // Obter usuário atual
+      final currentUserResult = await _authRepository.currentUser.first;
+      if (currentUserResult == null) {
+        return const Left(AuthFailure('Usuário não logado'));
+      }
+
+      // Converter para entidade local e aplicar mudanças
+      final updatedUser = local_entities.UserEntity(
+        id: currentUserResult.id,
+        name: displayName ?? currentUserResult.displayName,
+        email: currentUserResult.email,
+        avatarUrl: photoURL,
+        createdAt: DateTime.now(), // Ajustar conforme necessário
+        updatedAt: DateTime.now(),
+      );
+
+      // Usar o use case local para atualizar
+      final result = await _updateProfile(UpdateProfileParams(user: updatedUser));
+      
+      return result.fold(
+        (failure) {
+          _logAuthEvent('profile_update_failed', {
+            'error_type': failure.runtimeType.toString(),
+            'error_message': failure.message,
+          });
+
+          _crashlyticsService.recordError(
+            exception: failure,
+            stackTrace: StackTrace.current,
+            reason: 'Profile update failed',
+          );
+          
+          return Left(AuthFailure(failure.message));
+        },
+        (_) {
+          _logAuthEvent('profile_updated', {
+            'user_id': updatedUser.id,
+            'has_display_name': displayName != null,
+            'has_photo_url': photoURL != null,
+          });
+
+          return Right(updatedUser);
+        },
+      );
     } catch (e) {
       _crashlyticsService.recordError(
         exception: e,
@@ -270,12 +318,40 @@ class TaskManagerAuthService {
     try {
       final currentUserData = await _getCurrentUserForAnalytics();
       
-      // TODO: Implementar deleteAccount no core repository se necessário
-      // Por enquanto, vamos retornar erro não implementado
-      
       _logAuthEvent('account_deletion_requested', currentUserData);
       
-      return const Left(AuthFailure('Exclusão de conta não implementada'));
+      // Usar o use case local para deletar conta
+      final result = await _deleteAccount();
+      
+      return result.fold(
+        (failure) {
+          _logAuthEvent('account_deletion_failed', {
+            'error_type': failure.runtimeType.toString(),
+            'error_message': failure.message,
+            ...currentUserData,
+          });
+
+          _crashlyticsService.recordError(
+            exception: failure,
+            stackTrace: StackTrace.current,
+            reason: 'Account deletion failed',
+          );
+          
+          return Left(AuthFailure(failure.message));
+        },
+        (_) {
+          _logAuthEvent('account_deleted', currentUserData);
+          
+          // Limpar contexto do Crashlytics
+          _crashlyticsService.setTaskManagerContext(
+            userId: 'anonymous',
+            version: '1.0.0',
+            environment: 'production',
+          );
+          
+          return const Right(null);
+        },
+      );
     } catch (e) {
       _crashlyticsService.recordError(
         exception: e,

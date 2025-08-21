@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
+import '../providers/fuel_provider.dart';
+import '../../domain/entities/fuel_record_entity.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 
 class FuelPage extends StatefulWidget {
   const FuelPage({super.key});
@@ -10,101 +14,83 @@ class FuelPage extends StatefulWidget {
 }
 
 class _FuelPageState extends State<FuelPage> {
-  final List<Map<String, dynamic>> _fuelRecords = [
-    {
-      'id': '1',
-      'vehicleId': '1',
-      'vehicleName': 'Honda Civic',
-      'date': DateTime.now().subtract(const Duration(days: 2)),
-      'liters': 45.5,
-      'pricePerLiter': 5.89,
-      'totalCost': 268.00,
-      'odometer': 25150,
-      'gasStation': 'Posto Shell',
-      'fuelType': 'Gasolina Aditivada',
-      'isFullTank': true,
-    },
-    {
-      'id': '2',
-      'vehicleId': '1',
-      'vehicleName': 'Honda Civic',
-      'date': DateTime.now().subtract(const Duration(days: 10)),
-      'liters': 40.0,
-      'pricePerLiter': 5.75,
-      'totalCost': 230.00,
-      'odometer': 24750,
-      'gasStation': 'Posto Ipiranga',
-      'fuelType': 'Gasolina Comum',
-      'isFullTank': true,
-    },
-    {
-      'id': '3',
-      'vehicleId': '2',
-      'vehicleName': 'Toyota Corolla',
-      'date': DateTime.now().subtract(const Duration(days: 5)),
-      'liters': 50.0,
-      'pricePerLiter': 5.95,
-      'totalCost': 297.50,
-      'odometer': 18200,
-      'gasStation': 'Posto BR',
-      'fuelType': 'Gasolina Aditivada',
-      'isFullTank': true,
-    },
-  ];
-
   String _selectedFilter = 'all';
   String _searchQuery = '';
   String? _selectedVehicleId;
 
-  List<Map<String, dynamic>> get _filteredRecords {
-    var filtered = _fuelRecords;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
+
+  void _loadData() {
+    final fuelProvider = context.read<FuelProvider>();
+    final vehiclesProvider = context.read<VehiclesProvider>();
+    
+    // Load vehicles first, then fuel records
+    vehiclesProvider.loadVehicles().then((_) {
+      if (_selectedVehicleId?.isNotEmpty == true) {
+        fuelProvider.loadFuelRecordsByVehicle(_selectedVehicleId!);
+      } else {
+        fuelProvider.loadAllFuelRecords();
+      }
+    });
+  }
+
+  List<FuelRecordEntity> get _filteredRecords {
+    final fuelProvider = context.read<FuelProvider>();
+    var filtered = fuelProvider.fuelRecords;
 
     // Aplicar filtro por veículo
     if (_selectedFilter != 'all') {
-      filtered = filtered.where((r) => r['vehicleId'] == _selectedFilter).toList();
+      filtered = filtered.where((r) => r.vehicleId == _selectedFilter).toList();
     }
 
-    // Aplicar busca
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((r) {
-        final vehicleName = r['vehicleName'].toString().toLowerCase();
-        final gasStation = r['gasStation'].toString().toLowerCase();
-        final query = _searchQuery.toLowerCase();
-        return vehicleName.contains(query) || gasStation.contains(query);
-      }).toList();
-    }
-
-    // Ordenar por data (mais recente primeiro)
-    filtered.sort((a, b) => b['date'].compareTo(a['date']));
+    // Aplicar busca - já está sendo filtrado pelo provider
+    // O provider já gerencia a busca através do searchFuelRecords()
 
     return filtered;
   }
 
+  String _getVehicleName(String vehicleId) {
+    final vehiclesProvider = context.read<VehiclesProvider>();
+    // Busca na lista carregada localmente em vez de fazer chamada async
+    final vehicle = vehiclesProvider.vehicles.where((v) => v.id == vehicleId).firstOrNull;
+    return vehicle?.displayName ?? 'Veículo desconhecido';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildContent(context),
+    return Consumer2<FuelProvider, VehiclesProvider>(
+      builder: (context, fuelProvider, vehiclesProvider, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildContent(context, fuelProvider, vehiclesProvider),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: _buildFloatingActionButton(context),
+          ),
+          floatingActionButton: _buildFloatingActionButton(context),
+        );
+      },
     );
   }
 
@@ -181,7 +167,17 @@ class _FuelPageState extends State<FuelPage> {
         Expanded(
           flex: 2,
           child: TextField(
-            onChanged: (value) => setState(() => _searchQuery = value),
+            onChanged: (value) {
+              setState(() => _searchQuery = value);
+              
+              // Perform search using the provider
+              final fuelProvider = context.read<FuelProvider>();
+              if (value.isNotEmpty) {
+                fuelProvider.searchFuelRecords(value);
+              } else {
+                fuelProvider.clearSearch();
+              }
+            },
             decoration: InputDecoration(
               hintText: 'Buscar por veículo ou posto...',
               prefixIcon: const Icon(Icons.search, size: 20),
@@ -211,23 +207,41 @@ class _FuelPageState extends State<FuelPage> {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
-          child: DropdownButton<String>(
-            value: _selectedFilter,
-            underline: const SizedBox(),
-            icon: const Icon(Icons.arrow_drop_down),
-            items: const [
-              DropdownMenuItem(value: 'all', child: Text('Todos os veículos')),
-              DropdownMenuItem(value: '1', child: Text('Honda Civic')),
-              DropdownMenuItem(value: '2', child: Text('Toyota Corolla')),
-            ],
-            onChanged: (value) => setState(() => _selectedFilter = value!),
+          child: Consumer<VehiclesProvider>(
+            builder: (context, vehiclesProvider, child) {
+              final vehicles = vehiclesProvider.vehicles;
+              
+              return DropdownButton<String>(
+                value: _selectedFilter,
+                underline: const SizedBox(),
+                icon: const Icon(Icons.arrow_drop_down),
+                items: [
+                  const DropdownMenuItem(value: 'all', child: Text('Todos os veículos')),
+                  ...vehicles.map((vehicle) => DropdownMenuItem(
+                    value: vehicle.id,
+                    child: Text(vehicle.displayName),
+                  )),
+                ],
+                onChanged: (value) {
+                  setState(() => _selectedFilter = value!);
+                  
+                  // Update the fuel records based on selection
+                  final fuelProvider = context.read<FuelProvider>();
+                  if (value == 'all') {
+                    fuelProvider.loadAllFuelRecords();
+                  } else if (value != null) {
+                    fuelProvider.loadFuelRecordsByVehicle(value);
+                  }
+                },
+              );
+            },
           ),
         ),
       ],
     );
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, FuelProvider fuelProvider, VehiclesProvider vehiclesProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -238,37 +252,53 @@ class _FuelPageState extends State<FuelPage> {
               _selectedVehicleId = vehicleId;
               _selectedFilter = vehicleId ?? 'all';
             });
+            
+            // Load records for selected vehicle
+            if (vehicleId?.isNotEmpty == true) {
+              fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
+            } else {
+              fuelProvider.loadAllFuelRecords();
+            }
           },
           showEmptyOption: true,
         ),
         const SizedBox(height: 24),
-        if (_filteredRecords.isEmpty)
+        
+        // Show loading state
+        if (fuelProvider.isLoading)
+          _buildLoadingState()
+        // Show error state  
+        else if (fuelProvider.hasError)
+          _buildErrorState(fuelProvider.errorMessage!, () => _loadData())
+        // Show empty state
+        else if (_filteredRecords.isEmpty)
           _buildEmptyState()
+        // Show content
         else ...[
-          _buildStatistics(),
+          _buildStatistics(_filteredRecords),
           const SizedBox(height: 24),
-          _buildRecordsList(),
+          _buildRecordsList(_filteredRecords, vehiclesProvider),
         ],
       ],
     );
   }
 
-  Widget _buildStatistics() {
-    final totalLiters = _filteredRecords.fold<double>(
+  Widget _buildStatistics(List<FuelRecordEntity> records) {
+    final totalLiters = records.fold<double>(
       0,
-      (sum, record) => sum + (record['liters'] as double),
+      (sum, record) => sum + record.liters,
     );
-    final totalCost = _filteredRecords.fold<double>(
+    final totalCost = records.fold<double>(
       0,
-      (sum, record) => sum + (record['totalCost'] as double),
+      (sum, record) => sum + record.totalPrice,
     );
-    final avgPrice = _filteredRecords.isEmpty
+    final avgPrice = records.isEmpty
         ? 0.0
-        : _filteredRecords.fold<double>(
+        : records.fold<double>(
               0,
-              (sum, record) => sum + (record['pricePerLiter'] as double),
+              (sum, record) => sum + record.pricePerLiter,
             ) /
-            _filteredRecords.length;
+            records.length;
 
     return Row(
       children: [
@@ -353,7 +383,7 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-  Widget _buildRecordsList() {
+  Widget _buildRecordsList(List<FuelRecordEntity> records, VehiclesProvider vehiclesProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,14 +396,15 @@ class _FuelPageState extends State<FuelPage> {
           ),
         ),
         const SizedBox(height: 16),
-        ..._filteredRecords.map((record) => _buildRecordCard(record)),
+        ...records.map((record) => _buildRecordCard(record, vehiclesProvider)),
       ],
     );
   }
 
-  Widget _buildRecordCard(Map<String, dynamic> record) {
-    final date = record['date'] as DateTime;
+  Widget _buildRecordCard(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {
+    final date = record.date;
     final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final vehicleName = _getVehicleName(record.vehicleId);
 
     return Card(
       elevation: 0,
@@ -383,7 +414,8 @@ class _FuelPageState extends State<FuelPage> {
         side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: InkWell(
-        onTap: () => _showRecordDetails(record),
+        onTap: () => _showRecordDetails(record, vehiclesProvider),
+        onLongPress: () => _showRecordMenu(record),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -412,7 +444,7 @@ class _FuelPageState extends State<FuelPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              record['vehicleName'],
+                              vehicleName,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -430,7 +462,7 @@ class _FuelPageState extends State<FuelPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          record['gasStation'],
+                          record.gasStationName ?? 'Posto não informado',
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -449,20 +481,20 @@ class _FuelPageState extends State<FuelPage> {
                 children: [
                   _buildInfoItem(
                     Icons.water_drop_outlined,
-                    '${record['liters']} L',
+                    '${record.liters.toStringAsFixed(1)} L',
                     'Litros',
                   ),
                   _buildInfoItem(
                     Icons.speed,
-                    '${record['odometer']} km',
+                    '${record.odometer.toStringAsFixed(0)} km',
                     'Odômetro',
                   ),
                   _buildInfoItem(
                     Icons.attach_money,
-                    'R\$ ${record['totalCost'].toStringAsFixed(2)}',
+                    'R\$ ${record.totalPrice.toStringAsFixed(2)}',
                     'Total',
                   ),
-                  if (record['isFullTank'])
+                  if (record.fullTank)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -578,7 +610,9 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-  void _showRecordDetails(Map<String, dynamic> record) {
+  void _showRecordDetails(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {
+    final vehicleName = _getVehicleName(record.vehicleId);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -586,20 +620,22 @@ class _FuelPageState extends State<FuelPage> {
           children: [
             Icon(Icons.local_gas_station, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 8),
-            Text(record['vehicleName']),
+            Text(vehicleName),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('Posto', record['gasStation']),
-            _buildDetailRow('Combustível', record['fuelType']),
-            _buildDetailRow('Litros', '${record['liters']} L'),
-            _buildDetailRow('Preço/L', 'R\$ ${record['pricePerLiter']}'),
-            _buildDetailRow('Total', 'R\$ ${record['totalCost']}'),
-            _buildDetailRow('Odômetro', '${record['odometer']} km'),
-            _buildDetailRow('Tanque cheio', record['isFullTank'] ? 'Sim' : 'Não'),
+            _buildDetailRow('Posto', record.gasStationName ?? 'Não informado'),
+            _buildDetailRow('Combustível', record.fuelType.displayName),
+            _buildDetailRow('Litros', record.formattedLiters),
+            _buildDetailRow('Preço/L', record.formattedPricePerLiter),
+            _buildDetailRow('Total', record.formattedTotalPrice),
+            _buildDetailRow('Odômetro', record.formattedOdometer),
+            _buildDetailRow('Tanque cheio', record.fullTank ? 'Sim' : 'Não'),
+            if (record.hasNotes)
+              _buildDetailRow('Observações', record.notes!),
           ],
         ),
         actions: [
@@ -608,6 +644,134 @@ class _FuelPageState extends State<FuelPage> {
             child: const Text('Fechar'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showRecordMenu(FuelRecordEntity record) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Editar'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/fuel/add', extra: {
+                  'editFuelRecordId': record.id,
+                  'vehicleId': record.vehicleId,
+                });
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Excluir', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDeleteRecord(record);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteRecord(FuelRecordEntity record) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar exclusão'),
+        content: const Text('Tem certeza que deseja excluir este registro de abastecimento?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              final fuelProvider = context.read<FuelProvider>();
+              final success = await fuelProvider.deleteFuelRecord(record.id);
+              
+              if (mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Registro excluído com sucesso!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(fuelProvider.errorMessage ?? 'Erro ao excluir registro'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(48.0),
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error, VoidCallback onRetry) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(48.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar dados',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
       ),
     );
   }

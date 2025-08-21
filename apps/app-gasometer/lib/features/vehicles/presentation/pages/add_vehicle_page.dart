@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
+import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/validation/validation_service.dart';
+import '../../../../core/interfaces/validation_result.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicles_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -29,6 +32,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   final _renavamController = TextEditingController();
   final _odometroController = TextEditingController();
   
+  final Map<String, ValidationResult> _validationResults = {};
+  
   String _selectedCombustivel = 'Gasolina';
   bool _isLoading = false;
   File? _vehicleImage;
@@ -37,6 +42,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   @override
   void initState() {
     super.initState();
+    
     if (widget.vehicle != null) {
       _populateFields();
     }
@@ -132,20 +138,28 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       title: 'Identificação do Veículo',
       icon: Icons.directions_car,
       children: [
-        _buildTextField(
+        ValidatedFormField(
           controller: _marcaController,
           label: 'Marca',
           hint: 'Ex: Ford, Volkswagen, etc.',
-          textCapitalization: TextCapitalization.words,
-          validator: (value) => _validateTextInput(value, 'Marca'),
+          required: true,
+          validationType: ValidationType.length,
+          minLength: 2,
+          maxLengthValidation: 50,
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+          onValidationChanged: (result) => _validationResults['marca'] = result,
         ),
         const SizedBox(height: 12),
-        _buildTextField(
+        ValidatedFormField(
           controller: _modeloController,
           label: 'Modelo',
           hint: 'Ex: Gol, Fiesta, etc.',
-          textCapitalization: TextCapitalization.words,
-          validator: (value) => _validateTextInput(value, 'Modelo'),
+          required: true,
+          validationType: ValidationType.length,
+          minLength: 2,
+          maxLengthValidation: 50,
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
+          onValidationChanged: (result) => _validationResults['modelo'] = result,
         ),
         const SizedBox(height: 12),
         Row(
@@ -155,12 +169,16 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildTextField(
+              child: ValidatedFormField(
                 controller: _corController,
                 label: 'Cor',
                 hint: 'Ex: Branco, Preto, etc.',
-                textCapitalization: TextCapitalization.words,
-                validator: (value) => _validateTextInput(value, 'Cor', maxLength: 30),
+                required: true,
+                validationType: ValidationType.length,
+                minLength: 3,
+                maxLengthValidation: 30,
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+                onValidationChanged: (result) => _validationResults['cor'] = result,
               ),
             ),
           ],
@@ -184,58 +202,78 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       title: 'Documentação',
       icon: Icons.description,
       children: [
-        _buildTextField(
+        ValidatedFormField(
           controller: _odometroController,
           label: 'Odômetro Atual',
           hint: '0,00',
-          suffixText: 'km',
-          textAlign: TextAlign.right,
+          required: true,
+          validationType: ValidationType.decimal,
+          minValue: 0.0,
+          maxValue: 999999.0,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: _getOdometroFormatters(),
-          validator: _validateOdometro,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+          ],
+          decoration: const InputDecoration(
+            suffixText: 'km',
+          ),
+          onValidationChanged: (result) => _validationResults['odometro'] = result,
           onChanged: (value) {
-            // Atualiza o estado para mostrar o contador
             setState(() {});
           },
         ),
         const SizedBox(height: 12),
-        _buildTextField(
+        ValidatedFormField(
           controller: _placaController,
           label: 'Placa',
           hint: 'Ex: ABC1234 ou ABC1D23',
-          textCapitalization: TextCapitalization.characters,
+          required: true,
+          validationType: ValidationType.licensePlate,
           maxLength: 7,
-          showCounter: true,
-          inputFormatters: _getPlacaFormatters(),
-          validator: _validatePlaca,
+          showCharacterCount: true,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+            LengthLimitingTextInputFormatter(7),
+          ],
+          onValidationChanged: (result) => _validationResults['placa'] = result,
           onChanged: (value) {
             setState(() {});
           },
         ),
         const SizedBox(height: 12),
-        _buildTextField(
+        ValidatedFormField(
           controller: _chassiController,
-          label: 'Chassi',
+          label: 'Chassi (opcional)',
           hint: 'Ex: 9BWZZZ377VT004251',
-          textCapitalization: TextCapitalization.characters,
+          required: false,
+          validationType: ValidationType.chassis,
           maxLength: 17,
-          showCounter: true,
-          inputFormatters: _getChassiFormatters(),
-          validator: _validateChassi,
+          showCharacterCount: true,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
+            LengthLimitingTextInputFormatter(17),
+            UpperCaseTextFormatter(),
+          ],
+          onValidationChanged: (result) => _validationResults['chassi'] = result,
           onChanged: (value) {
             setState(() {});
           },
         ),
         const SizedBox(height: 12),
-        _buildTextField(
+        ValidatedFormField(
           controller: _renavamController,
-          label: 'Renavam',
+          label: 'Renavam (opcional)',
           hint: 'Ex: 12345678901',
+          required: false,
+          validationType: ValidationType.renavam,
           keyboardType: TextInputType.number,
           maxLength: 11,
-          showCounter: true,
-          inputFormatters: _getRenavamFormatters(),
-          validator: _validateRenavam,
+          showCharacterCount: true,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(11),
+          ],
+          onValidationChanged: (result) => _validationResults['renavam'] = result,
           onChanged: (value) {
             setState(() {});
           },
@@ -828,7 +866,17 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Valida todos os campos primeiro
+    final hasErrors = _validationResults.values.any((result) => !result.isValid);
+    if (hasErrors || !_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Por favor, corrija os erros no formulário'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 

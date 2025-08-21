@@ -5,10 +5,17 @@ import '../../../domain/entities/plant_task.dart';
 import '../../providers/plant_task_provider.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
-class PlantTasksSection extends StatelessWidget {
+class PlantTasksSection extends StatefulWidget {
   final Plant plant;
 
   const PlantTasksSection({super.key, required this.plant});
+
+  @override
+  State<PlantTasksSection> createState() => _PlantTasksSectionState();
+}
+
+class _PlantTasksSectionState extends State<PlantTasksSection> {
+  bool _showAllCompletedTasks = false;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +25,7 @@ class PlantTasksSection extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final tasks = taskProvider.getTasksForPlant(plant.id);
+        final tasks = taskProvider.getTasksForPlant(widget.plant.id);
 
         if (tasks.isEmpty) {
           return _buildEmptyTasksState(context);
@@ -99,6 +106,9 @@ class PlantTasksSection extends StatelessWidget {
             )
             .toList();
     final completedTasks = tasks.where((task) => task.isCompleted).toList();
+    
+    // Ordenar tarefas concluídas por data de conclusão (mais recente primeiro)
+    completedTasks.sort((a, b) => (b.completedDate ?? DateTime(1970)).compareTo(a.completedDate ?? DateTime(1970)));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,15 +159,12 @@ class PlantTasksSection extends StatelessWidget {
           const SizedBox(height: 24),
         ],
 
-        // Tarefas concluídas (últimas 5)
+        // Tarefas concluídas agrupadas por data
         if (completedTasks.isNotEmpty) ...[
-          _buildTaskSection(
+          _buildCompletedTasksSection(
             context,
-            title: 'Tarefas concluídas',
-            tasks: completedTasks.take(5).toList(),
-            color: Colors.green,
-            taskProvider: taskProvider,
-            isCompleted: true,
+            completedTasks,
+            taskProvider,
           ),
         ],
       ],
@@ -327,7 +334,7 @@ class PlantTasksSection extends StatelessWidget {
         children: [
           // Checkbox ou ícone de status
           GestureDetector(
-            onTap: () => taskProvider.toggleTaskCompletion(plant.id, task.id),
+            onTap: () => taskProvider.toggleTaskCompletion(widget.plant.id, task.id),
             child: Container(
               width: 24,
               height: 24,
@@ -505,7 +512,7 @@ class PlantTasksSection extends StatelessWidget {
   ) {
     switch (action) {
       case 'complete':
-        taskProvider.toggleTaskCompletion(plant.id, task.id);
+        taskProvider.toggleTaskCompletion(widget.plant.id, task.id);
         break;
       case 'edit':
         // TODO: Implementar edição de tarefa
@@ -540,7 +547,7 @@ class PlantTasksSection extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  taskProvider.deleteTask(plant.id, task.id);
+                  taskProvider.deleteTask(widget.plant.id, task.id);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Tarefa excluída'),
@@ -554,5 +561,326 @@ class PlantTasksSection extends StatelessWidget {
             ],
           ),
     );
+  }
+
+  /// Seção de tarefas concluídas agrupadas por data com opção de carregar todas
+  Widget _buildCompletedTasksSection(
+    BuildContext context,
+    List<PlantTask> completedTasks,
+    PlantTaskProvider taskProvider,
+  ) {
+    final theme = Theme.of(context);
+    
+    // Determinar quantas tarefas mostrar
+    final tasksToShow = _showAllCompletedTasks 
+        ? completedTasks 
+        : completedTasks.take(15).toList();
+    
+    // Agrupar tarefas por data de conclusão
+    final groupedTasks = <String, List<PlantTask>>{};
+    
+    for (final task in tasksToShow) {
+      final completedDate = task.completedDate;
+      if (completedDate != null) {
+        final dateKey = _formatDateKey(completedDate);
+        groupedTasks.putIfAbsent(dateKey, () => []).add(task);
+      }
+    }
+    
+    // Ordenar as chaves de data (mais recente primeiro)
+    final sortedDateKeys = groupedTasks.keys.toList()
+      ..sort((a, b) => _compareDateKeys(a, b));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header da seção
+        Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Tarefas concluídas',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${completedTasks.length} tarefa${completedTasks.length != 1 ? 's' : ''}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Tarefas agrupadas por data
+        ...sortedDateKeys.map((dateKey) {
+          final dayTasks = groupedTasks[dateKey]!;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header do grupo de data
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.green.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      dateKey,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${dayTasks.length}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Tarefas do dia
+              ...dayTasks.map((task) => Padding(
+                padding: const EdgeInsets.only(bottom: 8, left: 16),
+                child: _buildCompletedTaskCard(context, task, taskProvider),
+              )),
+              
+              const SizedBox(height: 16),
+            ],
+          );
+        }),
+        
+        // Botão para carregar todas as tarefas
+        if (!_showAllCompletedTasks && completedTasks.length > 15) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _showAllCompletedTasks = true;
+                });
+              },
+              icon: const Icon(Icons.expand_more),
+              label: Text(
+                'Ver todas (${completedTasks.length - 15} mais)',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.green,
+                side: BorderSide(color: Colors.green.withValues(alpha: 0.5)),
+              ),
+            ),
+          ),
+        ],
+        
+        // Botão para mostrar menos (se estiver mostrando todas)
+        if (_showAllCompletedTasks && completedTasks.length > 15) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _showAllCompletedTasks = false;
+                });
+              },
+              icon: const Icon(Icons.expand_less),
+              label: const Text('Mostrar menos'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.green,
+                side: BorderSide(color: Colors.green.withValues(alpha: 0.5)),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Card otimizado para tarefas concluídas
+  Widget _buildCompletedTaskCard(
+    BuildContext context,
+    PlantTask task,
+    PlantTaskProvider taskProvider,
+  ) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.green.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Ícone de concluído
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Icon(
+              Icons.check, 
+              color: Colors.white, 
+              size: 12,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // Ícone da tarefa
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              _getTaskIcon(task.type), 
+              color: Colors.green, 
+              size: 16,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // Informações da tarefa
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+                if (task.description?.isNotEmpty == true) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    task.description!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+                
+                // Horário de conclusão
+                if (task.completedDate != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 12,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatCompletedTime(task.completedDate!),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Formatar chave de data para agrupamento
+  String _formatDateKey(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final taskDate = DateTime(date.year, date.month, date.day);
+
+    if (taskDate == today) {
+      return 'Hoje';
+    } else if (taskDate == yesterday) {
+      return 'Ontem';
+    } else {
+      final months = [
+        'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      ];
+      
+      if (date.year == now.year) {
+        return '${date.day} de ${months[date.month - 1]}';
+      } else {
+        return '${date.day} ${months[date.month - 1]} ${date.year}';
+      }
+    }
+  }
+
+  /// Comparar chaves de data para ordenação (mais recente primeiro)
+  int _compareDateKeys(String a, String b) {
+    // Hoje sempre primeiro
+    if (a == 'Hoje') return -1;
+    if (b == 'Hoje') return 1;
+    
+    // Ontem vem depois de hoje
+    if (a == 'Ontem') return -1;
+    if (b == 'Ontem') return 1;
+    
+    // Para outras datas, comparar alfabeticamente reverso (aproximação)
+    return b.compareTo(a);
+  }
+
+  /// Formatar horário de conclusão
+  String _formatCompletedTime(DateTime completedDate) {
+    return '${completedDate.hour.toString().padLeft(2, '0')}:${completedDate.minute.toString().padLeft(2, '0')}';
   }
 }

@@ -8,6 +8,7 @@ import '../providers/subscription_providers.dart';
 import '../../domain/entities/subscription_status.dart';
 import '../pages/premium_page.dart';
 import '../pages/notification_settings_page.dart';
+import '../widgets/delete_account_confirmation_dialog.dart';
 
 class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({super.key});
@@ -507,43 +508,80 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showDeleteAccountDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir conta'),
-        content: const Text(
-          'Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.\n\nTem certeza que deseja excluir sua conta?'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _deleteAccount();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
-    );
+    final authState = ref.read(authNotifierProvider);
+    
+    authState.whenData((user) async {
+      if (user == null) return;
+
+      await showDeleteAccountConfirmation(
+        context: context,
+        userEmail: user.email,
+        onConfirmed: () async {
+          _deleteAccount();
+        },
+      );
+    });
   }
 
   // Action methods
-  void _updateProfile() {
-    // TODO: Implementar atualização de perfil
+  void _updateProfile() async {
+    final authService = ref.read(taskManagerAuthServiceProvider);
+    final newName = _displayNameController.text.trim();
+
+    if (newName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nome não pode estar vazio'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Atualização de perfil será implementada em breve'),
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            SizedBox(width: 16),
+            Text('Atualizando perfil...'),
+          ],
+        ),
+        duration: Duration(seconds: 10),
         backgroundColor: AppColors.info,
       ),
     );
+
+    final result = await authService.updateProfile(displayName: newName);
+    
+    // Remover loading snackbar
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao atualizar perfil: ${failure.message}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        },
+        (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Perfil atualizado com sucesso!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        },
+      );
+    }
   }
 
   void _sendEmailVerification() {
@@ -574,13 +612,59 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  void _deleteAccount() {
+  void _deleteAccount() async {
+    final authService = ref.read(taskManagerAuthServiceProvider);
+    
+    // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Exclusão de conta será implementada em breve'),
-        backgroundColor: AppColors.info,
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            SizedBox(width: 16),
+            Text('Excluindo conta...'),
+          ],
+        ),
+        duration: Duration(seconds: 30),
+        backgroundColor: AppColors.error,
       ),
     );
+
+    final result = await authService.deleteAccount();
+    
+    // Remover loading snackbar
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao excluir conta: ${failure.message}'),
+              backgroundColor: AppColors.error,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        },
+        (_) {
+          // Conta excluída com sucesso - usuário já foi deslogado
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Conta excluída permanentemente'),
+              backgroundColor: AppColors.success,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        
+          // Voltar para a tela de login (o auth guard deve redirecionar automaticamente)
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
+      );
+    }
   }
 
   void _showThemeDialog() {

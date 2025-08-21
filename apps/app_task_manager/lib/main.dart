@@ -8,6 +8,8 @@ import 'firebase_options.dart';
 import 'core/database/hive_config.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/theme/app_theme.dart';
+import 'core/services/navigation_service.dart';
+import 'core/services/notification_actions_service.dart';
 import 'presentation/pages/home_page.dart';
 import 'presentation/widgets/auth_guard.dart';
 import 'presentation/providers/theme_provider.dart';
@@ -15,6 +17,7 @@ import 'infrastructure/services/analytics_service.dart';
 import 'infrastructure/services/crashlytics_service.dart';
 import 'infrastructure/services/performance_service.dart';
 import 'infrastructure/services/notification_service.dart';
+import 'core/utils/notification_test_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +49,17 @@ void main() async {
   // Inicializar serviços Firebase
   await _initializeFirebaseServices();
 
-  runApp(const ProviderScope(child: TaskManagerApp()));
+  // Criar ProviderScope e inicializar serviços de navegação
+  final providerContainer = ProviderContainer();
+  
+  // Inicializar serviços com container
+  NavigationService.initialize(providerContainer);
+  NotificationActionsService.initialize(providerContainer);
+  
+  runApp(UncontrolledProviderScope(
+    container: providerContainer,
+    child: const TaskManagerApp(),
+  ));
 }
 
 Future<void> _initializeFirebaseServices() async {
@@ -92,6 +105,14 @@ Future<void> _initializeFirebaseServices() async {
     });
 
     debugPrint('🚀 Firebase services initialized successfully');
+    
+    // Em modo debug, executar testes de notificação após 5 segundos
+    if (kDebugMode && notificationInitialized) {
+      Future.delayed(const Duration(seconds: 5), () {
+        debugPrint('🧪 Starting notification workflow tests...');
+        NotificationTestHelper.runAllTests(notificationService);
+      });
+    }
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing Firebase services: $e');
     
@@ -113,22 +134,8 @@ void _handleNotificationTap(String? payload) {
   debugPrint('🔔 Notification tapped: $payload');
   
   if (payload != null) {
-    // Navegar baseado no payload
-    if (payload.startsWith('task_reminder:')) {
-      final taskId = payload.split(':')[1];
-      // TODO: Navegar para a tarefa específica
-      debugPrint('Navigate to task: $taskId');
-    } else if (payload.startsWith('task_deadline:')) {
-      final taskId = payload.split(':')[1];
-      // TODO: Navegar para a tarefa com foco no deadline
-      debugPrint('Navigate to task deadline: $taskId');
-    } else if (payload == 'weekly_review') {
-      // TODO: Navegar para página de revisão semanal
-      debugPrint('Navigate to weekly review');
-    } else if (payload == 'daily_productivity') {
-      // TODO: Navegar para página principal com foco em produtividade
-      debugPrint('Navigate to productivity view');
-    }
+    // Usar NavigationService para gerenciar navegação
+    NavigationService.navigateFromNotification(payload);
   }
 }
 
@@ -136,24 +143,8 @@ void _handleNotificationTap(String? payload) {
 void _handleNotificationAction(String actionId, String? payload) {
   debugPrint('🔔 Notification action: $actionId, payload: $payload');
   
-  if (payload != null && (payload.startsWith('task_reminder:') || payload.startsWith('task_deadline:'))) {
-    final taskId = payload.split(':')[1];
-    
-    switch (actionId) {
-      case 'mark_done':
-        // TODO: Marcar tarefa como concluída
-        debugPrint('Mark task as done: $taskId');
-        break;
-      case 'snooze_1h':
-        // TODO: Reagendar lembrete para 1 hora
-        debugPrint('Snooze task for 1 hour: $taskId');
-        break;
-      case 'extend_deadline':
-        // TODO: Abrir dialog para estender deadline
-        debugPrint('Extend deadline for task: $taskId');
-        break;
-    }
-  }
+  // Usar NotificationActionsService para executar ações
+  NotificationActionsService.executeNotificationAction(actionId, payload);
 }
 
 class TaskManagerApp extends ConsumerWidget {
@@ -168,6 +159,7 @@ class TaskManagerApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
+      navigatorKey: NavigationService.navigatorKey,
       home: const AuthGuard(
         child: HomePage(),
       ),

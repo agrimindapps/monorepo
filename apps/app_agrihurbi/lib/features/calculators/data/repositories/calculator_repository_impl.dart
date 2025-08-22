@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
+import 'package:get_it/get_it.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -8,6 +10,7 @@ import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/repositories/calculator_repository.dart';
 import '../datasources/calculator_local_datasource.dart';
+import '../../../core/error/failures.dart';
 
 /// Implementação do repositório de calculadoras
 /// 
@@ -16,8 +19,13 @@ import '../datasources/calculator_local_datasource.dart';
 @LazySingleton(as: CalculatorRepository)
 class CalculatorRepositoryImpl implements CalculatorRepository {
   final CalculatorLocalDataSource _localDataSource;
+  final FirebaseAnalyticsService _analyticsService;
+  final HiveStorageService _hiveStorageService;
 
-  const CalculatorRepositoryImpl(this._localDataSource);
+  const CalculatorRepositoryImpl(
+    this._localDataSource,
+  ) : _analyticsService = const FirebaseAnalyticsService(),
+      _hiveStorageService = const HiveStorageService();
 
   @override
   Future<Either<Failure, List<CalculatorEntity>>> getAllCalculators() async {
@@ -72,27 +80,105 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     String calculatorId,
     Map<String, dynamic> inputs,
   ) async {
+    final startTime = DateTime.now();
+    
     try {
+      // Performance monitoring: start calculation
+      await _analyticsService.logEvent(
+        'calculator_repository_execution_start',
+        parameters: {
+          'calculator_id': calculatorId,
+          'input_count': inputs.length,
+          'timestamp': startTime.toIso8601String(),
+        },
+      );
+      
       final calculator = await _localDataSource.getCalculatorById(calculatorId);
       if (calculator == null) {
+        await _analyticsService.logEvent(
+          'calculator_not_found',
+          parameters: {
+            'calculator_id': calculatorId,
+          },
+        );
         return const Left(NotFoundFailure('Calculadora não encontrada'));
       }
 
       // Executa o cálculo usando o método da entidade
       final result = calculator.executeCalculation(inputs);
       
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
+      
+      // Performance monitoring: calculation success
+      await _analyticsService.logEvent(
+        'calculator_repository_execution_success',
+        parameters: {
+          'calculator_id': calculatorId,
+          'duration_ms': duration,
+          'result_count': result.results.length,
+          'is_valid': result.isValid,
+        },
+      );
+      
+      // Store performance metrics
+      await _storePerformanceMetric(
+        'calculation_execution',
+        calculatorId,
+        duration,
+      );
+      
       return Right(result);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
+      
+      // Error tracking
+      await _analyticsService.logEvent(
+        'calculator_repository_execution_error',
+        parameters: {
+          'calculator_id': calculatorId,
+          'error': e.toString(),
+          'duration_ms': duration,
+          'stack_trace': stackTrace.toString().substring(0, 500), // Limit stack trace
+        },
+      );
+      
+      debugPrint('CalculatorRepositoryImpl: Erro na execução - $e');
+      debugPrint('StackTrace: $stackTrace');
+      
       return Left(ServerFailure('Erro no cálculo: ${e.toString()}'));
     }
   }
 
   @override
   Future<Either<Failure, List<CalculationHistory>>> getCalculationHistory() async {
+    final startTime = DateTime.now();
+    
     try {
       final history = await _localDataSource.getCalculationHistory();
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
+      
+      // Performance monitoring
+      await _analyticsService.logEvent(
+        'calculation_history_loaded',
+        parameters: {
+          'history_count': history.length,
+          'duration_ms': duration,
+        },
+      );
+      
       return Right(history);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Error tracking
+      await _analyticsService.logEvent(
+        'calculation_history_load_error',
+        parameters: {
+          'error': e.toString(),
+        },
+      );
+      
+      debugPrint('CalculatorRepositoryImpl: Erro ao carregar histórico - $e');
+      debugPrint('StackTrace: $stackTrace');
+      
       return Left(CacheFailure('Erro ao carregar histórico: ${e.toString()}'));
     }
   }
@@ -101,10 +187,39 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
   Future<Either<Failure, Unit>> saveCalculationToHistory(
     CalculationHistory historyItem,
   ) async {
+    final startTime = DateTime.now();
+    
     try {
       await _localDataSource.saveCalculationToHistory(historyItem);
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
+      
+      // Performance monitoring
+      await _analyticsService.logEvent(
+        'calculation_history_saved',
+        parameters: {
+          'calculator_id': historyItem.calculatorId,
+          'user_id': historyItem.userId,
+          'duration_ms': duration,
+          'has_notes': historyItem.notes != null,
+          'tag_count': historyItem.tags?.length ?? 0,
+        },
+      );
+      
       return const Right(unit);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Error tracking
+      await _analyticsService.logEvent(
+        'calculation_history_save_error',
+        parameters: {
+          'calculator_id': historyItem.calculatorId,
+          'user_id': historyItem.userId,
+          'error': e.toString(),
+        },
+      );
+      
+      debugPrint('CalculatorRepositoryImpl: Erro ao salvar histórico - $e');
+      debugPrint('StackTrace: $stackTrace');
+      
       return Left(CacheFailure('Erro ao salvar no histórico: ${e.toString()}'));
     }
   }
@@ -156,6 +271,32 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure('Erro ao remover favorito: ${e.toString()}'));
+    }
+  }
+  
+  /// Store performance metrics for monitoring
+  Future<void> _storePerformanceMetric(
+    String operation,
+    String calculatorId,
+    int durationMs,
+  ) async {
+    try {
+      final metricKey = 'performance_${operation}_${calculatorId}';
+      final metric = {
+        'operation': operation,
+        'calculator_id': calculatorId,
+        'duration_ms': durationMs,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      
+      await _hiveStorageService.put(
+        boxName: 'performance_metrics',
+        key: metricKey,
+        value: metric,
+      );
+    } catch (e) {
+      // Silent fail for performance metrics to not affect main functionality
+      debugPrint('Error storing performance metric: $e');
     }
   }
 }

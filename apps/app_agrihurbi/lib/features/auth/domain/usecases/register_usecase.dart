@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:get_it/get_it.dart';
 
 import '../entities/user_entity.dart' hide UserEntity;
 import '../entities/user_entity.dart' as local_user;
@@ -14,35 +15,110 @@ import '../repositories/auth_repository.dart';
 @lazySingleton
 class RegisterUseCase implements UseCase<local_user.UserEntity, RegisterParams> {
   final AuthRepository repository;
+  final FirebaseAnalyticsService _analyticsService;
   
-  const RegisterUseCase(this.repository);
+  const RegisterUseCase(
+    this.repository,
+  ) : _analyticsService = const FirebaseAnalyticsService();
   
   @override
   Future<Either<Failure, local_user.UserEntity>> call(RegisterParams params) async {
-    // Validação dos parâmetros de entrada
-    final validation = _validateRegistrationData(params);
-    if (validation != null) {
-      return Left(ValidationFailure(validation));
+    final startTime = DateTime.now();
+    
+    try {
+      // Analytics: track registration attempt
+      await _analyticsService.logEvent(
+        'registration_attempt',
+        parameters: {
+          'has_phone': params.phone != null,
+          'email_domain': params.email.split('@').last,
+          'name_length': params.name.length,
+          'password_length': params.password.length,
+        },
+      );
+      
+      // Validação dos parâmetros de entrada
+      final validation = _validateRegistrationData(params);
+      if (validation != null) {
+        await _analyticsService.logEvent(
+          'registration_validation_failed',
+          parameters: {
+            'error': validation,
+            'email_domain': params.email.split('@').last,
+          },
+        );
+        return Left(ValidationFailure(validation));
+      }
+      
+      // Normalizar dados
+      final normalizedEmail = params.email.trim().toLowerCase();
+      final normalizedName = params.name.trim();
+      final normalizedPhone = params.phone?.trim();
+      
+      // Validar se email já existe
+      final emailExists = await _checkEmailExists(normalizedEmail);
+      if (emailExists) {
+        await _analyticsService.logEvent(
+          'registration_email_exists',
+          parameters: {
+            'email_domain': params.email.split('@').last,
+          },
+        );
+        return Left(ValidationFailure('Email já está em uso'));
+      }
+      
+      // Executar registro no repository
+      final result = await repository.register(
+        name: normalizedName,
+        email: normalizedEmail,
+        password: params.password,
+        phone: normalizedPhone,
+      );
+      
+      // Analytics: track registration result
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
+      
+      result.fold(
+        (failure) async {
+          await _analyticsService.logEvent(
+            'registration_failed',
+            parameters: {
+              'error_type': failure.runtimeType.toString(),
+              'duration_ms': duration,
+              'email_domain': params.email.split('@').last,
+            },
+          );
+        },
+        (user) async {
+          await _analyticsService.logEvent(
+            'registration_success',
+            parameters: {
+              'duration_ms': duration,
+              'user_id': user.id,
+              'email_domain': params.email.split('@').last,
+              'has_phone': params.phone != null,
+            },
+          );
+          
+          // Set user properties for analytics
+          await _analyticsService.setUserId(user.id);
+          await _analyticsService.setUserProperty('user_type', 'farmer');
+          await _analyticsService.setUserProperty('app_version', 'agrihurbi_v1');
+          await _analyticsService.setUserProperty('registration_date', DateTime.now().toIso8601String());
+        },
+      );
+      
+      return result;
+    } catch (e) {
+      await _analyticsService.logEvent(
+        'registration_unexpected_error',
+        parameters: {
+          'error': e.toString(),
+          'email_domain': params.email.split('@').last,
+        },
+      );
+      rethrow;
     }
-    
-    // Normalizar dados
-    final normalizedEmail = params.email.trim().toLowerCase();
-    final normalizedName = params.name.trim();
-    final normalizedPhone = params.phone?.trim();
-    
-    // Validar se email já existe
-    final emailExists = await _checkEmailExists(normalizedEmail);
-    if (emailExists) {
-      return Left(ValidationFailure('Email já está em uso'));
-    }
-    
-    // Executar registro no repository
-    return await repository.register(
-      name: normalizedName,
-      email: normalizedEmail,
-      password: params.password,
-      phone: normalizedPhone,
-    );
   }
   
   /// Valida os dados de registro antes do processamento

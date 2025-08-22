@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:get_it/get_it.dart';
 
 import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';
@@ -13,25 +14,90 @@ import '../repositories/auth_repository.dart';
 @lazySingleton
 class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
   final AuthRepository repository;
+  final FirebaseAnalyticsService _analyticsService;
   
-  const LoginUseCase(this.repository);
+  const LoginUseCase(
+    this.repository,
+  ) : _analyticsService = const FirebaseAnalyticsService();
   
   @override
   Future<Either<Failure, local_user.UserEntity>> call(LoginParams params) async {
-    // Validação dos parâmetros de entrada
-    final validation = _validateLoginData(params);
-    if (validation != null) {
-      return Left(ValidationFailure(validation));
+    final startTime = DateTime.now();
+    
+    try {
+      // Analytics: track login attempt
+      await _analyticsService.logEvent(
+        'login_attempt',
+        parameters: {
+          'remember_me': params.rememberMe,
+          'email_domain': params.email.split('@').last,
+        },
+      );
+      
+      // Validação dos parâmetros de entrada
+      final validation = _validateLoginData(params);
+      if (validation != null) {
+        await _analyticsService.logEvent(
+          'login_validation_failed',
+          parameters: {
+            'error': validation,
+            'email_domain': params.email.split('@').last,
+          },
+        );
+        return Left(ValidationFailure(validation));
+      }
+      
+      // Normalizar email
+      final normalizedEmail = params.email.trim().toLowerCase();
+      
+      // Executar login no repository
+      final result = await repository.login(
+        email: normalizedEmail,
+        password: params.password,
+      );
+      
+      // Analytics: track login result
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
+      
+      result.fold(
+        (failure) async {
+          await _analyticsService.logEvent(
+            'login_failed',
+            parameters: {
+              'error_type': failure.runtimeType.toString(),
+              'duration_ms': duration,
+              'email_domain': params.email.split('@').last,
+            },
+          );
+        },
+        (user) async {
+          await _analyticsService.logEvent(
+            'login_success',
+            parameters: {
+              'duration_ms': duration,
+              'user_id': user.id,
+              'email_domain': params.email.split('@').last,
+            },
+          );
+          
+          // Set user properties for analytics
+          await _analyticsService.setUserId(user.id);
+          await _analyticsService.setUserProperty('user_type', 'farmer');
+          await _analyticsService.setUserProperty('app_version', 'agrihurbi_v1');
+        },
+      );
+      
+      return result;
+    } catch (e) {
+      await _analyticsService.logEvent(
+        'login_unexpected_error',
+        parameters: {
+          'error': e.toString(),
+          'email_domain': params.email.split('@').last,
+        },
+      );
+      rethrow;
     }
-    
-    // Normalizar email
-    final normalizedEmail = params.email.trim().toLowerCase();
-    
-    // Executar login no repository
-    return await repository.login(
-      email: normalizedEmail,
-      password: params.password,
-    );
   }
   
   /// Valida os dados de login antes do processamento

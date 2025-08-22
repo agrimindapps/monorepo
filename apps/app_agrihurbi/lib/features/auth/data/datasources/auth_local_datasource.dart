@@ -1,10 +1,10 @@
-import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
+import 'package:get_it/get_it.dart';
 
 import '../models/user_model.dart';
 
@@ -58,6 +58,8 @@ abstract class AuthLocalDataSource {
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences _sharedPreferences;
   final FlutterSecureStorage _secureStorage;
+  final HiveStorageService _hiveStorageService;
+  final FirebaseAnalyticsService _analyticsService;
   
   // Chaves para storage
   static const String _userBoxKey = 'auth_users';
@@ -69,26 +71,47 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   const AuthLocalDataSourceImpl(
     this._sharedPreferences,
     this._secureStorage,
-  );
+  ) : _hiveStorageService = const HiveStorageService(),
+      _analyticsService = const FirebaseAnalyticsService();
 
   @override
   Future<void> cacheUser(UserModel user) async {
+    final startTime = DateTime.now();
+    
     try {
       debugPrint('AuthLocalDataSourceImpl: Salvando usuário ${user.id}');
       
-      // Abrir box do Hive
-      final userBox = await Hive.openBox<UserModel>(_userBoxKey);
+      // Usar HiveStorageService do core
+      await _hiveStorageService.put(
+        boxName: _userBoxKey,
+        key: _currentUserKey,
+        value: user.toJson(),
+      );
       
-      // Salvar usuário
-      await userBox.put(_currentUserKey, user);
+      final duration = DateTime.now().difference(startTime).inMilliseconds;
       
-      // Fechar box
-      await userBox.close();
+      // Analytics: track user caching
+      await _analyticsService.logEvent(
+        'user_cached',
+        parameters: {
+          'user_id': user.id,
+          'duration_ms': duration,
+        },
+      );
       
       debugPrint('AuthLocalDataSourceImpl: Usuário salvo com sucesso');
     } catch (e, stackTrace) {
       debugPrint('AuthLocalDataSourceImpl: Erro ao salvar usuário - $e');
       debugPrint('StackTrace: $stackTrace');
+      
+      await _analyticsService.logEvent(
+        'user_cache_error',
+        parameters: {
+          'error': e.toString(),
+          'user_id': user.id,
+        },
+      );
+      
       throw CacheFailure('Erro ao salvar usuário: ${e.toString()}');
     }
   }
@@ -98,25 +121,45 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     try {
       debugPrint('AuthLocalDataSourceImpl: Obtendo último usuário');
       
-      // Abrir box do Hive
-      final userBox = await Hive.openBox<UserModel>(_userBoxKey);
+      // Usar HiveStorageService do core
+      final userData = await _hiveStorageService.get(
+        boxName: _userBoxKey,
+        key: _currentUserKey,
+      );
       
-      // Obter usuário
-      final user = userBox.get(_currentUserKey);
-      
-      // Fechar box
-      await userBox.close();
-      
-      if (user != null) {
+      UserModel? user;
+      if (userData != null && userData is Map<String, dynamic>) {
+        user = UserModel.fromJson(userData);
         debugPrint('AuthLocalDataSourceImpl: Usuário encontrado - ${user.id}');
+        
+        // Analytics: track user retrieval
+        await _analyticsService.logEvent(
+          'user_retrieved_from_cache',
+          parameters: {
+            'user_id': user.id,
+          },
+        );
       } else {
         debugPrint('AuthLocalDataSourceImpl: Nenhum usuário encontrado');
+        
+        await _analyticsService.logEvent(
+          'user_not_found_in_cache',
+          parameters: {},
+        );
       }
       
       return user;
     } catch (e, stackTrace) {
       debugPrint('AuthLocalDataSourceImpl: Erro ao obter usuário - $e');
       debugPrint('StackTrace: $stackTrace');
+      
+      await _analyticsService.logEvent(
+        'user_retrieval_error',
+        parameters: {
+          'error': e.toString(),
+        },
+      );
+      
       throw CacheFailure('Erro ao obter usuário: ${e.toString()}');
     }
   }
@@ -126,10 +169,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     try {
       debugPrint('AuthLocalDataSourceImpl: Limpando dados do usuário');
       
-      // Limpar box do usuário
-      final userBox = await Hive.openBox<UserModel>(_userBoxKey);
-      await userBox.delete(_currentUserKey);
-      await userBox.close();
+      // Limpar usuário usando HiveStorageService
+      await _hiveStorageService.delete(
+        boxName: _userBoxKey,
+        key: _currentUserKey,
+      );
       
       // Limpar tokens
       await clearTokens();
@@ -137,10 +181,24 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       // Limpar dados de sessão
       await clearSessionData();
       
+      // Analytics: track user clearing
+      await _analyticsService.logEvent(
+        'user_cleared_from_cache',
+        parameters: {},
+      );
+      
       debugPrint('AuthLocalDataSourceImpl: Dados limpos com sucesso');
     } catch (e, stackTrace) {
       debugPrint('AuthLocalDataSourceImpl: Erro ao limpar usuário - $e');
       debugPrint('StackTrace: $stackTrace');
+      
+      await _analyticsService.logEvent(
+        'user_clear_error',
+        parameters: {
+          'error': e.toString(),
+        },
+      );
+      
       throw CacheFailure('Erro ao limpar usuário: ${e.toString()}');
     }
   }

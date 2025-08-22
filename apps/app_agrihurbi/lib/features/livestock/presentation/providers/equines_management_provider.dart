@@ -23,9 +23,9 @@ class EquinesManagementProvider extends ChangeNotifier {
   
   /// Estados de loading específicos para cada operação
   bool _isLoadingEquines = false;
-  bool _isCreating = false;
-  bool _isUpdating = false;
-  bool _isDeleting = false;
+  final bool _isCreating = false;
+  final bool _isUpdating = false;
+  final bool _isDeleting = false;
   
   String? _errorMessage;
 

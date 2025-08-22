@@ -21,8 +21,8 @@ class BovinesFilterProvider extends ChangeNotifier {
   bool _onlyActive = true;
   
   /// Cache de valores únicos para filtros
-  Set<String> _availableBreeds = {};
-  Set<String> _availableCountries = {};
+  final Set<String> _availableBreeds = {};
+  final Set<String> _availableCountries = {};
   
   // === GETTERS ===
   

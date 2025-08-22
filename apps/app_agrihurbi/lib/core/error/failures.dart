@@ -19,3 +19,7 @@ class AppNotFoundFailure extends Failure {
 class CalculationFailure extends Failure {
   const CalculationFailure([String message = 'Calculation error']) : super(message: message);
 }
+
+class PremiumRequiredFailure extends Failure {
+  const PremiumRequiredFailure([String message = 'Premium subscription required']) : super(message: message);
+}

@@ -12,6 +12,8 @@ import 'package:core/core.dart' as core_lib;
 // Core
 import 'package:app_agrihurbi/core/network/network_info.dart';
 import 'package:app_agrihurbi/core/network/dio_client.dart';
+import 'package:app_agrihurbi/core/services/premium_service.dart';
+import 'package:app_agrihurbi/core/services/error_tracking_service.dart';
 
 // Import generated file
 import 'injection_container.config.dart';
@@ -33,6 +35,12 @@ Future<void> configureAppDependencies() async {
   getIt.registerSingleton<core_lib.FirebaseAuthService>(core_lib.FirebaseAuthService());
   getIt.registerSingleton<core_lib.RevenueCatService>(core_lib.RevenueCatService());
   getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(core_lib.FirebaseAnalyticsService());
+  
+  // App Core Services
+  getIt.registerSingleton(PremiumService(
+    getIt<core_lib.RevenueCatService>(),
+    getIt<core_lib.FirebaseAnalyticsService>(),
+  ));
   
   // Network & Storage (external packages)
   getIt.registerSingleton<Connectivity>(Connectivity());

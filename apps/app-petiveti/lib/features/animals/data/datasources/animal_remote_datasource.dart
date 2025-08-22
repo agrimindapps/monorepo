@@ -1,101 +1,161 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../domain/entities/animal.dart';
+import '../../../../core/network/firebase_service.dart';
+import '../../../../core/error/exceptions.dart';
 import '../models/animal_model.dart';
 
 abstract class AnimalRemoteDataSource {
   Future<List<AnimalModel>> getAnimals(String userId);
-  Future<AnimalModel?> getAnimalById(String userId, String id);
-  Future<void> addAnimal(String userId, AnimalModel animal);
-  Future<void> updateAnimal(String userId, AnimalModel animal);
-  Future<void> deleteAnimal(String userId, String id);
+  Future<AnimalModel?> getAnimalById(String id);
+  Future<String> addAnimal(AnimalModel animal, String userId);
+  Future<void> updateAnimal(AnimalModel animal);
+  Future<void> deleteAnimal(String id);
+  Stream<List<AnimalModel>> streamAnimals(String userId);
+  Stream<AnimalModel?> streamAnimal(String id);
 }
 
 class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
-  final FirebaseFirestore firestore;
-  
-  AnimalRemoteDataSourceImpl({required this.firestore});
-  
-  CollectionReference _getUserAnimalsCollection(String userId) {
-    return firestore
-        .collection('users')
-        .doc(userId)
-        .collection('animals');
-  }
+  final FirebaseService _firebaseService;
+
+  AnimalRemoteDataSourceImpl({
+    FirebaseService? firebaseService,
+  }) : _firebaseService = firebaseService ?? FirebaseService.instance;
 
   @override
   Future<List<AnimalModel>> getAnimals(String userId) async {
     try {
-      final querySnapshot = await _getUserAnimalsCollection(userId)
-          .where('is_deleted', isEqualTo: false)
-          .orderBy('created_at', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => AnimalModel.fromJson({
-                ...doc.data() as Map<String, dynamic>,
-                'id': doc.id,
-              }))
-          .toList();
+      final animals = await _firebaseService.getCollection<AnimalModel>(
+        FirebaseCollections.animals,
+        where: [
+          WhereCondition('userId', isEqualTo: userId),
+        ],
+        orderBy: [
+          OrderByCondition('name'),
+        ],
+        fromMap: AnimalModel.fromMap,
+      );
+      
+      return animals;
     } catch (e) {
-      throw Exception('Erro ao buscar animais: $e');
+      throw ServerException(
+        message: 'Erro ao buscar animais do servidor: ${e.toString()}',
+        statusCode: 500,
+      );
     }
   }
 
   @override
-  Future<AnimalModel?> getAnimalById(String userId, String id) async {
+  Future<AnimalModel?> getAnimalById(String id) async {
     try {
-      final docSnapshot = await _getUserAnimalsCollection(userId)
-          .doc(id)
-          .get();
-
-      if (docSnapshot.exists) {
-        final data = docSnapshot.data() as Map<String, dynamic>;
-        if (data['is_deleted'] == false) {
-          return AnimalModel.fromJson({
-            ...data,
-            'id': docSnapshot.id,
-          });
-        }
-      }
-      return null;
+      final animal = await _firebaseService.getDocument<AnimalModel>(
+        FirebaseCollections.animals,
+        id,
+        AnimalModel.fromMap,
+      );
+      
+      return animal;
     } catch (e) {
-      throw Exception('Erro ao buscar animal: $e');
+      throw ServerException(
+        message: 'Erro ao buscar animal do servidor: ${e.toString()}',
+        statusCode: 500,
+      );
     }
   }
 
   @override
-  Future<void> addAnimal(String userId, AnimalModel animal) async {
+  Future<String> addAnimal(AnimalModel animal, String userId) async {
     try {
-      await _getUserAnimalsCollection(userId)
-          .doc(animal.id)
-          .set(animal.toJson());
+      final animalData = animal.copyWith(
+        userId: userId,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      
+      final id = await _firebaseService.addDocument<AnimalModel>(
+        FirebaseCollections.animals,
+        animalData,
+        (animal) => animal.toMap(),
+      );
+      
+      return id;
     } catch (e) {
-      throw Exception('Erro ao adicionar animal: $e');
+      throw ServerException(
+        message: 'Erro ao adicionar animal no servidor: ${e.toString()}',
+        statusCode: 500,
+      );
     }
   }
 
   @override
-  Future<void> updateAnimal(String userId, AnimalModel animal) async {
+  Future<void> updateAnimal(AnimalModel animal) async {
     try {
-      await _getUserAnimalsCollection(userId)
-          .doc(animal.id)
-          .update(animal.toJson());
+      final updatedAnimal = animal.copyWith(
+        updatedAt: DateTime.now(),
+      );
+      
+      await _firebaseService.setDocument<AnimalModel>(
+        FirebaseCollections.animals,
+        animal.id,
+        updatedAnimal,
+        (animal) => animal.toMap(),
+        merge: true,
+      );
     } catch (e) {
-      throw Exception('Erro ao atualizar animal: $e');
+      throw ServerException(
+        message: 'Erro ao atualizar animal no servidor: ${e.toString()}',
+        statusCode: 500,
+      );
     }
   }
 
   @override
-  Future<void> deleteAnimal(String userId, String id) async {
+  Future<void> deleteAnimal(String id) async {
     try {
-      await _getUserAnimalsCollection(userId)
-          .doc(id)
-          .update({
-            'is_deleted': true,
-            'updated_at': Timestamp.now(),
-          });
+      await _firebaseService.deleteDocument(
+        FirebaseCollections.animals,
+        id,
+      );
     } catch (e) {
-      throw Exception('Erro ao deletar animal: $e');
+      throw ServerException(
+        message: 'Erro ao deletar animal do servidor: ${e.toString()}',
+        statusCode: 500,
+      );
+    }
+  }
+
+  @override
+  Stream<List<AnimalModel>> streamAnimals(String userId) {
+    try {
+      return _firebaseService.streamCollection<AnimalModel>(
+        FirebaseCollections.animals,
+        where: [
+          WhereCondition('userId', isEqualTo: userId),
+        ],
+        orderBy: [
+          OrderByCondition('name'),
+        ],
+        fromMap: AnimalModel.fromMap,
+      );
+    } catch (e) {
+      throw ServerException(
+        message: 'Erro ao escutar animais do servidor: ${e.toString()}',
+        statusCode: 500,
+      );
+    }
+  }
+
+  @override
+  Stream<AnimalModel?> streamAnimal(String id) {
+    try {
+      return _firebaseService.streamDocument<AnimalModel>(
+        FirebaseCollections.animals,
+        id,
+        AnimalModel.fromMap,
+      );
+    } catch (e) {
+      throw ServerException(
+        message: 'Erro ao escutar animal do servidor: ${e.toString()}',
+        statusCode: 500,
+      );
     }
   }
 }

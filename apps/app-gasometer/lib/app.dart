@@ -8,6 +8,8 @@ import 'core/di/injection_container.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
+import 'features/fuel/presentation/providers/fuel_provider.dart';
+import 'features/maintenance/presentation/providers/maintenance_provider.dart';
 
 class GasOMeterApp extends StatelessWidget {
   const GasOMeterApp({super.key});
@@ -31,14 +33,22 @@ class GasOMeterApp extends StatelessWidget {
           create: (_) => sl<VehiclesProvider>(),
         ),
         
+        // Fuel Provider
+        ChangeNotifierProvider(
+          create: (_) => sl<FuelProvider>(),
+        ),
+        
+        // Maintenance Provider
+        ChangeNotifierProvider(
+          create: (_) => sl<MaintenanceProvider>(),
+        ),
+        
         // Theme Provider
         ChangeNotifierProvider(
           create: (_) => ThemeProvider()..initialize(),
         ),
         
         // TODO: Adicionar outros providers quando criados
-        // - FuelProvider
-        // - MaintenanceProvider  
         // - ReportsProvider
         // - AnalyticsProvider
       ],

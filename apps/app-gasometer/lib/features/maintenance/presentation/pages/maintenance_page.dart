@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../providers/maintenance_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../domain/entities/maintenance_entity.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
 
 class MaintenancePage extends StatefulWidget {
@@ -10,94 +14,63 @@ class MaintenancePage extends StatefulWidget {
 }
 
 class _MaintenancePageState extends State<MaintenancePage> {
-  final List<Map<String, dynamic>> _maintenanceRecords = [
-    {
-      'id': '1',
-      'vehicleId': '1',
-      'vehicleName': 'Honda Civic',
-      'type': 'Troca de Óleo',
-      'category': 'preventiva',
-      'date': DateTime.now().subtract(const Duration(days: 30)),
-      'cost': 180.00,
-      'odometer': 24500,
-      'workshop': 'Oficina Central',
-      'description': 'Troca de óleo do motor e filtro',
-      'nextService': DateTime.now().add(const Duration(days: 150)),
-    },
-    {
-      'id': '2',
-      'vehicleId': '1',
-      'vehicleName': 'Honda Civic',
-      'type': 'Alinhamento e Balanceamento',
-      'category': 'preventiva',
-      'date': DateTime.now().subtract(const Duration(days: 60)),
-      'cost': 120.00,
-      'odometer': 24000,
-      'workshop': 'Auto Center ABC',
-      'description': 'Alinhamento e balanceamento das 4 rodas',
-      'nextService': null,
-    },
-    {
-      'id': '3',
-      'vehicleId': '2',
-      'vehicleName': 'Toyota Corolla',
-      'type': 'Troca de Pastilhas de Freio',
-      'category': 'corretiva',
-      'date': DateTime.now().subtract(const Duration(days: 15)),
-      'cost': 350.00,
-      'odometer': 18000,
-      'workshop': 'Freios & Cia',
-      'description': 'Substituição das pastilhas de freio dianteiras',
-      'nextService': null,
-    },
-    {
-      'id': '4',
-      'vehicleId': '1',
-      'vehicleName': 'Honda Civic',
-      'type': 'Revisão Completa',
-      'category': 'preventiva',
-      'date': DateTime.now().subtract(const Duration(days: 90)),
-      'cost': 890.00,
-      'odometer': 23500,
-      'workshop': 'Concessionária Honda',
-      'description': 'Revisão completa de 20.000 km',
-      'nextService': DateTime.now().add(const Duration(days: 270)),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar providers de forma lazy
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MaintenanceProvider>().loadAllMaintenanceRecords();
+      context.read<VehiclesProvider>().initialize();
+    });
+  }
 
   String _selectedFilter = 'all';
   String _selectedCategory = 'all';
   String _searchQuery = '';
   String? _selectedVehicleId;
 
-  List<Map<String, dynamic>> get _filteredRecords {
-    var filtered = _maintenanceRecords;
+  List<MaintenanceEntity> get _filteredRecords {
+    final maintenanceProvider = context.watch<MaintenanceProvider>();
+    var filtered = maintenanceProvider.maintenanceRecords;
 
     // Aplicar filtro por veículo
     if (_selectedFilter != 'all') {
-      filtered = filtered.where((r) => r['vehicleId'] == _selectedFilter).toList();
+      filtered = filtered.where((r) => r.vehicleId == _selectedFilter).toList();
     }
 
-    // Aplicar filtro por categoria
+    // Aplicar filtro por categoria (tipo)
     if (_selectedCategory != 'all') {
-      filtered = filtered.where((r) => r['category'] == _selectedCategory).toList();
+      switch (_selectedCategory) {
+        case 'preventiva':
+          filtered = filtered.where((r) => r.isPreventive).toList();
+          break;
+        case 'corretiva':
+          filtered = filtered.where((r) => r.isCorrective).toList();
+          break;
+        case 'revisao':
+          filtered = filtered.where((r) => r.isInspection).toList();
+          break;
+        case 'emergencial':
+          filtered = filtered.where((r) => r.isEmergency).toList();
+          break;
+      }
     }
 
     // Aplicar busca
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((r) {
-        final vehicleName = r['vehicleName'].toString().toLowerCase();
-        final type = r['type'].toString().toLowerCase();
-        final workshop = r['workshop'].toString().toLowerCase();
+        final title = r.title.toLowerCase();
+        final type = r.type.displayName.toLowerCase();
+        final workshop = (r.workshopName ?? '').toLowerCase();
         final query = _searchQuery.toLowerCase();
-        return vehicleName.contains(query) || 
+        return title.contains(query) || 
                type.contains(query) || 
                workshop.contains(query);
       }).toList();
     }
 
     // Ordenar por data (mais recente primeiro)
-    filtered.sort((a, b) => b['date'].compareTo(a['date']));
+    filtered.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
 
     return filtered;
   }
@@ -314,13 +287,13 @@ class _MaintenancePageState extends State<MaintenancePage> {
   Widget _buildStatistics() {
     final totalCost = _filteredRecords.fold<double>(
       0,
-      (sum, record) => sum + (record['cost'] as double),
+      (sum, record) => sum + record.cost,
     );
     final preventiveCount = _filteredRecords
-        .where((r) => r['category'] == 'preventiva')
+        .where((r) => r.isPreventive)
         .length;
     final correctiveCount = _filteredRecords
-        .where((r) => r['category'] == 'corretiva')
+        .where((r) => r.isCorrective)
         .length;
 
     return Row(
@@ -407,15 +380,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   Widget _buildUpcomingMaintenances() {
-    final upcomingServices = _maintenanceRecords
-        .where((r) => r['nextService'] != null)
-        .where((r) => (r['nextService'] as DateTime).isAfter(DateTime.now()))
+    final upcomingServices = _filteredRecords
+        .where((r) => r.nextServiceDate != null)
+        .where((r) => r.nextServiceDate!.isAfter(DateTime.now()))
         .toList();
 
     if (upcomingServices.isEmpty) return const SizedBox.shrink();
 
     upcomingServices.sort((a, b) => 
-      (a['nextService'] as DateTime).compareTo(b['nextService'] as DateTime));
+      a.nextServiceDate!.compareTo(b.nextServiceDate!));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +409,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         ),
         const SizedBox(height: 12),
         ...upcomingServices.take(2).map((service) {
-          final daysUntil = (service['nextService'] as DateTime)
+          final daysUntil = service.nextServiceDate!
               .difference(DateTime.now())
               .inDays;
           return Card(
@@ -469,7 +442,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${service['vehicleName']} - ${service['type']}',
+                          '${service.vehicleId} - ${service.title}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,

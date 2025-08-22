@@ -164,3 +164,6 @@ final animalsStreamProvider = StreamProvider<List<Animal>>((ref) {
   final repository = di.getIt.get<AnimalRepository>();
   return repository.watchAnimals();
 });
+
+// Selected animal provider for maintaining selection across pages
+final selectedAnimalProvider = StateProvider<Animal?>((ref) => null);

@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-
+import '../../../../core/storage/hive_service.dart';
 import '../models/animal_model.dart';
 
 abstract class AnimalLocalDataSource {
@@ -12,18 +12,17 @@ abstract class AnimalLocalDataSource {
 }
 
 class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
-  static const String _boxName = 'animals';
+  final HiveService _hiveService;
   
-  Box<AnimalModel>? _box;
+  AnimalLocalDataSourceImpl(this._hiveService);
   
-  Future<Box<AnimalModel>> get box async {
-    _box ??= await Hive.openBox<AnimalModel>(_boxName);
-    return _box!;
+  Future<Box<AnimalModel>> get _box async {
+    return await _hiveService.getBox<AnimalModel>(HiveBoxNames.animals);
   }
 
   @override
   Future<List<AnimalModel>> getAnimals() async {
-    final animalsBox = await box;
+    final animalsBox = await _box;
     return animalsBox.values
         .where((animal) => !animal.isDeleted)
         .toList()
@@ -32,7 +31,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
 
   @override
   Future<AnimalModel?> getAnimalById(String id) async {
-    final animalsBox = await box;
+    final animalsBox = await _box;
     return animalsBox.values
         .where((animal) => animal.id == id && !animal.isDeleted)
         .firstOrNull;
@@ -40,19 +39,19 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
 
   @override
   Future<void> addAnimal(AnimalModel animal) async {
-    final animalsBox = await box;
+    final animalsBox = await _box;
     await animalsBox.put(animal.id, animal);
   }
 
   @override
   Future<void> updateAnimal(AnimalModel animal) async {
-    final animalsBox = await box;
+    final animalsBox = await _box;
     await animalsBox.put(animal.id, animal);
   }
 
   @override
   Future<void> deleteAnimal(String id) async {
-    final animalsBox = await box;
+    final animalsBox = await _box;
     final animal = animalsBox.get(id);
     if (animal != null) {
       final deletedAnimal = animal.copyWith(
@@ -65,7 +64,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
 
   @override
   Stream<List<AnimalModel>> watchAnimals() async* {
-    final animalsBox = await box;
+    final animalsBox = await _box;
     
     yield* Stream.periodic(const Duration(milliseconds: 500), (_) {
       return animalsBox.values

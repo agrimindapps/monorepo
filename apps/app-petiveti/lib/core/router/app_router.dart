@@ -2,23 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../navigation/bottom_navigation.dart';
+
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/animals/presentation/pages/animals_page.dart';
+import '../../features/appointments/presentation/pages/appointments_page.dart';
+import '../../features/medications/presentation/pages/medications_page.dart';
+import '../../features/vaccines/presentation/pages/vaccines_page.dart';
+import '../../features/weight/presentation/pages/weight_page.dart';
+import '../../features/reminders/presentation/pages/reminders_page.dart';
+import '../../features/expenses/presentation/pages/expenses_page.dart';
+import '../../features/subscription/presentation/pages/subscription_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
     routes: [
+      ShellRoute(
+        builder: (context, state, child) {
+          return BottomNavShell(
+            state: state,
+            child: child,
+          );
+        },
+        routes: [
       GoRoute(
         path: '/',
         name: 'home',
-        builder: (context, state) => const AnimalsPage(),
-      ),
-      GoRoute(
-        path: '/login',
-        name: 'login',
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) => const HomePage(),
       ),
       GoRoute(
         path: '/animals',
@@ -35,6 +49,227 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/appointments',
+        name: 'appointments',
+        builder: (context, state) => const AppointmentsPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-appointment',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Appointment Page - Coming Soon'),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/:id',
+            name: 'appointment-details',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return Scaffold(
+                body: Center(
+                  child: Text('Appointment Details: $id - Coming Soon'),
+                ),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: '/edit',
+                name: 'edit-appointment',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return Scaffold(
+                    body: Center(
+                      child: Text('Edit Appointment: $id - Coming Soon'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/vaccines',
+        name: 'vaccines',
+        builder: (context, state) => const VaccinesPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-vaccine',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Vaccine Page - Coming Soon'),
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/medications',
+        name: 'medications',
+        builder: (context, state) => const MedicationsPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-medication',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Medication Page - Coming Soon'),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/:id',
+            name: 'medication-details',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return Scaffold(
+                body: Center(
+                  child: Text('Medication Details: $id - Coming Soon'),
+                ),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: '/edit',
+                name: 'edit-medication',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return Scaffold(
+                    body: Center(
+                      child: Text('Edit Medication: $id - Coming Soon'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/weight',
+        name: 'weight',
+        builder: (context, state) => const WeightPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-weight',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Weight Record Page - Coming Soon'),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/history/:animalId',
+            name: 'weight-history',
+            builder: (context, state) {
+              final animalId = state.pathParameters['animalId']!;
+              return Scaffold(
+                body: Center(
+                  child: Text('Weight History for Animal: $animalId - Coming Soon'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/reminders',
+        name: 'reminders',
+        builder: (context, state) => const RemindersPage(userId: 'user1'),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-reminder',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Reminder Page - Coming Soon'),
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/expenses',
+        name: 'expenses',
+        builder: (context, state) => const ExpensesPage(userId: 'user1'),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-expense',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Expense Page - Coming Soon'),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/summary',
+            name: 'expenses-summary',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Expenses Summary Page - Coming Soon'),
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/calculators',
+        name: 'calculators',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.calculate,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Calculadoras Veterinárias',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Esta funcionalidade será implementada em breve.',
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/subscription',
+        name: 'subscription',
+        builder: (context, state) => const SubscriptionPage(userId: 'user1'),
+      ),
+        ],
+      ),
+      // Rotas fora do shell (sem bottom navigation)
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

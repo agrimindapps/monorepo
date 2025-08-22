@@ -12,10 +12,10 @@ typedef UnknownFailure = core_lib.UnknownFailure;
 typedef GeneralFailure = core_lib.UnknownFailure;
 
 // Additional app-specific failures
-class NotFoundFailure extends Failure {
-  const NotFoundFailure([String message = 'Resource not found']) : super(message);
+class AppNotFoundFailure extends Failure {
+  const AppNotFoundFailure([String message = 'Resource not found']) : super(message: message);
 }
 
 class CalculationFailure extends Failure {
-  const CalculationFailure([String message = 'Calculation error']) : super(message);
+  const CalculationFailure([String message = 'Calculation error']) : super(message: message);
 }

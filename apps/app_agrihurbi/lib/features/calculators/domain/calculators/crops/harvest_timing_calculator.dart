@@ -326,7 +326,7 @@ class HarvestTimingCalculator extends CalculatorEntity {
     }
 
     // Adequação da umidade atual
-    final double moistureDeviation = math.abs(currentMoisture - targetMoisture);
+    final double moistureDeviation = (currentMoisture - targetMoisture).abs();
     String maturityStatus;
     
     if (moistureDeviation <= 1.0) {
@@ -413,10 +413,11 @@ class HarvestTimingCalculator extends CalculatorEntity {
     final int daysToHarvest = optimalDate.difference(today).inDays;
     
     // Janela de colheita
-    final int harvestWindowDays = math.max(5, 15 - (weatherImpact['risk_level'] as double / 10).round());
+    final double riskLevel = (weatherImpact['risk_level'] as double) / 10;
+    final int harvestWindowDays = math.max(5, 15 - riskLevel.round());
 
     // Taxa de perda por atraso
-    final double delayLossPercentage = daysToHarvest > 0 ? 0.0 : math.abs(daysToHarvest.toDouble()) * 0.3;
+    final double delayLossPercentage = daysToHarvest > 0 ? 0.0 : daysToHarvest.toDouble().abs() * 0.3;
 
     return {
       'optimal_date': optimalDate.toString().split(' ')[0],
@@ -435,7 +436,7 @@ class HarvestTimingCalculator extends CalculatorEntity {
   ) {
     // Índice de qualidade baseado na umidade
     double qualityIndex = 100.0;
-    final double moistureDeviation = math.abs(currentMoisture - targetMoisture);
+    final double moistureDeviation = (currentMoisture - targetMoisture).abs();
     qualityIndex -= moistureDeviation * 5;
 
     // Impacto do clima na qualidade

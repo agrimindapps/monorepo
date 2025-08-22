@@ -5,20 +5,18 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 
-import 'package:app_agrihurbi/features/auth/domain/entities/user_entity.dart'
-    as _i7;
 import 'package:app_agrihurbi/features/auth/domain/repositories/auth_repository.dart'
     as _i2;
 import 'package:app_agrihurbi/features/auth/domain/usecases/get_current_user_usecase.dart'
-    as _i10;
+    as _i9;
 import 'package:app_agrihurbi/features/auth/domain/usecases/login_usecase.dart'
     as _i4;
 import 'package:app_agrihurbi/features/auth/domain/usecases/logout_usecase.dart'
-    as _i9;
-import 'package:app_agrihurbi/features/auth/domain/usecases/refresh_user_usecase.dart'
-    as _i11;
-import 'package:app_agrihurbi/features/auth/domain/usecases/register_usecase.dart'
     as _i8;
+import 'package:app_agrihurbi/features/auth/domain/usecases/refresh_user_usecase.dart'
+    as _i10;
+import 'package:app_agrihurbi/features/auth/domain/usecases/register_usecase.dart'
+    as _i7;
 import 'package:core/core.dart' as _i6;
 import 'package:dartz/dartz.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
@@ -76,28 +74,28 @@ class MockLoginUseCase extends _i1.Mock implements _i4.LoginUseCase {
       ) as _i2.AuthRepository);
 
   @override
-  _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>> call(
+  _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>> call(
           _i4.LoginParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
           [params],
         ),
-        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>>.value(
-            _FakeEither_1<_i6.Failure, _i7.UserEntity>(
+        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>>.value(
+            _FakeEither_1<_i6.Failure, _i6.UserEntity>(
           this,
           Invocation.method(
             #call,
             [params],
           ),
         )),
-      ) as _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>>);
+      ) as _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>>);
 }
 
 /// A class which mocks [RegisterUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockRegisterUseCase extends _i1.Mock implements _i8.RegisterUseCase {
+class MockRegisterUseCase extends _i1.Mock implements _i7.RegisterUseCase {
   MockRegisterUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -112,28 +110,28 @@ class MockRegisterUseCase extends _i1.Mock implements _i8.RegisterUseCase {
       ) as _i2.AuthRepository);
 
   @override
-  _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>> call(
-          _i8.RegisterParams? params) =>
+  _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>> call(
+          _i7.RegisterParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
           [params],
         ),
-        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>>.value(
-            _FakeEither_1<_i6.Failure, _i7.UserEntity>(
+        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>>.value(
+            _FakeEither_1<_i6.Failure, _i6.UserEntity>(
           this,
           Invocation.method(
             #call,
             [params],
           ),
         )),
-      ) as _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>>);
+      ) as _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>>);
 }
 
 /// A class which mocks [LogoutUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLogoutUseCase extends _i1.Mock implements _i9.LogoutUseCase {
+class MockLogoutUseCase extends _i1.Mock implements _i8.LogoutUseCase {
   MockLogoutUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -148,7 +146,7 @@ class MockLogoutUseCase extends _i1.Mock implements _i9.LogoutUseCase {
       ) as _i2.AuthRepository);
 
   @override
-  _i5.Future<_i3.Either<_i6.Failure, void>> call(_i9.LogoutParams? params) =>
+  _i5.Future<_i3.Either<_i6.Failure, void>> call(_i8.LogoutParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
@@ -169,7 +167,7 @@ class MockLogoutUseCase extends _i1.Mock implements _i9.LogoutUseCase {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetCurrentUserUseCase extends _i1.Mock
-    implements _i10.GetCurrentUserUseCase {
+    implements _i9.GetCurrentUserUseCase {
   MockGetCurrentUserUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -184,29 +182,29 @@ class MockGetCurrentUserUseCase extends _i1.Mock
       ) as _i2.AuthRepository);
 
   @override
-  _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity?>> call(
-          _i10.GetCurrentUserParams? params) =>
+  _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity?>> call(
+          _i9.GetCurrentUserParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
           [params],
         ),
-        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity?>>.value(
-            _FakeEither_1<_i6.Failure, _i7.UserEntity?>(
+        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity?>>.value(
+            _FakeEither_1<_i6.Failure, _i6.UserEntity?>(
           this,
           Invocation.method(
             #call,
             [params],
           ),
         )),
-      ) as _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity?>>);
+      ) as _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity?>>);
 }
 
 /// A class which mocks [RefreshUserUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockRefreshUserUseCase extends _i1.Mock
-    implements _i11.RefreshUserUseCase {
+    implements _i10.RefreshUserUseCase {
   MockRefreshUserUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -221,20 +219,20 @@ class MockRefreshUserUseCase extends _i1.Mock
       ) as _i2.AuthRepository);
 
   @override
-  _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>> call(
-          _i11.RefreshUserParams? params) =>
+  _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>> call(
+          _i10.RefreshUserParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
           [params],
         ),
-        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>>.value(
-            _FakeEither_1<_i6.Failure, _i7.UserEntity>(
+        returnValue: _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>>.value(
+            _FakeEither_1<_i6.Failure, _i6.UserEntity>(
           this,
           Invocation.method(
             #call,
             [params],
           ),
         )),
-      ) as _i5.Future<_i3.Either<_i6.Failure, _i7.UserEntity>>);
+      ) as _i5.Future<_i3.Either<_i6.Failure, _i6.UserEntity>>);
 }

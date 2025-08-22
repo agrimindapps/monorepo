@@ -43,7 +43,8 @@ enum ParameterUnit {
   atm,
   // Nutrientes
   ppm,
-  mgL
+  mgL,
+  mgdm3
 }
 
 class CalculatorParameter extends Equatable {
@@ -159,6 +160,8 @@ class CalculatorParameter extends Equatable {
         return 'ppm';
       case ParameterUnit.mgL:
         return 'mg/L';
+      case ParameterUnit.mgdm3:
+        return 'mg/dm³';
       default:
         return '';
     }

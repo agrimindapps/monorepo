@@ -70,10 +70,10 @@ class AuthProvider extends ChangeNotifier {
     _isLoading || _isLoggingIn || _isRegistering || _isLoggingOut || _isRefreshing;
   
   /// Informações do usuário para exibição
-  String get userDisplayName => _currentUser?.name ?? 'Usuário';
+  String get userDisplayName => _currentUser?.displayName ?? 'Usuário';
   String get userEmail => _currentUser?.email ?? '';
-  String? get userProfileImage => _currentUser?.profileImageUrl;
-  bool get hasProfileImage => _currentUser?.profileImageUrl?.isNotEmpty == true;
+  String? get userProfileImage => _currentUser?.photoUrl;
+  bool get hasProfileImage => _currentUser?.photoUrl?.isNotEmpty == true;
 
   /// Inicializa o estado de autenticação verificando usuário logado
   Future<void> _initializeAuthState() async {
@@ -319,7 +319,7 @@ class AuthProvider extends ChangeNotifier {
   
   /// Verifica se o usuário atual é válido
   bool get hasValidUser => 
-    _currentUser != null && _currentUser!.isActive && _currentUser!.id.isNotEmpty;
+    _currentUser != null && _currentUser!.id.isNotEmpty;
   
   /// Força verificação do estado de autenticação
   Future<void> checkAuthenticationStatus() async {

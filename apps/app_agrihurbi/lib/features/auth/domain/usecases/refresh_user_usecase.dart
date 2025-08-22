@@ -3,7 +3,6 @@ import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
-import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';
 
 /// Use case para refresh dos dados do usuário com validação e sincronização
@@ -11,13 +10,13 @@ import '../repositories/auth_repository.dart';
 /// Implementa UseCase que retorna a entidade atualizada do usuário
 /// Inclui sincronização com servidor, atualização de cache local
 @lazySingleton
-class RefreshUserUseCase implements UseCase<local_user.UserEntity, RefreshUserParams> {
+class RefreshUserUseCase implements UseCase<UserEntity, RefreshUserParams> {
   final AuthRepository repository;
   
   const RefreshUserUseCase(this.repository);
   
   @override
-  Future<Either<Failure, local_user.UserEntity>> call(RefreshUserParams params) async {
+  Future<Either<Failure, UserEntity>> call(RefreshUserParams params) async {
     // Validar se há usuário logado
     final currentUserResult = await repository.getCurrentUser();
     
@@ -67,13 +66,8 @@ class RefreshUserUseCase implements UseCase<local_user.UserEntity, RefreshUserPa
       return 'Email foi alterado inesperadamente';
     }
     
-    // Verificar se usuário ainda está ativo
-    if (!refreshed.isActive && original.isActive) {
-      return 'Usuário foi desativado';
-    }
-    
     // Validar campos essenciais
-    if (refreshed.name.trim().isEmpty) {
+    if (refreshed.displayName.trim().isEmpty) {
       return 'Nome do usuário vazio após refresh';
     }
     

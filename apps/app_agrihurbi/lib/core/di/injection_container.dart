@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,14 +47,15 @@ Future<void> configureAppDependencies() async {
   // === AUTO-GENERATED INJECTABLE DEPENDENCIES ===
   
   // All @injectable/@singleton/@lazySingleton classes are automatically registered
+  // This includes all providers, use cases, repositories, and data sources
   configureDependencies();
   
   // === POST-INITIALIZATION ===
   
-  print('✅ App Dependencies configured successfully!');
-  print('   - External dependencies: ${_getExternalDependenciesCount()} registered manually');
-  print('   - Injectable dependencies: Auto-registered by code generation');
-  print('   - Total reduction: ~90% fewer lines of code');
+  debugPrint('✅ App Dependencies configured successfully!');
+  debugPrint('   - External dependencies: ${_getExternalDependenciesCount()} registered manually');
+  debugPrint('   - Injectable dependencies: Auto-registered by code generation');
+  debugPrint('   - Total reduction: ~90% fewer lines of code');
 }
 
 int _getExternalDependenciesCount() {

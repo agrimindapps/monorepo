@@ -12,6 +12,8 @@ import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_se
 import 'package:app_agrihurbi/features/calculators/presentation/pages/calculators_list_page.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/pages/calculator_detail_page.dart';
 import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
+import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
+import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
@@ -315,19 +317,34 @@ class AppRouter {
             ],
           ),
           
-          // News Routes
+          // News Routes - Migrated to Provider + Clean Architecture
           GoRoute(
             path: 'news',
             name: 'news',
             builder: (context, state) => const NewsListPage(),
             routes: [
               GoRoute(
-                path: 'detail/:id',
-                name: 'news-detail',
+                path: 'article/:id',
+                name: 'news-article',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
                   return NewsDetailPage(id: id);
                 },
+              ),
+              GoRoute(
+                path: 'search',
+                name: 'news-search',
+                builder: (context, state) => const NewsSearchPage(),
+              ),
+              GoRoute(
+                path: 'favorites',
+                name: 'news-favorites',
+                builder: (context, state) => const NewsFavoritesPage(),
+              ),
+              GoRoute(
+                path: 'feeds',
+                name: 'news-feeds',
+                builder: (context, state) => const RSSFeedsPage(),
               ),
             ],
           ),
@@ -349,11 +366,42 @@ class AppRouter {
             ],
           ),
           
-          // Settings Routes
+          // Settings Routes - Migrated to Provider + Clean Architecture  
           GoRoute(
             path: 'settings',
             name: 'settings',
             builder: (context, state) => const SettingsPage(),
+            routes: [
+              GoRoute(
+                path: 'backup',
+                name: 'settings-backup',
+                builder: (context, state) => const BackupPage(),
+              ),
+              GoRoute(
+                path: 'about',
+                name: 'settings-about',
+                builder: (context, state) => const AboutPage(),
+              ),
+            ],
+          ),
+          
+          // Subscription Routes  
+          GoRoute(
+            path: 'subscription',
+            name: 'subscription',
+            builder: (context, state) => const SubscriptionPage(),
+            routes: [
+              GoRoute(
+                path: 'plans',
+                name: 'subscription-plans',
+                builder: (context, state) => const SubscriptionPlansPage(),
+              ),
+              GoRoute(
+                path: 'payment',
+                name: 'subscription-payment',
+                builder: (context, state) => const PaymentMethodsPage(),
+              ),
+            ],
           ),
           
           GoRoute(
@@ -567,19 +615,12 @@ class WeatherStatisticsPage extends StatelessWidget {
   );
 }
 
-class NewsListPage extends StatelessWidget {
-  const NewsListPage({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('News List Page')),
-  );
-}
-
 class NewsDetailPage extends StatelessWidget {
   final String id;
   const NewsDetailPage({super.key, required this.id});
   @override
   Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Detalhes da Notícia')),
     body: Center(child: Text('News Detail Page - ID: $id')),
   );
 }
@@ -601,11 +642,80 @@ class MarketDetailPage extends StatelessWidget {
   );
 }
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+// Settings and News pages are now imported from their respective feature modules
+
+// News Pages Placeholders
+class NewsSearchPage extends StatelessWidget {
+  const NewsSearchPage({super.key});
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Settings Page')),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Buscar Notícias')),
+    body: const Center(child: Text('News Search Page - Em desenvolvimento')),
+  );
+}
+
+class NewsFavoritesPage extends StatelessWidget {
+  const NewsFavoritesPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Notícias Favoritas')),
+    body: const Center(child: Text('News Favorites Page - Em desenvolvimento')),
+  );
+}
+
+class RSSFeedsPage extends StatelessWidget {
+  const RSSFeedsPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Gerenciar RSS Feeds')),
+    body: const Center(child: Text('RSS Feeds Page - Em desenvolvimento')),
+  );
+}
+
+// Settings Pages Placeholders
+class BackupPage extends StatelessWidget {
+  const BackupPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Backup e Recuperação')),
+    body: const Center(child: Text('Backup Page - Em desenvolvimento')),
+  );
+}
+
+class AboutPage extends StatelessWidget {
+  const AboutPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Sobre')),
+    body: const Center(child: Text('About Page - Em desenvolvimento')),
+  );
+}
+
+// Subscription Pages Placeholders
+class SubscriptionPage extends StatelessWidget {
+  const SubscriptionPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Assinatura Premium')),
+    body: const Center(child: Text('Subscription Page - Em desenvolvimento')),
+  );
+}
+
+class SubscriptionPlansPage extends StatelessWidget {
+  const SubscriptionPlansPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Planos de Assinatura')),
+    body: const Center(child: Text('Subscription Plans Page - Em desenvolvimento')),
+  );
+}
+
+class PaymentMethodsPage extends StatelessWidget {
+  const PaymentMethodsPage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Métodos de Pagamento')),
+    body: const Center(child: Text('Payment Methods Page - Em desenvolvimento')),
   );
 }
 

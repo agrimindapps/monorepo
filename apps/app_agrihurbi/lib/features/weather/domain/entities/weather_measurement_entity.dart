@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:equatable/equatable.dart';
 
 /// Weather measurement entity following Clean Architecture
@@ -93,29 +94,30 @@ class WeatherMeasurementEntity extends Equatable {
   });
 
   /// Creates empty weather measurement for initialization
-  const WeatherMeasurementEntity.empty()
-      : id = '',
-        locationId = '',
-        locationName = '',
-        timestamp = const Duration(),
-        temperature = 0.0,
-        humidity = 0.0,
-        pressure = 0.0,
-        windSpeed = 0.0,
-        windDirection = 0.0,
-        rainfall = 0.0,
-        uvIndex = 0.0,
-        visibility = 0.0,
-        weatherCondition = '',
-        description = '',
-        latitude = 0.0,
-        longitude = 0.0,
-        source = '',
-        qualityScore = 0.0,
-        isRealTime = false,
-        notes = null,
-        createdAt = const Duration(),
-        updatedAt = const Duration();
+  static final WeatherMeasurementEntity empty = WeatherMeasurementEntity(
+        id: '',
+        locationId: '',
+        locationName: '',
+        timestamp: DateTime(1970),
+        temperature: 0.0,
+        humidity: 0.0,
+        pressure: 0.0,
+        windSpeed: 0.0,
+        windDirection: 0.0,
+        rainfall: 0.0,
+        uvIndex: 0.0,
+        visibility: 0.0,
+        weatherCondition: '',
+        description: '',
+        latitude: 0.0,
+        longitude: 0.0,
+        source: '',
+        qualityScore: 0.0,
+        isRealTime: false,
+        notes: null,
+        createdAt: DateTime(1970),
+        updatedAt: DateTime(1970),
+      );
 
   /// Calculate heat index based on temperature and humidity
   double get heatIndex {
@@ -289,6 +291,3 @@ class WeatherMeasurementEntity extends Equatable {
         ')';
   }
 }
-
-// Import math for calculations
-import 'dart:math' as math;

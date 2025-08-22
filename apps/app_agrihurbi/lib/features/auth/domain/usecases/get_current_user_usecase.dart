@@ -3,7 +3,6 @@ import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
-import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';
 
 /// Use case para obter o usuário atual com validação de sessão
@@ -11,13 +10,13 @@ import '../repositories/auth_repository.dart';
 /// Implementa UseCase que retorna a entidade do usuário logado ou null
 /// Inclui validação de token, refresh automático se necessário
 @lazySingleton
-class GetCurrentUserUseCase implements UseCase<local_user.UserEntity?, GetCurrentUserParams> {
+class GetCurrentUserUseCase implements UseCase<UserEntity?, GetCurrentUserParams> {
   final AuthRepository repository;
   
   const GetCurrentUserUseCase(this.repository);
   
   @override
-  Future<Either<Failure, local_user.UserEntity?>> call(GetCurrentUserParams params) async {
+  Future<Either<Failure, UserEntity?>> call(GetCurrentUserParams params) async {
     // Obter usuário atual do repository
     final result = await repository.getCurrentUser();
     
@@ -67,12 +66,8 @@ class GetCurrentUserUseCase implements UseCase<local_user.UserEntity?, GetCurren
       return 'Email do usuário inválido';
     }
     
-    if (user.name.isEmpty) {
+    if (user.displayName.isEmpty) {
       return 'Nome do usuário inválido';
-    }
-    
-    if (!user.isActive) {
-      return 'Usuário inativo';
     }
     
     return null;

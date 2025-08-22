@@ -8,7 +8,6 @@ import 'package:app_agrihurbi/features/auth/domain/usecases/get_current_user_use
 import 'package:app_agrihurbi/features/auth/domain/usecases/login_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/refresh_user_usecase.dart';
-import 'package:app_agrihurbi/features/auth/domain/entities/user_entity.dart';
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:core/core.dart' as core_lib;
 
@@ -19,19 +18,25 @@ import '../../../../helpers/test_helpers.dart';
 void main() {
   group('AuthProvider', () {
     late AuthProvider authProvider;
+    late MockLoginUseCase mockLoginUseCase;
     late MockRegisterUseCase mockRegisterUseCase;
+    late MockLogoutUseCase mockLogoutUseCase;
     late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
+    late MockRefreshUserUseCase mockRefreshUserUseCase;
 
     setUp(() {
+      mockLoginUseCase = MockLoginUseCase();
       mockRegisterUseCase = MockRegisterUseCase();
+      mockLogoutUseCase = MockLogoutUseCase();
       mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
+      mockRefreshUserUseCase = MockRefreshUserUseCase();
       
       authProvider = AuthProvider(
-        loginUseCase: MockLoginUseCase(),
+        loginUseCase: mockLoginUseCase,
         registerUseCase: mockRegisterUseCase,
-        logoutUseCase: MockLogoutUseCase(),
+        logoutUseCase: mockLogoutUseCase,
         getCurrentUserUseCase: mockGetCurrentUserUseCase,
-        refreshUserUseCase: MockRefreshUserUseCase(),
+        refreshUserUseCase: mockRefreshUserUseCase,
       );
     });
 
@@ -110,20 +115,21 @@ void main() {
     });
 
     group('Register', () {
-      final mockUser = UserEntity(
+      final mockUser = core_lib.UserEntity(
         id: '123',
-        name: 'Test User',
         email: 'test@test.com',
-        phone: null,
-        profileImageUrl: null,
+        displayName: 'Test User',
+        photoUrl: null,
+        isEmailVerified: true,
+        lastLoginAt: DateTime.now(),
+        provider: core_lib.AuthProvider.email,
         createdAt: DateTime.now(),
-        lastLoginAt: null,
-        isActive: true,
+        updatedAt: DateTime.now(),
       );
 
       test('should register user successfully', () async {
         // Arrange
-        when(mockRegisterUsecase.call(any))
+        when(mockRegisterUseCase.call(any))
             .thenAnswer((_) async => Right(mockUser));
 
         // Act
@@ -144,7 +150,7 @@ void main() {
       test('should handle registration failure', () async {
         // Arrange
         const failure = ValidationFailure('Email já está em uso');
-        when(mockRegisterUsecase.call(any))
+        when(mockRegisterUseCase.call(any))
             .thenAnswer((_) async => const Left(failure));
 
         // Act
@@ -206,14 +212,14 @@ void main() {
     group('Refresh User', () {
       test('should refresh user data', () async {
         // Arrange
-        when(mockGetCurrentUserUsecase.call())
+        when(mockGetCurrentUserUseCase.call(any))
             .thenAnswer((_) async => const Right(null));
 
         // Act
         await authProvider.refreshUser();
 
         // Assert
-        verify(mockGetCurrentUserUsecase.call()).called(1);
+        verify(mockGetCurrentUserUseCase.call(any)).called(1);
         expect(authProvider.isLoading, isFalse);
       });
     });

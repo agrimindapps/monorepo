@@ -27,8 +27,8 @@ class YieldPredictionCalculator extends CalculatorEntity {
               id: 'plant_population',
               name: 'População de Plantas',
               description: 'População atual de plantas (plantas/ha)',
-              type: ParameterType.integer,
-              unit: ParameterUnit.plantasha,
+              type: ParameterType.number,
+              unit: ParameterUnit.count,
               minValue: 10000,
               maxValue: 500000,
               defaultValue: 65000,
@@ -428,9 +428,9 @@ class YieldPredictionCalculator extends CalculatorEntity {
     Map<String, dynamic> limitingFactors,
     Map<String, dynamic> managementEfficiency,
   ) {
-    final double baseYield = cropData['maximum_potential'] as double * 
-                           limitingFactors['overall_factor'] as double * 
-                           managementEfficiency['overall_efficiency'] as double;
+    final double baseYield = (cropData['maximum_potential'] as double) * 
+                           (limitingFactors['overall_factor'] as double) * 
+                           (managementEfficiency['overall_efficiency'] as double);
 
     return {
       'optimistic': baseYield * 1.2,

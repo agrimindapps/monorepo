@@ -23,7 +23,7 @@ void main() async {
     await HiveInitializer.initialize();
     
     // Configure Dependencies
-    await configureDependencies();
+    await configureAppDependencies();
     
     runApp(const AgriHurbiApp());
   } catch (e, stackTrace) {

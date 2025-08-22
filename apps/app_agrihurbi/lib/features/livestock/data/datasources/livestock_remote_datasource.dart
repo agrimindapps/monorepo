@@ -1,0 +1,164 @@
+import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
+import '../../../../core/network/dio_client.dart';
+
+import '../models/bovine_model.dart';
+import '../models/equine_model.dart';
+
+/// Interface para data source remoto de livestock
+abstract class LivestockRemoteDataSource {
+  // === BOVINOS ===
+  Future<List<BovineModel>> getAllBovines();
+  Future<BovineModel?> getBovineById(String id);
+  Future<void> createBovine(BovineModel bovine);
+  Future<void> updateBovine(BovineModel bovine);
+  Future<void> deleteBovine(String id);
+  
+  // === EQUINOS ===
+  Future<List<EquineModel>> getAllEquines();
+  Future<EquineModel?> getEquineById(String id);
+  Future<void> createEquine(EquineModel equine);
+  Future<void> updateEquine(EquineModel equine);
+  Future<void> deleteEquine(String id);
+  
+  // === SYNC ===
+  Future<void> syncLivestockData();
+}
+
+/// Implementação do data source remoto usando HTTP API
+@LazySingleton(as: LivestockRemoteDataSource)
+class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
+  final DioClient _dioClient;
+  
+  // Endpoints da API
+  static const String _bovinesEndpoint = '/livestock/bovines';
+  static const String _equinesEndpoint = '/livestock/equines';
+  
+  LivestockRemoteDataSourceImpl(this._dioClient);
+  
+  // === BOVINOS ===
+  
+  @override
+  Future<List<BovineModel>> getAllBovines() async {
+    try {
+      // TODO: Implementar chamada real para API quando estiver disponível
+      // Por enquanto, retorna lista vazia para não quebrar o app
+      return [];
+      
+      // final response = await _dioClient.get(
+      //   _bovinesEndpoint,
+      //   queryParameters: {'is_active': true},
+      // );
+      // 
+      // return (response.data as List<dynamic>)
+      //     .map((item) => BovineModel.fromJson(item as Map<String, dynamic>))
+      //     .toList();
+    } catch (e) {
+      throw ServerFailure('Erro ao buscar bovinos');
+    }
+  }
+
+  @override
+  Future<BovineModel?> getBovineById(String id) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      return null;
+    } catch (e) {
+      throw ServerFailure('Erro ao buscar bovino por ID');
+    }
+  }
+
+  @override
+  Future<void> createBovine(BovineModel bovine) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro ao criar bovino: $e');
+    }
+  }
+
+  @override
+  Future<void> updateBovine(BovineModel bovine) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro ao atualizar bovino: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteBovine(String id) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro ao deletar bovino: $e');
+    }
+  }
+
+  // === EQUINOS ===
+
+  @override
+  Future<List<EquineModel>> getAllEquines() async {
+    try {
+      // TODO: Implementar chamada real para API quando estiver disponível
+      return [];
+    } catch (e) {
+      throw ServerFailure('Erro ao buscar equinos: $e');
+    }
+  }
+
+  @override
+  Future<EquineModel?> getEquineById(String id) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      return null;
+    } catch (e) {
+      throw ServerFailure('Erro ao buscar equino por ID: $e');
+    }
+  }
+
+  @override
+  Future<void> createEquine(EquineModel equine) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro ao criar equino: $e');
+    }
+  }
+
+  @override
+  Future<void> updateEquine(EquineModel equine) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro ao atualizar equino: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteEquine(String id) async {
+    try {
+      // TODO: Implementar quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro ao deletar equino: $e');
+    }
+  }
+
+  // === SYNC ===
+
+  @override
+  Future<void> syncLivestockData() async {
+    try {
+      // TODO: Implementar sincronização quando API estiver disponível
+      // Simula sucesso por enquanto
+    } catch (e) {
+      throw ServerFailure('Erro na sincronização: $e');
+    }
+  }
+}

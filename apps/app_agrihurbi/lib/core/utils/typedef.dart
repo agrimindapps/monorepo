@@ -12,3 +12,6 @@ typedef ResultVoid = Future<Result<void>>;
 
 /// Map result type
 typedef ResultMap = Map<String, dynamic>;
+
+/// Data map type for API responses
+typedef DataMap = Map<String, dynamic>;

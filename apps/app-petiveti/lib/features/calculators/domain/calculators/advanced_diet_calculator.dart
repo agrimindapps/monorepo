@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../entities/calculation_result.dart';
 import '../entities/calculator_input.dart';
 import 'base_calculator.dart';
@@ -244,7 +246,7 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   double _calculateDailyCalories(AdvancedDietInput input) {
     // Fórmula base RER (Resting Energy Requirement)
     // RER = 70 * (peso em kg)^0.75
-    double rer = 70 * Math.pow(input.weight, 0.75);
+    double rer = 70 * math.pow(input.weight, 0.75);
     
     // Fatores multiplicadores baseados em estágio de vida e atividade
     double multiplier = _getCalorieMultiplier(input);
@@ -754,5 +756,3 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 }
 
-// Import do Math para usar pow
-import 'dart:math' as Math;

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:app_agrihurbi/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
-import 'package:app_agrihurbi/core/router/app_router.dart';
+import 'package:app_agrihurbi/core/utils/error_handler.dart';
 
 /// Home page
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,19 +15,35 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('AgriHurbi'),
         actions: [
-          GetBuilder<AuthController>(
-            builder: (controller) {
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
               return PopupMenuButton<String>(
-                onSelected: (value) {
+                onSelected: (value) async {
                   switch (value) {
                     case 'profile':
-                      AppNavigation.toProfile();
+                      context.push('/home/profile');
                       break;
                     case 'settings':
-                      AppNavigation.toSettings();
+                      context.push('/home/settings');
                       break;
                     case 'logout':
-                      controller.logout();
+                      final result = await authProvider.logout();
+                      result.fold(
+                        (failure) {
+                          if (context.mounted) {
+                            ErrorHandler.showErrorSnackbar(context, failure);
+                          }
+                        },
+                        (_) {
+                          if (context.mounted) {
+                            ErrorHandler.showSuccessSnackbar(
+                              context, 
+                              'Logout realizado com sucesso!',
+                            );
+                            context.go('/login');
+                          }
+                        },
+                      );
                       break;
                   }
                 },
@@ -90,42 +107,42 @@ class HomePage extends StatelessWidget {
               title: 'Rebanho',
               icon: Icons.pets,
               color: AppColors.cattle,
-              onTap: () => AppNavigation.toLivestock(),
+              onTap: () => context.push('/home/livestock'),
             ),
             _buildFeatureCard(
               context,
               title: 'Calculadoras',
               icon: Icons.calculate,
               color: AppTheme.accentColor,
-              onTap: () => AppNavigation.toCalculators(),
+              onTap: () => context.push('/home/calculators'),
             ),
             _buildFeatureCard(
               context,
               title: 'Clima',
               icon: Icons.wb_sunny,
               color: AppColors.sunny,
-              onTap: () => AppNavigation.toWeather(),
+              onTap: () => context.push('/home/weather'),
             ),
             _buildFeatureCard(
               context,
               title: 'Notícias',
               icon: Icons.newspaper,
               color: AppColors.completed,
-              onTap: () => AppNavigation.toNews(),
+              onTap: () => context.push('/home/news'),
             ),
             _buildFeatureCard(
               context,
               title: 'Mercados',
               icon: Icons.trending_up,
               color: AppColors.active,
-              onTap: () => AppNavigation.toMarkets(),
+              onTap: () => context.push('/home/markets'),
             ),
             _buildFeatureCard(
               context,
               title: 'Configurações',
               icon: Icons.settings,
               color: AppColors.inactive,
-              onTap: () => AppNavigation.toSettings(),
+              onTap: () => context.push('/home/settings'),
             ),
           ],
         ),
@@ -157,7 +174,7 @@ class HomePage extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 color,
-                color.withOpacity(0.8),
+                color.withValues(alpha: 0.8),
               ],
             ),
           ),

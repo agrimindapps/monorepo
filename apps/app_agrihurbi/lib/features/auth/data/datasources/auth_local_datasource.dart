@@ -1,142 +1,310 @@
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:app_agrihurbi/features/auth/data/models/user_model.dart';
-import 'package:app_agrihurbi/core/constants/app_constants.dart';
-import 'package:app_agrihurbi/core/utils/typedef.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
+import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 
-/// Abstract class for authentication local data source
+import '../models/user_model.dart';
+
+/// DataSource abstrato para operações locais de autenticação
+/// 
+/// Define contratos para persistência local usando Hive e Flutter Secure Storage
+/// Segue padrão Clean Architecture com separação de responsabilidades
 abstract class AuthLocalDataSource {
-  /// Cache user data
+  /// Salva usuário no cache local
   Future<void> cacheUser(UserModel user);
 
-  /// Get cached user
-  Future<UserModel?> getCachedUser();
+  /// Obtém o último usuário salvo no cache
+  Future<UserModel?> getLastUser();
 
-  /// Remove cached user
-  Future<void> removeCachedUser();
+  /// Remove usuário do cache
+  Future<void> clearUser();
 
-  /// Store tokens
-  Future<void> storeTokens({
-    required String accessToken,
-    required String refreshToken,
-  });
+  /// Salva token de acesso
+  Future<void> saveAccessToken(String token);
 
-  /// Get access token
+  /// Obtém token de acesso
   Future<String?> getAccessToken();
 
-  /// Get refresh token
+  /// Salva token de refresh
+  Future<void> saveRefreshToken(String token);
+
+  /// Obtém token de refresh
   Future<String?> getRefreshToken();
 
-  /// Remove tokens
-  Future<void> removeTokens();
+  /// Remove todos os tokens
+  Future<void> clearTokens();
 
-  /// Check if user is logged in
-  Future<bool> isLoggedIn();
+  /// Verifica se há usuário logado
+  Future<bool> hasLoggedUser();
+
+  /// Salva dados de sessão
+  Future<void> saveSessionData(Map<String, dynamic> sessionData);
+
+  /// Obtém dados de sessão
+  Future<Map<String, dynamic>?> getSessionData();
+
+  /// Remove dados de sessão
+  Future<void> clearSessionData();
 }
 
-/// Implementation of AuthLocalDataSource
+/// Implementação do datasource local de autenticação
+/// 
+/// Usa Hive para dados do usuário e Flutter Secure Storage para tokens
+/// Aplica estratégia local-first com persistência robusta
+@LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
-  final SharedPreferences sharedPreferences;
-  final FlutterSecureStorage secureStorage;
+  final SharedPreferences _sharedPreferences;
+  final FlutterSecureStorage _secureStorage;
+  
+  // Chaves para storage
+  static const String _userBoxKey = 'auth_users';
+  static const String _currentUserKey = 'current_user';
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+  static const String _sessionDataKey = 'session_data';
 
-  AuthLocalDataSourceImpl({
-    required this.sharedPreferences,
-    required this.secureStorage,
-  });
+  const AuthLocalDataSourceImpl(
+    this._sharedPreferences,
+    this._secureStorage,
+  );
 
   @override
   Future<void> cacheUser(UserModel user) async {
     try {
-      final userJson = json.encode(user.toJson());
-      await sharedPreferences.setString(AppConstants.userDataKey, userJson);
-    } catch (e) {
-      throw Exception('Failed to cache user: $e');
+      debugPrint('AuthLocalDataSourceImpl: Salvando usuário ${user.id}');
+      
+      // Abrir box do Hive
+      final userBox = await Hive.openBox<UserModel>(_userBoxKey);
+      
+      // Salvar usuário
+      await userBox.put(_currentUserKey, user);
+      
+      // Fechar box
+      await userBox.close();
+      
+      debugPrint('AuthLocalDataSourceImpl: Usuário salvo com sucesso');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao salvar usuário - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao salvar usuário: ${e.toString()}');
     }
   }
 
   @override
-  Future<UserModel?> getCachedUser() async {
+  Future<UserModel?> getLastUser() async {
     try {
-      final userJson = sharedPreferences.getString(AppConstants.userDataKey);
-      if (userJson != null) {
-        final userMap = json.decode(userJson) as DataMap;
-        return UserModel.fromJson(userMap);
+      debugPrint('AuthLocalDataSourceImpl: Obtendo último usuário');
+      
+      // Abrir box do Hive
+      final userBox = await Hive.openBox<UserModel>(_userBoxKey);
+      
+      // Obter usuário
+      final user = userBox.get(_currentUserKey);
+      
+      // Fechar box
+      await userBox.close();
+      
+      if (user != null) {
+        debugPrint('AuthLocalDataSourceImpl: Usuário encontrado - ${user.id}');
+      } else {
+        debugPrint('AuthLocalDataSourceImpl: Nenhum usuário encontrado');
       }
-      return null;
-    } catch (e) {
-      throw Exception('Failed to get cached user: $e');
+      
+      return user;
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao obter usuário - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao obter usuário: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> removeCachedUser() async {
+  Future<void> clearUser() async {
     try {
-      await sharedPreferences.remove(AppConstants.userDataKey);
-    } catch (e) {
-      throw Exception('Failed to remove cached user: $e');
+      debugPrint('AuthLocalDataSourceImpl: Limpando dados do usuário');
+      
+      // Limpar box do usuário
+      final userBox = await Hive.openBox<UserModel>(_userBoxKey);
+      await userBox.delete(_currentUserKey);
+      await userBox.close();
+      
+      // Limpar tokens
+      await clearTokens();
+      
+      // Limpar dados de sessão
+      await clearSessionData();
+      
+      debugPrint('AuthLocalDataSourceImpl: Dados limpos com sucesso');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao limpar usuário - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao limpar usuário: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> storeTokens({
-    required String accessToken,
-    required String refreshToken,
-  }) async {
+  Future<void> saveAccessToken(String token) async {
     try {
-      await Future.wait([
-        secureStorage.write(
-          key: AppConstants.accessTokenKey,
-          value: accessToken,
-        ),
-        secureStorage.write(
-          key: AppConstants.refreshTokenKey,
-          value: refreshToken,
-        ),
-      ]);
-    } catch (e) {
-      throw Exception('Failed to store tokens: $e');
+      debugPrint('AuthLocalDataSourceImpl: Salvando token de acesso');
+      
+      await _secureStorage.write(
+        key: _accessTokenKey,
+        value: token,
+      );
+      
+      debugPrint('AuthLocalDataSourceImpl: Token de acesso salvo');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao salvar token - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao salvar token: ${e.toString()}');
     }
   }
 
   @override
   Future<String?> getAccessToken() async {
     try {
-      return await secureStorage.read(key: AppConstants.accessTokenKey);
-    } catch (e) {
-      throw Exception('Failed to get access token: $e');
+      final token = await _secureStorage.read(key: _accessTokenKey);
+      
+      if (token != null) {
+        debugPrint('AuthLocalDataSourceImpl: Token de acesso encontrado');
+      } else {
+        debugPrint('AuthLocalDataSourceImpl: Token de acesso não encontrado');
+      }
+      
+      return token;
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao obter token - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao obter token: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> saveRefreshToken(String token) async {
+    try {
+      debugPrint('AuthLocalDataSourceImpl: Salvando token de refresh');
+      
+      await _secureStorage.write(
+        key: _refreshTokenKey,
+        value: token,
+      );
+      
+      debugPrint('AuthLocalDataSourceImpl: Token de refresh salvo');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao salvar refresh token - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao salvar refresh token: ${e.toString()}');
     }
   }
 
   @override
   Future<String?> getRefreshToken() async {
     try {
-      return await secureStorage.read(key: AppConstants.refreshTokenKey);
-    } catch (e) {
-      throw Exception('Failed to get refresh token: $e');
+      final token = await _secureStorage.read(key: _refreshTokenKey);
+      
+      if (token != null) {
+        debugPrint('AuthLocalDataSourceImpl: Token de refresh encontrado');
+      } else {
+        debugPrint('AuthLocalDataSourceImpl: Token de refresh não encontrado');
+      }
+      
+      return token;
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao obter refresh token - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao obter refresh token: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> removeTokens() async {
+  Future<void> clearTokens() async {
     try {
+      debugPrint('AuthLocalDataSourceImpl: Limpando tokens');
+      
       await Future.wait([
-        secureStorage.delete(key: AppConstants.accessTokenKey),
-        secureStorage.delete(key: AppConstants.refreshTokenKey),
+        _secureStorage.delete(key: _accessTokenKey),
+        _secureStorage.delete(key: _refreshTokenKey),
       ]);
-    } catch (e) {
-      throw Exception('Failed to remove tokens: $e');
+      
+      debugPrint('AuthLocalDataSourceImpl: Tokens limpos');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao limpar tokens - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao limpar tokens: ${e.toString()}');
     }
   }
 
   @override
-  Future<bool> isLoggedIn() async {
+  Future<bool> hasLoggedUser() async {
     try {
-      final accessToken = await getAccessToken();
-      final user = await getCachedUser();
-      return accessToken != null && user != null;
-    } catch (e) {
+      final user = await getLastUser();
+      final token = await getAccessToken();
+      
+      final hasUser = user != null && user.isActive;
+      final hasToken = token != null && token.isNotEmpty;
+      
+      final isLoggedIn = hasUser && hasToken;
+      
+      debugPrint('AuthLocalDataSourceImpl: Usuário logado: $isLoggedIn');
+      return isLoggedIn;
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao verificar login - $e');
+      debugPrint('StackTrace: $stackTrace');
       return false;
+    }
+  }
+
+  @override
+  Future<void> saveSessionData(Map<String, dynamic> sessionData) async {
+    try {
+      debugPrint('AuthLocalDataSourceImpl: Salvando dados de sessão');
+      
+      final jsonString = jsonEncode(sessionData);
+      await _sharedPreferences.setString(_sessionDataKey, jsonString);
+      
+      debugPrint('AuthLocalDataSourceImpl: Dados de sessão salvos');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao salvar sessão - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao salvar sessão: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getSessionData() async {
+    try {
+      final jsonString = _sharedPreferences.getString(_sessionDataKey);
+      
+      if (jsonString != null && jsonString.isNotEmpty) {
+        final sessionData = jsonDecode(jsonString) as Map<String, dynamic>;
+        debugPrint('AuthLocalDataSourceImpl: Dados de sessão encontrados');
+        return sessionData;
+      }
+      
+      debugPrint('AuthLocalDataSourceImpl: Nenhum dado de sessão encontrado');
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao obter sessão - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao obter sessão: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> clearSessionData() async {
+    try {
+      debugPrint('AuthLocalDataSourceImpl: Limpando dados de sessão');
+      
+      await _sharedPreferences.remove(_sessionDataKey);
+      
+      debugPrint('AuthLocalDataSourceImpl: Dados de sessão limpos');
+    } catch (e, stackTrace) {
+      debugPrint('AuthLocalDataSourceImpl: Erro ao limpar sessão - $e');
+      debugPrint('StackTrace: $stackTrace');
+      throw CacheFailure('Erro ao limpar sessão: ${e.toString()}');
     }
   }
 }

@@ -222,7 +222,7 @@ class BottomNavShell extends ConsumerWidget {
     ];
 
     final shouldShowBottomNav = !hideBottomNavPages.any(
-      (page) => state.location.startsWith(page),
+      (page) => state.uri.toString().startsWith(page),
     );
 
     if (!shouldShowBottomNav) {
@@ -230,7 +230,7 @@ class BottomNavShell extends ConsumerWidget {
     }
 
     return MainBottomNavigation(
-      currentLocation: state.location,
+      currentLocation: state.uri.toString(),
       child: child,
     );
   }

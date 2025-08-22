@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:app_agrihurbi/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
-import 'package:app_agrihurbi/core/router/app_router.dart';
+import 'package:app_agrihurbi/core/constants/app_constants.dart';
+import 'package:app_agrihurbi/core/utils/error_handler.dart';
 
 /// Register page
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -108,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (value == null || value.isEmpty) {
                       return 'Por favor, digite seu e-mail';
                     }
-                    if (!GetUtils.isEmail(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                       return 'Digite um e-mail válido';
                     }
                     return null;
@@ -128,7 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
-                      if (!GetUtils.isPhoneNumber(value)) {
+                      if (!RegExp(r'^[\+]?[1-9]?[0-9]{7,12}$').hasMatch(value.replaceAll(RegExp(r'[^\d\+]'), ''))) {
                         return 'Digite um telefone válido';
                       }
                     }
@@ -207,13 +209,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 32),
                 
                 // Register Button
-                GetBuilder<AuthController>(
-                  builder: (controller) {
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
                     return ElevatedButton(
-                      onPressed: controller.isLoading
+                      onPressed: authProvider.isLoading
                           ? null
-                          : () => _handleRegister(controller),
-                      child: controller.isLoading
+                          : () => _handleRegister(context, authProvider),
+                      child: authProvider.isLoading
                           ? const SizedBox(
                               height: 20,
                               width: 20,
@@ -240,7 +242,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
-                      onPressed: () => AppNavigation.back(),
+                      onPressed: () => context.pop(),
                       child: const Text('Entrar'),
                     ),
                   ],
@@ -249,16 +251,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 24),
                 
                 // Error Message
-                GetBuilder<AuthController>(
-                  builder: (controller) {
-                    if (controller.errorMessage != null) {
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    if (authProvider.errorMessage != null) {
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppTheme.errorColor.withOpacity(0.1),
+                          color: AppTheme.errorColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.errorColor.withOpacity(0.3),
+                            color: AppTheme.errorColor.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -271,7 +273,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                controller.errorMessage!,
+                                authProvider.errorMessage!,
                                 style: const TextStyle(
                                   color: AppTheme.errorColor,
                                   fontSize: 14,
@@ -284,7 +286,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 color: AppTheme.errorColor,
                                 size: 18,
                               ),
-                              onPressed: controller.clearError,
+                              onPressed: authProvider.clearError,
                             ),
                           ],
                         ),
@@ -301,15 +303,28 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void _handleRegister(AuthController controller) {
+  void _handleRegister(BuildContext context, AuthProvider authProvider) async {
     if (_formKey.currentState!.validate()) {
-      controller.register(
+      final result = await authProvider.register(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
         phone: _phoneController.text.trim().isEmpty 
             ? null 
             : _phoneController.text.trim(),
+      );
+
+      result.fold(
+        (failure) {
+          ErrorHandler.showErrorSnackbar(context, failure);
+        },
+        (user) {
+          ErrorHandler.showSuccessSnackbar(
+            context, 
+            SuccessMessages.registerSuccess,
+          );
+          context.go('/home');
+        },
       );
     }
   }

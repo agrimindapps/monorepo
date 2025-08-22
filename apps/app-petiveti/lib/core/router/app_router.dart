@@ -4,10 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../navigation/bottom_navigation.dart';
 
+import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/animals/presentation/pages/animals_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
+import '../../features/appointments/presentation/widgets/add_appointment_form.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
@@ -15,11 +19,32 @@ import '../../features/reminders/presentation/pages/reminders_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/calculators/presentation/pages/body_condition_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authProvider);
+  
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
     debugLogDiagnostics: true,
+    redirect: (context, state) {
+      final isAuthenticated = authState.isAuthenticated;
+      final isOnAuthPage = state.matchedLocation.startsWith('/login') || 
+                           state.matchedLocation.startsWith('/register');
+      final isOnSplash = state.matchedLocation == '/splash';
+
+      // If not authenticated and not on auth pages or splash, redirect to login
+      if (!isAuthenticated && !isOnAuthPage && !isOnSplash) {
+        return '/login';
+      }
+
+      // If authenticated and on auth pages, redirect to home
+      if (isAuthenticated && isOnAuthPage) {
+        return '/';
+      }
+
+      return null; // No redirect needed
+    },
     routes: [
       ShellRoute(
         builder: (context, state, child) {
@@ -58,11 +83,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/add',
             name: 'add-appointment',
-            builder: (context, state) => const Scaffold(
-              body: Center(
-                child: Text('Add Appointment Page - Coming Soon'),
-              ),
-            ),
+            builder: (context, state) => const AddAppointmentForm(),
           ),
           GoRoute(
             path: '/:id',
@@ -252,6 +273,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ),
+        routes: [
+          GoRoute(
+            path: '/body-condition',
+            name: 'body-condition-calculator',
+            builder: (context, state) => const BodyConditionPage(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/profile',
@@ -265,11 +293,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
         ],
       ),
+      
       // Rotas fora do shell (sem bottom navigation)
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
+      
       GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        builder: (context, state) => const RegisterPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

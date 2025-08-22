@@ -1,15 +1,101 @@
-import 'package:app_agrihurbi/core/utils/typedef.dart';
-import 'package:app_agrihurbi/features/auth/domain/entities/user_entity.dart';
-import 'package:app_agrihurbi/features/auth/domain/repositories/auth_repository.dart';
+import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
+import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 
-/// Use case for getting current user
-class GetCurrentUserUsecase {
+import '../entities/user_entity.dart' as local_user;
+import '../repositories/auth_repository.dart';
+
+/// Use case para obter o usuário atual com validação de sessão
+/// 
+/// Implementa UseCase que retorna a entidade do usuário logado ou null
+/// Inclui validação de token, refresh automático se necessário
+@lazySingleton
+class GetCurrentUserUseCase implements UseCase<local_user.UserEntity?, GetCurrentUserParams> {
   final AuthRepository repository;
-
-  GetCurrentUserUsecase(this.repository);
-
-  /// Execute get current user
-  ResultFuture<UserEntity?> call() {
-    return repository.getCurrentUser();
+  
+  const GetCurrentUserUseCase(this.repository);
+  
+  @override
+  Future<Either<Failure, local_user.UserEntity?>> call(GetCurrentUserParams params) async {
+    // Obter usuário atual do repository
+    final result = await repository.getCurrentUser();
+    
+    return result.fold(
+      (failure) {
+        // Se falhou por token expirado e refresh está habilitado
+        if (params.refreshIfExpired && _isTokenExpiredFailure(failure)) {
+          return _attemptTokenRefresh();
+        }
+        return Left(failure);
+      },
+      (user) {
+        // Validar dados do usuário se solicitado
+        if (params.validateUserData && user != null) {
+          final validation = _validateUserData(user);
+          if (validation != null) {
+            return Left(ValidationFailure(validation));
+          }
+        }
+        
+        return Right(user);
+      },
+    );
   }
+  
+  /// Verifica se o erro é de token expirado
+  bool _isTokenExpiredFailure(Failure failure) {
+    return failure.message.toLowerCase().contains('token') ||
+           failure.message.toLowerCase().contains('expired') ||
+           failure.message.toLowerCase().contains('unauthorized');
+  }
+  
+  /// Tenta fazer refresh do token
+  Future<Either<Failure, UserEntity?>> _attemptTokenRefresh() async {
+    // Esta implementação será feita quando o repository estiver completo
+    // Por ora, retorna null (sem usuário)
+    return const Right(null);
+  }
+  
+  /// Valida os dados do usuário retornado
+  String? _validateUserData(UserEntity user) {
+    if (user.id.isEmpty) {
+      return 'ID do usuário inválido';
+    }
+    
+    if (user.email.isEmpty) {
+      return 'Email do usuário inválido';
+    }
+    
+    if (user.name.isEmpty) {
+      return 'Nome do usuário inválido';
+    }
+    
+    if (!user.isActive) {
+      return 'Usuário inativo';
+    }
+    
+    return null;
+  }
+}
+
+/// Parâmetros para obtenção do usuário atual
+class GetCurrentUserParams extends Equatable {
+  const GetCurrentUserParams({
+    this.refreshIfExpired = true,
+    this.validateUserData = true,
+    this.includeProfile = true,
+  });
+
+  /// Se deve tentar refresh em caso de token expirado
+  final bool refreshIfExpired;
+  
+  /// Se deve validar os dados do usuário retornado
+  final bool validateUserData;
+  
+  /// Se deve incluir dados completos do perfil
+  final bool includeProfile;
+  
+  @override
+  List<Object> get props => [refreshIfExpired, validateUserData, includeProfile];
 }

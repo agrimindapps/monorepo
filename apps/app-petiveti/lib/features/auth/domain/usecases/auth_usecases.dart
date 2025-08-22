@@ -22,19 +22,19 @@ class SignInWithEmail implements UseCase<User, SignInWithEmailParams> {
   @override
   Future<Either<Failure, User>> call(SignInWithEmailParams params) async {
     if (params.email.trim().isEmpty) {
-      return Left(ValidationFailure('Email é obrigatório'));
+      return Left(ValidationFailure(message: 'Email é obrigatório'));
     }
 
     if (!_isValidEmail(params.email)) {
-      return Left(ValidationFailure('Email inválido'));
+      return Left(ValidationFailure(message: 'Email inválido'));
     }
 
     if (params.password.trim().isEmpty) {
-      return Left(ValidationFailure('Senha é obrigatória'));
+      return Left(ValidationFailure(message: 'Senha é obrigatória'));
     }
 
     if (params.password.length < 6) {
-      return Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
+      return Left(ValidationFailure(message: 'Senha deve ter pelo menos 6 caracteres'));
     }
 
     return await repository.signInWithEmail(params.email, params.password);
@@ -65,23 +65,23 @@ class SignUpWithEmail implements UseCase<User, SignUpWithEmailParams> {
   @override
   Future<Either<Failure, User>> call(SignUpWithEmailParams params) async {
     if (params.email.trim().isEmpty) {
-      return Left(ValidationFailure('Email é obrigatório'));
+      return Left(ValidationFailure(message: 'Email é obrigatório'));
     }
 
     if (!_isValidEmail(params.email)) {
-      return Left(ValidationFailure('Email inválido'));
+      return Left(ValidationFailure(message: 'Email inválido'));
     }
 
     if (params.password.trim().isEmpty) {
-      return Left(ValidationFailure('Senha é obrigatória'));
+      return Left(ValidationFailure(message: 'Senha é obrigatória'));
     }
 
     if (params.password.length < 6) {
-      return Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
+      return Left(ValidationFailure(message: 'Senha deve ter pelo menos 6 caracteres'));
     }
 
     if (params.name != null && params.name!.trim().length < 2) {
-      return Left(ValidationFailure('Nome deve ter pelo menos 2 caracteres'));
+      return Left(ValidationFailure(message: 'Nome deve ter pelo menos 2 caracteres'));
     }
 
     return await repository.signUpWithEmail(params.email, params.password, params.name);
@@ -166,11 +166,11 @@ class SendPasswordResetEmail implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String email) async {
     if (email.trim().isEmpty) {
-      return Left(ValidationFailure('Email é obrigatório'));
+      return Left(ValidationFailure(message: 'Email é obrigatório'));
     }
 
     if (!_isValidEmail(email)) {
-      return Left(ValidationFailure('Email inválido'));
+      return Left(ValidationFailure(message: 'Email inválido'));
     }
 
     return await repository.sendPasswordResetEmail(email);
@@ -199,7 +199,7 @@ class UpdateProfile implements UseCase<User, UpdateProfileParams> {
   @override
   Future<Either<Failure, User>> call(UpdateProfileParams params) async {
     if (params.name != null && params.name!.trim().length < 2) {
-      return Left(ValidationFailure('Nome deve ter pelo menos 2 caracteres'));
+      return Left(ValidationFailure(message: 'Nome deve ter pelo menos 2 caracteres'));
     }
 
     return await repository.updateProfile(params.name, params.photoUrl);

@@ -18,41 +18,61 @@ class VaccineModel extends HiveObject {
   final String name;
 
   @HiveField(3)
-  final int applicationDateTimestamp;
+  final String veterinarian;
 
   @HiveField(4)
-  final int? nextDoseDateTimestamp;
+  final int dateTimestamp;
 
   @HiveField(5)
-  final String? veterinarianName;
+  final int? nextDueDateTimestamp;
 
   @HiveField(6)
   final String? batch;
 
   @HiveField(7)
-  final String? notes;
+  final String? manufacturer;
 
   @HiveField(8)
-  final int status;
+  final String? dosage;
 
   @HiveField(9)
-  final int createdAtTimestamp;
+  final String? notes;
 
   @HiveField(10)
-  final int updatedAtTimestamp;
+  final bool isRequired;
 
   @HiveField(11)
+  final bool isCompleted;
+
+  @HiveField(12)
+  final int? reminderDateTimestamp;
+
+  @HiveField(13)
+  final int status;
+
+  @HiveField(14)
+  final int createdAtTimestamp;
+
+  @HiveField(15)
+  final int updatedAtTimestamp;
+
+  @HiveField(16)
   final bool isDeleted;
 
   VaccineModel({
     required this.id,
     required this.animalId,
     required this.name,
-    required this.applicationDateTimestamp,
-    this.nextDoseDateTimestamp,
-    this.veterinarianName,
+    required this.veterinarian,
+    required this.dateTimestamp,
+    this.nextDueDateTimestamp,
     this.batch,
+    this.manufacturer,
+    this.dosage,
     this.notes,
+    this.isRequired = true,
+    this.isCompleted = false,
+    this.reminderDateTimestamp,
     this.status = 0,
     required this.createdAtTimestamp,
     required this.updatedAtTimestamp,
@@ -64,13 +84,20 @@ class VaccineModel extends HiveObject {
       id: id,
       animalId: animalId,
       name: name,
-      applicationDate: DateTime.fromMillisecondsSinceEpoch(applicationDateTimestamp),
-      nextDoseDate: nextDoseDateTimestamp != null
-          ? DateTime.fromMillisecondsSinceEpoch(nextDoseDateTimestamp!)
+      veterinarian: veterinarian,
+      date: DateTime.fromMillisecondsSinceEpoch(dateTimestamp),
+      nextDueDate: nextDueDateTimestamp != null
+          ? DateTime.fromMillisecondsSinceEpoch(nextDueDateTimestamp!)
           : null,
-      veterinarianName: veterinarianName,
       batch: batch,
+      manufacturer: manufacturer,
+      dosage: dosage,
       notes: notes,
+      isRequired: isRequired,
+      isCompleted: isCompleted,
+      reminderDate: reminderDateTimestamp != null
+          ? DateTime.fromMillisecondsSinceEpoch(reminderDateTimestamp!)
+          : null,
       status: VaccineStatus.values[status],
       createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtTimestamp),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(updatedAtTimestamp),
@@ -83,11 +110,16 @@ class VaccineModel extends HiveObject {
       id: vaccine.id,
       animalId: vaccine.animalId,
       name: vaccine.name,
-      applicationDateTimestamp: vaccine.applicationDate.millisecondsSinceEpoch,
-      nextDoseDateTimestamp: vaccine.nextDoseDate?.millisecondsSinceEpoch,
-      veterinarianName: vaccine.veterinarianName,
+      veterinarian: vaccine.veterinarian,
+      dateTimestamp: vaccine.date.millisecondsSinceEpoch,
+      nextDueDateTimestamp: vaccine.nextDueDate?.millisecondsSinceEpoch,
       batch: vaccine.batch,
+      manufacturer: vaccine.manufacturer,
+      dosage: vaccine.dosage,
       notes: vaccine.notes,
+      isRequired: vaccine.isRequired,
+      isCompleted: vaccine.isCompleted,
+      reminderDateTimestamp: vaccine.reminderDate?.millisecondsSinceEpoch,
       status: vaccine.status.index,
       createdAtTimestamp: vaccine.createdAt.millisecondsSinceEpoch,
       updatedAtTimestamp: vaccine.updatedAt.millisecondsSinceEpoch,
@@ -105,11 +137,16 @@ class VaccineModel extends HiveObject {
       'id': id,
       'animalId': animalId,
       'nomeVacina': name,
-      'dataAplicacao': applicationDateTimestamp,
-      'proximaDose': nextDoseDateTimestamp ?? 0,
-      'veterinario': veterinarianName,
+      'veterinario': veterinarian,
+      'dataAplicacao': dateTimestamp,
+      'proximaDose': nextDueDateTimestamp ?? 0,
       'lote': batch,
+      'fabricante': manufacturer,
+      'dosagem': dosage,
       'observacoes': notes,
+      'obrigatoria': isRequired,
+      'concluida': isCompleted,
+      'dataLembrete': reminderDateTimestamp ?? 0,
       'status': status,
       'createdAt': createdAtTimestamp,
       'updatedAt': updatedAtTimestamp,
@@ -122,11 +159,16 @@ class VaccineModel extends HiveObject {
       id: map['id'] ?? '',
       animalId: map['animalId'] ?? '',
       name: map['nomeVacina'] ?? map['name'] ?? '',
-      applicationDateTimestamp: map['dataAplicacao'] ?? map['applicationDateTimestamp'] ?? 0,
-      nextDoseDateTimestamp: map['proximaDose'] == 0 ? null : (map['proximaDose'] ?? map['nextDoseDateTimestamp']),
-      veterinarianName: map['veterinario'] ?? map['veterinarianName'],
+      veterinarian: map['veterinario'] ?? map['veterinarian'] ?? '',
+      dateTimestamp: map['dataAplicacao'] ?? map['dateTimestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+      nextDueDateTimestamp: map['proximaDose'] == 0 ? null : (map['proximaDose'] ?? map['nextDueDateTimestamp']),
       batch: map['lote'] ?? map['batch'],
+      manufacturer: map['fabricante'] ?? map['manufacturer'],
+      dosage: map['dosagem'] ?? map['dosage'],
       notes: map['observacoes'] ?? map['notes'],
+      isRequired: map['obrigatoria'] ?? map['isRequired'] ?? true,
+      isCompleted: map['concluida'] ?? map['isCompleted'] ?? false,
+      reminderDateTimestamp: map['dataLembrete'] == 0 ? null : (map['dataLembrete'] ?? map['reminderDateTimestamp']),
       status: map['status'] ?? 0,
       createdAtTimestamp: map['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
       updatedAtTimestamp: map['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
@@ -7,12 +8,51 @@ import 'core/di/injection_container.dart' as di;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize dependency injection (includes Hive initialization)
-  await di.init();
-  
-  runApp(
-    const ProviderScope(
-      child: PetiVetiApp(),
-    ),
-  );
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp();
+    
+    // Initialize dependency injection (includes Hive initialization)
+    await di.init();
+    
+    runApp(
+      const ProviderScope(
+        child: PetiVetiApp(),
+      ),
+    );
+  } catch (error) {
+    // Handle initialization errors
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Erro de inicialização',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -1,289 +1,574 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:app_agrihurbi/core/constants/app_constants.dart';
+import 'package:go_router/go_router.dart';
 import 'package:app_agrihurbi/features/auth/presentation/pages/login_page.dart';
 import 'package:app_agrihurbi/features/auth/presentation/pages/register_page.dart';
 import 'package:app_agrihurbi/features/home/presentation/pages/home_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_form_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_detail_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_detail_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_form_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_search_page.dart';
+import 'package:app_agrihurbi/features/calculators/presentation/pages/calculators_list_page.dart';
+import 'package:app_agrihurbi/features/calculators/presentation/pages/calculator_detail_page.dart';
+import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
 
-/// Application router configuration using GetX
+/// Application router configuration using GoRouter
 class AppRouter {
-  /// Initial route for the application
-  static const String initialRoute = RouteNames.login;
+  static final GoRouter _router = GoRouter(
+    initialLocation: '/login',
+    routes: [
+      // Authentication Routes
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
+      ),
+      
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        builder: (context, state) => const RegisterPage(),
+      ),
+      
+      // Main App Routes
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const HomePage(),
+        routes: [
+          // Livestock routes - Migrated to Provider + Clean Architecture
+          GoRoute(
+            path: 'livestock',
+            name: 'livestock',
+            builder: (context, state) => const BovinesListPage(),
+            routes: [
+              // Bovines routes
+              GoRoute(
+                path: 'bovines',
+                name: 'bovines-list',
+                builder: (context, state) => const BovinesListPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'bovines-add',
+                    builder: (context, state) => const BovineFormPage(),
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'bovines-edit',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return BovineFormPage(bovineId: id);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'detail/:id',
+                    name: 'bovines-detail',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return BovineDetailPage(bovineId: id);
+                    },
+                  ),
+                ],
+              ),
+              
+              // Equines routes
+              GoRoute(
+                path: 'equines',
+                name: 'equines-list',
+                builder: (context, state) => const EquinesListPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'equines-add',
+                    builder: (context, state) => const EquineFormPage(),
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'equines-edit',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return EquineFormPage(equineId: id);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'detail/:id',
+                    name: 'equines-detail',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return EquineDetailPage(equineId: id);
+                    },
+                  ),
+                ],
+              ),
+              
+              // Search page
+              GoRoute(
+                path: 'search',
+                name: 'livestock-search',
+                builder: (context, state) => const LivestockSearchPage(),
+              ),
+              
+              // Legacy routes for backward compatibility
+              GoRoute(
+                path: 'add',
+                name: 'add-livestock',
+                builder: (context, state) => const BovineFormPage(),
+              ),
+              GoRoute(
+                path: 'edit/:id',
+                name: 'edit-livestock',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return BovineFormPage(bovineId: id);
+                },
+              ),
+              GoRoute(
+                path: 'detail/:id',
+                name: 'livestock-detail',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return BovineDetailPage(bovineId: id);
+                },
+              ),
+            ],
+          ),
+          
+          // Calculator Routes - Migrated to Provider + Clean Architecture
+          GoRoute(
+            path: 'calculators',
+            name: 'calculators',
+            builder: (context, state) => const CalculatorsListPage(),
+            routes: [
+              // General calculator detail route
+              GoRoute(
+                path: 'detail/:id',
+                name: 'calculator-detail',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return CalculatorDetailPage(calculatorId: id);
+                },
+              ),
+              
+              // Irrigation Calculator Routes
+              GoRoute(
+                path: 'irrigation/:id',
+                name: 'irrigation-calculator',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return CalculatorDetailPage(calculatorId: id);
+                },
+              ),
+              
+              // Nutrition Calculator Routes
+              GoRoute(
+                path: 'nutrition',
+                name: 'nutrition-calculators',
+                builder: (context, state) => const CalculatorsListPage(category: 'nutrition'),
+                routes: [
+                  GoRoute(
+                    path: 'npk',
+                    name: 'npk-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'npk_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'soil-ph',
+                    name: 'soil-ph-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'soil_ph_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'fertilizer-dosing',
+                    name: 'fertilizer-dosing-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'fertilizer_dosing_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'compost',
+                    name: 'compost-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'compost_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'organic-fertilizer',
+                    name: 'organic-fertilizer-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'organic_fertilizer_calculator'),
+                  ),
+                ],
+              ),
+              
+              // Livestock Calculator Routes
+              GoRoute(
+                path: 'livestock',
+                name: 'livestock-calculators',
+                builder: (context, state) => const CalculatorsListPage(category: 'livestock'),
+                routes: [
+                  GoRoute(
+                    path: 'feed',
+                    name: 'feed-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'feed_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'breeding-cycle',
+                    name: 'breeding-cycle-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'breeding_cycle_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'grazing',
+                    name: 'grazing-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'grazing_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'weight-gain',
+                    name: 'weight-gain-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'weight_gain_calculator'),
+                  ),
+                ],
+              ),
+              
+              // Crop Calculator Routes  
+              GoRoute(
+                path: 'crops',
+                name: 'crop-calculators',
+                builder: (context, state) => const CalculatorsListPage(category: 'crops'),
+                routes: [
+                  GoRoute(
+                    path: 'planting-density',
+                    name: 'planting-density-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'planting_density_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'harvest-timing',
+                    name: 'harvest-timing-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'harvest_timing_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'seed-rate',
+                    name: 'seed-rate-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'seed_rate_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'yield-prediction',
+                    name: 'yield-prediction-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'yield_prediction_calculator'),
+                  ),
+                ],
+              ),
+              
+              // Soil Calculator Routes
+              GoRoute(
+                path: 'soil',
+                name: 'soil-calculators',
+                builder: (context, state) => const CalculatorsListPage(category: 'soil'),
+                routes: [
+                  GoRoute(
+                    path: 'composition',
+                    name: 'soil-composition-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'soil_composition_calculator'),
+                  ),
+                  GoRoute(
+                    path: 'drainage',
+                    name: 'drainage-calculator',
+                    builder: (context, state) => const CalculatorDetailPage(calculatorId: 'drainage_calculator'),
+                  ),
+                ],
+              ),
+              
+              // Search and favorites
+              GoRoute(
+                path: 'search',
+                name: 'calculators-search',
+                builder: (context, state) => const CalculatorsSearchPage(),
+              ),
+              GoRoute(
+                path: 'favorites',
+                name: 'calculators-favorites',
+                builder: (context, state) => const CalculatorsFavoritesPage(),
+              ),
+            ],
+          ),
+          
+          // Weather Routes - Migrated to Provider + Clean Architecture
+          GoRoute(
+            path: 'weather',
+            name: 'weather',
+            builder: (context, state) => const WeatherDashboardPage(),
+            routes: [
+              GoRoute(
+                path: 'dashboard',
+                name: 'weather-dashboard',
+                builder: (context, state) => const WeatherDashboardPage(),
+              ),
+              GoRoute(
+                path: 'measurements',
+                name: 'weather-measurements',
+                builder: (context, state) => const WeatherMeasurementsPage(),
+              ),
+              GoRoute(
+                path: 'rain-gauges',
+                name: 'weather-rain-gauges',
+                builder: (context, state) => const RainGaugesPage(),
+              ),
+              GoRoute(
+                path: 'statistics',
+                name: 'weather-statistics',
+                builder: (context, state) => const WeatherStatisticsPage(),
+              ),
+            ],
+          ),
+          
+          // News Routes
+          GoRoute(
+            path: 'news',
+            name: 'news',
+            builder: (context, state) => const NewsListPage(),
+            routes: [
+              GoRoute(
+                path: 'detail/:id',
+                name: 'news-detail',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return NewsDetailPage(id: id);
+                },
+              ),
+            ],
+          ),
+          
+          // Market Routes
+          GoRoute(
+            path: 'markets',
+            name: 'markets',
+            builder: (context, state) => const MarketsListPage(),
+            routes: [
+              GoRoute(
+                path: 'detail/:id',
+                name: 'market-detail',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return MarketDetailPage(id: id);
+                },
+              ),
+            ],
+          ),
+          
+          // Settings Routes
+          GoRoute(
+            path: 'settings',
+            name: 'settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          
+          GoRoute(
+            path: 'profile',
+            name: 'profile',
+            builder: (context, state) => const ProfilePage(),
+          ),
+        ],
+      ),
+    ],
+  );
   
-  /// List of all application routes
-  static List<GetPage> get routes => [
-    // Authentication Routes
-    GetPage(
-      name: RouteNames.login,
-      page: () => const LoginPage(),
-      transition: Transition.fadeIn,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.register,
-      page: () => const RegisterPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // Main App Routes
-    GetPage(
-      name: RouteNames.home,
-      page: () => const HomePage(),
-      transition: Transition.fadeIn,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // Livestock Routes
-    GetPage(
-      name: RouteNames.livestock,
-      page: () => const LivestockListPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.livestockDetail,
-      page: () => const LivestockDetailPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.addLivestock,
-      page: () => const AddLivestockPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.editLivestock,
-      page: () => const EditLivestockPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // Calculator Routes
-    GetPage(
-      name: RouteNames.calculators,
-      page: () => const CalculatorsListPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.calculatorDetail,
-      page: () => const CalculatorDetailPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // Weather Routes
-    GetPage(
-      name: RouteNames.weather,
-      page: () => const WeatherPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.weatherDetail,
-      page: () => const WeatherDetailPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // News Routes
-    GetPage(
-      name: RouteNames.news,
-      page: () => const NewsListPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.newsDetail,
-      page: () => const NewsDetailPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // Market Routes
-    GetPage(
-      name: RouteNames.markets,
-      page: () => const MarketsListPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.marketDetail,
-      page: () => const MarketDetailPage(),
-      transition: Transition.downToUp,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    // Settings Routes
-    GetPage(
-      name: RouteNames.settings,
-      page: () => const SettingsPage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    
-    GetPage(
-      name: RouteNames.profile,
-      page: () => const ProfilePage(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-  ];
+  static GoRouter get router => _router;
 }
 
-/// Navigation helper methods
+/// Navigation helper methods using GoRouter
 class AppNavigation {
   /// Navigate to login page
-  static void toLogin() => Get.offAllNamed(RouteNames.login);
+  static void toLogin(BuildContext context) => context.go('/login');
   
   /// Navigate to home page
-  static void toHome() => Get.offAllNamed(RouteNames.home);
+  static void toHome(BuildContext context) => context.go('/home');
   
   /// Navigate to register page
-  static void toRegister() => Get.toNamed(RouteNames.register);
+  static void toRegister(BuildContext context) => context.push('/register');
   
   /// Navigate to livestock list
-  static void toLivestock() => Get.toNamed(RouteNames.livestock);
+  static void toLivestock(BuildContext context) => context.push('/home/livestock');
   
   /// Navigate to livestock detail
-  static void toLivestockDetail(String id) => 
-      Get.toNamed(RouteNames.livestockDetail, arguments: {'id': id});
+  static void toLivestockDetail(BuildContext context, String id) => 
+      context.push('/home/livestock/detail/$id');
   
   /// Navigate to add livestock
-  static void toAddLivestock() => Get.toNamed(RouteNames.addLivestock);
+  static void toAddLivestock(BuildContext context) => context.push('/home/livestock/add');
   
   /// Navigate to edit livestock
-  static void toEditLivestock(String id) => 
-      Get.toNamed(RouteNames.editLivestock, arguments: {'id': id});
+  static void toEditLivestock(BuildContext context, String id) => 
+      context.push('/home/livestock/edit/$id');
   
   /// Navigate to calculators
-  static void toCalculators() => Get.toNamed(RouteNames.calculators);
+  static void toCalculators(BuildContext context) => context.push('/home/calculators');
   
   /// Navigate to calculator detail
-  static void toCalculatorDetail(String type) => 
-      Get.toNamed(RouteNames.calculatorDetail, arguments: {'type': type});
+  static void toCalculatorDetail(BuildContext context, String id) => 
+      context.push('/home/calculators/detail/$id');
+  
+  /// Navigate to calculators by category
+  static void toCalculatorsByCategory(BuildContext context, String category) => 
+      context.push('/home/calculators/$category');
+  
+  /// Navigate to specific calculators
+  static void toNPKCalculator(BuildContext context) => 
+      context.push('/home/calculators/nutrition/npk');
+  
+  static void toSoilPHCalculator(BuildContext context) => 
+      context.push('/home/calculators/nutrition/soil-ph');
+  
+  static void toFertilizerDosingCalculator(BuildContext context) => 
+      context.push('/home/calculators/nutrition/fertilizer-dosing');
+  
+  static void toCompostCalculator(BuildContext context) => 
+      context.push('/home/calculators/nutrition/compost');
+  
+  static void toOrganicFertilizerCalculator(BuildContext context) => 
+      context.push('/home/calculators/nutrition/organic-fertilizer');
+  
+  static void toFeedCalculator(BuildContext context) => 
+      context.push('/home/calculators/livestock/feed');
+  
+  static void toBreedingCycleCalculator(BuildContext context) => 
+      context.push('/home/calculators/livestock/breeding-cycle');
+  
+  static void toGrazingCalculator(BuildContext context) => 
+      context.push('/home/calculators/livestock/grazing');
+  
+  static void toWeightGainCalculator(BuildContext context) => 
+      context.push('/home/calculators/livestock/weight-gain');
+  
+  static void toPlantingDensityCalculator(BuildContext context) => 
+      context.push('/home/calculators/crops/planting-density');
+  
+  static void toHarvestTimingCalculator(BuildContext context) => 
+      context.push('/home/calculators/crops/harvest-timing');
+  
+  static void toSeedRateCalculator(BuildContext context) => 
+      context.push('/home/calculators/crops/seed-rate');
+  
+  static void toYieldPredictionCalculator(BuildContext context) => 
+      context.push('/home/calculators/crops/yield-prediction');
+  
+  static void toSoilCompositionCalculator(BuildContext context) => 
+      context.push('/home/calculators/soil/composition');
+  
+  static void toDrainageCalculator(BuildContext context) => 
+      context.push('/home/calculators/soil/drainage');
+  
+  /// Navigate to calculator utilities
+  static void toCalculatorsSearch(BuildContext context) => 
+      context.push('/home/calculators/search');
+  
+  static void toCalculatorsFavorites(BuildContext context) => 
+      context.push('/home/calculators/favorites');
   
   /// Navigate to weather
-  static void toWeather() => Get.toNamed(RouteNames.weather);
+  static void toWeather(BuildContext context) => context.push('/home/weather');
   
   /// Navigate to weather detail
-  static void toWeatherDetail() => Get.toNamed(RouteNames.weatherDetail);
+  static void toWeatherDetail(BuildContext context) => context.push('/home/weather/detail');
   
   /// Navigate to news
-  static void toNews() => Get.toNamed(RouteNames.news);
+  static void toNews(BuildContext context) => context.push('/home/news');
   
   /// Navigate to news detail
-  static void toNewsDetail(String id) => 
-      Get.toNamed(RouteNames.newsDetail, arguments: {'id': id});
+  static void toNewsDetail(BuildContext context, String id) => 
+      context.push('/home/news/detail/$id');
   
   /// Navigate to markets
-  static void toMarkets() => Get.toNamed(RouteNames.markets);
+  static void toMarkets(BuildContext context) => context.push('/home/markets');
   
   /// Navigate to market detail
-  static void toMarketDetail(String id) => 
-      Get.toNamed(RouteNames.marketDetail, arguments: {'id': id});
+  static void toMarketDetail(BuildContext context, String id) => 
+      context.push('/home/markets/detail/$id');
   
   /// Navigate to settings
-  static void toSettings() => Get.toNamed(RouteNames.settings);
+  static void toSettings(BuildContext context) => context.push('/home/settings');
   
   /// Navigate to profile
-  static void toProfile() => Get.toNamed(RouteNames.profile);
+  static void toProfile(BuildContext context) => context.push('/home/profile');
   
   /// Go back
-  static void back() => Get.back();
-  
-  /// Close dialogs/bottomsheets
-  static void closeDialog() => Get.back();
+  static void back(BuildContext context) => context.pop();
   
   /// Show snackbar
-  static void showSnackbar(String title, String message, {bool isError = false}) {
-    Get.snackbar(
-      title,
-      message,
-      backgroundColor: isError ? const Color(0xFFD32F2F) : const Color(0xFF4CAF50),
-      colorText: const Color(0xFFFFFFFF),
-      duration: const Duration(seconds: 3),
+  static void showSnackbar(BuildContext context, String title, String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(message),
+          ],
+        ),
+        backgroundColor: isError ? const Color(0xFFD32F2F) : const Color(0xFF4CAF50),
+        duration: const Duration(seconds: 3),
+      ),
     );
   }
 }
 
-// Placeholder pages that will be implemented later
-class LivestockListPage extends StatelessWidget {
-  const LivestockListPage({Key? key}) : super(key: key);
+// Placeholder for EquinesListPage - TODO: Implementar
+class EquinesListPage extends StatelessWidget {
+  const EquinesListPage({super.key});
+  
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Livestock List Page')),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Equinos'),
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    ),
+    body: const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.pets, size: 64),
+          SizedBox(height: 16),
+          Text('Lista de Equinos'),
+          SizedBox(height: 8),
+          Text('Em desenvolvimento...'),
+        ],
+      ),
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () => context.push('/home/livestock/equines/add'),
+      child: const Icon(Icons.add),
+    ),
   );
 }
 
-class LivestockDetailPage extends StatelessWidget {
-  const LivestockDetailPage({Key? key}) : super(key: key);
+
+// Weather Pages Placeholders
+class WeatherMeasurementsPage extends StatelessWidget {
+  const WeatherMeasurementsPage({super.key});
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Livestock Detail Page')),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Medições Meteorológicas')),
+    body: const Center(child: Text('Weather Measurements Page - Em desenvolvimento')),
   );
 }
 
-class AddLivestockPage extends StatelessWidget {
-  const AddLivestockPage({Key? key}) : super(key: key);
+class RainGaugesPage extends StatelessWidget {
+  const RainGaugesPage({super.key});
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Add Livestock Page')),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Pluviômetros')),
+    body: const Center(child: Text('Rain Gauges Page - Em desenvolvimento')),
   );
 }
 
-class EditLivestockPage extends StatelessWidget {
-  const EditLivestockPage({Key? key}) : super(key: key);
+class WeatherStatisticsPage extends StatelessWidget {
+  const WeatherStatisticsPage({super.key});
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Edit Livestock Page')),
-  );
-}
-
-class CalculatorsListPage extends StatelessWidget {
-  const CalculatorsListPage({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Calculators List Page')),
-  );
-}
-
-class CalculatorDetailPage extends StatelessWidget {
-  const CalculatorDetailPage({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Calculator Detail Page')),
-  );
-}
-
-class WeatherPage extends StatelessWidget {
-  const WeatherPage({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Weather Page')),
-  );
-}
-
-class WeatherDetailPage extends StatelessWidget {
-  const WeatherDetailPage({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Weather Detail Page')),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Estatísticas Meteorológicas')),
+    body: const Center(child: Text('Weather Statistics Page - Em desenvolvimento')),
   );
 }
 
 class NewsListPage extends StatelessWidget {
-  const NewsListPage({Key? key}) : super(key: key);
+  const NewsListPage({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text('News List Page')),
@@ -291,15 +576,16 @@ class NewsListPage extends StatelessWidget {
 }
 
 class NewsDetailPage extends StatelessWidget {
-  const NewsDetailPage({Key? key}) : super(key: key);
+  final String id;
+  const NewsDetailPage({super.key, required this.id});
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('News Detail Page')),
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(child: Text('News Detail Page - ID: $id')),
   );
 }
 
 class MarketsListPage extends StatelessWidget {
-  const MarketsListPage({Key? key}) : super(key: key);
+  const MarketsListPage({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text('Markets List Page')),
@@ -307,15 +593,16 @@ class MarketsListPage extends StatelessWidget {
 }
 
 class MarketDetailPage extends StatelessWidget {
-  const MarketDetailPage({Key? key}) : super(key: key);
+  final String id;
+  const MarketDetailPage({super.key, required this.id});
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Market Detail Page')),
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(child: Text('Market Detail Page - ID: $id')),
   );
 }
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text('Settings Page')),
@@ -323,9 +610,59 @@ class SettingsPage extends StatelessWidget {
 }
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text('Profile Page')),
+  );
+}
+
+/// Placeholder for Calculator Search Page
+class CalculatorsSearchPage extends StatelessWidget {
+  const CalculatorsSearchPage({super.key});
+  
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Buscar Calculadoras'),
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    ),
+    body: const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search, size: 64),
+          SizedBox(height: 16),
+          Text('Busca de Calculadoras'),
+          SizedBox(height: 8),
+          Text('Implementação em desenvolvimento...'),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Placeholder for Calculator Favorites Page
+class CalculatorsFavoritesPage extends StatelessWidget {
+  const CalculatorsFavoritesPage({super.key});
+  
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Calculadoras Favoritas'),
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    ),
+    body: const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.favorite, size: 64),
+          SizedBox(height: 16),
+          Text('Calculadoras Favoritas'),
+          SizedBox(height: 8),
+          Text('Implementação em desenvolvimento...'),
+        ],
+      ),
+    ),
   );
 }

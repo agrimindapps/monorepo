@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../entities/calculation_result.dart';
 import '../entities/calculator_input.dart';
 import 'base_calculator.dart';
@@ -221,7 +223,7 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
 
   double _calculateDailyCalories(PregnancyInput input, PregnancyStage stage) {
     // Calorias base: ~70 * peso^0.75 para manutenção
-    double baseCalories = 70 * Math.pow(input.motherWeight, 0.75);
+    double baseCalories = 70 * math.pow(input.motherWeight, 0.75);
     
     switch (stage) {
       case PregnancyStage.early:
@@ -503,5 +505,3 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
   }
 }
 
-// Import do Math para usar pow
-import 'dart:math' as Math;

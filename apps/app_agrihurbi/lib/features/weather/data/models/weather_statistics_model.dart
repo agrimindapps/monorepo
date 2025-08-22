@@ -1,0 +1,724 @@
+import 'package:hive/hive.dart';
+import 'package:equatable/equatable.dart';
+import '../../domain/entities/weather_statistics_entity.dart';
+
+part 'weather_statistics_model.g.dart';
+
+/// Weather statistics model with Hive serialization
+/// Converts between domain entity and data model for persistence
+@HiveType(typeId: 52) // Unique typeId for weather statistics
+class WeatherStatisticsModel extends Equatable {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String locationId;
+
+  @HiveField(2)
+  final String locationName;
+
+  @HiveField(3)
+  final String period;
+
+  @HiveField(4)
+  final DateTime startDate;
+
+  @HiveField(5)
+  final DateTime endDate;
+
+  @HiveField(6)
+  final double avgTemperature;
+
+  @HiveField(7)
+  final double minTemperature;
+
+  @HiveField(8)
+  final double maxTemperature;
+
+  @HiveField(9)
+  final double temperatureVariance;
+
+  @HiveField(10)
+  final double avgHumidity;
+
+  @HiveField(11)
+  final double minHumidity;
+
+  @HiveField(12)
+  final double maxHumidity;
+
+  @HiveField(13)
+  final double humidityVariance;
+
+  @HiveField(14)
+  final double avgPressure;
+
+  @HiveField(15)
+  final double minPressure;
+
+  @HiveField(16)
+  final double maxPressure;
+
+  @HiveField(17)
+  final double pressureVariance;
+
+  @HiveField(18)
+  final double avgWindSpeed;
+
+  @HiveField(19)
+  final double maxWindSpeed;
+
+  @HiveField(20)
+  final double avgWindDirection;
+
+  @HiveField(21)
+  final String predominantWindDirection;
+
+  @HiveField(22)
+  final double totalRainfall;
+
+  @HiveField(23)
+  final double avgDailyRainfall;
+
+  @HiveField(24)
+  final double maxDailyRainfall;
+
+  @HiveField(25)
+  final int rainyDays;
+
+  @HiveField(26)
+  final int dryDays;
+
+  @HiveField(27)
+  final double avgUVIndex;
+
+  @HiveField(28)
+  final double maxUVIndex;
+
+  @HiveField(29)
+  final double avgVisibility;
+
+  @HiveField(30)
+  final double minVisibility;
+
+  @HiveField(31)
+  final Map<String, int> weatherConditionCounts;
+
+  @HiveField(32)
+  final String predominantCondition;
+
+  @HiveField(33)
+  final int favorableDays;
+
+  @HiveField(34)
+  final int unfavorableDays;
+
+  @HiveField(35)
+  final double avgHeatIndex;
+
+  @HiveField(36)
+  final double avgDewPoint;
+
+  @HiveField(37)
+  final int totalMeasurements;
+
+  @HiveField(38)
+  final int validMeasurements;
+
+  @HiveField(39)
+  final double dataCompleteness;
+
+  @HiveField(40)
+  final double avgDataQuality;
+
+  @HiveField(41)
+  final double temperatureTrend;
+
+  @HiveField(42)
+  final double humidityTrend;
+
+  @HiveField(43)
+  final double pressureTrend;
+
+  @HiveField(44)
+  final double rainfallTrend;
+
+  @HiveField(45)
+  final List<String> detectedAnomalies;
+
+  @HiveField(46)
+  final double anomalyScore;
+
+  @HiveField(47)
+  final bool isSeasonalDataAvailable;
+
+  @HiveField(48)
+  final double seasonalDeviationScore;
+
+  @HiveField(49)
+  final DateTime calculatedAt;
+
+  @HiveField(50)
+  final DateTime createdAt;
+
+  @HiveField(51)
+  final DateTime updatedAt;
+
+  const WeatherStatisticsModel({
+    required this.id,
+    required this.locationId,
+    required this.locationName,
+    required this.period,
+    required this.startDate,
+    required this.endDate,
+    required this.avgTemperature,
+    required this.minTemperature,
+    required this.maxTemperature,
+    required this.temperatureVariance,
+    required this.avgHumidity,
+    required this.minHumidity,
+    required this.maxHumidity,
+    required this.humidityVariance,
+    required this.avgPressure,
+    required this.minPressure,
+    required this.maxPressure,
+    required this.pressureVariance,
+    required this.avgWindSpeed,
+    required this.maxWindSpeed,
+    required this.avgWindDirection,
+    required this.predominantWindDirection,
+    required this.totalRainfall,
+    required this.avgDailyRainfall,
+    required this.maxDailyRainfall,
+    required this.rainyDays,
+    required this.dryDays,
+    required this.avgUVIndex,
+    required this.maxUVIndex,
+    required this.avgVisibility,
+    required this.minVisibility,
+    required this.weatherConditionCounts,
+    required this.predominantCondition,
+    required this.favorableDays,
+    required this.unfavorableDays,
+    required this.avgHeatIndex,
+    required this.avgDewPoint,
+    required this.totalMeasurements,
+    required this.validMeasurements,
+    required this.dataCompleteness,
+    required this.avgDataQuality,
+    required this.temperatureTrend,
+    required this.humidityTrend,
+    required this.pressureTrend,
+    required this.rainfallTrend,
+    required this.detectedAnomalies,
+    required this.anomalyScore,
+    required this.isSeasonalDataAvailable,
+    required this.seasonalDeviationScore,
+    required this.calculatedAt,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  /// Create model from domain entity
+  factory WeatherStatisticsModel.fromEntity(WeatherStatisticsEntity entity) {
+    return WeatherStatisticsModel(
+      id: entity.id,
+      locationId: entity.locationId,
+      locationName: entity.locationName,
+      period: entity.period,
+      startDate: entity.startDate,
+      endDate: entity.endDate,
+      avgTemperature: entity.avgTemperature,
+      minTemperature: entity.minTemperature,
+      maxTemperature: entity.maxTemperature,
+      temperatureVariance: entity.temperatureVariance,
+      avgHumidity: entity.avgHumidity,
+      minHumidity: entity.minHumidity,
+      maxHumidity: entity.maxHumidity,
+      humidityVariance: entity.humidityVariance,
+      avgPressure: entity.avgPressure,
+      minPressure: entity.minPressure,
+      maxPressure: entity.maxPressure,
+      pressureVariance: entity.pressureVariance,
+      avgWindSpeed: entity.avgWindSpeed,
+      maxWindSpeed: entity.maxWindSpeed,
+      avgWindDirection: entity.avgWindDirection,
+      predominantWindDirection: entity.predominantWindDirection,
+      totalRainfall: entity.totalRainfall,
+      avgDailyRainfall: entity.avgDailyRainfall,
+      maxDailyRainfall: entity.maxDailyRainfall,
+      rainyDays: entity.rainyDays,
+      dryDays: entity.dryDays,
+      avgUVIndex: entity.avgUVIndex,
+      maxUVIndex: entity.maxUVIndex,
+      avgVisibility: entity.avgVisibility,
+      minVisibility: entity.minVisibility,
+      weatherConditionCounts: entity.weatherConditionCounts,
+      predominantCondition: entity.predominantCondition,
+      favorableDays: entity.favorableDays,
+      unfavorableDays: entity.unfavorableDays,
+      avgHeatIndex: entity.avgHeatIndex,
+      avgDewPoint: entity.avgDewPoint,
+      totalMeasurements: entity.totalMeasurements,
+      validMeasurements: entity.validMeasurements,
+      dataCompleteness: entity.dataCompleteness,
+      avgDataQuality: entity.avgDataQuality,
+      temperatureTrend: entity.temperatureTrend,
+      humidityTrend: entity.humidityTrend,
+      pressureTrend: entity.pressureTrend,
+      rainfallTrend: entity.rainfallTrend,
+      detectedAnomalies: entity.detectedAnomalies,
+      anomalyScore: entity.anomalyScore,
+      isSeasonalDataAvailable: entity.isSeasonalDataAvailable,
+      seasonalDeviationScore: entity.seasonalDeviationScore,
+      calculatedAt: entity.calculatedAt,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    );
+  }
+
+  /// Convert to domain entity
+  WeatherStatisticsEntity toEntity() {
+    return WeatherStatisticsEntity(
+      id: id,
+      locationId: locationId,
+      locationName: locationName,
+      period: period,
+      startDate: startDate,
+      endDate: endDate,
+      avgTemperature: avgTemperature,
+      minTemperature: minTemperature,
+      maxTemperature: maxTemperature,
+      temperatureVariance: temperatureVariance,
+      avgHumidity: avgHumidity,
+      minHumidity: minHumidity,
+      maxHumidity: maxHumidity,
+      humidityVariance: humidityVariance,
+      avgPressure: avgPressure,
+      minPressure: minPressure,
+      maxPressure: maxPressure,
+      pressureVariance: pressureVariance,
+      avgWindSpeed: avgWindSpeed,
+      maxWindSpeed: maxWindSpeed,
+      avgWindDirection: avgWindDirection,
+      predominantWindDirection: predominantWindDirection,
+      totalRainfall: totalRainfall,
+      avgDailyRainfall: avgDailyRainfall,
+      maxDailyRainfall: maxDailyRainfall,
+      rainyDays: rainyDays,
+      dryDays: dryDays,
+      avgUVIndex: avgUVIndex,
+      maxUVIndex: maxUVIndex,
+      avgVisibility: avgVisibility,
+      minVisibility: minVisibility,
+      weatherConditionCounts: weatherConditionCounts,
+      predominantCondition: predominantCondition,
+      favorableDays: favorableDays,
+      unfavorableDays: unfavorableDays,
+      avgHeatIndex: avgHeatIndex,
+      avgDewPoint: avgDewPoint,
+      totalMeasurements: totalMeasurements,
+      validMeasurements: validMeasurements,
+      dataCompleteness: dataCompleteness,
+      avgDataQuality: avgDataQuality,
+      temperatureTrend: temperatureTrend,
+      humidityTrend: humidityTrend,
+      pressureTrend: pressureTrend,
+      rainfallTrend: rainfallTrend,
+      detectedAnomalies: detectedAnomalies,
+      anomalyScore: anomalyScore,
+      isSeasonalDataAvailable: isSeasonalDataAvailable,
+      seasonalDeviationScore: seasonalDeviationScore,
+      calculatedAt: calculatedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+
+  /// Create model from JSON (for API integration)
+  factory WeatherStatisticsModel.fromJson(Map<String, dynamic> json) {
+    return WeatherStatisticsModel(
+      id: json['id']?.toString() ?? '',
+      locationId: json['location_id']?.toString() ?? '',
+      locationName: json['location_name']?.toString() ?? '',
+      period: json['period']?.toString() ?? '',
+      startDate: DateTime.tryParse(json['start_date']?.toString() ?? '') ?? DateTime.now(),
+      endDate: DateTime.tryParse(json['end_date']?.toString() ?? '') ?? DateTime.now(),
+      avgTemperature: (json['avg_temperature']?.toDouble()) ?? 0.0,
+      minTemperature: (json['min_temperature']?.toDouble()) ?? 0.0,
+      maxTemperature: (json['max_temperature']?.toDouble()) ?? 0.0,
+      temperatureVariance: (json['temperature_variance']?.toDouble()) ?? 0.0,
+      avgHumidity: (json['avg_humidity']?.toDouble()) ?? 0.0,
+      minHumidity: (json['min_humidity']?.toDouble()) ?? 0.0,
+      maxHumidity: (json['max_humidity']?.toDouble()) ?? 0.0,
+      humidityVariance: (json['humidity_variance']?.toDouble()) ?? 0.0,
+      avgPressure: (json['avg_pressure']?.toDouble()) ?? 0.0,
+      minPressure: (json['min_pressure']?.toDouble()) ?? 0.0,
+      maxPressure: (json['max_pressure']?.toDouble()) ?? 0.0,
+      pressureVariance: (json['pressure_variance']?.toDouble()) ?? 0.0,
+      avgWindSpeed: (json['avg_wind_speed']?.toDouble()) ?? 0.0,
+      maxWindSpeed: (json['max_wind_speed']?.toDouble()) ?? 0.0,
+      avgWindDirection: (json['avg_wind_direction']?.toDouble()) ?? 0.0,
+      predominantWindDirection: json['predominant_wind_direction']?.toString() ?? '',
+      totalRainfall: (json['total_rainfall']?.toDouble()) ?? 0.0,
+      avgDailyRainfall: (json['avg_daily_rainfall']?.toDouble()) ?? 0.0,
+      maxDailyRainfall: (json['max_daily_rainfall']?.toDouble()) ?? 0.0,
+      rainyDays: json['rainy_days']?.toInt() ?? 0,
+      dryDays: json['dry_days']?.toInt() ?? 0,
+      avgUVIndex: (json['avg_uv_index']?.toDouble()) ?? 0.0,
+      maxUVIndex: (json['max_uv_index']?.toDouble()) ?? 0.0,
+      avgVisibility: (json['avg_visibility']?.toDouble()) ?? 0.0,
+      minVisibility: (json['min_visibility']?.toDouble()) ?? 0.0,
+      weatherConditionCounts: _parseConditionCounts(json['weather_condition_counts']),
+      predominantCondition: json['predominant_condition']?.toString() ?? '',
+      favorableDays: json['favorable_days']?.toInt() ?? 0,
+      unfavorableDays: json['unfavorable_days']?.toInt() ?? 0,
+      avgHeatIndex: (json['avg_heat_index']?.toDouble()) ?? 0.0,
+      avgDewPoint: (json['avg_dew_point']?.toDouble()) ?? 0.0,
+      totalMeasurements: json['total_measurements']?.toInt() ?? 0,
+      validMeasurements: json['valid_measurements']?.toInt() ?? 0,
+      dataCompleteness: (json['data_completeness']?.toDouble()) ?? 0.0,
+      avgDataQuality: (json['avg_data_quality']?.toDouble()) ?? 0.0,
+      temperatureTrend: (json['temperature_trend']?.toDouble()) ?? 0.0,
+      humidityTrend: (json['humidity_trend']?.toDouble()) ?? 0.0,
+      pressureTrend: (json['pressure_trend']?.toDouble()) ?? 0.0,
+      rainfallTrend: (json['rainfall_trend']?.toDouble()) ?? 0.0,
+      detectedAnomalies: _parseAnomalies(json['detected_anomalies']),
+      anomalyScore: (json['anomaly_score']?.toDouble()) ?? 0.0,
+      isSeasonalDataAvailable: json['is_seasonal_data_available'] == true,
+      seasonalDeviationScore: (json['seasonal_deviation_score']?.toDouble()) ?? 0.0,
+      calculatedAt: DateTime.tryParse(json['calculated_at']?.toString() ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+    );
+  }
+
+  /// Convert to JSON (for API integration)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'location_id': locationId,
+      'location_name': locationName,
+      'period': period,
+      'start_date': startDate.toIso8601String(),
+      'end_date': endDate.toIso8601String(),
+      'avg_temperature': avgTemperature,
+      'min_temperature': minTemperature,
+      'max_temperature': maxTemperature,
+      'temperature_variance': temperatureVariance,
+      'avg_humidity': avgHumidity,
+      'min_humidity': minHumidity,
+      'max_humidity': maxHumidity,
+      'humidity_variance': humidityVariance,
+      'avg_pressure': avgPressure,
+      'min_pressure': minPressure,
+      'max_pressure': maxPressure,
+      'pressure_variance': pressureVariance,
+      'avg_wind_speed': avgWindSpeed,
+      'max_wind_speed': maxWindSpeed,
+      'avg_wind_direction': avgWindDirection,
+      'predominant_wind_direction': predominantWindDirection,
+      'total_rainfall': totalRainfall,
+      'avg_daily_rainfall': avgDailyRainfall,
+      'max_daily_rainfall': maxDailyRainfall,
+      'rainy_days': rainyDays,
+      'dry_days': dryDays,
+      'avg_uv_index': avgUVIndex,
+      'max_uv_index': maxUVIndex,
+      'avg_visibility': avgVisibility,
+      'min_visibility': minVisibility,
+      'weather_condition_counts': weatherConditionCounts,
+      'predominant_condition': predominantCondition,
+      'favorable_days': favorableDays,
+      'unfavorable_days': unfavorableDays,
+      'avg_heat_index': avgHeatIndex,
+      'avg_dew_point': avgDewPoint,
+      'total_measurements': totalMeasurements,
+      'valid_measurements': validMeasurements,
+      'data_completeness': dataCompleteness,
+      'avg_data_quality': avgDataQuality,
+      'temperature_trend': temperatureTrend,
+      'humidity_trend': humidityTrend,
+      'pressure_trend': pressureTrend,
+      'rainfall_trend': rainfallTrend,
+      'detected_anomalies': detectedAnomalies,
+      'anomaly_score': anomalyScore,
+      'is_seasonal_data_available': isSeasonalDataAvailable,
+      'seasonal_deviation_score': seasonalDeviationScore,
+      'calculated_at': calculatedAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  /// Create summary statistics model
+  factory WeatherStatisticsModel.summary({
+    required String locationId,
+    required String locationName,
+    required String period,
+    required DateTime startDate,
+    required DateTime endDate,
+    required Map<String, dynamic> summaryData,
+  }) {
+    return WeatherStatisticsModel(
+      id: 'summary_${locationId}_${period}_${startDate.millisecondsSinceEpoch}',
+      locationId: locationId,
+      locationName: locationName,
+      period: period,
+      startDate: startDate,
+      endDate: endDate,
+      avgTemperature: (summaryData['avg_temperature']?.toDouble()) ?? 0.0,
+      minTemperature: (summaryData['min_temperature']?.toDouble()) ?? 0.0,
+      maxTemperature: (summaryData['max_temperature']?.toDouble()) ?? 0.0,
+      temperatureVariance: (summaryData['temperature_variance']?.toDouble()) ?? 0.0,
+      avgHumidity: (summaryData['avg_humidity']?.toDouble()) ?? 0.0,
+      minHumidity: (summaryData['min_humidity']?.toDouble()) ?? 0.0,
+      maxHumidity: (summaryData['max_humidity']?.toDouble()) ?? 0.0,
+      humidityVariance: (summaryData['humidity_variance']?.toDouble()) ?? 0.0,
+      avgPressure: (summaryData['avg_pressure']?.toDouble()) ?? 1013.25,
+      minPressure: (summaryData['min_pressure']?.toDouble()) ?? 1000.0,
+      maxPressure: (summaryData['max_pressure']?.toDouble()) ?? 1030.0,
+      pressureVariance: (summaryData['pressure_variance']?.toDouble()) ?? 0.0,
+      avgWindSpeed: (summaryData['avg_wind_speed']?.toDouble()) ?? 0.0,
+      maxWindSpeed: (summaryData['max_wind_speed']?.toDouble()) ?? 0.0,
+      avgWindDirection: (summaryData['avg_wind_direction']?.toDouble()) ?? 0.0,
+      predominantWindDirection: summaryData['predominant_wind_direction']?.toString() ?? 'N',
+      totalRainfall: (summaryData['total_rainfall']?.toDouble()) ?? 0.0,
+      avgDailyRainfall: (summaryData['avg_daily_rainfall']?.toDouble()) ?? 0.0,
+      maxDailyRainfall: (summaryData['max_daily_rainfall']?.toDouble()) ?? 0.0,
+      rainyDays: summaryData['rainy_days']?.toInt() ?? 0,
+      dryDays: summaryData['dry_days']?.toInt() ?? 0,
+      avgUVIndex: (summaryData['avg_uv_index']?.toDouble()) ?? 0.0,
+      maxUVIndex: (summaryData['max_uv_index']?.toDouble()) ?? 0.0,
+      avgVisibility: (summaryData['avg_visibility']?.toDouble()) ?? 10.0,
+      minVisibility: (summaryData['min_visibility']?.toDouble()) ?? 0.0,
+      weatherConditionCounts: _parseConditionCounts(summaryData['weather_condition_counts']),
+      predominantCondition: summaryData['predominant_condition']?.toString() ?? 'unknown',
+      favorableDays: summaryData['favorable_days']?.toInt() ?? 0,
+      unfavorableDays: summaryData['unfavorable_days']?.toInt() ?? 0,
+      avgHeatIndex: (summaryData['avg_heat_index']?.toDouble()) ?? 0.0,
+      avgDewPoint: (summaryData['avg_dew_point']?.toDouble()) ?? 0.0,
+      totalMeasurements: summaryData['total_measurements']?.toInt() ?? 0,
+      validMeasurements: summaryData['valid_measurements']?.toInt() ?? 0,
+      dataCompleteness: (summaryData['data_completeness']?.toDouble()) ?? 1.0,
+      avgDataQuality: (summaryData['avg_data_quality']?.toDouble()) ?? 1.0,
+      temperatureTrend: (summaryData['temperature_trend']?.toDouble()) ?? 0.0,
+      humidityTrend: (summaryData['humidity_trend']?.toDouble()) ?? 0.0,
+      pressureTrend: (summaryData['pressure_trend']?.toDouble()) ?? 0.0,
+      rainfallTrend: (summaryData['rainfall_trend']?.toDouble()) ?? 0.0,
+      detectedAnomalies: _parseAnomalies(summaryData['detected_anomalies']),
+      anomalyScore: (summaryData['anomaly_score']?.toDouble()) ?? 0.0,
+      isSeasonalDataAvailable: summaryData['is_seasonal_data_available'] == true,
+      seasonalDeviationScore: (summaryData['seasonal_deviation_score']?.toDouble()) ?? 0.0,
+      calculatedAt: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Create copy with updated properties
+  WeatherStatisticsModel copyWith({
+    String? id,
+    String? locationId,
+    String? locationName,
+    String? period,
+    DateTime? startDate,
+    DateTime? endDate,
+    double? avgTemperature,
+    double? minTemperature,
+    double? maxTemperature,
+    double? temperatureVariance,
+    double? avgHumidity,
+    double? minHumidity,
+    double? maxHumidity,
+    double? humidityVariance,
+    double? avgPressure,
+    double? minPressure,
+    double? maxPressure,
+    double? pressureVariance,
+    double? avgWindSpeed,
+    double? maxWindSpeed,
+    double? avgWindDirection,
+    String? predominantWindDirection,
+    double? totalRainfall,
+    double? avgDailyRainfall,
+    double? maxDailyRainfall,
+    int? rainyDays,
+    int? dryDays,
+    double? avgUVIndex,
+    double? maxUVIndex,
+    double? avgVisibility,
+    double? minVisibility,
+    Map<String, int>? weatherConditionCounts,
+    String? predominantCondition,
+    int? favorableDays,
+    int? unfavorableDays,
+    double? avgHeatIndex,
+    double? avgDewPoint,
+    int? totalMeasurements,
+    int? validMeasurements,
+    double? dataCompleteness,
+    double? avgDataQuality,
+    double? temperatureTrend,
+    double? humidityTrend,
+    double? pressureTrend,
+    double? rainfallTrend,
+    List<String>? detectedAnomalies,
+    double? anomalyScore,
+    bool? isSeasonalDataAvailable,
+    double? seasonalDeviationScore,
+    DateTime? calculatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return WeatherStatisticsModel(
+      id: id ?? this.id,
+      locationId: locationId ?? this.locationId,
+      locationName: locationName ?? this.locationName,
+      period: period ?? this.period,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      avgTemperature: avgTemperature ?? this.avgTemperature,
+      minTemperature: minTemperature ?? this.minTemperature,
+      maxTemperature: maxTemperature ?? this.maxTemperature,
+      temperatureVariance: temperatureVariance ?? this.temperatureVariance,
+      avgHumidity: avgHumidity ?? this.avgHumidity,
+      minHumidity: minHumidity ?? this.minHumidity,
+      maxHumidity: maxHumidity ?? this.maxHumidity,
+      humidityVariance: humidityVariance ?? this.humidityVariance,
+      avgPressure: avgPressure ?? this.avgPressure,
+      minPressure: minPressure ?? this.minPressure,
+      maxPressure: maxPressure ?? this.maxPressure,
+      pressureVariance: pressureVariance ?? this.pressureVariance,
+      avgWindSpeed: avgWindSpeed ?? this.avgWindSpeed,
+      maxWindSpeed: maxWindSpeed ?? this.maxWindSpeed,
+      avgWindDirection: avgWindDirection ?? this.avgWindDirection,
+      predominantWindDirection: predominantWindDirection ?? this.predominantWindDirection,
+      totalRainfall: totalRainfall ?? this.totalRainfall,
+      avgDailyRainfall: avgDailyRainfall ?? this.avgDailyRainfall,
+      maxDailyRainfall: maxDailyRainfall ?? this.maxDailyRainfall,
+      rainyDays: rainyDays ?? this.rainyDays,
+      dryDays: dryDays ?? this.dryDays,
+      avgUVIndex: avgUVIndex ?? this.avgUVIndex,
+      maxUVIndex: maxUVIndex ?? this.maxUVIndex,
+      avgVisibility: avgVisibility ?? this.avgVisibility,
+      minVisibility: minVisibility ?? this.minVisibility,
+      weatherConditionCounts: weatherConditionCounts ?? this.weatherConditionCounts,
+      predominantCondition: predominantCondition ?? this.predominantCondition,
+      favorableDays: favorableDays ?? this.favorableDays,
+      unfavorableDays: unfavorableDays ?? this.unfavorableDays,
+      avgHeatIndex: avgHeatIndex ?? this.avgHeatIndex,
+      avgDewPoint: avgDewPoint ?? this.avgDewPoint,
+      totalMeasurements: totalMeasurements ?? this.totalMeasurements,
+      validMeasurements: validMeasurements ?? this.validMeasurements,
+      dataCompleteness: dataCompleteness ?? this.dataCompleteness,
+      avgDataQuality: avgDataQuality ?? this.avgDataQuality,
+      temperatureTrend: temperatureTrend ?? this.temperatureTrend,
+      humidityTrend: humidityTrend ?? this.humidityTrend,
+      pressureTrend: pressureTrend ?? this.pressureTrend,
+      rainfallTrend: rainfallTrend ?? this.rainfallTrend,
+      detectedAnomalies: detectedAnomalies ?? this.detectedAnomalies,
+      anomalyScore: anomalyScore ?? this.anomalyScore,
+      isSeasonalDataAvailable: isSeasonalDataAvailable ?? this.isSeasonalDataAvailable,
+      seasonalDeviationScore: seasonalDeviationScore ?? this.seasonalDeviationScore,
+      calculatedAt: calculatedAt ?? this.calculatedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        locationId,
+        locationName,
+        period,
+        startDate,
+        endDate,
+        avgTemperature,
+        minTemperature,
+        maxTemperature,
+        temperatureVariance,
+        avgHumidity,
+        minHumidity,
+        maxHumidity,
+        humidityVariance,
+        avgPressure,
+        minPressure,
+        maxPressure,
+        pressureVariance,
+        avgWindSpeed,
+        maxWindSpeed,
+        avgWindDirection,
+        predominantWindDirection,
+        totalRainfall,
+        avgDailyRainfall,
+        maxDailyRainfall,
+        rainyDays,
+        dryDays,
+        avgUVIndex,
+        maxUVIndex,
+        avgVisibility,
+        minVisibility,
+        weatherConditionCounts,
+        predominantCondition,
+        favorableDays,
+        unfavorableDays,
+        avgHeatIndex,
+        avgDewPoint,
+        totalMeasurements,
+        validMeasurements,
+        dataCompleteness,
+        avgDataQuality,
+        temperatureTrend,
+        humidityTrend,
+        pressureTrend,
+        rainfallTrend,
+        detectedAnomalies,
+        anomalyScore,
+        isSeasonalDataAvailable,
+        seasonalDeviationScore,
+        calculatedAt,
+        createdAt,
+        updatedAt,
+      ];
+
+  @override
+  String toString() {
+    return 'WeatherStatisticsModel('
+        'id: $id, '
+        'location: $locationName, '
+        'period: $period, '
+        'temp: ${avgTemperature.toStringAsFixed(1)}°C, '
+        'rain: ${totalRainfall.toStringAsFixed(1)}mm'
+        ')';
+  }
+
+  // ============================================================================
+  // PRIVATE HELPER METHODS
+  // ============================================================================
+
+  /// Parse weather condition counts from various formats
+  static Map<String, int> _parseConditionCounts(dynamic conditionCounts) {
+    if (conditionCounts is Map<String, int>) {
+      return conditionCounts;
+    } else if (conditionCounts is Map) {
+      return Map<String, int>.from(
+        conditionCounts.map((key, value) => MapEntry(key.toString(), (value?.toInt()) ?? 0))
+      );
+    } else {
+      return <String, int>{};
+    }
+  }
+
+  /// Parse anomalies from various formats
+  static List<String> _parseAnomalies(dynamic anomalies) {
+    if (anomalies is List<String>) {
+      return anomalies;
+    } else if (anomalies is List) {
+      return anomalies.map((item) => item.toString()).toList();
+    } else {
+      return <String>[];
+    }
+  }
+}

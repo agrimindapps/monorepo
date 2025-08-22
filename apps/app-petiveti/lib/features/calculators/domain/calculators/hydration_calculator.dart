@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../entities/calculation_result.dart';
 import '../entities/calculator_input.dart';
 import 'base_calculator.dart';
@@ -273,7 +275,7 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
   double _calculateMaintenanceVolume(HydrationInput input) {
     // Volume de manutenção baseado no peso
     // Fórmula: 70 * peso^0.75 (para energia) convertido para água
-    return 70 * Math.pow(input.weight, 0.75) * 2; // Aproximadamente 2mL por kcal
+    return 70 * math.pow(input.weight, 0.75) * 2; // Aproximadamente 2mL por kcal
   }
 
   double _calculateReplacementVolume(HydrationInput input) {
@@ -527,5 +529,3 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
   }
 }
 
-// Import do Math para usar pow
-import 'dart:math' as Math;

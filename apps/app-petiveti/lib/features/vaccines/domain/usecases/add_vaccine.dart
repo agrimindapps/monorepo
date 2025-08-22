@@ -5,26 +5,44 @@ import '../../../../core/interfaces/usecase.dart';
 import '../entities/vaccine.dart';
 import '../repositories/vaccine_repository.dart';
 
-class AddVaccine implements UseCase<Vaccine, AddVaccineParams> {
+class AddVaccine implements UseCase<Vaccine, Vaccine> {
   final VaccineRepository repository;
 
   AddVaccine(this.repository);
 
   @override
-  Future<Either<Failure, Vaccine>> call(AddVaccineParams params) async {
-    if (params.vaccine.name.isEmpty) {
-      return Left(ValidationFailure(message: 'Nome da vacina é obrigatório'));
+  Future<Either<Failure, Vaccine>> call(Vaccine vaccine) async {
+    // Comprehensive validation
+    if (!vaccine.isValid) {
+      return const Left(ValidationFailure(message: 'Dados da vacina inválidos'));
     }
     
-    if (params.vaccine.animalId.isEmpty) {
-      return Left(ValidationFailure(message: 'Animal deve ser selecionado'));
+    if (vaccine.name.trim().isEmpty) {
+      return const Left(ValidationFailure(message: 'Nome da vacina é obrigatório'));
+    }
+    
+    if (vaccine.veterinarian.trim().isEmpty) {
+      return const Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
+    }
+    
+    if (vaccine.animalId.trim().isEmpty) {
+      return const Left(ValidationFailure(message: 'Animal deve ser selecionado'));
     }
 
-    return await repository.addVaccine(params.vaccine);
-  }
-}
+    if (vaccine.date.isAfter(DateTime.now())) {
+      return const Left(ValidationFailure(message: 'Data de aplicação não pode ser no futuro'));
+    }
 
-class AddVaccineParams {
-  final Vaccine vaccine;
-  AddVaccineParams({required this.vaccine});
+    // Validate next due date if present
+    if (vaccine.nextDueDate != null && vaccine.nextDueDate!.isBefore(vaccine.date)) {
+      return const Left(ValidationFailure(message: 'Data da próxima dose deve ser posterior à data de aplicação'));
+    }
+
+    // Validate reminder date if present
+    if (vaccine.reminderDate != null && vaccine.reminderDate!.isBefore(DateTime.now())) {
+      return const Left(ValidationFailure(message: 'Data do lembrete deve ser no futuro'));
+    }
+
+    return await repository.addVaccine(vaccine);
+  }
 }

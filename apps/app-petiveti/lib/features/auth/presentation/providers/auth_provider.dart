@@ -279,16 +279,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
-    sl<SignInWithEmail>(),
-    sl<SignUpWithEmail>(),
-    sl<SignInWithGoogle>(),
-    sl<SignInWithApple>(),
-    sl<SignInWithFacebook>(),
-    sl<SignOut>(),
-    sl<GetCurrentUser>(),
-    sl<SendEmailVerification>(),
-    sl<SendPasswordResetEmail>(),
-    sl<UpdateProfile>(),
-    sl<DeleteAccount>(),
+    getIt<SignInWithEmail>(),
+    getIt<SignUpWithEmail>(),
+    getIt<SignInWithGoogle>(),
+    getIt<SignInWithApple>(),
+    getIt<SignInWithFacebook>(),
+    getIt<SignOut>(),
+    getIt<GetCurrentUser>(),
+    getIt<SendEmailVerification>(),
+    getIt<SendPasswordResetEmail>(),
+    getIt<UpdateProfile>(),
+    getIt<DeleteAccount>(),
   );
+});
+
+// Convenience providers
+final authStateProvider = Provider<AuthState>((ref) {
+  return ref.watch(authProvider);
+});
+
+final currentUserProvider = Provider<User?>((ref) {
+  return ref.watch(authProvider).user;
+});
+
+final isAuthenticatedProvider = Provider<bool>((ref) {
+  return ref.watch(authProvider).isAuthenticated;
+});
+
+final authLoadingProvider = Provider<bool>((ref) {
+  return ref.watch(authProvider).isLoading;
+});
+
+final authErrorProvider = Provider<String?>((ref) {
+  final authState = ref.watch(authProvider);
+  return authState.hasError ? authState.error : null;
 });

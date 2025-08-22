@@ -22,6 +22,29 @@ class UserEntity extends Equatable {
     this.isActive = true,
   });
 
+  /// Cria uma cópia da entidade com campos opcionalmente modificados
+  UserEntity copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? phone,
+    String? profileImageUrl,
+    DateTime? createdAt,
+    DateTime? lastLoginAt,
+    bool? isActive,
+  }) {
+    return UserEntity(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      createdAt: createdAt ?? this.createdAt,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,

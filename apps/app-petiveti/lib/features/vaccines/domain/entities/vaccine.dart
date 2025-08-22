@@ -4,11 +4,16 @@ class Vaccine extends Equatable {
   final String id;
   final String animalId;
   final String name;
-  final DateTime applicationDate;
-  final DateTime? nextDoseDate;
-  final String? veterinarianName;
+  final String veterinarian;
+  final DateTime date;
+  final DateTime? nextDueDate;
   final String? batch;
+  final String? manufacturer;
+  final String? dosage;
   final String? notes;
+  final bool isRequired;
+  final bool isCompleted;
+  final DateTime? reminderDate;
   final VaccineStatus status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -18,11 +23,16 @@ class Vaccine extends Equatable {
     required this.id,
     required this.animalId,
     required this.name,
-    required this.applicationDate,
-    this.nextDoseDate,
-    this.veterinarianName,
+    required this.veterinarian,
+    required this.date,
+    this.nextDueDate,
     this.batch,
+    this.manufacturer,
+    this.dosage,
     this.notes,
+    this.isRequired = true,
+    this.isCompleted = false,
+    this.reminderDate,
     this.status = VaccineStatus.applied,
     required this.createdAt,
     required this.updatedAt,
@@ -33,11 +43,16 @@ class Vaccine extends Equatable {
     String? id,
     String? animalId,
     String? name,
-    DateTime? applicationDate,
-    DateTime? nextDoseDate,
-    String? veterinarianName,
+    String? veterinarian,
+    DateTime? date,
+    DateTime? nextDueDate,
     String? batch,
+    String? manufacturer,
+    String? dosage,
     String? notes,
+    bool? isRequired,
+    bool? isCompleted,
+    DateTime? reminderDate,
     VaccineStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -47,11 +62,16 @@ class Vaccine extends Equatable {
       id: id ?? this.id,
       animalId: animalId ?? this.animalId,
       name: name ?? this.name,
-      applicationDate: applicationDate ?? this.applicationDate,
-      nextDoseDate: nextDoseDate ?? this.nextDoseDate,
-      veterinarianName: veterinarianName ?? this.veterinarianName,
+      veterinarian: veterinarian ?? this.veterinarian,
+      date: date ?? this.date,
+      nextDueDate: nextDueDate ?? this.nextDueDate,
       batch: batch ?? this.batch,
+      manufacturer: manufacturer ?? this.manufacturer,
+      dosage: dosage ?? this.dosage,
       notes: notes ?? this.notes,
+      isRequired: isRequired ?? this.isRequired,
+      isCompleted: isCompleted ?? this.isCompleted,
+      reminderDate: reminderDate ?? this.reminderDate,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -59,37 +79,61 @@ class Vaccine extends Equatable {
     );
   }
 
+  // Validation methods
+  bool get isValid {
+    return name.trim().isNotEmpty &&
+           veterinarian.trim().isNotEmpty &&
+           animalId.trim().isNotEmpty &&
+           date.isBefore(DateTime.now().add(const Duration(days: 1))); // Can't be in future
+  }
+
   bool get isPending {
-    if (nextDoseDate == null) return false;
-    return nextDoseDate!.isAfter(DateTime.now()) && status == VaccineStatus.applied;
+    if (nextDueDate == null || isCompleted) return false;
+    return nextDueDate!.isAfter(DateTime.now()) && status == VaccineStatus.pending;
   }
 
   bool get isOverdue {
-    if (nextDoseDate == null) return false;
-    return nextDoseDate!.isBefore(DateTime.now()) && status == VaccineStatus.applied;
+    if (nextDueDate == null || isCompleted) return false;
+    return nextDueDate!.isBefore(DateTime.now()) && 
+           !isCompleted && 
+           isRequired && 
+           status != VaccineStatus.cancelled;
   }
 
   bool get isDueToday {
-    if (nextDoseDate == null) return false;
+    if (nextDueDate == null || isCompleted) return false;
     final now = DateTime.now();
-    return nextDoseDate!.year == now.year &&
-        nextDoseDate!.month == now.month &&
-        nextDoseDate!.day == now.day;
+    return nextDueDate!.year == now.year &&
+           nextDueDate!.month == now.month &&
+           nextDueDate!.day == now.day &&
+           !isCompleted;
   }
 
   bool get isDueSoon {
-    if (nextDoseDate == null) return false;
+    if (nextDueDate == null || isCompleted) return false;
     final now = DateTime.now();
-    final daysDiff = nextDoseDate!.difference(now).inDays;
-    return daysDiff >= 0 && daysDiff <= 7; // Due within 7 days
+    final daysDiff = nextDueDate!.difference(now).inDays;
+    return daysDiff >= 0 && daysDiff <= 7 && !isCompleted; // Due within 7 days
+  }
+
+  bool get needsReminder {
+    if (reminderDate == null || isCompleted) return false;
+    final now = DateTime.now();
+    return reminderDate!.isBefore(now) || reminderDate!.isAtSameMomentAs(now);
   }
 
   int get daysUntilNextDose {
-    if (nextDoseDate == null) return -1;
-    return nextDoseDate!.difference(DateTime.now()).inDays;
+    if (nextDueDate == null) return -1;
+    return nextDueDate!.difference(DateTime.now()).inDays;
+  }
+
+  int get daysSinceApplication {
+    return DateTime.now().difference(date).inDays;
   }
 
   String get displayStatus {
+    if (isCompleted) return 'Concluída';
+    
     switch (status) {
       case VaccineStatus.applied:
         return 'Aplicada';
@@ -102,11 +146,20 @@ class Vaccine extends Equatable {
     }
   }
 
+  String get priorityLevel {
+    if (isCompleted) return 'Baixa';
+    if (isOverdue && isRequired) return 'Alta';
+    if (isDueToday) return 'Alta';
+    if (isDueSoon) return 'Média';
+    return 'Baixa';
+  }
+
   String get nextDoseInfo {
-    if (nextDoseDate == null) return 'Dose única';
+    if (nextDueDate == null) return 'Dose única';
+    if (isCompleted) return 'Vacina concluída';
     
     if (isOverdue) {
-      final days = DateTime.now().difference(nextDoseDate!).inDays;
+      final days = DateTime.now().difference(nextDueDate!).inDays;
       return 'Atrasada há $days ${days == 1 ? 'dia' : 'dias'}';
     } else if (isDueToday) {
       return 'Vence hoje';
@@ -119,16 +172,59 @@ class Vaccine extends Equatable {
     return 'Próxima dose programada';
   }
 
+  String get reminderInfo {
+    if (reminderDate == null) return 'Sem lembrete';
+    if (needsReminder) return 'Lembrete ativo';
+    
+    final days = reminderDate!.difference(DateTime.now()).inDays;
+    if (days == 0) return 'Lembrete hoje';
+    if (days > 0) return 'Lembrete em $days ${days == 1 ? 'dia' : 'dias'}';
+    return 'Lembrete vencido';
+  }
+
+  // Business logic methods
+  bool canBeMarkedAsCompleted() {
+    return !isCompleted && 
+           status != VaccineStatus.cancelled &&
+           date.isBefore(DateTime.now().add(const Duration(days: 1)));
+  }
+
+  bool requiresNextDose() {
+    return nextDueDate != null && !isCompleted && isRequired;
+  }
+
+  Vaccine markAsCompleted() {
+    if (!canBeMarkedAsCompleted()) return this;
+    
+    return copyWith(
+      isCompleted: true,
+      status: VaccineStatus.applied,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Vaccine scheduleReminder(DateTime reminderDateTime) {
+    return copyWith(
+      reminderDate: reminderDateTime,
+      updatedAt: DateTime.now(),
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,
         animalId,
         name,
-        applicationDate,
-        nextDoseDate,
-        veterinarianName,
+        veterinarian,
+        date,
+        nextDueDate,
         batch,
+        manufacturer,
+        dosage,
         notes,
+        isRequired,
+        isCompleted,
+        reminderDate,
         status,
         createdAt,
         updatedAt,

@@ -59,7 +59,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
       final connectivityResult = await connectivity.checkConnectivity();
       if (connectivityResult != ConnectivityResult.none) {
         try {
-          await remoteDataSource.addAnimal(_currentUserId, animalModel);
+          await remoteDataSource.addAnimal(animalModel, _currentUserId);
         } catch (e) {
           // Mark for sync later if remote fails
           print('Remote sync failed, will retry later: $e');
@@ -86,7 +86,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
       final connectivityResult = await connectivity.checkConnectivity();
       if (connectivityResult != ConnectivityResult.none) {
         try {
-          await remoteDataSource.updateAnimal(_currentUserId, animalModel);
+          await remoteDataSource.updateAnimal(animalModel);
         } catch (e) {
           // Mark for sync later if remote fails
           print('Remote sync failed, will retry later: $e');
@@ -111,7 +111,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
       final connectivityResult = await connectivity.checkConnectivity();
       if (connectivityResult != ConnectivityResult.none) {
         try {
-          await remoteDataSource.deleteAnimal(_currentUserId, id);
+          await remoteDataSource.deleteAnimal(id);
         } catch (e) {
           // Mark for sync later if remote fails
           print('Remote sync failed, will retry later: $e');

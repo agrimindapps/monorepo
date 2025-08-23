@@ -38,7 +38,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar animais do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -56,7 +55,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar animal do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -80,7 +78,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao adicionar animal no servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -102,7 +99,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao atualizar animal no servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -117,7 +113,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao deletar animal do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -138,7 +133,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao escutar animais do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -154,7 +148,6 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao escutar animal do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }

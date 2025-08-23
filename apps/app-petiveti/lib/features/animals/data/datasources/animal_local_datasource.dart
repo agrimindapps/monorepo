@@ -55,7 +55,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     final animal = animalsBox.get(id);
     if (animal != null) {
       final deletedAnimal = animal.copyWith(
-        isDeleted: true,
+        isActive: false,
         updatedAt: DateTime.now(),
       );
       await animalsBox.put(id, deletedAnimal);

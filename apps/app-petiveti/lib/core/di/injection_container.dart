@@ -1,33 +1,49 @@
+// =============================================================================
+// CORE DEPENDENCIES
+// =============================================================================
 import 'package:get_it/get_it.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
+// =============================================================================
+// EXTERNAL PACKAGES - AUTHENTICATION
+// =============================================================================
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
-// Core Storage
-import '../storage/hive_service.dart';
-import '../notifications/notification_service.dart';
+// =============================================================================
+// EXTERNAL PACKAGES - INFRASTRUCTURE  
+// =============================================================================
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// =============================================================================
+// CORE SERVICES
+// =============================================================================
 import '../cache/cache_service.dart';
-import '../performance/performance_service.dart';
+import '../notifications/notification_service.dart';
 import '../optimization/lazy_loader.dart';
+import '../performance/performance_service.dart';
+import '../storage/hive_service.dart';
 
-// Features - Auth
+// =============================================================================
+// FEATURE IMPORTS - AUTH
+// =============================================================================
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/auth_usecases.dart';
 
-// Features - Animals
+// =============================================================================
+// FEATURE IMPORTS - ANIMALS
+// =============================================================================
 import '../../features/animals/data/datasources/animal_local_datasource.dart';
 import '../../features/animals/data/datasources/animal_remote_datasource.dart';
 import '../../features/animals/data/repositories/animal_repository_hybrid_impl.dart';
 import '../../features/animals/domain/repositories/animal_repository.dart';
-import '../../features/animals/domain/usecases/get_animals.dart';
-import '../../features/animals/domain/usecases/get_animal_by_id.dart';
 import '../../features/animals/domain/usecases/add_animal.dart';
+import '../../features/animals/domain/usecases/get_animal_by_id.dart';
+import '../../features/animals/domain/usecases/get_animals.dart';
 import '../../features/animals/domain/usecases/update_animal.dart';
 import '../../features/animals/domain/usecases/delete_animal.dart';
 
@@ -45,6 +61,7 @@ import '../../features/appointments/domain/usecases/delete_appointment.dart';
 
 // Features - Vaccines  
 import '../../features/vaccines/data/datasources/vaccine_local_datasource.dart';
+import '../../features/vaccines/data/datasources/vaccine_remote_datasource.dart';
 import '../../features/vaccines/data/repositories/vaccine_repository_impl.dart';
 import '../../features/vaccines/domain/repositories/vaccine_repository.dart';
 import '../../features/vaccines/domain/usecases/get_vaccines.dart';
@@ -156,10 +173,9 @@ void _registerExternalServices() {
     () => GoogleSignIn(),
   );
 
-  // RevenueCat Purchases
-  getIt.registerLazySingleton<Purchases>(
-    () => Purchases,
-  );
+  // RevenueCat Purchases - Register as Type since it has static methods
+  // Note: RevenueCat Purchases is accessed statically, not as instance
+  // getIt.registerLazySingleton<Purchases>(() => Purchases); // Not needed for static API
 }
 
 void _registerCoreServices() {
@@ -348,13 +364,21 @@ void _registerAppointmentsFeature() {
 void _registerVaccinesFeature() {
   // Data Sources
   getIt.registerLazySingleton<VaccineLocalDataSource>(
-    () => VaccineLocalDataSourceImpl(),
+    () => VaccineLocalDataSourceImpl(getIt<HiveService>()),
   );
   
-  // Repository (local-only for now, can be upgraded to hybrid later)
+  getIt.registerLazySingleton<VaccineRemoteDataSource>(
+    () => VaccineRemoteDataSourceImpl(
+      getIt<FirebaseFirestore>(),
+      'current_user', // TODO: Get actual user ID from auth service
+    ),
+  );
+  
+  // Repository (local + remote)
   getIt.registerLazySingleton<VaccineRepository>(
     () => VaccineRepositoryImpl(
       localDataSource: getIt<VaccineLocalDataSource>(),
+      remoteDataSource: getIt<VaccineRemoteDataSource>(),
     ),
   );
   
@@ -620,7 +644,7 @@ void _registerSubscriptionFeature() {
   getIt.registerLazySingleton<SubscriptionRemoteDataSource>(
     () => SubscriptionRemoteDataSourceImpl(
       firestore: getIt<FirebaseFirestore>(),
-      revenuecat: getIt<Purchases>(),
+      // RevenueCat Purchases is accessed statically, not injected
     ),
   );
 

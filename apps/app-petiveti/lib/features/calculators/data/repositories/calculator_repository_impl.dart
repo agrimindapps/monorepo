@@ -25,19 +25,19 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
 
   // Cache estático das calculadoras para melhor performance
   static final List<Calculator> _calculators = [
-    const MedicationDosageCalculator(),
-    const CaloricNeedsCalculator(),
-    const FluidTherapyCalculator(),
-    const AnesthesiaCalculator(),
-    const PregnancyCalculator(),
-    const BodyConditionCalculator(),
-    const DiabetesInsulinCalculator(),
-    const HydrationCalculator(),
-    const UnitConversionCalculator(),
-    const AdvancedDietCalculator(),
-    const AnimalAgeCalculator(),
-    const IdealWeightCalculator(),
-    const PregnancyBirthCalculator(),
+    MedicationDosageCalculator(),
+    CaloricNeedsCalculator(),
+    FluidTherapyCalculator(),
+    AnesthesiaCalculator(),
+    PregnancyCalculator(),
+    BodyConditionCalculator(),
+    DiabetesInsulinCalculator(),
+    HydrationCalculator(),
+    UnitConversionCalculator(),
+    AdvancedDietCalculator(),
+    AnimalAgeCalculator(),
+    IdealWeightCalculator(),
+    PregnancyBirthCalculator(),
   ];
 
   @override

@@ -2,10 +2,11 @@ import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../domain/entities/animal.dart';
+import '../../domain/entities/animal_enums.dart';
 
 part 'animal_model.g.dart';
 
-@HiveType(typeId: 11)
+@HiveType(typeId: 0)
 @JsonSerializable()
 class AnimalModel extends HiveObject {
   @HiveField(0)
@@ -13,139 +14,235 @@ class AnimalModel extends HiveObject {
   final String id;
 
   @HiveField(1)
+  @JsonKey(name: 'user_id')
+  final String userId;
+
+  @HiveField(2)
   @JsonKey(name: 'name')
   final String name;
 
-  @HiveField(2)
-  @JsonKey(name: 'species')
-  final String species;
-
   @HiveField(3)
-  @JsonKey(name: 'breed')
-  final String breed;
+  @JsonKey(name: 'species')
+  final AnimalSpecies species;
 
   @HiveField(4)
-  @JsonKey(name: 'birth_date')
-  final DateTime birthDate;
+  @JsonKey(name: 'breed')
+  final String? breed;
 
   @HiveField(5)
   @JsonKey(name: 'gender')
-  final String gender;
+  final AnimalGender gender;
 
   @HiveField(6)
-  @JsonKey(name: 'color')
-  final String color;
+  @JsonKey(name: 'birth_date')
+  final DateTime? birthDate;
 
   @HiveField(7)
-  @JsonKey(name: 'current_weight')
-  final double currentWeight;
+  @JsonKey(name: 'weight')
+  final double? weight;
 
   @HiveField(8)
-  @JsonKey(name: 'photo')
-  final String? photo;
+  @JsonKey(name: 'size')
+  final AnimalSize? size;
 
   @HiveField(9)
+  @JsonKey(name: 'color')
+  final String? color;
+
+  @HiveField(10)
+  @JsonKey(name: 'microchip_number')
+  final String? microchipNumber;
+
+  @HiveField(11)
   @JsonKey(name: 'notes')
   final String? notes;
 
-  @HiveField(10)
+  @HiveField(12)
+  @JsonKey(name: 'photo_url')
+  final String? photoUrl;
+
+  @HiveField(13)
+  @JsonKey(name: 'is_active')
+  final bool isActive;
+
+  @HiveField(14)
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
-  @HiveField(11)
+  @HiveField(15)
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
 
-  @HiveField(12)
-  @JsonKey(name: 'is_deleted')
-  final bool isDeleted;
-
   AnimalModel({
     required this.id,
+    required this.userId,
     required this.name,
     required this.species,
-    required this.breed,
-    required this.birthDate,
+    this.breed,
     required this.gender,
-    required this.color,
-    required this.currentWeight,
-    this.photo,
+    this.birthDate,
+    this.weight,
+    this.size,
+    this.color,
+    this.microchipNumber,
     this.notes,
+    this.photoUrl,
+    this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
-    this.isDeleted = false,
   });
 
   factory AnimalModel.fromEntity(Animal animal) {
     return AnimalModel(
       id: animal.id,
+      userId: animal.userId,
       name: animal.name,
       species: animal.species,
       breed: animal.breed,
-      birthDate: animal.birthDate,
       gender: animal.gender,
+      birthDate: animal.birthDate,
+      weight: animal.weight,
+      size: animal.size,
       color: animal.color,
-      currentWeight: animal.currentWeight,
-      photo: animal.photo,
+      microchipNumber: animal.microchipNumber,
       notes: animal.notes,
+      photoUrl: animal.photoUrl,
+      isActive: animal.isActive,
       createdAt: animal.createdAt,
       updatedAt: animal.updatedAt,
-      isDeleted: animal.isDeleted,
     );
   }
 
-  factory AnimalModel.fromJson(Map<String, dynamic> json) =>
-      _$AnimalModelFromJson(json);
+  factory AnimalModel.fromJson(Map<String, dynamic> json) {
+    return AnimalModel(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      name: json['name'] as String,
+      species: json['species'] is String
+          ? AnimalSpeciesExtension.fromString(json['species'] as String)
+          : AnimalSpecies.values[json['species'] as int],
+      breed: json['breed'] as String?,
+      gender: json['gender'] is String
+          ? AnimalGenderExtension.fromString(json['gender'] as String)
+          : AnimalGender.values[json['gender'] as int],
+      birthDate: json['birth_date'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['birth_date'] as int)
+          : null,
+      weight: (json['weight'] as num?)?.toDouble(),
+      size: json['size'] != null
+          ? (json['size'] is String
+              ? AnimalSizeExtension.fromString(json['size'] as String)
+              : AnimalSize.values[json['size'] as int])
+          : null,
+      color: json['color'] as String?,
+      microchipNumber: json['microchip_number'] as String?,
+      notes: json['notes'] as String?,
+      photoUrl: json['photo_url'] as String?,
+      isActive: json['is_active'] as bool? ?? true,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$AnimalModelToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'name': name,
+      'species': species.name,
+      'breed': breed,
+      'gender': gender.name,
+      'birth_date': birthDate?.millisecondsSinceEpoch,
+      'weight': weight,
+      'size': size?.name,
+      'color': color,
+      'microchip_number': microchipNumber,
+      'notes': notes,
+      'photo_url': photoUrl,
+      'is_active': isActive,
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt.millisecondsSinceEpoch,
+    };
+  }
 
   Animal toEntity() {
     return Animal(
       id: id,
+      userId: userId,
       name: name,
       species: species,
       breed: breed,
-      birthDate: birthDate,
       gender: gender,
+      birthDate: birthDate,
+      weight: weight,
+      size: size,
       color: color,
-      currentWeight: currentWeight,
-      photo: photo,
+      microchipNumber: microchipNumber,
       notes: notes,
+      photoUrl: photoUrl,
+      isActive: isActive,
       createdAt: createdAt,
       updatedAt: updatedAt,
-      isDeleted: isDeleted,
     );
   }
 
   AnimalModel copyWith({
     String? id,
+    String? userId,
     String? name,
-    String? species,
+    AnimalSpecies? species,
     String? breed,
+    AnimalGender? gender,
     DateTime? birthDate,
-    String? gender,
+    double? weight,
+    AnimalSize? size,
     String? color,
-    double? currentWeight,
-    String? photo,
+    String? microchipNumber,
     String? notes,
+    String? photoUrl,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
-    bool? isDeleted,
   }) {
     return AnimalModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       name: name ?? this.name,
       species: species ?? this.species,
       breed: breed ?? this.breed,
-      birthDate: birthDate ?? this.birthDate,
       gender: gender ?? this.gender,
+      birthDate: birthDate ?? this.birthDate,
+      weight: weight ?? this.weight,
+      size: size ?? this.size,
       color: color ?? this.color,
-      currentWeight: currentWeight ?? this.currentWeight,
-      photo: photo ?? this.photo,
+      microchipNumber: microchipNumber ?? this.microchipNumber,
       notes: notes ?? this.notes,
+      photoUrl: photoUrl ?? this.photoUrl,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      isDeleted: isDeleted ?? this.isDeleted,
+    );
+  }
+
+  // Getter para compatibilidade com datasource
+  bool get isDeleted => !isActive;
+
+  // Factory method para Map conversion
+  static AnimalModel fromMap(Map<String, dynamic> map) {
+    return AnimalModel.fromJson(map);
+  }
+
+  // Instance method para Map conversion  
+  Map<String, dynamic> toMap() {
+    return toJson();
+  }
+
+  // Método copyWith atualizado para suportar isDeleted
+  AnimalModel copyWithDeleted({
+    bool? isDeleted,
+  }) {
+    return copyWith(
+      isActive: isDeleted != null ? !isDeleted : null,
     );
   }
 }

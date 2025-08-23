@@ -17,7 +17,7 @@ class UpdateAnimal extends UseCase<void, Animal> {
       return const Left(ValidationFailure(message: 'Nome do animal é obrigatório'));
     }
     
-    if (params.species.trim().isEmpty) {
+    if (params.species.name.isEmpty) {
       return const Left(ValidationFailure(message: 'Espécie é obrigatória'));
     }
     

@@ -177,7 +177,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Create a credential from the access token
       final facebookAuthCredential = firebase_auth.FacebookAuthProvider.credential(
-        result.accessToken!.tokenString,
+        result.accessToken!.token,
       );
 
       // Sign in to Firebase with Facebook credentials

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../providers/maintenance_provider.dart';
+
+import '../../../../core/presentation/widgets/widgets.dart';
+import '../../../../core/theme/design_tokens.dart';
+import '../../../../shared/widgets/vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/maintenance_entity.dart';
-import '../../../../shared/widgets/vehicle_selector.dart';
+import '../providers/maintenance_provider.dart';
 
 class MaintenancePage extends StatefulWidget {
   const MaintenancePage({super.key});
@@ -89,7 +92,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
                       child: _buildContent(context),
                     ),
                   ),
@@ -105,66 +108,52 @@ class _MaintenancePageState extends State<MaintenancePage> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            children: [
-              Row(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.build,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.build,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 28,
+                  Text(
+                    'Manutenções',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Manutenções',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          'Histórico de manutenções dos seus veículos',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Histórico de manutenções dos seus veículos',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              _buildFilters(context),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -184,15 +173,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   prefixIcon: const Icon(Icons.search, size: 20),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                     borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                     borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                     borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                   ),
                   filled: true,
@@ -202,7 +191,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         Row(
           children: [
             Expanded(
@@ -210,7 +199,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                   border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: DropdownButton<String>(
@@ -227,13 +216,13 @@ class _MaintenancePageState extends State<MaintenancePage> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: GasometerDesignTokens.spacingMd),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                   border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: DropdownButton<String>(
@@ -270,14 +259,16 @@ class _MaintenancePageState extends State<MaintenancePage> {
           },
           showEmptyOption: true,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        _buildFilters(context),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         if (_filteredRecords.isEmpty)
           _buildEmptyState()
         else ...[
           _buildStatistics(),
-          const SizedBox(height: 24),
+          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildUpcomingMaintenances(),
-          const SizedBox(height: 24),
+          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildRecordsList(),
         ],
       ],
@@ -306,7 +297,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
             Colors.green,
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: GasometerDesignTokens.spacingLg),
         Expanded(
           child: _buildStatCard(
             'Preventivas',
@@ -315,7 +306,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
             Colors.blue,
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: GasometerDesignTokens.spacingLg),
         Expanded(
           child: _buildStatCard(
             'Corretivas',
@@ -332,21 +323,21 @@ class _MaintenancePageState extends State<MaintenancePage> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingCardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingSm),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
                   ),
                   child: Icon(
                     icon,
@@ -354,7 +345,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: GasometerDesignTokens.spacingMd),
                 Text(
                   title,
                   style: TextStyle(
@@ -364,7 +355,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: GasometerDesignTokens.spacingMd),
             Text(
               value,
               style: TextStyle(
@@ -396,7 +387,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         Row(
           children: [
             Icon(Icons.notification_important, color: Theme.of(context).colorScheme.primary, size: 20),
-            const SizedBox(width: 8),
+            SizedBox(width: GasometerDesignTokens.spacingSm),
             Text(
               'Próximas Manutenções',
               style: TextStyle(
@@ -407,7 +398,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         ...upcomingServices.take(2).map((service) {
           final daysUntil = service.nextServiceDate!
               .difference(DateTime.now())
@@ -417,18 +408,18 @@ class _MaintenancePageState extends State<MaintenancePage> {
             margin: const EdgeInsets.only(bottom: 8),
             color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
               side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingSm),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
                     ),
                     child: Icon(
                       Icons.access_time,
@@ -436,7 +427,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: GasometerDesignTokens.spacingMd),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,22 +462,22 @@ class _MaintenancePageState extends State<MaintenancePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Histórico de Manutenções',
           style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            fontSize: GasometerDesignTokens.fontSizeXl,
+            fontWeight: GasometerDesignTokens.fontWeightBold,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 16),
-        ..._filteredRecords.map((record) => _buildRecordCard(record)),
+        SizedBox(height: GasometerDesignTokens.spacingLg),
+        ..._filteredRecords.map((record) => _buildRecordCard(record.toMap())),
       ],
     );
   }
 
   Widget _buildRecordCard(Map<String, dynamic> record) {
-    final date = record['date'] as DateTime;
+    final date = record['date'] as DateTime? ?? DateTime.now();
     final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     final isPreventive = record['category'] == 'preventiva';
 
@@ -494,24 +485,24 @@ class _MaintenancePageState extends State<MaintenancePage> {
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: InkWell(
         onTap: () => _showRecordDetails(record),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingCardPadding),
           child: Column(
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd - 2),
                     decoration: BoxDecoration(
                       color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
                           .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                     ),
                     child: Icon(
                       isPreventive ? Icons.schedule : Icons.build_circle,
@@ -519,7 +510,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: GasometerDesignTokens.spacingLg),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -529,7 +520,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                           children: [
                             Expanded(
                               child: Text(
-                                record['type'],
+                                record['type'] as String? ?? '',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -547,26 +538,26 @@ class _MaintenancePageState extends State<MaintenancePage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: GasometerDesignTokens.spacingXs),
                         Row(
                           children: [
                             Text(
-                              record['vehicleName'],
+                              record['vehicleName'] as String? ?? '',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: GasometerDesignTokens.spacingSm),
                             Text(
                               '•',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: GasometerDesignTokens.spacingSm),
                             Text(
-                              record['workshop'],
+                              record['workshop'] as String? ?? '',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -579,9 +570,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: GasometerDesignTokens.spacingMd),
               const Divider(height: 1),
-              const SizedBox(height: 12),
+              SizedBox(height: GasometerDesignTokens.spacingMd),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -628,7 +619,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
           size: 18,
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: GasometerDesignTokens.spacingXs + 2),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -654,42 +645,16 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   Widget _buildEmptyState() {
-    return SizedBox(
-      height: 400,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.build_outlined,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-              size: 64,
-            ),
+    return EnhancedEmptyState.maintenances(
+      onAddMaintenance: () => context.go('/maintenance/add'),
+      onViewGuides: () {
+        // TODO: Implementar navegação para guias
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Guias de manutenção em breve!'),
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'Nenhuma manutenção encontrada',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Registre a primeira manutenção do seu veículo',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -699,7 +664,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
       ),
       tooltip: 'Nova Manutenção',
       child: const Icon(Icons.add),
@@ -716,10 +681,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
               record['category'] == 'preventiva' ? Icons.schedule : Icons.build_circle,
               color: record['category'] == 'preventiva' ? Colors.blue : Theme.of(context).colorScheme.primary,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: GasometerDesignTokens.spacingSm),
             Expanded(
               child: Text(
-                record['type'],
+                record['type'] as String? ?? '',
                 style: const TextStyle(fontSize: 18),
               ),
             ),
@@ -730,30 +695,30 @@ class _MaintenancePageState extends State<MaintenancePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow('Veículo', record['vehicleName']),
-              _buildDetailRow('Oficina', record['workshop']),
-              _buildDetailRow('Data', _formatDate(record['date'])),
+              _buildDetailRow('Veículo', record['vehicleName'] as String? ?? ''),
+              _buildDetailRow('Oficina', record['workshop'] as String? ?? ''),
+              _buildDetailRow('Data', _formatDate(record['date'] as DateTime? ?? DateTime.now())),
               _buildDetailRow('Odômetro', '${record['odometer']} km'),
               _buildDetailRow('Custo', 'R\$ ${record['cost'].toStringAsFixed(2)}'),
               _buildDetailRow('Categoria', 
                 record['category'] == 'preventiva' ? 'Preventiva' : 'Corretiva'),
-              const SizedBox(height: 12),
+              SizedBox(height: GasometerDesignTokens.spacingMd),
               const Text(
                 'Descrição:',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: GasometerDesignTokens.spacingXs),
               Text(
-                record['description'],
+                record['description'] as String? ?? '',
                 style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               if (record['nextService'] != null) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: GasometerDesignTokens.spacingMd),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
                   ),
                   child: Row(
                     children: [
@@ -762,10 +727,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
                         color: Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: GasometerDesignTokens.spacingSm),
                       Expanded(
                         child: Text(
-                          'Próxima manutenção: ${_formatDate(record['nextService'])}',
+                          'Próxima manutenção: ${_formatDate(record['nextService'] as DateTime? ?? DateTime.now())}',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w500,

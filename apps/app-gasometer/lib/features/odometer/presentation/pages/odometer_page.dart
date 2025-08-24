@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'add_odometer_page.dart';
+
+import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
+import '../../../../core/presentation/widgets/standard_card.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
 import '../../domain/entities/odometer_entity.dart';
+import 'add_odometer_page.dart';
 
 class OdometerPage extends StatefulWidget {
   const OdometerPage({super.key});
@@ -82,100 +86,52 @@ class _OdometerPageState extends State<OdometerPage> {
 
   Widget _buildHeader() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.speed,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 28,
-                ),
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Odômetro',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      'Registros de quilometragem',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
+              child: const Icon(
+                Icons.speed,
+                color: Colors.white,
+                size: 28,
               ),
-              if (_selectedVehicleId != null)
-                IconButton(
-                  onPressed: () => setState(() => _showStatistics = !_showStatistics),
-                  icon: Icon(
-                    _showStatistics ? Icons.assessment : Icons.assessment_outlined,
-                    color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Odômetro',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                  tooltip: _showStatistics ? 'Ocultar estatísticas' : 'Mostrar estatísticas',
-                ),
-              if (_isLoading)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade200),
+                  Text(
+                    'Controle da quilometragem dos seus veículos',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          color: Colors.blue.shade600,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Carregando...',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -184,10 +140,12 @@ class _OdometerPageState extends State<OdometerPage> {
   Widget _buildControls() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: GasometerDesignTokens.paddingAll(
+        GasometerDesignTokens.spacingPagePadding,
+      ),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
+          constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
           child: Column(
             children: [
               VehicleSelector(
@@ -198,7 +156,7 @@ class _OdometerPageState extends State<OdometerPage> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: GasometerDesignTokens.spacingLg),
               _buildMonthsBar(),
             ],
           ),
@@ -250,14 +208,16 @@ class _OdometerPageState extends State<OdometerPage> {
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
+          constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: GasometerDesignTokens.paddingAll(
+              GasometerDesignTokens.spacingPagePadding,
+            ),
             child: Column(
               children: [
                 if (_showStatistics) ...[
                   _buildStatisticsCard(),
-                  const SizedBox(height: 16),
+                  SizedBox(height: GasometerDesignTokens.spacingLg),
                 ],
                 _buildOdometerList(),
               ],
@@ -269,94 +229,33 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildNoVehicleSelected() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.directions_car_outlined,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-              size: 64,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Selecione um veículo',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Escolha um veículo para visualizar os registros de odômetro',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return EnhancedEmptyState.generic(
+      icon: Icons.directions_car_outlined,
+      title: 'Selecione um veículo',
+      description: 'Escolha um veículo para visualizar os registros de odômetro',
+      height: 350,
     );
   }
 
   Widget _buildStatisticsCard() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.assessment,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Estatísticas do Mês',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(child: _buildStatisticItem('Km Inicial', '25.169,4', Icons.trip_origin)),
-                Expanded(child: _buildStatisticItem('Km Final', '25.420,5', Icons.flag)),
-                Expanded(child: _buildStatisticItem('Total Rodado', '251,1', Icons.trending_up)),
-                Expanded(child: _buildStatisticItem('Média/Dia', '16,7', Icons.timeline)),
-              ],
-            ),
-          ],
-        ),
+    return StandardCard.standard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CardSectionTitle(
+            title: 'Estatísticas do Mês',
+            icon: Icons.assessment,
+          ),
+          SizedBox(height: GasometerDesignTokens.spacingXl),
+          Row(
+            children: [
+              Expanded(child: _buildStatisticItem('Km Inicial', '25.169,4', Icons.trip_origin)),
+              Expanded(child: _buildStatisticItem('Km Final', '25.420,5', Icons.flag)),
+              Expanded(child: _buildStatisticItem('Total Rodado', '251,1', Icons.trending_up)),
+              Expanded(child: _buildStatisticItem('Média/Dia', '16,7', Icons.timeline)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -365,31 +264,37 @@ class _OdometerPageState extends State<OdometerPage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: GasometerDesignTokens.paddingAll(
+            GasometerDesignTokens.spacingMd,
+          ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusLg,
+            ),
           ),
           child: Icon(
             icon,
             color: Theme.of(context).colorScheme.primary,
-            size: 24,
+            size: GasometerDesignTokens.iconSizeListItem,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: GasometerDesignTokens.spacingSm),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontSize: GasometerDesignTokens.fontSizeLg,
+            fontWeight: GasometerDesignTokens.fontWeightBold,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            fontSize: GasometerDesignTokens.fontSizeSm,
+            color: Theme.of(context).colorScheme.onSurface.withValues(
+              alpha: GasometerDesignTokens.opacitySecondary,
+            ),
           ),
           textAlign: TextAlign.center,
         ),
@@ -408,44 +313,11 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildEmptyState() {
-    return SizedBox(
+    return EnhancedEmptyState.generic(
+      icon: Icons.speed_outlined,
+      title: 'Nenhum registro encontrado',
+      description: 'Não há registros de odômetro para este período',
       height: 300,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.speed_outlined,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-                size: 64,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Nenhum registro encontrado',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Não há registros de odômetro para este período',
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -454,150 +326,85 @@ class _OdometerPageState extends State<OdometerPage> {
     final dayOfMonth = date.day.toString().padLeft(2, '0');
     final weekday = _getWeekdayName(date.weekday);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-        ),
-        color: Theme.of(context).colorScheme.surface,
-        child: InkWell(
-          onTap: () => _editOdometer(odometer),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Data
-                Column(
-                  children: [
-                    Text(
-                      weekday,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dayOfMonth,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                const SizedBox(width: 16),
-                // Informações
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildInfoChip(
-                            icon: Icons.speed,
-                            value: '${odometer['odometer'].toStringAsFixed(1)} km',
-                            label: 'Odômetro',
-                            isHighlighted: true,
-                          ),
-                          if (odometer['difference'] > 0)
-                            _buildInfoChip(
-                              icon: Icons.trending_up,
-                              value: '${odometer['difference'].toStringAsFixed(1)} km',
-                              label: 'Diferença',
-                              isHighlighted: false,
-                            ),
-                        ],
-                      ),
-                      if (odometer['description'].isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          odometer['description'],
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                    ],
+    return StandardCard.standard(
+      margin: EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
+      onTap: () => _editOdometer(odometer),
+      child: Row(
+        children: [
+          // Data
+          Column(
+            children: [
+              Text(
+                weekday,
+                style: TextStyle(
+                  fontSize: GasometerDesignTokens.fontSizeSm,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(
+                    alpha: GasometerDesignTokens.opacitySecondary,
                   ),
+                  fontWeight: GasometerDesignTokens.fontWeightMedium,
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+              SizedBox(height: GasometerDesignTokens.spacingXs),
+              Text(
+                dayOfMonth,
+                style: TextStyle(
+                  fontSize: GasometerDesignTokens.fontSizeXxxl,
+                  fontWeight: GasometerDesignTokens.fontWeightBold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
+              ),
+            ],
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingLg),
+          Container(
+            width: 1,
+            height: 40,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingLg),
+          // Informações
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CardInfoRow(
+                  icon: Icons.speed,
+                  label: 'Odômetro',
+                  value: '${odometer['odometer'].toStringAsFixed(1)} km',
+                  iconColor: Theme.of(context).colorScheme.primary,
+                ),
+                if ((odometer['difference'] as num? ?? 0) > 0)
+                  CardInfoRow(
+                    icon: Icons.trending_up,
+                    label: 'Diferença',
+                    value: '${odometer['difference'].toStringAsFixed(1)} km',
+                  ),
+                if ((odometer['description'] as String? ?? '').isNotEmpty) ...[
+                  SizedBox(height: GasometerDesignTokens.spacingSm),
+                  Text(
+                    odometer['description'] as String? ?? '',
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeSm,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(
+                        alpha: GasometerDesignTokens.opacitySecondary,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
+          Icon(
+            Icons.chevron_right,
+            color: Theme.of(context).colorScheme.onSurface.withValues(
+              alpha: GasometerDesignTokens.opacityHint,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String value,
-    required String label,
-    required bool isHighlighted,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: isHighlighted
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                : Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: isHighlighted
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isHighlighted
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildFloatingActionButton() {
     final hasSelectedVehicle = _selectedVehicleId != null;
@@ -618,9 +425,15 @@ class _OdometerPageState extends State<OdometerPage> {
 
   void _showSelectVehicleMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Selecione um veículo primeiro'),
-        backgroundColor: Colors.orange,
+      SnackBar(
+        content: const Text('Selecione um veículo primeiro'),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: GasometerDesignTokens.borderRadius(
+            GasometerDesignTokens.radiusInput,
+          ),
+        ),
       ),
     );
   }
@@ -645,9 +458,15 @@ class _OdometerPageState extends State<OdometerPage> {
       });
       
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registro cadastrado com sucesso'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Registro cadastrado com sucesso'),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusInput,
+            ),
+          ),
         ),
       );
     }
@@ -671,9 +490,15 @@ class _OdometerPageState extends State<OdometerPage> {
       });
       
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registro editado com sucesso'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Registro editado com sucesso'),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusInput,
+            ),
+          ),
         ),
       );
     }

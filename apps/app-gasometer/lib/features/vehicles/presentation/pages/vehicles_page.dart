@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
-import '../providers/vehicles_provider.dart';
+
+import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
+import '../../../../core/presentation/widgets/standard_card.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../providers/vehicles_provider.dart';
 import 'add_vehicle_page.dart';
 
 class VehiclesPage extends StatefulWidget {
@@ -39,7 +43,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
                       child: _OptimizedVehiclesContent(),
                     ),
                   ),
@@ -86,109 +90,75 @@ class _VehiclesPageState extends State<VehiclesPage> {
 class _OptimizedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Selector<VehiclesProvider, (bool, int)>(
-      selector: (context, provider) => (provider.isLoading, provider.vehicleCount),
-      builder: (context, data, child) {
-        final (isLoading, vehicleCount) = data;
-        
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+    return Container(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Row(
+              child: const Icon(
+                Icons.directions_car,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.directions_car,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 28,
+                  Text(
+                    'Veículos',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Meus Veículos',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          vehicleCount == 0 
-                            ? 'Nenhum veículo cadastrado'
-                            : '$vehicleCount veículo${vehicleCount == 1 ? '' : 's'} cadastrado${vehicleCount == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Gerencie sua frota de veículos',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
                     ),
                   ),
-                  if (isLoading)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 12,
-                            height: 12,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Carregando...',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
 
 /// Conteúdo principal otimizado com Selector
 class _OptimizedVehiclesContent extends StatelessWidget {
+  
+  Future<void> _navigateToAddVehicle(BuildContext context) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (context) => const AddVehiclePage(),
+      ),
+    );
+    
+    // Se resultado for true, atualizar lista
+    if (result == true && context.mounted) {
+      await context.read<VehiclesProvider>().loadVehicles();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Selector<VehiclesProvider, (bool, bool, List<VehicleEntity>, String?)>(
@@ -210,7 +180,14 @@ class _OptimizedVehiclesContent extends StatelessWidget {
         }
         
         if (vehicles.isEmpty) {
-          return _EmptyState();
+          return EnhancedEmptyState.generic(
+            icon: Icons.directions_car_outlined,
+            title: 'Nenhum veículo cadastrado',
+            description: 'Cadastre seu primeiro veículo para começar a controlar seus gastos com combustível e manutenção',
+            actionLabel: 'Cadastrar Veículo',
+            onAction: () => _navigateToAddVehicle(context),
+            height: MediaQuery.of(context).size.height - 200,
+          );
         }
         
         return _VehicleGrid(vehicles: vehicles);
@@ -295,49 +272,6 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
-/// Estado vazio otimizado
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height - 200,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.directions_car_outlined,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-              size: 64,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Nenhum veículo cadastrado',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Cadastre seu primeiro veículo para começar',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Grid de veículos otimizado
 class _VehicleGrid extends StatelessWidget {
@@ -360,8 +294,8 @@ class _VehicleGrid extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
+          mainAxisSpacing: GasometerDesignTokens.spacingLg,
+          crossAxisSpacing: GasometerDesignTokens.spacingLg,
           itemCount: vehicles.length,
           itemBuilder: (context, index) {
             return _OptimizedVehicleCard(vehicle: vehicles[index]);
@@ -380,20 +314,14 @@ class _OptimizedVehicleCard extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant,
-          width: 1,
-        ),
-      ),
-      color: Theme.of(context).colorScheme.surface,
+    return StandardCard.standard(
       child: Column(
         children: [
           _VehicleCardHeader(vehicle: vehicle),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
           _VehicleCardContent(vehicle: vehicle),
           _VehicleCardActions(vehicle: vehicle),
         ],
@@ -410,20 +338,24 @@ class _VehicleCardHeader extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: GasometerDesignTokens.paddingAll(
+        GasometerDesignTokens.spacingLg,
+      ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 24,
-            backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            radius: GasometerDesignTokens.iconSizeAvatar / 2,
+            backgroundColor: Theme.of(context).colorScheme.primary.withValues(
+              alpha: GasometerDesignTokens.opacityOverlay,
+            ),
             child: Icon(
               Icons.directions_car,
               color: Theme.of(context).colorScheme.primary,
-              size: 24,
+              size: GasometerDesignTokens.iconSizeListItem,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: GasometerDesignTokens.spacingMd),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,8 +363,8 @@ class _VehicleCardHeader extends StatelessWidget {
                 Text(
                   '${vehicle.brand} ${vehicle.model}',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: GasometerDesignTokens.fontSizeLg,
+                    fontWeight: GasometerDesignTokens.fontWeightBold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   maxLines: 1,
@@ -441,8 +373,10 @@ class _VehicleCardHeader extends StatelessWidget {
                 Text(
                   '${vehicle.year} • ${vehicle.color}',
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontSize: GasometerDesignTokens.fontSizeMd,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(
+                      alpha: GasometerDesignTokens.opacitySecondary,
+                    ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -465,28 +399,30 @@ class _VehicleCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: GasometerDesignTokens.paddingAll(
+        GasometerDesignTokens.spacingLg,
+      ),
       child: Column(
         children: [
-          _InfoRow(
+          CardInfoRow(
             label: 'Placa',
             value: vehicle.licensePlate,
             icon: Icons.credit_card,
           ),
-          const SizedBox(height: 12),
-          _InfoRow(
+          SizedBox(height: GasometerDesignTokens.spacingMd),
+          CardInfoRow(
             label: 'Combustível',
             value: vehicle.supportedFuels.map((f) => f.displayName).join(', '),
             icon: Icons.local_gas_station,
           ),
-          const SizedBox(height: 12),
-          _InfoRow(
+          SizedBox(height: GasometerDesignTokens.spacingMd),
+          CardInfoRow(
             label: 'Km Inicial',
             value: '${vehicle.currentOdometer.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km',
             icon: Icons.speed,
           ),
-          const SizedBox(height: 12),
-          _InfoRow(
+          SizedBox(height: GasometerDesignTokens.spacingMd),
+          CardInfoRow(
             label: 'Km Atual',
             value: '${vehicle.currentOdometer.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km',
             icon: Icons.trending_up,
@@ -497,48 +433,6 @@ class _VehicleCardContent extends StatelessWidget {
   }
 }
 
-/// Row de informação otimizada
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 /// Ações do card de veículo
 class _VehicleCardActions extends StatelessWidget {
@@ -549,26 +443,41 @@ class _VehicleCardActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: GasometerDesignTokens.paddingOnly(
+        left: GasometerDesignTokens.spacingSm,
+        right: GasometerDesignTokens.spacingSm,
+        top: GasometerDesignTokens.spacingXs,
+        bottom: GasometerDesignTokens.spacingXs,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           TextButton.icon(
-            icon: const Icon(Icons.edit, size: 16),
+            icon: Icon(Icons.edit, size: GasometerDesignTokens.iconSizeXs),
             label: const Text('Editar'),
             onPressed: () => _editVehicle(context, vehicle),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: GasometerDesignTokens.paddingOnly(
+                left: GasometerDesignTokens.spacingMd,
+                right: GasometerDesignTokens.spacingMd,
+                top: GasometerDesignTokens.spacingSm,
+                bottom: GasometerDesignTokens.spacingSm,
+              ),
             ),
           ),
           TextButton.icon(
-            icon: const Icon(Icons.delete, size: 16),
+            icon: Icon(Icons.delete, size: GasometerDesignTokens.iconSizeXs),
             label: const Text('Excluir'),
             onPressed: () => _deleteVehicle(context, vehicle),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: GasometerDesignTokens.paddingOnly(
+                left: GasometerDesignTokens.spacingMd,
+                right: GasometerDesignTokens.spacingMd,
+                top: GasometerDesignTokens.spacingSm,
+                bottom: GasometerDesignTokens.spacingSm,
+              ),
             ),
           ),
         ],
@@ -591,8 +500,8 @@ class _VehicleCardActions extends StatelessWidget {
       'combustivel': vehicle.supportedFuels.isNotEmpty ? vehicle.supportedFuels.first.displayName : 'Gasolina',
     };
     
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
         builder: (context) => AddVehiclePage(vehicle: vehicleMap),
       ),
     );
@@ -604,7 +513,7 @@ class _VehicleCardActions extends StatelessWidget {
   }
   
   void _deleteVehicle(BuildContext context, VehicleEntity vehicle) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirmar exclusão'),
@@ -655,8 +564,8 @@ class _OptimizedFloatingActionButton extends StatelessWidget {
   }
   
   void _addVehicle(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
         builder: (context) => const AddVehiclePage(),
       ),
     );

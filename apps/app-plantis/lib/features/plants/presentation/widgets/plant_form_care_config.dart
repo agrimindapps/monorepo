@@ -84,8 +84,46 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
   Widget build(BuildContext context) {
     return Consumer<PlantFormProvider>(
       builder: (context, provider, child) {
+        final fieldErrors = provider.fieldErrors; // Get validation errors for real-time display
+        
         return Column(
           children: [
+            // Water Care Section
+            _buildCareSection(
+              title: 'Água',
+              icon: Icons.water_drop,
+              iconColor: Colors.blue,
+              isEnabled: provider.enableWateringCare ?? false,
+              onToggle: (value) => provider.setEnableWateringCare(value),
+              interval: _getIntervalText(provider.wateringIntervalDays),
+              onIntervalChanged: (interval) {
+                provider.setWateringInterval(_getIntervalDays(interval));
+              },
+              lastDate: provider.lastWateringDate,
+              onDateChanged: (date) => provider.setLastWateringDate(date),
+              errorText: fieldErrors['wateringInterval'], // Show validation error
+            ),
+
+            const SizedBox(height: 20),
+
+            // Fertilizer Care Section
+            _buildCareSection(
+              title: 'Adubo',
+              icon: Icons.eco,
+              iconColor: Colors.green,
+              isEnabled: provider.enableFertilizerCare ?? false,
+              onToggle: (value) => provider.setEnableFertilizerCare(value),
+              interval: _getIntervalText(provider.fertilizingIntervalDays),
+              onIntervalChanged: (interval) {
+                provider.setFertilizingInterval(_getIntervalDays(interval));
+              },
+              lastDate: provider.lastFertilizerDate,
+              onDateChanged: (date) => provider.setLastFertilizerDate(date),
+              errorText: fieldErrors['fertilizingInterval'], // Show validation error
+            ),
+
+            const SizedBox(height: 20),
+
             // Sunlight Care Section
             _buildCareSection(
               title: 'Luz solar',
@@ -133,6 +171,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               },
               lastDate: provider.lastPruningDate,
               onDateChanged: (date) => provider.setLastPruningDate(date),
+              errorText: fieldErrors['pruningInterval'], // Show validation error
             ),
 
             const SizedBox(height: 20),
@@ -167,6 +206,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     required ValueChanged<String> onIntervalChanged,
     required DateTime? lastDate,
     required ValueChanged<DateTime?> onDateChanged,
+    String? errorText, // Add error text parameter
   }) {
     final theme = Theme.of(context);
 
@@ -176,8 +216,9 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              isEnabled ? iconColor.withValues(alpha: 0.3) : Colors.grey[300]!,
+          color: errorText != null 
+              ? theme.colorScheme.error // Show error border
+              : (isEnabled ? iconColor.withValues(alpha: 0.3) : Colors.grey[300]!),
           width: 1.5,
         ),
         boxShadow: [
@@ -229,6 +270,30 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               lastDate: lastDate,
               onDateChanged: onDateChanged,
               iconColor: iconColor,
+            ),
+          ],
+          
+          // Error text display
+          if (errorText != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: theme.colorScheme.error,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    errorText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -390,7 +455,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     String currentValue,
     ValueChanged<String> onChanged,
   ) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder:
           (context) => Container(

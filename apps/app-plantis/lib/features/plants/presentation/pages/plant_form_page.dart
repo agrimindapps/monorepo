@@ -16,20 +16,28 @@ class PlantFormPage extends StatefulWidget {
 }
 
 class _PlantFormPageState extends State<PlantFormPage> {
-  late PlantFormProvider _provider;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _provider = context.read<PlantFormProvider>();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.plantId != null) {
-        _provider.initializeForEdit(widget.plantId!);
-      } else {
-        _provider.initializeForAdd();
-      }
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Initialize provider only once
+    if (!_initialized) {
+      _initialized = true;
+      final provider = Provider.of<PlantFormProvider>(context, listen: false);
+      
+      // Initialize provider data
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          if (widget.plantId != null) {
+            provider.initializeForEdit(widget.plantId!);
+          } else {
+            provider.initializeForAdd();
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -82,30 +90,65 @@ class _PlantFormPageState extends State<PlantFormPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (provider.hasError && !isEditing) {
+          if (provider.hasError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+                  Icon(
+                    isEditing ? Icons.edit_off : Icons.error_outline,
+                    size: 64,
+                    color: theme.colorScheme.error.withValues(alpha: 0.6),
+                  ),
                   const SizedBox(height: 16),
                   Text(
+                    isEditing 
+                        ? 'Erro ao carregar dados da planta'
+                        : 'Erro ao inicializar formulário',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
                     provider.errorMessage ?? 'Erro desconhecido',
-                    style: theme.textTheme.bodyLarge?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      provider.clearError();
-                      if (widget.plantId != null) {
-                        provider.initializeForEdit(widget.plantId!);
-                      }
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Tentar novamente'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => context.pop(),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Voltar'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          provider.clearError();
+                          if (widget.plantId != null) {
+                            provider.initializeForEdit(widget.plantId!);
+                          } else {
+                            provider.initializeForAdd();
+                          }
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Tentar novamente'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -188,10 +231,12 @@ class _PlantFormPageState extends State<PlantFormPage> {
   }
 
   Future<void> _savePlant(BuildContext context) async {
-    final success = await _provider.savePlant();
+    final provider = Provider.of<PlantFormProvider>(context, listen: false);
+    
+    final success = await provider.savePlant();
 
-    if (success) {
-      if (mounted) {
+    if (mounted) {
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -203,13 +248,11 @@ class _PlantFormPageState extends State<PlantFormPage> {
           ),
         );
         context.pop();
-      }
-    } else {
-      if (mounted) {
+      } else {
         final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_provider.errorMessage ?? 'Erro ao salvar planta'),
+            content: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -218,7 +261,9 @@ class _PlantFormPageState extends State<PlantFormPage> {
   }
 
   Future<void> _handleBackPressed(BuildContext context) async {
-    final hasChanges = _provider.isValid && _provider.name.isNotEmpty;
+    final provider = Provider.of<PlantFormProvider>(context, listen: false);
+    
+    final hasChanges = provider.isValid && provider.name.isNotEmpty;
 
     if (hasChanges) {
       final shouldDiscard = await showDialog<bool>(

@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
-import '../../domain/entities/weather_measurement_entity.dart';
+
 import '../../domain/entities/rain_gauge_entity.dart';
+import '../../domain/entities/weather_measurement_entity.dart';
 import '../../domain/entities/weather_statistics_entity.dart';
 import '../../domain/failures/weather_failures.dart';
-import '../../domain/usecases/get_weather_measurements.dart';
+import '../../domain/repositories/weather_repository.dart';
+import '../../domain/usecases/calculate_weather_statistics.dart';
 import '../../domain/usecases/create_weather_measurement.dart';
 import '../../domain/usecases/get_rain_gauges.dart';
-import '../../domain/usecases/calculate_weather_statistics.dart';
-import '../../domain/repositories/weather_repository.dart';
+import '../../domain/usecases/get_weather_measurements.dart';
 
 /// Weather provider using ChangeNotifier for state management
 /// Follows Provider pattern similar to existing app architecture
@@ -44,7 +45,7 @@ class WeatherProvider with ChangeNotifier {
   // Data states
   List<WeatherMeasurementEntity> _measurements = [];
   List<RainGaugeEntity> _rainGauges = [];
-  List<WeatherStatisticsEntity> _statistics = [];
+  final List<WeatherStatisticsEntity> _statistics = [];
   WeatherMeasurementEntity? _currentWeather;
   WeatherMeasurementEntity? _latestMeasurement;
 

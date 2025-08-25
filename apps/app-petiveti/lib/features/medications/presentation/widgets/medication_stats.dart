@@ -228,7 +228,7 @@ class MedicationStats extends ConsumerWidget {
               const SizedBox(height: 4),
               LinearProgressIndicator(
                 value: percentage / 100,
-                backgroundColor: color.withOpacity(0.2),
+                backgroundColor: color.withValues(alpha: 0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
             ],
@@ -260,7 +260,7 @@ class MedicationStats extends ConsumerWidget {
           flex: 2,
           child: LinearProgressIndicator(
             value: percentage / 100,
-            backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
             valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
           ),
         ),

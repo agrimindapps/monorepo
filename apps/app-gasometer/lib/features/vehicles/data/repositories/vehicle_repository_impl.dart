@@ -1,15 +1,17 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
-import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/error/failures.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/vehicle_repository.dart';
 import '../datasources/vehicle_local_data_source.dart';
 import '../datasources/vehicle_remote_data_source.dart';
 import '../models/vehicle_model.dart';
-import '../../../auth/domain/repositories/auth_repository.dart';
 
 @LazySingleton(as: VehicleRepository)
 class VehicleRepositoryImpl implements VehicleRepository {
@@ -41,69 +43,56 @@ class VehicleRepositoryImpl implements VehicleRepository {
   @override
   Future<Either<Failure, List<VehicleEntity>>> getAllVehicles() async {
     try {
-      final isConnected = await _isConnected;
-      
-      if (isConnected) {
-        // Try to get from remote first
-        final userId = await _getCurrentUserId();
-        if (userId != null) {
-          try {
-            final remoteVehicles = await remoteDataSource.getAllVehicles(userId);
-            
-            // Sync to local storage
-            await localDataSource.clearAllVehicles();
-            for (final vehicle in remoteVehicles) {
-              await localDataSource.saveVehicle(vehicle);
-            }
-            
-            return Right(remoteVehicles.map((model) => model.toEntity()).toList());
-          } catch (e) {
-            // Fallback to local if remote fails
-            final localVehicles = await localDataSource.getAllVehicles();
-            return Right(localVehicles.map((model) => model.toEntity()).toList());
-          }
-        }
-      }
-      
-      // Get from local storage
+      // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localVehicles = await localDataSource.getAllVehicles();
-      return Right(localVehicles.map((model) => model.toEntity()).toList());
+      final localEntities = localVehicles.map((model) => model.toEntity()).toList();
+      
+      // Sync em background se conectado (não bloqueia o retorno)
+      unawaited(_syncInBackground());
+      
+      return Right(localEntities);
       
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  /// Sync em background sem bloquear a UI
+  Future<void> _syncInBackground() async {
+    try {
+      final isConnected = await _isConnected;
+      if (!isConnected) return;
+
+      final userId = await _getCurrentUserId();
+      if (userId == null) return;
+
+      // Sync remoto sem aguardar
+      unawaited(remoteDataSource.getAllVehicles(userId).then((remoteVehicles) async {
+        // Atualizar cache local
+        await localDataSource.clearAllVehicles();
+        for (final vehicle in remoteVehicles) {
+          await localDataSource.saveVehicle(vehicle);
+        }
+      }).catchError((Object error) {
+        // Sync falhou, mas não afeta a funcionalidade local
+        print('Background sync failed: $error');
+      }));
+    } catch (e) {
+      // Ignorar erros de sync em background
+      print('Background sync error: $e');
     }
   }
 
   @override
   Future<Either<Failure, VehicleEntity>> getVehicleById(String id) async {
     try {
-      final isConnected = await _isConnected;
-      
-      if (isConnected) {
-        final userId = await _getCurrentUserId();
-        if (userId != null) {
-          try {
-            final remoteVehicle = await remoteDataSource.getVehicleById(userId, id);
-            if (remoteVehicle != null) {
-              // Update local cache
-              await localDataSource.saveVehicle(remoteVehicle);
-              return Right(remoteVehicle.toEntity());
-            }
-          } catch (e) {
-            // Continue to local fallback
-          }
-        }
-      }
-      
-      // Get from local storage
+      // OFFLINE FIRST: Buscar local primeiro
       final localVehicle = await localDataSource.getVehicleById(id);
       if (localVehicle != null) {
+        // Sync em background se necessário
+        unawaited(_syncVehicleInBackground(id));
         return Right(localVehicle.toEntity());
       }
       
@@ -111,12 +100,29 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  /// Sync de veículo específico em background
+  Future<void> _syncVehicleInBackground(String vehicleId) async {
+    try {
+      final isConnected = await _isConnected;
+      if (!isConnected) return;
+
+      final userId = await _getCurrentUserId();
+      if (userId == null) return;
+
+      unawaited(remoteDataSource.getVehicleById(userId, vehicleId).then((remoteVehicle) async {
+        if (remoteVehicle != null) {
+          await localDataSource.saveVehicle(remoteVehicle);
+        }
+      }).catchError((Object error) {
+        print('Background vehicle sync failed: $error');
+      }));
+    } catch (e) {
+      print('Background vehicle sync error: $e');
     }
   }
 

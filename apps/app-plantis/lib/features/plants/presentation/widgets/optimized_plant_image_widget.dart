@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 
 /// Optimized plant image widget with memory caching and lazy loading
 class OptimizedPlantImageWidget extends StatefulWidget {

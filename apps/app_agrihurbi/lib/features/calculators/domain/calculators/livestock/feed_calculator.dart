@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Alimentação Animal
 /// Calcula necessidades nutricionais e formulação de rações para diferentes espécies
 class FeedCalculator extends CalculatorEntity {
-  FeedCalculator()
+  const FeedCalculator()
       : super(
           id: 'feed_calculator',
           name: 'Calculadora de Alimentação',
@@ -239,7 +240,7 @@ class FeedCalculator extends CalculatorEntity {
             unit: 'g/dia',
             description: 'Necessidade diária de fósforo',
           ),
-          CalculatorResultValue(
+          CalculationResultValue(
             label: 'Concentrado Recomendado',
             value: CalculatorMath.roundTo(feedFormulation['concentrate_kg'] as double, 2),
             unit: 'kg/dia',
@@ -393,7 +394,8 @@ class FeedCalculator extends CalculatorEntity {
 
     // Ajuste por temperatura
     if (temperature < 5 || temperature > 30) {
-      final double tempStress = math.max(0.05, math.min(0.25, math.abs(temperature - 20) * 0.01));
+      final double tempDiff = temperature - 20;
+      final double tempStress = math.max(0.05, math.min(0.25, (tempDiff < 0 ? -tempDiff : tempDiff) * 0.01));
       maintenanceEM *= (1 + tempStress);
     }
 

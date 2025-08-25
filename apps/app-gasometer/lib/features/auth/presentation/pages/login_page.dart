@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/services/analytics_service.dart';
 import '../controllers/login_controller.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/login_form_widget.dart';
-import '../widgets/signup_form_widget.dart';
-import '../widgets/recovery_form_widget.dart';
 import '../widgets/auth_tabs_widget.dart';
 import '../widgets/login_background_widget.dart';
+import '../widgets/login_form_widget.dart';
+import '../widgets/recovery_form_widget.dart';
+import '../widgets/signup_form_widget.dart';
 
 /// Página de login seguindo padrões SOLID
 /// Responsabilidade única: Orquestrar widgets de autenticação
@@ -176,7 +176,7 @@ class _LoginPageState extends State<LoginPage>
         topLeft: Radius.circular(20),
         bottomLeft: Radius.circular(20),
       ),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,

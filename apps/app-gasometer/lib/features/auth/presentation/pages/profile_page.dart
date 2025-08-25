@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../../../core/services/gasometer_notification_service.dart';
 
 class ProfilePage extends StatelessWidget {

@@ -147,7 +147,7 @@ void main() {
         color: 'Branco',
         licensePlate: 'ABC-1234',
         type: VehicleType.car,
-        supportedFuels: [FuelType.gasoline],
+        supportedFuels: const [FuelType.gasoline],
         currentOdometer: 55000,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

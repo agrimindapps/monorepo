@@ -10,12 +10,12 @@ class SyncStatusIndicator extends StatelessWidget {
   final bool showPendingCount;
 
   const SyncStatusIndicator({
-    Key? key,
+    super.key,
     required this.syncService,
     this.style = const SyncIndicatorStyle(),
     this.onTap,
     this.showPendingCount = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -162,12 +162,12 @@ class FloatingSyncIndicator extends StatelessWidget {
   final VoidCallback? onTap;
 
   const FloatingSyncIndicator({
-    Key? key,
+    super.key,
     required this.syncService,
     this.alignment = Alignment.bottomRight,
     this.margin = const EdgeInsets.all(16.0),
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -215,11 +215,11 @@ class SyncProgressIndicator extends StatelessWidget {
   final bool showPercentage;
 
   const SyncProgressIndicator({
-    Key? key,
+    super.key,
     required this.syncService,
     this.label,
     this.showPercentage = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -284,10 +284,10 @@ class UnsyncedItemIndicator extends StatelessWidget {
   final UnsyncedIndicatorStyle style;
 
   const UnsyncedItemIndicator({
-    Key? key,
+    super.key,
     required this.isUnsynced,
     this.style = const UnsyncedIndicatorStyle(),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

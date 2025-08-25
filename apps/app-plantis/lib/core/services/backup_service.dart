@@ -1,13 +1,15 @@
 import 'dart:convert';
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:core/core.dart';
-import '../data/models/backup_model.dart';
-import '../data/repositories/backup_repository.dart';
+import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
+
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
+import '../data/models/backup_model.dart';
+import '../data/repositories/backup_repository.dart';
 import 'secure_storage_service.dart';
 
 /// Service principal para operações de backup e restauração
@@ -42,7 +44,7 @@ class BackupService {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       // Coleta todos os dados
@@ -52,13 +54,13 @@ class BackupService {
 
       // Verifica se alguma operação falhou
       if (plantsResult.isLeft()) {
-        return Left(DataFailure('Erro ao carregar plantas'));
+        return const Left(DataFailure('Erro ao carregar plantas'));
       }
       if (spacesResult.isLeft()) {
-        return Left(DataFailure('Erro ao carregar espaços'));
+        return const Left(DataFailure('Erro ao carregar espaços'));
       }
       if (tasksResult.isLeft()) {
-        return Left(DataFailure('Erro ao carregar tarefas'));
+        return const Left(DataFailure('Erro ao carregar tarefas'));
       }
 
       final plants = plantsResult.getOrElse(() => []);
@@ -134,7 +136,7 @@ class BackupService {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       return await _backupRepository.listBackups(user.id);
@@ -151,7 +153,7 @@ class BackupService {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       // Download do backup
@@ -162,7 +164,7 @@ class BackupService {
         (backup) async {
           // Verifica compatibilidade
           if (!backup.isCompatible) {
-            return Left(ValidationFailure(
+            return const Left(ValidationFailure(
               'Backup incompatível com a versão atual do app',
             ));
           }
@@ -231,7 +233,7 @@ class BackupService {
     final settingsJson = await _storageService.getString(_backupSettingsKey);
     if (settingsJson != null) {
       try {
-        final settings = BackupSettings.fromJson(jsonDecode(settingsJson));
+        final settings = BackupSettings.fromJson(jsonDecode(settingsJson) as Map<String, dynamic>);
         return settings;
       } catch (e) {
         // Se falhar ao parsear, retorna configurações padrão

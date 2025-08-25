@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/models/pragas_hive.dart';
+
 import '../../../core/extensions/pragas_hive_extension.dart';
+import '../../../core/models/pragas_hive.dart';
 import '../../../core/widgets/optimized_praga_image_widget.dart';
 import '../models/praga_view_mode.dart';
 

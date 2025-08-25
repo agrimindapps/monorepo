@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/services/diagnostico_integration_service.dart';
+
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget especializado para exibir um defensivo completo
 /// Mostra dados integrados de FitossanitarioHive + FitossanitarioInfoHive + DiagnosticoHive
@@ -436,7 +437,7 @@ class DefensivoCompletoCardWidget extends StatelessWidget {
       children: [
         // Principais culturas relacionadas
         if (defensivoCompleto.culturasRelacionadas.isNotEmpty) ...[
-          Icon(
+          const Icon(
             FontAwesomeIcons.seedling,
             size: 12,
             color: Colors.green,

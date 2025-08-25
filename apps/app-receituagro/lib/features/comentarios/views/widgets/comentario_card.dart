@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../constants/comentarios_design_tokens.dart';
-import '../../models/comentario_model.dart';
 import '../../models/comentario_edit_state.dart';
+import '../../models/comentario_model.dart';
 
 class ComentarioCard extends StatefulWidget {
   final ComentarioModel comentario;

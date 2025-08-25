@@ -1,8 +1,9 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart' as core;
-import '../providers/notification_providers.dart';
+
 import '../../domain/entities/notification_stats.dart' as local;
+import '../providers/notification_providers.dart';
 
 class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({super.key});

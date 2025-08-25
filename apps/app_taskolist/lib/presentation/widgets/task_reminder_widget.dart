@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/notification_providers.dart';
+
 import '../../domain/entities/task_entity.dart';
+import '../providers/notification_providers.dart';
 
 class TaskReminderWidget extends ConsumerStatefulWidget {
   final TaskEntity task;
@@ -189,7 +190,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
         ),
         const SizedBox(height: 12),
         
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey[300]!),
             borderRadius: BorderRadius.circular(8),

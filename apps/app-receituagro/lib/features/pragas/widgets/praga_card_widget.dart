@@ -310,7 +310,7 @@ class PragaCardWidget extends StatelessWidget {
       children: [
         // Botão de favorito
         if (showFavoriteButton && onFavoriteToggle != null)
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: isFavorite 
                   ? Colors.red.withValues(alpha: 0.1)
@@ -501,7 +501,7 @@ class PragaCardWidget extends StatelessWidget {
   }
 
   Widget _buildCompactFavoriteButton() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isFavorite 
             ? Colors.red.withValues(alpha: 0.1)
@@ -643,7 +643,7 @@ class PragaCardWidget extends StatelessWidget {
   // ==================== WIDGETS AUXILIARES ====================
 
   Widget _buildFloatingFavoriteButton() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isFavorite 
             ? Colors.red.withValues(alpha: 0.9)

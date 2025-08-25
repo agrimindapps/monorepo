@@ -301,7 +301,7 @@ class LogViewer extends StatelessWidget {
         ? logs.where((log) => log.level == filterLevel).toList()
         : logs;
 
-    return Container(
+    return DecoratedBox(
       decoration: AgrihurbiTheme.cardDecoration,
       child: Column(
         children: [

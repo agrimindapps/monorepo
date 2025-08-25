@@ -1,5 +1,5 @@
-import '../models/task_model.dart';
 import '../../domain/entities/task_entity.dart';
+import '../models/task_model.dart';
 
 abstract class TaskRemoteDataSource {
   Future<String> createTask(TaskModel task);

@@ -25,7 +25,7 @@ class FavoritoDefensivoModel {
 
   factory FavoritoDefensivoModel.fromMap(Map<String, dynamic> map) {
     return FavoritoDefensivoModel(
-      id: map['id'] ?? 0,
+      id: map['id'] as int? ?? 0,
       idReg: map['idReg']?.toString() ?? '',
       line1: map['line1']?.toString() ?? map['nomeComum']?.toString() ?? 'Defensivo desconhecido',
       line2: map['line2']?.toString() ?? map['ingredienteAtivo']?.toString() ?? 'Sem ingrediente ativo',

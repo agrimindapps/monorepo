@@ -1,5 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'dart:math' as math;
+
+import 'package:injectable/injectable.dart';
+
 import '../entities/calculation_result.dart';
 import '../interfaces/calculator_strategy.dart';
 
@@ -163,7 +165,7 @@ class CalculatorFormattingService {
     return ResultSummary(
       title: 'Resumo - ${strategy.strategyName}',
       primaryResults: primaryValues.map((v) => 
-        '${v.label}: ${formatValue(v.value, unit: v.unit)}'
+        '${v.label}: ${formatValue((v.value as num).toDouble(), unit: v.unit)}'
       ).toList(),
       keyInsights: keyInsights,
       totalRecommendations: result.recommendations?.length ?? 0,
@@ -178,12 +180,12 @@ class CalculatorFormattingService {
     FormattingOptions options,
   ) async {
     return values.map((value) {
-      final formatted = _formatByUnit(value.value, value.unit, options);
+      final formatted = _formatByUnit((value.value as num).toDouble(), value.unit, options);
       
       return FormattedResultValue(
         label: value.label,
         formattedValue: formatted,
-        originalValue: value.value,
+        originalValue: (value.value as num).toDouble(),
         unit: value.unit,
         description: value.description ?? '',
         isPrimary: value.isPrimary,
@@ -277,7 +279,7 @@ class CalculatorFormattingService {
     final summaryParts = <String>[];
     
     for (final value in primaryValues) {
-      final formatted = _formatByUnit(value.value, value.unit, options);
+      final formatted = _formatByUnit((value.value as num).toDouble(), value.unit, options);
       summaryParts.add('${value.label}: $formatted');
     }
     
@@ -336,7 +338,7 @@ class CalculatorFormattingService {
     final primaryValues = result.values.where((v) => v.isPrimary).toList();
     
     if (primaryValues.length >= 3) {
-      final maxValue = primaryValues.reduce((a, b) => a.value > b.value ? a : b);
+      final maxValue = primaryValues.reduce((a, b) => (a.value as num) > (b.value as num) ? a : b);
       insights.add('${maxValue.label} é o maior valor calculado');
     }
     

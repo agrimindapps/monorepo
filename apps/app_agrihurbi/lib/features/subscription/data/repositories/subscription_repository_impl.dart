@@ -1,13 +1,13 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/error/exceptions.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/network/network_info.dart';
+import 'package:app_agrihurbi/features/subscription/data/datasources/subscription_local_datasource.dart';
+import 'package:app_agrihurbi/features/subscription/data/datasources/subscription_remote_datasource.dart';
+import 'package:app_agrihurbi/features/subscription/data/models/subscription_model.dart';
 import 'package:app_agrihurbi/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:app_agrihurbi/features/subscription/domain/repositories/subscription_repository.dart';
-import 'package:app_agrihurbi/features/subscription/data/datasources/subscription_remote_datasource.dart';
-import 'package:app_agrihurbi/features/subscription/data/datasources/subscription_local_datasource.dart';
-import 'package:app_agrihurbi/features/subscription/data/models/subscription_model.dart';
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: SubscriptionRepository)
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
@@ -29,17 +29,17 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         if (subscription != null) {
           await _localDataSource.cacheSubscription(subscription);
         }
-        return Right(subscription);
+        return Right(subscription?.toEntity());
       } else {
         final cached = await _localDataSource.getCachedSubscription();
-        return Right(cached);
+        return Right(cached?.toEntity());
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -58,14 +58,14 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         };
         final subscription = await _remoteDataSource.createSubscription(data);
         await _localDataSource.cacheSubscription(subscription);
-        return Right(subscription);
+        return Right(subscription.toEntity());
       } else {
-        return Left(ServerFailure('No internet connection'));
+        return const Left(ServerFailure(message: 'No internet connection'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -77,14 +77,14 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       if (await _networkInfo.isConnected) {
         final subscription = await _remoteDataSource.updateSubscription('current', {'tier': newTier.name});
         await _localDataSource.cacheSubscription(subscription);
-        return Right(subscription);
+        return Right(subscription.toEntity());
       } else {
-        return Left(ServerFailure('No internet connection'));
+        return const Left(ServerFailure(message: 'No internet connection'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -105,12 +105,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         await _localDataSource.clearSubscriptionCache();
         return const Right(null);
       } else {
-        return Left(ServerFailure('No internet connection'));
+        return const Left(ServerFailure(message: 'No internet connection'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -120,14 +120,14 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       if (await _networkInfo.isConnected) {
         final subscription = await _remoteDataSource.updateSubscription('current', {'status': 'active'});
         await _localDataSource.cacheSubscription(subscription);
-        return Right(subscription);
+        return Right(subscription.toEntity());
       } else {
-        return Left(ServerFailure('No internet connection'));
+        return const Left(ServerFailure(message: 'No internet connection'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -140,9 +140,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final featureModel = PremiumFeatureModel.fromEntity(feature);
       return Right(subscription.features.contains(featureModel));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -154,9 +154,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       
       return Right(subscription.features.map((f) => f.toEntity()).toList());
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -177,14 +177,14 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       
       return Right(FeatureUsage(
         feature: feature,
-        currentUsage: usage['usage'] ?? 0,
+        currentUsage: usage['usage'] as int? ?? 0,
         limit: _getFeatureLimit(feature),
-        resetDate: DateTime.parse(usage['resetDate'] ?? DateTime.now().toIso8601String()),
+        resetDate: DateTime.parse(usage['resetDate'] as String? ?? DateTime.now().toIso8601String()),
       ));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -198,9 +198,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await _localDataSource.recordFeatureUsage(featureModel, usage);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -243,7 +243,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required PaymentType type,
     required String token,
   }) async {
-    return Left(ServerFailure('Not implemented'));
+    return const Left(ServerFailure(message: 'Not implemented'));
   }
 
   @override
@@ -251,7 +251,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required String paymentMethodId,
     required DateTime expiryDate,
   }) async {
-    return Left(ServerFailure('Not implemented'));
+    return const Left(ServerFailure(message: 'Not implemented'));
   }
 
   @override
@@ -270,19 +270,19 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       if (await _networkInfo.isConnected) {
         final plans = await _remoteDataSource.getSubscriptionPlans();
         return Right(plans.map((p) => SubscriptionPlan(
-          tier: SubscriptionTier.values.firstWhere((t) => t.name == p['tier']),
-          name: p['name'],
-          description: p['description'],
-          monthlyPrice: p['monthlyPrice'].toDouble(),
-          yearlyPrice: p['yearlyPrice'].toDouble(),
-          features: (p['features'] as List).map((f) => PremiumFeature.values.firstWhere((pf) => pf.name == f)).toList(),
-          benefits: List<String>.from(p['benefits'] ?? []),
-          isPopular: p['isPopular'] ?? false,
+          tier: SubscriptionTier.values.firstWhere((t) => t.name == (p['tier'] as String? ?? '')),
+          name: p['name'] as String? ?? '',
+          description: p['description'] as String? ?? '',
+          monthlyPrice: (p['monthlyPrice'] as num?)?.toDouble() ?? 0.0,
+          yearlyPrice: (p['yearlyPrice'] as num?)?.toDouble() ?? 0.0,
+          features: (p['features'] as List<dynamic>?)?.map((f) => PremiumFeature.values.firstWhere((pf) => pf.name == f)).toList() ?? [],
+          benefits: (p['benefits'] as List<dynamic>?)?.cast<String>() ?? [],
+          isPopular: p['isPopular'] as bool? ?? false,
         )).toList());
       }
       return const Right([]);
     } catch (e) {
-      return Left(ServerFailure('Failed to get subscription plans'));
+      return const Left(ServerFailure(message: 'Failed to get subscription plans'));
     }
   }
 
@@ -308,7 +308,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required SubscriptionTier tier,
     int trialDays = 7,
   }) async {
-    return Left(ServerFailure('Not implemented'));
+    return const Left(ServerFailure(message: 'Not implemented'));
   }
 
   @override
@@ -328,16 +328,16 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         final result = await _remoteDataSource.applyPromoCode(code);
         return Right(PromoCodeResult(
           code: code,
-          discountPercent: result['discountPercent'].toDouble(),
-          discountAmount: result['discountAmount'].toDouble(),
-          expiresAt: DateTime.parse(result['expiresAt']),
-          isValid: result['isValid'],
-          errorMessage: result['errorMessage'],
+          discountPercent: (result['discountPercent'] as num?)?.toDouble() ?? 0.0,
+          discountAmount: (result['discountAmount'] as num?)?.toDouble() ?? 0.0,
+          expiresAt: DateTime.parse(result['expiresAt'] as String? ?? DateTime.now().toIso8601String()),
+          isValid: result['isValid'] as bool? ?? false,
+          errorMessage: result['errorMessage'] as String?,
         ));
       }
-      return Left(ServerFailure('No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     } catch (e) {
-      return Left(ServerFailure('Failed to apply promo code'));
+      return const Left(ServerFailure(message: 'Failed to apply promo code'));
     }
   }
 
@@ -359,6 +359,42 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, void>> markNotificationAsRead(String notificationId) async {
     return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> updateAutoRenewal(bool autoRenew) async {
+    try {
+      if (await _networkInfo.isConnected) {
+        await _remoteDataSource.updateSubscription('current', {'autoRenew': autoRenew});
+        final cached = await _localDataSource.getCachedSubscription();
+        if (cached != null) {
+          // Update cached subscription
+          final updatedModel = SubscriptionModel(
+            id: cached.id,
+            userId: cached.userId,
+            tier: cached.tier,
+            status: cached.status,
+            startDate: cached.startDate,
+            endDate: cached.endDate,
+            nextBillingDate: cached.nextBillingDate,
+            price: cached.price,
+            currency: cached.currency,
+            billingPeriod: cached.billingPeriod,
+            features: cached.features,
+            paymentMethod: cached.paymentMethod,
+            autoRenew: autoRenew,
+          );
+          await _localDataSource.cacheSubscription(updatedModel);
+        }
+        return const Right(null);
+      } else {
+        return const Left(ServerFailure(message: 'No internet connection'));
+      }
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
+    }
   }
 
   @override

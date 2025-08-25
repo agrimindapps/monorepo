@@ -143,7 +143,7 @@ class _CaloriasExercicioFormWidgetState
   Widget _buildAtividadeDropdown(bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: isDark
               ? const Color(0xFF303030).withValues(alpha: 0.5)
@@ -199,7 +199,7 @@ class _CaloriasExercicioFormWidgetState
   Widget _buildTempoField(bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: isDark
               ? const Color(0xFF303030).withValues(alpha: 0.5)

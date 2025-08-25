@@ -157,7 +157,7 @@ class CommentItemWidget extends StatelessWidget {
   }
 
   void _confirmarRemocaoComentario() {
-    final context = Get.context!;
+    final context = Get.context;
     final cores = {
       'texto': PlantasColors.textColor,
       'textoSecundario': PlantasColors.textSecondaryColor,

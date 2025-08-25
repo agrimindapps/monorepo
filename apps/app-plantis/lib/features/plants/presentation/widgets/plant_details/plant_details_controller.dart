@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/plant_details_provider.dart';
+
 import '../../../domain/entities/plant.dart';
+import '../../providers/plant_details_provider.dart';
 
 /// Controller responsável pela lógica de negócio da tela de detalhes da planta
 class PlantDetailsController {

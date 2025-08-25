@@ -126,7 +126,7 @@ class ModernHeaderWidget extends StatelessWidget {
             if (additionalActions != null) ...[
               ...additionalActions!.map((action) => Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(9),

@@ -224,7 +224,7 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
             Expanded(
               child: Text(
                 widget.value != null
-                    ? _formatDate(widget.value)
+                    ? _formatDate(widget.value as DateTime? ?? DateTime.now())
                     : 'Selecionar data',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: widget.value != null
@@ -310,7 +310,7 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: widget.value is DateTime 
-          ? widget.value 
+          ? widget.value as DateTime
           : DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now().add(const Duration(days: 365 * 10)),

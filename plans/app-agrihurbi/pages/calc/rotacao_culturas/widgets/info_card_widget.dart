@@ -47,7 +47,7 @@ class InfoCardWidget extends StatelessWidget {
         clipBehavior: Clip.antiAliasWithSaveLayer,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             color: backgroundColor ?? defaultBackgroundColor,
             border: Border.all(

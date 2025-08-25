@@ -75,7 +75,7 @@ class _OdometerPageState extends State<OdometerPage> {
         child: Column(
           children: [
             _buildHeader(),
-            if (_selectedVehicleId != null) _buildControls(),
+            _buildControls(),
             Expanded(child: _buildContent()),
           ],
         ),
@@ -155,9 +155,12 @@ class _OdometerPageState extends State<OdometerPage> {
                     _selectedVehicleId = vehicleId;
                   });
                 },
+                showEmptyOption: false,
               ),
-              SizedBox(height: GasometerDesignTokens.spacingLg),
-              _buildMonthsBar(),
+              if (_selectedVehicleId != null) ...[
+                SizedBox(height: GasometerDesignTokens.spacingLg),
+                _buildMonthsBar(),
+              ],
             ],
           ),
         ),

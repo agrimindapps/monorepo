@@ -1,11 +1,12 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import '../../../../core/services/task_generation_service.dart';
-import '../../../../core/data/models/planta_config_model.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/data/models/legacy/tarefa_model.dart';
+import '../../../../core/data/models/planta_config_model.dart';
+import '../../../../core/services/task_generation_service.dart';
+import '../../../plants/domain/repositories/plants_repository.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
-import '../../../plants/domain/repositories/plants_repository.dart';
 
 /// Use case para completar uma tarefa e gerar automaticamente a próxima
 ///
@@ -97,7 +98,7 @@ class CompleteTaskWithRegenerationUseCase
       // Gerar próxima tarefa se a planta tem configuração
       task_entity.Task? nextTask;
       if (plant.config != null &&
-          _shouldGenerateNextTask(currentTask, plant.config!)) {
+          _shouldGenerateNextTask(currentTask, plant.config)) {
         final nextTaskResult = await _generateNextTask(
           currentTask,
           params.completionDate,
@@ -166,7 +167,7 @@ class CompleteTaskWithRegenerationUseCase
 
     // Verificar se o tipo de cuidado ainda está ativo na configuração
     if (plantConfig.isCareTypeActive != null) {
-      return plantConfig.isCareTypeActive(careType);
+      return plantConfig.isCareTypeActive(careType) as bool;
     }
 
     // Fallback: sempre gerar próxima tarefa se não conseguir verificar
@@ -201,13 +202,13 @@ class CompleteTaskWithRegenerationUseCase
 
       final nextTaskModel = generationResult.fold((_) => null, (task) => task);
       if (nextTaskModel == null) {
-        return Left(ValidationFailure('Nenhuma próxima tarefa foi gerada'));
+        return const Left(ValidationFailure('Nenhuma próxima tarefa foi gerada'));
       }
 
       // Converter de volta para Task entity
       final nextTask = task_entity.Task.fromModel(
         nextTaskModel,
-        plantName: plant.name,
+        plantName: plant.name as String?,
       );
 
       // Salvar próxima tarefa
@@ -262,27 +263,27 @@ class CompleteTaskWithRegenerationUseCase
     final config = plant.config;
 
     return PlantaConfigModel.create(
-      plantaId: plant.id,
-      userId: plant.userId,
+      plantaId: plant.id as String,
+      userId: plant.userId as String?,
       aguaAtiva:
-          config?.wateringIntervalDays != null &&
-          config.wateringIntervalDays > 0,
-      intervaloRegaDias: config?.wateringIntervalDays ?? 3,
+          (config?.wateringIntervalDays != null) &&
+          ((config?.wateringIntervalDays as int?) ?? 0) > 0,
+      intervaloRegaDias: (config?.wateringIntervalDays as int?) ?? 3,
       aduboAtivo:
-          config?.fertilizingIntervalDays != null &&
-          config.fertilizingIntervalDays > 0,
-      intervaloAdubacaoDias: config?.fertilizingIntervalDays ?? 14,
+          (config?.fertilizingIntervalDays != null) &&
+          ((config?.fertilizingIntervalDays as int?) ?? 0) > 0,
+      intervaloAdubacaoDias: (config?.fertilizingIntervalDays as int?) ?? 14,
       podaAtiva:
-          config?.pruningIntervalDays != null && config.pruningIntervalDays > 0,
-      intervaloPodaDias: config?.pruningIntervalDays ?? 30,
+          (config?.pruningIntervalDays != null) && ((config?.pruningIntervalDays as int?) ?? 0) > 0,
+      intervaloPodaDias: (config?.pruningIntervalDays as int?) ?? 30,
       banhoSolAtivo:
-          config?.sunlightIntervalDays != null &&
-          config.sunlightIntervalDays > 0,
-      intervaloBanhoSolDias: config?.sunlightIntervalDays ?? 1,
+          (config?.sunlightIntervalDays != null) &&
+          ((config?.sunlightIntervalDays as int?) ?? 0) > 0,
+      intervaloBanhoSolDias: (config?.sunlightIntervalDays as int?) ?? 1,
       inspecaoPragasAtiva:
-          config?.pestInspectionIntervalDays != null &&
-          config.pestInspectionIntervalDays > 0,
-      intervaloInspecaoPragasDias: config?.pestInspectionIntervalDays ?? 7,
+          (config?.pestInspectionIntervalDays != null) &&
+          ((config?.pestInspectionIntervalDays as int?) ?? 0) > 0,
+      intervaloInspecaoPragasDias: (config?.pestInspectionIntervalDays as int?) ?? 7,
       replantarAtivo: true,
       intervaloReplantarDias: 180,
     );

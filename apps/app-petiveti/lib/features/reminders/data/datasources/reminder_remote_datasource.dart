@@ -1,6 +1,6 @@
-import '../../domain/entities/reminder.dart';
-import '../../../../core/network/firebase_service.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/firebase_service.dart';
+import '../../domain/entities/reminder.dart';
 import '../models/reminder_model.dart';
 
 abstract class ReminderRemoteDataSource {
@@ -31,7 +31,7 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
           WhereCondition('userId', isEqualTo: userId),
         ],
         orderBy: [
-          OrderByCondition('dueDate'),
+          const OrderByCondition('dueDate'),
         ],
         fromMap: ReminderModel.fromMap,
       );
@@ -40,7 +40,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar lembretes do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -61,7 +60,7 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
           WhereCondition('status', isNotEqualTo: ReminderStatus.completed.name),
         ],
         orderBy: [
-          OrderByCondition('dueDate'),
+          const OrderByCondition('dueDate'),
         ],
         fromMap: ReminderModel.fromMap,
       );
@@ -70,7 +69,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar lembretes de hoje do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -88,7 +86,7 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
           WhereCondition('status', isNotEqualTo: ReminderStatus.completed.name),
         ],
         orderBy: [
-          OrderByCondition('dueDate'),
+          const OrderByCondition('dueDate'),
         ],
         fromMap: ReminderModel.fromMap,
       );
@@ -97,7 +95,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar lembretes atrasados do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -115,7 +112,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar lembrete do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -139,7 +135,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao adicionar lembrete no servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -161,7 +156,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao atualizar lembrete no servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -176,7 +170,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao deletar lembrete do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -190,14 +183,13 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
           WhereCondition('userId', isEqualTo: userId),
         ],
         orderBy: [
-          OrderByCondition('dueDate'),
+          const OrderByCondition('dueDate'),
         ],
         fromMap: ReminderModel.fromMap,
       );
     } catch (e) {
       throw ServerException(
         message: 'Erro ao escutar lembretes do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -213,7 +205,6 @@ class ReminderRemoteDataSourceImpl implements ReminderRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao escutar lembrete do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }

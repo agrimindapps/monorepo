@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/sync_status_provider.dart';
 import '../../services/sync_service.dart';
+import '../providers/sync_status_provider.dart';
 
 /// Widget que exibe o status atual da sincronização
 class SyncStatusWidget extends StatelessWidget {

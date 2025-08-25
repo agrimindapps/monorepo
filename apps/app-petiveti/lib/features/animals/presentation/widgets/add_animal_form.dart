@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/animal.dart';
+import '../../domain/entities/animal_enums.dart';
 
 class AddAnimalForm extends StatefulWidget {
   final Animal? animal;
-  final Function(Animal) onSave;
+  final void Function(Animal) onSave;
 
   const AddAnimalForm({
     super.key,
@@ -24,8 +25,8 @@ class _AddAnimalFormState extends State<AddAnimalForm> {
   final _colorController = TextEditingController();
   final _notesController = TextEditingController();
 
-  String _selectedSpecies = 'Cachorro';
-  String _selectedGender = 'Macho';
+  AnimalSpecies _selectedSpecies = AnimalSpecies.dog;
+  AnimalGender _selectedGender = AnimalGender.male;
   DateTime _selectedBirthDate = DateTime.now().subtract(const Duration(days: 365));
 
   @override
@@ -34,13 +35,13 @@ class _AddAnimalFormState extends State<AddAnimalForm> {
     
     if (widget.animal != null) {
       _nameController.text = widget.animal!.name;
-      _breedController.text = widget.animal!.breed;
-      _weightController.text = widget.animal!.currentWeight.toString();
-      _colorController.text = widget.animal!.color;
+      _breedController.text = widget.animal!.breed ?? '';
+      _weightController.text = widget.animal!.weight?.toString() ?? '';
+      _colorController.text = widget.animal!.color ?? '';
       _notesController.text = widget.animal!.notes ?? '';
       _selectedSpecies = widget.animal!.species;
       _selectedGender = widget.animal!.gender;
-      _selectedBirthDate = widget.animal!.birthDate;
+      _selectedBirthDate = widget.animal!.birthDate ?? DateTime.now().subtract(const Duration(days: 365));
     }
   }
 
@@ -108,17 +109,18 @@ class _AddAnimalFormState extends State<AddAnimalForm> {
             Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<String>(
+                  child: DropdownButtonFormField<AnimalSpecies>(
                     value: _selectedSpecies,
                     decoration: const InputDecoration(
                       labelText: 'Espécie *',
                       border: OutlineInputBorder(),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'Cachorro', child: Text('Cachorro')),
-                      DropdownMenuItem(value: 'Gato', child: Text('Gato')),
-                      DropdownMenuItem(value: 'Pássaro', child: Text('Pássaro')),
-                      DropdownMenuItem(value: 'Outro', child: Text('Outro')),
+                    items: [
+                      DropdownMenuItem(value: AnimalSpecies.dog, child: Text(AnimalSpecies.dog.displayName)),
+                      DropdownMenuItem(value: AnimalSpecies.cat, child: Text(AnimalSpecies.cat.displayName)),
+                      DropdownMenuItem(value: AnimalSpecies.bird, child: Text(AnimalSpecies.bird.displayName)),
+                      DropdownMenuItem(value: AnimalSpecies.rabbit, child: Text(AnimalSpecies.rabbit.displayName)),
+                      DropdownMenuItem(value: AnimalSpecies.other, child: Text(AnimalSpecies.other.displayName)),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -129,15 +131,17 @@ class _AddAnimalFormState extends State<AddAnimalForm> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: DropdownButtonFormField<String>(
+                  child: DropdownButtonFormField<AnimalGender>(
                     value: _selectedGender,
                     decoration: const InputDecoration(
                       labelText: 'Gênero *',
                       border: OutlineInputBorder(),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'Macho', child: Text('Macho')),
-                      DropdownMenuItem(value: 'Fêmea', child: Text('Fêmea')),
+                    items: [
+                      DropdownMenuItem(value: AnimalGender.male, child: Text(AnimalGender.male.displayName)),
+                      DropdownMenuItem(value: AnimalGender.female, child: Text(AnimalGender.female.displayName)),
+                      DropdownMenuItem(value: AnimalGender.neuteredMale, child: Text(AnimalGender.neuteredMale.displayName)),
+                      DropdownMenuItem(value: AnimalGender.spayedFemale, child: Text(AnimalGender.spayedFemale.displayName)),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -284,23 +288,24 @@ class _AddAnimalFormState extends State<AddAnimalForm> {
 
   void _saveAnimal() {
     if (_formKey.currentState!.validate()) {
-      final weight = double.parse(_weightController.text);
+      final weightText = _weightController.text.trim();
+      final weight = weightText.isEmpty ? null : double.parse(weightText);
       final now = DateTime.now();
       
       final animal = Animal(
         id: widget.animal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: 'current_user_id', // TODO: Get from auth service
         name: _nameController.text.trim(),
         species: _selectedSpecies,
-        breed: _breedController.text.trim(),
+        breed: _breedController.text.trim().isEmpty ? null : _breedController.text.trim(),
         birthDate: _selectedBirthDate,
         gender: _selectedGender,
-        color: _colorController.text.trim(),
-        currentWeight: weight,
-        photo: widget.animal?.photo,
+        color: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+        weight: weight,
+        photoUrl: widget.animal?.photoUrl,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         createdAt: widget.animal?.createdAt ?? now,
         updatedAt: now,
-        isDeleted: false,
       );
       
       widget.onSave(animal);

@@ -1,13 +1,13 @@
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/fitossanitario_info_hive_repository.dart';
+import '../models/cultura_hive.dart';
 import '../models/diagnostico_hive.dart';
 import '../models/fitossanitario_hive.dart';
-import '../models/cultura_hive.dart';
-import '../models/pragas_hive.dart';
 import '../models/fitossanitario_info_hive.dart';
+import '../models/pragas_hive.dart';
+import '../repositories/cultura_hive_repository.dart';
+import '../repositories/diagnostico_hive_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
+import '../repositories/fitossanitario_info_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
 
 /// Service responsável por integrar dados de múltiplas HiveBoxes
 /// para criar views relacionais completas dos diagnósticos

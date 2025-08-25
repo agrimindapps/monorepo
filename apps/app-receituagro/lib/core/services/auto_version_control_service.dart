@@ -1,16 +1,18 @@
 import 'dart:developer' as developer;
+
 import 'package:dartz/dartz.dart';
-import 'version_manager_service.dart';
-import 'data_cleaning_service.dart';
-import 'auto_data_import_service.dart';
-import 'asset_loader_service.dart';
+
 import '../repositories/cultura_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
+import 'asset_loader_service.dart';
+import 'auto_data_import_service.dart';
+import 'data_cleaning_service.dart';
+import 'version_manager_service.dart';
 
 /// Resultado da execução do controle automático de versão
 class VersionControlResult {

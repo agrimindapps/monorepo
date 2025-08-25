@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../di/injection_container.dart' as di;
-import '../../domain/usecases/update_task.dart';
-import '../../domain/usecases/get_tasks.dart';
+
 import '../../domain/entities/task_entity.dart';
+import '../../domain/usecases/get_tasks.dart';
+import '../../domain/usecases/update_task.dart';
 import '../../infrastructure/services/notification_service.dart';
+import '../di/injection_container.dart' as di;
 
 /// Provider para UpdateTask use case
 final updateTaskProvider = Provider<UpdateTask>((ref) {

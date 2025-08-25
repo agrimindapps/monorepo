@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'favoritos_page.dart';
+
 import 'bindings/favoritos_binding.dart';
+import 'favoritos_page.dart';
 
 /// Exemplo de como usar a FavoritosPage com Provider
 /// 

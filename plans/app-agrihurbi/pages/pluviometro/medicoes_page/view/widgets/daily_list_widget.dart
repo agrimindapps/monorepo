@@ -78,7 +78,7 @@ class _DailyItemWidget extends StatelessWidget {
           isSelected: hasMedicao,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: MedicoesTheme.space1),
-            child: Container(
+            child: DecoratedBox(
               decoration: MedicoesTheme.dailyItemDecoration,
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(

@@ -1,8 +1,10 @@
-import 'package:core/core.dart';
 import 'dart:async';
+
+import 'package:core/core.dart';
+
+import '../../domain/entities/notification_stats.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
-import '../../domain/entities/notification_stats.dart';
 
 /// Notification service específico do app Task Manager
 class TaskManagerNotificationService {
@@ -34,7 +36,7 @@ class TaskManagerNotificationService {
   Future<bool> initialize() async {
     try {
       final channels = [
-        NotificationChannelEntity(
+        const NotificationChannelEntity(
           id: taskReminderChannelId,
           name: 'Lembretes de Tarefas',
           description: 'Notificações para lembrar sobre tarefas',
@@ -44,7 +46,7 @@ class TaskManagerNotificationService {
           enableLights: true,
           showBadge: true,
         ),
-        NotificationChannelEntity(
+        const NotificationChannelEntity(
           id: taskDeadlineChannelId,
           name: 'Prazos de Tarefas',
           description: 'Notificações urgentes sobre prazos vencendo',
@@ -54,7 +56,7 @@ class TaskManagerNotificationService {
           enableLights: true,
           showBadge: true,
         ),
-        NotificationChannelEntity(
+        const NotificationChannelEntity(
           id: taskCompletedChannelId,
           name: 'Tarefas Concluídas',
           description: 'Confirmações de tarefas completadas',
@@ -64,7 +66,7 @@ class TaskManagerNotificationService {
           enableLights: false,
           showBadge: false,
         ),
-        NotificationChannelEntity(
+        const NotificationChannelEntity(
           id: projectUpdateChannelId,
           name: 'Atualizações de Projeto',
           description: 'Notificações sobre progresso de projetos',
@@ -74,7 +76,7 @@ class TaskManagerNotificationService {
           enableLights: false,
           showBadge: true,
         ),
-        NotificationChannelEntity(
+        const NotificationChannelEntity(
           id: generalChannelId,
           name: 'Geral',
           description: 'Notificações gerais do aplicativo',
@@ -163,7 +165,7 @@ class TaskManagerNotificationService {
         priority: NotificationPriorityEntity.high,
         autoCancel: true,
         showBadge: true,
-        actions: [
+        actions: const [
           NotificationActionEntity(
             id: 'mark_done',
             title: 'Marcar como Feita',
@@ -228,7 +230,7 @@ class TaskManagerNotificationService {
         autoCancel: true,
         showBadge: true,
         color: 0xFFFF5722, // Cor vermelha para urgência
-        actions: [
+        actions: const [
           NotificationActionEntity(
             id: 'mark_done',
             title: 'Marcar como Feita',
@@ -322,9 +324,9 @@ class TaskManagerNotificationService {
     required int minute,
   }) async {
     try {
-      final notificationId = generalBaseId + 1;
+      const notificationId = generalBaseId + 1;
       
-      final notification = NotificationEntity(
+      const notification = NotificationEntity(
         id: notificationId,
         title: '📊 Revisão Semanal',
         body: 'Hora de revisar suas tarefas da semana e planejar a próxima!',
@@ -373,9 +375,9 @@ class TaskManagerNotificationService {
     }
 
     try {
-      final notificationId = generalBaseId + 2;
+      const notificationId = generalBaseId + 2;
       
-      final notification = NotificationEntity(
+      const notification = NotificationEntity(
         id: notificationId,
         title: '🚀 Momento de Foco',
         body: 'Que tal verificar suas tarefas e manter o foco no que é importante?',

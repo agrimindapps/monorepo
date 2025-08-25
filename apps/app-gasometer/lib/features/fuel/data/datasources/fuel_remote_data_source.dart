@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../models/fuel_supply_model.dart';
-import '../../domain/entities/fuel_record_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../domain/entities/fuel_record_entity.dart';
+import '../models/fuel_supply_model.dart';
 
 abstract class FuelRemoteDataSource {
   Future<List<FuelRecordEntity>> getAllFuelRecords(String userId);
@@ -206,7 +206,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
       previousOdometer: null,
       distanceTraveled: null,
       consumption: null,
-      metadata: {},
+      metadata: const {},
     );
   }
 

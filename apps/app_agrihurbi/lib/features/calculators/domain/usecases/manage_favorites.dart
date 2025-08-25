@@ -1,6 +1,6 @@
-import 'package:injectable/injectable.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
+
 import '../repositories/calculator_repository.dart';
 
 /// Parâmetros base para operações de favoritos
@@ -44,7 +44,7 @@ class ManageFavorites {
     } else if (params is RemoveFavoriteParams) {
       return await repository.removeFromFavorites(params.calculatorId);
     } else {
-      return Left(ValidationFailure('Parâmetro de favorito inválido'));
+      return const Left(ValidationFailure(message: 'Parâmetro de favorito inválido'));
     }
   }
 }

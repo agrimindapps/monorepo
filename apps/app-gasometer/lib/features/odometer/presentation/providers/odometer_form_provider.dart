@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
+
+import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/services/odometer_formatter.dart';
 import '../../domain/services/odometer_validator.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
 /// Provider for managing odometer form state
 ///
@@ -276,7 +277,7 @@ class OdometerFormProvider extends ChangeNotifier {
       type: _registrationType,
       createdAt: createdAt ?? now,
       updatedAt: now,
-      metadata: {
+      metadata: const {
         'source': 'mobile_app',
         'version': '1.0.0',
       },
@@ -301,15 +302,15 @@ class OdometerFormProvider extends ChangeNotifier {
   /// Loads data from Map
   void fromMap(Map<String, dynamic> map) {
     _vehicleId = map['vehicleId']?.toString() ?? '';
-    _odometerValue = (map['odometerValue'] ?? 0.0).toDouble();
+    _odometerValue = (map['odometerValue'] as num? ?? 0.0).toDouble();
     _registrationDate = DateTime.fromMillisecondsSinceEpoch(
-      map['registrationDate'] ?? DateTime.now().millisecondsSinceEpoch,
+      (map['registrationDate'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
     );
     _description = map['description']?.toString() ?? '';
     _registrationType = OdometerType.fromString(
       map['registrationType']?.toString() ?? 'other',
     );
-    _isLoading = map['isLoading'] ?? false;
+    _isLoading = map['isLoading'] as bool? ?? false;
     _error = map['error']?.toString() ?? '';
     notifyListeners();
   }

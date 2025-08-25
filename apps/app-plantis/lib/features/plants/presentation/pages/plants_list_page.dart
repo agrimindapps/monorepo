@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
-import '../providers/plants_provider.dart';
-import '../providers/plant_form_provider.dart';
-import '../selectors/plants_selectors.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
-import '../widgets/plants_app_bar.dart';
-import '../widgets/plants_grid_view.dart';
-import '../widgets/plants_list_view.dart';
-import '../widgets/plants_grouped_by_spaces_view.dart';
+import '../providers/plant_form_provider.dart';
+import '../providers/plants_provider.dart';
+import '../selectors/plants_selectors.dart';
 import '../widgets/empty_plants_widget.dart';
-import '../widgets/plants_loading_widget.dart';
+import '../widgets/plant_form_modal.dart';
+import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_error_widget.dart';
 import '../widgets/plants_fab.dart';
-import '../widgets/plant_form_modal.dart';
+import '../widgets/plants_grid_view.dart';
+import '../widgets/plants_grouped_by_spaces_view.dart';
+import '../widgets/plants_list_view.dart';
+import '../widgets/plants_loading_widget.dart';
 
 class PlantsListPage extends StatefulWidget {
   const PlantsListPage({super.key});

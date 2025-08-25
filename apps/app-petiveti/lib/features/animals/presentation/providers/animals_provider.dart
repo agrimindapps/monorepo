@@ -4,11 +4,11 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/repositories/animal_repository.dart';
-import '../../domain/usecases/get_animals.dart';
-import '../../domain/usecases/get_animal_by_id.dart';
 import '../../domain/usecases/add_animal.dart';
-import '../../domain/usecases/update_animal.dart';
 import '../../domain/usecases/delete_animal.dart';
+import '../../domain/usecases/get_animal_by_id.dart';
+import '../../domain/usecases/get_animals.dart';
+import '../../domain/usecases/update_animal.dart';
 
 // State classes
 class AnimalsState {

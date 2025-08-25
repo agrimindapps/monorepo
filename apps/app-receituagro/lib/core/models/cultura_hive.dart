@@ -29,11 +29,11 @@ class CulturaHive extends HiveObject {
 
   factory CulturaHive.fromJson(Map<String, dynamic> json) {
     return CulturaHive(
-      objectId: json['objectId'] ?? '',
+      objectId: (json['objectId'] as String?) ?? '',
       createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
       updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
-      idReg: json['idReg'] ?? '',
-      cultura: json['cultura'] ?? '',
+      idReg: (json['idReg'] as String?) ?? '',
+      cultura: (json['cultura'] as String?) ?? '',
     );
   }
 

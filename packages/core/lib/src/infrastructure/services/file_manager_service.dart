@@ -13,6 +13,7 @@ import '../../domain/repositories/i_file_repository.dart';
 /// Implementação do serviço de gerenciamento de arquivos
 class FileManagerService implements IFileRepository {
   static final FileManagerService _instance = FileManagerService._internal();
+  /// Obtém a instância singleton do FileManagerService
   factory FileManagerService() => _instance;
   FileManagerService._internal();
 
@@ -538,7 +539,7 @@ class FileManagerService implements IFileRepository {
           compressedData = encoder.encode(archive);
           break;
         case domain.CompressionType.gzip:
-          final encoder = GZipEncoder();
+          const encoder = GZipEncoder();
           compressedData = encoder.encode(archive.files.first.content as List<int>);
           break;
         default:
@@ -582,7 +583,7 @@ class FileManagerService implements IFileRepository {
           archive = ZipDecoder().decodeBytes(bytes, password: password);
           break;
         case '.gz':
-          final decompressed = GZipDecoder().decodeBytes(bytes);
+          final decompressed = const GZipDecoder().decodeBytes(bytes);
           // Para arquivos gzip simples, criar um arquivo
           final outputPath = joinPaths([destinationPath, getFileNameWithoutExtension(sourcePath)]);
           await File(outputPath).writeAsBytes(decompressed);
@@ -945,6 +946,7 @@ class FileManagerService implements IFileRepository {
     
     // Implementar watcher de diretório
     // Por enquanto, retornar stream vazio
+    controller.close();
     
     return controller.stream;
   }

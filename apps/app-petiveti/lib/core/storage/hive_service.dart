@@ -1,5 +1,4 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 
 // Generated Adapters
 import '../../features/animals/data/models/animal_model.dart';
@@ -68,8 +67,8 @@ class HiveService {
       await Hive.openBox<WeightModel>(HiveBoxNames.weights);
       
       // Boxes para configurações e cache
-      await Hive.openBox(HiveBoxNames.settings);
-      await Hive.openBox(HiveBoxNames.cache);
+      await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.settings);
+      await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.cache);
     } catch (e) {
       // Log do erro mas não falha a inicialização
       print('Erro ao abrir boxes: $e');
@@ -95,7 +94,7 @@ class HiveService {
   /// Fecha uma box específica
   Future<void> closeBox(String boxName) async {
     if (Hive.isBoxOpen(boxName)) {
-      await Hive.box(boxName).close();
+      await Hive.box<dynamic>(boxName).close();
     }
   }
 
@@ -107,8 +106,8 @@ class HiveService {
   /// Deleta uma box específica
   Future<void> deleteBox(String boxName) async {
     if (Hive.isBoxOpen(boxName)) {
-      await Hive.box(boxName).clear();
-      await Hive.box(boxName).close();
+      await Hive.box<dynamic>(boxName).clear();
+      await Hive.box<dynamic>(boxName).close();
     }
     await Hive.deleteBoxFromDisk(boxName);
   }

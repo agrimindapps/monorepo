@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/usecases/manage_settings.dart';
+import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 /// Settings Provider for App Configuration Management
 /// 
@@ -477,7 +477,7 @@ class SettingsProvider with ChangeNotifier {
           return false;
         },
         (settings) {
-          _settings = settings;
+          _settings = settings as SettingsEntity?;
           _setSuccess('Configurações importadas com sucesso!');
           notifyListeners();
           return true;
@@ -546,8 +546,4 @@ class SettingsProvider with ChangeNotifier {
     _successMessage = null;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

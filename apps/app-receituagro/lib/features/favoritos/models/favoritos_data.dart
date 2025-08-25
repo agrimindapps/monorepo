@@ -1,6 +1,6 @@
 import 'favorito_defensivo_model.dart';
-import 'favorito_praga_model.dart';
 import 'favorito_diagnostico_model.dart';
+import 'favorito_praga_model.dart';
 
 class FavoritosData {
   final List<FavoritoDefensivoModel> defensivos;

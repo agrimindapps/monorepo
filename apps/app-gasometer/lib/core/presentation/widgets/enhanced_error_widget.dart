@@ -15,7 +15,7 @@ class EnhancedErrorWidget extends StatelessWidget {
   final bool isCompact;
 
   const EnhancedErrorWidget({
-    Key? key,
+    super.key,
     required this.error,
     this.onRetry,
     this.onGoBack,
@@ -25,7 +25,7 @@ class EnhancedErrorWidget extends StatelessWidget {
     this.customTitle,
     this.customMessage,
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   /// Factory constructor for provider errors
   factory EnhancedErrorWidget.fromProvider(
@@ -413,14 +413,14 @@ class LoadingWithErrorWidget extends StatelessWidget {
   final bool showErrorInline;
 
   const LoadingWithErrorWidget({
-    Key? key,
+    super.key,
     required this.isLoading,
     this.error,
     required this.child,
     this.onRetry,
     this.loadingText,
     this.showErrorInline = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -464,14 +464,14 @@ class ProviderStateBuilder extends StatelessWidget {
   final VoidCallback? onRetry;
 
   const ProviderStateBuilder({
-    Key? key,
+    super.key,
     required this.provider,
     required this.loadingBuilder,
     required this.emptyBuilder,
     required this.contentBuilder,
     this.errorBuilder,
     this.onRetry,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

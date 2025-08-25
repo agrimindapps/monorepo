@@ -1,26 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
-import 'core/services/analytics_service.dart';
-import 'core/services/gasometer_notification_service.dart';
-import 'core/services/database_inspector_service.dart';
-import 'core/sync/services/sync_service.dart';
+import 'core/data/models/category_model.dart';
 import 'core/di/injection_container.dart';
-import 'firebase_options.dart';
-
+import 'core/services/analytics_service.dart';
+import 'core/services/database_inspector_service.dart';
+import 'core/services/gasometer_notification_service.dart';
+import 'core/sync/models/sync_queue_item.dart';
+import 'core/sync/services/sync_service.dart';
+import 'features/expenses/data/models/expense_model.dart';
+import 'features/fuel/data/models/fuel_supply_model.dart';
+import 'features/maintenance/data/models/maintenance_model.dart';
+import 'features/odometer/data/models/odometer_model.dart';
 // Import Hive adapters
 import 'features/vehicles/data/models/vehicle_model.dart';
-import 'features/fuel/data/models/fuel_supply_model.dart';
-import 'features/odometer/data/models/odometer_model.dart';
-import 'features/expenses/data/models/expense_model.dart';
-import 'features/maintenance/data/models/maintenance_model.dart';
-import 'core/data/models/category_model.dart';
-import 'core/sync/models/sync_queue_item.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

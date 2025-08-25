@@ -1,13 +1,13 @@
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Necessidade Hídrica das Culturas
 /// Calcula a necessidade de água baseada na evapotranspiração e características da cultura
 class WaterNeedCalculator extends CalculatorEntity {
-  WaterNeedCalculator()
+  const WaterNeedCalculator()
       : super(
           id: 'water_need',
           name: 'Necessidade Hídrica',

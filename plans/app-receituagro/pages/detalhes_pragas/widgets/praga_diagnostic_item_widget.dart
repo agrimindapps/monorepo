@@ -84,7 +84,7 @@ class PragaDiagnosticItemWidget extends StatelessWidget {
   Widget _buildDefensivoImageContent(bool isDark) {
     // Por enquanto, usando ícone como placeholder
     // Futuramente pode ser implementado carregamento de imagem real
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,

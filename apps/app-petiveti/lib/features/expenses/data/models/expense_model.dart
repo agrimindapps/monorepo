@@ -27,7 +27,7 @@ class ExpenseModel extends Expense {
       userId: map['userId']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
-      amount: (map['amount'] ?? 0).toDouble(),
+      amount: ((map['amount'] ?? 0) as num).toDouble(),
       category: ExpenseCategory.values.firstWhere(
         (e) => e.toString() == 'ExpenseCategory.${map['category']}',
         orElse: () => ExpenseCategory.other,
@@ -36,18 +36,18 @@ class ExpenseModel extends Expense {
         (e) => e.toString() == 'PaymentMethod.${map['paymentMethod']}',
         orElse: () => PaymentMethod.cash,
       ),
-      expenseDate: DateTime.fromMillisecondsSinceEpoch(map['expenseDate'] ?? 0),
+      expenseDate: DateTime.fromMillisecondsSinceEpoch((map['expenseDate'] as int?) ?? 0),
       veterinaryClinic: map['veterinaryClinic']?.toString(),
       veterinarianName: map['veterinarianName']?.toString(),
       invoiceNumber: map['invoiceNumber']?.toString(),
       attachments: map['attachments'] != null 
-          ? List<String>.from(map['attachments'])
+          ? List<String>.from(map['attachments'] as Iterable)
           : [],
       metadata: map['metadata'] != null 
-          ? Map<String, dynamic>.from(map['metadata'])
+          ? Map<String, dynamic>.from(map['metadata'] as Map)
           : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
     );
   }
 
@@ -93,6 +93,7 @@ class ExpenseModel extends Expense {
     );
   }
 
+  @override
   ExpenseModel copyWith({
     String? id,
     String? animalId,

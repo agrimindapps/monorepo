@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import '../../../../shared/utils/result.dart';
-import '../interfaces/i_hive_manager.dart';
 import '../exceptions/storage_exceptions.dart';
+import '../interfaces/i_hive_manager.dart';
 import '../utils/result_adapter.dart';
 
 /// Implementação do gerenciador centralizado do Hive
@@ -193,7 +193,7 @@ class HiveManager implements IHiveManager {
   Future<Result<void>> clearAllData() async {
     if (!_isInitialized) {
       return ResultAdapter.failure(
-        HiveInitializationException('HiveManager not initialized'),
+        const HiveInitializationException('HiveManager not initialized'),
       );
     }
 
@@ -216,7 +216,7 @@ class HiveManager implements IHiveManager {
       debugPrint('HiveManager: Cleared all data successfully');
       return Result.success(null);
       
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('HiveManager: Failed to clear all data - $e');
       return ResultAdapter.error(
         Exception('Failed to clear all Hive data: $e'),
@@ -251,13 +251,13 @@ class HiveManager implements IHiveManager {
   Result<void> validateState() {
     if (!_isInitialized) {
       return ResultAdapter.failure(
-        HiveInitializationException('HiveManager not initialized'),
+        const HiveInitializationException('HiveManager not initialized'),
       );
     }
 
     if (_appName == null) {
       return ResultAdapter.failure(
-        HiveInitializationException('App name not set'),
+        const HiveInitializationException('App name not set'),
       );
     }
 

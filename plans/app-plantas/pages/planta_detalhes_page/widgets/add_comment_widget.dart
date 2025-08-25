@@ -86,7 +86,7 @@ class AddCommentWidget extends StatelessWidget {
   Widget _buildSendButton(
     Map<String, Color> cores,
   ) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: cores['primaria']!.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.0),

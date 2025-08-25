@@ -156,28 +156,24 @@ class SettingsTile extends StatelessWidget {
 }
 
 /// Slider Settings Tile Implementation
-class _SliderSettingsTile extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final Widget? leading;
+class _SliderSettingsTile extends SettingsTile {
   final double value;
   final double min;
   final double max;
   final int? divisions;
   final ValueChanged<double>? onChanged;
-  final bool enabled;
   final String Function(double)? valueFormatter;
 
   const _SliderSettingsTile({
-    required this.title,
-    this.subtitle,
-    this.leading,
+    required super.title,
+    super.subtitle,
+    super.leading,
     required this.value,
     required this.min,
     required this.max,
     this.divisions,
     required this.onChanged,
-    this.enabled = true,
+    super.enabled,
     this.valueFormatter,
   });
 

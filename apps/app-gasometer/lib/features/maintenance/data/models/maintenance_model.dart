@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
+
 import '../../../../core/data/models/base_sync_model.dart';
 
 part 'maintenance_model.g.dart';
@@ -113,11 +114,11 @@ class MaintenanceModel extends BaseSyncModel {
       veiculoId: map['veiculoId']?.toString() ?? '',
       tipo: map['tipo']?.toString() ?? '',
       descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] ?? 0.0).toDouble(),
-      data: map['data']?.toInt() ?? 0,
-      odometro: map['odometro']?.toInt() ?? 0,
-      proximaRevisao: map['proximaRevisao']?.toInt(),
-      concluida: map['concluida'] ?? false,
+      valor: (map['valor'] as num? ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num?)?.toInt() ?? 0,
+      proximaRevisao: (map['proximaRevisao'] as num?)?.toInt(),
+      concluida: map['concluida'] as bool? ?? false,
     );
   }
 
@@ -172,11 +173,11 @@ class MaintenanceModel extends BaseSyncModel {
       veiculoId: map['veiculo_id']?.toString() ?? '',
       tipo: map['tipo']?.toString() ?? '',
       descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] ?? 0.0).toDouble(),
-      data: map['data']?.toInt() ?? 0,
-      odometro: map['odometro']?.toInt() ?? 0,
-      proximaRevisao: map['proxima_revisao']?.toInt(),
-      concluida: map['concluida'] ?? false,
+      valor: (map['valor'] as num? ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num?)?.toInt() ?? 0,
+      proximaRevisao: (map['proxima_revisao'] as num?)?.toInt(),
+      concluida: map['concluida'] as bool? ?? false,
     );
   }
 

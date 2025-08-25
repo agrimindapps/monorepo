@@ -1,5 +1,5 @@
-import '../entities/calculator.dart';
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/input_field.dart';
 
 /// Calculadora de Fluidoterapia
@@ -30,9 +30,9 @@ class FluidTherapyCalculator extends Calculator {
   @override
   List<InputField> get inputFields => [
     const InputField(
-      id: 'weight',
+      key: 'weight',
       label: 'Peso do Animal',
-      description: 'Peso atual do animal em quilogramas',
+      helperText: 'Peso atual do animal em quilogramas',
       type: InputFieldType.number,
       unit: 'kg',
       isRequired: true,
@@ -40,9 +40,9 @@ class FluidTherapyCalculator extends Calculator {
       maxValue: 100.0,
     ),
     const InputField(
-      id: 'dehydration_percentage',
+      key: 'dehydration_percentage',
       label: 'Grau de Desidratação',
-      description: 'Porcentagem de desidratação estimada',
+      helperText: 'Porcentagem de desidratação estimada',
       type: InputFieldType.dropdown,
       options: [
         '0% (Sem desidratação)',
@@ -55,9 +55,9 @@ class FluidTherapyCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'ongoing_losses',
+      key: 'ongoing_losses',
       label: 'Perdas Contínuas',
-      description: 'Volume de perdas estimadas por dia',
+      helperText: 'Volume de perdas estimadas por dia',
       type: InputFieldType.number,
       unit: 'ml/dia',
       defaultValue: 0.0,
@@ -65,25 +65,25 @@ class FluidTherapyCalculator extends Calculator {
       maxValue: 2000.0,
     ),
     const InputField(
-      id: 'vomiting_frequency',
+      key: 'vomiting_frequency',
       label: 'Frequência de Vômitos',
-      description: 'Número de episódios de vômito por dia',
+      helperText: 'Número de episódios de vômito por dia',
       type: InputFieldType.dropdown,
       options: ['0', '1-2', '3-5', '6-10', '>10'],
       defaultValue: '0',
     ),
     const InputField(
-      id: 'diarrhea_severity',
+      key: 'diarrhea_severity',
       label: 'Severidade da Diarreia',
-      description: 'Intensidade da diarreia',
+      helperText: 'Intensidade da diarreia',
       type: InputFieldType.dropdown,
       options: ['Nenhuma', 'Leve', 'Moderada', 'Severa'],
       defaultValue: 'Nenhuma',
     ),
     const InputField(
-      id: 'correction_hours',
+      key: 'correction_hours',
       label: 'Horas para Correção',
-      description: 'Tempo desejado para corrigir déficit',
+      helperText: 'Tempo desejado para corrigir déficit',
       type: InputFieldType.dropdown,
       options: ['6', '12', '24', '48'],
       defaultValue: '24',
@@ -129,26 +129,39 @@ class FluidTherapyCalculator extends Calculator {
       dehydrationPercentage, vomitingFrequency, diarrheaSeverity
     );
 
-    final results = {
-      'maintenance_needs': maintenanceNeeds.round(),
-      'dehydration_deficit': dehydrationDeficit.round(),
-      'additional_losses': additionalLosses.round(),
-      'maintenance_rate': maintenanceRate.toStringAsFixed(1),
-      'deficit_rate': deficitRate.toStringAsFixed(1),
-      'loss_rate': lossRate.toStringAsFixed(1),
-      'total_rate': totalRate.toStringAsFixed(1),
-      'total_daily': totalDaily.round(),
-      'total_with_deficit': totalWithDeficit.round(),
-      'fluid_recommendations': fluidRecommendations,
-      'monitoring_parameters': _getMonitoringParameters(),
-    };
+    final resultItems = [
+      ResultItem(
+        label: 'Necessidades de Manutenção',
+        value: maintenanceNeeds.round(),
+        unit: 'ml',
+      ),
+      ResultItem(
+        label: 'Déficit de Desidratação',
+        value: dehydrationDeficit.round(),
+        unit: 'ml',
+      ),
+      ResultItem(
+        label: 'Taxa de Manutenção',
+        value: maintenanceRate.toStringAsFixed(1),
+        unit: 'ml/h',
+      ),
+      ResultItem(
+        label: 'Taxa Total',
+        value: totalRate.toStringAsFixed(1),
+        unit: 'ml/h',
+      ),
+      ResultItem(
+        label: 'Volume Total Diário',
+        value: totalDaily.round(),
+        unit: 'ml/dia',
+      ),
+    ];
 
-    return CalculationResult(
+    return _FluidTherapyResult(
       calculatorId: id,
-      timestamp: DateTime.now(),
-      inputs: inputs,
-      results: results,
+      results: resultItems,
       summary: 'Taxa total: ${totalRate.toStringAsFixed(1)} ml/h (${totalWithDeficit.round()} ml em ${correctionHours}h)',
+      calculatedAt: DateTime.now(),
     );
   }
 
@@ -162,7 +175,7 @@ class FluidTherapyCalculator extends Calculator {
     final errors = <String>[];
 
     for (final field in inputFields) {
-      if (field.isRequired && !inputs.containsKey(field.id)) {
+      if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
@@ -303,4 +316,14 @@ class FluidTherapyCalculator extends Calculator {
       'Sinais de sobrecarga hídrica (edema, dispneia)',
     ];
   }
+}
+
+/// Implementação concreta do resultado da calculadora de fluidoterapia
+class _FluidTherapyResult extends CalculationResult {
+  const _FluidTherapyResult({
+    required super.calculatorId,
+    required super.results,
+    super.summary,
+    super.calculatedAt,
+  });
 }

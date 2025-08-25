@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
+
 import '../../../../core/data/models/base_sync_model.dart';
 
 part 'odometer_model.g.dart';
@@ -99,8 +100,8 @@ class OdometerModel extends BaseSyncModel {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       idVeiculo: map['idVeiculo']?.toString() ?? '',
-      data: map['data']?.toInt() ?? 0,
-      odometro: (map['odometro'] ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
       descricao: map['descricao']?.toString() ?? '',
       tipoRegistro: map['tipoRegistro']?.toString(),
     );
@@ -149,8 +150,8 @@ class OdometerModel extends BaseSyncModel {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       idVeiculo: map['id_veiculo']?.toString() ?? '',
-      data: map['data']?.toInt() ?? 0,
-      odometro: (map['odometro'] ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
       descricao: map['descricao']?.toString() ?? '',
       tipoRegistro: map['tipo_registro']?.toString(),
     );

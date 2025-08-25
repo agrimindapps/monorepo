@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/plant.dart';
+
 import '../../../../../core/theme/colors.dart';
+import '../../../domain/entities/plant.dart';
 
 /// Widget responsável por exibir as informações básicas da planta
 class PlantInfoSection extends StatelessWidget {

@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../data/services/subscription_sync_service.dart';
 
 class PremiumProvider extends ChangeNotifier {

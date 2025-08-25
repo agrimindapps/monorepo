@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/subscription_providers.dart';
-import '../pages/premium_page.dart';
-import '../../domain/entities/user_limits.dart' as local;
 import '../../domain/entities/usage_stats.dart' as local_stats;
+import '../../domain/entities/user_limits.dart' as local;
+import '../pages/premium_page.dart';
+import '../providers/subscription_providers.dart';
 
 class PremiumBanner extends ConsumerWidget {
   final VoidCallback? onUpgradePressed;

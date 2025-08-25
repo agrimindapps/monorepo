@@ -1,9 +1,9 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 
+import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';
 import '../entities/equine_entity.dart';
-import '../entities/animal_base_entity.dart';
 
 /// Parâmetros para busca avançada de animais
 class SearchAnimalsParams {

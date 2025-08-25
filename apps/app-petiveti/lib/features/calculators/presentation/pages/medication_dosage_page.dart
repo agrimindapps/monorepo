@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../domain/entities/medication_dosage_output.dart';
 import '../providers/medication_dosage_provider.dart';
 import '../widgets/medication_dosage_input_form.dart';
 import '../widgets/medication_dosage_result_card.dart';
 import '../widgets/medication_selector_widget.dart';
-import '../widgets/safety_alerts_widget.dart';
 import '../widgets/prescription_export_widget.dart';
-import '../../domain/entities/medication_dosage_input.dart';
-import '../../domain/entities/medication_dosage_output.dart';
+import '../widgets/safety_alerts_widget.dart';
 
 /// Página principal da Calculadora de Dosagem de Medicamentos
 class MedicationDosagePage extends StatelessWidget {
-  const MedicationDosagePage({Key? key}) : super(key: key);
+  const MedicationDosagePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -583,7 +583,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
                                   '${result.dosePerAdministration.toStringAsFixed(2)} ${result.unit} - ${result.administrationsPerDay}x/dia',
                                 ),
                                 trailing: Text(
-                                  '${result.calculatedAt.day}/${result.calculatedAt.month}',
+                                  '${result.calculatedAt?.day ?? DateTime.now().day}/${result.calculatedAt?.month ?? DateTime.now().month}',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 onTap: () {
@@ -625,10 +625,10 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
                   Navigator.pop(context);
                   _tabController.animateTo(0);
                 },
-                child: const Text('Limpar'),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.red,
                 ),
+                child: const Text('Limpar'),
               ),
             ],
           ),

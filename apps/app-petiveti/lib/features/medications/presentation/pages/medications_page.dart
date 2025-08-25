@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
-import '../widgets/medication_card.dart';
 import '../widgets/empty_medications_state.dart';
+import '../widgets/medication_card.dart';
 import '../widgets/medication_filters.dart';
 import '../widgets/medication_stats.dart';
 
@@ -12,9 +12,9 @@ class MedicationsPage extends ConsumerStatefulWidget {
   final String? animalId;
 
   const MedicationsPage({
-    Key? key,
+    super.key,
     this.animalId,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<MedicationsPage> createState() => _MedicationsPageState();
@@ -83,9 +83,9 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
               text: 'Vencendo (${medicationsState.expiringMedications.length})',
               icon: const Icon(Icons.warning, size: 16),
             ),
-            Tab(
+            const Tab(
               text: 'Estatísticas',
-              icon: const Icon(Icons.analytics, size: 16),
+              icon: Icon(Icons.analytics, size: 16),
             ),
           ],
         ),
@@ -153,8 +153,8 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddMedication(context),
-        child: const Icon(Icons.add),
         tooltip: 'Adicionar Medicamento',
+        child: const Icon(Icons.add),
       ),
     );
   }

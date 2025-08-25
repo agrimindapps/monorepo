@@ -1,6 +1,6 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+
 import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
 
@@ -10,7 +10,7 @@ class GetCalculationHistory {
   GetCalculationHistory(this.repository);
 
   Future<Either<Failure, List<CalculationHistory>>> call() async {
-    return await repository.getCalculationHistory();
+    return repository.getCalculationHistory();
   }
 }
 
@@ -20,7 +20,7 @@ class DeleteCalculationHistory {
   DeleteCalculationHistory(this.repository);
 
   Future<Either<Failure, Unit>> call(String historyId) async {
-    return await repository.removeFromHistory(historyId);
+    return repository.removeFromHistory(historyId);
   }
 }
 

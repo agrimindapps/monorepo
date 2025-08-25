@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/dio_client.dart';
 import '../models/user_model.dart';
-import '../../domain/failures/auth_failures.dart';
 
 /// DataSource abstrato para operações remotas de autenticação
 /// 
@@ -94,9 +92,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final userData = response.data['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Login bem-sucedido');
-        return UserModel.fromJson(userData);
+        return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
-        final message = response.data['message'] ?? 'Falha no login';
+        final message = response.data['message'] as String? ?? 'Falha no login';
         debugPrint('AuthRemoteDataSourceImpl: Login falhou - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -129,9 +127,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final userData = response.data['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Registro bem-sucedido');
-        return UserModel.fromJson(userData);
+        return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
-        final message = response.data['message'] ?? 'Falha no registro';
+        final message = response.data['message'] as String? ?? 'Falha no registro';
         debugPrint('AuthRemoteDataSourceImpl: Registro falhou - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -166,12 +164,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200) {
         final userData = response.data['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Usuário obtido do servidor');
-        return UserModel.fromJson(userData);
+        return UserModel.fromJson(userData as Map<String, dynamic>);
       } else if (response.statusCode == 401) {
         debugPrint('AuthRemoteDataSourceImpl: Usuário não autenticado');
         return null;
       } else {
-        final message = response.data['message'] ?? 'Falha ao obter usuário';
+        final message = response.data['message'] as String? ?? 'Falha ao obter usuário';
         debugPrint('AuthRemoteDataSourceImpl: Erro ao obter usuário - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -193,7 +191,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         debugPrint('AuthRemoteDataSourceImpl: Token renovado');
         return token as String;
       } else {
-        final message = response.data['message'] ?? 'Falha na renovação do token';
+        final message = response.data['message'] as String? ?? 'Falha na renovação do token';
         debugPrint('AuthRemoteDataSourceImpl: Falha na renovação - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -231,9 +229,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200) {
         final userData = response.data['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Perfil atualizado');
-        return UserModel.fromJson(userData);
+        return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
-        final message = response.data['message'] ?? 'Falha na atualização do perfil';
+        final message = response.data['message'] as String? ?? 'Falha na atualização do perfil';
         debugPrint('AuthRemoteDataSourceImpl: Falha na atualização - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -262,7 +260,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200) {
         debugPrint('AuthRemoteDataSourceImpl: Senha alterada com sucesso');
       } else {
-        final message = response.data['message'] ?? 'Falha na alteração da senha';
+        final message = response.data['message'] as String? ?? 'Falha na alteração da senha';
         debugPrint('AuthRemoteDataSourceImpl: Falha na alteração - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -287,7 +285,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200) {
         debugPrint('AuthRemoteDataSourceImpl: Email de recuperação enviado');
       } else {
-        final message = response.data['message'] ?? 'Falha na recuperação de senha';
+        final message = response.data['message'] as String? ?? 'Falha na recuperação de senha';
         debugPrint('AuthRemoteDataSourceImpl: Falha na recuperação - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -316,7 +314,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == 200) {
         debugPrint('AuthRemoteDataSourceImpl: Senha redefinida com sucesso');
       } else {
-        final message = response.data['message'] ?? 'Falha na redefinição da senha';
+        final message = response.data['message'] as String? ?? 'Falha na redefinição da senha';
         debugPrint('AuthRemoteDataSourceImpl: Falha na redefinição - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -343,7 +341,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         debugPrint('AuthRemoteDataSourceImpl: Email em uso: $isTaken');
         return isTaken as bool;
       } else {
-        final message = response.data['message'] ?? 'Falha na verificação de email';
+        final message = response.data['message'] as String? ?? 'Falha na verificação de email';
         debugPrint('AuthRemoteDataSourceImpl: Falha na verificação - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }

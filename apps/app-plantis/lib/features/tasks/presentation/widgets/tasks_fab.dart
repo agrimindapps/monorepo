@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/tasks_provider.dart';
+
 import '../../../plants/presentation/providers/plants_provider.dart';
 import '../../domain/entities/task.dart';
+import '../providers/tasks_provider.dart';
 
 class TasksFab extends StatelessWidget {
   const TasksFab({super.key});
@@ -198,12 +199,12 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                     items:
                         _taskTypes.map((type) {
                           return DropdownMenuItem<String>(
-                            value: type['value'],
+                            value: type['value'] as String?,
                             child: Row(
                               children: [
-                                Icon(type['icon'], size: 20),
+                                Icon(type['icon'] as IconData?, size: 20),
                                 const SizedBox(width: 8),
-                                Text(type['label']),
+                                Text(type['label'] as String),
                               ],
                             ),
                           );
@@ -228,19 +229,19 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                     items:
                         _priorities.map((priority) {
                           return DropdownMenuItem<String>(
-                            value: priority['value'],
+                            value: priority['value'] as String?,
                             child: Row(
                               children: [
                                 Container(
                                   width: 16,
                                   height: 16,
                                   decoration: BoxDecoration(
-                                    color: priority['color'],
+                                    color: priority['color'] as Color?,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(priority['label']),
+                                Text(priority['label'] as String),
                               ],
                             ),
                           );

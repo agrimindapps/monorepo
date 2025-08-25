@@ -1,9 +1,7 @@
 import 'package:hive/hive.dart';
-import 'package:dartz/dartz.dart';
-import '../models/weather_measurement_model.dart';
 import '../models/rain_gauge_model.dart';
+import '../models/weather_measurement_model.dart';
 import '../models/weather_statistics_model.dart';
-import '../../domain/failures/weather_failures.dart';
 
 /// Abstract interface for weather local data source operations
 abstract class WeatherLocalDataSource {
@@ -99,6 +97,23 @@ abstract class WeatherLocalDataSource {
   Future<DateTime?> getLastSyncTime();
   
   Future<void> setLastSyncTime(DateTime timestamp);
+
+  // Advanced search and sync methods
+  Future<List<WeatherMeasurementModel>> searchMeasurements({
+    String? locationId,
+    DateTime? fromDate,
+    DateTime? toDate,
+    double? minTemperature,
+    double? maxTemperature,
+    String? weatherCondition,
+    double? minRainfall,
+    double? maxRainfall,
+    int? limit,
+  });
+
+  Future<List<WeatherMeasurementModel>> getPendingMeasurements();
+
+  Future<void> markMeasurementsAsSynced(List<String> ids);
 }
 
 /// Implementation of weather local data source using Hive
@@ -121,7 +136,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       _statisticsBox = await Hive.openBox<WeatherStatisticsModel>(_statisticsBoxName);
       _metadataBox = await Hive.openBox(_metadataBoxName);
     } catch (e) {
-      throw WeatherLocalStorageFailure('init', 'Failed to initialize Hive boxes: $e');
+      throw Exception('Failed to initialize Hive boxes: $e');
     }
   }
 
@@ -175,7 +190,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       
       return measurements;
     } catch (e) {
-      throw WeatherLocalStorageFailure('getAllMeasurements', e.toString());
+      throw Exception('getAllMeasurements failed: ${e.toString()}');
     }
   }
 
@@ -185,7 +200,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       return _measurementsBox!.get(id);
     } catch (e) {
-      throw WeatherLocalStorageFailure('getMeasurementById', e.toString());
+      throw Exception('getMeasurementById failed: ${e.toString()}');
     }
   }
 
@@ -216,7 +231,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       final measurements = await getAllMeasurements(locationId: locationId, limit: 1);
       return measurements.isNotEmpty ? measurements.first : null;
     } catch (e) {
-      throw WeatherLocalStorageFailure('getLatestMeasurement', e.toString());
+      throw Exception('getLatestMeasurement failed: ${e.toString()}');
     }
   }
 
@@ -226,7 +241,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _measurementsBox!.put(measurement.id, measurement);
     } catch (e) {
-      throw WeatherLocalStorageFailure('saveMeasurement', e.toString());
+      throw Exception('saveMeasurement failed: ${e.toString()}');
     }
   }
 
@@ -239,7 +254,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       };
       await _measurementsBox!.putAll(measurementsMap);
     } catch (e) {
-      throw WeatherLocalStorageFailure('saveMeasurements', e.toString());
+      throw Exception('saveMeasurements failed: ${e.toString()}');
     }
   }
 
@@ -250,10 +265,10 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       if (_measurementsBox!.containsKey(measurement.id)) {
         await _measurementsBox!.put(measurement.id, measurement);
       } else {
-        throw WeatherMeasurementNotFoundFailure(measurement.id);
+        throw Exception('Measurement not found: ${measurement.id}');
       }
     } catch (e) {
-      throw WeatherLocalStorageFailure('updateMeasurement', e.toString());
+      throw Exception('updateMeasurement failed: ${e.toString()}');
     }
   }
 
@@ -263,7 +278,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _measurementsBox!.delete(id);
     } catch (e) {
-      throw WeatherLocalStorageFailure('deleteMeasurement', e.toString());
+      throw Exception('deleteMeasurement failed: ${e.toString()}');
     }
   }
 
@@ -273,7 +288,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _measurementsBox!.deleteAll(ids);
     } catch (e) {
-      throw WeatherLocalStorageFailure('deleteMeasurements', e.toString());
+      throw Exception('deleteMeasurements failed: ${e.toString()}');
     }
   }
 
@@ -283,7 +298,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _measurementsBox!.clear();
     } catch (e) {
-      throw WeatherLocalStorageFailure('clearAllMeasurements', e.toString());
+      throw Exception('clearAllMeasurements failed: ${e.toString()}');
     }
   }
 
@@ -297,7 +312,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       return _rainGaugesBox!.values.toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getAllRainGauges', e.toString());
+      throw Exception('getAllRainGauges failed: ${e.toString()}');
     }
   }
 
@@ -307,7 +322,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       return _rainGaugesBox!.get(id);
     } catch (e) {
-      throw WeatherLocalStorageFailure('getRainGaugeById', e.toString());
+      throw Exception('getRainGaugeById failed: ${e.toString()}');
     }
   }
 
@@ -319,7 +334,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
           .where((gauge) => gauge.locationId == locationId)
           .toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getRainGaugesByLocation', e.toString());
+      throw Exception('getRainGaugesByLocation failed: ${e.toString()}');
     }
   }
 
@@ -331,7 +346,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
           .where((gauge) => gauge.isActive)
           .toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getActiveRainGauges', e.toString());
+      throw Exception('getActiveRainGauges failed: ${e.toString()}');
     }
   }
 
@@ -341,7 +356,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _rainGaugesBox!.put(rainGauge.id, rainGauge);
     } catch (e) {
-      throw WeatherLocalStorageFailure('saveRainGauge', e.toString());
+      throw Exception('saveRainGauge failed: ${e.toString()}');
     }
   }
 
@@ -354,7 +369,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       };
       await _rainGaugesBox!.putAll(rainGaugesMap);
     } catch (e) {
-      throw WeatherLocalStorageFailure('saveRainGauges', e.toString());
+      throw Exception('saveRainGauges failed: ${e.toString()}');
     }
   }
 
@@ -365,10 +380,10 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       if (_rainGaugesBox!.containsKey(rainGauge.id)) {
         await _rainGaugesBox!.put(rainGauge.id, rainGauge);
       } else {
-        throw RainGaugeNotFoundFailure(rainGauge.id);
+        throw Exception('Rain gauge not found: ${rainGauge.id}');
       }
     } catch (e) {
-      throw WeatherLocalStorageFailure('updateRainGauge', e.toString());
+      throw Exception('updateRainGauge failed: ${e.toString()}');
     }
   }
 
@@ -378,7 +393,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _rainGaugesBox!.delete(id);
     } catch (e) {
-      throw WeatherLocalStorageFailure('deleteRainGauge', e.toString());
+      throw Exception('deleteRainGauge failed: ${e.toString()}');
     }
   }
 
@@ -388,7 +403,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _rainGaugesBox!.clear();
     } catch (e) {
-      throw WeatherLocalStorageFailure('clearAllRainGauges', e.toString());
+      throw Exception('clearAllRainGauges failed: ${e.toString()}');
     }
   }
 
@@ -402,7 +417,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       return _statisticsBox!.values.toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getAllStatistics', e.toString());
+      throw Exception('getAllStatistics failed: ${e.toString()}');
     }
   }
 
@@ -412,7 +427,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       return _statisticsBox!.get(id);
     } catch (e) {
-      throw WeatherLocalStorageFailure('getStatisticsById', e.toString());
+      throw Exception('getStatisticsById failed: ${e.toString()}');
     }
   }
 
@@ -424,7 +439,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
           .where((stats) => stats.locationId == locationId)
           .toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getStatisticsByLocation', e.toString());
+      throw Exception('getStatisticsByLocation failed: ${e.toString()}');
     }
   }
 
@@ -436,7 +451,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
           .where((stats) => stats.period == period)
           .toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getStatisticsByPeriod', e.toString());
+      throw Exception('getStatisticsByPeriod failed: ${e.toString()}');
     }
   }
 
@@ -446,7 +461,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _statisticsBox!.put(statistics.id, statistics);
     } catch (e) {
-      throw WeatherLocalStorageFailure('saveStatistics', e.toString());
+      throw Exception('saveStatistics failed: ${e.toString()}');
     }
   }
 
@@ -459,7 +474,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       };
       await _statisticsBox!.putAll(statisticsMap);
     } catch (e) {
-      throw WeatherLocalStorageFailure('saveMultipleStatistics', e.toString());
+      throw Exception('saveMultipleStatistics failed: ${e.toString()}');
     }
   }
 
@@ -470,10 +485,10 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       if (_statisticsBox!.containsKey(statistics.id)) {
         await _statisticsBox!.put(statistics.id, statistics);
       } else {
-        throw WeatherStatisticsFailure('Statistics not found: ${statistics.id}');
+        throw Exception('Statistics not found: ${statistics.id}');
       }
     } catch (e) {
-      throw WeatherLocalStorageFailure('updateStatistics', e.toString());
+      throw Exception('updateStatistics failed: ${e.toString()}');
     }
   }
 
@@ -483,7 +498,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _statisticsBox!.delete(id);
     } catch (e) {
-      throw WeatherLocalStorageFailure('deleteStatistics', e.toString());
+      throw Exception('deleteStatistics failed: ${e.toString()}');
     }
   }
 
@@ -493,7 +508,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _statisticsBox!.clear();
     } catch (e) {
-      throw WeatherLocalStorageFailure('clearAllStatistics', e.toString());
+      throw Exception('clearAllStatistics failed: ${e.toString()}');
     }
   }
 
@@ -508,7 +523,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await clearAllRainGauges();
       await clearAllStatistics();
     } catch (e) {
-      throw WeatherCacheFailure('Failed to clear cache: $e');
+      throw Exception('Failed to clear cache: $e');
     }
   }
 
@@ -523,7 +538,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
         'total': _measurementsBox!.length + _rainGaugesBox!.length + _statisticsBox!.length,
       };
     } catch (e) {
-      throw WeatherCacheFailure('Failed to get cache size: $e');
+      throw Exception('Failed to get cache size: $e');
     }
   }
 
@@ -536,7 +551,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _statisticsBox!.compact();
       await _metadataBox!.compact();
     } catch (e) {
-      throw WeatherLocalStorageFailure('compactDatabase', e.toString());
+      throw Exception('compactDatabase failed: ${e.toString()}');
     }
   }
 
@@ -545,7 +560,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     try {
       await _ensureInitialized();
       final timestamp = _metadataBox!.get('last_sync_time');
-      return timestamp != null ? DateTime.parse(timestamp) : null;
+      return timestamp != null ? DateTime.parse(timestamp as String) : null;
     } catch (e) {
       return null; // Return null if unable to parse or retrieve
     }
@@ -557,11 +572,12 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       await _metadataBox!.put('last_sync_time', timestamp.toIso8601String());
     } catch (e) {
-      throw WeatherLocalStorageFailure('setLastSyncTime', e.toString());
+      throw Exception('setLastSyncTime failed: ${e.toString()}');
     }
   }
 
   /// Search measurements with advanced filtering
+  @override
   Future<List<WeatherMeasurementModel>> searchMeasurements({
     String? locationId,
     DateTime? fromDate,
@@ -608,11 +624,12 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       
       return measurements;
     } catch (e) {
-      throw WeatherLocalStorageFailure('searchMeasurements', e.toString());
+      throw Exception('searchMeasurements failed: ${e.toString()}');
     }
   }
 
   /// Get measurements that need to be synced (pending upload)
+  @override
   Future<List<WeatherMeasurementModel>> getPendingMeasurements() async {
     try {
       await _ensureInitialized();
@@ -622,11 +639,12 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
           .where((m) => m.source.startsWith('manual') || m.source.startsWith('sensor'))
           .toList();
     } catch (e) {
-      throw WeatherLocalStorageFailure('getPendingMeasurements', e.toString());
+      throw Exception('getPendingMeasurements failed: ${e.toString()}');
     }
   }
 
   /// Mark measurements as synced
+  @override
   Future<void> markMeasurementsAsSynced(List<String> ids) async {
     try {
       await _ensureInitialized();
@@ -642,7 +660,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
         }
       }
     } catch (e) {
-      throw WeatherLocalStorageFailure('markMeasurementsAsSynced', e.toString());
+      throw Exception('markMeasurementsAsSynced failed: ${e.toString()}');
     }
   }
 
@@ -660,7 +678,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _measurementsBox!.deleteAll(oldMeasurements);
       return oldMeasurements.length;
     } catch (e) {
-      throw WeatherLocalStorageFailure('cleanOldMeasurements', e.toString());
+      throw Exception('cleanOldMeasurements failed: ${e.toString()}');
     }
   }
 

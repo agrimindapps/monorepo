@@ -11,13 +11,13 @@ class ConnectivityIndicator extends StatelessWidget {
   final ConnectivityIndicatorStyle style;
 
   const ConnectivityIndicator({
-    Key? key,
+    super.key,
     required this.connectivityService,
     this.child,
     this.showWhenOnline = false,
     this.margin,
     this.style = const ConnectivityIndicatorStyle(),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +114,10 @@ class AppBarConnectivityIndicator extends StatelessWidget implements PreferredSi
   final PreferredSizeWidget appBar;
 
   const AppBarConnectivityIndicator({
-    Key? key,
+    super.key,
     required this.connectivityService,
     required this.appBar,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,9 +141,9 @@ class ConnectivityBanner extends StatelessWidget {
   final IConnectivityService connectivityService;
 
   const ConnectivityBanner({
-    Key? key,
+    super.key,
     required this.connectivityService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -212,11 +212,11 @@ class FloatingConnectivityIndicator extends StatelessWidget {
   final EdgeInsetsGeometry margin;
 
   const FloatingConnectivityIndicator({
-    Key? key,
+    super.key,
     required this.connectivityService,
     this.alignment = Alignment.bottomLeft,
     this.margin = const EdgeInsets.all(16.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

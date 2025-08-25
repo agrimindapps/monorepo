@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/bovine_entity.dart';
-import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/create_bovine.dart';
-import '../../domain/usecases/update_bovine.dart';
 import '../../domain/usecases/delete_bovine.dart';
+import '../../domain/usecases/get_bovines.dart';
+import '../../domain/usecases/update_bovine.dart';
 
 /// Provider especializado para operações de bovinos
 /// 
@@ -244,6 +244,29 @@ class BovinesProvider extends ChangeNotifier {
       debugPrint('BovinesProvider: Bovino não encontrado - $id');
       return null;
     }
+  }
+
+  /// Carrega um bovino específico por ID e o define como selecionado
+  Future<bool> loadBovineById(String id) async {
+    // Primeiro tenta buscar localmente
+    final localBovine = getBovineById(id);
+    if (localBovine != null) {
+      _selectedBovine = localBovine;
+      notifyListeners();
+      return true;
+    }
+    
+    // Se não encontrou localmente, recarrega todos os bovinos
+    await loadBovines();
+    final bovine = getBovineById(id);
+    
+    if (bovine != null) {
+      _selectedBovine = bovine;
+      notifyListeners();
+      return true;
+    }
+    
+    return false;
   }
 
   /// Busca bovinos por raça

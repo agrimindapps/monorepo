@@ -1,6 +1,6 @@
+import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../entities/odometer_entity.dart';
 import 'odometer_formatter.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
 /// Centralized validation service for odometer form fields
 ///
@@ -80,7 +80,7 @@ class OdometerValidator {
   ) {
     // Basic validation first
     if (odometerValue < minOdometer) {
-      return OdometerValidationResult(
+      return const OdometerValidationResult(
         isValid: false,
         errorMessage: 'O valor não pode ser negativo',
       );
@@ -101,7 +101,7 @@ class OdometerValidator {
       );
     }
 
-    return OdometerValidationResult(isValid: true);
+    return const OdometerValidationResult(isValid: true);
   }
 
   /// Validates registration type

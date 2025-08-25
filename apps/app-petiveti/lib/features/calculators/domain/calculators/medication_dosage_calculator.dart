@@ -1,5 +1,5 @@
-import '../entities/calculator.dart';
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/input_field.dart';
 
 /// Calculadora de Dosagem de Medicamentos
@@ -30,9 +30,9 @@ class MedicationDosageCalculator extends Calculator {
   @override
   List<InputField> get inputFields => [
     const InputField(
-      id: 'weight',
+      key: 'weight',
       label: 'Peso do Animal',
-      description: 'Peso atual do animal em quilogramas',
+      helperText: 'Peso atual do animal em quilogramas',
       type: InputFieldType.number,
       unit: 'kg',
       isRequired: true,
@@ -40,9 +40,9 @@ class MedicationDosageCalculator extends Calculator {
       maxValue: 100.0,
     ),
     const InputField(
-      id: 'medication',
+      key: 'medication',
       label: 'Medicamento',
-      description: 'Selecione o medicamento',
+      helperText: 'Selecione o medicamento',
       type: InputFieldType.dropdown,
       options: [
         'Amoxicilina',
@@ -59,17 +59,17 @@ class MedicationDosageCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'species',
+      key: 'species',
       label: 'Espécie',
-      description: 'Tipo de animal',
+      helperText: 'Tipo de animal',
       type: InputFieldType.dropdown,
       options: ['Cão', 'Gato'],
       isRequired: true,
     ),
     const InputField(
-      id: 'frequency',
+      key: 'frequency',
       label: 'Frequência',
-      description: 'Quantas vezes ao dia',
+      helperText: 'Quantas vezes ao dia',
       type: InputFieldType.dropdown,
       options: ['1x/dia', '2x/dia', '3x/dia', '4x/dia'],
       isRequired: true,
@@ -99,21 +99,43 @@ class MedicationDosageCalculator extends Calculator {
     final frequencyNumber = _getFrequencyNumber(frequency);
     final dosePerAdministration = totalDose / frequencyNumber;
 
-    final results = {
-      'total_daily_dose': totalDose,
-      'dose_per_administration': dosePerAdministration,
-      'unit': unit,
-      'frequency': frequency,
-      'frequency_number': frequencyNumber,
-      'warnings': warnings,
-    };
+    // Criar ResultItems
+    final resultItems = [
+      ResultItem(
+        label: 'Dose por Administração',
+        value: dosePerAdministration.toStringAsFixed(1),
+        unit: unit,
+      ),
+      ResultItem(
+        label: 'Dose Total Diária',
+        value: totalDose.toStringAsFixed(1),
+        unit: unit,
+      ),
+      ResultItem(
+        label: 'Frequência',
+        value: frequency,
+      ),
+    ];
 
-    return CalculationResult(
+    // Criar Recomendações
+    final recommendations = warnings.map((warning) => Recommendation(
+      title: 'Atenção',
+      message: warning,
+      severity: ResultSeverity.warning,
+    )).toList();
+
+    return _MedicationDosageResult(
       calculatorId: id,
-      timestamp: DateTime.now(),
-      inputs: inputs,
-      results: results,
+      results: resultItems,
+      recommendations: recommendations,
       summary: 'Dose: ${dosePerAdministration.toStringAsFixed(1)} $unit por administração ($frequency)',
+      calculatedAt: DateTime.now(),
+      totalDailyDose: totalDose,
+      dosePerAdministration: dosePerAdministration,
+      unit: unit,
+      frequency: frequency,
+      frequencyNumber: frequencyNumber,
+      warnings: warnings,
     );
   }
 
@@ -128,7 +150,7 @@ class MedicationDosageCalculator extends Calculator {
 
     // Validar campos obrigatórios
     for (final field in inputFields) {
-      if (field.isRequired && !inputs.containsKey(field.id)) {
+      if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
@@ -211,4 +233,38 @@ class MedicationDosageCalculator extends Calculator {
       default: return 1;
     }
   }
+}
+
+class _MedicationDosageResult extends CalculationResult {
+  final double totalDailyDose;
+  final double dosePerAdministration;
+  final String unit;
+  final String frequency;
+  final int frequencyNumber;
+  final List<String> warnings;
+
+  const _MedicationDosageResult({
+    required this.totalDailyDose,
+    required this.dosePerAdministration,
+    required this.unit,
+    required this.frequency,
+    required this.frequencyNumber,
+    required this.warnings,
+    required super.calculatorId,
+    required super.results,
+    super.recommendations = const [],
+    super.summary,
+    super.calculatedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+        totalDailyDose,
+        dosePerAdministration,
+        unit,
+        frequency,
+        frequencyNumber,
+        warnings,
+        ...super.props,
+      ];
 }

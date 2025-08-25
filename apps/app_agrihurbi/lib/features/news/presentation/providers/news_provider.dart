@@ -1,10 +1,10 @@
+import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
+import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
+import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
+import 'package:app_agrihurbi/features/news/domain/usecases/get_commodity_prices.dart';
+import 'package:app_agrihurbi/features/news/domain/usecases/get_news.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
-import 'package:app_agrihurbi/features/news/domain/usecases/get_news.dart';
-import 'package:app_agrihurbi/features/news/domain/usecases/get_commodity_prices.dart';
-import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
 
 /// News Provider for State Management
 /// 
@@ -510,8 +510,4 @@ class NewsProvider with ChangeNotifier {
     _errorMessage = null;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

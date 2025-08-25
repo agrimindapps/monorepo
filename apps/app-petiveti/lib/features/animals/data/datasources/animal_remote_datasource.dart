@@ -1,6 +1,5 @@
-import '../../domain/entities/animal.dart';
-import '../../../../core/network/firebase_service.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/firebase_service.dart';
 import '../models/animal_model.dart';
 
 abstract class AnimalRemoteDataSource {
@@ -29,7 +28,7 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
           WhereCondition('userId', isEqualTo: userId),
         ],
         orderBy: [
-          OrderByCondition('name'),
+          const OrderByCondition('name'),
         ],
         fromMap: AnimalModel.fromMap,
       );
@@ -126,7 +125,7 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
           WhereCondition('userId', isEqualTo: userId),
         ],
         orderBy: [
-          OrderByCondition('name'),
+          const OrderByCondition('name'),
         ],
         fromMap: AnimalModel.fromMap,
       );

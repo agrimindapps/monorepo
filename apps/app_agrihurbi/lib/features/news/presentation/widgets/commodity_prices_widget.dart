@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
+import 'package:flutter/material.dart';
 
 /// Commodity Prices Widget
 /// 

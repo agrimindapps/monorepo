@@ -1,7 +1,7 @@
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculator_parameter.dart';
 import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
+import '../../domain/entities/calculator_parameter.dart';
 
 /// Model para serialização de calculadoras (futuro uso com APIs)
 /// 

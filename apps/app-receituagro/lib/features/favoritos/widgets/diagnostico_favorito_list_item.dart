@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/favorito_diagnostico_model.dart';
+
 import '../constants/favoritos_design_tokens.dart';
+import '../models/favorito_diagnostico_model.dart';
 
 class DiagnosticoFavoritoListItem extends StatelessWidget {
   final FavoritoDiagnosticoModel diagnostico;
@@ -48,7 +49,7 @@ class DiagnosticoFavoritoListItem extends StatelessWidget {
                     color: FavoritosDesignTokens.diagnosticosColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     FavoritosDesignTokens.diagnosticosIcon,
                     color: FavoritosDesignTokens.diagnosticosColor,
                     size: 24,

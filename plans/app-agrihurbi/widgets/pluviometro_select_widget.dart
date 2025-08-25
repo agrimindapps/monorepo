@@ -122,7 +122,7 @@ class _PluvioSelectState extends State<PluvioSelect> {
   Widget _buildErrorState() {
     return SizedBox(
       height: 52,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.red[50],
           borderRadius: BorderRadius.circular(8),
@@ -149,7 +149,7 @@ class _PluvioSelectState extends State<PluvioSelect> {
   Widget _buildEmptyState() {
     return SizedBox(
       height: 52,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.grey[100],
           borderRadius: BorderRadius.circular(8),

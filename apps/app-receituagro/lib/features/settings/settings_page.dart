@@ -1,12 +1,13 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
+
 import '../../core/di/injection_container.dart' as di;
-import '../../core/widgets/modern_header_widget.dart';
-import '../../core/providers/preferences_provider.dart';
-import '../subscription/subscription_page.dart';
-import '../../core/services/receituagro_notification_service.dart';
 import '../../core/interfaces/i_premium_service.dart';
+import '../../core/providers/preferences_provider.dart';
+import '../../core/services/receituagro_notification_service.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import '../subscription/subscription_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -27,7 +28,7 @@ class SettingsPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 children: [
                   // App Info Card
-                  Container(
+                  DecoratedBox(
             decoration: BoxDecoration(
               color: theme.scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
@@ -118,7 +119,7 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   
                   // Notifications Card
-                  Container(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       color: theme.scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
@@ -214,7 +215,7 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 12),
           
           // Support Card
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: theme.scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
@@ -317,7 +318,7 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 12),
             
             // Development Card
-            Container(
+            DecoratedBox(
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(12),
@@ -478,7 +479,7 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 12),
           
           // About App
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: theme.scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
@@ -1137,7 +1138,7 @@ class SettingsPage extends StatelessWidget {
   Widget _buildActivePremiumCard(BuildContext context, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(16),
@@ -1291,7 +1292,7 @@ class SettingsPage extends StatelessWidget {
   Widget _buildPremiumSubscriptionCard(BuildContext context, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(16),

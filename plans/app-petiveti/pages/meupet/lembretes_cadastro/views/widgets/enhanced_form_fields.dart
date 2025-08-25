@@ -311,7 +311,7 @@ class EnhancedLembreteFormFields extends StatelessWidget {
   }
 
   Future<void> _selectDate(void Function(DateTime) onDateSelected) async {
-    final context = Get.context!;
+    final context = Get.context;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -324,7 +324,7 @@ class EnhancedLembreteFormFields extends StatelessWidget {
   }
 
   Future<void> _selectTime(void Function(TimeOfDay) onTimeSelected) async {
-    final context = Get.context!;
+    final context = Get.context;
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),

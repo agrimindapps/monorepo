@@ -21,7 +21,7 @@ class AddAnimal extends UseCase<void, Animal> {
       return const Left(ValidationFailure(message: 'Espécie é obrigatória'));
     }
     
-    if (params.currentWeight <= 0) {
+    if (params.weight != null && params.weight! <= 0) {
       return const Left(ValidationFailure(message: 'Peso deve ser maior que zero'));
     }
 

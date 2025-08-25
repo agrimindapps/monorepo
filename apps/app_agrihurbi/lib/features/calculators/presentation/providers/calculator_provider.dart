@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculation_history.dart';
-import '../../domain/usecases/get_calculators.dart';
+import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/execute_calculation.dart';
+import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/manage_favorites.dart';
 import '../../domain/usecases/save_calculation_to_history.dart';
@@ -369,7 +369,7 @@ class CalculatorProvider extends ChangeNotifier {
         debugPrint('CalculatorProvider: Erro ao carregar favoritos - ${failure.message}');
       },
       (favorites) {
-        _favoriteCalculatorIds = favorites;
+        _favoriteCalculatorIds = favorites is List ? List<String>.from(favorites) : <String>[];
         debugPrint('CalculatorProvider: Favoritos carregados - ${favorites.length} itens');
       },
     );

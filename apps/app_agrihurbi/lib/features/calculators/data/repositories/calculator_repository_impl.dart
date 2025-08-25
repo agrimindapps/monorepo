@@ -1,16 +1,14 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
-import 'package:get_it/get_it.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculation_history.dart';
+import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/repositories/calculator_repository.dart';
 import '../datasources/calculator_local_datasource.dart';
-import '../../../core/error/failures.dart';
 
 /// Implementação do repositório de calculadoras
 /// 
@@ -22,10 +20,10 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
   final FirebaseAnalyticsService _analyticsService;
   final HiveStorageService _hiveStorageService;
 
-  const CalculatorRepositoryImpl(
+  CalculatorRepositoryImpl(
     this._localDataSource,
-  ) : _analyticsService = const FirebaseAnalyticsService(),
-      _hiveStorageService = const HiveStorageService();
+  ) : _analyticsService = FirebaseAnalyticsService(),
+      _hiveStorageService = HiveStorageService();
 
   @override
   Future<Either<Failure, List<CalculatorEntity>>> getAllCalculators() async {
@@ -281,7 +279,7 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     int durationMs,
   ) async {
     try {
-      final metricKey = 'performance_${operation}_${calculatorId}';
+      final metricKey = 'performance_${operation}_$calculatorId';
       final metric = {
         'operation': operation,
         'calculator_id': calculatorId,
@@ -290,9 +288,9 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
       };
       
       await _hiveStorageService.put(
-        boxName: 'performance_metrics',
+        box: 'performance_metrics',
         key: metricKey,
-        value: metric,
+        data: metric,
       );
     } catch (e) {
       // Silent fail for performance metrics to not affect main functionality

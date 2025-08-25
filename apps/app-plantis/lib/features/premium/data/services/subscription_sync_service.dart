@@ -104,26 +104,26 @@ class SubscriptionSyncService {
       if (data['isActive'] != true) return null;
 
       return SubscriptionEntity(
-        id: data['productId'] ?? '',
-        userId: data['userId'] ?? '',
-        productId: data['productId'] ?? '',
-        status: _parseSubscriptionStatus(data['status']),
-        tier: _parseSubscriptionTier(data['tier']),
+        id: (data['productId'] as String?) ?? '',
+        userId: (data['userId'] as String?) ?? '',
+        productId: (data['productId'] as String?) ?? '',
+        status: _parseSubscriptionStatus(data['status'] as String?),
+        tier: _parseSubscriptionTier(data['tier'] as String?),
         expirationDate:
             data['expirationDate'] != null
-                ? DateTime.parse(data['expirationDate'])
+                ? DateTime.parse(data['expirationDate'] as String)
                 : null,
         purchaseDate:
             data['purchaseDate'] != null
-                ? DateTime.parse(data['purchaseDate'])
+                ? DateTime.parse(data['purchaseDate'] as String)
                 : null,
         originalPurchaseDate:
             data['originalPurchaseDate'] != null
-                ? DateTime.parse(data['originalPurchaseDate'])
+                ? DateTime.parse(data['originalPurchaseDate'] as String)
                 : null,
-        store: _parseStore(data['store']),
-        isInTrial: data['isInTrial'] ?? false,
-        isSandbox: data['isSandbox'] ?? false,
+        store: _parseStore(data['store'] as String?),
+        isInTrial: (data['isInTrial'] as bool?) ?? false,
+        isSandbox: (data['isSandbox'] as bool?) ?? false,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -153,26 +153,26 @@ class SubscriptionSyncService {
             if (data['isActive'] != true) return null;
 
             return SubscriptionEntity(
-              id: data['productId'] ?? '',
-              userId: data['userId'] ?? '',
-              productId: data['productId'] ?? '',
-              status: _parseSubscriptionStatus(data['status']),
-              tier: _parseSubscriptionTier(data['tier']),
+              id: (data['productId'] as String?) ?? '',
+              userId: (data['userId'] as String?) ?? '',
+              productId: (data['productId'] as String?) ?? '',
+              status: _parseSubscriptionStatus(data['status'] as String?),
+              tier: _parseSubscriptionTier(data['tier'] as String?),
               expirationDate:
                   data['expirationDate'] != null
-                      ? DateTime.parse(data['expirationDate'])
+                      ? DateTime.parse(data['expirationDate'] as String)
                       : null,
               purchaseDate:
                   data['purchaseDate'] != null
-                      ? DateTime.parse(data['purchaseDate'])
+                      ? DateTime.parse(data['purchaseDate'] as String)
                       : null,
               originalPurchaseDate:
                   data['originalPurchaseDate'] != null
-                      ? DateTime.parse(data['originalPurchaseDate'])
+                      ? DateTime.parse(data['originalPurchaseDate'] as String)
                       : null,
-              store: _parseStore(data['store']),
-              isInTrial: data['isInTrial'] ?? false,
-              isSandbox: data['isSandbox'] ?? false,
+              store: _parseStore(data['store'] as String?),
+              isInTrial: (data['isInTrial'] as bool?) ?? false,
+              isSandbox: (data['isSandbox'] as bool?) ?? false,
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             );

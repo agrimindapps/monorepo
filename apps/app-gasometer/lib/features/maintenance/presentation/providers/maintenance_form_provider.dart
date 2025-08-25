@@ -1,12 +1,14 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/maintenance_form_model.dart';
+
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../core/constants/maintenance_constants.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_formatter_service.dart';
 import '../../domain/services/maintenance_validator_service.dart';
-import '../../core/constants/maintenance_constants.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../models/maintenance_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de manutenção
 class MaintenanceFormProvider extends ChangeNotifier {
@@ -188,7 +190,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   void _onTitleChanged() {
     _titleDebounceTimer?.cancel();
     _titleDebounceTimer = Timer(
-      Duration(milliseconds: MaintenanceConstants.titleDebounceMs),
+      const Duration(milliseconds: MaintenanceConstants.titleDebounceMs),
       () {
         final sanitized = _formatter.sanitizeInput(titleController.text);
         _updateTitle(sanitized);
@@ -207,7 +209,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   void _onDescriptionChanged() {
     _descriptionDebounceTimer?.cancel();
     _descriptionDebounceTimer = Timer(
-      Duration(milliseconds: MaintenanceConstants.descriptionDebounceMs),
+      const Duration(milliseconds: MaintenanceConstants.descriptionDebounceMs),
       () {
         final sanitized = _formatter.sanitizeInput(descriptionController.text);
         _updateDescription(sanitized);
@@ -218,7 +220,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   void _onCostChanged() {
     _costDebounceTimer?.cancel();
     _costDebounceTimer = Timer(
-      Duration(milliseconds: MaintenanceConstants.costDebounceMs),
+      const Duration(milliseconds: MaintenanceConstants.costDebounceMs),
       () {
         final value = _formatter.parseFormattedAmount(costController.text);
         _updateCost(value);
@@ -229,7 +231,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   void _onOdometerChanged() {
     _odometerDebounceTimer?.cancel();
     _odometerDebounceTimer = Timer(
-      Duration(milliseconds: MaintenanceConstants.odometerDebounceMs),
+      const Duration(milliseconds: MaintenanceConstants.odometerDebounceMs),
       () {
         final value = _formatter.parseFormattedOdometer(odometerController.text);
         _updateOdometer(value);

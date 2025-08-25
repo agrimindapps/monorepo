@@ -1,14 +1,16 @@
 import 'dart:developer' as developer;
+
 import 'package:dartz/dartz.dart';
-import 'asset_loader_service.dart';
-import 'version_manager_service.dart';
+
 import '../repositories/cultura_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
+import 'asset_loader_service.dart';
+import 'version_manager_service.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
 /// Orquestra o carregamento de JSONs e populacião das Hive boxes
@@ -105,7 +107,7 @@ class DataInitializationService {
       
       // Salva no repositório
       final saveResult = await category.repository.loadFromJson(jsonData, currentVersion);
-      if (saveResult.isLeft()) {
+      if (saveResult.isLeft() as bool) {
         return Left(Exception('Erro ao salvar dados de ${category.name}: ${saveResult.fold((e) => e.toString(), (r) => '')}'));
       }
       

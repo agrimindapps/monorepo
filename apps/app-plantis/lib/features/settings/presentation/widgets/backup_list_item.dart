@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/plantis_colors.dart';
+
 import '../../../../core/data/models/backup_model.dart';
+import '../../../../core/theme/plantis_colors.dart';
 
 /// Widget que representa um item da lista de backups
 class BackupListItem extends StatelessWidget {
@@ -35,7 +36,7 @@ class BackupListItem extends StatelessWidget {
                     color: PlantisColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.cloud,
                     color: PlantisColors.primary,
                     size: 20,
@@ -77,7 +78,7 @@ class BackupListItem extends StatelessWidget {
                     }
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'restore',
                       child: Row(
                         children: [
@@ -86,8 +87,8 @@ class BackupListItem extends StatelessWidget {
                             color: PlantisColors.leaf,
                             size: 18,
                           ),
-                          const SizedBox(width: 8),
-                          const Text('Restaurar'),
+                          SizedBox(width: 8),
+                          Text('Restaurar'),
                         ],
                       ),
                     ),
@@ -151,7 +152,7 @@ class BackupListItem extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onRestore,
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.restore,
                       size: 16,
                       color: PlantisColors.leaf,
@@ -159,7 +160,7 @@ class BackupListItem extends StatelessWidget {
                     label: const Text('Restaurar'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: PlantisColors.leaf,
-                      side: BorderSide(color: PlantisColors.leaf),
+                      side: const BorderSide(color: PlantisColors.leaf),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
@@ -172,7 +173,7 @@ class BackupListItem extends StatelessWidget {
                     side: BorderSide(color: theme.colorScheme.error),
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.delete,
                     size: 16,
                   ),

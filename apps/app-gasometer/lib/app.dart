@@ -1,15 +1,15 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
 
-import 'core/theme/gasometer_theme.dart';
-import 'core/router/app_router.dart';
 import 'core/di/injection_container.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
-import 'features/premium/presentation/providers/premium_provider.dart';
-import 'features/vehicles/presentation/providers/vehicles_provider.dart';
 import 'features/fuel/presentation/providers/fuel_provider.dart';
 import 'features/maintenance/presentation/providers/maintenance_provider.dart';
+import 'features/premium/presentation/providers/premium_provider.dart';
+import 'features/vehicles/presentation/providers/vehicles_provider.dart';
 
 class GasOMeterApp extends StatelessWidget {
   const GasOMeterApp({super.key});

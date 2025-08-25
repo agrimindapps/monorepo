@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/bovine_entity.dart';
-import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/create_bovine.dart';
-import '../../domain/usecases/update_bovine.dart';
 import '../../domain/usecases/delete_bovine.dart';
+import '../../domain/usecases/get_bovines.dart';
+import '../../domain/usecases/update_bovine.dart';
 
 /// Provider especializado para gerenciamento de bovinos
 /// 

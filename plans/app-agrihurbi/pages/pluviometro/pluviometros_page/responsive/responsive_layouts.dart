@@ -68,7 +68,7 @@ class ResponsivePluviometrosLayout extends StatelessWidget {
               Container(
                 padding:
                     EdgeInsets.symmetric(horizontal: info.horizontalPadding),
-                child: bottomBar!,
+                child: bottomBar,
               ),
           ],
         ),
@@ -115,7 +115,7 @@ class ResponsivePluviometrosLayout extends StatelessWidget {
         if (bottomBar != null)
           Container(
             padding: EdgeInsets.symmetric(horizontal: info.horizontalPadding),
-            child: bottomBar!,
+            child: bottomBar,
           ),
       ],
     );
@@ -182,7 +182,7 @@ class ResponsivePluviometrosLayout extends StatelessWidget {
                 if (bottomBar != null)
                   Padding(
                     padding: const EdgeInsets.all(16),
-                    child: bottomBar!,
+                    child: bottomBar,
                   ),
               ],
             ),

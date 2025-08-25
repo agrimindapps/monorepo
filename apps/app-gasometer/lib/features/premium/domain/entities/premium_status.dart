@@ -1,5 +1,6 @@
-import 'package:equatable/equatable.dart';
 import 'package:core/core.dart' as core;
+import 'package:equatable/equatable.dart';
+
 import 'premium_features.dart';
 
 /// Status premium específico do GasOMeter

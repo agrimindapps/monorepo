@@ -48,7 +48,7 @@ class LoadingStateWidget extends StatelessWidget {
   }
 
   Widget _buildLoadingOverlay(BuildContext context, LoadingState state) {
-    return Container(
+    return ColoredBox(
       color: Colors.black.withValues(alpha: 0.3),
       child: Center(
         child: Card(

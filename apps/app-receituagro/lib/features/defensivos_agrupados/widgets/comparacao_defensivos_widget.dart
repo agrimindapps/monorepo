@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/diagnostico_integration_service.dart';
+
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget especializado para comparar múltiplos defensivos
 /// Mostra uma tabela comparativa side-by-side
@@ -18,7 +19,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
@@ -352,7 +353,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  criterio['titulo'],
+                  criterio['titulo'] as String,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -368,7 +369,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
               children: (criterio['items'] as List).map<Widget>((item) {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  child: _buildLinhaComparativa(theme, item),
+                  child: _buildLinhaComparativa(theme, item as Map<String, dynamic>),
                 );
               }).toList(),
             ),
@@ -385,7 +386,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          item['label'],
+          item['label'] as String,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

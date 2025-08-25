@@ -1,15 +1,15 @@
-import 'package:dartz/dartz.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../../domain/entities/weather_measurement_entity.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../domain/entities/rain_gauge_entity.dart';
+import '../../domain/entities/weather_measurement_entity.dart';
 import '../../domain/entities/weather_statistics_entity.dart';
 import '../../domain/failures/weather_failures.dart';
 import '../../domain/repositories/weather_repository.dart';
 import '../datasources/weather_local_datasource.dart';
 import '../datasources/weather_remote_datasource.dart';
-import '../models/weather_measurement_model.dart';
 import '../models/rain_gauge_model.dart';
-import '../models/weather_statistics_model.dart';
+import '../models/weather_measurement_model.dart';
 
 /// Implementation of weather repository following Clean Architecture
 /// Implements offline-first strategy with automatic sync when online
@@ -141,7 +141,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
         }
       }
 
-      return Left(WeatherMeasurementFetchFailure('No measurements available offline'));
+      return const Left(WeatherMeasurementFetchFailure('No measurements available offline'));
     } catch (e) {
       return Left(WeatherMeasurementFetchFailure(e.toString()));
     }
@@ -637,7 +637,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
         }
       }
 
-      return Left(WeatherStatisticsFailure('Statistics not available offline'));
+      return const Left(WeatherStatisticsFailure('Statistics not available offline'));
     } catch (e) {
       return Left(WeatherStatisticsFailure(e.toString()));
     }
@@ -692,7 +692,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
       }
     }
 
-    return Left(WeatherStatisticsFailure('Statistics calculation not available offline'));
+    return const Left(WeatherStatisticsFailure('Statistics calculation not available offline'));
   }
 
   @override
@@ -715,7 +715,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
         (failure) => Left(failure),
         (measurementList) {
           if (measurementList.isEmpty) {
-            return Left(InsufficientWeatherDataFailure('trends', 0, 30));
+            return const Left(InsufficientWeatherDataFailure('trends', 0, 30));
           }
 
           // Calculate simple trends
@@ -788,7 +788,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   ) async {
     try {
       if (!(await _isOnline)) {
-        return Left(WeatherNetworkFailure('No internet connection'));
+        return const Left(WeatherNetworkFailure('No internet connection'));
       }
 
       final remoteMeasurement = await _remoteDataSource.getCurrentWeatherFromAPI(
@@ -814,7 +814,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }) async {
     try {
       if (!(await _isOnline)) {
-        return Left(WeatherNetworkFailure('No internet connection'));
+        return const Left(WeatherNetworkFailure('No internet connection'));
       }
 
       final remoteForecast = await _remoteDataSource.getWeatherForecast(
@@ -837,7 +837,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Either<WeatherFailure, int>> syncWeatherData() async {
     try {
       if (!(await _isOnline)) {
-        return Left(WeatherNetworkFailure('No internet connection for sync'));
+        return const Left(WeatherNetworkFailure('No internet connection for sync'));
       }
 
       int syncedCount = 0;
@@ -869,7 +869,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Either<WeatherFailure, int>> uploadPendingMeasurements() async {
     try {
       if (!(await _isOnline)) {
-        return Left(WeatherNetworkFailure('No internet connection'));
+        return const Left(WeatherNetworkFailure('No internet connection'));
       }
 
       final pendingMeasurements = await _localDataSource.getPendingMeasurements();
@@ -893,7 +893,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Either<WeatherFailure, int>> downloadWeatherUpdates({DateTime? since}) async {
     try {
       if (!(await _isOnline)) {
-        return Left(WeatherNetworkFailure('No internet connection'));
+        return const Left(WeatherNetworkFailure('No internet connection'));
       }
 
       final lastSync = since ?? await _localDataSource.getLastSyncTime();
@@ -956,7 +956,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
             'location_id': locationId,
             'total_measurements': measurementList.length,
             'period_days': endDate.difference(startDate).inDays,
-            'data_completeness': measurementList.length > 0 ? 1.0 : 0.0,
+            'data_completeness': measurementList.isNotEmpty ? 1.0 : 0.0,
             'quality_score': 0.9, // Simplified
             'issues': <String>[],
           };
@@ -1070,17 +1070,17 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Stream<WeatherMeasurementEntity> subscribeToWeatherUpdates(String? locationId) {
     // Implementation would use StreamController for real-time updates
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   @override
   Stream<RainGaugeEntity> subscribeToRainGaugeUpdates(String? gaugeId) {
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   @override
   Stream<Map<String, dynamic>> subscribeToWeatherAlerts() {
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   @override

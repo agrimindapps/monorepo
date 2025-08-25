@@ -1,12 +1,11 @@
-import 'package:injectable/injectable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../data/models/base_sync_model.dart';
 import '../interfaces/i_conflict_resolver.dart';
 import '../models/conflict_data.dart';
 import '../strategies/conflict_resolution_strategy.dart';
 
-@injectable
 class ConflictResolver<T extends BaseSyncModel> implements IConflictResolver<T> {
   
   @override

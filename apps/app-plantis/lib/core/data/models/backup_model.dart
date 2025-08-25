@@ -121,7 +121,7 @@ class BackupMetadata {
       spacesCount: json['spacesCount'] as int,
       appVersion: json['appVersion'] as String,
       platform: json['platform'] as String,
-      additionalInfo: Map<String, dynamic>.from(json['additionalInfo'] ?? {}),
+      additionalInfo: Map<String, dynamic>.from((json['additionalInfo'] as Map<dynamic, dynamic>?) ?? {}),
     );
   }
 
@@ -161,11 +161,11 @@ class BackupData {
 
   factory BackupData.fromJson(Map<String, dynamic> json) {
     return BackupData(
-      plants: List<Map<String, dynamic>>.from(json['plants'] ?? []),
-      tasks: List<Map<String, dynamic>>.from(json['tasks'] ?? []),
-      spaces: List<Map<String, dynamic>>.from(json['spaces'] ?? []),
-      settings: Map<String, dynamic>.from(json['settings'] ?? {}),
-      userPreferences: Map<String, dynamic>.from(json['userPreferences'] ?? {}),
+      plants: List<Map<String, dynamic>>.from((json['plants'] as Iterable<dynamic>?) ?? []),
+      tasks: List<Map<String, dynamic>>.from((json['tasks'] as Iterable<dynamic>?) ?? []),
+      spaces: List<Map<String, dynamic>>.from((json['spaces'] as Iterable<dynamic>?) ?? []),
+      settings: Map<String, dynamic>.from((json['settings'] as Map<dynamic, dynamic>?) ?? {}),
+      userPreferences: Map<String, dynamic>.from((json['userPreferences'] as Map<dynamic, dynamic>?) ?? {}),
     );
   }
 

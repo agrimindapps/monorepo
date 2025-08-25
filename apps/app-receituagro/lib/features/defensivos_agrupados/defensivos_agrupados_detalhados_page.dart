@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../core/widgets/modern_header_widget.dart';
-import '../../core/services/diagnostico_integration_service.dart';
-import '../../core/extensions/diagnostico_detalhado_extension.dart';
+
 import '../../core/di/injection_container.dart';
+import '../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../core/services/diagnostico_integration_service.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import 'widgets/comparacao_defensivos_widget.dart';
 import 'widgets/defensivo_completo_card_widget.dart';
 import 'widgets/filtros_defensivos_widget.dart';
-import 'widgets/comparacao_defensivos_widget.dart';
 
 /// Página que mostra defensivos com informações completas
 /// Integra dados de FitossanitarioHive + FitossanitarioInfoHive + DiagnosticoHive

@@ -226,7 +226,7 @@ class InfoDialog extends StatelessWidget {
     final alternateRowColor =
         isDark ? const Color(0xFF242424) : const Color(0xFFF8F9FA);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(8),
@@ -300,7 +300,7 @@ class InfoDialog extends StatelessWidget {
     Color textColor,
     Color bgColor,
   ) {
-    return Container(
+    return ColoredBox(
       color: bgColor,
       child: Row(
         children: [

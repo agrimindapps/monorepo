@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/subscription_providers.dart';
+
 import '../pages/premium_page.dart';
+import '../providers/subscription_providers.dart';
 
 /// Widget que controla acesso a features premium
 class PremiumGate extends ConsumerWidget {
@@ -165,7 +166,7 @@ class CreationLimitGate extends ConsumerWidget {
           children: [
             child,
             Positioned.fill(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.black.withAlpha(77),
                   borderRadius: BorderRadius.circular(8),

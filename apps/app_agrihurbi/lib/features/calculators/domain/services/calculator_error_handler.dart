@@ -172,7 +172,7 @@ class CalculatorErrorHandler {
         actions.add(RecoveryAction(
           type: RecoveryActionType.validateInput,
           description: 'Corrigir o valor inserido',
-          parameterId: error.details['parameter_id'],
+          parameterId: error.details['parameter_id'] as String?,
         ));
         break;
 
@@ -180,52 +180,52 @@ class CalculatorErrorHandler {
         actions.add(RecoveryAction(
           type: RecoveryActionType.provideInput,
           description: 'Preencher campo obrigatório',
-          parameterId: error.details['parameter_id'],
+          parameterId: error.details['parameter_id'] as String?,
         ));
         break;
 
       case CalculatorErrorCode.conversionError:
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.selectDifferentUnit,
           description: 'Selecionar unidade compatível',
         ));
         break;
 
       case CalculatorErrorCode.mathematicalError:
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.validateInput,
           description: 'Verificar valores numéricos',
         ));
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.useDefaultValues,
           description: 'Usar valores padrão',
         ));
         break;
 
       case CalculatorErrorCode.configurationError:
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.contactSupport,
           description: 'Entrar em contato com suporte',
         ));
         break;
 
       case CalculatorErrorCode.networkError:
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.retry,
           description: 'Tentar novamente',
         ));
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.useOfflineMode,
           description: 'Usar modo offline',
         ));
         break;
 
       case CalculatorErrorCode.unknownError:
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.retry,
           description: 'Tentar novamente',
         ));
-        actions.add(RecoveryAction(
+        actions.add(const RecoveryAction(
           type: RecoveryActionType.reportIssue,
           description: 'Reportar problema',
         ));
@@ -260,7 +260,7 @@ class CalculatorErrorHandler {
     if (exception is RangeError) {
       return CalculatorError(
         code: CalculatorErrorCode.validationError,
-        message: 'Valor fora do range válido: ${exception.message}',
+        message: 'Valor fora do range válido: ${exception.toString()}',
         userMessage: 'Valor fora dos limites permitidos',
         details: {
           'calculator_id': calculatorId,
@@ -275,7 +275,7 @@ class CalculatorErrorHandler {
     if (exception is UnsupportedError) {
       return CalculatorError(
         code: CalculatorErrorCode.configurationError,
-        message: 'Operação não suportada: ${exception.message}',
+        message: 'Operação não suportada: ${exception.toString()}',
         userMessage: 'Operação não disponível',
         details: {
           'calculator_id': calculatorId,
@@ -289,7 +289,7 @@ class CalculatorErrorHandler {
     if (exception is ArgumentError) {
       return CalculatorError(
         code: CalculatorErrorCode.validationError,
-        message: 'Argumento inválido: ${exception.message}',
+        message: 'Argumento inválido: ${exception.toString()}',
         userMessage: 'Dados de entrada inválidos',
         details: {
           'calculator_id': calculatorId,

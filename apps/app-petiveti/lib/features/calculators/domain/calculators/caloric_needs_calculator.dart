@@ -1,7 +1,8 @@
-import '../entities/calculator.dart';
-import '../entities/calculation_result.dart';
-import '../entities/input_field.dart';
 import 'dart:math';
+
+import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
+import '../entities/input_field.dart';
 
 /// Calculadora de Necessidades Calóricas
 /// Calcula as necessidades energéticas diárias do animal
@@ -31,9 +32,9 @@ class CaloricNeedsCalculator extends Calculator {
   @override
   List<InputField> get inputFields => [
     const InputField(
-      id: 'weight',
+      key: 'weight',
       label: 'Peso do Animal',
-      description: 'Peso atual do animal em quilogramas',
+      helperText: 'Peso atual do animal em quilogramas',
       type: InputFieldType.number,
       unit: 'kg',
       isRequired: true,
@@ -41,17 +42,17 @@ class CaloricNeedsCalculator extends Calculator {
       maxValue: 100.0,
     ),
     const InputField(
-      id: 'species',
+      key: 'species',
       label: 'Espécie',
-      description: 'Tipo de animal',
+      helperText: 'Tipo de animal',
       type: InputFieldType.dropdown,
       options: ['Cão', 'Gato'],
       isRequired: true,
     ),
     const InputField(
-      id: 'life_stage',
+      key: 'life_stage',
       label: 'Fase da Vida',
-      description: 'Estágio de desenvolvimento',
+      helperText: 'Estágio de desenvolvimento',
       type: InputFieldType.dropdown,
       options: [
         'Filhote (até 4 meses)',
@@ -62,9 +63,9 @@ class CaloricNeedsCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'activity_level',
+      key: 'activity_level',
       label: 'Nível de Atividade',
-      description: 'Quantidade de exercício diário',
+      helperText: 'Quantidade de exercício diário',
       type: InputFieldType.dropdown,
       options: [
         'Sedentário',
@@ -76,9 +77,9 @@ class CaloricNeedsCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'physiological_state',
+      key: 'physiological_state',
       label: 'Estado Fisiológico',
-      description: 'Condição especial atual',
+      helperText: 'Condição especial atual',
       type: InputFieldType.dropdown,
       options: [
         'Normal',
@@ -91,9 +92,9 @@ class CaloricNeedsCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'body_condition',
+      key: 'body_condition',
       label: 'Condição Corporal',
-      description: 'Escala de 1-9 (5 = ideal)',
+      helperText: 'Escala de 1-9 (5 = ideal)',
       type: InputFieldType.slider,
       minValue: 1.0,
       maxValue: 9.0,
@@ -132,21 +133,40 @@ class CaloricNeedsCalculator extends Calculator {
       adjustedDER, species, lifeStage, activityLevel, physiologicalState, bodyCondition
     );
 
-    final results = {
-      'rer': rer.round(),
-      'der': der.round(),
-      'adjusted_der': adjustedDER.round(),
-      'food_amount_grams': foodAmountGrams,
-      'food_amount_cups': (foodAmountGrams / 80).toStringAsFixed(1), // ~80g por xícara
-      'recommendations': recommendations,
-    };
-
-    return CalculationResult(
+    // Create result items directly
+    final resultItems = [
+      ResultItem(
+        label: 'Necessidade Energética de Repouso (RER)',
+        value: rer.round(),
+        unit: 'kcal/dia',
+      ),
+      ResultItem(
+        label: 'Necessidade Energética Diária (DER)',
+        value: adjustedDER.round(),
+        unit: 'kcal/dia',
+      ),
+      ResultItem(
+        label: 'Quantidade de Ração',
+        value: foodAmountGrams,
+        unit: 'gramas/dia',
+      ),
+      ResultItem(
+        label: 'Quantidade de Ração (xícaras)',
+        value: (foodAmountGrams / 80).toStringAsFixed(1),
+        unit: 'xícaras/dia',
+      ),
+    ];
+    
+    final recommendationItems = recommendations.map((rec) => 
+      Recommendation(title: 'Recomendação', message: rec)
+    ).toList();
+    
+    return _CaloricNeedsResult(
       calculatorId: id,
-      timestamp: DateTime.now(),
-      inputs: inputs,
-      results: results,
+      results: resultItems,
+      recommendations: recommendationItems,
       summary: 'Necessidade energética: ${adjustedDER.round()} kcal/dia (~${foodAmountGrams}g de ração)',
+      calculatedAt: DateTime.now(),
     );
   }
 
@@ -160,7 +180,7 @@ class CaloricNeedsCalculator extends Calculator {
     final errors = <String>[];
 
     for (final field in inputFields) {
-      if (field.isRequired && !inputs.containsKey(field.id)) {
+      if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
@@ -182,13 +202,13 @@ class CaloricNeedsCalculator extends Calculator {
 
   double _calculateRER(double weight) {
     // RER = 70 * (peso em kg)^0.75
-    return 70 * pow(weight, 0.75);
+    return (70 * pow(weight, 0.75)).toDouble();
   }
 
-  double _calculateDER(String rer, String species, String lifeStage, 
+  double _calculateDER(double rer, String species, String lifeStage, 
                       String activityLevel, String physiologicalState) {
     double multiplier = 1.0;
-    final rerValue = double.parse(rer.toString());
+    final rerValue = rer;
 
     // Fatores por fase da vida
     switch (lifeStage) {
@@ -296,4 +316,15 @@ class CaloricNeedsCalculator extends Calculator {
 
     return recommendations;
   }
+}
+
+/// Implementação concreta do resultado da calculadora de necessidades calóricas
+class _CaloricNeedsResult extends CalculationResult {
+  const _CaloricNeedsResult({
+    required super.calculatorId,
+    required super.results,
+    super.recommendations,
+    super.summary,
+    super.calculatedAt,
+  });
 }

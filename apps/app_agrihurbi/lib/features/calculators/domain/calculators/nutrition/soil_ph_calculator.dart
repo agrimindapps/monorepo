@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de pH do Solo
 /// Calcula a necessidade de calcário para correção do pH do solo
 class SoilPHCalculator extends CalculatorEntity {
-  SoilPHCalculator()
+  const SoilPHCalculator()
       : super(
           id: 'soil_ph_calculator',
           name: 'Correção de pH do Solo',
@@ -220,7 +221,7 @@ class SoilPHCalculator extends CalculatorEntity {
             label: 'Total para Área',
             value: CalculatorMath.roundTo(totalLimestone, 1),
             unit: 'toneladas',
-            description: 'Quantidade total para ${area} ha',
+            description: 'Quantidade total para $area ha',
           ),
           CalculationResultValue(
             label: 'Calcário PRNT 100%',

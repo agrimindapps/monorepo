@@ -57,8 +57,8 @@ class TaskItemWidget extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: dimensoes['iconL']!,
-                  height: dimensoes['iconL']!,
+                  width: dimensoes['iconL'],
+                  height: dimensoes['iconL'],
                   decoration: BoxDecoration(
                     color: _getTaskColor(tipoTarefa).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(dimensoes['radiusS']!),
@@ -66,10 +66,10 @@ class TaskItemWidget extends StatelessWidget {
                   child: Icon(
                     _getTaskIcon(tipoTarefa),
                     color: _getTaskColor(tipoTarefa),
-                    size: dimensoes['iconS']!,
+                    size: dimensoes['iconS'],
                   ),
                 ),
-                SizedBox(width: dimensoes['paddingM']!),
+                SizedBox(width: dimensoes['paddingM']),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +80,7 @@ class TaskItemWidget extends StatelessWidget {
                           color: isOverdue ? cores['erro'] : cores['texto'],
                         ),
                       ),
-                      SizedBox(height: dimensoes['paddingXS']!),
+                      SizedBox(height: dimensoes['paddingXS']),
                       if (dataLimite != null)
                         Text(
                           isOverdue
@@ -101,7 +101,7 @@ class TaskItemWidget extends StatelessWidget {
                     icon: Icon(
                       Icons.check_circle_outline,
                       color: cores['sucesso'],
-                      size: dimensoes['iconS']!,
+                      size: dimensoes['iconS'],
                     ),
                     constraints: BoxConstraints(
                       minWidth: dimensoes['iconL']!,

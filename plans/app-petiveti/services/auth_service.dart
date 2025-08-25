@@ -84,7 +84,7 @@ class AuthService extends GetxService implements IAuthService {
       final result = await _firebaseAuth.signInWithEmailAndPassword(email, senha);
       
       if (result.success && result.user != null) {
-        _currentUser.value = _convertAuthUserToUserModel(result.user!);
+        _currentUser.value = _convertAuthUserToUserModel(result.user);
         
         Get.snackbar(
           'Sucesso',
@@ -134,7 +134,7 @@ class AuthService extends GetxService implements IAuthService {
       );
       
       if (result.success && result.user != null) {
-        _currentUser.value = _convertAuthUserToUserModel(result.user!);
+        _currentUser.value = _convertAuthUserToUserModel(result.user);
         
         Get.snackbar(
           'Sucesso',

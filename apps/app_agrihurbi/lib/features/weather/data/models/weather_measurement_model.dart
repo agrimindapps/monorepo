@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
 import '../../domain/entities/weather_measurement_entity.dart';
 
 part 'weather_measurement_model.g.dart';
@@ -162,20 +163,20 @@ class WeatherMeasurementModel extends Equatable {
       locationId: json['location_id']?.toString() ?? '',
       locationName: json['location_name']?.toString() ?? '',
       timestamp: DateTime.tryParse(json['timestamp']?.toString() ?? '') ?? DateTime.now(),
-      temperature: (json['temperature']?.toDouble()) ?? 0.0,
-      humidity: (json['humidity']?.toDouble()) ?? 0.0,
-      pressure: (json['pressure']?.toDouble()) ?? 1013.25,
-      windSpeed: (json['wind_speed']?.toDouble()) ?? 0.0,
-      windDirection: (json['wind_direction']?.toDouble()) ?? 0.0,
-      rainfall: (json['rainfall']?.toDouble()) ?? 0.0,
-      uvIndex: (json['uv_index']?.toDouble()) ?? 0.0,
-      visibility: (json['visibility']?.toDouble()) ?? 10.0,
+      temperature: (json['temperature'] as num?)?.toDouble() ?? 0.0,
+      humidity: (json['humidity'] as num?)?.toDouble() ?? 0.0,
+      pressure: (json['pressure'] as num?)?.toDouble() ?? 1013.25,
+      windSpeed: (json['wind_speed'] as num?)?.toDouble() ?? 0.0,
+      windDirection: (json['wind_direction'] as num?)?.toDouble() ?? 0.0,
+      rainfall: (json['rainfall'] as num?)?.toDouble() ?? 0.0,
+      uvIndex: (json['uv_index'] as num?)?.toDouble() ?? 0.0,
+      visibility: (json['visibility'] as num?)?.toDouble() ?? 10.0,
       weatherCondition: json['weather_condition']?.toString() ?? 'unknown',
       description: json['description']?.toString() ?? '',
-      latitude: (json['latitude']?.toDouble()) ?? 0.0,
-      longitude: (json['longitude']?.toDouble()) ?? 0.0,
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
       source: json['source']?.toString() ?? 'unknown',
-      qualityScore: (json['quality_score']?.toDouble()) ?? 1.0,
+      qualityScore: (json['quality_score'] as num?)?.toDouble() ?? 1.0,
       isRealTime: json['is_real_time'] == true,
       notes: json['notes']?.toString(),
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
@@ -227,19 +228,19 @@ class WeatherMeasurementModel extends Equatable {
       id: 'owm_${DateTime.now().millisecondsSinceEpoch}',
       locationId: locationId,
       locationName: locationName,
-      timestamp: DateTime.fromMillisecondsSinceEpoch((json['dt'] ?? 0) * 1000),
-      temperature: (main['temp']?.toDouble()) ?? 0.0,
-      humidity: (main['humidity']?.toDouble()) ?? 0.0,
-      pressure: (main['pressure']?.toDouble()) ?? 1013.25,
-      windSpeed: ((wind['speed']?.toDouble()) ?? 0.0) * 3.6, // Convert m/s to km/h
-      windDirection: (wind['deg']?.toDouble()) ?? 0.0,
-      rainfall: (rain['1h']?.toDouble()) ?? 0.0,
-      uvIndex: (json['uvi']?.toDouble()) ?? 0.0,
-      visibility: ((json['visibility']?.toDouble()) ?? 10000.0) / 1000.0, // Convert m to km
+      timestamp: DateTime.fromMillisecondsSinceEpoch((json['dt'] as int? ?? 0) * 1000),
+      temperature: (main['temp'] as num?)?.toDouble() ?? 0.0,
+      humidity: (main['humidity'] as num?)?.toDouble() ?? 0.0,
+      pressure: (main['pressure'] as num?)?.toDouble() ?? 1013.25,
+      windSpeed: ((wind['speed'] as num?)?.toDouble() ?? 0.0) * 3.6, // Convert m/s to km/h
+      windDirection: (wind['deg'] as num?)?.toDouble() ?? 0.0,
+      rainfall: (rain['1h'] as num?)?.toDouble() ?? 0.0,
+      uvIndex: (json['uvi'] as num?)?.toDouble() ?? 0.0,
+      visibility: ((json['visibility'] as num?)?.toDouble() ?? 10000.0) / 1000.0, // Convert m to km
       weatherCondition: _mapOpenWeatherCondition(weather['main']?.toString() ?? 'unknown'),
       description: weather['description']?.toString() ?? 'Weather data from OpenWeatherMap',
-      latitude: (json['coord']?['lat']?.toDouble()) ?? 0.0,
-      longitude: (json['coord']?['lon']?.toDouble()) ?? 0.0,
+      latitude: (json['coord']?['lat'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['coord']?['lon'] as num?)?.toDouble() ?? 0.0,
       source: 'api_openweathermap',
       qualityScore: 0.95,
       isRealTime: true,
@@ -266,14 +267,14 @@ class WeatherMeasurementModel extends Equatable {
       locationId: locationId,
       locationName: locationName,
       timestamp: DateTime.tryParse(json['DateTime']?.toString() ?? '') ?? DateTime.now(),
-      temperature: (temperature['Metric']?['Value']?.toDouble()) ?? 0.0,
-      humidity: (humidity?.toDouble()) ?? 0.0,
-      pressure: (pressure['Metric']?['Value']?.toDouble()) ?? 1013.25,
-      windSpeed: (wind['Speed']?['Metric']?['Value']?.toDouble()) ?? 0.0,
-      windDirection: (wind['Direction']?['Degrees']?.toDouble()) ?? 0.0,
-      rainfall: (precipitation['Past24Hours']?['Metric']?['Value']?.toDouble()) ?? 0.0,
-      uvIndex: (json['UVIndex']?.toDouble()) ?? 0.0,
-      visibility: (json['Visibility']?['Metric']?['Value']?.toDouble()) ?? 10.0,
+      temperature: ((temperature['Metric']?['Value']) as num?)?.toDouble() ?? 0.0,
+      humidity: ((humidity as num?)?.toDouble()) ?? 0.0,
+      pressure: ((pressure['Metric']?['Value']) as num?)?.toDouble() ?? 1013.25,
+      windSpeed: ((wind['Speed']?['Metric']?['Value']) as num?)?.toDouble() ?? 0.0,
+      windDirection: ((wind['Direction']?['Degrees']) as num?)?.toDouble() ?? 0.0,
+      rainfall: ((precipitation['Past24Hours']?['Metric']?['Value']) as num?)?.toDouble() ?? 0.0,
+      uvIndex: ((json['UVIndex'] as num?)?.toDouble()) ?? 0.0,
+      visibility: ((json['Visibility']?['Metric']?['Value']) as num?)?.toDouble() ?? 10.0,
       weatherCondition: _mapAccuWeatherCondition(json['WeatherText']?.toString() ?? 'unknown'),
       description: json['WeatherText']?.toString() ?? 'Weather data from AccuWeather',
       latitude: 0.0, // Would need to be provided separately
@@ -300,14 +301,14 @@ class WeatherMeasurementModel extends Equatable {
       locationId: locationId,
       locationName: locationName,
       timestamp: DateTime.tryParse(sensorData['timestamp']?.toString() ?? '') ?? DateTime.now(),
-      temperature: (sensorData['temperature']?.toDouble()) ?? 0.0,
-      humidity: (sensorData['humidity']?.toDouble()) ?? 0.0,
-      pressure: (sensorData['pressure']?.toDouble()) ?? 1013.25,
-      windSpeed: (sensorData['wind_speed']?.toDouble()) ?? 0.0,
-      windDirection: (sensorData['wind_direction']?.toDouble()) ?? 0.0,
-      rainfall: (sensorData['rainfall']?.toDouble()) ?? 0.0,
-      uvIndex: (sensorData['uv_index']?.toDouble()) ?? 0.0,
-      visibility: (sensorData['visibility']?.toDouble()) ?? 10.0,
+      temperature: ((sensorData['temperature'] as num?)?.toDouble()) ?? 0.0,
+      humidity: ((sensorData['humidity'] as num?)?.toDouble()) ?? 0.0,
+      pressure: ((sensorData['pressure'] as num?)?.toDouble()) ?? 1013.25,
+      windSpeed: ((sensorData['wind_speed'] as num?)?.toDouble()) ?? 0.0,
+      windDirection: ((sensorData['wind_direction'] as num?)?.toDouble()) ?? 0.0,
+      rainfall: ((sensorData['rainfall'] as num?)?.toDouble()) ?? 0.0,
+      uvIndex: ((sensorData['uv_index'] as num?)?.toDouble()) ?? 0.0,
+      visibility: ((sensorData['visibility'] as num?)?.toDouble()) ?? 10.0,
       weatherCondition: sensorData['condition']?.toString() ?? 'unknown',
       description: sensorData['description']?.toString() ?? 'Sensor measurement',
       latitude: latitude,
@@ -403,8 +404,8 @@ class WeatherMeasurementModel extends Equatable {
     return 'WeatherMeasurementModel('
         'id: $id, '
         'location: $locationName, '
-        'temp: ${temperature}°C, '
-        'humidity: ${humidity}%, '
+        'temp: $temperature°C, '
+        'humidity: $humidity%, '
         'condition: $weatherCondition'
         ')';
   }
@@ -468,14 +469,14 @@ class WeatherMeasurementModel extends Equatable {
     }
 
     // Reduce score for unrealistic values
-    final temp = sensorData['temperature']?.toDouble();
-    if (temp != null && (temp < -50 || temp > 60)) score -= 0.2;
+    final temp = (sensorData['temperature'] as num?)?.toDouble();
+    if (temp != null && ((temp < -50) || (temp > 60))) score -= 0.2;
 
-    final humidity = sensorData['humidity']?.toDouble();
-    if (humidity != null && (humidity < 0 || humidity > 100)) score -= 0.2;
+    final humidity = (sensorData['humidity'] as num?)?.toDouble();
+    if (humidity != null && ((humidity < 0) || (humidity > 100))) score -= 0.2;
 
-    final pressure = sensorData['pressure']?.toDouble();
-    if (pressure != null && (pressure < 800 || pressure > 1200)) score -= 0.15;
+    final pressure = (sensorData['pressure'] as num?)?.toDouble();
+    if (pressure != null && ((pressure < 800) || (pressure > 1200))) score -= 0.15;
 
     // Reduce score for very old timestamps
     final timestamp = DateTime.tryParse(sensorData['timestamp']?.toString() ?? '');

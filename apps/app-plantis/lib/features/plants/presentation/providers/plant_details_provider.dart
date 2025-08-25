@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/plant.dart';
-import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
+import '../../domain/usecases/get_plants_usecase.dart';
 
 class PlantDetailsProvider extends ChangeNotifier {
   final GetPlantByIdUseCase getPlantByIdUseCase;

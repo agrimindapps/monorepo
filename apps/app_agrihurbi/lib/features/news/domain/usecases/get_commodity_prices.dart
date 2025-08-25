@@ -1,9 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
+import 'package:injectable/injectable.dart';
 
 /// Get Commodity Prices Use Case
 /// 
@@ -17,8 +15,8 @@ class GetCommodityPrices {
   /// Get current prices for all or specific commodity types
   ResultFuture<List<CommodityPriceEntity>> call({
     List<CommodityType>? types,
-  }) async {
-    return await _repository.getCommodityPrices(types: types);
+  }) {
+    return _repository.getCommodityPrices(types: types);
   }
 }
 
@@ -29,8 +27,8 @@ class GetCommodityById {
 
   const GetCommodityById(this._repository);
 
-  ResultFuture<CommodityPriceEntity> call(String commodityId) async {
-    return await _repository.getCommodityById(commodityId);
+  ResultFuture<CommodityPriceEntity> call(String commodityId) {
+    return _repository.getCommodityById(commodityId);
   }
 }
 
@@ -45,8 +43,8 @@ class GetCommodityHistory {
     required String commodityId,
     required DateTime startDate,
     required DateTime endDate,
-  }) async {
-    return await _repository.getCommodityHistory(
+  }) {
+    return _repository.getCommodityHistory(
       commodityId: commodityId,
       startDate: startDate,
       endDate: endDate,
@@ -61,8 +59,8 @@ class GetMarketSummary {
 
   const GetMarketSummary(this._repository);
 
-  ResultFuture<MarketSummaryEntity> call() async {
-    return await _repository.getMarketSummary();
+  ResultFuture<MarketSummaryEntity> call() {
+    return _repository.getMarketSummary();
   }
 }
 
@@ -78,8 +76,8 @@ class ManagePriceAlerts {
     required String commodityId,
     required double targetPrice,
     required bool isAbove,
-  }) async {
-    return await _repository.setPriceAlert(
+  }) {
+    return _repository.setPriceAlert(
       commodityId: commodityId,
       targetPrice: targetPrice,
       isAbove: isAbove,
@@ -87,12 +85,12 @@ class ManagePriceAlerts {
   }
 
   /// Get active price alerts
-  ResultFuture<List<PriceAlert>> getActiveAlerts() async {
-    return await _repository.getPriceAlerts();
+  ResultFuture<List<PriceAlert>> getActiveAlerts() {
+    return _repository.getPriceAlerts();
   }
 
   /// Remove price alert
-  ResultVoid removeAlert(String alertId) async {
-    return await _repository.removePriceAlert(alertId);
+  ResultVoid removeAlert(String alertId) {
+    return _repository.removePriceAlert(alertId);
   }
 }

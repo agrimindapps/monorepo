@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
+import 'package:flutter/material.dart';
 
 /// News Article Card Widget
 /// 

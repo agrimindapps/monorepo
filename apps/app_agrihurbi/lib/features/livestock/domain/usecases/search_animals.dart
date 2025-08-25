@@ -1,7 +1,8 @@
+import 'package:app_agrihurbi/core/error/failures.dart';
+import 'package:core/core.dart' hide Failure, ValidationFailure;
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 
 import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';
@@ -23,7 +24,7 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
     // Validação dos parâmetros
     final validation = _validateSearchParams(params);
     if (validation != null) {
-      return Left(ValidationFailure(validation));
+      return Left(ValidationFailure(message: validation));
     }
     
     // Se busca é específica por tipo, usar métodos específicos
@@ -160,7 +161,7 @@ class QuickSearchAnimalsUseCase implements UseCase<SearchAnimalsResult, String> 
   @override
   Future<Either<Failure, SearchAnimalsResult>> call(String query) async {
     if (query.trim().isEmpty) {
-      return const Left(ValidationFailure('Termo de busca é obrigatório'));
+      return const Left(ValidationFailure(message: 'Termo de busca é obrigatório'));
     }
     
     return await _searchUseCase.call(

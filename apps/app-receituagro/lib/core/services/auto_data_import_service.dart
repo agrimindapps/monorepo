@@ -1,15 +1,17 @@
 import 'dart:developer' as developer;
+
 import 'package:dartz/dartz.dart';
+
+import '../repositories/cultura_hive_repository.dart';
+import '../repositories/diagnostico_hive_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
+import '../repositories/fitossanitario_info_hive_repository.dart';
+import '../repositories/plantas_inf_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
+import '../repositories/pragas_inf_hive_repository.dart';
 import 'asset_loader_service.dart';
 import 'data_cleaning_service.dart';
 import 'version_manager_service.dart';
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/plantas_inf_hive_repository.dart';
-import '../repositories/pragas_inf_hive_repository.dart';
 
 /// Modelo para callback de progresso
 class ImportProgress {
@@ -244,7 +246,7 @@ class AutoDataImportService {
 
       // 3. Salva no repositório
       final saveResult = await repository.loadFromJson(jsonData, version);
-      if (saveResult.isLeft()) {
+      if (saveResult.isLeft() as bool) {
         return Left(Exception('Erro ao salvar: ${saveResult.fold((e) => e.toString(), (r) => '')}'));
       }
 

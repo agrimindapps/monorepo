@@ -58,7 +58,7 @@ class CleanHomeDefensivosController extends GetxController {
     final result = await _getHomeDataUseCase.execute();
 
     if (result.isSuccess) {
-      _homeData.value = result.valueOrNull!;
+      _homeData.value = result.valueOrNull;
       _setLoadingState(LoadingState.success);
     } else {
       final error = result.errorOrNull!;

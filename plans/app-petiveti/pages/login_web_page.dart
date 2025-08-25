@@ -387,7 +387,7 @@ class _PetiVetiLoginWebPageState extends State<PetiVetiLoginWebPage> {
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -437,7 +437,7 @@ class _PetiVetiLoginWebPageState extends State<PetiVetiLoginWebPage> {
               topLeft: Radius.circular(20),
               bottomLeft: Radius.circular(20),
             ),
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,

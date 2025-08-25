@@ -392,7 +392,7 @@ class _EnhancedLoginPageState extends State<EnhancedLoginPage>
               topLeft: Radius.circular(20),
               bottomLeft: Radius.circular(20),
             ),
-            child: Container(
+            child: DecoratedBox(
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: NetworkImage(
@@ -401,7 +401,7 @@ class _EnhancedLoginPageState extends State<EnhancedLoginPage>
                   fit: BoxFit.cover,
                 ),
               ),
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.centerLeft,

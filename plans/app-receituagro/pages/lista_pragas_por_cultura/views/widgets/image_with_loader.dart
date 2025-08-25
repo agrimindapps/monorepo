@@ -52,7 +52,7 @@ class ImageWithLoader extends StatelessWidget {
   }
 
   Widget _buildDefaultErrorWidget(bool isDark) {
-    return Container(
+    return ColoredBox(
       color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
       child: const Center(
         child: Icon(

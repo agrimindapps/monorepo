@@ -1,9 +1,10 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart' as core;
-import '../providers/premium_provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../providers/premium_provider.dart';
 
 class PremiumProductsList extends StatefulWidget {
   const PremiumProductsList({super.key});
@@ -45,7 +46,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
             ),
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.error_outline,
                   color: AppColors.error,
                   size: 32,
@@ -89,7 +90,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
             ),
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.info_outline,
                   color: AppColors.grey500,
                   size: 32,
@@ -134,7 +135,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
     final isMonthly = product.productId.contains('monthly');
     final isRecommended = !isMonthly; // Yearly is recommended
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -162,9 +163,9 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                   horizontal: 12,
                   vertical: 6,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: const BorderRadius.vertical(
+                  borderRadius: BorderRadius.vertical(
                     bottom: Radius.circular(8),
                   ),
                 ),
@@ -267,7 +268,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : Text(
+                      : const Text(
                           'Assinar Agora',
                           style: AppTextStyles.buttonMedium,
                         ),
@@ -284,7 +285,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.savings,
                           color: AppColors.success,
                           size: 16,

@@ -1,14 +1,14 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:dartz/dartz.dart';
-import 'package:core/core.dart' hide UserEntity, LoginUseCase, LogoutUseCase, LoginParams;
 
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/usecases/login_usecase.dart';
-import '../../domain/usecases/register_usecase.dart';
-import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_user_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
 
 /// Provider para operações de autenticação usando Clean Architecture
 /// 
@@ -153,7 +153,7 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('StackTrace: $stackTrace');
       final error = 'Erro inesperado no login: ${e.toString()}';
       _setError(error);
-      return Left(UnknownFailure(error));
+      return Left(UnknownFailure(message: error));
     } finally {
       _isLoggingIn = false;
       _setLoading(false);
@@ -204,7 +204,7 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('StackTrace: $stackTrace');
       final error = 'Erro inesperado no registro: ${e.toString()}';
       _setError(error);
-      return Left(UnknownFailure(error));
+      return Left(UnknownFailure(message: error));
     } finally {
       _isRegistering = false;
       _setLoading(false);
@@ -253,7 +253,7 @@ class AuthProvider extends ChangeNotifier {
       _clearUserState();
       final error = 'Erro no logout: ${e.toString()}';
       _setError(error);
-      return Left(UnknownFailure(error));
+      return Left(UnknownFailure(message: error));
     } finally {
       _isLoggingOut = false;
       _setLoading(false);
@@ -269,9 +269,9 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     try {
       if (_currentUser == null) {
-        final error = 'Nenhum usuário logado para atualizar';
+        const error = 'Nenhum usuário logado para atualizar';
         _setError(error);
-        return Left(ValidationFailure(error));
+        return const Left(ValidationFailure(message: error));
       }
       
       debugPrint('AuthProvider: Atualizando dados do usuário ${_currentUser!.id}');
@@ -305,7 +305,7 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('StackTrace: $stackTrace');
       final error = 'Erro na atualização: ${e.toString()}';
       _setError(error);
-      return Left(UnknownFailure(error));
+      return Left(UnknownFailure(message: error));
     } finally {
       _isRefreshing = false;
       notifyListeners();

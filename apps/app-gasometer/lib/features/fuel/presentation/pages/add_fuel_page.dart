@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../providers/fuel_form_provider.dart';
 import '../providers/fuel_provider.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../widgets/fuel_form_view.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 
 class AddFuelPage extends StatefulWidget {
   final String? vehicleId;

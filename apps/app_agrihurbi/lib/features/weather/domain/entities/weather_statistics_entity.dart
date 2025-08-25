@@ -149,13 +149,13 @@ class WeatherStatisticsEntity extends Equatable {
   });
 
   /// Creates empty statistics for initialization
-  const WeatherStatisticsEntity.empty()
+  WeatherStatisticsEntity.empty()
       : id = '',
         locationId = '',
         locationName = '',
         period = '',
-        startDate = const Duration(),
-        endDate = const Duration(),
+        startDate = DateTime.fromMillisecondsSinceEpoch(0),
+        endDate = DateTime.fromMillisecondsSinceEpoch(0),
         avgTemperature = 0.0,
         minTemperature = 0.0,
         maxTemperature = 0.0,
@@ -199,9 +199,9 @@ class WeatherStatisticsEntity extends Equatable {
         anomalyScore = 0.0,
         isSeasonalDataAvailable = false,
         seasonalDeviationScore = 0.0,
-        calculatedAt = const Duration(),
-        createdAt = const Duration(),
-        updatedAt = const Duration();
+        calculatedAt = DateTime.fromMillisecondsSinceEpoch(0),
+        createdAt = DateTime.fromMillisecondsSinceEpoch(0),
+        updatedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Get temperature range
   double get temperatureRange => maxTemperature - minTemperature;

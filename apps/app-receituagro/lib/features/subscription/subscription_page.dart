@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../core/di/injection_container.dart' as di;
 import '../../core/services/navigation_service.dart';
 
@@ -146,7 +147,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1B3E),
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -513,7 +514,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: isYearly 
@@ -659,7 +660,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     required bool isSelected,
     String? badge,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),

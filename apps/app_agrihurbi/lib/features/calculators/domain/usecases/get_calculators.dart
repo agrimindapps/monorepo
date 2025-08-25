@@ -1,8 +1,8 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/calculator_entity.dart';
+
 import '../entities/calculator_category.dart';
+import '../entities/calculator_entity.dart';
 import '../repositories/calculator_repository.dart';
 
 class GetCalculators {
@@ -11,7 +11,7 @@ class GetCalculators {
   GetCalculators(this.repository);
 
   Future<Either<Failure, List<CalculatorEntity>>> call() async {
-    return await repository.getAllCalculators();
+    return repository.getAllCalculators();
   }
 }
 
@@ -23,7 +23,7 @@ class GetCalculatorsByCategory {
   Future<Either<Failure, List<CalculatorEntity>>> call(
     CalculatorCategory category,
   ) async {
-    return await repository.getCalculatorsByCategory(category);
+    return repository.getCalculatorsByCategory(category);
   }
 }
 
@@ -33,7 +33,7 @@ class GetCalculatorById {
   GetCalculatorById(this.repository);
 
   Future<Either<Failure, CalculatorEntity>> call(String id) async {
-    return await repository.getCalculatorById(id);
+    return repository.getCalculatorById(id);
   }
 }
 
@@ -45,6 +45,6 @@ class SearchCalculators {
   Future<Either<Failure, List<CalculatorEntity>>> call(
     String searchTerm,
   ) async {
-    return await repository.searchCalculators(searchTerm);
+    return repository.searchCalculators(searchTerm);
   }
 }

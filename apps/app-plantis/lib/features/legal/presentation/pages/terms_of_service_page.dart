@@ -45,8 +45,8 @@ class _TermsOfServicePageState extends State<TermsOfServicePage> {
   void _shareContent() {
     // Implementar compartilhamento se necessário
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Compartilhamento disponível em breve'),
+      const SnackBar(
+        content: Text('Compartilhamento disponível em breve'),
         backgroundColor: PlantisColors.primary,
         behavior: SnackBarBehavior.floating,
       ),
@@ -106,13 +106,13 @@ class _TermsOfServicePageState extends State<TermsOfServicePage> {
                   ),
                   child: Column(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.description,
                         size: 48,
                         color: Colors.white,
                       ),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Termos de Uso do Plantis',
                         style: TextStyle(
                           color: Colors.white,
@@ -342,7 +342,7 @@ Responderemos suas questões dentro de 48 horas úteis.''',
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               color: PlantisColors.primary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -355,7 +355,7 @@ Responderemos suas questões dentro de 48 horas úteis.''',
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
-              border: Border(
+              border: const Border(
                 left: BorderSide(
                   width: 4,
                   color: PlantisColors.primary,

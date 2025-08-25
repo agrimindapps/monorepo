@@ -55,7 +55,7 @@ class PrimaryResultWidget extends StatelessWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
-                    _formatValue(result.value),
+                    _formatValue(result.value is num ? (result.value as num).toDouble() : 0.0),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -72,10 +72,10 @@ class PrimaryResultWidget extends StatelessWidget {
                   ],
                 ],
               ),
-              if (result.description.isNotEmpty) ...[
+              if (result.description?.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
                 Text(
-                  result.description,
+                  result.description ?? '',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -89,7 +89,7 @@ class PrimaryResultWidget extends StatelessWidget {
   }
 
   void _copyToClipboard(BuildContext context) {
-    final text = '${result.label}: ${_formatValue(result.value)} ${result.unit}';
+    final text = '${result.label}: ${_formatValue(result.value is num ? (result.value as num).toDouble() : 0.0)} ${result.unit}';
     Clipboard.setData(ClipboardData(text: text));
     
     ScaffoldMessenger.of(context).showSnackBar(
@@ -174,15 +174,15 @@ class SecondaryResultWidget extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      subtitle: result.description.isNotEmpty 
-          ? Text(result.description)
+      subtitle: result.description?.isNotEmpty == true 
+          ? Text(result.description ?? '')
           : null,
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            _formatValue(result.value),
+            _formatValue(result.value is num ? (result.value as num).toDouble() : 0.0),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -383,7 +383,7 @@ class QualityIndicatorWidget extends StatelessWidget {
             const SizedBox(height: 8),
             LinearProgressIndicator(
               value: percentage,
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(indicatorColor),
             ),
             const SizedBox(height: 4),
@@ -479,7 +479,7 @@ class RecommendationsWidget extends StatelessWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

@@ -1,8 +1,9 @@
-import 'package:injectable/injectable.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:app_agrihurbi/core/error/exceptions.dart';
-import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
+import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
+import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 
 /// News Local Data Source
 /// 
@@ -104,7 +105,7 @@ class NewsLocalDataSource {
 
         // Filter by category
         if (filter?.categories.isNotEmpty == true &&
-            !filter!.categories.contains(article.category)) {
+            !filter!.categories.contains(NewsCategoryModel.fromEntity(article.category))) {
           return false;
         }
 
@@ -212,7 +213,7 @@ class NewsLocalDataSource {
       var prices = _commoditiesBox.values.toList();
 
       if (types?.isNotEmpty == true) {
-        prices = prices.where((price) => types!.contains(price.type)).toList();
+        prices = prices.where((price) => types!.contains(CommodityTypeModel.fromEntity(price.type))).toList();
       }
 
       prices.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
@@ -331,7 +332,8 @@ class NewsLocalDataSource {
   /// Save last RSS update timestamp
   Future<void> saveLastRSSUpdate(DateTime timestamp) async {
     try {
-      await Hive.box('metadata').put('last_rss_update', timestamp.toIso8601String());
+      final Box<String> metadataBox = Hive.box<String>('metadata');
+      await metadataBox.put('last_rss_update', timestamp.toIso8601String());
     } catch (e) {
       throw CacheException('Failed to save last RSS update: $e');
     }
@@ -340,7 +342,8 @@ class NewsLocalDataSource {
   /// Get last RSS update timestamp
   Future<DateTime?> getLastRSSUpdate() async {
     try {
-      final timestampStr = Hive.box('metadata').get('last_rss_update') as String?;
+      final Box<String> metadataBox = Hive.box<String>('metadata');
+      final timestampStr = metadataBox.get('last_rss_update');
       return timestampStr != null ? DateTime.tryParse(timestampStr) : null;
     } catch (e) {
       throw CacheException('Failed to get last RSS update: $e');

@@ -1,5 +1,8 @@
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../entities/calculator_category.dart';
 import '../entities/calculator_entity.dart';
 
 /// Serviço de gerenciamento de calculadoras favoritas
@@ -369,9 +372,3 @@ enum CalculatorSortOrder {
   complexityDesc,
 }
 
-/// Complexidade da calculadora
-enum CalculatorComplexity {
-  simple,
-  intermediate,
-  advanced,
-}

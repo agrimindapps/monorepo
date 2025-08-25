@@ -39,9 +39,9 @@ class TaskStatusWidget extends StatelessWidget {
             Icon(
               Icons.check_circle,
               color: cores['sucesso'],
-              size: dimensoes['iconXS']!,
+              size: dimensoes['iconXS'],
             ),
-            SizedBox(width: dimensoes['paddingXS']!),
+            SizedBox(width: dimensoes['paddingXS']),
             Text(
               I18nService.allCareUpToDate,
               style: textStyles['caption']!.copyWith(
@@ -75,9 +75,9 @@ class TaskStatusWidget extends StatelessWidget {
           Icon(
             Icons.schedule,
             color: cores['aviso'],
-            size: dimensoes['iconXS']!,
+            size: dimensoes['iconXS'],
           ),
-          SizedBox(width: dimensoes['paddingXS']!),
+          SizedBox(width: dimensoes['paddingXS']),
           Text(
             I18nService.pendingCareCount(pendingCount),
             style: textStyles['caption']!.copyWith(

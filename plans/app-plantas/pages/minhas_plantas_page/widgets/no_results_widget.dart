@@ -29,7 +29,7 @@ class NoResultsWidget extends StatelessWidget {
               size: 80,
               color: cores['textoTerciario'],
             ),
-            SizedBox(height: dimensoes['marginL']!),
+            SizedBox(height: dimensoes['marginL']),
             Text(
               'Nenhum resultado encontrado',
               style: textStyles['h3']!.copyWith(
@@ -37,7 +37,7 @@ class NoResultsWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: dimensoes['marginM']!),
+            SizedBox(height: dimensoes['marginM']),
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -58,7 +58,7 @@ class NoResultsWidget extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: dimensoes['marginL']!),
+            SizedBox(height: dimensoes['marginL']),
             Container(
               padding: EdgeInsets.all(dimensoes['paddingM']!),
               decoration: BoxDecoration(
@@ -74,9 +74,9 @@ class NoResultsWidget extends StatelessWidget {
                   Icon(
                     Icons.lightbulb_outline,
                     color: cores['info'],
-                    size: dimensoes['iconS']!,
+                    size: dimensoes['iconS'],
                   ),
-                  SizedBox(width: dimensoes['paddingM']!),
+                  SizedBox(width: dimensoes['paddingM']),
                   Expanded(
                     child: Text(
                       'Dica: Tente buscar pelo nome da planta ou espécie',

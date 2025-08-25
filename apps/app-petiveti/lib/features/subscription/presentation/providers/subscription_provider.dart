@@ -78,7 +78,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> loadAvailablePlans() async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getAvailablePlans(NoParams());
+    final result = await _getAvailablePlans(const NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(
@@ -240,13 +240,13 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
   return SubscriptionNotifier(
-    sl<GetAvailablePlans>(),
-    sl<GetCurrentSubscription>(),
-    sl<SubscribeToPlan>(),
-    sl<CancelSubscription>(),
-    sl<PauseSubscription>(),
-    sl<ResumeSubscription>(),
-    sl<UpgradePlan>(),
-    sl<RestorePurchases>(),
+    getIt<GetAvailablePlans>(),
+    getIt<GetCurrentSubscription>(),
+    getIt<SubscribeToPlan>(),
+    getIt<CancelSubscription>(),
+    getIt<PauseSubscription>(),
+    getIt<ResumeSubscription>(),
+    getIt<UpgradePlan>(),
+    getIt<RestorePurchases>(),
   );
 });

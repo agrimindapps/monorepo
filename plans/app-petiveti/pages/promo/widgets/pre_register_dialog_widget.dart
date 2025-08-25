@@ -97,7 +97,7 @@ class _PreRegisterDialogWidgetState extends State<PreRegisterDialogWidget>
       ),
       child: ConstrainedBox(
         constraints: ResponsiveHelpers.getResponsiveDialogConstraints(context),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             color: PromoConstants.whiteColor,
             borderRadius: BorderRadius.circular(PromoConstants.cardBorderRadius),

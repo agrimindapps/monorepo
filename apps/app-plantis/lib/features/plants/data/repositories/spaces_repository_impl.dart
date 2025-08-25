@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/space.dart';
 import '../../domain/repositories/spaces_repository.dart';
@@ -34,7 +35,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       // ALWAYS return local data first for instant UI response
@@ -77,7 +78,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       // ALWAYS get from local first for instant response
@@ -92,7 +93,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
       if (localSpace != null) {
         return Right(localSpace);
       } else {
-        return Left(NotFoundFailure('Espaço não encontrado'));
+        return const Left(NotFoundFailure('Espaço não encontrado'));
       }
     } on CacheFailure catch (e) {
       return Left(e);
@@ -121,7 +122,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       final spaceModel = SpaceModel.fromEntity(space);
@@ -163,7 +164,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       final spaceModel = SpaceModel.fromEntity(space);
@@ -205,7 +206,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       // Always delete locally first
@@ -279,11 +280,11 @@ class SpacesRepositoryImpl implements SpacesRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (!(await networkInfo.isConnected)) {
-        return Left(NetworkFailure('Sem conexão com a internet'));
+        return const Left(NetworkFailure('Sem conexão com a internet'));
       }
 
       // Get all local spaces that need sync

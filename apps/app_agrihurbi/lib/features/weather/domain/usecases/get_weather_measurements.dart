@@ -72,7 +72,7 @@ class GetWeatherMeasurements {
   }) async {
     try {
       if (locationId.trim().isEmpty) {
-        return Left(WeatherDataFailure('Location ID cannot be empty'));
+        return const Left(WeatherDataFailure('Location ID cannot be empty'));
       }
 
       return await _repository.getMeasurementsByLocation(
@@ -97,7 +97,7 @@ class GetWeatherMeasurements {
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> byId(String id) async {
     try {
       if (id.trim().isEmpty) {
-        return Left(WeatherDataFailure('Measurement ID cannot be empty'));
+        return const Left(WeatherDataFailure('Measurement ID cannot be empty'));
       }
 
       return await _repository.getMeasurementById(id);
@@ -122,14 +122,14 @@ class GetWeatherMeasurements {
       // Validate temperature range
       if (minTemperature != null && maxTemperature != null) {
         if (minTemperature > maxTemperature) {
-          return Left(WeatherDataFailure('Minimum temperature cannot be greater than maximum temperature'));
+          return const Left(WeatherDataFailure('Minimum temperature cannot be greater than maximum temperature'));
         }
       }
 
       // Validate rainfall range
       if (minRainfall != null && maxRainfall != null) {
         if (minRainfall > maxRainfall) {
-          return Left(WeatherDataFailure('Minimum rainfall cannot be greater than maximum rainfall'));
+          return const Left(WeatherDataFailure('Minimum rainfall cannot be greater than maximum rainfall'));
         }
       }
 
@@ -167,11 +167,11 @@ class GetWeatherMeasurements {
   }) async {
     try {
       if (days <= 0) {
-        return Left(WeatherDataFailure('Days must be a positive number'));
+        return const Left(WeatherDataFailure('Days must be a positive number'));
       }
 
       if (days > 90) {
-        return Left(WeatherDataFailure('Cannot retrieve more than 90 days of recent data'));
+        return const Left(WeatherDataFailure('Cannot retrieve more than 90 days of recent data'));
       }
 
       final endDate = DateTime.now();

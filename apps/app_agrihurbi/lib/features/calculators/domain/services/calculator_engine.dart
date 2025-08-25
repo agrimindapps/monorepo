@@ -1,10 +1,11 @@
-import '../entities/calculator_entity.dart';
 import '../entities/calculation_result.dart';
+import '../entities/calculator_category.dart';
+import '../entities/calculator_entity.dart';
 import '../entities/calculator_parameter.dart';
-import 'parameter_validator.dart';
-import 'unit_conversion_service.dart';
-import 'result_formatter_service.dart';
+import '../validation/parameter_validator.dart';
 import 'calculator_error_handler.dart';
+import 'result_formatter_service.dart';
+import 'unit_conversion_service.dart';
 
 /// Motor principal do sistema de calculadoras
 /// 
@@ -154,7 +155,7 @@ class CalculatorEngine {
   }) async {
     final calculator = _registeredCalculators[calculatorId];
     if (calculator == null) {
-      return ValidationBatchResult(
+      return const ValidationBatchResult(
         isValid: false,
         errors: {'calculator': 'Calculadora não encontrada'},
         warnings: {},
@@ -239,7 +240,7 @@ class CalculatorEngine {
         );
 
         if (conversion.isSuccess) {
-          convertedParameters[parameterId] = conversion.value!;
+          convertedParameters[parameterId] = conversion.value;
         } else {
           throw Exception('Erro na conversão: ${conversion.errorMessage}');
         }
@@ -289,14 +290,14 @@ class CalculatorEngine {
       formattedResults.add(FormattedResultValue(
         label: resultValue.label,
         formattedValue: formattedValue,
-        originalValue: resultValue.value,
+        originalValue: resultValue.value as double,
         unit: displayUnit,
-        description: resultValue.description,
+        description: resultValue.description ?? '',
       ));
     }
 
-    final formattedRecommendations = result.recommendations.isNotEmpty
-        ? ResultFormatterService.formatRecommendations(result.recommendations)
+    final formattedRecommendations = result.recommendations?.isNotEmpty == true
+        ? ResultFormatterService.formatRecommendations(result.recommendations!)
         : <String>[];
 
     return FormattedCalculationResult(
@@ -304,7 +305,7 @@ class CalculatorEngine {
       calculatorName: calculator.name,
       results: formattedResults,
       recommendations: formattedRecommendations,
-      additionalData: result.additionalData,
+      additionalData: result.additionalData ?? {},
       timestamp: DateTime.now(),
     );
   }
@@ -386,7 +387,7 @@ class CalculationSession {
     FormattedCalculationResult? result,
     List<String>? errors,
   }) {
-    this.endTime = DateTime.now();
+    endTime = DateTime.now();
     this.success = success;
     this.result = result;
     if (errors != null) {

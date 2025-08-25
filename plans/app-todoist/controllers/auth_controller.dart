@@ -304,7 +304,7 @@ class TodoistAuthController extends GetxController
     
     if (_currentUser.value == null) return {'user': 'null'};
 
-    final user = _currentUser.value!;
+    final user = _currentUser.value;
     return {
       'isAuthenticated': isLoggedIn,
       'isGuest': _currentUser.value?.isGuest ?? false,

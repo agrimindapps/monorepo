@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../controller/favoritos_controller.dart';
-import '../widgets/empty_state_widget.dart';
-import '../widgets/diagnostico_favorito_list_item.dart';
-import '../models/view_mode.dart';
+
 import '../constants/favoritos_design_tokens.dart';
+import '../controller/favoritos_controller.dart';
+import '../models/favorito_diagnostico_model.dart';
+import '../models/view_mode.dart';
+import '../widgets/diagnostico_favorito_list_item.dart';
+import '../widgets/empty_state_widget.dart';
 
 class DiagnosticosTab extends StatelessWidget {
   final FavoritosController controller;
@@ -70,7 +72,7 @@ class DiagnosticosTab extends StatelessWidget {
 }
 
 class _DiagnosticoGridItem extends StatelessWidget {
-  final dynamic diagnostico;
+  final FavoritoDiagnosticoModel diagnostico;
   final VoidCallback? onTap;
   final VoidCallback? onRemove;
 
@@ -84,7 +86,7 @@ class _DiagnosticoGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -116,7 +118,7 @@ class _DiagnosticoGridItem extends StatelessWidget {
                         color: FavoritosDesignTokens.diagnosticosColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         FavoritosDesignTokens.diagnosticosIcon,
                         color: FavoritosDesignTokens.diagnosticosColor,
                         size: 18,

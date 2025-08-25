@@ -1,124 +1,85 @@
-// =============================================================================
-// CORE DEPENDENCIES
-// =============================================================================
-import 'package:get_it/get_it.dart';
-
-// =============================================================================
-// EXTERNAL PACKAGES - AUTHENTICATION
-// =============================================================================
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:google_sign_in/google_sign_in.dart';
-
-// =============================================================================
-// EXTERNAL PACKAGES - INFRASTRUCTURE  
-// =============================================================================
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// =============================================================================
-// CORE SERVICES
-// =============================================================================
-import '../cache/cache_service.dart';
-import '../notifications/notification_service.dart';
-import '../optimization/lazy_loader.dart';
-import '../performance/performance_service.dart';
-import '../storage/hive_service.dart';
-
-// =============================================================================
-// FEATURE IMPORTS - AUTH
-// =============================================================================
-import '../../features/auth/data/datasources/auth_local_datasource.dart';
-import '../../features/auth/data/datasources/auth_remote_datasource.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/domain/usecases/auth_usecases.dart';
-
-// =============================================================================
-// FEATURE IMPORTS - ANIMALS
-// =============================================================================
 import '../../features/animals/data/datasources/animal_local_datasource.dart';
 import '../../features/animals/data/datasources/animal_remote_datasource.dart';
 import '../../features/animals/data/repositories/animal_repository_hybrid_impl.dart';
 import '../../features/animals/domain/repositories/animal_repository.dart';
 import '../../features/animals/domain/usecases/add_animal.dart';
+import '../../features/animals/domain/usecases/delete_animal.dart';
 import '../../features/animals/domain/usecases/get_animal_by_id.dart';
 import '../../features/animals/domain/usecases/get_animals.dart';
 import '../../features/animals/domain/usecases/update_animal.dart';
-import '../../features/animals/domain/usecases/delete_animal.dart';
-
-// Features - Appointments
 import '../../features/appointments/data/datasources/appointment_local_datasource.dart';
 import '../../features/appointments/data/datasources/appointment_remote_datasource.dart';
 import '../../features/appointments/data/repositories/appointment_repository_impl.dart';
 import '../../features/appointments/domain/repositories/appointment_repository.dart';
+import '../../features/appointments/domain/usecases/add_appointment.dart';
+import '../../features/appointments/domain/usecases/delete_appointment.dart';
+import '../../features/appointments/domain/usecases/get_appointment_by_id.dart';
 import '../../features/appointments/domain/usecases/get_appointments.dart';
 import '../../features/appointments/domain/usecases/get_upcoming_appointments.dart';
-import '../../features/appointments/domain/usecases/get_appointment_by_id.dart';
-import '../../features/appointments/domain/usecases/add_appointment.dart';
 import '../../features/appointments/domain/usecases/update_appointment.dart';
-import '../../features/appointments/domain/usecases/delete_appointment.dart';
-
-// Features - Vaccines  
-import '../../features/vaccines/data/datasources/vaccine_local_datasource.dart';
-import '../../features/vaccines/data/datasources/vaccine_remote_datasource.dart';
-import '../../features/vaccines/data/repositories/vaccine_repository_impl.dart';
-import '../../features/vaccines/domain/repositories/vaccine_repository.dart';
-import '../../features/vaccines/domain/usecases/get_vaccines.dart';
-import '../../features/vaccines/domain/usecases/add_vaccine.dart';
-
-// Features - Medications
-import '../../features/medications/data/datasources/medication_local_datasource.dart';
-import '../../features/medications/data/repositories/medication_repository_local_only_impl.dart';
-import '../../features/medications/domain/repositories/medication_repository.dart';
-import '../../features/medications/domain/usecases/get_medications.dart';
-import '../../features/medications/domain/usecases/get_medications_by_animal_id.dart';
-import '../../features/medications/domain/usecases/get_active_medications.dart';
-import '../../features/medications/domain/usecases/add_medication.dart';
-import '../../features/medications/domain/usecases/update_medication.dart';
-import '../../features/medications/domain/usecases/delete_medication.dart' show DeleteMedication, DiscontinueMedication;
-import '../../features/medications/domain/usecases/get_medication_by_id.dart';
-import '../../features/medications/domain/usecases/get_expiring_medications.dart';
-
-// Features - Weight
-import '../../features/weight/data/datasources/weight_local_datasource.dart';
-import '../../features/weight/data/repositories/weight_repository_impl.dart';
-import '../../features/weight/domain/repositories/weight_repository.dart';
-import '../../features/weight/domain/usecases/get_weights.dart';
-
-// Features - Reminders
-import '../../features/reminders/data/datasources/reminder_local_datasource.dart';
-import '../../features/reminders/data/datasources/reminder_remote_datasource.dart';
-import '../../features/reminders/data/repositories/reminder_repository_hybrid_impl.dart';
-import '../../features/reminders/domain/repositories/reminder_repository.dart';
-import '../../features/reminders/domain/usecases/get_reminders.dart';
-import '../../features/reminders/domain/usecases/add_reminder.dart';
-import '../../features/reminders/domain/usecases/update_reminder.dart';
-import '../../features/reminders/domain/usecases/delete_reminder.dart';
-
-// Features - Expenses
+import '../../features/auth/data/datasources/auth_local_datasource.dart';
+import '../../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/auth_usecases.dart';
+import '../../features/calculators/domain/strategies/body_condition_strategy.dart';
 import '../../features/expenses/data/datasources/expense_local_datasource.dart';
 import '../../features/expenses/data/datasources/expense_remote_datasource.dart';
 import '../../features/expenses/data/repositories/expense_repository_hybrid_impl.dart';
 import '../../features/expenses/domain/repositories/expense_repository.dart';
 import '../../features/expenses/domain/usecases/expense_usecases.dart';
-import '../../features/weight/domain/usecases/get_weights_by_animal_id.dart';
-import '../../features/weight/domain/usecases/add_weight.dart';
-import '../../features/weight/domain/usecases/get_weight_statistics.dart';
-import '../../features/weight/domain/usecases/update_weight.dart';
-
-// Features - Subscription
+import '../../features/medications/data/datasources/medication_local_datasource.dart';
+import '../../features/medications/data/repositories/medication_repository_local_only_impl.dart';
+import '../../features/medications/domain/repositories/medication_repository.dart';
+import '../../features/medications/domain/usecases/add_medication.dart';
+import '../../features/medications/domain/usecases/delete_medication.dart'
+    show DeleteMedication, DiscontinueMedication;
+import '../../features/medications/domain/usecases/get_active_medications.dart';
+import '../../features/medications/domain/usecases/get_expiring_medications.dart';
+import '../../features/medications/domain/usecases/get_medication_by_id.dart';
+import '../../features/medications/domain/usecases/get_medications.dart';
+import '../../features/medications/domain/usecases/get_medications_by_animal_id.dart';
+import '../../features/medications/domain/usecases/update_medication.dart';
+import '../../features/reminders/data/datasources/reminder_local_datasource.dart';
+import '../../features/reminders/data/datasources/reminder_remote_datasource.dart';
+import '../../features/reminders/data/repositories/reminder_repository_hybrid_impl.dart';
+import '../../features/reminders/domain/repositories/reminder_repository.dart';
+import '../../features/reminders/domain/usecases/add_reminder.dart';
+import '../../features/reminders/domain/usecases/delete_reminder.dart';
+import '../../features/reminders/domain/usecases/get_reminders.dart';
+import '../../features/reminders/domain/usecases/update_reminder.dart';
 import '../../features/subscription/data/datasources/subscription_local_datasource.dart';
 import '../../features/subscription/data/datasources/subscription_remote_datasource.dart';
 import '../../features/subscription/data/repositories/subscription_repository_impl.dart';
 import '../../features/subscription/domain/repositories/subscription_repository.dart';
 import '../../features/subscription/domain/usecases/subscription_usecases.dart';
-
-// Features - Calculators
-import '../../features/calculators/domain/strategies/body_condition_strategy.dart';
-
-// Core Auth Services
+import '../../features/vaccines/data/datasources/vaccine_local_datasource.dart';
+import '../../features/vaccines/data/datasources/vaccine_remote_datasource.dart';
+import '../../features/vaccines/data/repositories/vaccine_repository_impl.dart';
+import '../../features/vaccines/domain/repositories/vaccine_repository.dart';
+import '../../features/vaccines/domain/usecases/add_vaccine.dart';
+import '../../features/vaccines/domain/usecases/get_vaccines.dart';
+import '../../features/weight/data/datasources/weight_local_datasource.dart';
+import '../../features/weight/data/repositories/weight_repository_impl.dart';
+import '../../features/weight/domain/repositories/weight_repository.dart';
+import '../../features/weight/domain/usecases/add_weight.dart';
+import '../../features/weight/domain/usecases/get_weight_statistics.dart';
+import '../../features/weight/domain/usecases/get_weights.dart';
+import '../../features/weight/domain/usecases/get_weights_by_animal_id.dart';
+import '../../features/weight/domain/usecases/update_weight.dart';
 import '../auth/auth_service.dart';
+import '../cache/cache_service.dart';
+import '../notifications/notification_service.dart';
+import '../optimization/lazy_loader.dart';
+import '../performance/performance_service.dart' as local_perf;
+import '../storage/hive_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -194,9 +155,9 @@ void _registerCoreServices() {
     () => CacheService(),
   );
   
-  // Performance Service
-  getIt.registerLazySingleton<PerformanceService>(
-    () => PerformanceService(),
+  // Performance Service (Local)
+  getIt.registerLazySingleton<local_perf.PerformanceService>(
+    () => local_perf.PerformanceService(),
   );
   
   // Lazy Loader

@@ -1,5 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:app_petiveti/features/animals/domain/entities/animal.dart';
+import 'package:app_petiveti/features/animals/domain/entities/animal_enums.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Animal Entity Tests', () {
@@ -8,13 +9,14 @@ void main() {
     setUp(() {
       testAnimal = Animal(
         id: 'test_001',
+        userId: 'user_001',
         name: 'Rex',
-        species: 'Dog',
+        species: AnimalSpecies.dog,
         breed: 'Labrador',
         birthDate: DateTime(2020, 1, 1), // 3+ years old
-        gender: 'Male',
+        gender: AnimalGender.male,
         color: 'Golden',
-        currentWeight: 25.5,
+        weight: 25.5,
         notes: 'Docile animal',
         createdAt: DateTime(2023, 1, 1),
         updatedAt: DateTime(2023, 1, 2),
@@ -24,9 +26,9 @@ void main() {
     test('should create animal with correct properties', () {
       expect(testAnimal.id, equals('test_001'));
       expect(testAnimal.name, equals('Rex'));
-      expect(testAnimal.species, equals('Dog'));
+      expect(testAnimal.species, equals(AnimalSpecies.dog));
       expect(testAnimal.breed, equals('Labrador'));
-      expect(testAnimal.gender, equals('Male'));
+      expect(testAnimal.gender, equals(AnimalGender.male));
       expect(testAnimal.currentWeight, equals(25.5));
       expect(testAnimal.color, equals('Golden'));
       expect(testAnimal.notes, equals('Docile animal'));
@@ -35,7 +37,7 @@ void main() {
 
     test('should calculate correct age in days', () {
       final now = DateTime.now();
-      final expectedDays = now.difference(testAnimal.birthDate).inDays;
+      final expectedDays = now.difference(testAnimal.birthDate!).inDays;
       expect(testAnimal.ageInDays, equals(expectedDays));
     });
 
@@ -51,21 +53,21 @@ void main() {
 
     test('should return correct display age for years', () {
       final youngAnimal = testAnimal.copyWith(
-        birthDate: DateTime.now().subtract(Duration(days: 400)), // More than 1 year
+        birthDate: DateTime.now().subtract(const Duration(days: 400)), // More than 1 year
       );
       expect(youngAnimal.displayAge, contains('ano'));
     });
 
     test('should return correct display age for months', () {
       final puppyAnimal = testAnimal.copyWith(
-        birthDate: DateTime.now().subtract(Duration(days: 60)), // About 2 months
+        birthDate: DateTime.now().subtract(const Duration(days: 60)), // About 2 months
       );
       expect(puppyAnimal.displayAge, contains('mês'));
     });
 
     test('should return correct display age for days', () {
       final newBornAnimal = testAnimal.copyWith(
-        birthDate: DateTime.now().subtract(Duration(days: 15)), // 15 days old
+        birthDate: DateTime.now().subtract(const Duration(days: 15)), // 15 days old
       );
       expect(newBornAnimal.displayAge, contains('dia'));
     });
@@ -73,7 +75,7 @@ void main() {
     test('should copy animal with new values', () {
       final copied = testAnimal.copyWith(
         name: 'Max',
-        currentWeight: 30.0,
+        weight: 30.0,
       );
 
       expect(copied.name, equals('Max'));
@@ -85,13 +87,14 @@ void main() {
     test('should maintain equality based on properties', () {
       final animal1 = Animal(
         id: 'test_001',
+        userId: 'user_001',
         name: 'Rex',
-        species: 'Dog',
+        species: AnimalSpecies.dog,
         breed: 'Labrador',
         birthDate: DateTime(2020, 1, 1),
-        gender: 'Male',
+        gender: AnimalGender.male,
         color: 'Golden',
-        currentWeight: 25.5,
+        weight: 25.5,
         notes: 'Docile animal',
         createdAt: DateTime(2023, 1, 1),
         updatedAt: DateTime(2023, 1, 2),
@@ -99,13 +102,14 @@ void main() {
 
       final animal2 = Animal(
         id: 'test_001',
+        userId: 'user_001',
         name: 'Rex',
-        species: 'Dog',
+        species: AnimalSpecies.dog,
         breed: 'Labrador',
         birthDate: DateTime(2020, 1, 1),
-        gender: 'Male',
+        gender: AnimalGender.male,
         color: 'Golden',
-        currentWeight: 25.5,
+        weight: 25.5,
         notes: 'Docile animal',
         createdAt: DateTime(2023, 1, 1),
         updatedAt: DateTime(2023, 1, 2),
@@ -118,13 +122,14 @@ void main() {
     test('should handle null values correctly', () {
       final animalWithNulls = Animal(
         id: 'test_002',
+        userId: 'user_002',
         name: 'Miau',
-        species: 'Cat',
+        species: AnimalSpecies.cat,
         breed: 'Persian',
         birthDate: DateTime(2021, 6, 1),
-        gender: 'Female',
+        gender: AnimalGender.female,
         color: 'White',
-        currentWeight: 4.5,
+        weight: 4.5,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         // notes is null
@@ -132,12 +137,12 @@ void main() {
 
       expect(animalWithNulls.notes, isNull);
       expect(animalWithNulls.name, equals('Miau'));
-      expect(animalWithNulls.species, equals('Cat'));
+      expect(animalWithNulls.species, equals(AnimalSpecies.cat));
     });
 
     test('should handle optional photo field', () {
       final animalWithPhoto = testAnimal.copyWith(
-        photo: 'path/to/photo.jpg',
+        photoUrl: 'path/to/photo.jpg',
       );
 
       expect(animalWithPhoto.photo, equals('path/to/photo.jpg'));
@@ -149,23 +154,23 @@ void main() {
       final copied = testAnimal.copyWith(
         id: 'new_id',
         name: 'Buddy',
-        species: 'Cat',
+        species: AnimalSpecies.cat,
         breed: 'Siamese',
         birthDate: newDate,
-        gender: 'Female',
+        gender: AnimalGender.female,
         color: 'Black',
-        currentWeight: 12.0,
-        photo: 'new_photo.jpg',
+        weight: 12.0,
+        photoUrl: 'new_photo.jpg',
         notes: 'Updated notes',
-        isDeleted: true,
+        isActive: false,
       );
 
       expect(copied.id, equals('new_id'));
       expect(copied.name, equals('Buddy'));
-      expect(copied.species, equals('Cat'));
+      expect(copied.species, equals(AnimalSpecies.cat));
       expect(copied.breed, equals('Siamese'));
       expect(copied.birthDate, equals(newDate));
-      expect(copied.gender, equals('Female'));
+      expect(copied.gender, equals(AnimalGender.female));
       expect(copied.color, equals('Black'));
       expect(copied.currentWeight, equals(12.0));
       expect(copied.photo, equals('new_photo.jpg'));
@@ -174,18 +179,19 @@ void main() {
     });
 
     test('should handle different species correctly', () {
-      final species = ['Dog', 'Cat', 'Rabbit', 'Hamster', 'Bird'];
+      final species = [AnimalSpecies.dog, AnimalSpecies.cat, AnimalSpecies.rabbit, AnimalSpecies.hamster, AnimalSpecies.bird];
       
       for (final animalSpecies in species) {
         final animal = Animal(
-          id: 'test_${animalSpecies.toLowerCase()}',
+          id: 'test_${animalSpecies.name}',
+          userId: 'user_test',
           name: 'Pet',
           species: animalSpecies,
           breed: 'Mixed',
           birthDate: DateTime(2020, 1, 1),
-          gender: 'Male',
+          gender: AnimalGender.male,
           color: 'Brown',
-          currentWeight: 5.0,
+          weight: 5.0,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -196,18 +202,19 @@ void main() {
     });
 
     test('should handle gender variations', () {
-      final genders = ['Male', 'Female'];
+      final genders = [AnimalGender.male, AnimalGender.female];
       
       for (final gender in genders) {
         final animal = Animal(
-          id: 'test_${gender.toLowerCase()}',
+          id: 'test_${gender.name}',
+          userId: 'user_test',
           name: 'Pet',
-          species: 'Dog',
+          species: AnimalSpecies.dog,
           breed: 'Labrador',
           birthDate: DateTime(2020, 1, 1),
           gender: gender,
           color: 'Golden',
-          currentWeight: 25.0,
+          weight: 25.0,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -237,13 +244,14 @@ void main() {
     test('should maintain immutability', () {
       final original = Animal(
         id: 'immutable_test',
+        userId: 'user_test',
         name: 'Original',
-        species: 'Dog',
+        species: AnimalSpecies.dog,
         breed: 'Poodle',
         birthDate: DateTime(2020, 1, 1),
-        gender: 'Male',
+        gender: AnimalGender.male,
         color: 'White',
-        currentWeight: 15.0,
+        weight: 15.0,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -259,7 +267,7 @@ void main() {
       final weights = [0.5, 1.0, 5.5, 25.0, 50.5, 100.0];
       
       for (final weight in weights) {
-        final animal = testAnimal.copyWith(currentWeight: weight);
+        final animal = testAnimal.copyWith(weight: weight);
         expect(animal.currentWeight, equals(weight));
       }
     });
@@ -283,13 +291,14 @@ void main() {
       expect(
         () => Animal(
           id: 'valid_001',
+          userId: 'user_valid',
           name: 'Valid Pet',
-          species: 'Dog',
+          species: AnimalSpecies.dog,
           breed: 'Golden Retriever',
           birthDate: DateTime(2020, 1, 1),
-          gender: 'Male',
+          gender: AnimalGender.male,
           color: 'Golden',
-          currentWeight: 30.0,
+          weight: 30.0,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
@@ -311,13 +320,14 @@ void main() {
         expect(
           () => Animal(
             id: 'breed_test',
+            userId: 'user_breed',
             name: 'Pet',
-            species: 'Dog',
+            species: AnimalSpecies.dog,
             breed: breed,
             birthDate: DateTime(2020, 1, 1),
-            gender: 'Male',
+            gender: AnimalGender.male,
             color: 'Brown',
-            currentWeight: 25.0,
+            weight: 25.0,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),
@@ -341,13 +351,14 @@ void main() {
         expect(
           () => Animal(
             id: 'color_test',
+            userId: 'user_color',
             name: 'Pet',
-            species: 'Cat',
+            species: AnimalSpecies.cat,
             breed: 'Persian',
             birthDate: DateTime(2020, 1, 1),
-            gender: 'Female',
+            gender: AnimalGender.female,
             color: color,
-            currentWeight: 4.5,
+            weight: 4.5,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),

@@ -124,18 +124,18 @@ class AppointmentModel extends HiveObject {
 
   factory AppointmentModel.fromMap(Map<String, dynamic> map) {
     return AppointmentModel(
-      id: map['id'] ?? '',
-      animalId: map['animalId'] ?? '',
-      veterinarianName: map['veterinario'] ?? map['veterinarianName'] ?? '',
-      dateTimestamp: map['dataConsulta'] ?? map['dateTimestamp'] ?? 0,
-      reason: map['motivo'] ?? map['reason'] ?? '',
-      diagnosis: map['diagnostico'] ?? map['diagnosis'],
-      notes: map['observacoes'] ?? map['notes'],
-      status: map['status'] ?? 0,
-      cost: (map['valor'] ?? map['cost'])?.toDouble(),
-      createdAtTimestamp: map['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
-      updatedAtTimestamp: map['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch,
-      isDeleted: map['isDeleted'] ?? false,
+      id: (map['id'] as String?) ?? '',
+      animalId: (map['animalId'] as String?) ?? '',
+      veterinarianName: (map['veterinario'] as String?) ?? (map['veterinarianName'] as String?) ?? '',
+      dateTimestamp: (map['dataConsulta'] as int?) ?? (map['dateTimestamp'] as int?) ?? 0,
+      reason: (map['motivo'] as String?) ?? (map['reason'] as String?) ?? '',
+      diagnosis: (map['diagnostico'] as String?) ?? (map['diagnosis'] as String?),
+      notes: (map['observacoes'] as String?) ?? (map['notes'] as String?),
+      status: (map['status'] as int?) ?? 0,
+      cost: ((map['valor'] ?? map['cost']) as num?)?.toDouble(),
+      createdAtTimestamp: (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      updatedAtTimestamp: (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      isDeleted: (map['isDeleted'] as bool?) ?? false,
     );
   }
 

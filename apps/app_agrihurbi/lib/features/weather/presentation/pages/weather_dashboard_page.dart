@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/weather_provider.dart';
+import '../widgets/rain_gauges_summary.dart';
 import '../widgets/weather_current_card.dart';
 import '../widgets/weather_measurements_list.dart';
-import '../widgets/rain_gauges_summary.dart';
 import '../widgets/weather_statistics_card.dart';
-import '../../domain/entities/weather_measurement_entity.dart';
 
 /// Main weather dashboard page
 /// Displays current weather, measurements, rain gauges, and statistics
@@ -135,8 +135,8 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddMeasurementDialog(),
-        child: const Icon(Icons.add),
         tooltip: 'Adicionar medição manual',
+        child: const Icon(Icons.add),
       ),
     );
   }

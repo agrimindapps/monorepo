@@ -2,9 +2,9 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/local_data_service.dart';
-import '../models/fuel_supply_model.dart';
-import '../../domain/entities/fuel_record_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../domain/entities/fuel_record_entity.dart';
+import '../models/fuel_supply_model.dart';
 
 abstract class FuelLocalDataSource {
   Future<List<FuelRecordEntity>> getAllFuelRecords();
@@ -86,7 +86,7 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
       final existingData = _localDataService.getFuelRecord(fuelRecord.id);
       
       if (existingData == null) {
-        throw CacheException('Registro não encontrado para atualização');
+        throw const CacheException('Registro não encontrado para atualização');
       }
       
       final updatedRecord = fuelRecord.copyWith(
@@ -185,7 +185,7 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
       previousOdometer: null,
       distanceTraveled: null,
       consumption: null,
-      metadata: {},
+      metadata: const {},
     );
   }
 

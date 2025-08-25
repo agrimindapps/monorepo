@@ -4,106 +4,86 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 
-/// Sistema de cache otimizado para high performance
-/// 
-/// Implementa múltiplas estratégias de cache:
-/// - LRU (Least Recently Used)
-/// - TTL (Time To Live)
-/// - Size-based eviction
-/// - Memory pressure aware
-class OptimizedCacheManager extends ChangeNotifier {
-  static final OptimizedCacheManager _instance = OptimizedCacheManager._internal();
-  factory OptimizedCacheManager() => _instance;
-  OptimizedCacheManager._internal();
+// Configurações padrão
+const int _defaultMaxSize = 100;
+const Duration _defaultTtl = Duration(minutes: 30);
+const int _maxMemoryUsageKB = 5 * 1024; // 5MB
 
-  // Configurações padrão
-  static const int _defaultMaxSize = 100;
-  static const Duration _defaultTtl = Duration(minutes: 30);
-  static const int _maxMemoryUsageKB = 5 * 1024; // 5MB
+/// Configuração de cache por camada
+class CacheConfig {
+  final int maxSize;
+  final Duration ttl;
+  final bool enableCompression;
+  final bool enableSerialization;
+  final int priority; // 1 = alta, 5 = baixa
 
-  // Caches especializados
-  final Map<String, _CacheLayer> _cacheLayers = {};
+  const CacheConfig({
+    this.maxSize = _defaultMaxSize,
+    this.ttl = _defaultTtl,
+    this.enableCompression = false,
+    this.enableSerialization = true,
+    this.priority = 3,
+  });
+}
+
+/// Entrada de cache com metadados
+class CacheEntry<T> {
+  final String key;
+  final T value;
+  final DateTime createdAt;
+  final DateTime? expiresAt;
+  final int accessCount;
+  final DateTime lastAccessed;
+  final int sizeBytes;
+
+  CacheEntry({
+    required this.key,
+    required this.value,
+    required this.createdAt,
+    this.expiresAt,
+    this.accessCount = 1,
+    required this.lastAccessed,
+    required this.sizeBytes,
+  });
+
+  CacheEntry<T> copyWithAccess() {
+    return CacheEntry<T>(
+      key: key,
+      value: value,
+      createdAt: createdAt,
+      expiresAt: expiresAt,
+      accessCount: accessCount + 1,
+      lastAccessed: DateTime.now(),
+      sizeBytes: sizeBytes,
+    );
+  }
+
+  bool get isExpired {
+    if (expiresAt == null) return false;
+    return DateTime.now().isAfter(expiresAt!);
+  }
+
+  double get score {
+    // Score baseado em frequência e recência
+    final frequency = accessCount.toDouble();
+    final recency = DateTime.now().difference(lastAccessed).inMinutes.toDouble();
+    return frequency / (recency + 1);
+  }
+}
+
+/// Camada de cache interna
+class _CacheLayer<T> {
+  final String name;
+  final CacheConfig config;
+  final LinkedHashMap<String, CacheEntry<T>> _data = LinkedHashMap();
   
-  // Estatísticas
-  int _totalHits = 0;
-  int _totalMisses = 0;
-  int _totalEvictions = 0;
+  int _hits = 0;
+  int _misses = 0;
+  int _evictions = 0;
 
-  /// Configuração de cache por camada
-  class CacheConfig {
-    final int maxSize;
-    final Duration ttl;
-    final bool enableCompression;
-    final bool enableSerialization;
-    final int priority; // 1 = alta, 5 = baixa
+  _CacheLayer(this.name, this.config);
 
-    const CacheConfig({
-      this.maxSize = _defaultMaxSize,
-      this.ttl = _defaultTtl,
-      this.enableCompression = false,
-      this.enableSerialization = true,
-      this.priority = 3,
-    });
-  }
-
-  /// Entrada de cache com metadados
-  class CacheEntry<T> {
-    final String key;
-    final T value;
-    final DateTime createdAt;
-    final DateTime? expiresAt;
-    final int accessCount;
-    final DateTime lastAccessed;
-    final int sizeBytes;
-
-    CacheEntry({
-      required this.key,
-      required this.value,
-      required this.createdAt,
-      this.expiresAt,
-      this.accessCount = 1,
-      required this.lastAccessed,
-      required this.sizeBytes,
-    });
-
-    CacheEntry<T> copyWithAccess() {
-      return CacheEntry<T>(
-        key: key,
-        value: value,
-        createdAt: createdAt,
-        expiresAt: expiresAt,
-        accessCount: accessCount + 1,
-        lastAccessed: DateTime.now(),
-        sizeBytes: sizeBytes,
-      );
-    }
-
-    bool get isExpired {
-      if (expiresAt == null) return false;
-      return DateTime.now().isAfter(expiresAt!);
-    }
-
-    double get score {
-      // Score baseado em frequência e recência
-      final frequency = accessCount.toDouble();
-      final recency = DateTime.now().difference(lastAccessed).inMinutes.toDouble();
-      return frequency / (recency + 1);
-    }
-  }
-
-  /// Camada de cache interna
-  class _CacheLayer<T> {
-    final String name;
-    final CacheConfig config;
-    final LinkedHashMap<String, CacheEntry<T>> _data = LinkedHashMap();
-    
-    int _hits = 0;
-    int _misses = 0;
-    int _evictions = 0;
-
-    _CacheLayer(this.name, this.config);
-
-    CacheEntry<T>? get(String key) {
+  CacheEntry<T>? get(String key) {
       final entry = _data[key];
       
       if (entry == null) {
@@ -237,6 +217,26 @@ class OptimizedCacheManager extends ChangeNotifier {
     }
   }
 
+/// Sistema de cache otimizado para high performance
+/// 
+/// Implementa múltiplas estratégias de cache:
+/// - LRU (Least Recently Used)
+/// - TTL (Time To Live)
+/// - Size-based eviction
+/// - Memory pressure aware
+class OptimizedCacheManager extends ChangeNotifier {
+  static final OptimizedCacheManager _instance = OptimizedCacheManager._internal();
+  factory OptimizedCacheManager() => _instance;
+  OptimizedCacheManager._internal();
+
+  // Caches especializados
+  final Map<String, _CacheLayer<dynamic>> _cacheLayers = {};
+  
+  // Estatísticas
+  int _totalHits = 0;
+  int _totalMisses = 0;
+  int _totalEvictions = 0;
+
   /// Cria ou obtém uma camada de cache
   _CacheLayer<T> _getOrCreateLayer<T>(String layerName, CacheConfig config) {
     if (!_cacheLayers.containsKey(layerName)) {
@@ -323,8 +323,8 @@ class OptimizedCacheManager extends ChangeNotifier {
   /// Obtém estatísticas gerais
   Map<String, dynamic> getGlobalStats() {
     final layerStats = _cacheLayers.values.map((layer) => layer.getStats()).toList();
-    final totalSize = layerStats.fold<int>(0, (sum, stats) => sum + stats['size']);
-    final totalSizeKB = layerStats.fold<double>(0.0, (sum, stats) => sum + stats['total_size_kb']);
+    final totalSize = layerStats.fold<int>(0, (int sum, Map<String, dynamic> stats) => sum + (stats['size'] as int));
+    final totalSizeKB = layerStats.fold<double>(0.0, (double sum, Map<String, dynamic> stats) => sum + (stats['total_size_kb'] as double));
 
     return {
       'total_layers': _cacheLayers.length,
@@ -357,6 +357,8 @@ class OptimizedCacheManager extends ChangeNotifier {
 
 /// Camadas de cache pré-definidas para o app
 class CacheLayers {
+  // Private constructor to prevent instantiation
+  CacheLayers._();
   static const String calculators = 'calculators';
   static const String livestock = 'livestock';
   static const String weather = 'weather';
@@ -367,43 +369,43 @@ class CacheLayers {
   static const String api = 'api';
 
   /// Configurações otimizadas por tipo de dado
-  static const Map<String, OptimizedCacheManager.CacheConfig> configs = {
-    calculators: OptimizedCacheManager.CacheConfig(
+  static final Map<String, CacheConfig> configs = {
+    calculators: const CacheConfig(
       maxSize: 50,
       ttl: Duration(hours: 2),
       priority: 2,
     ),
-    livestock: OptimizedCacheManager.CacheConfig(
+    livestock: const CacheConfig(
       maxSize: 200,
       ttl: Duration(hours: 6),
       priority: 1,
     ),
-    weather: OptimizedCacheManager.CacheConfig(
+    weather: const CacheConfig(
       maxSize: 100,
       ttl: Duration(minutes: 15),
       priority: 2,
     ),
-    news: OptimizedCacheManager.CacheConfig(
+    news: const CacheConfig(
       maxSize: 50,
       ttl: Duration(hours: 1),
       priority: 3,
     ),
-    user: OptimizedCacheManager.CacheConfig(
+    user: const CacheConfig(
       maxSize: 10,
       ttl: Duration(hours: 24),
       priority: 1,
     ),
-    settings: OptimizedCacheManager.CacheConfig(
+    settings: const CacheConfig(
       maxSize: 20,
       ttl: Duration(days: 7),
       priority: 1,
     ),
-    images: OptimizedCacheManager.CacheConfig(
+    images: const CacheConfig(
       maxSize: 30,
       ttl: Duration(hours: 4),
       priority: 4,
     ),
-    api: OptimizedCacheManager.CacheConfig(
+    api: const CacheConfig(
       maxSize: 100,
       ttl: Duration(minutes: 10),
       priority: 3,
@@ -421,13 +423,13 @@ mixin CacheAwareMixin {
     String key,
     Future<T> Function() factory,
   ) async {
-    final config = CacheLayers.configs[layer] ?? const OptimizedCacheManager.CacheConfig();
+    final config = CacheLayers.configs[layer] ?? const CacheConfig();
     return await _cache.getOrPut(layer, key, factory, config: config);
   }
 
   /// Cache simples
   void putCache<T>(String layer, String key, T value) {
-    final config = CacheLayers.configs[layer] ?? const OptimizedCacheManager.CacheConfig();
+    final config = CacheLayers.configs[layer] ?? const CacheConfig();
     _cache.put(layer, key, value, config: config);
   }
 

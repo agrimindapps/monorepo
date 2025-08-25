@@ -26,43 +26,43 @@ class GasOMeterDatabaseInspectorService {
   /// Inicializa o serviço e registra as boxes customizadas
   void initialize() {
     final customBoxes = [
-      CustomBoxType(
+      const CustomBoxType(
         key: vehiclesBoxName,
         displayName: 'Veículos',
         description: 'Dados dos veículos cadastrados no app',
         module: 'Veículos',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: fuelRecordsBoxName,
         displayName: 'Abastecimentos',
         description: 'Registros de abastecimento de combustível',
         module: 'Combustível',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: maintenanceBoxName,
         displayName: 'Manutenções',
         description: 'Registros de manutenção dos veículos',
         module: 'Manutenção',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: odometerBoxName,
         displayName: 'Odômetro',
         description: 'Leituras do odômetro dos veículos',
         module: 'Odômetro',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: expensesBoxName,
         displayName: 'Despesas',
         description: 'Despesas relacionadas aos veículos',
         module: 'Despesas',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: syncQueueBoxName,
         displayName: 'Fila de Sincronização',
         description: 'Fila de itens pendentes para sincronização',
         module: 'Sincronização',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: categoriesBoxName,
         displayName: 'Categorias',
         description: 'Categorias para classificação de despesas',

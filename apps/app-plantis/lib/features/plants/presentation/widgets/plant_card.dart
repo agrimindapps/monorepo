@@ -14,7 +14,7 @@ class PlantCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -153,12 +153,12 @@ class PlantCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.schedule, color: const Color(0xFFFF9500), size: 14),
+          const Icon(Icons.schedule, color: Color(0xFFFF9500), size: 14),
           const SizedBox(width: 6),
           Text(
             '$pendingTasks pendentes',
-            style: TextStyle(
-              color: const Color(0xFFFF9500),
+            style: const TextStyle(
+              color: Color(0xFFFF9500),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

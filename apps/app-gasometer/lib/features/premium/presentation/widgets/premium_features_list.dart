@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/premium_provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../providers/premium_provider.dart';
 
 class PremiumFeaturesList extends StatelessWidget {
   const PremiumFeaturesList({super.key});
@@ -13,7 +14,7 @@ class PremiumFeaturesList extends StatelessWidget {
       builder: (context, premiumProvider, child) {
         final features = _getPremiumFeatures();
         
-        return Container(
+        return DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
@@ -31,7 +32,7 @@ class PremiumFeaturesList extends StatelessWidget {
             itemBuilder: (context, index) {
               final feature = features[index];
               return FutureBuilder<bool>(
-                future: _checkFeatureAccess(premiumProvider, feature['id']),
+                future: _checkFeatureAccess(premiumProvider, feature['id'] as String? ?? ''),
                 builder: (context, snapshot) {
                   final hasAccess = snapshot.data ?? false;
                   
@@ -46,7 +47,7 @@ class PremiumFeaturesList extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Icon(
-                        feature['icon'],
+                        feature['icon'] as IconData? ?? Icons.help,
                         color: hasAccess 
                           ? AppColors.success
                           : AppColors.grey500,
@@ -54,11 +55,11 @@ class PremiumFeaturesList extends StatelessWidget {
                       ),
                     ),
                     title: Text(
-                      feature['title'],
+                      feature['title'] as String? ?? '',
                       style: AppTextStyles.titleSmall,
                     ),
                     subtitle: Text(
-                      feature['description'],
+                      feature['description'] as String? ?? '',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.grey600,
                       ),

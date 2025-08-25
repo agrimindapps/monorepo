@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 /// Service para gerenciar funcionalidades premium do app
 /// 
@@ -19,7 +19,13 @@ class PremiumService {
   /// Verifica se o usuário tem acesso premium ativo
   Future<bool> hasActiveSubscription() async {
     try {
-      final hasSubscription = await _revenueCatService.hasActiveSubscription();
+      final result = await _revenueCatService.hasActiveSubscription();
+      
+      // Handle Either<Failure, bool> return type
+      final hasSubscription = result.fold(
+        (failure) => false, // Return false on failure
+        (success) => success, // Return the boolean result
+      );
       
       await _analyticsService.logEvent(
         'premium_status_checked',
@@ -191,7 +197,13 @@ class PremiumService {
   /// Obtém informações sobre assinatura
   Future<SubscriptionInfo> getSubscriptionInfo() async {
     try {
-      final hasSubscription = await _revenueCatService.hasActiveSubscription();
+      final result = await _revenueCatService.hasActiveSubscription();
+      
+      // Handle Either<Failure, bool> return type
+      final hasSubscription = result.fold(
+        (failure) => false,
+        (success) => success,
+      );
       
       // Se não tem assinatura, retorna informações básicas
       if (!hasSubscription) {

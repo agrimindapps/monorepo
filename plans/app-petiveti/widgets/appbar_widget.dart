@@ -19,7 +19,7 @@ class CustomLocalAppBarVet extends StatelessWidget
   Widget build(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(60),
-      child: Container(
+      child: DecoratedBox(
         decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(

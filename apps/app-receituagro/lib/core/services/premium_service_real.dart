@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:core/core.dart';
-import '../repositories/premium_hive_repository.dart';
-import '../models/premium_status_hive.dart';
-import '../interfaces/i_premium_service.dart';
-import 'navigation_service.dart';
 import 'dart:async';
+
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
+import '../interfaces/i_premium_service.dart';
+import '../models/premium_status_hive.dart';
+import '../repositories/premium_hive_repository.dart';
+import 'navigation_service.dart';
 
 /// Service premium real que integra RevenueCat com cache Hive local
 /// Unifica todas as interfaces IPremiumService fragmentadas do projeto

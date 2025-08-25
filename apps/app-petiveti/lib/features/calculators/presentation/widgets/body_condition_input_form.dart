@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/body_condition_provider.dart';
 import '../../domain/entities/body_condition_input.dart';
+import '../providers/body_condition_provider.dart';
 
 /// Formulário de entrada para cálculo de condição corporal
 class BodyConditionInputForm extends ConsumerStatefulWidget {

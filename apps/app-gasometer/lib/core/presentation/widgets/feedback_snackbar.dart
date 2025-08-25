@@ -122,7 +122,7 @@ class FeedbackSnackBar {
       SnackBar(
         content: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 16.0,
               height: 16.0,
               child: CircularProgressIndicator(
@@ -236,13 +236,13 @@ class CustomSnackBar extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   const CustomSnackBar({
-    Key? key,
+    super.key,
     required this.message,
     required this.type,
     this.onAction,
     this.actionLabel,
     this.onDismiss,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -322,12 +322,12 @@ class FloatingFeedback extends StatefulWidget {
   final VoidCallback? onDismiss;
 
   const FloatingFeedback({
-    Key? key,
+    super.key,
     required this.message,
     required this.type,
     this.duration = const Duration(seconds: 3),
     this.onDismiss,
-  }) : super(key: key);
+  });
 
   @override
   State<FloatingFeedback> createState() => _FloatingFeedbackState();

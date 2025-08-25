@@ -1,7 +1,8 @@
 import 'package:hive/hive.dart';
+
 import '../models/favorito_defensivo_model.dart';
-import '../models/favorito_praga_model.dart';
 import '../models/favorito_diagnostico_model.dart';
+import '../models/favorito_praga_model.dart';
 import '../services/favoritos_data_service.dart';
 
 class FavoritosHiveRepository implements IFavoritosRepository {

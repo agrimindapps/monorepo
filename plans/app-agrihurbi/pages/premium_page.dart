@@ -59,7 +59,7 @@ class _AgriHurbiPremiumPageState extends State<AgriHurbiPremiumPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+              background: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,

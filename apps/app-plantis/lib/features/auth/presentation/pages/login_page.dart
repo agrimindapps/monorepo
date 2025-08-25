@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -112,7 +113,7 @@ class _LoginPageState extends State<LoginPage>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.eco,
                               size: 32,
                               color: PlantisColors.primary,
@@ -161,7 +162,7 @@ class _LoginPageState extends State<LoginPage>
                                         ),
                                         child: Column(
                                           children: [
-                                            Text(
+                                            const Text(
                                               'Entrar',
                                               style: TextStyle(
                                                 color: Colors.black87,
@@ -286,7 +287,7 @@ class _LoginPageState extends State<LoginPage>
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                             ),
-                                            child: Icon(
+                                            child: const Icon(
                                               Icons.email_outlined,
                                               color: PlantisColors.primary,
                                               size: 20,
@@ -315,7 +316,7 @@ class _LoginPageState extends State<LoginPage>
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: PlantisColors.primary,
                                               width: 2,
                                             ),
@@ -375,7 +376,7 @@ class _LoginPageState extends State<LoginPage>
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                             ),
-                                            child: Icon(
+                                            child: const Icon(
                                               Icons.lock_outline,
                                               color: PlantisColors.primary,
                                               size: 20,
@@ -425,7 +426,7 @@ class _LoginPageState extends State<LoginPage>
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: PlantisColors.primary,
                                               width: 2,
                                             ),
@@ -512,7 +513,7 @@ class _LoginPageState extends State<LoginPage>
                                                   MaterialTapTargetSize
                                                       .shrinkWrap,
                                             ),
-                                            child: Text(
+                                            child: const Text(
                                               'Esqueceu sua senha?',
                                               style: TextStyle(
                                                 color: PlantisColors.primary,
@@ -610,7 +611,7 @@ class _LoginPageState extends State<LoginPage>
                               const SizedBox(height: 24),
 
                               // Or continue with
-                              Text(
+                              const Text(
                                 'ou continue com',
                                 style: TextStyle(
                                   color: PlantisColors.textSecondary,
@@ -689,7 +690,7 @@ class _LoginPageState extends State<LoginPage>
                                       ),
                                       child:
                                           authProvider.isLoading
-                                              ? SizedBox(
+                                              ? const SizedBox(
                                                 height: 20,
                                                 width: 20,
                                                 child: CircularProgressIndicator(
@@ -700,7 +701,7 @@ class _LoginPageState extends State<LoginPage>
                                                       >(PlantisColors.primary),
                                                 ),
                                               )
-                                              : Row(
+                                              : const Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
@@ -710,7 +711,7 @@ class _LoginPageState extends State<LoginPage>
                                                     color:
                                                         PlantisColors.primary,
                                                   ),
-                                                  const SizedBox(width: 8),
+                                                  SizedBox(width: 8),
                                                   Text(
                                                     'Continuar sem conta',
                                                     style: TextStyle(

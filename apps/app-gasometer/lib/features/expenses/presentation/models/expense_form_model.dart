@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/expense_entity.dart';
+
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../domain/entities/expense_entity.dart';
 
 /// Model reativo para o formulário de despesas
 class ExpenseFormModel extends Equatable {

@@ -306,28 +306,28 @@ class Task extends BaseSyncEntity {
       }
     }
 
-    final taskType = mapCareType(tarefaModel.tipoCuidado);
+    final taskType = mapCareType(tarefaModel.tipoCuidado as String);
 
     return Task(
-      id: tarefaModel.id,
-      createdAt: tarefaModel.createdAt ?? DateTime.now(),
-      updatedAt: tarefaModel.updatedAt ?? DateTime.now(),
-      lastSyncAt: tarefaModel.lastSyncAt,
-      isDirty: tarefaModel.isDirty,
-      isDeleted: tarefaModel.isDeleted,
-      version: tarefaModel.version,
-      userId: tarefaModel.userId,
-      moduleName: tarefaModel.moduleName,
+      id: tarefaModel.id as String,
+      createdAt: (tarefaModel.createdAt as DateTime?) ?? DateTime.now(),
+      updatedAt: (tarefaModel.updatedAt as DateTime?) ?? DateTime.now(),
+      lastSyncAt: tarefaModel.lastSyncAt as DateTime?,
+      isDirty: (tarefaModel.isDirty as bool?) ?? false,
+      isDeleted: (tarefaModel.isDeleted as bool?) ?? false,
+      version: (tarefaModel.version as int?) ?? 1,
+      userId: tarefaModel.userId as String?,
+      moduleName: tarefaModel.moduleName as String?,
       title: taskType.displayName,
-      description: _getTaskDescription(tarefaModel.tipoCuidado),
-      plantId: tarefaModel.plantaId,
+      description: _getTaskDescription(tarefaModel.tipoCuidado as String),
+      plantId: tarefaModel.plantaId as String,
       plantName: plantName ?? 'Planta',
       type: taskType,
-      status: tarefaModel.concluida ? TaskStatus.completed : TaskStatus.pending,
-      priority: mapPriority(tarefaModel.tipoCuidado),
-      dueDate: tarefaModel.dataExecucao,
-      completedAt: tarefaModel.dataConclusao,
-      completionNotes: tarefaModel.observacoes,
+      status: ((tarefaModel.concluida as bool?) ?? false) ? TaskStatus.completed : TaskStatus.pending,
+      priority: mapPriority(tarefaModel.tipoCuidado as String),
+      dueDate: tarefaModel.dataExecucao as DateTime,
+      completedAt: tarefaModel.dataConclusao as DateTime?,
+      completionNotes: tarefaModel.observacoes as String?,
     );
   }
 

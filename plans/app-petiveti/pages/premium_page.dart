@@ -61,7 +61,7 @@ class _PetiVetiPremiumPageState extends State<PetiVetiPremiumPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+              background: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -161,7 +161,7 @@ class _PetiVetiPremiumPageState extends State<PetiVetiPremiumPage> {
       elevation: 12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       color: isDark ? const Color(0xFF1A2332) : Colors.white,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: LinearGradient(
@@ -632,7 +632,7 @@ class _PetiVetiPremiumPageState extends State<PetiVetiPremiumPage> {
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: isDark ? const Color(0xFF1A2332) : Colors.white,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(

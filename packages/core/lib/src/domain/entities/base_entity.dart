@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Entidade base para todos os objetos de domínio
 /// Garante que todas as entidades tenham um ID único e sejam comparáveis
 abstract class BaseEntity extends Equatable {
+  /// Cria uma instância da entidade base
   const BaseEntity({
     required this.id,
     this.createdAt,

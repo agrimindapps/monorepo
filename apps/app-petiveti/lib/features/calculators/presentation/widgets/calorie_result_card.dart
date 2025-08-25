@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calorie_output.dart';
 
 /// Widget para exibir os resultados do cálculo calórico
@@ -50,7 +52,7 @@ class CalorieResultCard extends StatelessWidget {
   Widget _buildMainResultCard(BuildContext context) {
     return Card(
       elevation: 4,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
@@ -58,7 +60,7 @@ class CalorieResultCard extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withOpacity(0.8),
+              Theme.of(context).primaryColor.withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -92,7 +94,7 @@ class CalorieResultCard extends StatelessWidget {
                   Container(
                     width: 1,
                     height: 60,
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                   Expanded(
                     child: _buildMainMetric(
@@ -111,7 +113,7 @@ class CalorieResultCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -228,7 +230,7 @@ class CalorieResultCard extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
             border: Border.all(color: color, width: 2),
           ),
@@ -311,9 +313,9 @@ class CalorieResultCard extends StatelessWidget {
             
             // Horários
             if (feeding.feedingSchedule.isNotEmpty) ...[
-              Text(
+              const Text(
                 'Horários Sugeridos:',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
               Text(feeding.feedingSchedule.join(' • ')),
@@ -321,9 +323,9 @@ class CalorieResultCard extends StatelessWidget {
             ],
             
             // Tipo de alimento
-            Text(
+            const Text(
               'Tipo de Alimento:',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(feeding.foodType),
@@ -331,13 +333,13 @@ class CalorieResultCard extends StatelessWidget {
             // Suplementos
             if (feeding.supplementNeeds.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text(
+              const Text(
                 'Suplementos Recomendados:',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
               ...feeding.supplementNeeds.map((supplement) => 
-                Text('• $supplement', style: TextStyle(fontSize: 12))),
+                Text('• $supplement', style: const TextStyle(fontSize: 12))),
             ],
           ],
         ),
@@ -399,13 +401,13 @@ class CalorieResultCard extends StatelessWidget {
             
             if (weightAdvice.exerciseRecommendations.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text(
+              const Text(
                 'Exercícios Recomendados:',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
               ...weightAdvice.exerciseRecommendations.map((exercise) => 
-                Text('• $exercise', style: TextStyle(fontSize: 12))),
+                Text('• $exercise', style: const TextStyle(fontSize: 12))),
             ],
           ],
         ),
@@ -524,7 +526,7 @@ class CalorieResultCard extends StatelessWidget {
                   color: cardColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: cardColor.withOpacity(0.5),
+                    color: cardColor.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -559,12 +561,12 @@ class CalorieResultCard extends StatelessWidget {
                               onPressed: () {
                                 // TODO: Implementar ação específica
                               },
-                              child: Text(recommendation.actionLabel!),
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
+                              child: Text(recommendation.actionLabel!),
                             ),
                           ],
                         ],

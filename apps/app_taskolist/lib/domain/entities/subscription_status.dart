@@ -10,11 +10,11 @@ class SubscriptionStatus {
     _expirationDate = expirationDate;
 
   bool get isActive => _isActive && 
-    (_expirationDate == null || _expirationDate!.isAfter(DateTime.now()));
+    (_expirationDate == null || _expirationDate.isAfter(DateTime.now()));
 
   DateTime? get expirationDate => _expirationDate;
 
-  factory SubscriptionStatus.free() => SubscriptionStatus(
+  factory SubscriptionStatus.free() => const SubscriptionStatus(
     isActive: false,
     expirationDate: null,
   );

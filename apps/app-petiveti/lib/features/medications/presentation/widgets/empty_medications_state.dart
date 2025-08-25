@@ -23,7 +23,7 @@ class EmptyMedicationsState extends StatelessWidget {
             Icon(
               Icons.medication_outlined,
               size: 80,
-              color: theme.colorScheme.secondary.withOpacity(0.5),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(

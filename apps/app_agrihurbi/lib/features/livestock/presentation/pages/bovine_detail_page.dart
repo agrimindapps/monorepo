@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../domain/entities/bovine_entity.dart';
-import '../providers/livestock_provider.dart';
+import '../providers/bovines_provider.dart';
 
 /// Página de detalhes completos do bovino com visualização rica
 /// 
@@ -41,7 +41,7 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
   }
 
   Future<void> _loadBovineDetails() async {
-    final provider = context.read<LivestockProvider>();
+    final provider = context.read<BovinesProvider>();
     
     // Busca bovino local primeiro
     var bovine = provider.getBovineById(widget.bovineId);
@@ -208,8 +208,8 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
   }
 
   Widget _buildPlaceholderImage() {
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceVariant,
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Icon(
         Icons.pets,
         size: 80,
@@ -553,7 +553,7 @@ Compartilhado via AgriHurbi
   }
 
   void _deleteBovine() async {
-    final provider = context.read<LivestockProvider>();
+    final provider = context.read<BovinesProvider>();
     final success = await provider.deleteBovine(_bovine!.id);
     
     if (!mounted) return;

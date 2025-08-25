@@ -13,7 +13,7 @@ import '../constants.dart';
 import '../controllers/correcao_acidez_controller.dart';
 
 class CorrecaoAcidezResult extends StatelessWidget {
-  final _numberFormat = NumberFormat("#,###.00#", "pt_BR");
+  final _numberFormat = NumberFormat('#,###.00#', 'pt_BR');
 
   CorrecaoAcidezResult({super.key});
 

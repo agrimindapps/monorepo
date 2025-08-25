@@ -121,7 +121,7 @@ class PlantaDetalhesAppBar extends StatelessWidget {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,

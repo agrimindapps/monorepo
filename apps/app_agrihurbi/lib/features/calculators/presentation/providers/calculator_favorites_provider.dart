@@ -61,7 +61,7 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
         debugPrint('CalculatorFavoritesProvider: Erro ao carregar favoritos - ${failure.message}');
       },
       (favorites) {
-        _favoriteCalculatorIds = favorites;
+        _favoriteCalculatorIds = favorites is List ? List<String>.from(favorites) : <String>[];
         debugPrint('CalculatorFavoritesProvider: Favoritos carregados - ${favorites.length} itens');
       },
     );

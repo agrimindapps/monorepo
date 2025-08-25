@@ -95,7 +95,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? Theme.of(context).primaryColor.withOpacity(0.1)
+                          ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                           : null,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
@@ -198,7 +198,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? _getBcsColor(bcs).withOpacity(0.1)
+                          ? _getBcsColor(bcs).withValues(alpha: 0.1)
                           : null,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
@@ -262,11 +262,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
   }
 
   Widget _buildSelectionSummary(BuildContext context) {
-    if (input.activityLevel == null || input.bodyConditionScore == null) {
-      return const SizedBox.shrink();
-    }
-
-    final combinedFactor = input.activityLevel!.factor * input.bodyConditionScore!.factor;
+    final combinedFactor = input.activityLevel.factor * input.bodyConditionScore.factor;
     
     return Card(
       color: Colors.blue[50],
@@ -296,11 +292,11 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Atividade: ${input.activityLevel!.displayName}',
+                        'Atividade: ${input.activityLevel.displayName}',
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        'Fator: ${input.activityLevel!.factor}x',
+                        'Fator: ${input.activityLevel.factor}x',
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ],
@@ -312,12 +308,12 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        'BCS: ${input.bodyConditionScore!.displayName.split(' ')[0]}',
+                        'BCS: ${input.bodyConditionScore.displayName.split(' ')[0]}',
                         style: const TextStyle(fontWeight: FontWeight.w500),
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        'Fator: ${input.bodyConditionScore!.factor}x',
+                        'Fator: ${input.bodyConditionScore.factor}x',
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                         textAlign: TextAlign.center,
                       ),

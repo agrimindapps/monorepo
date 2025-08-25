@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
-import '../../domain/entities/odometer_entity.dart';
-import '../../domain/services/odometer_validator.dart';
+
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../domain/entities/odometer_entity.dart';
+import '../../domain/services/odometer_validator.dart';
 import '../constants/odometer_constants.dart';
 
 /// Service for contextual validation of odometer values with vehicle data
@@ -32,7 +33,7 @@ class OdometerValidationService {
       if (vehicle == null) {
         return OdometerContextValidationResult(
           isValid: false,
-          errorMessage: OdometerConstants.errorMessages['carregarVeiculo']!,
+          errorMessage: OdometerConstants.errorMessages['carregarVeiculo'],
           errorType: ValidationErrorType.vehicleNotFound,
         );
       }
@@ -46,7 +47,7 @@ class OdometerValidationService {
       if (!basicValidation.isValid) {
         return OdometerContextValidationResult(
           isValid: false,
-          errorMessage: basicValidation.errorMessage!,
+          errorMessage: basicValidation.errorMessage,
           errorType: ValidationErrorType.valueOutOfRange,
         );
       }
@@ -63,7 +64,7 @@ class OdometerValidationService {
       debugPrint('Error in validateOdometerWithContext: $e');
       return OdometerContextValidationResult(
         isValid: false,
-        errorMessage: OdometerConstants.errorMessages['validacaoOdometro']!,
+        errorMessage: OdometerConstants.errorMessages['validacaoOdometro'],
         errorType: ValidationErrorType.systemError,
       );
     }
@@ -208,7 +209,7 @@ class OdometerValidationService {
       // Suggest typical values based on vehicle age
       if (odometerValue == 0) {
         final vehicleAge = DateTime.now().year - vehicle.year;
-        final typicalKmPerYear = 15000.0;
+        const typicalKmPerYear = 15000.0;
         final suggestedValue = vehicleAge * typicalKmPerYear;
         
         suggestions.add(ValidationSuggestion(

@@ -279,7 +279,7 @@ class PlantListTile extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.schedule, size: 14, color: const Color(0xFFFF9500)),
+          const Icon(Icons.schedule, size: 14, color: Color(0xFFFF9500)),
           const SizedBox(width: 6),
           Text(
             pendingCares == 1

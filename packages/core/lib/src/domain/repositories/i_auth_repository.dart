@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
-import '../entities/user_entity.dart';
+
 import '../../shared/utils/failure.dart';
+import '../entities/user_entity.dart';
 
 /// Interface do repositório de autenticação
 /// Define os contratos para operações de autenticação via Firebase

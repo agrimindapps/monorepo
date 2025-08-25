@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:http/http.dart' as http;
 import 'dart:developer' as developer;
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 /// Serviço para gerenciar assets remotos e reduzir tamanho do APK
 /// 
@@ -48,7 +48,7 @@ class RemoteAssetService {
   Future<void> _loadConfig() async {
     try {
       final String configJson = await rootBundle.loadString(_configAssetPath);
-      _config = json.decode(configJson);
+      _config = json.decode(configJson) as Map<String, dynamic>?;
       developer.log('Remote assets config loaded: ${_config?['assets']?.length ?? 0} assets', 
                    name: 'RemoteAssetService');
     } catch (e) {
@@ -90,7 +90,7 @@ class RemoteAssetService {
     }
 
     // Verifica se é asset crítico (deve ficar local)
-    final criticalAssets = List<String>.from(_config?['critical_local_assets'] ?? []);
+    final criticalAssets = List<String>.from(_config?['critical_local_assets'] as Iterable<dynamic>? ?? []);
     if (criticalAssets.contains(imageName)) {
       return await _getLocalAsset(imageName);
     }
@@ -182,8 +182,8 @@ class RemoteAssetService {
 
   /// Realiza o download efetivo
   Future<Uint8List?> _performDownload(String imageName) async {
-    final String baseUrl = _config?['base_url'] ?? '';
-    final String fallbackUrl = _config?['fallback_url'] ?? '';
+    final String baseUrl = _config?['base_url'] as String? ?? '';
+    final String fallbackUrl = _config?['fallback_url'] as String? ?? '';
     
     // Converte nome para WebP se necessário
     final String remoteImageName = imageName.replaceAll('.jpg', '.webp');
@@ -217,7 +217,7 @@ class RemoteAssetService {
           'User-Agent': 'ReceitaAgro-App/1.0',
           'Accept': 'image/webp,image/jpeg,image/*,*/*;q=0.8',
         },
-      ).timeout(Duration(seconds: _downloadTimeoutSeconds));
+      ).timeout(const Duration(seconds: _downloadTimeoutSeconds));
 
       if (response.statusCode == 200) {
         return response.bodyBytes;
@@ -282,7 +282,7 @@ class RemoteAssetService {
 
   /// Pré-carrega assets importantes
   Future<void> preloadCriticalAssets() async {
-    final criticalAssets = List<String>.from(_config?['critical_local_assets'] ?? []);
+    final criticalAssets = List<String>.from(_config?['critical_local_assets'] as Iterable<dynamic>? ?? []);
     
     final futures = criticalAssets.map((asset) => getImage(asset));
     await Future.wait(futures);
@@ -295,14 +295,14 @@ class RemoteAssetService {
   Future<void> syncAssetsInBackground() async {
     if (_config == null) return;
     
-    final assets = List<Map<String, dynamic>>.from(_config?['assets'] ?? []);
+    final assets = List<Map<String, dynamic>>.from(_config?['assets'] as Iterable<dynamic>? ?? []);
     if (assets.isEmpty) return;
 
     // Processa em lotes para não sobrecarregar
     const batchSize = 5;
     for (int i = 0; i < assets.length; i += batchSize) {
       final batch = assets.skip(i).take(batchSize);
-      final futures = batch.map((asset) => getImage(asset['local_name']));
+      final futures = batch.map((asset) => getImage(asset['local_name'] as String));
       
       try {
         await Future.wait(futures, eagerError: false);
@@ -311,7 +311,7 @@ class RemoteAssetService {
       }
       
       // Pequena pausa entre lotes
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
     
     developer.log('Background sync completed', name: 'RemoteAssetService');
@@ -337,7 +337,7 @@ class RemoteAssetService {
 
   /// Verifica se asset está disponível localmente
   bool isAssetLocal(String imageName) {
-    final criticalAssets = List<String>.from(_config?['critical_local_assets'] ?? []);
+    final criticalAssets = List<String>.from(_config?['critical_local_assets'] as Iterable<dynamic>? ?? []);
     return criticalAssets.contains(imageName);
   }
 

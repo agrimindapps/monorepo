@@ -122,11 +122,11 @@ class MedicationDosageInput extends Equatable {
   factory MedicationDosageInput.fromMap(Map<String, dynamic> map) {
     return MedicationDosageInput(
       species: Species.values.firstWhere((e) => e.name == map['species']),
-      weight: map['weight']?.toDouble() ?? 0.0,
+      weight: (map['weight'] as num?)?.toDouble() ?? 0.0,
       ageGroup: AgeGroup.values.firstWhere((e) => e.name == map['ageGroup']),
-      medicationId: map['medicationId'] ?? '',
-      concentration: map['concentration']?.toDouble(),
-      pharmaceuticalForm: map['pharmaceuticalForm'],
+      medicationId: map['medicationId'] as String? ?? '',
+      concentration: (map['concentration'] as num?)?.toDouble(),
+      pharmaceuticalForm: map['pharmaceuticalForm'] as String?,
       frequency: AdministrationFrequency.values.firstWhere(
         (e) => e.name == map['frequency'],
       ),
@@ -135,8 +135,8 @@ class MedicationDosageInput extends Equatable {
                 (sc) => sc.name == e,
               ))
           .toList() ?? [],
-      isEmergency: map['isEmergency'] ?? false,
-      veterinarianNotes: map['veterinarianNotes'],
+      isEmergency: map['isEmergency'] as bool? ?? false,
+      veterinarianNotes: map['veterinarianNotes'] as String?,
     );
   }
 

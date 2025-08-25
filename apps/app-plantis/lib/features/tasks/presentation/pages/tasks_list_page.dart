@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/tasks_provider.dart';
+
 import '../../domain/entities/task.dart' as task_entity;
-import '../widgets/tasks_app_bar.dart';
-import '../widgets/tasks_loading_widget.dart';
-import '../widgets/tasks_error_widget.dart';
+import '../providers/tasks_provider.dart';
 import '../widgets/empty_tasks_widget.dart';
+import '../widgets/tasks_app_bar.dart';
+import '../widgets/tasks_error_widget.dart';
+import '../widgets/tasks_loading_widget.dart';
 
 class TaskDateGroup {
   final String dateKey;

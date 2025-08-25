@@ -18,8 +18,8 @@ class AuthLoadingOverlay extends StatelessWidget {
       children: [
         child,
         if (isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.3),
+          ColoredBox(
+            color: Colors.black.withValues(alpha: 0.3),
             child: Center(
               child: Card(
                 child: Padding(

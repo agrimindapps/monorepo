@@ -130,7 +130,7 @@ class ManutencoesCadastroWidgetState extends State<ManutencoesCadastroWidget>
             const ManutencoesCadastroFormView(),
             // Loading overlay
             Obx(() => controller.isLoading.value
-                ? Container(
+                ? ColoredBox(
                     color: Colors.black.withValues(alpha: 0.3),
                     child: Center(
                       child: Container(

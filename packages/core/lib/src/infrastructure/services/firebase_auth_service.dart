@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../domain/entities/user_entity.dart' as core_entities;
 import '../../domain/repositories/i_auth_repository.dart';
 import '../../shared/utils/failure.dart';

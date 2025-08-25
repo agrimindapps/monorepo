@@ -262,9 +262,9 @@ class BovinesFilterProvider extends ChangeNotifier {
 
   /// Restaura filtros de um Map
   void restoreFilters(Map<String, dynamic> filters) {
-    _searchQuery = filters['searchQuery'] ?? '';
-    _selectedBreed = filters['selectedBreed'];
-    _selectedOriginCountry = filters['selectedOriginCountry'];
+    _searchQuery = (filters['searchQuery'] as String?) ?? '';
+    _selectedBreed = filters['selectedBreed'] as String?;
+    _selectedOriginCountry = filters['selectedOriginCountry'] as String?;
     
     // Restaura enums por nome
     if (filters['selectedAptitude'] != null) {
@@ -281,7 +281,7 @@ class BovinesFilterProvider extends ChangeNotifier {
       );
     }
     
-    _onlyActive = filters['onlyActive'] ?? true;
+    _onlyActive = (filters['onlyActive'] as bool?) ?? true;
     notifyListeners();
     debugPrint('BovinesFilterProvider: Filtros restaurados');
   }

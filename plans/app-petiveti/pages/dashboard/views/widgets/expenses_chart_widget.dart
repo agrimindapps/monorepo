@@ -82,7 +82,7 @@ class ExpensesChartWidget extends StatelessWidget {
       spacing: 16,
       runSpacing: 8,
       children: expensesByCategory.categorias.keys.map<Widget>((categoria) {
-        final valor = expensesByCategory.categorias[categoria]!;
+        final valor = expensesByCategory.categorias[categoria];
         final color = DashboardConstants.getCategoryColor(categoria);
         
         return DashboardHelpers.buildLegendItem(

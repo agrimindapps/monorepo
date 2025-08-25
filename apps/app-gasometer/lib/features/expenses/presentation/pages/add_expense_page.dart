@@ -1,15 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../core/presentation/theme/app_theme.dart';
+import '../../../../core/presentation/widgets/common_app_bar.dart';
+import '../../../../core/presentation/widgets/error_boundary.dart';
+import '../../../../core/presentation/widgets/loading_overlay.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../domain/entities/expense_entity.dart';
 import '../providers/expense_form_provider.dart';
 import '../providers/expenses_provider.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../widgets/expense_form_view.dart';
-import '../../domain/entities/expense_entity.dart';
-import '../../../../core/presentation/widgets/common_app_bar.dart';
-import '../../../../core/presentation/widgets/loading_overlay.dart';
-import '../../../../core/presentation/widgets/error_boundary.dart';
-import '../../../../core/presentation/theme/app_theme.dart';
 
 /// Exceção específica para erros de inicialização
 class InitializationException implements Exception {
@@ -390,7 +391,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
           // Informações do veículo selecionado
           if (formProvider.formModel.vehicle != null) ...[
-            _buildVehicleInfo(formProvider.formModel.vehicle!),
+            _buildVehicleInfo(formProvider.formModel.vehicle),
             const SizedBox(height: 16),
           ],
 

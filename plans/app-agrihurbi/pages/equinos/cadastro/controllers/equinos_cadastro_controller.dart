@@ -121,7 +121,7 @@ class EquinosCadastroController extends GetxController {
         );
 
         if (!validationResult.isValid) {
-          errorMessage.value = validationResult.message!;
+          errorMessage.value = validationResult.message;
           return;
         }
 

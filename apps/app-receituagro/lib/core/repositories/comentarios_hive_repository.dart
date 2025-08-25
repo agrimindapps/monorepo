@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
-import '../models/comentario_hive.dart';
+
 import '../../features/comentarios/models/comentario_model.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
+import '../models/comentario_hive.dart';
 import 'base_hive_repository.dart';
 
 class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive> 

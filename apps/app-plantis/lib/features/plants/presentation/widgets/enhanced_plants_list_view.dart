@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../domain/entities/plant.dart';
-import '../providers/plants_provider.dart';
-import '../providers/plant_form_provider.dart';
-import 'enhanced_plants_app_bar.dart';
-import 'enhanced_plant_card.dart';
-import 'empty_plants_widget.dart';
-import 'plants_loading_widget.dart';
-import 'plants_error_widget.dart';
-import 'plant_form_modal.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
+import '../../domain/entities/plant.dart';
+import '../providers/plant_form_provider.dart';
+import '../providers/plants_provider.dart';
+import 'empty_plants_widget.dart';
+import 'enhanced_plant_card.dart';
+import 'enhanced_plants_app_bar.dart';
+import 'plant_form_modal.dart';
+import 'plants_error_widget.dart';
+import 'plants_loading_widget.dart';
 
 /// Enhanced Plants List View siguiendo principios SOLID
 /// S - Responsabilidad única: Solo maneja la vista principal de plantas

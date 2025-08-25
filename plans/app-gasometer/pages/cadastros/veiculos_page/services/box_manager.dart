@@ -132,7 +132,7 @@ class BoxManager {
 
     // Return existing box if already open
     if (_openBoxes.containsKey(boxName) && _openBoxes[boxName]!.isOpen) {
-      final existingBox = _openBoxes[boxName]!;
+      final existingBox = _openBoxes[boxName];
       if (existingBox is Box<T>) {
         return existingBox;
       } else {
@@ -159,7 +159,7 @@ class BoxManager {
   /// Get a box synchronously (only if already open)
   Box<T>? getBoxSync<T>(String boxName) {
     if (_openBoxes.containsKey(boxName) && _openBoxes[boxName]!.isOpen) {
-      final existingBox = _openBoxes[boxName]!;
+      final existingBox = _openBoxes[boxName];
       if (existingBox is Box<T>) {
         return existingBox;
       }

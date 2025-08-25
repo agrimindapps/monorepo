@@ -1,21 +1,23 @@
 import 'dart:async';
+
+import 'package:core/core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
+
 import 'core/di/injection_container.dart' as di;
-import 'core/theme/receituagro_theme.dart';
-import 'core/services/receituagro_notification_service.dart';
-import 'core/services/receituagro_storage_service.dart';
+import 'core/providers/preferences_provider.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/navigation_service.dart';
-import 'core/services/startup_optimization_service.dart';
+import 'core/services/receituagro_notification_service.dart';
+import 'core/services/receituagro_storage_service.dart';
 import 'core/services/revenuecat_service.dart' as local_rc;
-import 'core/providers/preferences_provider.dart';
+import 'core/services/startup_optimization_service.dart';
+import 'core/theme/receituagro_theme.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -162,7 +164,9 @@ class ReceitaAgroApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
-        ChangeNotifierProvider(create: (_) => PreferencesProvider()..initialize()),
+        ChangeNotifierProvider(
+          create: (_) => PreferencesProvider()..initialize(),
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

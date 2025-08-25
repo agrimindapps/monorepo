@@ -60,9 +60,9 @@ class MedicationCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: statusColor.withOpacity(0.3)),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       medication.status.displayName,
@@ -76,9 +76,9 @@ class MedicationCard extends StatelessWidget {
                   PopupMenuButton(
                     itemBuilder: (context) => [
                       if (onEdit != null)
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: 'edit',
-                          child: const Row(
+                          child: Row(
                             children: [
                               Icon(Icons.edit, size: 18),
                               SizedBox(width: 8),
@@ -87,9 +87,9 @@ class MedicationCard extends StatelessWidget {
                           ),
                         ),
                       if (onDiscontinue != null && medication.isActive)
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: 'discontinue',
-                          child: const Row(
+                          child: Row(
                             children: [
                               Icon(Icons.pause_circle, size: 18, color: Colors.orange),
                               SizedBox(width: 8),
@@ -98,9 +98,9 @@ class MedicationCard extends StatelessWidget {
                           ),
                         ),
                       if (onDelete != null)
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: 'delete',
-                          child: const Row(
+                          child: Row(
                             children: [
                               Icon(Icons.delete, size: 18, color: Colors.red),
                               SizedBox(width: 8),
@@ -184,7 +184,7 @@ class MedicationCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: statusColor.withOpacity(0.2),
+                  backgroundColor: statusColor.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                 ),
                 const SizedBox(height: 4),
@@ -221,9 +221,9 @@ class MedicationCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [

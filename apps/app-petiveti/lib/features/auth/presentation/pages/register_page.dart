@@ -193,19 +193,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   title: RichText(
                     text: TextSpan(
                       style: Theme.of(context).textTheme.bodyMedium,
-                      children: [
-                        const TextSpan(text: 'Aceito os '),
+                      children: const [
+                        TextSpan(text: 'Aceito os '),
                         TextSpan(
                           text: 'Termos de Uso',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.blue,
                             decoration: TextDecoration.underline,
                           ),
                         ),
-                        const TextSpan(text: ' e '),
+                        TextSpan(text: ' e '),
                         TextSpan(
                           text: 'Política de Privacidade',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.blue,
                             decoration: TextDecoration.underline,
                           ),

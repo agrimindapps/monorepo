@@ -1,16 +1,17 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../../features/auth/domain/repositories/auth_repository.dart';
+import '../../data/models/base_sync_model.dart';
+import '../../services/analytics_service.dart';
 import '../models/sync_queue_item.dart';
 import '../strategies/conflict_resolution_strategy.dart';
-import 'sync_queue.dart';
-import 'sync_operations.dart';
 import 'conflict_resolver.dart';
-import '../../services/analytics_service.dart';
-import '../../data/models/base_sync_model.dart';
-import '../../../features/auth/domain/repositories/auth_repository.dart';
+import 'sync_operations.dart';
+import 'sync_queue.dart';
 
 enum SyncStatus {
   idle,
@@ -379,10 +380,10 @@ class SyncService {
         
         final stats = _syncQueue.getQueueStats();
         
-        if (stats['failed'] > 0) {
+        if ((stats['failed'] as int? ?? 0) > 0) {
           _updateStatus(SyncStatus.error);
           _updateMessage('Alguns itens falharam na sincronização');
-        } else if (stats['pending'] > 0) {
+        } else if ((stats['pending'] as int? ?? 0) > 0) {
           _updateStatus(SyncStatus.syncing);
           _updateMessage('${stats['pending']} itens aguardando sincronização');
         } else {
@@ -736,7 +737,7 @@ class SyncService {
         'last_error': _lastSyncError?.toString(),
         'last_error_type': _lastSyncError?.type.name,
         'last_error_retryable': _lastSyncError?.isRetryable,
-        'last_error_timestamp': _lastSyncError?.timestamp?.toIso8601String(),
+        'last_error_timestamp': _lastSyncError?.timestamp.toIso8601String(),
       },
       ...queueStats,
       ...connectivityStats,
@@ -754,7 +755,7 @@ class SyncService {
       'status_code': _lastSyncError!.statusCode,
       'operation_type': _lastSyncError!.operationType,
       'model_type': _lastSyncError!.modelType,
-      'timestamp': _lastSyncError!.timestamp?.toIso8601String(),
+      'timestamp': _lastSyncError!.timestamp.toIso8601String(),
       'is_retryable': _lastSyncError!.isRetryable,
       'recovery_strategy': _lastSyncError!.recoveryStrategy,
       'current_retry_attempt': _currentRetryAttempt,

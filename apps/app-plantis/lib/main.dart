@@ -1,24 +1,24 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import 'package:core/core.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:core/core.dart';
 
 import 'app.dart';
-import 'core/di/injection_container.dart' as di;
-import 'core/services/plantis_notification_service.dart';
-import 'features/development/services/app_data_inspector_initializer.dart';
-import 'firebase_options.dart';
-
 // Import Hive adapters - these include the generated adapters from .g.dart files
 import 'core/data/models/comentario_model.dart';
 import 'core/data/models/espaco_model.dart';
 // import 'core/data/models/planta_model.dart'; // DEPRECATED: Migrado para PlantModel em inglês
 // import 'core/data/models/tarefa_model.dart'; // DEPRECATED: Migrado para TaskModel em inglês
 import 'core/data/models/planta_config_model.dart';
+import 'core/di/injection_container.dart' as di;
+import 'core/services/plantis_notification_service.dart';
+import 'features/development/services/app_data_inspector_initializer.dart';
+import 'firebase_options.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized

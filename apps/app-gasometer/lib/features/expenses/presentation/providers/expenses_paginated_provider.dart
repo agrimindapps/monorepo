@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
+
+import '../../../../core/widgets/paginated_list_view.dart';
+import '../../data/repositories/expenses_repository.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
-import '../../data/repositories/expenses_repository.dart';
-import '../../../../core/widgets/paginated_list_view.dart';
 
 /// Provider de despesas com suporte a paginação e lazy loading
 class ExpensesPaginatedProvider extends ChangeNotifier with PaginatedProvider<ExpenseEntity> {

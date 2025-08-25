@@ -1,12 +1,11 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:dartz/dartz.dart';
-
 import 'package:app_petiveti/core/error/failures.dart';
 import 'package:app_petiveti/features/appointments/domain/entities/appointment.dart';
 import 'package:app_petiveti/features/appointments/domain/repositories/appointment_repository.dart';
 import 'package:app_petiveti/features/appointments/domain/usecases/add_appointment.dart';
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 import 'add_appointment_test.mocks.dart';
 

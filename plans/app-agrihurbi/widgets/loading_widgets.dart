@@ -386,7 +386,7 @@ class AgrihurbiLoadingOverlay extends StatelessWidget {
       children: [
         child,
         if (isVisible)
-          Container(
+          ColoredBox(
             color: (backgroundColor ?? Colors.black).withValues(alpha: 0.5),
             child: AgrihurbiLoading.circular(message: message),
           ),

@@ -4,8 +4,8 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../domain/entities/task_entity.dart';
-import '../providers/task_providers.dart';
 import '../providers/auth_providers.dart';
+import '../providers/task_providers.dart';
 
 class BottomInputBar extends ConsumerStatefulWidget {
   const BottomInputBar({super.key});
@@ -104,11 +104,11 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, -2),
+            offset: Offset(0, -2),
           ),
         ],
         borderRadius: _isExpanded 

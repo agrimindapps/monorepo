@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
+import '../../../../core/services/task_notification_service.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../../domain/usecases/get_tasks_usecase.dart';
 import '../../domain/usecases/add_task_usecase.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
-import '../../../../core/services/task_notification_service.dart';
+import '../../domain/usecases/get_tasks_usecase.dart';
 
 enum TasksFilterType {
   all('Todas'),
@@ -139,7 +140,7 @@ class TasksProvider extends ChangeNotifier {
     _clearError();
 
     try {
-      final result = await _getTasksUseCase(NoParams());
+      final result = await _getTasksUseCase(const NoParams());
 
       result.fold((failure) => _setError(_mapFailureToMessage(failure)), (
         tasks,

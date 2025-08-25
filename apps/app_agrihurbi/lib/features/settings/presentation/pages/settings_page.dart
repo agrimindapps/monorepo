@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/presentation/providers/settings_provider.dart';
 import 'package:app_agrihurbi/features/settings/presentation/widgets/settings_section.dart';
 import 'package:app_agrihurbi/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// Settings Page
 /// 

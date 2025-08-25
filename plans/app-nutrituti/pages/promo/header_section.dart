@@ -223,7 +223,7 @@ class HeaderSectionState extends State<HeaderSection>
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(

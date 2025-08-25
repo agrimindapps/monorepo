@@ -1,16 +1,18 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../core/widgets/modern_header_widget.dart';
+
+import 'package:flutter/material.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../core/models/fitossanitario_hive.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../core/extensions/fitossanitario_hive_extension.dart';
-import '../../core/di/injection_container.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'models/view_mode.dart';
-import 'widgets/defensivo_search_field.dart';
 import 'widgets/defensivo_item_widget.dart';
+import 'widgets/defensivo_search_field.dart';
 import 'widgets/defensivos_empty_state_widget.dart';
 import 'widgets/defensivos_loading_skeleton_widget.dart';
-import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 
 class ListaDefensivosPage extends StatefulWidget {
   const ListaDefensivosPage({super.key});
@@ -25,12 +27,18 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   final FitossanitarioHiveRepository _repository = sl<FitossanitarioHiveRepository>();
   final List<FitossanitarioHive> _allDefensivos = [];
   List<FitossanitarioHive> _filteredDefensivos = [];
+  List<FitossanitarioHive> _displayedDefensivos = []; // Para lazy loading
   ViewMode _selectedViewMode = ViewMode.list;
   bool _isLoading = true;
   bool _isSearching = false;
   bool _isAscending = true;
+  bool _isLoadingMore = false; // Para controlar carregamento paginado
   Timer? _debounceTimer;
   String? _errorMessage;
+  
+  // Configurações de paginação
+  static const int _itemsPerPage = 50;
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -62,7 +70,11 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         setState(() {
           _allDefensivos.clear();
           _allDefensivos.addAll(defensivos);
+          // Ordena alfabeticamente por nome
+          _allDefensivos.sort((a, b) => a.displayName.compareTo(b.displayName));
           _filteredDefensivos = List.from(_allDefensivos);
+          _currentPage = 0;
+          _loadPage(); // Carrega primeira página
           _isLoading = false;
         });
       }
@@ -85,6 +97,8 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
       setState(() {
         _isSearching = false;
         _filteredDefensivos = List.from(_allDefensivos);
+        _currentPage = 0;
+        _loadPage();
       });
       return;
     }
@@ -110,8 +124,12 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
 
     if (mounted) {
       setState(() {
+        // Ordena resultados filtrados alfabeticamente
+        filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
         _filteredDefensivos = filtered;
         _isSearching = false;
+        _currentPage = 0;
+        _loadPage(); // Recarrega primeira página com resultados filtrados
       });
     }
   }
@@ -144,7 +162,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   void _onDefensivoTap(FitossanitarioHive defensivo) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => DetalheDefensivoPage(
           defensivoName: defensivo.displayName,
           fabricante: defensivo.displayFabricante,
@@ -154,7 +172,50 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   }
 
   void _onScroll() {
-    // Implementação de scroll infinito se necessário
+    // Lazy loading: carrega mais itens quando próximo do fim
+    if (_scrollController.hasClients) {
+      final threshold = _scrollController.position.maxScrollExtent * 0.8;
+      if (_scrollController.position.pixels >= threshold && 
+          !_isLoadingMore && 
+          _displayedDefensivos.length < _filteredDefensivos.length) {
+        _loadMoreItems();
+      }
+    }
+  }
+  
+  void _loadPage() {
+    const startIndex = 0;
+    final endIndex = (_itemsPerPage).clamp(0, _filteredDefensivos.length);
+    _displayedDefensivos = _filteredDefensivos.sublist(startIndex, endIndex);
+    _currentPage = 0;
+  }
+  
+  void _loadMoreItems() async {
+    if (_isLoadingMore) return;
+    
+    setState(() {
+      _isLoadingMore = true;
+    });
+    
+    // Simula delay para UX suave
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    
+    final nextPage = _currentPage + 1;
+    final startIndex = nextPage * _itemsPerPage;
+    final endIndex = ((nextPage + 1) * _itemsPerPage).clamp(0, _filteredDefensivos.length);
+    
+    if (startIndex < _filteredDefensivos.length) {
+      final newItems = _filteredDefensivos.sublist(startIndex, endIndex);
+      setState(() {
+        _displayedDefensivos.addAll(newItems);
+        _currentPage = nextPage;
+        _isLoadingMore = false;
+      });
+    } else {
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
   }
 
   String _getHeaderSubtitle() {
@@ -245,7 +306,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
           ),
         ),
       );
-    } else if (_filteredDefensivos.isEmpty) {
+    } else if (_displayedDefensivos.isEmpty) {
       return DefensivosEmptyStateWidget(
         isDark: isDark,
         isSearchResult: _searchController.text.isNotEmpty,
@@ -279,9 +340,9 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: _filteredDefensivos.length,
+          itemCount: _displayedDefensivos.length,
           itemBuilder: (context, index) {
-            final defensivo = _filteredDefensivos[index];
+            final defensivo = _displayedDefensivos[index];
             return DefensivoItemWidget(
               defensivo: defensivo,
               isDark: isDark,
@@ -292,20 +353,33 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         ),
       );
     } else {
-      return SingleChildScrollView(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(8),
-          child: Column(
-          children: [
-            ..._filteredDefensivos.map((defensivo) => DefensivoItemWidget(
-              defensivo: defensivo,
-              isDark: isDark,
-              onTap: () => _onDefensivoTap(defensivo),
-              isGridView: false,
-            )),
-            const SizedBox(height: 80), // Espaço para bottom navigation
-          ],
-        ),
+      return ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(8),
+        itemCount: _displayedDefensivos.length + (_isLoadingMore ? 2 : 1), // +1 para espaço, +1 para loading
+        itemBuilder: (context, index) {
+          // Loading indicator no meio da lista
+          if (_isLoadingMore && index == _displayedDefensivos.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          
+          // Último item: espaço para bottom navigation
+          if (index == _displayedDefensivos.length + (_isLoadingMore ? 1 : 0)) {
+            return const SizedBox(height: 80);
+          }
+          
+          // Items da lista virtualizados
+          final defensivo = _displayedDefensivos[index];
+          return DefensivoItemWidget(
+            defensivo: defensivo,
+            isDark: isDark,
+            onTap: () => _onDefensivoTap(defensivo),
+            isGridView: false,
+          );
+        },
       );
     }
   }

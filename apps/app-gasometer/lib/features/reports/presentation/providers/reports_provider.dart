@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/report_summary_entity.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/report_comparison_entity.dart';
+import '../../domain/entities/report_summary_entity.dart';
+import '../../domain/usecases/compare_reports.dart';
+import '../../domain/usecases/export_report.dart';
+import '../../domain/usecases/generate_custom_report.dart';
 import '../../domain/usecases/generate_monthly_report.dart';
 import '../../domain/usecases/generate_yearly_report.dart';
-import '../../domain/usecases/generate_custom_report.dart';
-import '../../domain/usecases/compare_reports.dart';
 import '../../domain/usecases/get_reports_analytics.dart';
-import '../../domain/usecases/export_report.dart';
-import '../../../../core/error/failures.dart';
 
 @injectable
 class ReportsProvider extends ChangeNotifier {

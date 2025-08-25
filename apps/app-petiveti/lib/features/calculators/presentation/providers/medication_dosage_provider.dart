@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../../data/repositories/medication_database.dart';
+import '../../domain/entities/medication_data.dart';
 import '../../domain/entities/medication_dosage_input.dart';
 import '../../domain/entities/medication_dosage_output.dart';
-import '../../domain/entities/medication_data.dart';
 import '../../domain/strategies/medication_dosage_strategy.dart';
-import '../../data/repositories/medication_database.dart';
 
 /// Provider para gerenciamento de state da calculadora de dosagem de medicamentos
 class MedicationDosageProvider with ChangeNotifier {

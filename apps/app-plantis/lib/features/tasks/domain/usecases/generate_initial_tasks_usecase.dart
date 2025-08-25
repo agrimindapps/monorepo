@@ -1,7 +1,8 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import '../../../../core/services/task_generation_service.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/data/models/planta_config_model.dart';
+import '../../../../core/services/task_generation_service.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 

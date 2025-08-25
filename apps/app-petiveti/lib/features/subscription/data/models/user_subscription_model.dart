@@ -28,33 +28,33 @@ class UserSubscriptionModel extends UserSubscription {
       id: map['id']?.toString() ?? '',
       userId: map['userId']?.toString() ?? '',
       planId: map['planId']?.toString() ?? '',
-      plan: SubscriptionPlanModel.fromMap(map['plan'] ?? {}),
+      plan: SubscriptionPlanModel.fromMap((map['plan'] as Map<String, dynamic>?) ?? {}),
       status: PlanStatus.values.firstWhere(
         (e) => e.toString() == 'PlanStatus.${map['status']}',
         orElse: () => PlanStatus.pending,
       ),
-      startDate: DateTime.fromMillisecondsSinceEpoch(map['startDate'] ?? 0),
+      startDate: DateTime.fromMillisecondsSinceEpoch((map['startDate'] as int?) ?? 0),
       expirationDate: map['expirationDate'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['expirationDate'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['expirationDate'] as int))
           : null,
       cancelledAt: map['cancelledAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['cancelledAt'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['cancelledAt'] as int))
           : null,
       pausedAt: map['pausedAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['pausedAt'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['pausedAt'] as int))
           : null,
-      autoRenew: map['autoRenew'] ?? true,
+      autoRenew: (map['autoRenew'] as bool?) ?? true,
       transactionId: map['transactionId']?.toString(),
       receiptData: map['receiptData']?.toString(),
-      isTrialPeriod: map['isTrialPeriod'] ?? false,
+      isTrialPeriod: (map['isTrialPeriod'] as bool?) ?? false,
       trialEndDate: map['trialEndDate'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['trialEndDate'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['trialEndDate'] as int))
           : null,
       metadata: map['metadata'] != null 
-          ? Map<String, dynamic>.from(map['metadata'])
+          ? Map<String, dynamic>.from(map['metadata'] as Map)
           : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
     );
   }
 
@@ -102,6 +102,7 @@ class UserSubscriptionModel extends UserSubscription {
     );
   }
 
+  @override
   UserSubscriptionModel copyWith({
     String? id,
     String? userId,

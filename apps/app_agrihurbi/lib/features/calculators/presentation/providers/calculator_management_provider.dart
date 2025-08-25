@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/calculator_entity.dart';
 import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/get_calculators.dart';
 
 /// Provider especializado para gerenciamento de calculadoras

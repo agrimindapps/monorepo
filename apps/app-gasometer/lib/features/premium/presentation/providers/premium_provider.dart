@@ -1,19 +1,21 @@
 import 'dart:async';
+
+import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core/core.dart' as core;
+
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/premium_status.dart';
-import '../../domain/usecases/check_premium_status.dart';
-import '../../domain/usecases/can_use_feature.dart';
-import '../../domain/usecases/can_add_vehicle.dart';
+import '../../domain/repositories/premium_repository.dart';
 import '../../domain/usecases/can_add_fuel_record.dart';
 import '../../domain/usecases/can_add_maintenance_record.dart';
-import '../../domain/usecases/purchase_premium.dart';
+import '../../domain/usecases/can_add_vehicle.dart';
+import '../../domain/usecases/can_use_feature.dart';
+import '../../domain/usecases/check_premium_status.dart';
 import '../../domain/usecases/get_available_products.dart';
-import '../../domain/usecases/restore_purchases.dart';
 import '../../domain/usecases/manage_local_license.dart';
-import '../../domain/repositories/premium_repository.dart';
+import '../../domain/usecases/purchase_premium.dart';
+import '../../domain/usecases/restore_purchases.dart';
 
 @injectable
 class PremiumProvider extends ChangeNotifier {

@@ -12,7 +12,7 @@ class GetWeightStatistics implements UseCase<WeightStatistics, String> {
   @override
   Future<Either<Failure, WeightStatistics>> call(String animalId) async {
     if (animalId.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do animal é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do animal é obrigatório'));
     }
     
     return await repository.getWeightStatistics(animalId);
@@ -27,11 +27,11 @@ class AnalyzeWeightTrend implements UseCase<WeightTrendAnalysis, AnalyzeWeightTr
   @override
   Future<Either<Failure, WeightTrendAnalysis>> call(AnalyzeWeightTrendParams params) async {
     if (params.animalId.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do animal é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do animal é obrigatório'));
     }
     
     if (params.periodInDays <= 0) {
-      return Left(ValidationFailure(message: 'Período deve ser maior que zero'));
+      return const Left(ValidationFailure(message: 'Período deve ser maior que zero'));
     }
     
     return await repository.analyzeWeightTrend(

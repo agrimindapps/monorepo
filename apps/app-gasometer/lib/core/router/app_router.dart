@@ -5,18 +5,18 @@ import 'package:provider/provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/vehicles/presentation/pages/vehicles_page.dart';
-import '../../features/vehicles/presentation/pages/vehicle_details_page.dart';
-import '../../features/odometer/presentation/pages/odometer_page.dart';
-import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
-import '../../features/maintenance/presentation/pages/maintenance_page.dart';
+import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/maintenance/presentation/pages/add_maintenance_page.dart';
+import '../../features/maintenance/presentation/pages/maintenance_page.dart';
+import '../../features/odometer/presentation/pages/odometer_page.dart';
+import '../../features/promo/presentation/pages/privacy_policy_page.dart';
+import '../../features/promo/presentation/pages/promo_page.dart';
+import '../../features/promo/presentation/pages/terms_conditions_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/promo/presentation/pages/promo_page.dart';
-import '../../features/promo/presentation/pages/privacy_policy_page.dart';
-import '../../features/promo/presentation/pages/terms_conditions_page.dart';
+import '../../features/vehicles/presentation/pages/vehicle_details_page.dart';
+import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/main_navigation.dart';
 import '../services/platform_service.dart';
 import 'guards/route_guard.dart';
@@ -24,7 +24,7 @@ import 'guards/route_guard.dart';
 class AppRouter {
   static GoRouter router(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final platformService = PlatformService();
+    const platformService = PlatformService();
     final routeGuard = RouteGuard(authProvider, platformService);
     
     return GoRouter(

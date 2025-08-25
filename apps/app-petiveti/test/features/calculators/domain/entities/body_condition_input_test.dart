@@ -1,11 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:app_petiveti/features/calculators/domain/entities/body_condition_input.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('BodyConditionInput', () {
     test('should create valid input with required parameters', () {
-      final input = BodyConditionInput(
+      const input = BodyConditionInput(
         species: AnimalSpecies.dog,
         currentWeight: 25.0,
         ribPalpation: RibPalpation.moderatePressure,
@@ -24,7 +23,7 @@ void main() {
     });
 
     test('should create input with optional parameters', () {
-      final input = BodyConditionInput(
+      const input = BodyConditionInput(
         species: AnimalSpecies.cat,
         currentWeight: 4.5,
         ribPalpation: RibPalpation.easy,
@@ -54,7 +53,7 @@ void main() {
 
     group('Validation', () {
       test('should be valid with positive weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -67,7 +66,7 @@ void main() {
       });
 
       test('should be invalid with zero weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 0.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -81,7 +80,7 @@ void main() {
       });
 
       test('should be invalid with negative weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: -5.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -94,7 +93,7 @@ void main() {
       });
 
       test('should be invalid with excessively high weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 250.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -107,7 +106,7 @@ void main() {
       });
 
       test('should be invalid with zero ideal weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           idealWeight: 0.0,
@@ -121,7 +120,7 @@ void main() {
       });
 
       test('should be invalid with excessive weight difference', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 10.0,
           idealWeight: 50.0, // 5x difference
@@ -138,7 +137,7 @@ void main() {
       });
 
       test('should be valid with reasonable weight difference', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 20.0,
           idealWeight: 25.0, // 25% difference - reasonable
@@ -154,7 +153,7 @@ void main() {
 
     group('CopyWith', () {
       test('should create copy with updated species', () {
-        final originalInput = BodyConditionInput(
+        const originalInput = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -170,7 +169,7 @@ void main() {
       });
 
       test('should create copy with updated weight', () {
-        final originalInput = BodyConditionInput(
+        const originalInput = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -185,7 +184,7 @@ void main() {
       });
 
       test('should create copy with updated optional parameters', () {
-        final originalInput = BodyConditionInput(
+        const originalInput = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -212,7 +211,7 @@ void main() {
 
     group('Equality', () {
       test('should be equal when all properties match', () {
-        final input1 = BodyConditionInput(
+        const input1 = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -222,7 +221,7 @@ void main() {
           animalAge: 36,
         );
 
-        final input2 = BodyConditionInput(
+        const input2 = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -237,7 +236,7 @@ void main() {
       });
 
       test('should not be equal when properties differ', () {
-        final input1 = BodyConditionInput(
+        const input1 = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -245,7 +244,7 @@ void main() {
           abdominalProfile: AbdominalProfile.straight,
         );
 
-        final input2 = BodyConditionInput(
+        const input2 = BodyConditionInput(
           species: AnimalSpecies.cat, // Different species
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,

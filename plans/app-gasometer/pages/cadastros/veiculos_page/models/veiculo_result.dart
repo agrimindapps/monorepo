@@ -1,4 +1,4 @@
-library veiculo_result;
+library;
 
 /// Result pattern implementation for vehicle operations
 ///

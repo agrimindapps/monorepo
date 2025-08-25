@@ -91,7 +91,7 @@ class SubscriptionCardWidget extends StatelessWidget {
   }
 
   Widget _buildFreeContent() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -230,7 +230,7 @@ class SubscriptionCardWidget extends StatelessWidget {
   }
 
   Widget _buildPremiumContent(SubscriptionModel subscription) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(

@@ -1,7 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
+
 import '../providers/premium_provider.dart';
 
 class PremiumPage extends StatefulWidget {

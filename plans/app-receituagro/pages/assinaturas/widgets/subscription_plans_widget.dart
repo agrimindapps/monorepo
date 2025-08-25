@@ -206,7 +206,7 @@ class _SubscriptionPlansWidgetState extends State<SubscriptionPlansWidget> {
           selectedPackage = package;
         });
       },
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -313,7 +313,7 @@ class _SubscriptionPlansWidgetState extends State<SubscriptionPlansWidget> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: selectedPackage != null 
-            ? () => widget.onPurchase(selectedPackage!)
+            ? () => widget.onPurchase(selectedPackage)
             : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green.shade600,

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/task_entity.dart';
-import '../providers/task_providers.dart';
 import '../providers/auth_providers.dart';
+import '../providers/task_providers.dart';
 
 class CreateTaskDialog extends ConsumerStatefulWidget {
   const CreateTaskDialog({super.key});

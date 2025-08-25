@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../defensivos/defensivos_page.dart';
-import '../pragas/pragas_page.dart';
-import '../favoritos/favoritos_page.dart';
+
 import '../comentarios/comentarios_page.dart';
+import '../defensivos/defensivos_page.dart';
+import '../favoritos/favoritos_page.dart';
+import '../pragas/pragas_page.dart';
 import '../settings/settings_page.dart';
 
 class MainNavigationPage extends StatefulWidget {

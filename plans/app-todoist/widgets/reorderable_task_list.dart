@@ -76,7 +76,7 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
         return Material(
           elevation: 8,
           borderRadius: BorderRadius.circular(8),
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
@@ -125,7 +125,7 @@ class _ReorderableTaskListState extends State<ReorderableTaskList> {
               ),
               // Task widget with custom styling for drag mode
               Expanded(
-                child: Container(
+                child: DecoratedBox(
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(8),

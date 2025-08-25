@@ -1,16 +1,18 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../core/widgets/modern_header_widget.dart';
+
+import 'package:flutter/material.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/extensions/pragas_hive_extension.dart';
 import '../../core/models/pragas_hive.dart';
 import '../../core/repositories/pragas_hive_repository.dart';
-import '../../core/extensions/pragas_hive_extension.dart';
-import '../../core/di/injection_container.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import 'detalhe_praga_page.dart';
 import 'models/praga_view_mode.dart';
-import 'widgets/praga_search_field_widget.dart';
 import 'widgets/praga_item_widget.dart';
+import 'widgets/praga_search_field_widget.dart';
 import 'widgets/pragas_empty_state_widget.dart';
 import 'widgets/pragas_loading_skeleton_widget.dart';
-import 'detalhe_praga_page.dart';
 
 class ListaPragasPage extends StatefulWidget {
   final String? pragaType;

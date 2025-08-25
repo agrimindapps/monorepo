@@ -137,13 +137,13 @@ class RainGaugeEntity extends Equatable {
   });
 
   /// Creates empty rain gauge for initialization
-  const RainGaugeEntity.empty()
+  RainGaugeEntity.empty()
       : id = '',
         locationId = '',
         locationName = '',
         deviceId = '',
         deviceModel = '',
-        installationDate = const Duration(),
+        installationDate = DateTime.fromMillisecondsSinceEpoch(0),
         currentRainfall = 0.0,
         dailyAccumulation = 0.0,
         weeklyAccumulation = 0.0,
@@ -151,8 +151,8 @@ class RainGaugeEntity extends Equatable {
         yearlyAccumulation = 0.0,
         maxRainfallRate = 0.0,
         avgRainfallRate = 0.0,
-        lastMeasurement = const Duration(),
-        nextMeasurement = const Duration(),
+        lastMeasurement = DateTime.fromMillisecondsSinceEpoch(0),
+        nextMeasurement = DateTime.fromMillisecondsSinceEpoch(0),
         measurementInterval = 60,
         latitude = 0.0,
         longitude = 0.0,
@@ -169,8 +169,8 @@ class RainGaugeEntity extends Equatable {
         maintenanceNotes = null,
         sourceType = 'automatic',
         isActive = false,
-        createdAt = const Duration(),
-        updatedAt = const Duration();
+        createdAt = DateTime.fromMillisecondsSinceEpoch(0),
+        updatedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Get status color for UI display
   String get statusColor {
@@ -249,7 +249,7 @@ class RainGaugeEntity extends Equatable {
   /// Get measurement frequency description
   String get measurementFrequency {
     if (measurementInterval < 60) {
-      return '${measurementInterval} minutes';
+      return '$measurementInterval minutes';
     } else if (measurementInterval < 1440) {
       final hours = (measurementInterval / 60).round();
       return '$hours hour${hours > 1 ? 's' : ''}';

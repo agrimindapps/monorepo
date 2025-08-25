@@ -1,15 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/repositories/favoritos_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
-import '../../core/repositories/favoritos_hive_repository.dart';
-import '../../core/di/injection_container.dart';
+import 'models/favorito_defensivo_model.dart';
+import 'models/favorito_diagnostico_model.dart';
+import 'models/favorito_praga_model.dart';
 import 'services/favoritos_cache_service.dart';
 import 'services/favoritos_navigation_service.dart';
-import 'models/favorito_defensivo_model.dart';
-import 'models/favorito_praga_model.dart';
-import 'models/favorito_diagnostico_model.dart';
 
 class FavoritosPage extends StatefulWidget {
   const FavoritosPage({super.key});

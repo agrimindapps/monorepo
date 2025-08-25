@@ -1,7 +1,8 @@
 import 'package:hive/hive.dart';
+
+import '../../../../core/cache/cache_manager.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../models/odometer_model.dart';
-import '../../../../core/cache/cache_manager.dart';
 
 /// Repository para persistência de leituras de odômetro usando Hive com cache strategy
 class OdometerRepository with CachedRepository<OdometerEntity> {

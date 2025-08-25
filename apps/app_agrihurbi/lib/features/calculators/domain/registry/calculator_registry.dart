@@ -1,26 +1,21 @@
-import '../entities/calculator_entity.dart';
-import '../calculators/irrigation/irrigation_calculator.dart';
-import '../calculators/nutrition/organic_fertilizer_calculator.dart';
-import '../calculators/nutrition/npk_calculator.dart';
-import '../calculators/nutrition/soil_ph_calculator.dart';
-import '../calculators/nutrition/fertilizer_dosing_calculator.dart';
-import '../calculators/nutrition/compost_calculator.dart';
-import '../calculators/livestock/feed_calculator.dart';
-import '../calculators/livestock/breeding_cycle_calculator.dart';
-import '../calculators/livestock/grazing_calculator.dart';
-import '../calculators/livestock/weight_gain_calculator.dart';
-import '../calculators/crops/planting_density_calculator.dart';
 import '../calculators/crops/harvest_timing_calculator.dart';
+import '../calculators/crops/planting_density_calculator.dart';
 import '../calculators/crops/seed_rate_calculator.dart';
 import '../calculators/crops/yield_prediction_calculator.dart';
-import '../calculators/soil/soil_composition_calculator.dart';
+import '../calculators/irrigation/water_need_calculator.dart';
+import '../calculators/livestock/breeding_cycle_calculator.dart';
+import '../calculators/livestock/feed_calculator.dart';
+import '../calculators/livestock/grazing_calculator.dart';
+import '../calculators/livestock/weight_gain_calculator.dart';
+import '../calculators/nutrition/compost_calculator.dart';
+import '../calculators/nutrition/fertilizer_dosing_calculator.dart';
+import '../calculators/nutrition/npk_calculator.dart';
+import '../calculators/nutrition/organic_fertilizer_calculator.dart';
+import '../calculators/nutrition/soil_ph_calculator.dart';
 import '../calculators/soil/drainage_calculator.dart';
+import '../calculators/soil/soil_composition_calculator.dart';
+import '../entities/calculator_entity.dart';
 import '../services/calculator_engine.dart';
-import '../services/calculator_favorites_service.dart';
-import '../services/unit_conversion_service.dart';
-import '../services/result_formatter_service.dart';
-import '../services/calculator_error_handler.dart';
-import '../validation/parameter_validator.dart';
 
 /// Registry central para todas as calculadoras do sistema
 /// 
@@ -46,30 +41,30 @@ class CalculatorRegistry {
   /// Registra todas as factories das calculadoras
   void _registerCalculatorFactories() {
     // Irrigation Calculators
-    _calculatorFactories['irrigation_calculator'] = () => IrrigationCalculator();
+    _calculatorFactories['water_need_calculator'] = () => const WaterNeedCalculator();
 
     // Nutrition Calculators
-    _calculatorFactories['organic_fertilizer_calculator'] = () => OrganicFertilizerCalculator();
-    _calculatorFactories['npk_calculator'] = () => NPKCalculator();
-    _calculatorFactories['soil_ph_calculator'] = () => SoilPHCalculator();
-    _calculatorFactories['fertilizer_dosing_calculator'] = () => FertilizerDosingCalculator();
-    _calculatorFactories['compost_calculator'] = () => CompostCalculator();
+    _calculatorFactories['organic_fertilizer_calculator'] = () => const OrganicFertilizerCalculator();
+    _calculatorFactories['npk_calculator'] = () => const NPKCalculator();
+    _calculatorFactories['soil_ph_calculator'] = () => const SoilPHCalculator();
+    _calculatorFactories['fertilizer_dosing_calculator'] = () => const FertilizerDosingCalculator();
+    _calculatorFactories['compost_calculator'] = () => const CompostCalculator();
 
     // Livestock Calculators
-    _calculatorFactories['feed_calculator'] = () => FeedCalculator();
-    _calculatorFactories['breeding_cycle_calculator'] = () => BreedingCycleCalculator();
-    _calculatorFactories['grazing_calculator'] = () => GrazingCalculator();
-    _calculatorFactories['weight_gain_calculator'] = () => WeightGainCalculator();
+    _calculatorFactories['feed_calculator'] = () => const FeedCalculator();
+    _calculatorFactories['breeding_cycle_calculator'] = () => const BreedingCycleCalculator();
+    _calculatorFactories['grazing_calculator'] = () => const GrazingCalculator();
+    _calculatorFactories['weight_gain_calculator'] = () => const WeightGainCalculator();
 
     // Crop Calculators
-    _calculatorFactories['planting_density_calculator'] = () => PlantingDensityCalculator();
-    _calculatorFactories['harvest_timing_calculator'] = () => HarvestTimingCalculator();
-    _calculatorFactories['seed_rate_calculator'] = () => SeedRateCalculator();
-    _calculatorFactories['yield_prediction_calculator'] = () => YieldPredictionCalculator();
+    _calculatorFactories['planting_density_calculator'] = () => const PlantingDensityCalculator();
+    _calculatorFactories['harvest_timing_calculator'] = () => const HarvestTimingCalculator();
+    _calculatorFactories['seed_rate_calculator'] = () => const SeedRateCalculator();
+    _calculatorFactories['yield_prediction_calculator'] = () => const YieldPredictionCalculator();
 
     // Soil Calculators
-    _calculatorFactories['soil_composition_calculator'] = () => SoilCompositionCalculator();
-    _calculatorFactories['drainage_calculator'] = () => DrainageCalculator();
+    _calculatorFactories['soil_composition_calculator'] = () => const SoilCompositionCalculator();
+    _calculatorFactories['drainage_calculator'] = () => const DrainageCalculator();
   }
 
   /// Obtém calculadora por ID (com lazy loading)

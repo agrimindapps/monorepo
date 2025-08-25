@@ -97,23 +97,23 @@ class DiagnosticoHive extends HiveObject {
 
   factory DiagnosticoHive.fromJson(Map<String, dynamic> json) {
     return DiagnosticoHive(
-      objectId: json['objectId'] ?? '',
+      objectId: (json['objectId'] as String?) ?? '',
       createdAt: json['createdAt'] != null
           ? int.tryParse(json['createdAt'].toString()) ?? 0
           : 0,
       updatedAt: json['updatedAt'] != null
           ? int.tryParse(json['updatedAt'].toString()) ?? 0
           : 0,
-      idReg: json['IdReg'] ?? '',
-      fkIdDefensivo: json['fkIdDefensivo'] ?? '',
+      idReg: (json['IdReg'] as String?) ?? '',
+      fkIdDefensivo: (json['fkIdDefensivo'] as String?) ?? '',
       nomeDefensivo: json['nomeDefensivo'] as String?,
-      fkIdCultura: json['fkIdCultura'] ?? '',
+      fkIdCultura: (json['fkIdCultura'] as String?) ?? '',
       nomeCultura: json['nomeCultura'] as String?,
-      fkIdPraga: json['fkIdPraga'] ?? '',
+      fkIdPraga: (json['fkIdPraga'] as String?) ?? '',
       nomePraga: json['nomePraga'] as String?,
       dsMin: json['dsMin'] as String?,
-      dsMax: json['dsMax'] ?? '',
-      um: json['um'] ?? '',
+      dsMax: (json['dsMax'] as String?) ?? '',
+      um: (json['um'] as String?) ?? '',
       minAplicacaoT: json['minAplicacaoT'] as String?,
       maxAplicacaoT: json['maxAplicacaoT'] as String?,
       umT: json['umT'] as String?,

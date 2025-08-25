@@ -1,6 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../../../shared/utils/result.dart';
-import '../exceptions/storage_exceptions.dart';
 
 /// Interface para gerenciamento centralizado do Hive
 /// Define contratos para inicialização, abertura e fechamento de boxes

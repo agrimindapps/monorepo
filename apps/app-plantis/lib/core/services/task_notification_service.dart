@@ -1,6 +1,8 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import 'plantis_notification_service.dart';
 
@@ -75,7 +77,7 @@ class TaskNotificationService {
       final bool enabled = await _notificationService.areNotificationsEnabled();
       if (!enabled) return;
 
-      final String title = 'Tarefa em Atraso! 🚨';
+      const String title = 'Tarefa em Atraso! 🚨';
       final String body = '${task.title} para ${task.plantName} está atrasada';
       final String payload = _createNotificationPayload(
         task,
@@ -105,7 +107,7 @@ class TaskNotificationService {
 
       if (todayTasks.isEmpty) return;
 
-      final String title = 'Bom dia! 🌱';
+      const String title = 'Bom dia! 🌱';
       final String body = _getDailySummaryBody(todayTasks);
       final String payload = _createDailySummaryPayload(todayTasks);
 
@@ -237,13 +239,13 @@ class TaskNotificationService {
   /// Processar tap na notificação (para uso futuro)
   static void handleNotificationTap(String payload) {
     try {
-      final Map<String, dynamic> data = jsonDecode(payload);
-      final String type = data['type'] ?? '';
+      final Map<String, dynamic> data = jsonDecode(payload) as Map<String, dynamic>;
+      final String type = (data['type'] as String?) ?? '';
 
       switch (type) {
         case 'task_reminder':
         case 'task_overdue':
-          final String taskId = data['taskId'] ?? '';
+          final String taskId = (data['taskId'] as String?) ?? '';
           debugPrint('Navegando para tarefa: $taskId');
           // Aqui você pode implementar navegação para detalhes da tarefa
           break;

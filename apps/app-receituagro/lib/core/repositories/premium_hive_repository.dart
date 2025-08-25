@@ -13,18 +13,18 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   @override
   PremiumStatusHive createFromJson(Map<String, dynamic> json) {
     return PremiumStatusHive(
-      objectId: json['objectId'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-      userId: json['userId'] ?? '',
-      isActive: json['isActive'] ?? false,
-      isTestSubscription: json['isTestSubscription'] ?? false,
-      expiryDateTimestamp: json['expiryDateTimestamp'],
-      planType: json['planType'],
-      subscriptionId: json['subscriptionId'],
-      productId: json['productId'],
-      lastSyncTimestamp: json['lastSyncTimestamp'],
-      needsOnlineSync: json['needsOnlineSync'] ?? true,
+      objectId: json['objectId'] as String?,
+      createdAt: json['createdAt'] as int?,
+      updatedAt: json['updatedAt'] as int?,
+      userId: (json['userId'] as String?) ?? '',
+      isActive: (json['isActive'] as bool?) ?? false,
+      isTestSubscription: (json['isTestSubscription'] as bool?) ?? false,
+      expiryDateTimestamp: json['expiryDateTimestamp'] as int?,
+      planType: json['planType'] as String?,
+      subscriptionId: json['subscriptionId'] as String?,
+      productId: json['productId'] as String?,
+      lastSyncTimestamp: json['lastSyncTimestamp'] as int?,
+      needsOnlineSync: (json['needsOnlineSync'] as bool?) ?? true,
     );
   }
 

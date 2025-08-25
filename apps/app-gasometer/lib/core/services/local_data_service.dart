@@ -75,14 +75,14 @@ class LocalDataService {
   Map<String, dynamic>? getVehicle(String id) {
     _ensureInitialized();
     final data = _vehiclesBox.get(id);
-    return data != null ? Map<String, dynamic>.from(data) : null;
+    return data != null ? Map<String, dynamic>.from(data as Map<dynamic, dynamic>? ?? {}) : null;
   }
   
   /// Obtém todos os veículos
   List<Map<String, dynamic>> getAllVehicles() {
     _ensureInitialized();
     return _vehiclesBox.values
-        .map((v) => Map<String, dynamic>.from(v))
+        .map((v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
         .toList();
   }
   
@@ -104,14 +104,14 @@ class LocalDataService {
   Map<String, dynamic>? getFuelRecord(String id) {
     _ensureInitialized();
     final data = _fuelRecordsBox.get(id);
-    return data != null ? Map<String, dynamic>.from(data) : null;
+    return data != null ? Map<String, dynamic>.from(data as Map<dynamic, dynamic>? ?? {}) : null;
   }
   
   /// Obtém todos os registros de combustível
   List<Map<String, dynamic>> getAllFuelRecords() {
     _ensureInitialized();
     return _fuelRecordsBox.values
-        .map((v) => Map<String, dynamic>.from(v))
+        .map((v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
         .toList();
   }
   
@@ -120,8 +120,8 @@ class LocalDataService {
     _ensureInitialized();
     return _fuelRecordsBox.values
         .where((record) => 
-            Map<String, dynamic>.from(record)['vehicleId'] == vehicleId)
-        .map((v) => Map<String, dynamic>.from(v))
+            Map<String, dynamic>.from(record as Map<dynamic, dynamic>? ?? {})['vehicleId'] == vehicleId)
+        .map((v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
         .toList();
   }
   
@@ -143,14 +143,14 @@ class LocalDataService {
   Map<String, dynamic>? getMaintenanceRecord(String id) {
     _ensureInitialized();
     final data = _maintenanceBox.get(id);
-    return data != null ? Map<String, dynamic>.from(data) : null;
+    return data != null ? Map<String, dynamic>.from(data as Map<dynamic, dynamic>? ?? {}) : null;
   }
   
   /// Obtém todos os registros de manutenção
   List<Map<String, dynamic>> getAllMaintenanceRecords() {
     _ensureInitialized();
     return _maintenanceBox.values
-        .map((v) => Map<String, dynamic>.from(v))
+        .map((v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
         .toList();
   }
   
@@ -159,8 +159,8 @@ class LocalDataService {
     _ensureInitialized();
     return _maintenanceBox.values
         .where((record) => 
-            Map<String, dynamic>.from(record)['vehicleId'] == vehicleId)
-        .map((v) => Map<String, dynamic>.from(v))
+            Map<String, dynamic>.from(record as Map<dynamic, dynamic>? ?? {})['vehicleId'] == vehicleId)
+        .map((v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
         .toList();
   }
   

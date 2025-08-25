@@ -1,11 +1,12 @@
 import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../../services/analytics_service.dart';
 import '../models/sync_queue_item.dart';
 import 'sync_queue.dart';
-import '../../services/analytics_service.dart';
 
 enum NetworkStatus {
   offline,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Application theme configuration
 class AppTheme {
+  // Private constructor to prevent instantiation
+  AppTheme._();
   static const Color primaryColor = Color(0xFF2E7D32); // Green for agriculture
   static const Color secondaryColor = Color(0xFF4CAF50);
   static const Color accentColor = Color(0xFFFF9800); // Orange for emphasis

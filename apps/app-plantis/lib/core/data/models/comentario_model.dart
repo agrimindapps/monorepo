@@ -119,11 +119,11 @@ class ComentarioModel extends BaseSyncModel {
       conteudo: map['conteudo']?.toString() ?? '',
       dataAtualizacao:
           map['dataAtualizacao'] != null
-              ? DateTime.parse(map['dataAtualizacao'])
+              ? DateTime.parse(map['dataAtualizacao'] as String)
               : null,
       dataCriacao:
           map['dataCriacao'] != null
-              ? DateTime.parse(map['dataCriacao'])
+              ? DateTime.parse(map['dataCriacao'] as String)
               : null,
     );
   }
@@ -168,11 +168,11 @@ class ComentarioModel extends BaseSyncModel {
       conteudo: map['conteudo']?.toString() ?? '',
       dataAtualizacao:
           map['data_atualizacao'] != null
-              ? DateTime.parse(map['data_atualizacao'])
+              ? DateTime.parse(map['data_atualizacao'] as String)
               : null,
       dataCriacao:
           map['data_criacao'] != null
-              ? DateTime.parse(map['data_criacao'])
+              ? DateTime.parse(map['data_criacao'] as String)
               : null,
     );
   }

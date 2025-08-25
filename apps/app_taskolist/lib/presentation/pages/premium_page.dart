@@ -1,6 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/subscription_service.dart';
 
@@ -143,15 +144,15 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                       ),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Column(
+                    child: const Column(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.workspace_premium,
                           size: 48,
                           color: Colors.white,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
+                        SizedBox(height: 16),
+                        Text(
                           'Desbloqueie todo o potencial\ndo Task Manager',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -160,8 +161,8 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
+                        SizedBox(height: 8),
+                        Text(
                           'Organize melhor, produza mais',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -210,11 +211,11 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
+                    child: const Column(
                       children: [
-                        const Icon(Icons.security, color: Colors.grey),
-                        const SizedBox(height: 8),
-                        const Text(
+                        Icon(Icons.security, color: Colors.grey),
+                        SizedBox(height: 8),
+                        Text(
                           'Pagamento seguro processado pela App Store/Google Play',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -222,8 +223,8 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                             fontSize: 12,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
+                        SizedBox(height: 4),
+                        Text(
                           'Cancele a qualquer momento',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -326,7 +327,7 @@ class _ProductCard extends StatelessWidget {
     final isLifetime = product.productId.contains('lifetime');
     final isPopular = isYearly;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: isPopular ? const Color(0xFF6366F1) : Colors.grey[300]!,

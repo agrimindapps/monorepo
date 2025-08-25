@@ -1,14 +1,13 @@
-import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Tempo de Irrigação
 /// Calcula o tempo necessário para aplicar determinada lâmina de água
 class IrrigationTimeCalculator extends CalculatorEntity {
-  IrrigationTimeCalculator()
+  const IrrigationTimeCalculator()
       : super(
           id: 'irrigation_time',
           name: 'Tempo de Irrigação',

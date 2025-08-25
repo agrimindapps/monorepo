@@ -1,6 +1,7 @@
-import 'package:hive/hive.dart';
-import 'package:core/core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:core/core.dart';
+import 'package:hive/hive.dart';
+
 import '../../../../core/data/models/base_sync_model.dart';
 import '../../domain/entities/vehicle_entity.dart';
 
@@ -170,16 +171,16 @@ class VehicleModel extends BaseSyncModel {
       moduleName: baseFields['moduleName'] as String?,
       marca: map['marca']?.toString() ?? '',
       modelo: map['modelo']?.toString() ?? '',
-      ano: map['ano']?.toInt() ?? 0,
+      ano: (map['ano'] as num?)?.toInt() ?? 0,
       placa: map['placa']?.toString() ?? '',
-      odometroInicial: (map['odometroInicial'] ?? 0.0).toDouble(),
-      combustivel: map['combustivel']?.toInt() ?? 0,
+      odometroInicial: (map['odometroInicial'] as num? ?? 0.0).toDouble(),
+      combustivel: (map['combustivel'] as num?)?.toInt() ?? 0,
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
-      vendido: map['vendido'] ?? false,
-      valorVenda: (map['valorVenda'] ?? 0.0).toDouble(),
-      odometroAtual: (map['odometroAtual'] ?? 0.0).toDouble(),
+      vendido: map['vendido'] as bool? ?? false,
+      valorVenda: (map['valorVenda'] as num? ?? 0.0).toDouble(),
+      odometroAtual: (map['odometroAtual'] as num? ?? 0.0).toDouble(),
       foto: map['foto']?.toString(),
     );
   }
@@ -244,16 +245,16 @@ class VehicleModel extends BaseSyncModel {
       moduleName: baseFields['moduleName'] as String?,
       marca: map['marca']?.toString() ?? '',
       modelo: map['modelo']?.toString() ?? '',
-      ano: map['ano']?.toInt() ?? 0,
+      ano: (map['ano'] as num?)?.toInt() ?? 0,
       placa: map['placa']?.toString() ?? '',
-      odometroInicial: (map['odometro_inicial'] ?? 0.0).toDouble(),
-      combustivel: map['combustivel']?.toInt() ?? 0,
+      odometroInicial: (map['odometro_inicial'] as num?)?.toDouble() ?? 0.0,
+      combustivel: (map['combustivel'] as num?)?.toInt() ?? 0,
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
-      vendido: map['vendido'] ?? false,
-      valorVenda: (map['valor_venda'] ?? 0.0).toDouble(),
-      odometroAtual: (map['odometro_atual'] ?? 0.0).toDouble(),
+      vendido: map['vendido'] as bool? ?? false,
+      valorVenda: (map['valor_venda'] as num?)?.toDouble() ?? 0.0,
+      odometroAtual: (map['odometro_atual'] as num?)?.toDouble() ?? 0.0,
       foto: map['foto']?.toString(),
     );
   }
@@ -308,15 +309,15 @@ class VehicleModel extends BaseSyncModel {
       modelo: entity.model,
       ano: entity.year,
       placa: entity.licensePlate,
-      odometroInicial: entity.metadata['odometroInicial']?.toDouble() ?? 0.0,
+      odometroInicial: (entity.metadata['odometroInicial'] as num?)?.toDouble() ?? 0.0,
       combustivel: entity.supportedFuels.isNotEmpty 
           ? entity.supportedFuels.first.index 
           : 0,
       renavan: entity.metadata['renavan']?.toString() ?? '',
       chassi: entity.metadata['chassi']?.toString() ?? '',
       cor: entity.color,
-      vendido: entity.metadata['vendido'] ?? false,
-      valorVenda: entity.metadata['valorVenda']?.toDouble() ?? 0.0,
+      vendido: entity.metadata['vendido'] as bool? ?? false,
+      valorVenda: (entity.metadata['valorVenda'] as num?)?.toDouble() ?? 0.0,
       odometroAtual: entity.currentOdometer,
       foto: entity.metadata['foto']?.toString(),
       isDeleted: !entity.isActive,
@@ -351,9 +352,9 @@ class VehicleModel extends BaseSyncModel {
   }) {
     return VehicleModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? this.createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? this.updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? this.lastSyncAtMs,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

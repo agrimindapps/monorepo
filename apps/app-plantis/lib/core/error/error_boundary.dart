@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import 'error_handler.dart';
 
 /// Widget que captura e trata erros não tratados na árvore de widgets

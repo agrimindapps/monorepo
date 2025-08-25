@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/services/diagnostico_integration_service.dart';
+
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/widgets/praga_image_widget.dart';
 
 /// Widget especializado para exibir uma praga por cultura
@@ -353,7 +354,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
       children: [
         // Principais defensivos
         if (pragaPorCultura.defensivosRelacionados.isNotEmpty) ...[
-          Icon(
+          const Icon(
             FontAwesomeIcons.vial,
             size: 12,
             color: Colors.green,

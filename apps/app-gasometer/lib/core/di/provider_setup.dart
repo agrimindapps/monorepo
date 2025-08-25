@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'injection_container.dart';
 
-// Providers
-import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
 import '../../features/fuel/presentation/providers/fuel_provider.dart';
-import '../../features/reports/presentation/providers/reports_provider.dart';
 import '../../features/maintenance/presentation/providers/maintenance_provider.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
+import '../../features/reports/presentation/providers/reports_provider.dart';
+// Providers
+import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 import '../sync/presentation/providers/sync_status_provider.dart';
+import 'injection_container.dart';
 
 /// Configuração otimizada de providers com lazy loading e reutilização de instâncias
 class ProviderSetup {

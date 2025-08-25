@@ -1,9 +1,11 @@
-import 'package:dartz/dartz.dart';
 import 'dart:developer' as developer;
+
+import 'package:dartz/dartz.dart';
+
 import '../../domain/entities/box_sync_config.dart';
 import '../../shared/utils/failure.dart';
-import 'hive_storage_service.dart';
 import 'connectivity_service.dart';
+import 'hive_storage_service.dart';
 
 /// Serviço responsável por gerenciar sincronização seletiva de boxes do Hive
 class SelectiveSyncService {
@@ -214,7 +216,7 @@ class SelectiveSyncService {
       final isOnline = connectivityResult.getOrElse(() => false);
       
       if (!isOnline) {
-        return Left(NetworkFailure('Não é possível sincronizar: offline'));
+        return const Left(NetworkFailure('Não é possível sincronizar: offline'));
       }
       
       await Future.delayed(const Duration(milliseconds: 100)); // Simula operação

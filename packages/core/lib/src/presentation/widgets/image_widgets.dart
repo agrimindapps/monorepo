@@ -256,7 +256,7 @@ class _SingleImagePickerState extends State<SingleImagePicker> {
 
   Widget _buildUploadingOverlay() {
     return Positioned.fill(
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.7),
           borderRadius: widget.borderRadius,
@@ -294,7 +294,7 @@ class _SingleImagePickerState extends State<SingleImagePicker> {
     return Positioned(
       top: 4,
       right: 4,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.7),
           shape: BoxShape.circle,
@@ -501,7 +501,7 @@ class _MultipleImagePickerState extends State<MultipleImagePicker> {
 
   Widget _buildUploadingOverlay(int index) {
     return Positioned.fill(
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.7),
           borderRadius: BorderRadius.circular(8),
@@ -523,7 +523,7 @@ class _MultipleImagePickerState extends State<MultipleImagePicker> {
     return Positioned(
       top: 4,
       right: 4,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.7),
           shape: BoxShape.circle,

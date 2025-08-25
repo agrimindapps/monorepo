@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -57,7 +57,8 @@ class AnimalRepositoryImpl implements AnimalRepository {
       
       // Try to sync to remote if online
       final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
+      if (connectivityResult.contains(ConnectivityResult.wifi) || 
+          connectivityResult.contains(ConnectivityResult.mobile)) {
         try {
           await remoteDataSource.addAnimal(animalModel, _currentUserId);
         } catch (e) {
@@ -84,7 +85,8 @@ class AnimalRepositoryImpl implements AnimalRepository {
       
       // Try to sync to remote if online
       final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
+      if (connectivityResult.contains(ConnectivityResult.wifi) || 
+          connectivityResult.contains(ConnectivityResult.mobile)) {
         try {
           await remoteDataSource.updateAnimal(animalModel);
         } catch (e) {
@@ -109,7 +111,8 @@ class AnimalRepositoryImpl implements AnimalRepository {
       
       // Try to sync to remote if online
       final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
+      if (connectivityResult.contains(ConnectivityResult.wifi) || 
+          connectivityResult.contains(ConnectivityResult.mobile)) {
         try {
           await remoteDataSource.deleteAnimal(id);
         } catch (e) {
@@ -130,7 +133,8 @@ class AnimalRepositoryImpl implements AnimalRepository {
   Future<Either<Failure, void>> syncAnimals() async {
     try {
       final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
+      if (!connectivityResult.contains(ConnectivityResult.wifi) && 
+          !connectivityResult.contains(ConnectivityResult.mobile)) {
         return const Left(NetworkFailure(message: 'Sem conexão com internet'));
       }
 

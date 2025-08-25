@@ -35,7 +35,7 @@ class GasometerFirebaseService {
 
       // Log analytics
       await _analytics.logFuelRefill(
-        fuelType: fuelData['fuelType'] ?? 'unknown',
+        fuelType: fuelData['fuelType'] as String? ?? 'unknown',
         liters: (fuelData['liters'] as num?)?.toDouble() ?? 0.0,
         totalCost: (fuelData['totalCost'] as num?)?.toDouble() ?? 0.0,
         fullTank: fuelData['fullTank'] as bool? ?? false,
@@ -74,7 +74,7 @@ class GasometerFirebaseService {
 
       // Log analytics
       await _analytics.logMaintenance(
-        maintenanceType: maintenanceData['type'] ?? 'unknown',
+        maintenanceType: maintenanceData['type'] as String? ?? 'unknown',
         cost: (maintenanceData['cost'] as num?)?.toDouble() ?? 0.0,
         odometer: (maintenanceData['odometer'] as num?)?.toInt() ?? 0,
       );
@@ -112,7 +112,7 @@ class GasometerFirebaseService {
 
       // Log analytics
       await _analytics.logExpense(
-        expenseType: expenseData['type'] ?? 'unknown',
+        expenseType: expenseData['type'] as String? ?? 'unknown',
         amount: (expenseData['amount'] as num?)?.toDouble() ?? 0.0,
       );
 
@@ -149,7 +149,7 @@ class GasometerFirebaseService {
 
       // Log analytics
       await _analytics.logVehicleCreated(
-        vehicleData['type'] ?? 'unknown',
+        vehicleData['type'] as String? ?? 'unknown',
       );
 
       await _analytics.log('Vehicle data saved successfully');

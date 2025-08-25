@@ -1,6 +1,6 @@
+import 'diagnostic_data.dart';
 import 'diagnostico_details_model.dart';
 import 'loading_state.dart';
-import 'diagnostic_data.dart';
 
 /// Comprehensive state model for diagnostic details page
 /// Following Single Responsibility Principle (SOLID)

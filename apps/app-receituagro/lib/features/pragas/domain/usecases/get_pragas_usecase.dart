@@ -1,3 +1,6 @@
+import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../entities/praga_entity.dart';
 import '../repositories/i_pragas_repository.dart';
 
@@ -11,8 +14,14 @@ class GetPragasUseCase {
   }) : _repository = repository;
 
   /// Busca todas as pragas
-  Future<List<PragaEntity>> execute() async {
-    return await _repository.getAll();
+  /// Retorna `Either<Failure, List<PragaEntity>>`
+  Future<Either<Failure, List<PragaEntity>>> execute() async {
+    try {
+      final pragas = await _repository.getAll();
+      return Right(pragas);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar pragas: ${e.toString()}'));
+    }
   }
 }
 
@@ -24,11 +33,16 @@ class GetPragasByTipoUseCase {
     required IPragasRepository repository,
   }) : _repository = repository;
 
-  Future<List<PragaEntity>> execute(String tipo) async {
-    if (tipo.isEmpty) {
-      throw ArgumentError('Tipo não pode ser vazio');
+  Future<Either<Failure, List<PragaEntity>>> execute(String tipo) async {
+    try {
+      if (tipo.isEmpty) {
+        return const Left(ValidationFailure('Tipo não pode ser vazio'));
+      }
+      final pragas = await _repository.getByTipo(tipo);
+      return Right(pragas);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar pragas por tipo: ${e.toString()}'));
     }
-    return await _repository.getByTipo(tipo);
   }
 }
 

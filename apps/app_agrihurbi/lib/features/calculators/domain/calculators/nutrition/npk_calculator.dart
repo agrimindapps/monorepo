@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de NPK
 /// Calcula a necessidade de fertilizantes NPK baseado na análise do solo e exigência da cultura
 class NPKCalculator extends CalculatorEntity {
-  NPKCalculator()
+  const NPKCalculator()
       : super(
           id: 'npk_calculator',
           name: 'Calculadora NPK',
@@ -196,19 +197,19 @@ class NPKCalculator extends CalculatorEntity {
             label: 'Total N para Área',
             value: CalculatorMath.roundTo(totalN, 0),
             unit: 'kg',
-            description: 'Nitrogênio total para ${area} ha',
+            description: 'Nitrogênio total para $area ha',
           ),
           CalculationResultValue(
             label: 'Total P₂O₅ para Área',
             value: CalculatorMath.roundTo(totalP, 0),
             unit: 'kg',
-            description: 'Fósforo total para ${area} ha',
+            description: 'Fósforo total para $area ha',
           ),
           CalculationResultValue(
             label: 'Total K₂O para Área',
             value: CalculatorMath.roundTo(totalK, 0),
             unit: 'kg',
-            description: 'Potássio total para ${area} ha',
+            description: 'Potássio total para $area ha',
           ),
           CalculationResultValue(
             label: 'Fornecimento Solo N',

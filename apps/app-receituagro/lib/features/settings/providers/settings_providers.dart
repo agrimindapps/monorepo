@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/theme_service.dart';
-import '../services/premium_service.dart';
-import '../services/device_service.dart';
+
 import '../config_page.dart';
+import '../services/device_service.dart';
+import '../services/premium_service.dart';
+import '../services/theme_service.dart';
 
 /// Centralized provider configuration for settings module
 class SettingsProviders {

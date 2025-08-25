@@ -1,22 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:app_agrihurbi/features/auth/presentation/pages/login_page.dart';
 import 'package:app_agrihurbi/features/auth/presentation/pages/register_page.dart';
+import 'package:app_agrihurbi/features/calculators/presentation/pages/calculator_detail_page.dart';
+import 'package:app_agrihurbi/features/calculators/presentation/pages/calculators_list_page.dart';
 import 'package:app_agrihurbi/features/home/presentation/pages/home_page.dart';
-import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list_page.dart';
-import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_form_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_detail_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_form_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_detail_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_form_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_search_page.dart';
-import 'package:app_agrihurbi/features/calculators/presentation/pages/calculators_list_page.dart';
-import 'package:app_agrihurbi/features/calculators/presentation/pages/calculator_detail_page.dart';
-import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
 import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
 import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
+import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
+  // Private constructor to prevent instantiation
+  AppRouter._();
   static final GoRouter _router = GoRouter(
     initialLocation: '/login',
     routes: [
@@ -419,6 +421,8 @@ class AppRouter {
 
 /// Navigation helper methods using GoRouter
 class AppNavigation {
+  // Private constructor to prevent instantiation
+  AppNavigation._();
   /// Navigate to login page
   static void toLogin(BuildContext context) => context.go('/login');
   

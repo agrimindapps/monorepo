@@ -14,15 +14,15 @@ class UpdateAppointment implements UseCase<Appointment, UpdateAppointmentParams>
   Future<Either<Failure, Appointment>> call(UpdateAppointmentParams params) async {
     // Validate appointment data
     if (params.appointment.veterinarianName.isEmpty) {
-      return Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
+      return const Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
     }
     
     if (params.appointment.reason.isEmpty) {
-      return Left(ValidationFailure(message: 'Motivo da consulta é obrigatório'));
+      return const Left(ValidationFailure(message: 'Motivo da consulta é obrigatório'));
     }
     
     if (params.appointment.id.isEmpty) {
-      return Left(ValidationFailure(message: 'ID da consulta é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID da consulta é obrigatório'));
     }
 
     // Update the updatedAt timestamp

@@ -1,8 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_petiveti/features/calculators/domain/entities/calorie_input.dart';
-import 'package:app_petiveti/features/calculators/domain/entities/calorie_output.dart';
 import 'package:app_petiveti/features/calculators/presentation/providers/calorie_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CalorieProvider', () {

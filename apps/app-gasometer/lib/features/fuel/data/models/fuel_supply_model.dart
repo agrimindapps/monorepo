@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
+
 import '../../../../core/data/models/base_sync_model.dart';
 
 part 'fuel_supply_model.g.dart';
@@ -119,15 +120,15 @@ class FuelSupplyModel extends BaseSyncModel {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       veiculoId: map['veiculoId']?.toString() ?? '',
-      data: map['data']?.toInt() ?? 0,
-      odometro: (map['odometro'] ?? 0.0).toDouble(),
-      litros: (map['litros'] ?? 0.0).toDouble(),
-      valorTotal: (map['valorTotal'] ?? 0.0).toDouble(),
-      tanqueCheio: map['tanqueCheio'],
-      precoPorLitro: (map['precoPorLitro'] ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
+      litros: (map['litros'] as num? ?? 0.0).toDouble(),
+      valorTotal: (map['valorTotal'] as num? ?? 0.0).toDouble(),
+      tanqueCheio: map['tanqueCheio'] as bool?,
+      precoPorLitro: (map['precoPorLitro'] as num? ?? 0.0).toDouble(),
       posto: map['posto']?.toString(),
       observacao: map['observacao']?.toString(),
-      tipoCombustivel: map['tipoCombustivel']?.toInt() ?? 0,
+      tipoCombustivel: (map['tipoCombustivel'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -184,15 +185,15 @@ class FuelSupplyModel extends BaseSyncModel {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       veiculoId: map['veiculo_id']?.toString() ?? '',
-      data: map['data']?.toInt() ?? 0,
-      odometro: (map['odometro'] ?? 0.0).toDouble(),
-      litros: (map['litros'] ?? 0.0).toDouble(),
-      valorTotal: (map['valor_total'] ?? 0.0).toDouble(),
-      tanqueCheio: map['tanque_cheio'],
-      precoPorLitro: (map['preco_por_litro'] ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
+      litros: (map['litros'] as num? ?? 0.0).toDouble(),
+      valorTotal: (map['valor_total'] as num? ?? 0.0).toDouble(),
+      tanqueCheio: map['tanque_cheio'] as bool?,
+      precoPorLitro: (map['preco_por_litro'] as num? ?? 0.0).toDouble(),
       posto: map['posto']?.toString(),
       observacao: map['observacao']?.toString(),
-      tipoCombustivel: map['tipo_combustivel']?.toInt() ?? 0,
+      tipoCombustivel: (map['tipo_combustivel'] as num?)?.toInt() ?? 0,
     );
   }
 

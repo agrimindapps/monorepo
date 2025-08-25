@@ -1,8 +1,9 @@
 import 'package:dartz/dartz.dart';
-import '../base_usecase.dart';
-import '../../repositories/i_auth_repository.dart';
-import '../../repositories/i_analytics_repository.dart';
+
 import '../../../shared/utils/failure.dart';
+import '../../repositories/i_analytics_repository.dart';
+import '../../repositories/i_auth_repository.dart';
+import '../base_usecase.dart';
 
 /// Use case para fazer logout do usuário atual
 class LogoutUseCase implements NoParamsUseCase<void> {

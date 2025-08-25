@@ -56,7 +56,7 @@ class LazyLoadingExamplePage extends StatelessWidget {
             const SizedBox(height: 24),
             
             Expanded(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(8),

@@ -1,7 +1,8 @@
+import 'dart:io';
+
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
-import 'dart:io';
 
 class DataInspectorPage extends StatefulWidget {
   const DataInspectorPage({super.key});
@@ -37,25 +38,25 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   void _initializeInspector() {
     // Registrar boxes customizadas do app-plantis
     _inspector.registerCustomBoxes([
-      CustomBoxType(
+      const CustomBoxType(
         key: 'plants_box',
         displayName: 'Plantas',
         module: 'plants',
         description: 'Dados das plantas cadastradas',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: 'care_tasks_box',
         displayName: 'Tarefas de Cuidados',
         module: 'care',
         description: 'Lembretes e tarefas de cuidados',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: 'notifications_box',
         displayName: 'Notificações',
         module: 'notifications',
         description: 'Configurações e histórico de notificações',
       ),
-      CustomBoxType(
+      const CustomBoxType(
         key: 'user_preferences_box',
         displayName: 'Preferências do Usuário',
         module: 'settings',
@@ -435,7 +436,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                 if (stats['isOpen'] != null)
                   _buildStatRow(
                     'Status',
-                    stats['isOpen'] ? 'Aberta' : 'Fechada',
+                    (stats['isOpen'] as bool?) ?? false ? 'Aberta' : 'Fechada',
                   ),
               ]),
             );

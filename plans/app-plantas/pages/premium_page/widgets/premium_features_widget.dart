@@ -60,7 +60,7 @@ class PremiumFeaturesWidget extends GetView<PremiumController> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: plantasCores['fundoCard']!,
+            color: plantasCores['fundoCard'],
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -77,13 +77,13 @@ class PremiumFeaturesWidget extends GetView<PremiumController> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: plantasGradientes['primario']!,
+                  gradient: plantasGradientes['primario'],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   _getIconFromImageName(iconName),
                   size: 28,
-                  color: plantasCores['textoClaro']!,
+                  color: plantasCores['textoClaro'],
                 ),
               ),
 
@@ -95,7 +95,7 @@ class PremiumFeaturesWidget extends GetView<PremiumController> {
                   description,
                   style: TextStyle(
                     fontSize: 16,
-                    color: plantasCores['texto']!,
+                    color: plantasCores['texto'],
                     height: 1.4,
                     fontWeight: FontWeight.w500,
                   ),
@@ -107,13 +107,13 @@ class PremiumFeaturesWidget extends GetView<PremiumController> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: plantasCores['sucesso']!,
+                  color: plantasCores['sucesso'],
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check,
                   size: 20,
-                  color: plantasCores['textoClaro']!,
+                  color: plantasCores['textoClaro'],
                 ),
               ),
             ],

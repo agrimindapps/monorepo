@@ -5,8 +5,9 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import '../core/services/notification_manager.dart';
+
 import '../core/di/injection_container.dart' as di;
+import '../core/services/notification_manager.dart';
 
 class NotificationsUsageExample {
   /// Exemplo 1: Inicializar o sistema de notificações no app

@@ -1,18 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:async';
-import '../../core/widgets/modern_header_widget.dart';
+
+import '../../core/di/injection_container.dart';
 import '../../core/models/fitossanitario_hive.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../core/di/injection_container.dart';
+import '../../core/widgets/modern_header_widget.dart';
 import 'models/defensivo_agrupado_item_model.dart';
 import 'models/defensivos_agrupados_category.dart';
 import 'models/defensivos_agrupados_state.dart';
 import 'models/defensivos_agrupados_view_mode.dart';
-import 'widgets/defensivo_agrupado_search_field_widget.dart';
 import 'widgets/defensivo_agrupado_item_widget.dart';
-import 'widgets/defensivos_agrupados_loading_skeleton_widget.dart';
+import 'widgets/defensivo_agrupado_search_field_widget.dart';
 import 'widgets/defensivos_agrupados_empty_state_widget.dart';
+import 'widgets/defensivos_agrupados_loading_skeleton_widget.dart';
 
 class ListaDefensivosAgrupadosPage extends StatefulWidget {
   final String tipoAgrupamento;

@@ -1,11 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import '../models/fuel_form_model.dart';
-import '../../domain/services/fuel_formatter_service.dart';
-import '../../domain/services/fuel_validator_service.dart';
-import '../../core/constants/fuel_constants.dart';
+
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../core/constants/fuel_constants.dart';
+import '../../domain/services/fuel_formatter_service.dart';
+import '../../domain/services/fuel_validator_service.dart';
+import '../models/fuel_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de abastecimento
 class FuelFormProvider extends ChangeNotifier {
@@ -150,7 +152,7 @@ class FuelFormProvider extends ChangeNotifier {
   void _onLitersChanged() {
     _litersDebounceTimer?.cancel();
     _litersDebounceTimer = Timer(
-      Duration(milliseconds: FuelConstants.litersDebounceMs),
+      const Duration(milliseconds: FuelConstants.litersDebounceMs),
       () {
         final value = _formatter.parseFormattedValue(litersController.text);
         _updateLiters(value);
@@ -161,7 +163,7 @@ class FuelFormProvider extends ChangeNotifier {
   void _onPricePerLiterChanged() {
     _priceDebounceTimer?.cancel();
     _priceDebounceTimer = Timer(
-      Duration(milliseconds: FuelConstants.priceDebounceMs),
+      const Duration(milliseconds: FuelConstants.priceDebounceMs),
       () {
         final value = _formatter.parseFormattedValue(pricePerLiterController.text);
         _updatePricePerLiter(value);
@@ -172,7 +174,7 @@ class FuelFormProvider extends ChangeNotifier {
   void _onOdometerChanged() {
     _odometerDebounceTimer?.cancel();
     _odometerDebounceTimer = Timer(
-      Duration(milliseconds: FuelConstants.odometerDebounceMs),
+      const Duration(milliseconds: FuelConstants.odometerDebounceMs),
       () {
         final value = _formatter.parseFormattedValue(odometerController.text);
         _updateOdometer(value);

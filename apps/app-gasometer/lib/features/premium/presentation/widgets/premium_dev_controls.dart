@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/premium_provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../providers/premium_provider.dart';
 
 class PremiumDevControls extends StatelessWidget {
   const PremiumDevControls({super.key});
@@ -17,7 +18,7 @@ class PremiumDevControls extends StatelessWidget {
 
     return Consumer<PremiumProvider>(
       builder: (context, premiumProvider, child) {
-        return Container(
+        return DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.warning.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
@@ -39,7 +40,7 @@ class PremiumDevControls extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.developer_mode,
                       color: AppColors.warning,
                       size: 20,
@@ -61,7 +62,7 @@ class PremiumDevControls extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Licença Local',
                       style: AppTextStyles.titleSmall,
                     ),
@@ -117,17 +118,17 @@ class PremiumDevControls extends StatelessWidget {
                         onPressed: premiumProvider.isLoading 
                           ? null 
                           : () => _revokeLicense(context, premiumProvider),
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.block,
                           size: 18,
                           color: AppColors.error,
                         ),
-                        label: Text(
+                        label: const Text(
                           'Revogar Licença',
                           style: TextStyle(color: AppColors.error),
                         ),
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.error),
+                          side: const BorderSide(color: AppColors.error),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
@@ -139,7 +140,7 @@ class PremiumDevControls extends StatelessWidget {
                     
                     const SizedBox(height: 16),
                     
-                    Text(
+                    const Text(
                       'Outras Ações',
                       style: AppTextStyles.titleSmall,
                     ),

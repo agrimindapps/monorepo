@@ -1,9 +1,11 @@
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import '../../shared/utils/result.dart';
+
 import '../../shared/utils/app_error.dart';
+import '../../shared/utils/result.dart';
 
 /// Configuração para o ImageService
 class ImageServiceConfig {

@@ -1,6 +1,6 @@
-import '../entities/fuel_record_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/fuel_constants.dart';
+import '../entities/fuel_record_entity.dart';
 
 /// Serviço avançado para validação contextual de registros de abastecimento
 class FuelValidationService {

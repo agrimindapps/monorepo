@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../controller/favoritos_controller.dart';
-import '../widgets/empty_state_widget.dart';
-import '../widgets/defensivo_favorito_list_item.dart';
+import '../models/favorito_defensivo_model.dart';
 import '../models/view_mode.dart';
+import '../widgets/defensivo_favorito_list_item.dart';
+import '../widgets/empty_state_widget.dart';
 
 class DefensivosTab extends StatelessWidget {
   final FavoritosController controller;
@@ -69,7 +71,7 @@ class DefensivosTab extends StatelessWidget {
 }
 
 class _DefensivoGridItem extends StatelessWidget {
-  final dynamic defensivo;
+  final FavoritoDefensivoModel defensivo;
   final VoidCallback? onTap;
   final VoidCallback? onRemove;
 
@@ -83,7 +85,7 @@ class _DefensivoGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),

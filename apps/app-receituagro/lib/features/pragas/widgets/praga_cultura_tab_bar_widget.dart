@@ -62,7 +62,7 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
         borderRadius: BorderRadius.circular(12),
       ),
       color: widget.isDark ? const Color(0xFF222228) : Colors.white,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(

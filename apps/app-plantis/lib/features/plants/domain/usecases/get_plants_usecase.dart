@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../entities/plant.dart';
 import '../repositories/plants_repository.dart';
 
@@ -23,7 +24,7 @@ class GetPlantByIdUseCase implements UseCase<Plant, String> {
   Future<Either<Failure, Plant>> call(String id) {
     if (id.trim().isEmpty) {
       return Future.value(
-        Left(ValidationFailure('ID da planta é obrigatório')),
+        const Left(ValidationFailure('ID da planta é obrigatório')),
       );
     }
     return repository.getPlantById(id);

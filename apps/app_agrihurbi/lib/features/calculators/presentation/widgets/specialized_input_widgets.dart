@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../domain/entities/calculator_parameter.dart';
 
 /// Widget especializado para entrada de coordenadas (GPS)
 class CoordinateInputWidget extends StatefulWidget {
@@ -336,7 +335,7 @@ class _MultiSelectionWidgetState extends State<MultiSelectionWidget> {
             dense: true,
             contentPadding: EdgeInsets.zero,
           );
-        }).toList(),
+        }),
         if (widget.maxSelections != null)
           Padding(
             padding: const EdgeInsets.only(top: 4),
@@ -424,7 +423,7 @@ class _SliderInputWidgetState extends State<SliderInputWidget> {
                 min: widget.min,
                 max: widget.max,
                 divisions: widget.divisions,
-                label: '${_currentValue}${widget.unit ?? ''}',
+                label: '$_currentValue${widget.unit ?? ''}',
                 onChanged: (value) {
                   setState(() {
                     _currentValue = value;

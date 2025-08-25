@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/plant.dart';
+
 import '../../../../../core/services/image_service.dart';
 import '../../../../../core/theme/colors.dart';
+import '../../../domain/entities/plant.dart';
 
 /// Widget responsável por exibir e gerenciar as imagens da planta
 class PlantImageSection extends StatelessWidget {
@@ -294,7 +295,7 @@ class PlantImageSection extends StatelessWidget {
                     onTap:
                         () =>
                             _showImagePreview(context, plant.imageUrls, index),
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [

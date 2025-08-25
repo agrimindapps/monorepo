@@ -14,7 +14,7 @@ class ErrorStateWidget extends StatelessWidget {
   final bool isCompact;
 
   const ErrorStateWidget({
-    Key? key,
+    super.key,
     required this.title,
     this.message,
     this.icon,
@@ -24,7 +24,7 @@ class ErrorStateWidget extends StatelessWidget {
     this.secondaryButtonText,
     this.style = const ErrorStateStyle(),
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   /// Factory for network errors
   factory ErrorStateWidget.network({
@@ -152,7 +152,7 @@ class ErrorStateWidget extends StatelessWidget {
         children: [
           if (icon != null)
             Icon(
-              icon!,
+              icon,
               size: style.iconSize ?? 24.0,
               color: style.iconColor ?? theme.colorScheme.error,
             ),
@@ -207,7 +207,7 @@ class ErrorStateWidget extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  icon!,
+                  icon,
                   size: style.iconSize ?? 48.0,
                   color: style.iconColor ?? theme.colorScheme.error,
                 ),
@@ -249,7 +249,7 @@ class ErrorStateWidget extends StatelessWidget {
       buttons.add(
         ElevatedButton.icon(
           onPressed: onRetry,
-          icon: Icon(Icons.refresh),
+          icon: const Icon(Icons.refresh),
           label: Text(retryButtonText ?? 'Try Again'),
           style: ElevatedButton.styleFrom(
             backgroundColor: style.primaryButtonColor ?? theme.colorScheme.primary,
@@ -264,11 +264,11 @@ class ErrorStateWidget extends StatelessWidget {
       buttons.add(
         OutlinedButton(
           onPressed: onSecondaryAction,
-          child: Text(secondaryButtonText ?? 'Cancel'),
           style: OutlinedButton.styleFrom(
             foregroundColor: style.secondaryButtonColor ?? theme.colorScheme.primary,
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
           ),
+          child: Text(secondaryButtonText ?? 'Cancel'),
         ),
       );
     }
@@ -297,10 +297,10 @@ class AnimatedErrorState extends StatefulWidget {
   final Duration animationDuration;
 
   const AnimatedErrorState({
-    Key? key,
+    super.key,
     required this.errorWidget,
     this.animationDuration = const Duration(milliseconds: 300),
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedErrorState> createState() => _AnimatedErrorStateState();

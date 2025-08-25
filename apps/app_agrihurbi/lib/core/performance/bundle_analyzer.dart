@@ -1,27 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io' as io;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
-/// Analisador de bundle size e performance
-/// 
-/// Monitora e analisa:
-/// - Tamanho do bundle APK/IPA
-/// - Assets utilizados
-/// - Dependencies overhead
-/// - Performance metrics
-class BundleAnalyzer {
-  static final BundleAnalyzer _instance = BundleAnalyzer._internal();
-  factory BundleAnalyzer() => _instance;
-  BundleAnalyzer._internal();
-
-  // Métricas coletadas
-  final Map<String, BundleMetrics> _metrics = {};
-  DateTime? _lastAnalysis;
-
-  /// Métricas de bundle
-  class BundleMetrics {
+/// Métricas de bundle
+class BundleMetrics {
     final DateTime timestamp;
     final Map<String, int> assetSizes;
     final Map<String, int> librarySizes;
@@ -53,22 +34,37 @@ class BundleAnalyzer {
     }
   }
 
-  /// Configuração de análise
-  class AnalysisConfig {
-    final bool analyzeAssets;
-    final bool analyzeDependencies;
-    final bool measurePerformance;
-    final bool generateRecommendations;
-    final List<String> excludePatterns;
+/// Configuração de análise
+class AnalysisConfig {
+  final bool analyzeAssets;
+  final bool analyzeDependencies;
+  final bool measurePerformance;
+  final bool generateRecommendations;
+  final List<String> excludePatterns;
 
-    const AnalysisConfig({
-      this.analyzeAssets = true,
-      this.analyzeDependencies = true,
-      this.measurePerformance = true,
-      this.generateRecommendations = true,
-      this.excludePatterns = const [],
-    });
-  }
+  const AnalysisConfig({
+    this.analyzeAssets = true,
+    this.analyzeDependencies = true,
+    this.measurePerformance = true,
+    this.generateRecommendations = true,
+    this.excludePatterns = const [],
+  });
+}
+
+/// Analisador de bundle size e performance
+/// 
+/// Monitora e analisa:
+/// - Tamanho do bundle APK/IPA
+/// - Assets utilizados
+/// - Dependencies overhead
+/// - Performance metrics
+class BundleAnalyzer {
+  static final BundleAnalyzer _instance = BundleAnalyzer._internal();
+  factory BundleAnalyzer() => _instance;
+  BundleAnalyzer._internal();
+
+  // Métricas coletadas
+  final Map<String, BundleMetrics> _metrics = {};
 
   /// Executa análise completa do bundle
   Future<BundleMetrics> analyzeBundle({
@@ -80,8 +76,8 @@ class BundleAnalyzer {
     final librarySizes = config.analyzeDependencies ? await _analyzeDependencies() : <String, int>{};
     final performanceMetrics = config.measurePerformance ? await _measurePerformance() : <String, double>{};
     
-    final totalSize = assetSizes.values.fold(0, (sum, size) => sum + size) +
-                     librarySizes.values.fold(0, (sum, size) => sum + size);
+    final totalSize = assetSizes.values.fold<int>(0, (int sum, int size) => sum + size) +
+                     librarySizes.values.fold<int>(0, (int sum, int size) => sum + size);
 
     final recommendations = config.generateRecommendations 
         ? _generateRecommendations(assetSizes, librarySizes, performanceMetrics)
@@ -97,7 +93,6 @@ class BundleAnalyzer {
     );
 
     _metrics['latest'] = metrics;
-    _lastAnalysis = DateTime.now();
 
     developer.log(
       'Análise concluída: ${metrics.totalSizeMB.toStringAsFixed(2)}MB',
@@ -113,7 +108,7 @@ class BundleAnalyzer {
 
     try {
       // Lista assets do bundle
-      final assetManifest = await rootBundle.loadString('AssetManifest.json');
+      // final assetManifest = await rootBundle.loadString('AssetManifest.json');
       // No ambiente real, você analisaria o manifest para obter tamanhos reais
       
       // Simulação de análise de assets
@@ -173,7 +168,7 @@ class BundleAnalyzer {
       final stopwatch = Stopwatch()..start();
 
       // Simula medições de performance
-      await Future.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       metrics['app_startup_ms'] = stopwatch.elapsedMilliseconds.toDouble();
 
       // Métricas de memória (estimadas)
@@ -210,7 +205,7 @@ class BundleAnalyzer {
       recommendations.add('ASSETS: Considere comprimir imagens e otimizar assets (${(totalAssetSize / (1024 * 1024)).toStringAsFixed(1)}MB)');
     }
 
-    final imageSize = assetSizes['images/logos'] ?? 0 + assetSizes['images/icons'] ?? 0;
+    final imageSize = (assetSizes['images/logos'] ?? 0) + (assetSizes['images/icons'] ?? 0);
     if (imageSize > 500 * 1024) { // > 500KB
       recommendations.add('IMAGES: Use formatos WebP e SVG quando possível para reduzir tamanho');
     }
@@ -355,155 +350,5 @@ class BundleAnalyzer {
   /// Limpa todas as análises
   void clearAnalyses() {
     _metrics.clear();
-    _lastAnalysis = null;
-  }
-}
-
-/// Widget para exibir informações de bundle (debug)
-class BundleAnalyzerWidget extends StatefulWidget {
-  final Widget child;
-  final bool showInProduction;
-
-  const BundleAnalyzerWidget({
-    Key? key,
-    required this.child,
-    this.showInProduction = false,
-  }) : super(key: key);
-
-  @override
-  State<BundleAnalyzerWidget> createState() => _BundleAnalyzerWidgetState();
-}
-
-class _BundleAnalyzerWidgetState extends State<BundleAnalyzerWidget> {
-  final BundleAnalyzer _analyzer = BundleAnalyzer();
-  bool _showAnalysis = false;
-  Map<String, dynamic>? _report;
-
-  @override
-  void initState() {
-    super.initState();
-    if (kDebugMode || widget.showInProduction) {
-      _runAnalysis();
-    }
-  }
-
-  Future<void> _runAnalysis() async {
-    try {
-      await _analyzer.analyzeBundle();
-      if (mounted) {
-        setState(() {
-          _report = _analyzer.getDetailedReport();
-        });
-      }
-    } catch (e) {
-      developer.log('Erro na análise: $e', name: 'BundleAnalyzerWidget');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!kDebugMode && !widget.showInProduction) {
-      return widget.child;
-    }
-
-    return Stack(
-      children: [
-        widget.child,
-        if (_showAnalysis && _report != null)
-          _buildAnalysisOverlay(),
-        Positioned(
-          bottom: 100,
-          right: 16,
-          child: FloatingActionButton(
-            mini: true,
-            onPressed: () => setState(() => _showAnalysis = !_showAnalysis),
-            child: const Icon(Icons.analytics),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAnalysisOverlay() {
-    final summary = _report!['summary'] as Map<String, dynamic>;
-    final recommendations = _report!['recommendations'] as List<dynamic>;
-
-    return Positioned(
-      top: 100,
-      left: 16,
-      right: 16,
-      bottom: 200,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black87,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Bundle Analysis',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  onPressed: () => setState(() => _showAnalysis = false),
-                  icon: const Icon(Icons.close, color: Colors.white),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Total Size: ${summary['total_size_mb'].toStringAsFixed(2)}MB',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Recommendations: ${recommendations.length}',
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Top Recommendations:',
-              style: TextStyle(color: Colors.orange, fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: recommendations.length.clamp(0, 5),
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      '• ${recommendations[index]}',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: _runAnalysis,
-                  child: const Text('Re-analyze'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    _analyzer.saveAnalysis('manual_${DateTime.now().millisecondsSinceEpoch}');
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

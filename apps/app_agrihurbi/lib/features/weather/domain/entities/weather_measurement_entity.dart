@@ -146,8 +146,8 @@ class WeatherMeasurementEntity extends Equatable {
     final RH = humidity;
     
     // Magnus formula approximation
-    final a = 17.27;
-    final b = 237.7;
+    const a = 17.27;
+    const b = 237.7;
     
     final alpha = ((a * T) / (b + T)) + math.log(RH / 100.0);
     final dewPoint = (b * alpha) / (a - alpha);
@@ -285,8 +285,8 @@ class WeatherMeasurementEntity extends Equatable {
         'id: $id, '
         'location: $locationName, '
         'timestamp: $timestamp, '
-        'temp: ${temperature}°C, '
-        'humidity: ${humidity}%, '
+        'temp: $temperature°C, '
+        'humidity: $humidity%, '
         'condition: $weatherCondition'
         ')';
   }

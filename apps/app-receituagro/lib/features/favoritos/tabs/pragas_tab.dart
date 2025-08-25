@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../constants/favoritos_design_tokens.dart';
 import '../controller/favoritos_controller.dart';
+import '../models/favorito_praga_model.dart';
+import '../models/view_mode.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/praga_favorito_list_item.dart';
-import '../models/view_mode.dart';
-import '../constants/favoritos_design_tokens.dart';
 
 class PragasTab extends StatelessWidget {
   final FavoritosController controller;
@@ -70,7 +72,7 @@ class PragasTab extends StatelessWidget {
 }
 
 class _PragaGridItem extends StatelessWidget {
-  final dynamic praga;
+  final FavoritoPragaModel praga;
   final VoidCallback? onTap;
   final VoidCallback? onRemove;
 
@@ -84,7 +86,7 @@ class _PragaGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -116,7 +118,7 @@ class _PragaGridItem extends StatelessWidget {
                         color: FavoritosDesignTokens.pragasColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         FavoritosDesignTokens.pragasIcon,
                         color: FavoritosDesignTokens.pragasColor,
                         size: 18,

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'calculation_result.dart';
 
 /// Nível de alerta para dosagem
 enum AlertLevel {
@@ -103,8 +104,22 @@ class AdministrationInstructions extends Equatable {
       ];
 }
 
+/// Helper method to map AlertLevel to ResultSeverity
+ResultSeverity _mapAlertLevelToResultSeverity(AlertLevel level) {
+  switch (level) {
+    case AlertLevel.safe:
+      return ResultSeverity.success;
+    case AlertLevel.caution:
+      return ResultSeverity.info;
+    case AlertLevel.warning:
+      return ResultSeverity.warning;
+    case AlertLevel.danger:
+      return ResultSeverity.danger;
+  }
+}
+
 /// Resultado do cálculo de dosagem de medicamentos
-class MedicationDosageOutput extends Equatable {
+class MedicationDosageOutput extends CalculationResult {
   final String medicationName;
   final double dosagePerKg; // mg/kg
   final double totalDailyDose; // mg
@@ -117,10 +132,9 @@ class MedicationDosageOutput extends Equatable {
   final MonitoringInfo? monitoringInfo;
   final AdministrationInstructions instructions;
   final Map<String, dynamic> calculationDetails;
-  final DateTime calculatedAt;
   final bool isSafeToAdminister;
 
-  const MedicationDosageOutput({
+  MedicationDosageOutput({
     required this.medicationName,
     required this.dosagePerKg,
     required this.totalDailyDose,
@@ -133,9 +147,30 @@ class MedicationDosageOutput extends Equatable {
     this.monitoringInfo,
     required this.instructions,
     this.calculationDetails = const {},
-    required this.calculatedAt,
+    required DateTime calculatedAt,
     required this.isSafeToAdminister,
-  });
+  }) : super(
+    calculatorId: 'medication_dosage',
+    results: [
+      ResultItem(
+        label: 'Dosagem Total Diária',
+        value: totalDailyDose,
+        unit: unit,
+        severity: isSafeToAdminister ? ResultSeverity.success : ResultSeverity.danger,
+      ),
+      ResultItem(
+        label: 'Dose por Administração',
+        value: dosePerAdministration,
+        unit: unit,
+      ),
+    ],
+    recommendations: alerts.map((alert) => Recommendation(
+      title: alert.type.displayName,
+      message: alert.message,
+      severity: _mapAlertLevelToResultSeverity(alert.level),
+    )).toList(),
+    calculatedAt: calculatedAt,
+  );
 
   /// Retorna o nível de alerta mais alto
   AlertLevel get highestAlertLevel {
@@ -203,7 +238,7 @@ class MedicationDosageOutput extends Equatable {
         'sideEffects': instructions.sideEffects,
       },
       'calculationDetails': calculationDetails,
-      'calculatedAt': calculatedAt.toIso8601String(),
+      'calculatedAt': calculatedAt?.toIso8601String(),
       'isSafeToAdminister': isSafeToAdminister,
     };
   }

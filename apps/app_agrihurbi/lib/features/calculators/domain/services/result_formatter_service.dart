@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 import '../entities/calculation_result.dart';
-import '../entities/calculator_parameter.dart';
-import 'unit_conversion_service.dart';
 
 /// Serviço de formatação de resultados de calculadoras
 /// 
@@ -17,9 +15,9 @@ class ResultFormatterService {
     int? forcedDecimals,
   }) {
     final formattedValue = _formatNumber(
-      result.value,
-      decimals: forcedDecimals ?? _getDecimalPlaces(result.value, result.unit),
-      useThousandsSeparator: _shouldUseThousandsSeparator(result.value),
+      (result.value as num).toDouble(),
+      decimals: forcedDecimals ?? _getDecimalPlaces((result.value as num).toDouble(), result.unit),
+      useThousandsSeparator: _shouldUseThousandsSeparator((result.value as num).toDouble()),
     );
 
     if (!showUnit || result.unit.isEmpty) {
@@ -41,8 +39,8 @@ class ResultFormatterService {
         'unidade': result.unit,
       };
 
-      if (includeDescriptions && result.description.isNotEmpty) {
-        row['descricao'] = result.description;
+      if (includeDescriptions && (result.description?.isNotEmpty == true)) {
+        row['descricao'] = result.description!;
       }
 
       return row;
@@ -184,8 +182,8 @@ class ResultFormatterService {
   }) {
     var formatted = '${result.label}: ${formatPrimaryResult(result)}';
 
-    if (includeDescription && result.description.isNotEmpty) {
-      formatted += ' (${result.description})';
+    if (includeDescription && (result.description?.isNotEmpty == true)) {
+      formatted += ' (${result.description!})';
     }
 
     return formatted;
@@ -328,7 +326,7 @@ class ResultFormatterService {
   ) {
     final range = ranges.firstWhere(
       (r) => r.quality == quality,
-      orElse: () => QualityRange(
+      orElse: () => const QualityRange(
         min: 0,
         max: 0,
         quality: QualityLevel.unknown,

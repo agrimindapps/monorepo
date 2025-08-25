@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/widgets/modern_header_widget.dart';
+
 import '../../core/di/injection_container.dart' as di;
+import '../../core/widgets/modern_header_widget.dart';
 import 'controller/comentarios_controller.dart';
+import 'models/comentario_model.dart';
 import 'services/comentarios_service.dart';
 
 class ComentariosPage extends StatelessWidget {
@@ -172,7 +174,7 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildComentariosList(List<dynamic> comentarios) {
+  Widget _buildComentariosList(List<ComentarioModel> comentarios) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: comentarios.length,
@@ -183,7 +185,7 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildComentarioCard(dynamic comentario, BuildContext context) {
+  Widget _buildComentarioCard(ComentarioModel comentario, BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
@@ -234,10 +236,10 @@ class _ComentariosPageContent extends StatelessWidget {
                     children: [
                       Text(
                         comentario.ferramenta,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF4CAF50),
+                          color: Color(0xFF4CAF50),
                         ),
                       ),
                       if (comentario.pkIdentificador.isNotEmpty) ...[
@@ -364,7 +366,7 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  void _deleteComentario(BuildContext context, dynamic comentario) {
+  void _deleteComentario(BuildContext context, ComentarioModel comentario) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

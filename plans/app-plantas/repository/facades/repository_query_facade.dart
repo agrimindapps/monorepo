@@ -675,13 +675,13 @@ class RepositoryQueryFacade {
 
     for (final tarefa in sorted.reversed) {
       if (lastDate == null) {
-        lastDate = tarefa.dataConclusao!;
+        lastDate = tarefa.dataConclusao;
         streak = 1;
       } else {
         final diff = lastDate.difference(tarefa.dataConclusao!).inDays;
         if (diff <= 1) {
           streak++;
-          lastDate = tarefa.dataConclusao!;
+          lastDate = tarefa.dataConclusao;
         } else {
           break;
         }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/design_tokens.dart';
+
 class FormSectionWidget extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -12,10 +14,24 @@ class FormSectionWidget extends StatelessWidget {
     required this.children,
   });
 
+  /// Factory com títulos padronizados usando design tokens
+  factory FormSectionWidget.withTitle({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+    Color? iconColor,
+  }) {
+    return FormSectionWidget(
+      title: title,
+      icon: icon,
+      children: children,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingSectionSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -23,21 +39,21 @@ class FormSectionWidget extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: Theme.of(context).colorScheme.onSurface,
-                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+                size: GasometerDesignTokens.iconSizeButton,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontSize: GasometerDesignTokens.fontSizeLg,
+                  fontWeight: GasometerDesignTokens.fontWeightSemiBold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: GasometerDesignTokens.spacingLg),
           ...children,
         ],
       ),

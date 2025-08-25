@@ -166,7 +166,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     stream.listen(
       (tasks) => state = AsyncValue.data(tasks),
       onError: (error, stackTrace) =>
-          state = AsyncValue.error(error, stackTrace),
+          state = AsyncValue.error(error as Object? ?? 'Unknown error', stackTrace as StackTrace? ?? StackTrace.empty),
     );
   }
 }

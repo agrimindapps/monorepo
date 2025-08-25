@@ -70,7 +70,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _checkAuthState() async {
-    final result = await _getCurrentUser(NoParams());
+    final result = await _getCurrentUser(const NoParams());
     result.fold(
       (failure) => state = state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -134,7 +134,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithGoogle() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInWithGoogle(NoParams());
+    final result = await _signInWithGoogle(const NoParams());
 
     return result.fold(
       (failure) {
@@ -157,7 +157,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithApple() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInWithApple(NoParams());
+    final result = await _signInWithApple(const NoParams());
 
     return result.fold(
       (failure) {
@@ -180,7 +180,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithFacebook() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInWithFacebook(NoParams());
+    final result = await _signInWithFacebook(const NoParams());
 
     return result.fold(
       (failure) {
@@ -203,7 +203,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _signOut(NoParams());
+    final result = await _signOut(const NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(
@@ -218,7 +218,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> sendEmailVerification() async {
-    final result = await _sendEmailVerification(NoParams());
+    final result = await _sendEmailVerification(const NoParams());
     return result.isRight();
   }
 
@@ -252,7 +252,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> deleteAccount() async {
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _deleteAccount(NoParams());
+    final result = await _deleteAccount(const NoParams());
 
     return result.fold(
       (failure) {

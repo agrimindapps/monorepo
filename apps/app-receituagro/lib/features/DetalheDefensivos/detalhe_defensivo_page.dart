@@ -1,15 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/interfaces/i_premium_service.dart';
+import '../../core/models/fitossanitario_hive.dart';
 import '../../core/repositories/favoritos_hive_repository.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../core/models/fitossanitario_hive.dart';
-import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import '../comentarios/services/comentarios_service.dart';
+import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/models/comentario_model.dart';
-import '../../core/interfaces/i_premium_service.dart';
+import '../comentarios/services/comentarios_service.dart';
 
 
 // Modelo de dados para diagnóstico
@@ -652,7 +653,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       'corrosivo': _defensivoData?.corrosivo ?? 'Não corrosivo',
     };
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -700,7 +701,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
+                const Text(
                   'Informações Técnicas',
                   style: TextStyle(
                     fontSize: 18,
@@ -772,7 +773,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       'mapa': _defensivoData?.idReg ?? '12345-67',
     };
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -820,7 +821,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
+                const Text(
                   'Classificação',
                   style: TextStyle(
                     fontSize: 18,
@@ -1012,7 +1013,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
 
     final accentColor = theme.colorScheme.tertiary;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -1063,7 +1064,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -1152,7 +1153,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                   ),
                 ),
               ),
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
@@ -1718,10 +1719,10 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.comment_outlined,
               size: 64,
-              color: const Color(0xFF4CAF50),
+              color: Color(0xFF4CAF50),
             ),
             const SizedBox(height: 16),
             Text(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../interfaces/i_sync_service.dart';
+
 import '../../interfaces/i_connectivity_service.dart';
+import '../../interfaces/i_sync_service.dart';
 import 'connectivity_indicator.dart';
+import 'empty_state_widget.dart';
+import 'error_state_widget.dart';
 import 'real_time_sync_status.dart';
 import 'sync_status_indicator.dart';
-import 'error_state_widget.dart';
-import 'empty_state_widget.dart';
 
 /// Enhanced scaffold with built-in connectivity and sync indicators
 /// Provides consistent UX patterns across all pages
@@ -31,7 +32,7 @@ class EnhancedAppScaffold extends StatelessWidget {
   final VoidCallback? onSyncTap;
 
   const EnhancedAppScaffold({
-    Key? key,
+    super.key,
     this.appBar,
     required this.body,
     this.drawer,
@@ -49,7 +50,7 @@ class EnhancedAppScaffold extends StatelessWidget {
     this.showSyncStatus = true,
     this.showFloatingSyncIndicator = false,
     this.onSyncTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +132,7 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onSyncTap;
 
   const EnhancedAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.actions,
     this.leading,
@@ -145,7 +146,7 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showSyncIndicator = true,
     this.showConnectivityIndicator = true,
     this.onSyncTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +200,7 @@ class EnhancedPageWrapper extends StatelessWidget {
   final IConnectivityService? connectivityService;
 
   const EnhancedPageWrapper({
-    Key? key,
+    super.key,
     required this.child,
     this.isLoading = false,
     this.errorMessage,
@@ -208,7 +209,7 @@ class EnhancedPageWrapper extends StatelessWidget {
     this.emptyWidget,
     this.syncService,
     this.connectivityService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +259,7 @@ class EnhancedListView<T> extends StatelessWidget {
   final bool shrinkWrap;
 
   const EnhancedListView({
-    Key? key,
+    super.key,
     required this.items,
     required this.itemBuilder,
     this.isItemUnsynced,
@@ -266,7 +267,7 @@ class EnhancedListView<T> extends StatelessWidget {
     this.controller,
     this.padding,
     this.shrinkWrap = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +291,7 @@ class EnhancedListView<T> extends StatelessWidget {
           listItem = Stack(
             children: [
               listItem,
-              Positioned(
+              const Positioned(
                 top: 8.0,
                 right: 8.0,
                 child: UnsyncedItemIndicator(isUnsynced: true),

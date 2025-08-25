@@ -23,21 +23,21 @@ class SubscriptionPlanModel extends SubscriptionPlan {
       productId: map['productId']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
-      price: (map['price'] ?? 0).toDouble(),
+      price: ((map['price'] ?? 0) as num).toDouble(),
       currency: map['currency']?.toString() ?? 'R\$',
       type: PlanType.values.firstWhere(
         (e) => e.toString() == 'PlanType.${map['type']}',
         orElse: () => PlanType.free,
       ),
-      durationInDays: map['durationInDays'],
+      durationInDays: (map['durationInDays'] as int?),
       features: map['features'] != null 
-          ? List<String>.from(map['features'])
+          ? List<String>.from(map['features'] as Iterable)
           : [],
-      isPopular: map['isPopular'] ?? false,
-      originalPrice: map['originalPrice']?.toDouble(),
-      trialDays: map['trialDays'],
+      isPopular: (map['isPopular'] as bool?) ?? false,
+      originalPrice: ((map['originalPrice']) as num?)?.toDouble(),
+      trialDays: (map['trialDays'] as int?),
       metadata: map['metadata'] != null 
-          ? Map<String, dynamic>.from(map['metadata'])
+          ? Map<String, dynamic>.from(map['metadata'] as Map)
           : null,
     );
   }
@@ -78,6 +78,7 @@ class SubscriptionPlanModel extends SubscriptionPlan {
     );
   }
 
+  @override
   SubscriptionPlanModel copyWith({
     String? id,
     String? productId,

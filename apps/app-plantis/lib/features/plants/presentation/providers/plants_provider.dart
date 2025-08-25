@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/plant.dart';
-import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
-import '../../domain/usecases/update_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
+import '../../domain/usecases/get_plants_usecase.dart';
+import '../../domain/usecases/update_plant_usecase.dart';
 
 class PlantsProvider extends ChangeNotifier {
   final GetPlantsUseCase _getPlantsUseCase;
@@ -68,7 +69,7 @@ class PlantsProvider extends ChangeNotifier {
     }
     _clearError();
 
-    final result = await _getPlantsUseCase.call(NoParams());
+    final result = await _getPlantsUseCase.call(const NoParams());
 
     result.fold((failure) => _setError(_getErrorMessage(failure)), (plants) {
       _plants = _sortPlants(plants);

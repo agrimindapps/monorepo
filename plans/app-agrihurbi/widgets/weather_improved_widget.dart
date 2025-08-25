@@ -335,7 +335,7 @@ class WeatherDetailPage extends StatelessWidget {
           );
         }
 
-        final weather = weatherService.currentWeather!;
+        final weather = weatherService.currentWeather;
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(

@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Centralized error handling utility
 class ErrorHandler {
+  // Private constructor to prevent instantiation
+  ErrorHandler._();
   /// Show error snackbar based on failure type
   static void showErrorSnackbar(
     BuildContext context,
@@ -189,7 +191,7 @@ class ErrorHandler {
             size: 48,
           ),
           title: Text(customTitle ?? _getErrorTitle(failure)),
-          content: Text(failure.message),
+          content: Text(failure.message.isNotEmpty ? failure.message : 'Ocorreu um erro inesperado'),
           actions: actions ??
               [
                 TextButton(

@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
@@ -24,7 +24,7 @@ class RefreshUserUseCase implements UseCase<UserEntity, RefreshUserParams> {
       (failure) => Left(failure),
       (currentUser) async {
         if (currentUser == null) {
-          return Left(ValidationFailure('Nenhum usuário logado'));
+          return const Left(ValidationFailure('Nenhum usuário logado'));
         }
         
         // Executar refresh no repository

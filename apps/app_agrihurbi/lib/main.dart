@@ -1,19 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
+import 'package:app_agrihurbi/core/constants/app_constants.dart';
 // Core
 import 'package:app_agrihurbi/core/di/injection_container.dart';
 import 'package:app_agrihurbi/core/router/app_router.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
-import 'package:app_agrihurbi/core/constants/app_constants.dart';
-
-// Providers
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-import 'package:app_agrihurbi/features/livestock/presentation/providers/livestock_provider.dart';
-import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
-
 // Core Utils
 import 'package:app_agrihurbi/core/utils/hive_initializer.dart';
+// Providers
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
+import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/providers/livestock_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

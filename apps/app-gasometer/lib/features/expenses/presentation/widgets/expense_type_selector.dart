@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/expense_entity.dart';
-import '../../core/constants/expense_constants.dart';
+
 import '../../../../core/presentation/theme/app_theme.dart';
+import '../../core/constants/expense_constants.dart';
+import '../../domain/entities/expense_entity.dart';
 
 /// Widget para seleção do tipo de despesa com visual atrativo
 class ExpenseTypeSelector extends StatelessWidget {
@@ -47,7 +48,7 @@ class ExpenseTypeSelector extends StatelessWidget {
   }
 
   Widget _buildTypeGrid() {
-    final types = ExpenseType.values;
+    const types = ExpenseType.values;
     
     return GridView.builder(
       shrinkWrap: true,

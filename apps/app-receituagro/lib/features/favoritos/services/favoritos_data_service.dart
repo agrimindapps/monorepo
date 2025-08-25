@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../models/favoritos_data.dart';
-import '../models/favorito_defensivo_model.dart';
-import '../models/favorito_praga_model.dart';
-import '../models/favorito_diagnostico_model.dart';
+
 import '../../../core/interfaces/i_premium_service.dart';
+import '../models/favorito_defensivo_model.dart';
+import '../models/favorito_diagnostico_model.dart';
+import '../models/favorito_praga_model.dart';
+import '../models/favoritos_data.dart';
 
 abstract class IFavoritosRepository {
   Future<List<FavoritoDefensivoModel>> getFavoritosDefensivos();

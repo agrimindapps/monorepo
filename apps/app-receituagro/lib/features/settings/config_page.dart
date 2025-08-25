@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'constants/settings_design_tokens.dart';
 import 'models/settings_state.dart';
-import 'services/theme_service.dart';
-import 'services/premium_service.dart';
-import 'services/device_service.dart';
-import 'services/navigation_service.dart';
+import 'sections/desenvolvimento_section.dart';
 import 'sections/publicidade_section.dart';
 import 'sections/site_access_section.dart';
-import 'sections/speech_to_text_section.dart';
-import 'sections/desenvolvimento_section.dart';
 import 'sections/sobre_section.dart';
+import 'sections/speech_to_text_section.dart';
+import 'services/device_service.dart';
+import 'services/navigation_service.dart';
+import 'services/premium_service.dart';
+import 'services/theme_service.dart';
 
 /// Main configuration page following SOLID principles
 class ConfigPage extends StatefulWidget {

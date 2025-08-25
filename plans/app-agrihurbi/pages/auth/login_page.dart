@@ -216,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                       if (!isMobile)
                         Expanded(
                           flex: 5,
-                          child: Container(
+                          child: DecoratedBox(
                             decoration: BoxDecoration(
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(16.0),

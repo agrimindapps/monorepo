@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/entities/equine_entity.dart';
-import '../../domain/entities/animal_base_entity.dart';
 import '../providers/livestock_provider.dart';
 import '../widgets/bovine_card_widget.dart';
 

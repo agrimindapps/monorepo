@@ -1,6 +1,7 @@
-import 'dart:ui' as ui;
-import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
+import 'dart:ui' as ui;
+
+import 'package:flutter/services.dart';
 
 /// Serviço otimizado para carregamento de imagens com cache e lazy loading
 /// Resolve o problema de performance com 1181+ imagens (143MB)

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../domain/entities/equine_entity.dart';
-import '../providers/livestock_provider.dart';
+import '../providers/equines_provider.dart';
 
 /// Página de detalhes completos do equino com visualização rica
 /// 
@@ -41,7 +41,7 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
   }
 
   Future<void> _loadEquineDetails() async {
-    final provider = context.read<LivestockProvider>();
+    final provider = context.read<EquinesProvider>();
     
     // Busca equino local primeiro
     var equine = provider.getEquineById(widget.equineId);
@@ -208,8 +208,8 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
   }
 
   Widget _buildPlaceholderImage() {
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceVariant,
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Icon(
         Icons.pets,
         size: 80,
@@ -392,7 +392,7 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

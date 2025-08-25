@@ -36,7 +36,7 @@ class ErrorHandlerTestSuite {
     // Test timeout error
     final timeoutResult = await _errorHandler.execute(
       () async {
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
         throw TimeoutException('Operation timed out');
       },
       operationName: 'test_timeout',
@@ -84,7 +84,7 @@ class ErrorHandlerTestSuite {
     debugPrint('✅ Server error test passed');
 
     // Test unauthorized error
-    final authError = UnauthorizedError(
+    const authError = UnauthorizedError(
       message: 'Session expired',
       technicalDetails: 'JWT token invalid',
     );
@@ -99,7 +99,7 @@ class ErrorHandlerTestSuite {
   Future<void> _testValidationErrors() async {
     debugPrint('Testing Validation Errors...');
 
-    final validationError = ValidationError(
+    const validationError = ValidationError(
       message: 'Form validation failed',
       fieldErrors: {
         'email': ['Email is required', 'Email format is invalid'],
@@ -121,7 +121,7 @@ class ErrorHandlerTestSuite {
     debugPrint('Testing Retry Mechanisms...');
 
     // Test exponential backoff
-    final policy = RetryPolicy(
+    const policy = RetryPolicy(
       maxAttempts: 4,
       initialDelay: Duration(milliseconds: 100),
       backoffMultiplier: 2.0,
@@ -137,8 +137,8 @@ class ErrorHandlerTestSuite {
     debugPrint('✅ Exponential backoff test passed');
 
     // Test retry condition
-    final networkError = NetworkError(message: 'Connection failed');
-    final authError = InvalidCredentialsError();
+    const networkError = NetworkError(message: 'Connection failed');
+    const authError = InvalidCredentialsError();
 
     assert(policy.shouldRetry(networkError) == true);
     assert(policy.shouldRetry(authError) == false);
@@ -150,14 +150,14 @@ class ErrorHandlerTestSuite {
     debugPrint('Testing Result Pattern...');
 
     // Test successful result
-    final successResult = Result.success('Test data');
+    const successResult = Result.success('Test data');
     assert(successResult.isSuccess == true);
     assert(successResult.data == 'Test data');
     assert(successResult.getOrThrow() == 'Test data');
     assert(successResult.getOrElse('fallback') == 'Test data');
 
     // Test failure result
-    final failureResult = Result<String>.failure(
+    const failureResult = Result<String>.failure(
       NetworkError(message: 'Network failed'),
     );
     assert(failureResult.isSuccess == false);
@@ -184,7 +184,7 @@ class ErrorHandlerTestSuite {
     debugPrint('Testing Logging System...');
 
     // Test error logging
-    final testError = BusinessLogicError(
+    const testError = BusinessLogicError(
       message: 'Invalid vehicle state',
       userFriendlyMessage: 'Veículo não pode ser removido',
       metadata: {
@@ -218,7 +218,7 @@ class ErrorHandlerTestSuite {
       'POST',
       '/api/test',
       200,
-      Duration(milliseconds: 150),
+      const Duration(milliseconds: 150),
       requestData: {'test': true},
       responseData: {'success': true},
     );
@@ -256,12 +256,12 @@ class ErrorHandlerTestSuite {
 
     // Test different error types for UI display
     final errors = [
-      NetworkError(message: 'Network error'),
-      ValidationError(message: 'Validation error'),
-      ServerError(message: 'Server error', statusCode: 500),
-      AuthenticationError(message: 'Auth error'),
-      BusinessLogicError(message: 'Business error'),
-      UnexpectedError(message: 'Unexpected error'),
+      const NetworkError(message: 'Network error'),
+      const ValidationError(message: 'Validation error'),
+      const ServerError(message: 'Server error', statusCode: 500),
+      const AuthenticationError(message: 'Auth error'),
+      const BusinessLogicError(message: 'Business error'),
+      const UnexpectedError(message: 'Unexpected error'),
     ];
 
     for (final error in errors) {
@@ -287,7 +287,7 @@ class TestProvider extends BaseProvider {
   Future<void> testSuccessfulOperation() async {
     await executeOperation(
       () async {
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
         // Simulate success
       },
       operationName: 'testSuccessfulOperation',
@@ -297,8 +297,8 @@ class TestProvider extends BaseProvider {
   Future<void> testFailedOperation() async {
     await executeOperation(
       () async {
-        await Future.delayed(Duration(milliseconds: 50));
-        throw BusinessLogicError(
+        await Future.delayed(const Duration(milliseconds: 50));
+        throw const BusinessLogicError(
           message: 'Test business logic error',
           userFriendlyMessage: 'Operação de teste falhou',
         );

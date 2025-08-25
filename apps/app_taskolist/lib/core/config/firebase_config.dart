@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 /// Configuração específica do Firebase para o Task Manager
 class TaskManagerFirebaseConfig {

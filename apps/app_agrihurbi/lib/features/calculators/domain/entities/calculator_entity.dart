@@ -1,7 +1,14 @@
 import 'package:equatable/equatable.dart';
+
+import 'calculation_result.dart';
 import 'calculator_category.dart';
 import 'calculator_parameter.dart';
-import 'calculation_result.dart';
+
+enum CalculatorComplexity {
+  low,
+  medium,
+  high,
+}
 
 abstract class CalculatorEntity extends Equatable {
   final String id;
@@ -12,6 +19,8 @@ abstract class CalculatorEntity extends Equatable {
   final String? formula;
   final List<String>? references;
   final bool isActive;
+  final List<String> tags;
+  final CalculatorComplexity complexity;
 
   const CalculatorEntity({
     required this.id,
@@ -22,6 +31,8 @@ abstract class CalculatorEntity extends Equatable {
     this.formula,
     this.references,
     this.isActive = true,
+    this.tags = const [],
+    this.complexity = CalculatorComplexity.medium,
   });
 
   /// Método abstrato que deve ser implementado por cada calculadora específica
@@ -115,5 +126,7 @@ abstract class CalculatorEntity extends Equatable {
         formula,
         references,
         isActive,
+        tags,
+        complexity,
       ];
 }

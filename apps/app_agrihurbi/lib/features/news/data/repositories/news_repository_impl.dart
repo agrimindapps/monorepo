@@ -1,15 +1,15 @@
+import 'package:app_agrihurbi/core/error/exceptions.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
+import 'package:app_agrihurbi/core/network/network_info.dart';
+import 'package:app_agrihurbi/features/news/data/datasources/news_local_datasource.dart';
+import 'package:app_agrihurbi/features/news/data/datasources/news_remote_datasource.dart';
+import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
+import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
+import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
+import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
+import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
-import 'package:app_agrihurbi/core/error/exceptions.dart';
-import 'package:app_agrihurbi/core/network/network_info.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
-import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
-import 'package:app_agrihurbi/features/news/data/datasources/news_remote_datasource.dart';
-import 'package:app_agrihurbi/features/news/data/datasources/news_local_datasource.dart';
-import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
-import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 
 /// News Repository Implementation
 @LazySingleton(as: NewsRepository)
@@ -68,11 +68,11 @@ class NewsRepositoryImpl implements NewsRepository {
         return Right(cachedArticles);
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -83,11 +83,11 @@ class NewsRepositoryImpl implements NewsRepository {
       if (cachedArticle != null) {
         return Right(cachedArticle);
       }
-      return Left(NotFoundFailure('Article not found'));
+      return const Left(NotFoundFailure(message: 'Article not found'));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -122,11 +122,11 @@ class NewsRepositoryImpl implements NewsRepository {
       );
       return Right(cachedResults);
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -155,7 +155,7 @@ class NewsRepositoryImpl implements NewsRepository {
         return Right(premiumArticles);
       } else {
         // Get premium from cache
-        final filter = NewsFilterModel(showOnlyPremium: true);
+        const filter = NewsFilterModel(showOnlyPremium: true);
         final cachedPremium = await _localDataSource.searchCachedArticles(
           query: '',
           filter: filter,
@@ -164,11 +164,11 @@ class NewsRepositoryImpl implements NewsRepository {
         return Right(cachedPremium);
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -190,11 +190,11 @@ class NewsRepositoryImpl implements NewsRepository {
         return Right(cachedPrices);
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -205,11 +205,11 @@ class NewsRepositoryImpl implements NewsRepository {
       if (cachedCommodity != null) {
         return Right(cachedCommodity);
       }
-      return Left(NotFoundFailure('Commodity not found'));
+      return const Left(NotFoundFailure(message: 'Commodity not found'));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -228,12 +228,12 @@ class NewsRepositoryImpl implements NewsRepository {
         );
         return Right(history);
       } else {
-        return Left(ServerFailure('No internet connection for historical data'));
+        return const Left(ServerFailure(message: 'No internet connection for historical data'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -249,14 +249,14 @@ class NewsRepositoryImpl implements NewsRepository {
         if (cachedSummary != null) {
           return Right(cachedSummary);
         }
-        return Left(ServerFailure('No market data available offline'));
+        return const Left(ServerFailure(message: 'No market data available offline'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -268,9 +268,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.addToFavorites(articleId);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -280,9 +280,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.removeFromFavorites(articleId);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -292,9 +292,9 @@ class NewsRepositoryImpl implements NewsRepository {
       final favorites = await _localDataSource.getFavoriteArticles();
       return Right(favorites);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -304,9 +304,9 @@ class NewsRepositoryImpl implements NewsRepository {
       final isFavorite = await _localDataSource.isArticleFavorite(articleId);
       return Right(isFavorite);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -321,14 +321,14 @@ class NewsRepositoryImpl implements NewsRepository {
         await _localDataSource.saveLastRSSUpdate(DateTime.now());
         return const Right(null);
       } else {
-        return Left(ServerFailure('No internet connection to refresh RSS feeds'));
+        return const Left(ServerFailure(message: 'No internet connection to refresh RSS feeds'));
       }
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -338,9 +338,9 @@ class NewsRepositoryImpl implements NewsRepository {
       final lastUpdate = await _localDataSource.getLastRSSUpdate();
       return Right(lastUpdate);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -353,9 +353,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.cacheArticles([articleModel]);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -365,9 +365,9 @@ class NewsRepositoryImpl implements NewsRepository {
       final cachedArticles = await _localDataSource.getCachedArticles();
       return Right(cachedArticles);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -377,9 +377,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.clearArticlesCache();
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -391,9 +391,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.addRSSFeed(feedUrl);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -403,9 +403,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.removeRSSFeed(feedUrl);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -415,9 +415,9 @@ class NewsRepositoryImpl implements NewsRepository {
       final sources = await _localDataSource.getRSSFeeds();
       return Right(sources);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -441,9 +441,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.savePriceAlert(alert);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -451,20 +451,22 @@ class NewsRepositoryImpl implements NewsRepository {
   Future<Either<Failure, List<PriceAlert>>> getPriceAlerts() async {
     try {
       final alertsData = await _localDataSource.getPriceAlerts();
-      final alerts = alertsData.map((data) => PriceAlert(
-        id: data['id'],
-        commodityId: data['commodityId'],
-        commodityName: data['commodityName'] ?? 'Unknown',
-        targetPrice: data['targetPrice'],
-        isAbove: data['isAbove'],
-        createdAt: DateTime.parse(data['createdAt']),
-        isActive: data['isActive'] ?? true,
-      )).toList();
+      final alerts = alertsData.map((data) {
+        return PriceAlert(
+          id: data['id'] as String? ?? '',
+          commodityId: data['commodityId'] as String? ?? '',
+          commodityName: data['commodityName'] as String? ?? 'Unknown',
+          targetPrice: (data['targetPrice'] as num?)?.toDouble() ?? 0.0,
+          isAbove: data['isAbove'] as bool? ?? false,
+          createdAt: DateTime.parse(data['createdAt'] as String? ?? DateTime.now().toIso8601String()),
+          isActive: data['isActive'] as bool? ?? true,
+        );
+      }).toList();
       return Right(alerts);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -474,9 +476,9 @@ class NewsRepositoryImpl implements NewsRepository {
       await _localDataSource.removePriceAlert(alertId);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 }

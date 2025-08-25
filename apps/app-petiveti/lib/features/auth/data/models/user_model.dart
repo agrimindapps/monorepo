@@ -31,18 +31,18 @@ class UserModel extends User {
         (e) => e.toString() == 'AuthProvider.${map['provider']}',
         orElse: () => AuthProvider.email,
       ),
-      isEmailVerified: map['isEmailVerified'] ?? false,
-      isPremium: map['isPremium'] ?? false,
+      isEmailVerified: (map['isEmailVerified'] as bool?) ?? false,
+      isPremium: (map['isPremium'] as bool?) ?? false,
       premiumExpiresAt: map['premiumExpiresAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['premiumExpiresAt'])
+          ? DateTime.fromMillisecondsSinceEpoch(map['premiumExpiresAt'] as int)
           : null,
       metadata: map['metadata'] != null 
-          ? Map<String, dynamic>.from(map['metadata'])
+          ? Map<String, dynamic>.from((map['metadata'] as Map?) ?? {})
           : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
       lastLoginAt: map['lastLoginAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['lastLoginAt'])
+          ? DateTime.fromMillisecondsSinceEpoch(map['lastLoginAt'] as int)
           : null,
     );
   }

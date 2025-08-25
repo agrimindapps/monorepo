@@ -86,7 +86,7 @@ class CustosDataSectionWidget extends StatelessWidget {
   }
 
   Widget _buildTipoField() {
-    return Obx(() => Container(
+    return Obx(() => DecoratedBox(
           decoration: BoxDecoration(
             color: ThemeManager().isDark.value
                 ? Colors.grey.shade900
@@ -98,7 +98,7 @@ class CustosDataSectionWidget extends StatelessWidget {
           ),
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: ManutencaoConstants.fieldLabels['tipo']!,
+              labelText: ManutencaoConstants.fieldLabels['tipo'],
               prefixIcon: Icon(
                 _getTipoIcon(controller.tipo.value),
                 color: _getTipoColor(controller.tipo.value),
@@ -169,8 +169,8 @@ class CustosDataSectionWidget extends StatelessWidget {
     return Obx(() => TextFormField(
           textAlign: TextAlign.right,
           decoration: InputDecoration(
-            labelText: ManutencaoConstants.fieldLabels['valor']!,
-            hintText: ManutencaoConstants.fieldHints['valor']!,
+            labelText: ManutencaoConstants.fieldLabels['valor'],
+            hintText: ManutencaoConstants.fieldHints['valor'],
             prefix: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               margin: const EdgeInsets.only(right: 8),
@@ -233,7 +233,7 @@ class CustosDataSectionWidget extends StatelessWidget {
   }
 
   Widget _buildDescricaoField() {
-    return Obx(() => Container(
+    return Obx(() => DecoratedBox(
           decoration: BoxDecoration(
             color: ThemeManager().isDark.value
                 ? Colors.grey.shade900
@@ -302,7 +302,7 @@ class CustosDataSectionWidget extends StatelessWidget {
                 child: TextFormField(
                   initialValue: controller.descricao.value,
                   decoration: InputDecoration(
-                    hintText: ManutencaoConstants.fieldHints['descricao']!,
+                    hintText: ManutencaoConstants.fieldHints['descricao'],
                     hintStyle: TextStyle(
                       color: ShadcnStyle.mutedTextColor.withValues(alpha: 0.6),
                     ),

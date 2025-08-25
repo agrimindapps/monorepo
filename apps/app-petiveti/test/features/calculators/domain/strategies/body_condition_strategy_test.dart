@@ -1,9 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:app_petiveti/features/calculators/domain/entities/body_condition_input.dart';
 import 'package:app_petiveti/features/calculators/domain/entities/body_condition_output.dart';
 import 'package:app_petiveti/features/calculators/domain/strategies/body_condition_strategy.dart';
 import 'package:app_petiveti/features/calculators/domain/strategies/calculator_strategy.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('BodyConditionStrategy', () {
@@ -30,7 +29,7 @@ void main() {
 
     group('Input Validation', () {
       test('should validate valid input', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -43,7 +42,7 @@ void main() {
       });
 
       test('should reject input with zero weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 0.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -57,7 +56,7 @@ void main() {
       });
 
       test('should reject input with negative weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: -5.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -70,7 +69,7 @@ void main() {
       });
 
       test('should reject input with excessively high weight', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 250.0, // Way too high
           ribPalpation: RibPalpation.moderatePressure,
@@ -84,7 +83,7 @@ void main() {
       });
 
       test('should reject input with negative age', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -99,7 +98,7 @@ void main() {
       });
 
       test('should reject input with excessive age', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -115,7 +114,7 @@ void main() {
 
     group('BCS Calculation', () {
       test('should calculate ideal BCS (5) for balanced input', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -129,7 +128,7 @@ void main() {
       });
 
       test('should calculate underweight BCS for very easy rib palpation', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 20.0,
           ribPalpation: RibPalpation.veryEasy,
@@ -143,7 +142,7 @@ void main() {
       });
 
       test('should calculate overweight BCS for difficult rib palpation', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 35.0,
           ribPalpation: RibPalpation.veryDifficult,
@@ -159,14 +158,14 @@ void main() {
       test('should ensure BCS is always between 1 and 9', () {
         // Test extreme inputs to ensure bounds
         final extremeInputs = [
-          BodyConditionInput(
+          const BodyConditionInput(
             species: AnimalSpecies.dog,
             currentWeight: 100.0,
             ribPalpation: RibPalpation.veryDifficult,
             waistVisibility: WaistVisibility.notVisible,
             abdominalProfile: AbdominalProfile.pendular,
           ),
-          BodyConditionInput(
+          const BodyConditionInput(
             species: AnimalSpecies.cat,
             currentWeight: 2.0,
             ribPalpation: RibPalpation.veryEasy,
@@ -185,7 +184,7 @@ void main() {
 
     group('Weight Estimation', () {
       test('should use provided ideal weight when available', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           idealWeight: 22.0,
@@ -199,7 +198,7 @@ void main() {
       });
 
       test('should estimate ideal weight for dogs when not provided', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 30.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -209,12 +208,12 @@ void main() {
 
         final result = strategy.calculate(input);
         expect(result.idealWeightEstimate, isNotNull);
-        expect(result.idealWeightEstimate!, greaterThan(0));
-        expect(result.idealWeightEstimate!, lessThan(100)); // Reasonable upper bound
+        expect(result.idealWeightEstimate, greaterThan(0));
+        expect(result.idealWeightEstimate, lessThan(100)); // Reasonable upper bound
       });
 
       test('should estimate ideal weight for cats when not provided', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.cat,
           currentWeight: 5.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -224,14 +223,14 @@ void main() {
 
         final result = strategy.calculate(input);
         expect(result.idealWeightEstimate, isNotNull);
-        expect(result.idealWeightEstimate!, greaterThan(0));
-        expect(result.idealWeightEstimate!, lessThan(15)); // Reasonable upper bound for cats
+        expect(result.idealWeightEstimate, greaterThan(0));
+        expect(result.idealWeightEstimate, lessThan(15)); // Reasonable upper bound for cats
       });
     });
 
     group('Recommendations Generation', () {
       test('should generate weight loss recommendations for overweight animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 35.0,
           ribPalpation: RibPalpation.difficult,
@@ -242,7 +241,7 @@ void main() {
         final result = strategy.calculate(input);
         expect(result.recommendations, isNotEmpty);
         expect(
-          result.recommendations.any((rec) => 
+          result.bcsRecommendations.any((rec) => 
             rec.type == NutritionalRecommendationType.decreaseFood),
           isTrue,
         );
@@ -250,7 +249,7 @@ void main() {
       });
 
       test('should generate weight gain recommendations for underweight animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 15.0,
           ribPalpation: RibPalpation.veryEasy,
@@ -261,7 +260,7 @@ void main() {
         final result = strategy.calculate(input);
         expect(result.recommendations, isNotEmpty);
         expect(
-          result.recommendations.any((rec) => 
+          result.bcsRecommendations.any((rec) => 
             rec.type == NutritionalRecommendationType.increaseFood),
           isTrue,
         );
@@ -269,7 +268,7 @@ void main() {
       });
 
       test('should generate maintenance recommendations for ideal weight animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -280,7 +279,7 @@ void main() {
         final result = strategy.calculate(input);
         expect(result.recommendations, isNotEmpty);
         expect(
-          result.recommendations.any((rec) => 
+          result.bcsRecommendations.any((rec) => 
             rec.type == NutritionalRecommendationType.maintain),
           isTrue,
         );
@@ -288,7 +287,7 @@ void main() {
       });
 
       test('should add special recommendations for neutered animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -306,7 +305,7 @@ void main() {
       });
 
       test('should add special recommendations for animals with metabolic conditions', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -326,7 +325,7 @@ void main() {
 
     group('Action Urgency Assessment', () {
       test('should require urgent attention for extremely underweight animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 10.0,
           ribPalpation: RibPalpation.veryEasy,
@@ -341,7 +340,7 @@ void main() {
       });
 
       test('should require urgent attention for severely obese animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 50.0,
           ribPalpation: RibPalpation.veryDifficult,
@@ -356,7 +355,7 @@ void main() {
       });
 
       test('should require routine monitoring for ideal weight animals', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -373,7 +372,7 @@ void main() {
 
     group('Species-Specific Behavior', () {
       test('should handle cats differently from dogs', () {
-        final dogInput = BodyConditionInput(
+        const dogInput = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -381,7 +380,7 @@ void main() {
           abdominalProfile: AbdominalProfile.straight,
         );
 
-        final catInput = BodyConditionInput(
+        const catInput = BodyConditionInput(
           species: AnimalSpecies.cat,
           currentWeight: 5.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -404,7 +403,7 @@ void main() {
 
     group('Error Handling', () {
       test('should throw InvalidInputException for invalid input', () {
-        final input = BodyConditionInput(
+        const input = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: -10.0, // Invalid negative weight
           ribPalpation: RibPalpation.moderatePressure,
@@ -421,7 +420,7 @@ void main() {
 
     group('Age and Neutering Corrections', () {
       test('should apply age corrections for puppies', () {
-        final puppyInput = BodyConditionInput(
+        const puppyInput = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 10.0,
           ribPalpation: RibPalpation.moderatePressure,
@@ -437,7 +436,7 @@ void main() {
       });
 
       test('should apply neutering corrections', () {
-        final neuteredInput = BodyConditionInput(
+        const neuteredInput = BodyConditionInput(
           species: AnimalSpecies.dog,
           currentWeight: 25.0,
           ribPalpation: RibPalpation.moderatePressure,

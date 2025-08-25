@@ -1,5 +1,5 @@
-import '../entities/calculator.dart';
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/input_field.dart';
 
 /// Calculadora de Anestesia
@@ -30,9 +30,9 @@ class AnesthesiaCalculator extends Calculator {
   @override
   List<InputField> get inputFields => [
     const InputField(
-      id: 'weight',
+      key: 'weight',
       label: 'Peso do Animal',
-      description: 'Peso atual do animal em quilogramas',
+      helperText: 'Peso atual do animal em quilogramas',
       type: InputFieldType.number,
       unit: 'kg',
       isRequired: true,
@@ -40,17 +40,17 @@ class AnesthesiaCalculator extends Calculator {
       maxValue: 100.0,
     ),
     const InputField(
-      id: 'species',
+      key: 'species',
       label: 'Espécie',
-      description: 'Tipo de animal',
+      helperText: 'Tipo de animal',
       type: InputFieldType.dropdown,
       options: ['Cão', 'Gato'],
       isRequired: true,
     ),
     const InputField(
-      id: 'procedure_type',
+      key: 'procedure_type',
       label: 'Tipo de Procedimento',
-      description: 'Duração e complexidade do procedimento',
+      helperText: 'Duração e complexidade do procedimento',
       type: InputFieldType.dropdown,
       options: [
         'Sedação leve (exames)',
@@ -62,9 +62,9 @@ class AnesthesiaCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'age_group',
+      key: 'age_group',
       label: 'Faixa Etária',
-      description: 'Idade do animal',
+      helperText: 'Idade do animal',
       type: InputFieldType.dropdown,
       options: [
         'Filhote (< 6 meses)',
@@ -75,9 +75,9 @@ class AnesthesiaCalculator extends Calculator {
       isRequired: true,
     ),
     const InputField(
-      id: 'health_status',
+      key: 'health_status',
       label: 'Estado de Saúde',
-      description: 'Condição clínica geral',
+      helperText: 'Condição clínica geral',
       type: InputFieldType.dropdown,
       options: [
         'Saudável (ASA I)',
@@ -122,20 +122,41 @@ class AnesthesiaCalculator extends Calculator {
       });
     }
 
-    final results = {
-      'protocol_name': protocol['name'],
-      'medications': medications,
-      'monitoring': protocol['monitoring'],
-      'warnings': protocol['warnings'],
-      'duration': protocol['duration'],
-    };
 
-    return CalculationResult(
+    // Criar ResultItems a partir dos medicamentos
+    final resultItems = <ResultItem>[];
+    for (final med in medications) {
+      resultItems.add(ResultItem(
+        label: med['name'] as String,
+        value: '${med['total_dose'].toStringAsFixed(2)} ${med['unit']}',
+        description: '${med['route']} - ${med['timing']}',
+      ));
+    }
+
+    // Criar Recomendações
+    final recommendations = [
+      ...(protocol['monitoring'] as List<String>).map((monitor) => Recommendation(
+        title: 'Monitoramento',
+        message: monitor,
+      )),
+      ...(protocol['warnings'] as List<String>).map((warning) => Recommendation(
+        title: 'Aviso',
+        message: warning,
+        severity: ResultSeverity.warning,
+      )),
+    ];
+
+    return _AnesthesiaResult(
       calculatorId: id,
-      timestamp: DateTime.now(),
-      inputs: inputs,
-      results: results,
+      results: resultItems,
+      recommendations: recommendations,
       summary: 'Protocolo: ${protocol['name']} - ${medications.length} medicamentos',
+      calculatedAt: DateTime.now(),
+      protocolName: protocol['name'] as String,
+      medications: medications,
+      monitoring: protocol['monitoring'] as List<String>,
+      warnings: protocol['warnings'] as List<String>,
+      duration: protocol['duration'] as String,
     );
   }
 
@@ -149,7 +170,7 @@ class AnesthesiaCalculator extends Calculator {
     final errors = <String>[];
 
     for (final field in inputFields) {
-      if (field.isRequired && !inputs.containsKey(field.id)) {
+      if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
@@ -320,4 +341,35 @@ class AnesthesiaCalculator extends Calculator {
         'Considerar ventilação mecânica',
       ];
   }
+}
+
+class _AnesthesiaResult extends CalculationResult {
+  final String protocolName;
+  final List<Map<String, dynamic>> medications;
+  final List<String> monitoring;
+  final List<String> warnings;
+  final String duration;
+
+  const _AnesthesiaResult({
+    required this.protocolName,
+    required this.medications,
+    required this.monitoring,
+    required this.warnings,
+    required this.duration,
+    required super.calculatorId,
+    required super.results,
+    super.recommendations = const [],
+    super.summary,
+    super.calculatedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+        protocolName,
+        medications,
+        monitoring,
+        warnings,
+        duration,
+        ...super.props,
+      ];
 }

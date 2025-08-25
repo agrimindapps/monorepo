@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:app_petiveti/features/vaccines/domain/entities/vaccine.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Vaccine Entity Tests', () {
@@ -10,14 +10,12 @@ void main() {
         id: 'test_vaccine_001',
         animalId: 'test_animal_001',
         name: 'V10',
-        description: 'Vacina múltipla contra 10 doenças',
-        applicationDate: DateTime(2023, 1, 15),
-        nextDoseDate: DateTime(2024, 1, 15),
-        veterinarianName: 'Dr. João Silva',
-        clinicName: 'Clínica Veterinária Central',
+        veterinarian: 'Dr. João Silva',
+        date: DateTime(2023, 1, 15),
+        nextDueDate: DateTime(2024, 1, 15),
         batch: 'ABC123456',
-        status: VaccineStatus.applied,
         notes: 'Aplicação sem intercorrências',
+        status: VaccineStatus.applied,
         createdAt: DateTime(2023, 1, 15, 10, 30),
         updatedAt: DateTime(2023, 1, 15, 10, 30),
       );
@@ -27,9 +25,7 @@ void main() {
       expect(testVaccine.id, equals('test_vaccine_001'));
       expect(testVaccine.animalId, equals('test_animal_001'));
       expect(testVaccine.name, equals('V10'));
-      expect(testVaccine.description, equals('Vacina múltipla contra 10 doenças'));
-      expect(testVaccine.veterinarianName, equals('Dr. João Silva'));
-      expect(testVaccine.clinicName, equals('Clínica Veterinária Central'));
+      expect(testVaccine.veterinarian, equals('Dr. João Silva'));
       expect(testVaccine.batch, equals('ABC123456'));
       expect(testVaccine.status, equals(VaccineStatus.applied));
       expect(testVaccine.notes, equals('Aplicação sem intercorrências'));
@@ -37,7 +33,7 @@ void main() {
 
     test('should calculate correct days until next dose', () {
       final vaccine = testVaccine.copyWith(
-        nextDoseDate: DateTime.now().add(Duration(days: 30)),
+        nextDueDate: DateTime.now().add(const Duration(days: 30)),
       );
       
       expect(vaccine.daysUntilNextDose, equals(30));
@@ -45,7 +41,7 @@ void main() {
 
     test('should calculate correct days since application', () {
       final vaccine = testVaccine.copyWith(
-        applicationDate: DateTime.now().subtract(Duration(days: 60)),
+        date: DateTime.now().subtract(const Duration(days: 60)),
       );
       
       expect(vaccine.daysSinceApplication, equals(60));
@@ -53,7 +49,7 @@ void main() {
 
     test('should identify vaccine as overdue when next dose date has passed', () {
       final overdueVaccine = testVaccine.copyWith(
-        nextDoseDate: DateTime.now().subtract(Duration(days: 10)),
+        nextDueDate: DateTime.now().subtract(const Duration(days: 10)),
         status: VaccineStatus.scheduled,
       );
       
@@ -62,7 +58,7 @@ void main() {
 
     test('should identify vaccine as due soon when next dose date is within 7 days', () {
       final dueSoonVaccine = testVaccine.copyWith(
-        nextDoseDate: DateTime.now().add(Duration(days: 5)),
+        nextDueDate: DateTime.now().add(const Duration(days: 5)),
         status: VaccineStatus.scheduled,
       );
       
@@ -71,27 +67,27 @@ void main() {
 
     test('should not identify applied vaccines as overdue', () {
       final appliedVaccine = testVaccine.copyWith(
-        nextDoseDate: DateTime.now().subtract(Duration(days: 10)),
+        nextDueDate: DateTime.now().subtract(const Duration(days: 10)),
         status: VaccineStatus.applied,
       );
       
       expect(appliedVaccine.isOverdue, isFalse);
     });
 
-    test('should format next dose date correctly', () {
+    test('should have correct next due date', () {
       final vaccine = testVaccine.copyWith(
-        nextDoseDate: DateTime(2024, 6, 15),
+        nextDueDate: DateTime(2024, 6, 15),
       );
       
-      expect(vaccine.formattedNextDoseDate, equals('15/06/2024'));
+      expect(vaccine.nextDueDate, equals(DateTime(2024, 6, 15)));
     });
 
-    test('should format application date correctly', () {
+    test('should have correct application date', () {
       final vaccine = testVaccine.copyWith(
-        applicationDate: DateTime(2023, 3, 10),
+        date: DateTime(2023, 3, 10),
       );
       
-      expect(vaccine.formattedApplicationDate, equals('10/03/2023'));
+      expect(vaccine.date, equals(DateTime(2023, 3, 10)));
     });
 
     test('should copy vaccine with new values', () {
@@ -113,11 +109,9 @@ void main() {
         id: 'test_001',
         animalId: 'animal_001',
         name: 'V8',
-        description: 'Vacina múltipla',
-        applicationDate: DateTime(2023, 1, 1),
-        nextDoseDate: DateTime(2024, 1, 1),
-        veterinarianName: 'Dr. Silva',
-        clinicName: 'Clínica A',
+        veterinarian: 'Dr. Silva',
+        date: DateTime(2023, 1, 1),
+        nextDueDate: DateTime(2024, 1, 1),
         batch: 'ABC123',
         status: VaccineStatus.applied,
         createdAt: DateTime(2023, 1, 1),
@@ -128,11 +122,9 @@ void main() {
         id: 'test_001',
         animalId: 'animal_001',
         name: 'V8',
-        description: 'Vacina múltipla',
-        applicationDate: DateTime(2023, 1, 1),
-        nextDoseDate: DateTime(2024, 1, 1),
-        veterinarianName: 'Dr. Silva',
-        clinicName: 'Clínica A',
+        veterinarian: 'Dr. Silva',
+        date: DateTime(2023, 1, 1),
+        nextDueDate: DateTime(2024, 1, 1),
         batch: 'ABC123',
         status: VaccineStatus.applied,
         createdAt: DateTime(2023, 1, 1),
@@ -148,18 +140,16 @@ void main() {
         id: 'test_002',
         animalId: 'animal_002',
         name: 'Raiva',
-        applicationDate: DateTime(2023, 6, 1),
-        veterinarianName: 'Dr. Maria',
-        clinicName: 'Clínica B',
+        veterinarian: 'Dr. Maria',
+        date: DateTime(2023, 6, 1),
         batch: 'XYZ789',
         status: VaccineStatus.scheduled,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        // description, nextDoseDate, notes are null
+        // nextDueDate, notes are null
       );
 
-      expect(vaccineWithNulls.description, isNull);
-      expect(vaccineWithNulls.nextDoseDate, isNull);
+      expect(vaccineWithNulls.nextDueDate, isNull);
       expect(vaccineWithNulls.notes, isNull);
       expect(vaccineWithNulls.name, equals('Raiva'));
       expect(vaccineWithNulls.status, equals(VaccineStatus.scheduled));
@@ -169,12 +159,12 @@ void main() {
       final now = DateTime.now();
       
       // Test vaccine with next dose today
-      final todayVaccine = testVaccine.copyWith(nextDoseDate: now);
+      final todayVaccine = testVaccine.copyWith(nextDueDate: now);
       expect(todayVaccine.daysUntilNextDose, equals(0));
       expect(todayVaccine.isDueSoon, isTrue);
 
       // Test vaccine with application today
-      final todayApplication = testVaccine.copyWith(applicationDate: now);
+      final todayApplication = testVaccine.copyWith(date: now);
       expect(todayApplication.daysSinceApplication, equals(0));
     });
 
@@ -224,9 +214,8 @@ void main() {
         id: 'immutable_test',
         animalId: 'animal_test',
         name: 'Original',
-        applicationDate: DateTime(2023, 1, 1),
-        veterinarianName: 'Dr. Original',
-        clinicName: 'Clínica Original',
+        veterinarian: 'Dr. Original',
+        date: DateTime(2023, 1, 1),
         batch: 'ORIG123',
         status: VaccineStatus.scheduled,
         createdAt: DateTime.now(),
@@ -288,9 +277,8 @@ void main() {
           id: 'valid_001',
           animalId: 'animal_001',
           name: 'V10',
-          applicationDate: DateTime(2023, 1, 1),
-          veterinarianName: 'Dr. Valid',
-          clinicName: 'Clínica Valid',
+          veterinarian: 'Dr. Valid',
+          date: DateTime(2023, 1, 1),
           batch: 'VALID123',
           status: VaccineStatus.applied,
           createdAt: DateTime.now(),
@@ -309,10 +297,9 @@ void main() {
           id: 'past_test',
           animalId: 'animal_001',
           name: 'V8',
-          applicationDate: DateTime(2020, 1, 1),
-          nextDoseDate: DateTime(2021, 1, 1),
-          veterinarianName: 'Dr. Past',
-          clinicName: 'Clínica Past',
+          veterinarian: 'Dr. Past',
+          date: DateTime(2020, 1, 1),
+          nextDueDate: DateTime(2021, 1, 1),
           batch: 'PAST123',
           status: VaccineStatus.completed,
           createdAt: now,
@@ -327,10 +314,9 @@ void main() {
           id: 'future_test',
           animalId: 'animal_001',
           name: 'V8',
-          applicationDate: now.add(Duration(days: 30)),
-          nextDoseDate: now.add(Duration(days: 365)),
-          veterinarianName: 'Dr. Future',
-          clinicName: 'Clínica Future',
+          veterinarian: 'Dr. Future',
+          date: now.add(const Duration(days: 30)),
+          nextDueDate: now.add(const Duration(days: 365)),
           batch: 'FUTURE123',
           status: VaccineStatus.scheduled,
           createdAt: now,

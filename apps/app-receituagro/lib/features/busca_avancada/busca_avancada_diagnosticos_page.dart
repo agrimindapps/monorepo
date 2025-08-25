@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../core/widgets/modern_header_widget.dart';
-import '../../core/services/diagnostico_integration_service.dart';
+
 import '../../core/di/injection_container.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
-import '../../core/repositories/pragas_hive_repository.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
+import '../../core/services/diagnostico_integration_service.dart';
+import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDiagnostico/widgets/diagnostico_relacional_card_widget.dart';
-import 'widgets/filtro_multiplo_widget.dart';
 import 'widgets/estatisticas_busca_widget.dart';
+import 'widgets/filtro_multiplo_widget.dart';
 
 /// Página de busca avançada que permite filtrar diagnósticos
 /// por múltiplas categorias (cultura, praga, defensivo) simultaneamente

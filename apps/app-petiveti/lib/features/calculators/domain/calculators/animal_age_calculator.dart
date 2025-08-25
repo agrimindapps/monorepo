@@ -1,5 +1,5 @@
-import '../entities/calculator.dart';
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/input_field.dart' as input;
 
 /// Resultado da calculadora de idade animal
@@ -113,7 +113,7 @@ class AnimalAgeCalculator extends Calculator {
       calculatorId: id,
       results: results,
       recommendations: recommendations,
-      summary: calculationData['age_comparison'],
+      summary: calculationData['age_comparison']?.toString(),
       calculatedAt: DateTime.now(),
     );
   }

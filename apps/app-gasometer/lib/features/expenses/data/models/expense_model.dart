@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
+
 import '../../../../core/data/models/base_sync_model.dart';
 
 part 'expense_model.g.dart';
@@ -111,9 +112,9 @@ class ExpenseModel extends BaseSyncModel {
       veiculoId: map['veiculoId']?.toString() ?? '',
       tipo: map['tipo']?.toString() ?? '',
       descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] ?? 0.0).toDouble(),
-      data: map['data']?.toInt() ?? 0,
-      odometro: (map['odometro'] ?? 0.0).toDouble(),
+      valor: (map['valor'] as num? ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
     );
   }
 
@@ -164,9 +165,9 @@ class ExpenseModel extends BaseSyncModel {
       veiculoId: map['veiculo_id']?.toString() ?? '',
       tipo: map['tipo']?.toString() ?? '',
       descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] ?? 0.0).toDouble(),
-      data: map['data']?.toInt() ?? 0,
-      odometro: (map['odometro'] ?? 0.0).toDouble(),
+      valor: (map['valor'] as num? ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
     );
   }
 

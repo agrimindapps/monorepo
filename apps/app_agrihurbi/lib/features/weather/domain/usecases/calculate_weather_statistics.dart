@@ -1,5 +1,7 @@
-import 'package:dartz/dartz.dart';
 import 'dart:math' as math;
+
+import 'package:dartz/dartz.dart';
+
 import '../entities/weather_measurement_entity.dart';
 import '../entities/weather_statistics_entity.dart';
 import '../failures/weather_failures.dart';
@@ -236,7 +238,7 @@ class CalculateWeatherStatistics {
     DateTime endDate,
   ) {
     if (locationId.trim().isEmpty) {
-      return Left(WeatherStatisticsFailure('Location ID cannot be empty'));
+      return const Left(WeatherStatisticsFailure('Location ID cannot be empty'));
     }
 
     final validPeriods = ['daily', 'weekly', 'monthly', 'yearly'];

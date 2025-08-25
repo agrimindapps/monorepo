@@ -11,7 +11,7 @@ class AppDataInspectorInitializer {
     // Registrar todas as boxes customizadas do app-plantis
     inspector.registerCustomBoxes([
       // Módulo de Plantas
-      CustomBoxType(
+      const CustomBoxType(
         key: 'plants',
         displayName: 'Plantas',
         module: 'plants',
@@ -20,7 +20,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Espaços/Ambientes
-      CustomBoxType(
+      const CustomBoxType(
         key: 'spaces',
         displayName: 'Espaços',
         module: 'spaces',
@@ -29,7 +29,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Tarefas
-      CustomBoxType(
+      const CustomBoxType(
         key: 'tasks',
         displayName: 'Tarefas de Cuidados',
         module: 'tasks',
@@ -38,14 +38,14 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Notificações
-      CustomBoxType(
+      const CustomBoxType(
         key: 'notifications_settings',
         displayName: 'Configurações de Notificações',
         module: 'notifications',
         description: 'Preferências de notificações e lembretes do usuário',
       ),
 
-      CustomBoxType(
+      const CustomBoxType(
         key: 'notifications_history',
         displayName: 'Histórico de Notificações',
         module: 'notifications',
@@ -53,7 +53,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Configurações
-      CustomBoxType(
+      const CustomBoxType(
         key: 'user_preferences',
         displayName: 'Preferências do Usuário',
         module: 'settings',
@@ -61,7 +61,7 @@ class AppDataInspectorInitializer {
             'Configurações gerais do aplicativo e preferências do usuário',
       ),
 
-      CustomBoxType(
+      const CustomBoxType(
         key: 'app_settings',
         displayName: 'Configurações do App',
         module: 'settings',
@@ -69,7 +69,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo Premium/Licenças
-      CustomBoxType(
+      const CustomBoxType(
         key: 'premium_license',
         displayName: 'Licença Premium',
         module: 'premium',
@@ -77,7 +77,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Cache
-      CustomBoxType(
+      const CustomBoxType(
         key: 'image_cache',
         displayName: 'Cache de Imagens',
         module: 'cache',
@@ -85,14 +85,14 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Sincronização
-      CustomBoxType(
+      const CustomBoxType(
         key: 'sync_queue',
         displayName: 'Fila de Sincronização',
         module: 'sync',
         description: 'Dados pendentes de sincronização com o servidor',
       ),
 
-      CustomBoxType(
+      const CustomBoxType(
         key: 'sync_metadata',
         displayName: 'Metadados de Sincronização',
         module: 'sync',
@@ -100,7 +100,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Analytics
-      CustomBoxType(
+      const CustomBoxType(
         key: 'analytics_events',
         displayName: 'Eventos de Analytics',
         module: 'analytics',
@@ -108,7 +108,7 @@ class AppDataInspectorInitializer {
       ),
 
       // Módulo de Backup
-      CustomBoxType(
+      const CustomBoxType(
         key: 'backup_metadata',
         displayName: 'Metadados de Backup',
         module: 'backup',

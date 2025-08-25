@@ -105,9 +105,9 @@ class Medication extends Equatable {
 
   /// Retorna uma descrição amigável do intervalo de tratamento
   String get treatmentInterval {
-    final start = "${startDate.day}/${startDate.month}/${startDate.year}";
-    final end = "${endDate.day}/${endDate.month}/${endDate.year}";
-    return "$start - $end";
+    final start = '${startDate.day}/${startDate.month}/${startDate.year}';
+    final end = '${endDate.day}/${endDate.month}/${endDate.year}';
+    return '$start - $end';
   }
 
   /// Retorna um resumo completo do medicamento

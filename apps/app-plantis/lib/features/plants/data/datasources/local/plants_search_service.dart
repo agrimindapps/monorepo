@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:sqflite/sqflite.dart';
+
 import 'package:path/path.dart' as path;
+import 'package:sqflite/sqflite.dart';
+
 import '../../../domain/entities/plant.dart';
 
 /// Optimized search service for plants with FTS5, caching and indexing

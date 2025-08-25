@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:equatable/equatable.dart';
 
 import '../entities/calculation_result.dart';
 import '../entities/calorie_input.dart';
@@ -654,7 +653,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     
     // Alertas críticos
     if (der > (rer * 4)) {
-      recommendations.add(Recommendation(
+      recommendations.add(const Recommendation(
         title: 'Necessidades Calóricas Extremas',
         message: 'Animal requer monitoramento veterinário constante devido às altas necessidades energéticas',
         severity: ResultSeverity.danger,
@@ -664,7 +663,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     
     // Alertas para condições especiais
     if (input.medicalCondition != MedicalCondition.none) {
-      recommendations.add(Recommendation(
+      recommendations.add(const Recommendation(
         title: 'Dieta Terapêutica Requerida',
         message: 'Condição médica requer dieta específica e acompanhamento profissional',
         severity: ResultSeverity.warning,
@@ -674,7 +673,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     
     // Alertas para peso
     if (input.bodyConditionScore == BodyConditionScore.obese) {
-      recommendations.add(Recommendation(
+      recommendations.add(const Recommendation(
         title: 'Programa de Perda de Peso',
         message: 'Obesidade requer intervenção imediata com dieta restritiva e exercícios',
         severity: ResultSeverity.warning,
@@ -683,7 +682,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     }
     
     // Informações gerais
-    recommendations.add(Recommendation(
+    recommendations.add(const Recommendation(
       title: 'Monitoramento Regular',
       message: 'Pesar o animal semanalmente e ajustar porções conforme necessário',
       severity: ResultSeverity.info,

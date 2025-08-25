@@ -4,14 +4,14 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart';
 import '../../domain/entities/medication.dart';
 import '../../domain/repositories/medication_repository.dart';
+import '../../domain/usecases/add_medication.dart';
+import '../../domain/usecases/delete_medication.dart';
+import '../../domain/usecases/get_active_medications.dart';
+import '../../domain/usecases/get_expiring_medications.dart';
+import '../../domain/usecases/get_medication_by_id.dart';
 import '../../domain/usecases/get_medications.dart';
 import '../../domain/usecases/get_medications_by_animal_id.dart';
-import '../../domain/usecases/get_active_medications.dart';
-import '../../domain/usecases/add_medication.dart';
 import '../../domain/usecases/update_medication.dart';
-import '../../domain/usecases/delete_medication.dart';
-import '../../domain/usecases/get_medication_by_id.dart';
-import '../../domain/usecases/get_expiring_medications.dart';
 
 // State classes
 class MedicationsState {

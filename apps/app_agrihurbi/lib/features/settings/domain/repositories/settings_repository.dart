@@ -1,6 +1,6 @@
-import 'package:dartz/dartz.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
+import 'package:core/core.dart' show Failure;
+import 'package:dartz/dartz.dart';
 
 /// Settings Repository Interface
 /// 

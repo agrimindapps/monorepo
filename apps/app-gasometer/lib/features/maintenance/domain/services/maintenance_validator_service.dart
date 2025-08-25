@@ -1,5 +1,5 @@
-import '../entities/maintenance_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../entities/maintenance_entity.dart';
 
 /// Serviço especializado para validação de campos de manutenção
 class MaintenanceValidatorService {

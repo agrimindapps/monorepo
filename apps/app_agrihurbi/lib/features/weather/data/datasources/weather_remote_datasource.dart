@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
-import '../../core/network/dio_client.dart';
-import '../models/weather_measurement_model.dart';
-import '../models/rain_gauge_model.dart';
-import '../models/weather_statistics_model.dart';
+
+import '../../../../core/network/dio_client.dart';
 import '../../domain/failures/weather_failures.dart';
+import '../models/rain_gauge_model.dart';
+import '../models/weather_measurement_model.dart';
+import '../models/weather_statistics_model.dart';
 
 /// Abstract interface for weather remote data source operations
 abstract class WeatherRemoteDataSource {
@@ -139,12 +140,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['measurements'] ?? [];
-      return data.map((json) => WeatherMeasurementModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['measurements'] as List?) ?? [];
+      return data.map((json) => WeatherMeasurementModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'getAllMeasurements');
     } catch (e) {
-      throw WeatherApiFailure('weather-service', 500, e.toString());
+      throw Exception('Weather service error: ${e.toString()}');
     }
   }
 
@@ -152,14 +153,14 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   Future<WeatherMeasurementModel> getMeasurementById(String id) async {
     try {
       final response = await _dioClient.get('$_baseUrl/measurements/$id');
-      return WeatherMeasurementModel.fromJson(response.data);
+      return WeatherMeasurementModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw WeatherMeasurementNotFoundFailure(id);
+        throw Exception('Measurement not found with id: $id');
       }
       throw _handleDioError(e, 'getMeasurementById');
     } catch (e) {
-      throw WeatherApiFailure('weather-service', 500, e.toString());
+      throw Exception('Weather service error: ${e.toString()}');
     }
   }
 
@@ -189,11 +190,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     try {
       final measurements = await getAllMeasurements(locationId: locationId, limit: 1);
       if (measurements.isEmpty) {
-        throw WeatherMeasurementFetchFailure('No measurements found');
+        throw const WeatherMeasurementFetchFailure('No measurements found');
       }
       return measurements.first;
     } catch (e) {
-      throw WeatherMeasurementFetchFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -204,11 +205,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         '$_baseUrl/measurements',
         data: measurement.toJson(),
       );
-      return WeatherMeasurementModel.fromJson(response.data);
+      return WeatherMeasurementModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e, 'createMeasurement');
     } catch (e) {
-      throw WeatherMeasurementSaveFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -219,14 +220,14 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         '$_baseUrl/measurements/${measurement.id}',
         data: measurement.toJson(),
       );
-      return WeatherMeasurementModel.fromJson(response.data);
+      return WeatherMeasurementModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw WeatherMeasurementNotFoundFailure(measurement.id);
+        throw Exception('Measurement not found with id: ${measurement.id}');
       }
       throw _handleDioError(e, 'updateMeasurement');
     } catch (e) {
-      throw WeatherMeasurementSaveFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -236,11 +237,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       await _dioClient.delete('$_baseUrl/measurements/$id');
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw WeatherMeasurementNotFoundFailure(id);
+        throw Exception('Measurement not found with id: $id');
       }
       throw _handleDioError(e, 'deleteMeasurement');
     } catch (e) {
-      throw WeatherApiFailure('weather-service', 500, e.toString());
+      throw Exception('Weather service error: ${e.toString()}');
     }
   }
 
@@ -256,12 +257,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
-      final List<dynamic> data = response.data['measurements'] ?? [];
-      return data.map((json) => WeatherMeasurementModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['measurements'] as List?) ?? [];
+      return data.map((json) => WeatherMeasurementModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'uploadMeasurements');
     } catch (e) {
-      throw WeatherSyncFailure('Failed to upload measurements: $e', measurements.length);
+      throw Exception('Failed to upload measurements: $e (${measurements.length} measurements)');
     }
   }
 
@@ -273,12 +274,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   Future<List<RainGaugeModel>> getAllRainGauges() async {
     try {
       final response = await _dioClient.get('$_baseUrl/rain-gauges');
-      final List<dynamic> data = response.data['rain_gauges'] ?? [];
-      return data.map((json) => RainGaugeModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['rain_gauges'] as List?) ?? [];
+      return data.map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'getAllRainGauges');
     } catch (e) {
-      throw RainGaugeFetchFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -286,14 +287,14 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   Future<RainGaugeModel> getRainGaugeById(String id) async {
     try {
       final response = await _dioClient.get('$_baseUrl/rain-gauges/$id');
-      return RainGaugeModel.fromJson(response.data);
+      return RainGaugeModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw RainGaugeNotFoundFailure(id);
+        throw Exception('Rain gauge not found with id: $id');
       }
       throw _handleDioError(e, 'getRainGaugeById');
     } catch (e) {
-      throw RainGaugeFetchFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -304,12 +305,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         '$_baseUrl/rain-gauges',
         queryParameters: {'location_id': locationId},
       );
-      final List<dynamic> data = response.data['rain_gauges'] ?? [];
-      return data.map((json) => RainGaugeModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['rain_gauges'] as List?) ?? [];
+      return data.map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'getRainGaugesByLocation');
     } catch (e) {
-      throw RainGaugeFetchFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -320,12 +321,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         '$_baseUrl/rain-gauges',
         queryParameters: {'status': 'active'},
       );
-      final List<dynamic> data = response.data['rain_gauges'] ?? [];
-      return data.map((json) => RainGaugeModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['rain_gauges'] as List?) ?? [];
+      return data.map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'getActiveRainGauges');
     } catch (e) {
-      throw RainGaugeFetchFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -336,11 +337,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         '$_baseUrl/rain-gauges',
         data: rainGauge.toJson(),
       );
-      return RainGaugeModel.fromJson(response.data);
+      return RainGaugeModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e, 'createRainGauge');
     } catch (e) {
-      throw RainGaugeSaveFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -351,14 +352,14 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         '$_baseUrl/rain-gauges/${rainGauge.id}',
         data: rainGauge.toJson(),
       );
-      return RainGaugeModel.fromJson(response.data);
+      return RainGaugeModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw RainGaugeNotFoundFailure(rainGauge.id);
+        throw Exception('Rain gauge not found with id: ${rainGauge.id}');
       }
       throw _handleDioError(e, 'updateRainGauge');
     } catch (e) {
-      throw RainGaugeSaveFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -368,11 +369,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       await _dioClient.delete('$_baseUrl/rain-gauges/$id');
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw RainGaugeNotFoundFailure(id);
+        throw Exception('Rain gauge not found with id: $id');
       }
       throw _handleDioError(e, 'deleteRainGauge');
     } catch (e) {
-      throw RainGaugeFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -390,14 +391,14 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           'timestamp': timestamp.toIso8601String(),
         },
       );
-      return RainGaugeModel.fromJson(response.data);
+      return RainGaugeModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw RainGaugeNotFoundFailure(gaugeId);
+        throw Exception('Rain gauge not found with id: $gaugeId');
       }
       throw _handleDioError(e, 'updateRainGaugeMeasurement');
     } catch (e) {
-      throw RainGaugeSaveFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -425,12 +426,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['statistics'] ?? [];
-      return data.map((json) => WeatherStatisticsModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['statistics'] as List?) ?? [];
+      return data.map((json) => WeatherStatisticsModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'getStatistics');
     } catch (e) {
-      throw WeatherStatisticsFailure(e.toString());
+      throw Exception(e.toString());
     }
   }
 
@@ -451,11 +452,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           'end_date': endDate.toIso8601String(),
         },
       );
-      return WeatherStatisticsModel.fromJson(response.data);
+      return WeatherStatisticsModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e, 'calculateStatistics');
     } catch (e) {
-      throw WeatherStatisticsCalculationFailure(e.toString(), period);
+      throw Exception('Failed to calculate statistics for period $period: ${e.toString()}');
     }
   }
 
@@ -476,11 +477,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         case 'accuweather':
           return await _getCurrentWeatherFromAccuWeather(latitude, longitude);
         default:
-          throw WeatherApiFailure(provider, 400, 'Unsupported weather provider');
+          throw Exception('Unsupported weather provider: $provider (status: 400)');
       }
     } catch (e) {
       if (e is WeatherFailure) rethrow;
-      throw WeatherApiFailure(provider, 500, e.toString());
+      throw Exception('Weather API error for provider $provider (status: 500): ${e.toString()}');
     }
   }
 
@@ -498,11 +499,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         case 'accuweather':
           return await _getForecastFromAccuWeather(latitude, longitude, days);
         default:
-          throw WeatherApiFailure(provider, 400, 'Unsupported weather provider');
+          throw Exception('Unsupported weather provider: $provider (status: 400)');
       }
     } catch (e) {
       if (e is WeatherFailure) rethrow;
-      throw WeatherApiFailure(provider, 500, e.toString());
+      throw Exception('Weather forecast API error for provider $provider (status: 500): ${e.toString()}');
     }
   }
 
@@ -521,12 +522,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['measurements'] ?? [];
-      return data.map((json) => WeatherMeasurementModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['measurements'] as List?) ?? [];
+      return data.map((json) => WeatherMeasurementModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'downloadMeasurements');
     } catch (e) {
-      throw WeatherSyncFailure('Failed to download measurements: $e');
+      throw Exception('Failed to download measurements: $e');
     }
   }
 
@@ -541,12 +542,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['rain_gauges'] ?? [];
-      return data.map((json) => RainGaugeModel.fromJson(json)).toList();
+      final List<dynamic> data = (response.data['rain_gauges'] as List?) ?? [];
+      return data.map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw _handleDioError(e, 'downloadRainGauges');
     } catch (e) {
-      throw WeatherSyncFailure('Failed to download rain gauges: $e');
+      throw Exception('Failed to download rain gauges: $e');
     }
   }
 
@@ -554,11 +555,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   Future<Map<String, dynamic>> getServerStatus() async {
     try {
       final response = await _dioClient.get('$_baseUrl/status');
-      return response.data;
+      return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw _handleDioError(e, 'getServerStatus');
     } catch (e) {
-      throw WeatherApiFailure('weather-service', 500, e.toString());
+      throw Exception('Weather service error: ${e.toString()}');
     }
   }
 
@@ -584,17 +585,17 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       );
 
       return WeatherMeasurementModel.fromOpenWeatherMapApi(
-        response.data,
-        'external_${latitude}_${longitude}',
-        response.data['name'] ?? 'Unknown Location',
+        response.data as Map<String, dynamic>,
+        'external_${latitude}_$longitude',
+        (response.data['name'] as String?) ?? 'Unknown Location',
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        throw WeatherApiAuthFailure('openweathermap');
+        throw const WeatherApiAuthFailure('openweathermap');
       } else if (e.response?.statusCode == 429) {
-        throw WeatherApiRateLimitFailure('openweathermap', DateTime.now().add(const Duration(minutes: 60)));
+        throw Exception('Rate limit exceeded for OpenWeatherMap, retry after: ${DateTime.now().add(const Duration(minutes: 60))}');
       }
-      throw WeatherApiFailure('openweathermap', e.response?.statusCode ?? 500, e.message ?? 'Unknown error');
+      throw Exception('OpenWeatherMap API error (status: ${e.response?.statusCode ?? 500}): ${e.message ?? 'Unknown error'}');
     }
   }
 
@@ -629,17 +630,17 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       final weatherData = weatherResponse.data[0];
       
       return WeatherMeasurementModel.fromAccuWeatherApi(
-        weatherData,
-        'external_${latitude}_${longitude}',
-        locationResponse.data['LocalizedName'] ?? 'Unknown Location',
+        weatherData as Map<String, dynamic>,
+        'external_${latitude}_$longitude',
+        (locationResponse.data['LocalizedName'] as String?) ?? 'Unknown Location',
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        throw WeatherApiAuthFailure('accuweather');
+        throw const WeatherApiAuthFailure('accuweather');
       } else if (e.response?.statusCode == 503) {
-        throw WeatherApiRateLimitFailure('accuweather', DateTime.now().add(const Duration(hours: 1)));
+        throw Exception('Service unavailable for AccuWeather, retry after: ${DateTime.now().add(const Duration(hours: 1))}');
       }
-      throw WeatherApiFailure('accuweather', e.response?.statusCode ?? 500, e.message ?? 'Unknown error');
+      throw Exception('AccuWeather API error (status: ${e.response?.statusCode ?? 500}): ${e.message ?? 'Unknown error'}');
     }
   }
 
@@ -662,23 +663,23 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
-      final List<dynamic> forecastList = response.data['list'] ?? [];
+      final List<dynamic> forecastList = (response.data['list'] as List?) ?? [];
       final cityName = response.data['city']?['name'] ?? 'Unknown Location';
       
       return forecastList
           .map((forecast) => WeatherMeasurementModel.fromOpenWeatherMapApi(
-                forecast,
-                'external_${latitude}_${longitude}',
-                cityName,
+                forecast as Map<String, dynamic>,
+                'external_${latitude}_$longitude',
+                (cityName as String?) ?? 'Unknown Location',
               ))
           .toList();
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        throw WeatherApiAuthFailure('openweathermap');
+        throw const WeatherApiAuthFailure('openweathermap');
       } else if (e.response?.statusCode == 429) {
-        throw WeatherApiRateLimitFailure('openweathermap', DateTime.now().add(const Duration(minutes: 60)));
+        throw Exception('Rate limit exceeded for OpenWeatherMap forecast, retry after: ${DateTime.now().add(const Duration(minutes: 60))}');
       }
-      throw WeatherApiFailure('openweathermap', e.response?.statusCode ?? 500, e.message ?? 'Unknown error');
+      throw Exception('OpenWeatherMap forecast API error (status: ${e.response?.statusCode ?? 500}): ${e.message ?? 'Unknown error'}');
     }
   }
 
@@ -697,7 +698,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   /// Handle Dio exceptions and convert to weather failures
   WeatherFailure _handleDioError(DioException error, String operation) {
     final statusCode = error.response?.statusCode ?? 500;
-    final message = error.response?.data?['message'] ?? error.message ?? 'Unknown error';
+    final message = (error.response?.data?['message'] as String?) ?? error.message ?? 'Unknown error';
 
     switch (statusCode) {
       case 400:
@@ -705,9 +706,9 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       case 401:
         return WeatherApiAuthFailure('weather-service', message);
       case 403:
-        return WeatherApiAuthFailure('weather-service', 'Access forbidden');
+        return const WeatherApiAuthFailure('weather-service', 'Access forbidden');
       case 404:
-        return WeatherDataFailure('Resource not found');
+        return const WeatherDataFailure('Resource not found');
       case 429:
         return WeatherApiRateLimitFailure('weather-service', DateTime.now().add(const Duration(minutes: 15)));
       case 500:

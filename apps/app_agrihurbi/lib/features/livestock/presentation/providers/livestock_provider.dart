@@ -1,16 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/entities/equine_entity.dart';
-import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/repositories/livestock_repository.dart';
+import '../../domain/usecases/create_bovine.dart';
+import '../../domain/usecases/delete_bovine.dart';
 import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/get_equines.dart';
-import '../../domain/usecases/create_bovine.dart';
-import '../../domain/usecases/update_bovine.dart';
-import '../../domain/usecases/delete_bovine.dart';
 import '../../domain/usecases/search_animals.dart' as search_use_case;
+import '../../domain/usecases/update_bovine.dart';
 
 /// Provider principal para gerenciamento de estado do livestock
 /// 

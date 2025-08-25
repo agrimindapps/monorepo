@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculation_history.dart';
-import '../../domain/usecases/get_calculators.dart';
+import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/execute_calculation.dart';
+import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 
 /// Provider simplificado para gerenciamento de estado das calculadoras

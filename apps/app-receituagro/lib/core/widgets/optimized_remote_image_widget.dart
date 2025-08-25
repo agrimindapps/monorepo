@@ -160,8 +160,8 @@ class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget>
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(-1.0, -0.3),
-                end: Alignment(1.0, 0.3),
+                begin: const Alignment(-1.0, -0.3),
+                end: const Alignment(1.0, 0.3),
                 colors: [
                   Colors.grey.shade200,
                   Colors.white.withOpacity(0.8),
@@ -284,7 +284,7 @@ class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget>
           color: Colors.green.shade600.withOpacity(0.8),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
@@ -292,7 +292,7 @@ class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget>
               size: 8,
               color: Colors.white,
             ),
-            const SizedBox(width: 2),
+            SizedBox(width: 2),
             Text(
               'WEB',
               style: TextStyle(

@@ -186,7 +186,7 @@ class FiltroMultiploWidget extends StatelessWidget {
     required ValueChanged<String?> onChanged,
     bool isFullWidth = false,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: selectedValue != null 

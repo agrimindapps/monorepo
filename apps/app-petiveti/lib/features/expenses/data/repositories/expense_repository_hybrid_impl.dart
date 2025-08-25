@@ -1,9 +1,10 @@
-import 'package:dartz/dartz.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/expense.dart';
+import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../datasources/expense_local_datasource.dart';
 import '../datasources/expense_remote_datasource.dart';
@@ -63,13 +64,14 @@ class ExpenseRepositoryHybridImpl implements ExpenseRepository {
   }
 
   @override
-  Future<Either<Failure, List<Expense>>> getExpensesByAnimal(String userId, String animalId) async {
+  Future<Either<Failure, List<Expense>>> getExpensesByAnimal(String animalId) async {
     try {
-      final localExpenses = await localDataSource.getExpensesByAnimal(userId, animalId);
+      final localExpenses = await localDataSource.getExpensesByAnimal(animalId);
       
       if (await isConnected) {
         try {
-          final remoteExpenses = await remoteDataSource.getExpensesByAnimal(userId, animalId);
+          // Para remote, usaremos um userId padrão ou precisaremos obtê-lo de outro lugar
+          final remoteExpenses = await remoteDataSource.getExpensesByAnimal('default_user', animalId);
           
           // Sync and return updated data
           for (final remoteExpense in remoteExpenses) {
@@ -83,7 +85,7 @@ class ExpenseRepositoryHybridImpl implements ExpenseRepository {
             }
           }
           
-          final updatedExpenses = await localDataSource.getExpensesByAnimal(userId, animalId);
+          final updatedExpenses = await localDataSource.getExpensesByAnimal(animalId);
           return Right(updatedExpenses);
           
         } catch (e) {
@@ -168,9 +170,15 @@ class ExpenseRepositoryHybridImpl implements ExpenseRepository {
   }
 
   @override
-  Future<Either<Failure, ExpenseSummary>> getExpenseSummary(String userId, DateTime startDate, DateTime endDate) async {
+  Future<Either<Failure, ExpenseSummary>> getExpenseSummary(String userId) async {
     try {
-      final summary = await localDataSource.getExpenseSummary(userId, startDate, endDate);
+      // Usar período padrão (mês atual) quando não especificado
+      final now = DateTime.now();
+      final startDate = DateTime(now.year, now.month, 1);
+      final endDate = DateTime(now.year, now.month + 1, 0);
+      
+      final expenses = await localDataSource.getExpensesByDateRange(userId, startDate, endDate);
+      final summary = ExpenseSummary.fromExpenses(expenses);
       return Right(summary);
     } catch (e) {
       return Left(CacheFailure(message: 'Erro ao calcular resumo de despesas: ${e.toString()}'));
@@ -258,9 +266,9 @@ class ExpenseRepositoryHybridImpl implements ExpenseRepository {
   }
 
   @override
-  Stream<Either<Failure, List<Expense>>> watchExpensesByAnimal(String userId, String animalId) {
+  Stream<Either<Failure, ExpenseSummary>> watchExpenseSummary(String userId) {
     return Stream.periodic(const Duration(seconds: 5), (_) {
-      return getExpensesByAnimal(userId, animalId);
+      return getExpenseSummary(userId);
     }).asyncMap((future) => future);
   }
 }

@@ -12,7 +12,7 @@ class DeleteMedication implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String id) async {
     if (id.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do medicamento é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do medicamento é obrigatório'));
     }
     
     return await repository.deleteMedication(id);
@@ -27,11 +27,11 @@ class DiscontinueMedication implements UseCase<void, DiscontinueMedicationParams
   @override
   Future<Either<Failure, void>> call(DiscontinueMedicationParams params) async {
     if (params.id.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do medicamento é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do medicamento é obrigatório'));
     }
     
     if (params.reason.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'Motivo da descontinuação é obrigatório'));
+      return const Left(ValidationFailure(message: 'Motivo da descontinuação é obrigatório'));
     }
     
     return await repository.discontinueMedication(params.id, params.reason);

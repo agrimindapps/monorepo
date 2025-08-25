@@ -33,7 +33,7 @@ class DataPicker extends StatelessWidget {
 
           return GestureDetector(
             onTap: () => _selectDate(context),
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 border: Border.all(
                   color: hasError

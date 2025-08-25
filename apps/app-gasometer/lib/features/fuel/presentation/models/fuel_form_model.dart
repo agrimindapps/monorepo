@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/fuel_record_entity.dart';
+
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../domain/entities/fuel_record_entity.dart';
 
 /// Model reativo para o formulário de abastecimento
 class FuelFormModel extends Equatable {

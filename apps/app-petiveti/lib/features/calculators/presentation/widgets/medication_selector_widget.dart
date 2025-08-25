@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/medication_dosage_provider.dart';
+
 import '../../domain/entities/medication_data.dart';
+import '../providers/medication_dosage_provider.dart';
 
 /// Widget para seleção de medicamentos com busca e favoritos
 class MedicationSelectorWidget extends StatefulWidget {
-  const MedicationSelectorWidget({Key? key}) : super(key: key);
+  const MedicationSelectorWidget({super.key});
 
   @override
   State<MedicationSelectorWidget> createState() => _MedicationSelectorWidgetState();
@@ -233,7 +234,7 @@ class _MedicationSelectorWidgetState extends State<MedicationSelectorWidget> {
         : provider.filteredMedications;
 
     if (medications.isEmpty) {
-      return Container(
+      return SizedBox(
         height: 120,
         child: Center(
           child: Column(

@@ -1,3 +1,4 @@
+import '../entities/calculation_history.dart';
 import '../entities/calculation_result.dart';
 import '../entities/calculator.dart';
 import '../repositories/calculator_repository.dart';

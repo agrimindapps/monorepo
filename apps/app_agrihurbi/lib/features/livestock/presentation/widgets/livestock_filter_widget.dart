@@ -311,6 +311,11 @@ class CompactLivestockFilterWidget extends StatelessWidget {
       activeFilters.add(
         FilterChip(
           label: Text('Raça: $selectedBreed'),
+          onSelected: (bool selected) {
+            if (!selected) {
+              onBreedChanged?.call(null);
+            }
+          },
           onDeleted: () => onBreedChanged?.call(null),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         ),
@@ -322,6 +327,11 @@ class CompactLivestockFilterWidget extends StatelessWidget {
       activeFilters.add(
         FilterChip(
           label: Text('Aptidão: ${selectedAptitude!.displayName}'),
+          onSelected: (bool selected) {
+            if (!selected) {
+              onAptitudeChanged?.call(null);
+            }
+          },
           onDeleted: () => onAptitudeChanged?.call(null),
           backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
         ),
@@ -333,6 +343,11 @@ class CompactLivestockFilterWidget extends StatelessWidget {
       activeFilters.add(
         FilterChip(
           label: Text('Sistema: ${selectedBreedingSystem!.displayName}'),
+          onSelected: (bool selected) {
+            if (!selected) {
+              onBreedingSystemChanged?.call(null);
+            }
+          },
           onDeleted: () => onBreedingSystemChanged?.call(null),
           backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
         ),

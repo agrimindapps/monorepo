@@ -1,6 +1,6 @@
-import 'package:dartz/dartz.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/features/subscription/domain/entities/subscription_entity.dart';
+import 'package:core/core.dart' show Failure;
+import 'package:dartz/dartz.dart';
 
 /// Subscription Repository Interface
 /// 

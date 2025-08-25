@@ -88,7 +88,7 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.memory, size: 16, color: Colors.white),
+              const Icon(Icons.memory, size: 16, color: Colors.white),
               const SizedBox(width: 4),
               Text(
                 _getMemoryText(),
@@ -137,11 +137,11 @@ class _MemoryReportDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
           Icon(Icons.memory, color: Colors.blue),
-          const SizedBox(width: 8),
-          const Text('Memory Report'),
+          SizedBox(width: 8),
+          Text('Memory Report'),
         ],
       ),
       content: SizedBox(

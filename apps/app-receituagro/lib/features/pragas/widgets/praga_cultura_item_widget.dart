@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../../../core/widgets/praga_image_widget.dart';
 import '../models/praga_cultura_item_model.dart';
 import '../models/praga_view_mode.dart';
-import '../../../core/widgets/praga_image_widget.dart';
 
 class PragaCulturaItemWidget extends StatelessWidget {
   final PragaCulturaItemModel praga;

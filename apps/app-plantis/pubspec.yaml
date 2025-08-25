@@ -19,7 +19,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.7.0 <4.0.0"
+  sdk: '>=3.7.0 <4.0.0'
+  flutter: ">=3.10.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -45,20 +46,9 @@ dependencies:
   # Navigation
   go_router: ^16.1.0
   
-  # Local Storage (além do Hive do core)
-  shared_preferences: ^2.5.3
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  # Local Storage - sqflite é específico deste app
   sqflite: ^2.4.1
-  flutter_secure_storage: ^9.2.2
-  
-  # Firebase (usando os services do core)
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.1
-  firebase_crashlytics: ^5.0.0
-  firebase_analytics: ^12.0.0
-  cloud_firestore: ^6.0.0
-  firebase_storage: ^13.0.0
+  # Nota: Firebase, Hive e SharedPreferences vêm do core package
   
   # Utilities
   equatable: ^2.0.5
@@ -89,7 +79,16 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  path_provider: ^2.1.5
+  cloud_firestore: any
+  firebase_storage: any
+  shared_preferences: any
+  hive: any
+  flutter_secure_storage: any
   path: any
+  firebase_core: any
+  firebase_crashlytics: any
+  hive_flutter: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -102,10 +101,10 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   
   # Code Generation
-  build_runner: ^2.5.4
+  build_runner: ^2.4.13
   injectable_generator: ^2.6.2
-  hive_generator: ^2.0.0
-  json_serializable: ^6.7.1
+  hive_generator: ^2.0.1
+  json_serializable: ^6.8.0
   
   # Testing
   mockito: ^5.4.4

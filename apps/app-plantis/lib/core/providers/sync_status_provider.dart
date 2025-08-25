@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:core/core.dart';
 
-import '../sync/sync_queue.dart';
+import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../data/models/sync_queue_item.dart';
+import '../sync/sync_queue.dart';
 
 enum SyncState {
   idle, // No sync operations

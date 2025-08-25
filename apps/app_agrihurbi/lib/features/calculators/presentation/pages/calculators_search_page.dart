@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../domain/entities/calculator_entity.dart';
 import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
-import '../providers/calculator_provider_simple.dart';
+import '../providers/calculator_provider.dart';
 import '../widgets/calculator_card_widget.dart';
 
 /// Página de busca avançada de calculadoras
@@ -26,7 +26,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
   CalculatorCategory? _selectedCategory;
   CalculatorComplexity? _selectedComplexity;
   CalculatorSortOrder _sortOrder = CalculatorSortOrder.nameAsc;
-  List<String> _selectedTags = [];
+  final List<String> _selectedTags = [];
   bool _showOnlyFavorites = false;
   
   List<CalculatorEntity> _searchResults = [];
@@ -122,7 +122,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             onChanged: (_) => _updateSearchResults(),
           ),
@@ -537,11 +537,11 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
 
   String _getComplexityName(CalculatorComplexity complexity) {
     switch (complexity) {
-      case CalculatorComplexity.simple:
+      case CalculatorComplexity.low:
         return 'Simples';
-      case CalculatorComplexity.intermediate:
+      case CalculatorComplexity.medium:
         return 'Intermediária';
-      case CalculatorComplexity.advanced:
+      case CalculatorComplexity.high:
         return 'Avançada';
     }
   }

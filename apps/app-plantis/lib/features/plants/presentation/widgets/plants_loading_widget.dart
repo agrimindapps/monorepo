@@ -18,7 +18,7 @@ class PlantsLoadingWidget extends StatelessWidget {
               color: PlantisColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: CircularProgressIndicator(
+            child: const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(PlantisColors.primary),
               strokeWidth: 3,
             ),

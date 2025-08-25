@@ -1,17 +1,18 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
-import '../widgets/settings_section.dart';
-import '../widgets/settings_item.dart';
-import '../widgets/user_profile_card.dart';
-import '../widgets/premium_subscription_card.dart';
+
+import '../../core/di/injection_container.dart' as di;
+import '../../core/services/data_cleaner_service.dart';
+import '../../core/services/test_data_generator_service.dart';
 import '../../features/development/presentation/pages/data_inspector_page.dart';
-import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
-import '../../core/di/injection_container.dart' as di;
-import '../../core/services/test_data_generator_service.dart';
-import '../../core/services/data_cleaner_service.dart';
+import '../../features/legal/presentation/pages/terms_of_service_page.dart';
+import '../widgets/premium_subscription_card.dart';
+import '../widgets/settings_item.dart';
+import '../widgets/settings_section.dart';
+import '../widgets/user_profile_card.dart';
 
 class AccountSettingsPage extends StatelessWidget {
   const AccountSettingsPage({super.key});
@@ -63,7 +64,7 @@ class AccountSettingsPage extends StatelessWidget {
             PremiumSubscriptionCard(
               planName: 'Plano Gratuito',
               description: 'Desbloqueie recursos premium',
-              features: [
+              features: const [
                 'Plantas ilimitadas',
                 'Backup automático na nuvem',
                 'Relatórios avançados de cuidados',

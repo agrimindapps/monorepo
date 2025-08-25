@@ -1,36 +1,35 @@
-import 'package:get_it/get_it.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../interfaces/network_info.dart';
-import '../services/plantis_notification_service.dart';
-import '../services/task_notification_service.dart';
-import '../services/notification_manager.dart';
-import '../services/image_service.dart' as local;
-import '../services/test_data_generator_service.dart';
-import '../services/data_cleaner_service.dart';
-import '../services/backup_service.dart';
-import '../services/backup_scheduler.dart';
-import '../services/secure_storage_service.dart';
-import '../data/repositories/backup_repository.dart';
-import '../utils/navigation_service.dart';
-import '../providers/analytics_provider.dart';
-import '../providers/sync_status_provider.dart';
-import 'modules/plants_module.dart';
-import 'modules/tasks_module.dart';
-import 'modules/spaces_module.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
     as providers;
 import '../../features/premium/presentation/providers/premium_provider.dart';
-import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/settings/presentation/providers/backup_settings_provider.dart';
-
+import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
+import '../data/repositories/backup_repository.dart';
+import '../interfaces/network_info.dart';
+import '../providers/analytics_provider.dart';
+import '../providers/sync_status_provider.dart';
+import '../services/backup_scheduler.dart';
+import '../services/backup_service.dart';
+import '../services/data_cleaner_service.dart';
+import '../services/image_service.dart' as local;
+import '../services/notification_manager.dart';
+import '../services/plantis_notification_service.dart';
+import '../services/secure_storage_service.dart';
+import '../services/task_notification_service.dart';
+import '../services/test_data_generator_service.dart';
+import '../sync/sync_operations.dart';
 // Sync dependencies
 import '../sync/sync_queue.dart';
-import '../sync/sync_operations.dart';
+import '../utils/navigation_service.dart';
+import 'modules/plants_module.dart';
+import 'modules/spaces_module.dart';
+import 'modules/tasks_module.dart';
 
 final sl = GetIt.instance;
 

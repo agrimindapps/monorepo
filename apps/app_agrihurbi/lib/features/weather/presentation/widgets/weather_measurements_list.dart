@@ -261,7 +261,7 @@ class WeatherMeasurementsList extends StatelessWidget {
         color = Colors.grey;
         break;
       case 'partly_cloudy':
-        icon = Icons.partly_cloudy_day;
+        icon = Icons.cloud;
         color = Colors.blue;
         break;
       case 'rain':
@@ -409,7 +409,7 @@ class WeatherMeasurementsList extends StatelessWidget {
         'Qualidade: $label',
         style: TextStyle(
           fontSize: 10,
-          color: color.shade700,
+          color: color.withValues(alpha: 0.8),
           fontWeight: FontWeight.w500,
         ),
       ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/reminders_provider.dart';
+
 import '../../domain/entities/reminder.dart';
+import '../providers/reminders_provider.dart';
 
 class RemindersPage extends ConsumerStatefulWidget {
   final String userId;

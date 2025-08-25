@@ -158,18 +158,18 @@ class PlantaModel extends BaseSyncModel {
       espacoId: map['espacoId']?.toString(),
       imagePaths:
           map['imagePaths'] != null
-              ? List<String>.from(map['imagePaths'])
+              ? List<String>.from(map['imagePaths'] as Iterable<dynamic>)
               : null,
       observacoes: map['observacoes']?.toString(),
       comentarios:
           map['comentarios'] != null
               ? (map['comentarios'] as List)
-                  .map((c) => ComentarioModel.fromHiveMap(c))
+                  .map((c) => ComentarioModel.fromHiveMap(c as Map<String, dynamic>))
                   .toList()
               : null,
       dataCadastro:
           map['dataCadastro'] != null
-              ? DateTime.parse(map['dataCadastro'])
+              ? DateTime.parse(map['dataCadastro'] as String)
               : null,
       fotoBase64: map['fotoBase64']?.toString(),
     );
@@ -227,18 +227,18 @@ class PlantaModel extends BaseSyncModel {
       espacoId: map['espaco_id']?.toString(),
       imagePaths:
           map['image_paths'] != null
-              ? List<String>.from(map['image_paths'])
+              ? List<String>.from(map['image_paths'] as Iterable<dynamic>)
               : null,
       observacoes: map['observacoes']?.toString(),
       comentarios:
           map['comentarios'] != null
               ? (map['comentarios'] as List)
-                  .map((c) => ComentarioModel.fromFirebaseMap(c))
+                  .map((c) => ComentarioModel.fromFirebaseMap(c as Map<String, dynamic>))
                   .toList()
               : null,
       dataCadastro:
           map['data_cadastro'] != null
-              ? DateTime.parse(map['data_cadastro'])
+              ? DateTime.parse(map['data_cadastro'] as String)
               : null,
       fotoBase64: map['foto_base64']?.toString(),
     );

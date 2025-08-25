@@ -1,8 +1,7 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
-import 'package:get_it/get_it.dart';
 
 import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';
@@ -16,9 +15,9 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
   final AuthRepository repository;
   final FirebaseAnalyticsService _analyticsService;
   
-  const LoginUseCase(
+  LoginUseCase(
     this.repository,
-  ) : _analyticsService = const FirebaseAnalyticsService();
+  ) : _analyticsService = FirebaseAnalyticsService();
   
   @override
   Future<Either<Failure, local_user.UserEntity>> call(LoginParams params) async {
@@ -59,33 +58,8 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
       // Analytics: track login result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
       
-      result.fold(
-        (failure) async {
-          await _analyticsService.logEvent(
-            'login_failed',
-            parameters: {
-              'error_type': failure.runtimeType.toString(),
-              'duration_ms': duration,
-              'email_domain': params.email.split('@').last,
-            },
-          );
-        },
-        (user) async {
-          await _analyticsService.logEvent(
-            'login_success',
-            parameters: {
-              'duration_ms': duration,
-              'user_id': user.id,
-              'email_domain': params.email.split('@').last,
-            },
-          );
-          
-          // Set user properties for analytics
-          await _analyticsService.setUserId(user.id);
-          await _analyticsService.setUserProperty('user_type', 'farmer');
-          await _analyticsService.setUserProperty('app_version', 'agrihurbi_v1');
-        },
-      );
+      // Fire and forget analytics
+      _logAnalyticsAsync(result, duration, params.email);
       
       return result;
     } catch (e) {
@@ -124,6 +98,35 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
     }
     
     return null;
+  }
+  
+  /// Log analytics async (fire and forget)
+  void _logAnalyticsAsync(Either<Failure, local_user.UserEntity> result, int duration, String email) {
+    result.fold(
+      (failure) => _analyticsService.logEvent(
+        'login_failed',
+        parameters: {
+          'error_type': failure.runtimeType.toString(),
+          'duration_ms': duration,
+          'email_domain': email.split('@').last,
+        },
+      ),
+      (user) async {
+        await _analyticsService.logEvent(
+          'login_success',
+          parameters: {
+            'duration_ms': duration,
+            'user_id': user.id,
+            'email_domain': email.split('@').last,
+          },
+        );
+        
+        // Set user properties for analytics
+        await _analyticsService.setUserId(user.id);
+        await _analyticsService.setUserProperty('user_type', 'farmer');
+        await _analyticsService.setUserProperty('app_version', 'agrihurbi_v1');
+      },
+    );
   }
 }
 

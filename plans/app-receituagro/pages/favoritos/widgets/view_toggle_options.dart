@@ -25,7 +25,7 @@ class ViewToggleOptions extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = ThemeManager().isDark.value;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
         borderRadius:

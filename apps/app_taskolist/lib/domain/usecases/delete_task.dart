@@ -1,6 +1,6 @@
-import '../repositories/task_repository.dart';
 import '../../core/usecases/usecase.dart';
 import '../../core/utils/typedef.dart';
+import '../repositories/task_repository.dart';
 
 class DeleteTask extends UseCaseWithParams<void, DeleteTaskParams> {
   const DeleteTask(this._repository);

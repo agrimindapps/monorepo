@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/expense_form_provider.dart';
-import '../../core/constants/expense_constants.dart';
+
 import '../../../../core/presentation/theme/app_theme.dart';
 import '../../../../core/presentation/widgets/validated_text_field.dart';
+import '../../core/constants/expense_constants.dart';
+import '../providers/expense_form_provider.dart';
 import 'expense_type_selector.dart';
 import 'receipt_image_picker.dart';
 
@@ -110,9 +111,9 @@ class ExpenseFormView extends StatelessWidget {
                             hint: ExpenseConstants.odometerPlaceholder,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             prefixIcon: Icons.speed,
-                            suffix: Text(
+                            suffix: const Text(
                               ExpenseConstants.kilometerUnit,
-                              style: const TextStyle(color: Colors.grey),
+                              style: TextStyle(color: Colors.grey),
                             ),
                             required: true,
                             validator: (value) => CommonValidators.intValidator(

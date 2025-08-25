@@ -1,7 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
+import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
+import 'package:core/core.dart' show Failure;
+import 'package:dartz/dartz.dart';
 
 /// News Repository Interface
 /// 

@@ -3,8 +3,8 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
 import '../../../vehicles/domain/repositories/vehicle_repository.dart';
-import '../../domain/entities/report_summary_entity.dart';
 import '../../domain/entities/report_comparison_entity.dart';
+import '../../domain/entities/report_summary_entity.dart';
 
 abstract class ReportsDataSource {
   Future<ReportSummaryEntity> generateReport(String vehicleId, DateTime startDate, DateTime endDate, String period);
@@ -175,7 +175,7 @@ class ReportsDataSourceImpl implements ReportsDataSource {
             });
           }
 
-          monthlyAverages.sort((a, b) => a['month'].compareTo(b['month']));
+          monthlyAverages.sort((a, b) => (a['month'] as String).compareTo(b['month'] as String));
 
           // Calculate trend
           String trend = 'stable';
@@ -256,7 +256,7 @@ class ReportsDataSourceImpl implements ReportsDataSource {
             });
           }
 
-          priceTrends.sort((a, b) => a['month'].compareTo(b['month']));
+          priceTrends.sort((a, b) => (a['month'] as String).compareTo(b['month'] as String));
 
           return {
             'total_cost': totalCost,

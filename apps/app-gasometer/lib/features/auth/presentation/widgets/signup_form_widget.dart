@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/login_controller.dart';
-import 'auth_text_field_widget.dart';
 import 'auth_button_widget.dart';
+import 'auth_text_field_widget.dart';
 
 /// Widget para formulário de cadastro
 class SignupFormWidget extends StatelessWidget {

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/utils/sample_data.dart';
 import '../../core/enums/task_filter.dart';
+import '../../core/utils/sample_data.dart';
 import '../../domain/entities/task_entity.dart';
 import '../providers/task_providers.dart';
-import '../providers/auth_providers.dart';
-import '../widgets/task_list_widget.dart';
-import '../widgets/task_detail_drawer.dart';
 import '../widgets/bottom_input_bar.dart';
 import '../widgets/filter_side_panel.dart';
-import '../widgets/premium_banner.dart';
 import '../widgets/modern_drawer.dart';
-import 'settings_page.dart';
+import '../widgets/premium_banner.dart';
+import '../widgets/task_detail_drawer.dart';
+import '../widgets/task_list_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -80,7 +78,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   Future<void> _loadSampleDataIfEmpty() async {
     try {
       // Buscar tasks existentes usando o provider
-      final tasksRequest = GetTasksRequest();
+      const tasksRequest = GetTasksRequest();
       final tasks = await ref.read(getTasksProvider(tasksRequest).future);
       
       // Se não há tasks, carregar dados de exemplo

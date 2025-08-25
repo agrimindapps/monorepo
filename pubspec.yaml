@@ -2,13 +2,16 @@ name: plantis_receituagro_monorepo
 description: Monorepo contendo apps Plantis (plantas domésticas) e ReceitaAgro (pragas agrícolas)
 
 environment:
-  sdk: '>=3.7.2 <4.0.0'
+  sdk: '>=3.7.0 <4.0.0'
   flutter: ">=3.10.0"
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   melos: ^6.3.3
+  flutter_lints: ^6.0.0
+  
+  # Nota: Dependências específicas devem estar nos pubspec.yaml dos apps individuais
   cloud_firestore: any
   get: any
   supabase_flutter: any
@@ -46,6 +49,7 @@ dev_dependencies:
   flutter_local_notifications: any
   timezone: any
   firebase_crashlytics: any
+  fnutrituti: any
   firebase_storage: any
   logging: any
   logger: any

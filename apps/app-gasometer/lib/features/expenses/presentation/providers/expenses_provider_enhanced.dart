@@ -1,11 +1,12 @@
 import 'dart:async';
-import '../../../../core/providers/base_provider.dart';
+
 import '../../../../core/error/app_error.dart';
-import '../models/expense_form_model.dart';
+import '../../../../core/providers/base_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../data/repositories/expenses_repository.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_validation_service.dart';
-import '../../data/repositories/expenses_repository.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../models/expense_form_model.dart';
 
 /// Enhanced ExpensesProvider with consistent error handling
 class ExpensesProviderEnhanced extends BaseProvider with PaginatedProviderMixin<ExpenseEntity> {
@@ -163,7 +164,7 @@ class ExpensesProviderEnhanced extends BaseProvider with PaginatedProviderMixin<
   /// Update existing expense
   Future<bool> updateExpense(ExpenseFormModel formModel) async {
     if (!formModel.isEditing) {
-      final error = BusinessLogicError(
+      const error = BusinessLogicError(
         message: 'Cannot update: expense not in edit mode',
         userFriendlyMessage: 'Despesa não existe para edição',
       );

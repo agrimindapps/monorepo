@@ -6,34 +6,44 @@ extension LogLevelExtensions on LogLevel {
   /// Cor associada ao nível do log
   Color get color {
     switch (this) {
+      case LogLevel.trace:
+        return Colors.purple;
+      case LogLevel.debug:
+        return Colors.grey;
       case LogLevel.info:
         return Colors.blue;
       case LogLevel.warning:
         return Colors.orange;
       case LogLevel.error:
         return Colors.red;
-      case LogLevel.debug:
-        return Colors.grey;
+      case LogLevel.critical:
+        return Colors.red.shade900;
     }
   }
 
   /// Ícone associado ao nível do log
   IconData get icon {
     switch (this) {
+      case LogLevel.trace:
+        return Icons.search;
+      case LogLevel.debug:
+        return Icons.bug_report;
       case LogLevel.info:
         return Icons.info;
       case LogLevel.warning:
         return Icons.warning;
       case LogLevel.error:
         return Icons.error;
-      case LogLevel.debug:
-        return Icons.bug_report;
+      case LogLevel.critical:
+        return Icons.error_outline;
     }
   }
 
   /// Prioridade do log (maior número = maior prioridade)
   int get priority {
     switch (this) {
+      case LogLevel.trace:
+        return 0;
       case LogLevel.debug:
         return 1;
       case LogLevel.info:
@@ -42,20 +52,26 @@ extension LogLevelExtensions on LogLevel {
         return 3;
       case LogLevel.error:
         return 4;
+      case LogLevel.critical:
+        return 5;
     }
   }
 
   /// Nome formatado do nível
   String get displayName {
     switch (this) {
+      case LogLevel.trace:
+        return 'Trace';
+      case LogLevel.debug:
+        return 'Debug';
       case LogLevel.info:
         return 'Info';
       case LogLevel.warning:
         return 'Warning';
       case LogLevel.error:
         return 'Error';
-      case LogLevel.debug:
-        return 'Debug';
+      case LogLevel.critical:
+        return 'Critical';
     }
   }
 
@@ -63,33 +79,39 @@ extension LogLevelExtensions on LogLevel {
   String get logName => name.toUpperCase();
 
   /// Verifica se é um nível crítico
-  bool get isCritical => this == LogLevel.error;
+  bool get isCritical => this == LogLevel.error || this == LogLevel.critical;
 
   /// Verifica se é um nível de produção
   bool get isProductionLevel {
     switch (this) {
-      case LogLevel.error:
-      case LogLevel.warning:
-      case LogLevel.info:
-        return true;
+      case LogLevel.trace:
       case LogLevel.debug:
         return false;
+      case LogLevel.info:
+      case LogLevel.warning:
+      case LogLevel.error:
+      case LogLevel.critical:
+        return true;
     }
   }
 
   /// Verifica se é um nível de desenvolvimento
-  bool get isDevelopmentLevel => this == LogLevel.debug;
+  bool get isDevelopmentLevel => this == LogLevel.debug || this == LogLevel.trace;
 
   /// Obtém a cor do texto baseada no fundo
   Color get textColor {
     switch (this) {
-      case LogLevel.error:
+      case LogLevel.trace:
+        return Colors.white;
+      case LogLevel.debug:
+        return Colors.white;
+      case LogLevel.info:
         return Colors.white;
       case LogLevel.warning:
         return Colors.black;
-      case LogLevel.info:
+      case LogLevel.error:
         return Colors.white;
-      case LogLevel.debug:
+      case LogLevel.critical:
         return Colors.white;
     }
   }
@@ -97,14 +119,18 @@ extension LogLevelExtensions on LogLevel {
   /// Obtém cor de fundo mais suave para cards
   Color get lightBackgroundColor {
     switch (this) {
+      case LogLevel.trace:
+        return Colors.purple.withValues(alpha: 0.1);
+      case LogLevel.debug:
+        return Colors.grey.withValues(alpha: 0.1);
       case LogLevel.info:
         return Colors.blue.withValues(alpha: 0.1);
       case LogLevel.warning:
         return Colors.orange.withValues(alpha: 0.1);
       case LogLevel.error:
         return Colors.red.withValues(alpha: 0.1);
-      case LogLevel.debug:
-        return Colors.grey.withValues(alpha: 0.1);
+      case LogLevel.critical:
+        return Colors.red.shade900.withValues(alpha: 0.1);
     }
   }
 
@@ -125,6 +151,12 @@ extension LogLevelExtensions on LogLevel {
     final normalized = value.toLowerCase().trim();
     
     switch (normalized) {
+      case 'trace':
+      case 'trc':
+        return LogLevel.trace;
+      case 'debug':
+      case 'dbg':
+        return LogLevel.debug;
       case 'info':
       case 'information':
         return LogLevel.info;
@@ -134,9 +166,9 @@ extension LogLevelExtensions on LogLevel {
       case 'error':
       case 'err':
         return LogLevel.error;
-      case 'debug':
-      case 'dbg':
-        return LogLevel.debug;
+      case 'critical':
+      case 'crit':
+        return LogLevel.critical;
       default:
         return null;
     }
@@ -145,6 +177,8 @@ extension LogLevelExtensions on LogLevel {
 
 /// Classe helper para trabalhar com múltiplos LogLevels
 class LogLevelUtils {
+  // Private constructor to prevent instantiation
+  LogLevelUtils._();
   /// Obtém todos os níveis ordenados por prioridade (menor para maior)
   static List<LogLevel> get allLevelsByPriority {
     final levels = LogLevel.values.toList();

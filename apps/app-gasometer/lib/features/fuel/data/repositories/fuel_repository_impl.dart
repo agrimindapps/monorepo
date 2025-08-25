@@ -1,15 +1,16 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/repositories/fuel_repository.dart';
 import '../datasources/fuel_local_data_source.dart';
 import '../datasources/fuel_remote_data_source.dart';
-import '../../../auth/domain/repositories/auth_repository.dart';
 
 @LazySingleton(as: FuelRepository)
 class FuelRepositoryImpl implements FuelRepository {
@@ -41,31 +42,14 @@ class FuelRepositoryImpl implements FuelRepository {
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> getAllFuelRecords() async {
     try {
-      final userId = await _getCurrentUserId();
+      // OFFLINE FIRST: Sempre retorna dados locais primeiro
+      final localRecords = await localDataSource.getAllFuelRecords();
       
-      if (await _isConnected() && userId != null) {
-        // Try to get from remote first
-        try {
-          final remoteRecords = await remoteDataSource.getAllFuelRecords(userId);
-          
-          // Cache records locally
-          for (final record in remoteRecords) {
-            await localDataSource.addFuelRecord(record);
-          }
-          
-          return Right(remoteRecords);
-        } catch (e) {
-          // If remote fails, fallback to local
-          final localRecords = await localDataSource.getAllFuelRecords();
-          return Right(localRecords);
-        }
-      } else {
-        // Offline or anonymous user - use local data
-        final localRecords = await localDataSource.getAllFuelRecords();
-        return Right(localRecords);
-      }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      // Sync em background se conectado (não bloqueia o retorno)
+      unawaited(_syncAllFuelRecordsInBackground());
+      
+      return Right(localRecords);
+      
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
@@ -73,35 +57,67 @@ class FuelRepositoryImpl implements FuelRepository {
     }
   }
 
+  /// Sync em background sem bloquear a UI
+  Future<void> _syncAllFuelRecordsInBackground() async {
+    try {
+      final isConnected = await _isConnected();
+      if (!isConnected) return;
+
+      final userId = await _getCurrentUserId();
+      if (userId == null) return;
+
+      // Sync remoto sem aguardar
+      unawaited(remoteDataSource.getAllFuelRecords(userId).then((remoteRecords) async {
+        // Atualizar cache local
+        for (final record in remoteRecords) {
+          await localDataSource.addFuelRecord(record);
+        }
+      }).catchError((Object error) {
+        // Sync falhou, mas não afeta a funcionalidade local
+        print('Background fuel sync failed: $error');
+      }));
+    } catch (e) {
+      // Ignorar erros de sync em background
+      print('Background fuel sync error: $e');
+    }
+  }
+
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> getFuelRecordsByVehicle(String vehicleId) async {
     try {
-      final userId = await _getCurrentUserId();
+      // OFFLINE FIRST: Sempre retorna dados locais primeiro
+      final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
       
-      if (await _isConnected() && userId != null) {
-        try {
-          final remoteRecords = await remoteDataSource.getFuelRecordsByVehicle(userId, vehicleId);
-          
-          // Cache records locally
-          for (final record in remoteRecords) {
-            await localDataSource.addFuelRecord(record);
-          }
-          
-          return Right(remoteRecords);
-        } catch (e) {
-          final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
-          return Right(localRecords);
-        }
-      } else {
-        final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
-        return Right(localRecords);
-      }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      // Sync em background se conectado
+      unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
+      
+      return Right(localRecords);
+      
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+    }
+  }
+
+  /// Sync de registros por veículo em background
+  Future<void> _syncFuelRecordsByVehicleInBackground(String vehicleId) async {
+    try {
+      final isConnected = await _isConnected();
+      if (!isConnected) return;
+
+      final userId = await _getCurrentUserId();
+      if (userId == null) return;
+
+      unawaited(remoteDataSource.getFuelRecordsByVehicle(userId, vehicleId).then((remoteRecords) async {
+        for (final record in remoteRecords) {
+          await localDataSource.addFuelRecord(record);
+        }
+      }).catchError((Object error) {
+        print('Background fuel vehicle sync failed: $error');
+      }));
+    } catch (e) {
+      print('Background fuel vehicle sync error: $e');
     }
   }
 

@@ -34,7 +34,7 @@ class RegisterPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.eco, size: 32, color: PlantisColors.primary),
+                      const Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
                         'PlantApp',
@@ -81,7 +81,7 @@ class RegisterPage extends StatelessWidget {
                       Expanded(
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'Cadastrar',
                               style: TextStyle(
                                 color: Colors.black87,
@@ -140,7 +140,7 @@ class RegisterPage extends StatelessWidget {
                       color: PlantisColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.eco,
                       size: 40,
                       color: PlantisColors.primary,
@@ -176,7 +176,7 @@ class RegisterPage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Or text
-                  Text(
+                  const Text(
                     'ou',
                     style: TextStyle(
                       color: PlantisColors.textSecondary,
@@ -212,7 +212,7 @@ class RegisterPage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Terms text
-                  Text(
+                  const Text(
                     'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
                     textAlign: TextAlign.center,
                     style: TextStyle(

@@ -129,7 +129,7 @@ class _DiagnosticoTabState extends State<DiagnosticoTab>
         const SizedBox(height: 12),
         GetBuilder<DetalhesDefensivosController>(
           id: 'diagnostic_tab',
-          builder: (controller) => Container(
+          builder: (controller) => DecoratedBox(
             decoration: BoxDecoration(
               color: isDark ? Colors.grey.shade800 : Colors.grey.shade50,
               borderRadius: BorderRadius.circular(12),
@@ -460,7 +460,7 @@ class _DiagnosticoTabState extends State<DiagnosticoTab>
 
     return GetBuilder<DetalhesDefensivosController>(
       id: 'diagnostic_tab',
-      builder: (controller) => Container(
+      builder: (controller) => DecoratedBox(
         decoration: BoxDecoration(
           color: isDark ? Colors.grey.shade800 : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
@@ -556,7 +556,7 @@ class _DiagnosticoTabState extends State<DiagnosticoTab>
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: isDark ? Colors.grey.shade800 : Colors.grey.shade50,
           border: Border.all(

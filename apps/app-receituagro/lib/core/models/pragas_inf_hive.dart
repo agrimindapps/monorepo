@@ -45,15 +45,15 @@ class PragasInfHive extends HiveObject {
 
   factory PragasInfHive.fromJson(Map<String, dynamic> json) {
     return PragasInfHive(
-      objectId: json['objectId'] ?? '',
+      objectId: (json['objectId'] as String?) ?? '',
       createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
       updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
-      idReg: json['idReg'] ?? '',
+      idReg: (json['idReg'] as String?) ?? '',
       descrisao: json['descrisao'] as String?,
       sintomas: json['sintomas'] as String?,
       bioecologia: json['bioecologia'] as String?,
       controle: json['controle'] as String?,
-      fkIdPraga: json['fkIdPraga'] ?? '',
+      fkIdPraga: (json['fkIdPraga'] as String?) ?? '',
     );
   }
 

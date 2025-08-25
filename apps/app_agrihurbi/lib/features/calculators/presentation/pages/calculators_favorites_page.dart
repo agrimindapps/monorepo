@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../domain/entities/calculator_entity.dart';
 import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
 import '../providers/calculator_provider_simple.dart';
 import '../widgets/calculator_card_widget.dart';
@@ -27,7 +27,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
   List<CalculatorEntity> _favoriteCalculators = [];
   FavoritesStats? _stats;
   bool _isLoading = true;
-  bool _isOrganizing = false;
+  final bool _isOrganizing = false;
   CalculatorFavoritesService? _favoritesService;
 
   @override
@@ -641,6 +641,12 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
         return Icons.pets;
       case CalculatorCategory.crops:
         return Icons.agriculture;
+      case CalculatorCategory.yield:
+        return Icons.trending_up;
+      case CalculatorCategory.machinery:
+        return Icons.precision_manufacturing;
+      case CalculatorCategory.management:
+        return Icons.manage_accounts;
     }
   }
 

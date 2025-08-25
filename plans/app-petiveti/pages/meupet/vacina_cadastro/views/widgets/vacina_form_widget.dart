@@ -67,7 +67,7 @@ class VacinaFormMVCWidgetState extends State<VacinaFormMVCWidget>
     return Stack(
       children: [
         RepaintBoundary(
-          child: Container(
+          child: DecoratedBox(
             decoration: FormStyles.getFormContainerDecoration(),
             child: Form(
               key: _formKey,

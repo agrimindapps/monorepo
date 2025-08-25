@@ -58,7 +58,7 @@ class MockDeviceService implements IDeviceService {
   
   @override
   Future<DeviceInfo> getDeviceInfo() async {
-    return DeviceInfo(
+    return const DeviceInfo(
       platform: kIsWeb ? 'Web' : 'Mobile',
       version: '1.0.0',
       isPhysicalDevice: !kIsWeb,

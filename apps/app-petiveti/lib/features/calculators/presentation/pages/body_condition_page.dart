@@ -3,11 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/body_condition_provider.dart';
+import '../widgets/body_condition_history_panel.dart';
 import '../widgets/body_condition_input_form.dart';
 import '../widgets/body_condition_result_card.dart';
-import '../widgets/body_condition_history_panel.dart';
-import '../../domain/entities/body_condition_input.dart';
-import '../../domain/entities/body_condition_output.dart';
 
 /// Página principal da Calculadora de Condição Corporal
 class BodyConditionPage extends ConsumerStatefulWidget {
@@ -121,7 +119,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     if (state.isLoading) {
       return Container(
         padding: const EdgeInsets.all(8.0),
-        color: Colors.blue.withOpacity(0.1),
+        color: Colors.blue.withValues(alpha: 0.1),
         child: const Row(
           children: [
             SizedBox(
@@ -139,7 +137,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     if (state.hasError) {
       return Container(
         padding: const EdgeInsets.all(8.0),
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         child: Row(
           children: [
             const Icon(Icons.error_outline, color: Colors.red, size: 16),
@@ -157,7 +155,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     if (state.hasValidationErrors) {
       return Container(
         padding: const EdgeInsets.all(8.0),
-        color: Colors.orange.withOpacity(0.1),
+        color: Colors.orange.withValues(alpha: 0.1),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -491,7 +489,7 @@ class BcsGuideSheet extends StatelessWidget {
                     width: 40,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: (data['color'] as Color).withOpacity(0.2),
+                      color: (data['color'] as Color).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(color: data['color'] as Color),
                     ),

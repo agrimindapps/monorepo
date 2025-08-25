@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync

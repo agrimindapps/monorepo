@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterPasswordPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -32,9 +33,9 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
       final authProvider = context.read<AuthProvider>();
 
       await authProvider.register(
-        widget.userData?['email'] ?? '',
+        (widget.userData?['email'] as String?) ?? '',
         _passwordController.text,
-        widget.userData?['name'] ?? '',
+        (widget.userData?['name'] as String?) ?? '',
       );
 
       if (authProvider.isAuthenticated && mounted) {
@@ -72,7 +73,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.eco, size: 32, color: PlantisColors.primary),
+                      const Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
                         'PlantApp',
@@ -119,7 +120,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                       Expanded(
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'Cadastrar',
                               style: TextStyle(
                                 color: Colors.black87,
@@ -183,7 +184,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Password field
-                        Text(
+                        const Text(
                           'Senha',
                           style: TextStyle(
                             color: PlantisColors.primary,
@@ -203,7 +204,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                           decoration: InputDecoration(
                             hintText:
                                 'Mínimo 8 caracteres, letras, números e símbolos',
-                            prefixIcon: Icon(
+                            prefixIcon: const Icon(
                               Icons.lock_outline,
                               color: PlantisColors.primary,
                             ),
@@ -238,7 +239,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: PlantisColors.primary,
                                 width: 2,
                               ),
@@ -272,7 +273,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                           ),
                           decoration: InputDecoration(
                             hintText: 'Confirmar senha',
-                            prefixIcon: Icon(
+                            prefixIcon: const Icon(
                               Icons.lock_outline,
                               color: PlantisColors.primary,
                             ),
@@ -308,7 +309,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: PlantisColors.primary,
                                 width: 2,
                               ),
@@ -367,7 +368,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                               child: OutlinedButton(
                                 onPressed: () => context.pop(),
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
+                                  side: const BorderSide(
                                     color: PlantisColors.primary,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -377,7 +378,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                                     vertical: 16,
                                   ),
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Voltar',
                                   style: TextStyle(
                                     color: PlantisColors.primary,
@@ -435,7 +436,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                         const SizedBox(height: 24),
 
                         // Terms text
-                        Center(
+                        const Center(
                           child: Text(
                             'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
                             textAlign: TextAlign.center,

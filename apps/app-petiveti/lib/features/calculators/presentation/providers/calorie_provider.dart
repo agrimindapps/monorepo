@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/calorie_input.dart';
 import '../../domain/entities/calorie_output.dart';
-import '../../domain/strategies/calorie_calculator_strategy.dart';
 import '../../domain/strategies/calculator_strategy.dart';
+import '../../domain/strategies/calorie_calculator_strategy.dart';
 
 /// Estados para o provider de cálculo calórico
 enum CalorieCalculatorStatus {
@@ -193,15 +193,12 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   bool canProceedToNextStep() {
     switch (state.currentStep) {
       case 0: // Informações básicas
-        return state.input.species != null && 
-               state.input.weight > 0 && 
+        return state.input.weight > 0 && 
                state.input.age >= 0;
       case 1: // Estado fisiológico
-        return state.input.physiologicalState != null &&
-               (!state.input.isLactating || state.input.numberOfOffspring != null);
+        return (!state.input.isLactating || state.input.numberOfOffspring != null);
       case 2: // Atividade e condição corporal
-        return state.input.activityLevel != null && 
-               state.input.bodyConditionScore != null;
+        return state.input.bodyConditionScore != null;
       case 3: // Condições especiais
         return true; // Sempre pode prosseguir (campos opcionais)
       case 4: // Revisão

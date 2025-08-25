@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../presentation/pages/task_detail_page.dart';
+
 import '../../presentation/pages/home_page.dart';
+import '../../presentation/pages/task_detail_page.dart';
 import '../providers/service_providers.dart';
 
 /// Serviço de navegação para gerenciar deep linking e navegação por notificações

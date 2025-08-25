@@ -1,13 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
-import '../models/expense_form_model.dart';
+
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../data/repositories/expenses_repository.dart';
 import '../../domain/entities/expense_entity.dart';
-import '../../domain/services/expense_validation_service.dart';
+import '../../domain/services/expense_filters_service.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_statistics_service.dart';
-import '../../domain/services/expense_filters_service.dart';
-import '../../data/repositories/expenses_repository.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../domain/services/expense_validation_service.dart';
+import '../models/expense_form_model.dart';
 
 /// Provider refatorado para gerenciar operações de despesas com responsabilidades bem definidas
 class ExpensesProvider extends ChangeNotifier {

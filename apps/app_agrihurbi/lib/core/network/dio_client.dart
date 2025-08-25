@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
+import 'package:dio/dio.dart';
 
 /// Dio client configuration for HTTP requests
 class DioClient {
@@ -47,7 +47,7 @@ class DioClient {
   }
 
   /// GET request
-  Future<Response> get(
+  Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -60,7 +60,7 @@ class DioClient {
   }
 
   /// POST request
-  Future<Response> post(
+  Future<Response<dynamic>> post(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -75,7 +75,7 @@ class DioClient {
   }
 
   /// PUT request
-  Future<Response> put(
+  Future<Response<dynamic>> put(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -90,7 +90,7 @@ class DioClient {
   }
 
   /// DELETE request
-  Future<Response> delete(
+  Future<Response<dynamic>> delete(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -105,7 +105,7 @@ class DioClient {
   }
 
   /// PATCH request
-  Future<Response> patch(
+  Future<Response<dynamic>> patch(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,

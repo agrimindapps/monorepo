@@ -351,25 +351,25 @@ class OdometroPageView extends GetView<OdometroPageController> {
               ],
             ),
           ),
-          SizedBox(height: OdometroPageConstants.dimensions['padding']!),
+          SizedBox(height: OdometroPageConstants.dimensions['padding']),
           SizedBox(
             width: MediaQuery.of(context).size.width,
             height: controller.getNoDataHeight(context),
             child: Center(
               child: SizedBox(
                 width:
-                    OdometroPageConstants.dimensions['noDataContainerWidth']!,
+                    OdometroPageConstants.dimensions['noDataContainerWidth'],
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      OdometroPageConstants.icons['speedOutlined']!,
-                      size: OdometroPageConstants.dimensions['noDataIconSize']!,
+                      OdometroPageConstants.icons['speedOutlined'],
+                      size: OdometroPageConstants.dimensions['noDataIconSize'],
                       color: ShadcnStyle.mutedTextColor,
                     ),
                     SizedBox(
                         height: OdometroPageConstants
-                            .dimensions['contentSpacing']!),
+                            .dimensions['contentSpacing']),
                     Text(
                       'Nenhum registro de odômetro encontrado neste período.',
                       textAlign: TextAlign.center,
@@ -419,7 +419,7 @@ class OdometroPageView extends GetView<OdometroPageController> {
                     return MonthlyStatsHeader(statistics: convertedStats);
                   },
                 ),
-                SizedBox(height: OdometroPageConstants.dimensions['padding']!),
+                SizedBox(height: OdometroPageConstants.dimensions['padding']),
               ],
               // Conteúdo do carousel
               _buildCarouselContent(context),

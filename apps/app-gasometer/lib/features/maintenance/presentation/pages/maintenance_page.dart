@@ -6,6 +6,7 @@ import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../providers/maintenance_provider.dart';
 
@@ -27,49 +28,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
     });
   }
 
-  String _selectedFilter = 'all';
-  String _selectedCategory = 'all';
-  String _searchQuery = '';
   String? _selectedVehicleId;
 
   List<MaintenanceEntity> get _filteredRecords {
     final maintenanceProvider = context.watch<MaintenanceProvider>();
     var filtered = maintenanceProvider.maintenanceRecords;
 
-    // Aplicar filtro por veículo
-    if (_selectedFilter != 'all') {
-      filtered = filtered.where((r) => r.vehicleId == _selectedFilter).toList();
-    }
-
-    // Aplicar filtro por categoria (tipo)
-    if (_selectedCategory != 'all') {
-      switch (_selectedCategory) {
-        case 'preventiva':
-          filtered = filtered.where((r) => r.isPreventive).toList();
-          break;
-        case 'corretiva':
-          filtered = filtered.where((r) => r.isCorrective).toList();
-          break;
-        case 'revisao':
-          filtered = filtered.where((r) => r.isInspection).toList();
-          break;
-        case 'emergencial':
-          filtered = filtered.where((r) => r.isEmergency).toList();
-          break;
-      }
-    }
-
-    // Aplicar busca
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((r) {
-        final title = r.title.toLowerCase();
-        final type = r.type.displayName.toLowerCase();
-        final workshop = (r.workshopName ?? '').toLowerCase();
-        final query = _searchQuery.toLowerCase();
-        return title.contains(query) || 
-               type.contains(query) || 
-               workshop.contains(query);
-      }).toList();
+    // Aplicar filtro por veículo selecionado
+    if (_selectedVehicleId != null) {
+      filtered = filtered.where((r) => r.vehicleId == _selectedVehicleId).toList();
     }
 
     // Ordenar por data (mais recente primeiro)
@@ -159,91 +126,6 @@ class _MaintenancePageState extends State<MaintenancePage> {
     );
   }
 
-  Widget _buildFilters(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: TextField(
-                onChanged: (value) => setState(() => _searchQuery = value),
-                decoration: InputDecoration(
-                  hintText: 'Buscar por tipo, veículo ou oficina...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
-                child: DropdownButton<String>(
-                  value: _selectedFilter,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: const Icon(Icons.arrow_drop_down),
-                  items: const [
-                    DropdownMenuItem(value: 'all', child: Text('Todos os veículos')),
-                    DropdownMenuItem(value: '1', child: Text('Honda Civic')),
-                    DropdownMenuItem(value: '2', child: Text('Toyota Corolla')),
-                  ],
-                  onChanged: (value) => setState(() => _selectedFilter = value!),
-                ),
-              ),
-            ),
-            SizedBox(width: GasometerDesignTokens.spacingMd),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
-                child: DropdownButton<String>(
-                  value: _selectedCategory,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: const Icon(Icons.arrow_drop_down),
-                  items: const [
-                    DropdownMenuItem(value: 'all', child: Text('Todas as categorias')),
-                    DropdownMenuItem(value: 'preventiva', child: Text('Preventiva')),
-                    DropdownMenuItem(value: 'corretiva', child: Text('Corretiva')),
-                  ],
-                  onChanged: (value) => setState(() => _selectedCategory = value!),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildContent(BuildContext context) {
     return Column(
@@ -254,13 +136,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
           onVehicleChanged: (vehicleId) {
             setState(() {
               _selectedVehicleId = vehicleId;
-              _selectedFilter = vehicleId ?? 'all';
             });
           },
           showEmptyOption: true,
         ),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildFilters(context),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         if (_filteredRecords.isEmpty)
           _buildEmptyState()
@@ -659,16 +538,52 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
+    final vehiclesProvider = context.watch<VehiclesProvider>();
+    final hasSelectedVehicle = vehiclesProvider.vehicles.isNotEmpty;
+    
     return FloatingActionButton(
-      onPressed: () => context.go('/maintenance/add'),
+      onPressed: hasSelectedVehicle ? () => context.go('/maintenance/add') : _showSelectVehicleMessage,
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
       ),
-      tooltip: 'Nova Manutenção',
+      tooltip: hasSelectedVehicle 
+          ? 'Nova Manutenção'
+          : 'Cadastre um veículo primeiro',
       child: const Icon(Icons.add),
     );
+  }
+
+  void _showSelectVehicleMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Cadastre um veículo primeiro para registrar manutenções'),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: GasometerDesignTokens.borderRadius(
+            GasometerDesignTokens.radiusInput,
+          ),
+        ),
+        action: SnackBarAction(
+          label: 'Cadastrar',
+          onPressed: () => _showAddVehicleDialog(context),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddVehicleDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => const AddVehiclePage(),
+    );
+    
+    // Se resultado for true, recarregar veículos
+    if (result == true && context.mounted) {
+      await context.read<VehiclesProvider>().loadVehicles();
+    }
   }
 
   void _showRecordDetails(Map<String, dynamic> record) {

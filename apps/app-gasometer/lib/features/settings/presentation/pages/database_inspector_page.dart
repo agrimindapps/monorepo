@@ -1,6 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
+
+import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
 import '../../../../core/services/database_inspector_service.dart';
 
 class DatabaseInspectorPage extends StatefulWidget {
@@ -118,7 +120,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
 
   Widget _buildStatsCard() {
     if (_generalStats.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const CentralizedLoadingWidget(message: 'Carregando estatísticas...');
     }
 
     return Card(
@@ -404,7 +406,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
       itemCount: boxesInfo.length,
       itemBuilder: (context, index) {
         final boxInfo = boxesInfo[index];
-        final isAvailable = !boxInfo['hasError'];
+        final isAvailable = !(boxInfo['hasError'] as bool? ?? false);
         
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
@@ -418,27 +420,27 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(
-                _getModuleIcon(boxInfo['module']),
+                _getModuleIcon(boxInfo['module'] as String? ?? ''),
                 color: isAvailable 
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.error,
                 size: 20,
               ),
             ),
-            title: Text(boxInfo['displayName']),
+            title: Text(boxInfo['displayName'] as String? ?? ''),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${boxInfo['totalRecords']} registros • ${boxInfo['module']}'),
+                Text('${boxInfo['totalRecords'] as int? ?? 0} registros • ${boxInfo['module'] as String? ?? ''}'),
                 if (boxInfo['description'] != null)
                   Text(
-                    boxInfo['description'],
+                    boxInfo['description'] as String? ?? '',
                     style: TextStyle(
                       fontSize: 11,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
-                if (boxInfo['hasError'])
+                if (boxInfo['hasError'] as bool? ?? false)
                   Text(
                     'Erro: ${boxInfo['error']}',
                     style: TextStyle(
@@ -450,7 +452,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
             ),
             trailing: isAvailable ? const Icon(Icons.chevron_right) : const Icon(Icons.error),
             enabled: isAvailable,
-            onTap: isAvailable ? () => _loadBoxData(boxInfo['key']) : null,
+            onTap: isAvailable ? () => _loadBoxData(boxInfo['key'] as String? ?? '') : null,
           ),
         );
       },
@@ -459,7 +461,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
 
   Widget _buildBoxDataView() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const CentralizedLoadingWidget(message: 'Carregando dados...');
     }
 
     if (_boxData.isEmpty) {

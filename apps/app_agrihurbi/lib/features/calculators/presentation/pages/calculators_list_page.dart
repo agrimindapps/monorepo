@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
-import '../providers/calculator_provider_simple.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
+import '../providers/calculator_provider.dart';
 import '../widgets/calculator_card_widget.dart';
-import '../widgets/calculator_search_widget.dart';
 import '../widgets/calculator_category_filter.dart';
+import '../widgets/calculator_search_widget.dart';
 
 /// Página de listagem de calculadoras
 /// 

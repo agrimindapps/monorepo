@@ -23,7 +23,7 @@ class CalculatorSearchWidget extends StatefulWidget {
 class _CalculatorSearchWidgetState extends State<CalculatorSearchWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),

@@ -72,7 +72,7 @@ class _PromoPageState extends State<PromoPage> {
   }
 
   Widget _buildLoadingPage() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -208,7 +208,7 @@ class _PromoPageState extends State<PromoPage> {
 
   Widget _buildPreRegisterDialog() {
     return Positioned.fill(
-      child: Container(
+      child: ColoredBox(
         color: Colors.black.withValues(alpha: 0.5),
         child: PreRegisterDialogWidget(
           controller: _controller.preRegisterController,

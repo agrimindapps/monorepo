@@ -234,7 +234,7 @@ class SecurityService implements ISecurityRepository {
       return domain.BiometricPermissionStatus(
         isGranted: false,
         isAvailable: false,
-        biometricTypes: [],
+        biometricTypes: const [],
         error: e.toString(),
       );
     }

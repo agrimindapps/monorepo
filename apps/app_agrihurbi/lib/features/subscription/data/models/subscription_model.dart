@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
 import 'package:app_agrihurbi/features/subscription/domain/entities/subscription_entity.dart';
+import 'package:hive/hive.dart';
 
 part 'subscription_model.g.dart';
 
@@ -7,7 +7,7 @@ part 'subscription_model.g.dart';
 /// 
 /// Represents user subscription status and premium features access
 @HiveType(typeId: 16)
-class SubscriptionModel extends SubscriptionEntity {
+class SubscriptionModel {
   @HiveField(0)
   final String id;
   
@@ -61,21 +61,26 @@ class SubscriptionModel extends SubscriptionEntity {
     required this.features,
     this.paymentMethod,
     this.autoRenew = true,
-  }) : super(
-          id: id,
-          userId: userId,
-          tier: tier,
-          status: status,
-          startDate: startDate,
-          endDate: endDate,
-          nextBillingDate: nextBillingDate,
-          price: price,
-          currency: currency,
-          billingPeriod: billingPeriod,
-          features: features,
-          paymentMethod: paymentMethod,
-          autoRenew: autoRenew,
-        );
+  });
+  
+  /// Convert to domain entity
+  SubscriptionEntity toEntity() {
+    return SubscriptionEntity(
+      id: id,
+      userId: userId,
+      tier: tier.toEntity(),
+      status: status.toEntity(),
+      startDate: startDate,
+      endDate: endDate,
+      nextBillingDate: nextBillingDate,
+      price: price,
+      currency: currency,
+      billingPeriod: billingPeriod.toEntity(),
+      features: features.map((f) => f.toEntity()).toList(),
+      paymentMethod: paymentMethod?.toEntity(),
+      autoRenew: autoRenew,
+    );
+  }
 
   /// Create from Entity
   factory SubscriptionModel.fromEntity(SubscriptionEntity entity) {
@@ -101,24 +106,24 @@ class SubscriptionModel extends SubscriptionEntity {
   /// Create from JSON
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
     return SubscriptionModel(
-      id: json['id'] ?? '',
-      userId: json['userId'] ?? '',
-      tier: SubscriptionTierModel.fromString(json['tier'] ?? 'free'),
-      status: SubscriptionStatusModel.fromString(json['status'] ?? 'inactive'),
-      startDate: DateTime.tryParse(json['startDate'] ?? '') ?? DateTime.now(),
-      endDate: json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
+      tier: SubscriptionTierModel.fromString(json['tier'] as String? ?? 'free'),
+      status: SubscriptionStatusModel.fromString(json['status'] as String? ?? 'inactive'),
+      startDate: DateTime.tryParse(json['startDate'] as String? ?? '') ?? DateTime.now(),
+      endDate: json['endDate'] != null ? DateTime.tryParse(json['endDate'] as String? ?? '') : null,
       nextBillingDate: json['nextBillingDate'] != null 
-          ? DateTime.tryParse(json['nextBillingDate']) : null,
-      price: (json['price'] ?? 0.0).toDouble(),
-      currency: json['currency'] ?? 'BRL',
-      billingPeriod: BillingPeriodModel.fromString(json['billingPeriod'] ?? 'monthly'),
+          ? DateTime.tryParse(json['nextBillingDate'] as String? ?? '') : null,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      currency: json['currency'] as String? ?? 'BRL',
+      billingPeriod: BillingPeriodModel.fromString(json['billingPeriod'] as String? ?? 'monthly'),
       features: (json['features'] as List<dynamic>?)
-              ?.map((f) => PremiumFeatureModel.fromString(f))
+              ?.map((f) => PremiumFeatureModel.fromString(f as String))
               .toList() ?? [],
       paymentMethod: json['paymentMethod'] != null 
-          ? PaymentMethodModel.fromJson(json['paymentMethod']) 
+          ? PaymentMethodModel.fromJson(json['paymentMethod'] as Map<String, dynamic>) 
           : null,
-      autoRenew: json['autoRenew'] ?? true,
+      autoRenew: json['autoRenew'] as bool? ?? true,
     );
   }
 
@@ -429,7 +434,7 @@ enum PremiumFeatureModel {
 
 /// Payment Method Model with Hive Serialization
 @HiveType(typeId: 21)
-class PaymentMethodModel extends PaymentMethod {
+class PaymentMethodModel {
   @HiveField(0)
   final String id;
   
@@ -455,14 +460,19 @@ class PaymentMethodModel extends PaymentMethod {
     required this.brand,
     required this.expiryDate,
     this.isDefault = false,
-  }) : super(
-          id: id,
-          type: type,
-          lastFourDigits: lastFourDigits,
-          brand: brand,
-          expiryDate: expiryDate,
-          isDefault: isDefault,
-        );
+  });
+  
+  /// Convert to domain entity
+  PaymentMethod toEntity() {
+    return PaymentMethod(
+      id: id,
+      type: type.toEntity(),
+      lastFourDigits: lastFourDigits,
+      brand: brand,
+      expiryDate: expiryDate,
+      isDefault: isDefault,
+    );
+  }
 
   /// Create from Entity
   factory PaymentMethodModel.fromEntity(PaymentMethod entity) {
@@ -479,12 +489,12 @@ class PaymentMethodModel extends PaymentMethod {
   /// Create from JSON
   factory PaymentMethodModel.fromJson(Map<String, dynamic> json) {
     return PaymentMethodModel(
-      id: json['id'] ?? '',
-      type: PaymentTypeModel.fromString(json['type'] ?? 'creditCard'),
-      lastFourDigits: json['lastFourDigits'] ?? '',
-      brand: json['brand'] ?? '',
-      expiryDate: DateTime.tryParse(json['expiryDate'] ?? '') ?? DateTime.now(),
-      isDefault: json['isDefault'] ?? false,
+      id: json['id'] as String? ?? '',
+      type: PaymentTypeModel.fromString(json['type'] as String? ?? 'creditCard'),
+      lastFourDigits: json['lastFourDigits'] as String? ?? '',
+      brand: json['brand'] as String? ?? '',
+      expiryDate: DateTime.tryParse(json['expiryDate'] as String? ?? '') ?? DateTime.now(),
+      isDefault: json['isDefault'] as bool? ?? false,
     );
   }
 

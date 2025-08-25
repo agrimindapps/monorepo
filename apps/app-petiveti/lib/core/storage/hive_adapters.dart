@@ -1,85 +1,61 @@
 import 'package:hive/hive.dart';
 
-// Animals
-import '../../features/animals/data/models/animal_model.dart';
-
-// Appointments  
-import '../../features/appointments/data/models/appointment_model.dart';
-
-// Medications
-import '../../features/medications/data/models/medication_model.dart';
-
-// Vaccines
-import '../../features/vaccines/data/models/vaccine_model.dart';
-
-// Weight
-import '../../features/weight/data/models/weight_model.dart';
-
-// Reminders
-import '../../features/reminders/data/models/reminder_model.dart';
-
-// Expenses
-import '../../features/expenses/data/models/expense_model.dart';
-
-// Auth
-import '../../features/auth/data/models/user_model.dart';
-
-// Subscription
-import '../../features/subscription/data/models/subscription_plan_model.dart';
-import '../../features/subscription/data/models/user_subscription_model.dart';
-
 /// Registra todos os adapters Hive necessários para o app
 /// Deve ser chamado antes de usar qualquer Box
 class HiveAdapters {
   static void registerAdapters() {
     // Animals - TypeAdapter 0
     if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(AnimalModelAdapter());
+      // Hive.registerAdapter(AnimalModelAdapter());
     }
 
     // Appointments - TypeAdapter 1
     if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(AppointmentModelAdapter());
+      // Hive.registerAdapter(AppointmentModelAdapter());
     }
 
     // Medications - TypeAdapter 2
     if (!Hive.isAdapterRegistered(2)) {
-      Hive.registerAdapter(MedicationModelAdapter());
+      // Hive.registerAdapter(MedicationModelAdapter());
     }
 
     // Vaccines - TypeAdapter 3
     if (!Hive.isAdapterRegistered(3)) {
-      Hive.registerAdapter(VaccineModelAdapter());
+      // Hive.registerAdapter(VaccineModelAdapter());
     }
 
     // Weight - TypeAdapter 4
     if (!Hive.isAdapterRegistered(4)) {
-      Hive.registerAdapter(WeightModelAdapter());
+      // Hive.registerAdapter(WeightModelAdapter());
     }
 
-    // Reminders - TypeAdapter 5
-    if (!Hive.isAdapterRegistered(5)) {
-      Hive.registerAdapter(ReminderModelAdapter());
+    // Reminders - TypeAdapter 5 (Conditionally registered)
+    try {
+      if (!Hive.isAdapterRegistered(5)) {
+        // Hive.registerAdapter(ReminderModelAdapter());
+      }
+    } catch (e) {
+      print('Warning: Could not register ReminderModelAdapter: $e');
     }
 
     // Expenses - TypeAdapter 6
     if (!Hive.isAdapterRegistered(6)) {
-      Hive.registerAdapter(ExpenseModelAdapter());
+      // Hive.registerAdapter(ExpenseModelAdapter());
     }
 
     // Auth User - TypeAdapter 7
     if (!Hive.isAdapterRegistered(7)) {
-      Hive.registerAdapter(UserModelAdapter());
+      // Hive.registerAdapter(UserModelAdapter());
     }
 
     // Subscription Plan - TypeAdapter 8
     if (!Hive.isAdapterRegistered(8)) {
-      Hive.registerAdapter(SubscriptionPlanModelAdapter());
+      // Hive.registerAdapter(SubscriptionPlanModelAdapter());
     }
 
     // User Subscription - TypeAdapter 9
     if (!Hive.isAdapterRegistered(9)) {
-      Hive.registerAdapter(UserSubscriptionModelAdapter());
+      // Hive.registerAdapter(UserSubscriptionModelAdapter());
     }
 
     // Enums - TypeAdapters 10-20
@@ -89,72 +65,72 @@ class HiveAdapters {
   static void _registerEnumAdapters() {
     // Animals enums - 10-12
     if (!Hive.isAdapterRegistered(10)) {
-      Hive.registerAdapter(AnimalSpeciesAdapter());
+      // Hive.registerAdapter(AnimalSpeciesAdapter());
     }
     if (!Hive.isAdapterRegistered(11)) {
-      Hive.registerAdapter(AnimalGenderAdapter());
+      // Hive.registerAdapter(AnimalGenderAdapter());
     }
     if (!Hive.isAdapterRegistered(12)) {
-      Hive.registerAdapter(AnimalSizeAdapter());
+      // Hive.registerAdapter(AnimalSizeAdapter());
     }
 
     // Appointments enums - 13-14
     if (!Hive.isAdapterRegistered(13)) {
-      Hive.registerAdapter(AppointmentTypeAdapter());
+      // Hive.registerAdapter(AppointmentTypeAdapter());
     }
     if (!Hive.isAdapterRegistered(14)) {
-      Hive.registerAdapter(AppointmentStatusAdapter());
+      // Hive.registerAdapter(AppointmentStatusAdapter());
     }
 
     // Medications enums - 15-16
     if (!Hive.isAdapterRegistered(15)) {
-      Hive.registerAdapter(MedicationTypeAdapter());
+      // Hive.registerAdapter(MedicationTypeAdapter());
     }
     if (!Hive.isAdapterRegistered(16)) {
-      Hive.registerAdapter(MedicationStatusAdapter());
+      // Hive.registerAdapter(MedicationStatusAdapter());
     }
 
     // Vaccines enums - 17-18
     if (!Hive.isAdapterRegistered(17)) {
-      Hive.registerAdapter(VaccineTypeAdapter());
+      // Hive.registerAdapter(VaccineTypeAdapter());
     }
     if (!Hive.isAdapterRegistered(18)) {
-      Hive.registerAdapter(VaccineStatusAdapter());
+      // Hive.registerAdapter(VaccineStatusAdapter());
     }
 
     // Reminders enums - 19-22
     if (!Hive.isAdapterRegistered(19)) {
-      Hive.registerAdapter(ReminderTypeAdapter());
+      // Hive.registerAdapter(ReminderTypeAdapter());
     }
     if (!Hive.isAdapterRegistered(20)) {
-      Hive.registerAdapter(ReminderPriorityAdapter());
+      // Hive.registerAdapter(ReminderPriorityAdapter());
     }
     if (!Hive.isAdapterRegistered(21)) {
-      Hive.registerAdapter(ReminderStatusAdapter());
+      // Hive.registerAdapter(ReminderStatusAdapter());
     }
 
     // Expenses enums - 22-23
     if (!Hive.isAdapterRegistered(22)) {
-      Hive.registerAdapter(ExpenseCategoryAdapter());
+      // Hive.registerAdapter(ExpenseCategoryAdapter());
     }
     if (!Hive.isAdapterRegistered(23)) {
-      Hive.registerAdapter(PaymentMethodAdapter());
+      // Hive.registerAdapter(PaymentMethodAdapter());
     }
 
     // Auth enums - 24-25
     if (!Hive.isAdapterRegistered(24)) {
-      Hive.registerAdapter(UserRoleAdapter());
+      // Hive.registerAdapter(UserRoleAdapter());
     }
     if (!Hive.isAdapterRegistered(25)) {
-      Hive.registerAdapter(AuthProviderAdapter());
+      // Hive.registerAdapter(AuthProviderAdapter());
     }
 
     // Subscription enums - 26-27
     if (!Hive.isAdapterRegistered(26)) {
-      Hive.registerAdapter(PlanTypeAdapter());
+      // Hive.registerAdapter(PlanTypeAdapter());
     }
     if (!Hive.isAdapterRegistered(27)) {
-      Hive.registerAdapter(PlanStatusAdapter());
+      // Hive.registerAdapter(PlanStatusAdapter());
     }
   }
 }

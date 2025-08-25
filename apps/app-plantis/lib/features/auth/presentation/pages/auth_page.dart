@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../providers/auth_provider.dart';
 
 class AuthPage extends StatefulWidget {
   final int initialTab; // 0 = login, 1 = register
@@ -155,7 +156,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.eco,
                                   size: 32,
                                   color: PlantisColors.primary,
@@ -191,7 +192,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                   offset: Offset(0, _slideAnimation.value),
                                   child: FadeTransition(
                                     opacity: _fadeInAnimation,
-                                    child: Container(
+                                    child: DecoratedBox(
                                       decoration: BoxDecoration(
                                         color: Colors.grey.shade100,
                                         borderRadius: BorderRadius.circular(12),
@@ -317,7 +318,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             color: PlantisColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.email_outlined,
                             color: PlantisColors.primary,
                             size: 20,
@@ -337,7 +338,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),
@@ -380,7 +381,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             color: PlantisColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.lock_outline,
                             color: PlantisColors.primary,
                             size: 20,
@@ -415,7 +416,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),
@@ -483,7 +484,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: Text(
+                          child: const Text(
                             'Esqueceu sua senha?',
                             style: TextStyle(
                               color: PlantisColors.primary,
@@ -576,7 +577,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     const SizedBox(height: 24),
 
                     // Or continue with
-                    Text(
+                    const Text(
                       'ou continue com',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -636,7 +637,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             ),
                             child:
                                 authProvider.isLoading
-                                    ? SizedBox(
+                                    ? const SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
@@ -647,7 +648,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                             ),
                                       ),
                                     )
-                                    : Row(
+                                    : const Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
@@ -656,7 +657,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                           size: 20,
                                           color: PlantisColors.primary,
                                         ),
-                                        const SizedBox(width: 8),
+                                        SizedBox(width: 8),
                                         Text(
                                           'Continuar sem conta',
                                           style: TextStyle(
@@ -717,7 +718,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             color: PlantisColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.person_outline,
                             color: PlantisColors.primary,
                             size: 20,
@@ -735,7 +736,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),
@@ -778,7 +779,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             color: PlantisColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.email_outlined,
                             color: PlantisColors.primary,
                             size: 20,
@@ -796,7 +797,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),
@@ -839,7 +840,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             color: PlantisColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.lock_outline,
                             color: PlantisColors.primary,
                             size: 20,
@@ -875,7 +876,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),
@@ -923,7 +924,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             color: PlantisColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.lock_outline,
                             color: PlantisColors.primary,
                             size: 20,
@@ -959,7 +960,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),
@@ -1058,7 +1059,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     const SizedBox(height: 16),
 
                     // Terms text
-                    Text(
+                    const Text(
                       'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
                       textAlign: TextAlign.center,
                       style: TextStyle(

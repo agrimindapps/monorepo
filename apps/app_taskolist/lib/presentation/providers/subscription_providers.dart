@@ -1,12 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/subscription_status.dart';
 import 'package:core/core.dart' as core;
-import '../../core/di/injection_container.dart' as di;
-import '../../infrastructure/services/subscription_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/di/injection_container.dart' as di;
+import '../../domain/entities/subscription_status.dart';
 // Local Domain Entities
 import '../../domain/entities/usage_stats.dart' as local;
 import '../../domain/entities/user_limits.dart' as local;
+import '../../infrastructure/services/subscription_service.dart';
 
 class Subscription {
   static final subscriptionStatusProvider = StateNotifierProvider<SubscriptionStatusNotifier, AsyncValue<SubscriptionStatus>>((ref) {
@@ -15,18 +15,18 @@ class Subscription {
 }
 
 class SubscriptionStatusNotifier extends StateNotifier<AsyncValue<SubscriptionStatus>> {
-  SubscriptionStatusNotifier() : super(AsyncValue.loading()) {
+  SubscriptionStatusNotifier() : super(const AsyncValue.loading()) {
     _fetchSubscriptionStatus();
   }
 
   Future<void> _fetchSubscriptionStatus() async {
     try {
       // TODO: Implement actual subscription status fetching
-      final status = SubscriptionStatus(
+      const status = SubscriptionStatus(
         isActive: false, 
         expirationDate: null,
       );
-      state = AsyncValue.data(status);
+      state = const AsyncValue.data(status);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
@@ -215,7 +215,7 @@ class SubscriptionActions {
 final usageStatsProvider = FutureProvider<local.UsageStats>((ref) async {
   // Aqui você obteria as estatísticas reais dos repositórios
   // Por enquanto, retornando dados mock para demonstração
-  return local.UsageStats(
+  return const local.UsageStats(
     totalTasks: 25,
     totalSubtasks: 8,
     totalTags: 3,

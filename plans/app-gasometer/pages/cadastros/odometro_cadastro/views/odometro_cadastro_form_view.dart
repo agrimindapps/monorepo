@@ -26,15 +26,15 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildInformacoesBasicasSection(),
-                SizedBox(height: OdometroConstants.dimensions['fieldSpacing']!),
+                SizedBox(height: OdometroConstants.dimensions['fieldSpacing']),
                 _buildAdicionaisSection(),
               ],
             ),
           ),
           Obx(() => controller.isLoading.value
-              ? Container(
+              ? const ColoredBox(
                   color: Colors.black26,
-                  child: const Center(child: CircularProgressIndicator()),
+                  child: Center(child: CircularProgressIndicator()),
                 )
               : const SizedBox.shrink()),
         ],
@@ -50,7 +50,7 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
           OdometroConstants.sectionIcons['informacoesBasicas']!,
         ),
         Card(
-          elevation: OdometroConstants.dimensions['cardElevation']!,
+          elevation: OdometroConstants.dimensions['cardElevation'],
           margin: EdgeInsets.only(
               bottom: OdometroConstants.dimensions['cardMarginBottom']!),
           shape: RoundedRectangleBorder(
@@ -63,9 +63,9 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
                 EdgeInsets.all(OdometroConstants.dimensions['cardPadding']!),
             child: Column(
               children: [
-                SizedBox(height: OdometroConstants.dimensions['fieldSpacing']!),
+                SizedBox(height: OdometroConstants.dimensions['fieldSpacing']),
                 _buildOdometroField(),
-                SizedBox(height: OdometroConstants.dimensions['fieldSpacing']!),
+                SizedBox(height: OdometroConstants.dimensions['fieldSpacing']),
                 _buildDataRegistroField(),
               ],
             ),
@@ -78,13 +78,13 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
   Widget _buildAdicionaisSection() {
     return Column(
       children: [
-        SizedBox(height: OdometroConstants.dimensions['sectionPadding']!),
+        SizedBox(height: OdometroConstants.dimensions['sectionPadding']),
         _buildSectionHeader(
           OdometroConstants.sectionTitles['adicionais']!,
           OdometroConstants.sectionIcons['adicionais']!,
         ),
         Card(
-          elevation: OdometroConstants.dimensions['cardElevation']!,
+          elevation: OdometroConstants.dimensions['cardElevation'],
           margin: EdgeInsets.only(
               bottom: OdometroConstants.dimensions['cardMarginBottom']!),
           shape: RoundedRectangleBorder(
@@ -114,10 +114,10 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
         children: [
           Icon(
             icon,
-            size: OdometroConstants.dimensions['iconSize']!,
+            size: OdometroConstants.dimensions['iconSize'],
             color: ShadcnStyle.mutedTextColor,
           ),
-          SizedBox(width: OdometroConstants.dimensions['sectionPadding']!),
+          SizedBox(width: OdometroConstants.dimensions['sectionPadding']),
           Text(
             title,
             style: const TextStyle(
@@ -151,10 +151,10 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
           hint: OdometroConstants.fieldHints['odometro']!,
           suffixIcon: controller.odometer.value > 0
               ? IconButton(
-                  iconSize: OdometroConstants.dimensions['clearIconSize']!,
+                  iconSize: OdometroConstants.dimensions['clearIconSize'],
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  icon: Icon(OdometroConstants.sectionIcons['clear']!),
+                  icon: Icon(OdometroConstants.sectionIcons['clear']),
                   onPressed: () => controller.clearOdometer(),
                 )
               : null,
@@ -208,13 +208,13 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: OdometroConstants.dimensions['sectionPadding']!),
+              SizedBox(height: OdometroConstants.dimensions['sectionPadding']),
               InputDecorator(
                 decoration: ShadcnStyle.inputDecoration(
                   label: OdometroConstants.fieldLabels['dataHora']!,
                   suffixIcon: Icon(
-                    OdometroConstants.sectionIcons['dataHora']!,
-                    size: OdometroConstants.dimensions['calendarIconSize']!,
+                    OdometroConstants.sectionIcons['dataHora'],
+                    size: OdometroConstants.dimensions['calendarIconSize'],
                     color: ShadcnStyle.labelColor,
                   ),
                 ),
@@ -238,11 +238,11 @@ class OdometroCadastroFormView extends GetView<OdometroCadastroFormController> {
                       ),
                     ),
                     SizedBox(
-                        width: OdometroConstants.dimensions['dividerSpacing']!),
+                        width: OdometroConstants.dimensions['dividerSpacing']),
                     Container(
                       height:
-                          OdometroConstants.dimensions['timePickerSpacing']!,
-                      width: OdometroConstants.dimensions['dividerWidth']!,
+                          OdometroConstants.dimensions['timePickerSpacing'],
+                      width: OdometroConstants.dimensions['dividerWidth'],
                       color: ShadcnStyle.borderColor,
                     ),
                     // Time picker

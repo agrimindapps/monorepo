@@ -1,18 +1,17 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:dartz/dartz.dart';
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-import 'package:app_agrihurbi/features/auth/domain/usecases/register_usecase.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/login_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/refresh_user_usecase.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
+import 'package:app_agrihurbi/features/auth/domain/usecases/register_usecase.dart';
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:core/core.dart' as core_lib;
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 import 'auth_provider_test.mocks.dart';
-import '../../../../helpers/test_helpers.dart';
 
 @GenerateMocks([LoginUseCase, RegisterUseCase, LogoutUseCase, GetCurrentUserUseCase, RefreshUserUseCase])
 void main() {
@@ -149,9 +148,8 @@ void main() {
 
       test('should handle registration failure', () async {
         // Arrange
-        const failure = ValidationFailure('Email já está em uso');
         when(mockRegisterUseCase.call(any))
-            .thenAnswer((_) async => const Left(failure));
+            .thenAnswer((_) async => const Left(ValidationFailure(message: 'Email já está em uso')));
 
         // Act
         final result = await authProvider.register(

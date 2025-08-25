@@ -1,9 +1,10 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import '../entities/calculator_entity.dart';
-import '../entities/calculator_category.dart';
-import '../entities/calculation_result.dart';
+import 'package:dartz/dartz.dart';
+
 import '../entities/calculation_history.dart';
+import '../entities/calculation_result.dart';
+import '../entities/calculator_category.dart';
+import '../entities/calculator_entity.dart';
 
 abstract class CalculatorRepository {
   /// Obtém todas as calculadoras disponíveis

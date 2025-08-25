@@ -112,7 +112,7 @@ class ReceiptImagePicker extends StatelessWidget {
                 File(imagePath!),
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return Container(
+                  return ColoredBox(
                     color: AppTheme.colors.errorContainer,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -238,7 +238,7 @@ class ReceiptImagePicker extends StatelessWidget {
     required String tooltip,
     Color? backgroundColor,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor ?? Colors.white.withValues(alpha: 0.9),
         shape: BoxShape.circle,
@@ -287,7 +287,7 @@ class ReceiptImagePicker extends StatelessWidget {
             Positioned(
               top: 40,
               right: 20,
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.7),
                   shape: BoxShape.circle,

@@ -10,22 +10,20 @@ import '../database/20_odometro_model.dart';
 import '../pages/cadastros/veiculos_page/services/box_manager.dart';
 import '../repository/veiculos_repository.dart';
 
-/**
- * REFACTOR (prioridade: ALTA): Separar lógica de exportação CSV e helpers de formatação para arquivos utilitários.
- * REFACTOR (prioridade: MÉDIA): Padronizar nomes de métodos e variáveis para inglês ou português, evitando mistura.
- * REFACTOR (prioridade: MÉDIA): Documentar melhor o contrato dos métodos privados e públicos.
- * OPTIMIZE (prioridade: MÉDIA): Evitar abrir e fechar o box Hive em cada operação, usar conexão persistente ou pool.
- * OPTIMIZE (prioridade: MÉDIA): Melhorar performance do agrupamento de registros por mês, usando YearMonth ou similar.
- * BUG (prioridade: MÉDIA): Possível risco de concorrência ao acessar o box Hive em operações assíncronas simultâneas.
- * BUG (prioridade: MÉDIA): Falta validação para evitar registros duplicados de odômetro no mesmo timestamp.
- * TODO (prioridade: MÉDIA): Adicionar tratamento de erro mais detalhado e feedback para o usuário.
- * TODO (prioridade: MÉDIA): Adicionar testes unitários para métodos de CRUD e exportação.
- * TODO (prioridade: BAIXA): Permitir exportação de timeline para outros formatos além de CSV.
- * NOTE (prioridade: BAIXA): O método _getTimeline está incompleto, implementar lógica real de timeline.
- * STYLE (prioridade: BAIXA): Adicionar comentários explicativos nos métodos principais.
- * DOC (prioridade: BAIXA): Documentar o uso esperado da classe VeiculoTimelineItem.
- * SECURITY (prioridade: MÉDIA): Garantir que apenas usuários autorizados possam exportar ou alterar dados.
- */
+/// REFACTOR (prioridade: ALTA): Separar lógica de exportação CSV e helpers de formatação para arquivos utilitários.
+/// REFACTOR (prioridade: MÉDIA): Padronizar nomes de métodos e variáveis para inglês ou português, evitando mistura.
+/// REFACTOR (prioridade: MÉDIA): Documentar melhor o contrato dos métodos privados e públicos.
+/// OPTIMIZE (prioridade: MÉDIA): Evitar abrir e fechar o box Hive em cada operação, usar conexão persistente ou pool.
+/// OPTIMIZE (prioridade: MÉDIA): Melhorar performance do agrupamento de registros por mês, usando YearMonth ou similar.
+/// BUG (prioridade: MÉDIA): Possível risco de concorrência ao acessar o box Hive em operações assíncronas simultâneas.
+/// BUG (prioridade: MÉDIA): Falta validação para evitar registros duplicados de odômetro no mesmo timestamp.
+/// TODO (prioridade: MÉDIA): Adicionar tratamento de erro mais detalhado e feedback para o usuário.
+/// TODO (prioridade: MÉDIA): Adicionar testes unitários para métodos de CRUD e exportação.
+/// TODO (prioridade: BAIXA): Permitir exportação de timeline para outros formatos além de CSV.
+/// NOTE (prioridade: BAIXA): O método _getTimeline está incompleto, implementar lógica real de timeline.
+/// STYLE (prioridade: BAIXA): Adicionar comentários explicativos nos métodos principais.
+/// DOC (prioridade: BAIXA): Documentar o uso esperado da classe VeiculoTimelineItem.
+/// SECURITY (prioridade: MÉDIA): Garantir que apenas usuários autorizados possam exportar ou alterar dados.
 // TODO (prioridade: MÉDIA): Adicionar opção de backup/restauração dos dados do Hive.
 // TODO (prioridade: BAIXA): Permitir configuração do nome do box/coleção via parâmetro.
 

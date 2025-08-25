@@ -597,7 +597,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
         // Header da seção
         Row(
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle_outline,
               color: Colors.green,
               size: 20,
@@ -643,7 +643,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_today,
                       size: 16,
                       color: Colors.green,
@@ -816,7 +816,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.access_time,
                         size: 12,
                         color: Colors.green,

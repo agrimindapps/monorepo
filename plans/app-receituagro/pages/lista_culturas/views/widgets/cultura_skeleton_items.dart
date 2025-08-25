@@ -88,7 +88,7 @@ class _CulturaGridSkeletonState extends State<CulturaGridSkeleton>
           offset: Offset(0, _slideAnimation.value),
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 color: widget.isDark ? const Color(0xFF1E1E22) : Colors.white,
                 borderRadius: BorderRadius.circular(12),

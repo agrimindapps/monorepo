@@ -1,11 +1,11 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:dartz/dartz.dart';
-import 'package:app_agrihurbi/features/calculators/domain/usecases/execute_calculation.dart';
-import 'package:app_agrihurbi/features/calculators/domain/repositories/calculator_repository.dart';
 import 'package:app_agrihurbi/features/calculators/domain/entities/calculation_result.dart';
+import 'package:app_agrihurbi/features/calculators/domain/repositories/calculator_repository.dart';
+import 'package:app_agrihurbi/features/calculators/domain/usecases/execute_calculation.dart';
 import 'package:core/core.dart' as core_lib;
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([CalculatorRepository])
 import 'execute_calculation_test.mocks.dart';
@@ -31,7 +31,7 @@ void main() {
           calculatedAt: DateTime.now(),
           inputs: parameters,
           type: ResultType.single,
-          values: [
+          values: const [
             CalculationResultValue(
               label: 'Sum',
               value: 30.0,

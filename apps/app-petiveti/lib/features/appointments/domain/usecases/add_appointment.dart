@@ -14,15 +14,15 @@ class AddAppointment implements UseCase<Appointment, AddAppointmentParams> {
   Future<Either<Failure, Appointment>> call(AddAppointmentParams params) async {
     // Validate appointment data
     if (params.appointment.veterinarianName.isEmpty) {
-      return Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
+      return const Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
     }
     
     if (params.appointment.reason.isEmpty) {
-      return Left(ValidationFailure(message: 'Motivo da consulta é obrigatório'));
+      return const Left(ValidationFailure(message: 'Motivo da consulta é obrigatório'));
     }
     
     if (params.appointment.animalId.isEmpty) {
-      return Left(ValidationFailure(message: 'Animal deve ser selecionado'));
+      return const Left(ValidationFailure(message: 'Animal deve ser selecionado'));
     }
 
     return await repository.addAppointment(params.appointment);

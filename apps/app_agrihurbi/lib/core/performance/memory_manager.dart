@@ -1,7 +1,40 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+
+/// Callback para situações de pressão de memória
+typedef MemoryPressureCallback = Future<void> Function(MemoryPressureLevel level);
+
+/// Níveis de pressão de memória
+enum MemoryPressureLevel { 
+  normal, 
+  warning, 
+  critical 
+}
+
+/// Entrada de cache gerenciado
+class CacheEntry {
+  final String name;
+  final VoidCallback clearCallback;
+  final int priority; // 1 = alta prioridade, 5 = baixa prioridade
+  final DateTime lastAccessed;
+
+  CacheEntry({
+    required this.name,
+    required this.clearCallback,
+    required this.priority,
+    required this.lastAccessed,
+  });
+
+  CacheEntry copyWithAccess() {
+    return CacheEntry(
+      name: name,
+      clearCallback: clearCallback,
+        priority: priority,
+        lastAccessed: DateTime.now(),
+      );
+    }
+  }
 
 /// Gerenciador de memória para otimização de performance
 /// 
@@ -34,40 +67,6 @@ class MemoryManager extends ChangeNotifier {
   double _maxMemoryUsageMB = 0.0;
   DateTime? _lastCleanup;
 
-  /// Callback para situações de pressão de memória
-  typedef MemoryPressureCallback = Future<void> Function(MemoryPressureLevel level);
-
-  /// Níveis de pressão de memória
-  enum MemoryPressureLevel { 
-    normal, 
-    warning, 
-    critical 
-  }
-
-  /// Entrada de cache gerenciado
-  class CacheEntry {
-    final String name;
-    final VoidCallback clearCallback;
-    final int priority; // 1 = alta prioridade, 5 = baixa prioridade
-    final DateTime lastAccessed;
-
-    CacheEntry({
-      required this.name,
-      required this.clearCallback,
-      required this.priority,
-      required this.lastAccessed,
-    });
-
-    CacheEntry copyWithAccess() {
-      return CacheEntry(
-        name: name,
-        clearCallback: clearCallback,
-        priority: priority,
-        lastAccessed: DateTime.now(),
-      );
-    }
-  }
-
   /// Inicia o monitoramento de memória
   void _startMemoryMonitoring() {
     _memoryTimer = Timer.periodic(
@@ -81,7 +80,7 @@ class MemoryManager extends ChangeNotifier {
     try {
       // No Flutter, não há uma API direta para memória
       // Usaremos uma estimativa baseada no developer tools
-      final info = await developer.Service.getInfo();
+      // final info = await developer.Service.getInfo();
       
       // Estimativa baseada em heurísticas
       _currentMemoryUsageMB = _estimateMemoryUsage();
@@ -112,7 +111,7 @@ class MemoryManager extends ChangeNotifier {
     // - Tempo de execução da app
     // - Número de widgets ativos
     
-    final baseMB = 20.0; // Uso base da aplicação
+    const baseMB = 20.0; // Uso base da aplicação
     final cacheMB = _managedCaches.length * 2.0; // 2MB por cache
     final timeMB = DateTime.now().millisecondsSinceEpoch / 1000000; // Estimativa temporal
     
@@ -199,7 +198,7 @@ class MemoryManager extends ChangeNotifier {
       list.clear();
       
       // Pequena pausa para permitir GC
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       
       developer.log('Garbage collection forçado', name: 'MemoryManager');
     } catch (e) {
@@ -267,128 +266,11 @@ class MemoryManager extends ChangeNotifier {
   }
 
   /// Para o monitoramento de memória
+  @override
   void dispose() {
     _memoryTimer?.cancel();
     _pressureCallbacks.clear();
     _managedCaches.clear();
     super.dispose();
-  }
-}
-
-/// Mixin para widgets que querem gerenciar memória automaticamente
-mixin MemoryAwareMixin<T extends StatefulWidget> on State<T> {
-  final MemoryManager _memoryManager = MemoryManager();
-  
-  /// Registra um cache local
-  void registerLocalCache(String name, VoidCallback clearCallback, {int priority = 3}) {
-    _memoryManager.registerCache(
-      name: '${widget.runtimeType}_$name',
-      clearCallback: clearCallback,
-      priority: priority,
-    );
-  }
-
-  /// Marca cache como acessado
-  void markCacheAccessed(String name) {
-    _memoryManager.markCacheAccessed('${widget.runtimeType}_$name');
-  }
-
-  @override
-  void dispose() {
-    // Remove caches registrados por este widget
-    final prefix = '${widget.runtimeType}_';
-    final cacheNames = _memoryManager._managedCaches.keys
-        .where((name) => name.startsWith(prefix))
-        .toList();
-    
-    for (final name in cacheNames) {
-      _memoryManager.unregisterCache(name);
-    }
-    
-    super.dispose();
-  }
-}
-
-/// Widget para exibir informações de memória (útil para debug)
-class MemoryMonitorWidget extends StatefulWidget {
-  final Widget child;
-  final bool showOverlay;
-
-  const MemoryMonitorWidget({
-    Key? key,
-    required this.child,
-    this.showOverlay = false,
-  }) : super(key: key);
-
-  @override
-  State<MemoryMonitorWidget> createState() => _MemoryMonitorWidgetState();
-}
-
-class _MemoryMonitorWidgetState extends State<MemoryMonitorWidget> {
-  final MemoryManager _memoryManager = MemoryManager();
-  
-  @override
-  void initState() {
-    super.initState();
-    _memoryManager.addListener(_onMemoryUpdate);
-  }
-
-  @override
-  void dispose() {
-    _memoryManager.removeListener(_onMemoryUpdate);
-    super.dispose();
-  }
-
-  void _onMemoryUpdate() {
-    if (mounted) setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.showOverlay || !kDebugMode) {
-      return widget.child;
-    }
-
-    final stats = _memoryManager.getMemoryStats();
-    
-    return Stack(
-      children: [
-        widget.child,
-        Positioned(
-          top: 50,
-          right: 16,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black87,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'MEM: ${stats['current_memory_mb'].toStringAsFixed(1)}MB',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-                Text(
-                  'MAX: ${stats['max_memory_mb'].toStringAsFixed(1)}MB',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-                Text(
-                  'CACHES: ${stats['managed_caches']}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-                if (stats['is_memory_pressure'])
-                  const Text(
-                    'PRESSURE!',
-                    style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

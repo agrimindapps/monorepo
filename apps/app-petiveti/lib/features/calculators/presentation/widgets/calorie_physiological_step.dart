@@ -109,7 +109,7 @@ class _CaloriePhysiologicalStepState extends State<CaloriePhysiologicalStep> {
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? Theme.of(context).primaryColor.withOpacity(0.1)
+                          ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                           : null,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(

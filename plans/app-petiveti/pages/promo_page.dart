@@ -75,7 +75,7 @@ class PromoContent extends StatelessWidget {
 
     return Stack(
       children: [
-        Container(
+        ColoredBox(
           color: backgroundColor,
           child: SingleChildScrollView(
             controller: _scrollController,
@@ -1722,7 +1722,7 @@ class _FAQItemState extends State<_FAQItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),

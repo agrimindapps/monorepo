@@ -103,6 +103,64 @@ class AdvancedDietInput extends CalculatorInput {
         allergies,
         medications,
       ];
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'species': species.name,
+      'weight': weight,
+      'idealWeight': idealWeight,
+      'lifeStage': lifeStage.name,
+      'activityLevel': activityLevel.name,
+      'bodyCondition': bodyCondition.name,
+      'dietType': dietType.name,
+      'healthCondition': healthCondition.name,
+      'isNeutered': isNeutered,
+      'isPregnant': isPregnant,
+      'isLactating': isLactating,
+      'numberOfPuppies': numberOfPuppies,
+      'currentDailyCalories': currentDailyCalories,
+      'allergies': allergies,
+      'medications': medications,
+    };
+  }
+
+  @override
+  AdvancedDietInput copyWith({
+    AnimalSpecies? species,
+    double? weight,
+    double? idealWeight,
+    LifeStage? lifeStage,
+    ActivityLevel? activityLevel,
+    BodyCondition? bodyCondition,
+    DietType? dietType,
+    HealthCondition? healthCondition,
+    bool? isNeutered,
+    bool? isPregnant,
+    bool? isLactating,
+    int? numberOfPuppies,
+    double? currentDailyCalories,
+    List<String>? allergies,
+    List<String>? medications,
+  }) {
+    return AdvancedDietInput(
+      species: species ?? this.species,
+      weight: weight ?? this.weight,
+      idealWeight: idealWeight ?? this.idealWeight,
+      lifeStage: lifeStage ?? this.lifeStage,
+      activityLevel: activityLevel ?? this.activityLevel,
+      bodyCondition: bodyCondition ?? this.bodyCondition,
+      dietType: dietType ?? this.dietType,
+      healthCondition: healthCondition ?? this.healthCondition,
+      isNeutered: isNeutered ?? this.isNeutered,
+      isPregnant: isPregnant ?? this.isPregnant,
+      isLactating: isLactating ?? this.isLactating,
+      numberOfPuppies: numberOfPuppies ?? this.numberOfPuppies,
+      currentDailyCalories: currentDailyCalories ?? this.currentDailyCalories,
+      allergies: allergies ?? this.allergies,
+      medications: medications ?? this.medications,
+    );
+  }
 }
 
 class AdvancedDietResult extends CalculationResult {
@@ -140,16 +198,16 @@ class AdvancedDietResult extends CalculationResult {
     required this.feedingInstructions,
     required this.macronutrientBreakdown,
     required this.specialConsiderations,
-    required super.timestamp,
-    required super.calculatorType,
-    super.notes,
+    required super.calculatorId,
+    required super.results,
+    super.recommendations = const [],
+    super.summary,
+    super.calculatedAt,
   });
 
-  @override
-  String get primaryResult => '${dailyCalories.round()} kcal/dia';
+  // primaryResult é herdado da classe base e retorna ResultItem?
 
-  @override
-  String get summary => 'Dieta: $primaryResult - ${mealsPerDay}x ${gramsPerMeal.round()}g';
+  // summary será definido no constructor quando criar o resultado
 
   @override
   List<Object?> get props => [
@@ -175,13 +233,16 @@ class AdvancedDietResult extends CalculationResult {
 
 class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedDietResult> {
   @override
+  String get id => 'advanced_diet';
+
+  @override
   String get name => 'Calculadora Avançada de Dieta';
 
   @override
   String get description => 'Calcula necessidades nutricionais completas baseadas em condições específicas';
 
   @override
-  AdvancedDietResult calculate(AdvancedDietInput input) {
+  AdvancedDietResult performCalculation(AdvancedDietInput input) {
     _validateInput(input);
 
     // Calcular necessidades calóricas
@@ -209,6 +270,34 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
     final macroBreakdown = _getMacronutrientBreakdown(macronutrients);
     final specialConsiderations = _getSpecialConsiderations(input);
 
+    // Criar lista de ResultItem para o resultado estruturado
+    final results = <ResultItem>[
+      ResultItem(
+        label: 'Calorias Diárias',
+        value: dailyCalories.round(),
+        unit: 'kcal/dia',
+        severity: ResultSeverity.info,
+      ),
+      ResultItem(
+        label: 'Proteína',
+        value: macronutrients['protein']!.toStringAsFixed(1),
+        unit: 'g/dia',
+        severity: ResultSeverity.info,
+      ),
+      ResultItem(
+        label: 'Gordura',
+        value: macronutrients['fat']!.toStringAsFixed(1),
+        unit: 'g/dia',
+        severity: ResultSeverity.info,
+      ),
+      ResultItem(
+        label: 'Refeições por Dia',
+        value: mealsPerDay,
+        unit: 'refeições',
+        severity: ResultSeverity.info,
+      ),
+    ];
+
     return AdvancedDietResult(
       dailyCalories: dailyCalories,
       proteinRequirement: macronutrients['protein']!,
@@ -226,8 +315,10 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
       feedingInstructions: feedingInstructions,
       macronutrientBreakdown: macroBreakdown,
       specialConsiderations: specialConsiderations,
-      timestamp: DateTime.now(),
-      calculatorType: CalculatorType.advancedDiet,
+      calculatorId: 'advanced_diet',
+      results: results,
+      summary: 'Dieta: ${dailyCalories.round()} kcal/dia - ${mealsPerDay}x ${gramsPerMeal.round()}g',
+      calculatedAt: DateTime.now(),
     );
   }
 
@@ -246,7 +337,7 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   double _calculateDailyCalories(AdvancedDietInput input) {
     // Fórmula base RER (Resting Energy Requirement)
     // RER = 70 * (peso em kg)^0.75
-    double rer = 70 * math.pow(input.weight, 0.75);
+    double rer = 70 * math.pow(input.weight, 0.75).toDouble();
     
     // Fatores multiplicadores baseados em estágio de vida e atividade
     double multiplier = _getCalorieMultiplier(input);
@@ -672,6 +763,90 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
     }
     
     return considerations;
+  }
+
+  @override
+  List<String> getInputValidationErrors(AdvancedDietInput input) {
+    final errors = <String>[];
+    if (input.weight <= 0) {
+      errors.add('Peso deve ser maior que zero');
+    }
+    if (input.idealWeight != null && input.idealWeight! <= 0) {
+      errors.add('Peso ideal deve ser maior que zero');
+    }
+    if (input.isLactating && input.numberOfPuppies == null) {
+      errors.add('Número de filhotes deve ser informado para lactação');
+    }
+    return errors;
+  }
+
+  @override
+  AdvancedDietResult createErrorResult(String message, [AdvancedDietInput? input]) {
+    return AdvancedDietResult(
+      dailyCalories: 0,
+      proteinRequirement: 0,
+      fatRequirement: 0,
+      carbohydrateRequirement: 0,
+      fiberRequirement: 0,
+      vitamins: const {},
+      minerals: const {},
+      dailyWaterRequirement: 0,
+      mealsPerDay: 0,
+      gramsPerMeal: 0,
+      recommendedIngredients: const [],
+      avoidedIngredients: const [],
+      supplementRecommendations: const [],
+      feedingInstructions: const [],
+      macronutrientBreakdown: const {},
+      specialConsiderations: const [],
+      calculatorId: id,
+      results: [ResultItem(
+        label: 'Erro',
+        value: message,
+        severity: ResultSeverity.danger,
+      )],
+      summary: 'Erro no cálculo: $message',
+      calculatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  AdvancedDietInput createInputFromMap(Map<String, dynamic> inputs) {
+    return AdvancedDietInput(
+      species: AnimalSpecies.values.firstWhere(
+        (e) => e.name == inputs['species'],
+        orElse: () => AnimalSpecies.dog,
+      ),
+      weight: (inputs['weight'] as num?)?.toDouble() ?? 0.0,
+      idealWeight: (inputs['idealWeight'] as num?)?.toDouble(),
+      lifeStage: LifeStage.values.firstWhere(
+        (e) => e.name == inputs['lifeStage'],
+        orElse: () => LifeStage.adult,
+      ),
+      activityLevel: ActivityLevel.values.firstWhere(
+        (e) => e.name == inputs['activityLevel'],
+        orElse: () => ActivityLevel.moderate,
+      ),
+      bodyCondition: BodyCondition.values.firstWhere(
+        (e) => e.name == inputs['bodyCondition'],
+        orElse: () => BodyCondition.ideal,
+      ),
+      dietType: DietType.values.firstWhere(
+        (e) => e.name == inputs['dietType'],
+        orElse: () => DietType.commercial,
+      ),
+      healthCondition: HealthCondition.values.firstWhere(
+        (e) => e.name == inputs['healthCondition'],
+        orElse: () => HealthCondition.healthy,
+      ),
+      isNeutered: inputs['isNeutered'] as bool? ?? false,
+      isPregnant: inputs['isPregnant'] as bool? ?? false,
+      isLactating: inputs['isLactating'] as bool? ?? false,
+      numberOfPuppies: inputs['numberOfPuppies'] as int?,
+      currentDailyCalories: (inputs['currentDailyCalories'] as num?)?.toDouble(),
+      allergies: (inputs['allergies'] as List<dynamic>?)?.cast<String>(),
+      medications: (inputs['medications'] as List<dynamic>?)?.cast<String>(),
+    );
   }
 
   @override

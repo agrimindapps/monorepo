@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'calculator_input.dart';
 
 /// Espécies suportadas para cálculo calórico
 enum AnimalSpecies {
@@ -95,7 +95,7 @@ enum MedicalCondition {
 }
 
 /// Entrada tipada para cálculo de necessidades calóricas
-class CalorieInput extends Equatable {
+class CalorieInput extends CalculatorInput {
   const CalorieInput({
     required this.species,
     required this.weight,
@@ -189,6 +189,7 @@ class CalorieInput extends Equatable {
       ];
 
   /// Cria uma cópia com parâmetros modificados
+  @override
   CalorieInput copyWith({
     AnimalSpecies? species,
     double? weight,
@@ -218,6 +219,10 @@ class CalorieInput extends Equatable {
       notes: notes ?? this.notes,
     );
   }
+
+  /// Converte para Map (implementação requerida por CalculatorInput)
+  @override
+  Map<String, dynamic> toMap() => toJson();
 
   /// Converte para Map para serialização
   Map<String, dynamic> toJson() {

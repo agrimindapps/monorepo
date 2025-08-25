@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/header_section.dart';
-import '../widgets/navigation_bar.dart';
-import '../widgets/features_carousel.dart';
-import '../widgets/how_it_works.dart';
-import '../widgets/testimonials_section.dart';
-import '../widgets/faq_section.dart';
-import '../widgets/footer_section.dart';
 import '../widgets/call_to_action.dart';
+import '../widgets/faq_section.dart';
+import '../widgets/features_carousel.dart';
+import '../widgets/footer_section.dart';
+import '../widgets/header_section.dart';
+import '../widgets/how_it_works.dart';
+import '../widgets/navigation_bar.dart';
 import '../widgets/statistics_section.dart';
+import '../widgets/testimonials_section.dart';
 
 class PromoPage extends StatefulWidget {
   const PromoPage({super.key});

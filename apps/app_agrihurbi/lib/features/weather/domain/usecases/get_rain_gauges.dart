@@ -23,7 +23,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, RainGaugeEntity>> byId(String id) async {
     try {
       if (id.trim().isEmpty) {
-        return Left(RainGaugeFailure('Rain gauge ID cannot be empty'));
+        return const Left(RainGaugeFailure('Rain gauge ID cannot be empty'));
       }
 
       return await _repository.getRainGaugeById(id);
@@ -36,7 +36,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> byLocation(String locationId) async {
     try {
       if (locationId.trim().isEmpty) {
-        return Left(RainGaugeFailure('Location ID cannot be empty'));
+        return const Left(RainGaugeFailure('Location ID cannot be empty'));
       }
 
       return await _repository.getRainGaugesByLocation(locationId);
@@ -84,7 +84,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> byStatus(String status) async {
     try {
       if (status.trim().isEmpty) {
-        return Left(RainGaugeFailure('Status cannot be empty'));
+        return const Left(RainGaugeFailure('Status cannot be empty'));
       }
 
       final result = await call();
@@ -141,7 +141,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> byMaintenancePriority(String priority) async {
     try {
       if (priority.trim().isEmpty) {
-        return Left(RainGaugeFailure('Priority cannot be empty'));
+        return const Left(RainGaugeFailure('Priority cannot be empty'));
       }
 
       final validPriorities = ['critical', 'high', 'medium', 'low', 'none'];
@@ -194,7 +194,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> recentlyInstalled(int days) async {
     try {
       if (days <= 0) {
-        return Left(RainGaugeFailure('Days must be a positive number'));
+        return const Left(RainGaugeFailure('Days must be a positive number'));
       }
 
       final cutoffDate = DateTime.now().subtract(Duration(days: days));
@@ -218,7 +218,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> byDeviceModel(String model) async {
     try {
       if (model.trim().isEmpty) {
-        return Left(RainGaugeFailure('Device model cannot be empty'));
+        return const Left(RainGaugeFailure('Device model cannot be empty'));
       }
 
       final result = await call();
@@ -279,7 +279,7 @@ class GetRainGauges {
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> byRainfallIntensity(String intensity) async {
     try {
       if (intensity.trim().isEmpty) {
-        return Left(RainGaugeFailure('Intensity cannot be empty'));
+        return const Left(RainGaugeFailure('Intensity cannot be empty'));
       }
 
       final validIntensities = ['no_rain', 'light', 'moderate', 'heavy', 'very_heavy'];
@@ -355,8 +355,8 @@ class GetRainGauges {
       };
     }
 
-    final active = gauges.where((g) => g.isActive).length;
-    final operational = gauges.where((g) => g.isOperational).length;
+    final active = gauges.where((g) => (g.isActive as bool?) == true).length;
+    final operational = gauges.where((g) => (g.isOperational as bool?) == true).length;
     final totalDaily = gauges.map((g) => g.dailyAccumulation).reduce((a, b) => a + b);
     final totalMonthly = gauges.map((g) => g.monthlyAccumulation).reduce((a, b) => a + b);
     final avgQuality = gauges.map((g) => g.dataQuality).reduce((a, b) => a + b) / gauges.length;
@@ -390,20 +390,20 @@ class GetRainGauges {
 
     final issues = <String>[];
     
-    if (summary['operational_percentage'] < 80) {
+    if (((summary['operational_percentage'] as num?) ?? 0) < 80) {
       issues.add('Low operational percentage: ${summary['operational_percentage']}%');
     }
     
-    if (summary['maintenance_needed'] > 0) {
+    if (((summary['maintenance_needed'] as num?) ?? 0) > 0) {
       issues.add('${summary['maintenance_needed']} gauges need maintenance');
     }
 
-    final lowBattery = gauges.where((g) => g.isLowBattery).length;
+    final lowBattery = gauges.where((g) => (g.isLowBattery as bool?) == true).length;
     if (lowBattery > 0) {
       issues.add('$lowBattery gauges have low battery');
     }
 
-    final weakSignal = gauges.where((g) => g.isWeakSignal).length;
+    final weakSignal = gauges.where((g) => (g.isWeakSignal as bool?) == true).length;
     if (weakSignal > 0) {
       issues.add('$weakSignal gauges have weak signal');
     }
@@ -426,15 +426,15 @@ class GetRainGauges {
 
     int score = 100;
     
-    final operationalPercentage = gauges.where((g) => g.isOperational).length / gauges.length;
+    final operationalPercentage = gauges.where((g) => (g.isOperational as bool?) == true).length / gauges.length;
     if (operationalPercentage < 0.9) score -= 20;
     if (operationalPercentage < 0.7) score -= 20;
     
-    final maintenanceNeeded = gauges.where((g) => g.needsMaintenance).length / gauges.length;
+    final maintenanceNeeded = gauges.where((g) => (g.needsMaintenance as bool?) == true).length / gauges.length;
     if (maintenanceNeeded > 0.1) score -= 15;
     if (maintenanceNeeded > 0.2) score -= 15;
     
-    final lowBatteryPercentage = gauges.where((g) => g.isLowBattery).length / gauges.length;
+    final lowBatteryPercentage = gauges.where((g) => (g.isLowBattery as bool?) == true).length / gauges.length;
     if (lowBatteryPercentage > 0.1) score -= 10;
     
     final avgQuality = gauges.map((g) => g.dataQuality).reduce((a, b) => a + b) / gauges.length;

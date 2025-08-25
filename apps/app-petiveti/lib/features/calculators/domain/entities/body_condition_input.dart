@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'calculator_input.dart';
 
 /// Enums para tipagem forte e validação
 
@@ -58,7 +58,7 @@ enum AbdominalProfile {
 
 /// Input para cálculo de condição corporal
 /// Segue princípios de Clean Architecture e type safety
-class BodyConditionInput extends Equatable {
+class BodyConditionInput extends CalculatorInput {
   const BodyConditionInput({
     required this.species,
     required this.currentWeight,
@@ -92,15 +92,45 @@ class BodyConditionInput extends Equatable {
   final bool hasMetabolicConditions;
   final List<String>? metabolicConditions;
 
-  /// Validação de entrada
-  bool get isValid {
-    return currentWeight > 0 && 
-           currentWeight <= 200 && // limite máximo razoável
-           (idealWeight == null || idealWeight! > 0);
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'species': species.code,
+      'currentWeight': currentWeight,
+      'ribPalpation': ribPalpation.score,
+      'waistVisibility': waistVisibility.score,
+      'abdominalProfile': abdominalProfile.score,
+      'idealWeight': idealWeight,
+      'bcsScale': bcsScale.code,
+      'observations': observations,
+      'animalAge': animalAge,
+      'animalBreed': animalBreed,
+      'isNeutered': isNeutered,
+      'hasMetabolicConditions': hasMetabolicConditions,
+      'metabolicConditions': metabolicConditions,
+    };
   }
 
-  /// Lista de erros de validação
-  List<String> get validationErrors {
+  static BodyConditionInput fromMap(Map<String, dynamic> map) {
+    return BodyConditionInput(
+      species: AnimalSpecies.values.firstWhere((e) => e.code == map['species']),
+      currentWeight: (map['currentWeight'] as num?)?.toDouble() ?? 0.0,
+      ribPalpation: RibPalpation.values.firstWhere((e) => e.score == map['ribPalpation']),
+      waistVisibility: WaistVisibility.values.firstWhere((e) => e.score == map['waistVisibility']),
+      abdominalProfile: AbdominalProfile.values.firstWhere((e) => e.score == map['abdominalProfile']),
+      idealWeight: (map['idealWeight'] as num?)?.toDouble(),
+      bcsScale: BcsScale.values.firstWhere((e) => e.code == map['bcsScale'], orElse: () => BcsScale.ninelevel),
+      observations: map['observations'] as String?,
+      animalAge: (map['animalAge'] as num?)?.toInt(),
+      animalBreed: map['animalBreed'] as String?,
+      isNeutered: (map['isNeutered'] as bool?) ?? false,
+      hasMetabolicConditions: (map['hasMetabolicConditions'] as bool?) ?? false,
+      metabolicConditions: (map['metabolicConditions'] as List<dynamic>?)?.cast<String>(),
+    );
+  }
+
+  @override
+  List<String> validate() {
     final errors = <String>[];
     
     if (currentWeight <= 0) {
@@ -119,7 +149,15 @@ class BodyConditionInput extends Equatable {
     return errors;
   }
 
+  /// Validação de entrada (mantido para compatibilidade)
+  @override
+  bool get isValid => validate().isEmpty;
+
+  /// Lista de erros de validação (mantido para compatibilidade)
+  List<String> get validationErrors => validate();
+
   /// Cópia com alterações
+  @override
   BodyConditionInput copyWith({
     AnimalSpecies? species,
     double? currentWeight,

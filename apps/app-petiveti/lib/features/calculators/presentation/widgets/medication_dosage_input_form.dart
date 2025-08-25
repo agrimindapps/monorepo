@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../providers/medication_dosage_provider.dart';
+
 import '../../domain/entities/medication_dosage_input.dart';
+import '../providers/medication_dosage_provider.dart';
 
 /// Formulário de entrada de dados para cálculo de dosagem
 class MedicationDosageInputForm extends StatefulWidget {
-  const MedicationDosageInputForm({Key? key}) : super(key: key);
+  const MedicationDosageInputForm({super.key});
 
   @override
   State<MedicationDosageInputForm> createState() => _MedicationDosageInputFormState();
@@ -123,7 +124,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                             child: Row(
                               children: [
                                 Icon(
-                                  species == Species.dog ? Icons.pets : Icons.cat,
+                                  species == Species.dog ? Icons.pets : Icons.pets,
                                   size: 20,
                                   color: Colors.grey.shade600,
                                 ),

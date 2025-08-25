@@ -23,12 +23,12 @@ class BaseTheme {
       colorScheme: ColorScheme.light(
         primary: primaryColor,
         onPrimary: BaseColors.white,
-        primaryContainer: Color.lerp(primaryColor, BaseColors.white, 0.8)!,
+        primaryContainer: Color.lerp(primaryColor, BaseColors.white, 0.8),
         onPrimaryContainer: primaryColor,
         
         secondary: secondary,
         onSecondary: BaseColors.white,
-        secondaryContainer: Color.lerp(secondary, BaseColors.white, 0.8)!,
+        secondaryContainer: Color.lerp(secondary, BaseColors.white, 0.8),
         onSecondaryContainer: secondary,
         
         tertiary: BaseColors.info,
@@ -190,7 +190,7 @@ class BaseTheme {
       
       chipTheme: ChipThemeData(
         backgroundColor: BaseColors.surfaceLight,
-        selectedColor: Color.lerp(primaryColor, BaseColors.white, 0.8)!,
+        selectedColor: Color.lerp(primaryColor, BaseColors.white, 0.8),
         disabledColor: BaseColors.dividerLight,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         labelStyle: BaseTypography.labelMedium.copyWith(fontFamily: fontFamily),
@@ -254,13 +254,13 @@ class BaseTheme {
       colorScheme: ColorScheme.dark(
         primary: primaryColor,
         onPrimary: BaseColors.white,
-        primaryContainer: Color.lerp(primaryColor, BaseColors.black, 0.6)!,
-        onPrimaryContainer: Color.lerp(primaryColor, BaseColors.white, 0.8)!,
+        primaryContainer: Color.lerp(primaryColor, BaseColors.black, 0.6),
+        onPrimaryContainer: Color.lerp(primaryColor, BaseColors.white, 0.8),
         
         secondary: secondary,
         onSecondary: BaseColors.black,
-        secondaryContainer: Color.lerp(secondary, BaseColors.black, 0.6)!,
-        onSecondaryContainer: Color.lerp(secondary, BaseColors.white, 0.8)!,
+        secondaryContainer: Color.lerp(secondary, BaseColors.black, 0.6),
+        onSecondaryContainer: Color.lerp(secondary, BaseColors.white, 0.8),
         
         tertiary: BaseColors.info,
         onTertiary: BaseColors.white,

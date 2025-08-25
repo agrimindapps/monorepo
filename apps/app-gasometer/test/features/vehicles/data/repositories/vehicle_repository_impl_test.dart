@@ -1,17 +1,16 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:dartz/dartz.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:gasometer/core/error/exceptions.dart';
 import 'package:gasometer/core/error/failures.dart';
+import 'package:gasometer/features/auth/domain/entities/user_entity.dart';
+import 'package:gasometer/features/auth/domain/repositories/auth_repository.dart';
 import 'package:gasometer/features/vehicles/data/datasources/vehicle_local_data_source.dart';
 import 'package:gasometer/features/vehicles/data/datasources/vehicle_remote_data_source.dart';
 import 'package:gasometer/features/vehicles/data/models/vehicle_model.dart';
 import 'package:gasometer/features/vehicles/data/repositories/vehicle_repository_impl.dart';
 import 'package:gasometer/features/vehicles/domain/entities/vehicle_entity.dart';
-import 'package:gasometer/features/auth/domain/entities/user_entity.dart';
-import 'package:gasometer/features/auth/domain/repositories/auth_repository.dart';
+import 'package:mocktail/mocktail.dart';
 
 // Mock classes
 class MockVehicleLocalDataSource extends Mock implements VehicleLocalDataSource {}

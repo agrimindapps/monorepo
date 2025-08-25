@@ -305,7 +305,7 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       
       final updatedVaccine = await getVaccineById(vaccineId);
       if (updatedVaccine == null) {
-        throw ServerException(message: 'Vacina não encontrada após agendamento de lembrete');
+        throw const ServerException(message: 'Vacina não encontrada após agendamento de lembrete');
       }
       return updatedVaccine;
     } catch (e) {

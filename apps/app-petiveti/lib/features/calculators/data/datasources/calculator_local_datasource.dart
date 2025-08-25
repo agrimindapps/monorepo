@@ -1,5 +1,5 @@
-import '../models/calculation_history_model.dart';
 import '../../../../core/storage/hive_service.dart';
+import '../models/calculation_history_model.dart';
 
 /// Data source local para calculadoras usando HiveService
 class CalculatorLocalDatasource {
@@ -112,5 +112,58 @@ class CalculatorLocalDatasource {
     final box = await _hiveService.getBox<Map>(_statsBoxName);
     final stats = box.get(calculatorId, defaultValue: <String, dynamic>{});
     return Map<String, dynamic>.from(stats ?? <String, dynamic>{});
+  }
+
+  /// Incrementa contador de uso da calculadora
+  Future<void> incrementCalculatorUsage(String calculatorId) async {
+    await recordCalculatorUsage(calculatorId);
+  }
+
+  /// Obtém item específico do histórico por ID
+  Future<CalculationHistoryModel?> getCalculationHistoryById(String id) async {
+    final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
+    return box.get(id);
+  }
+
+  /// Remove item do histórico (alias para compatibilidade)
+  Future<void> deleteCalculationHistory(String id) async {
+    await removeCalculationHistory(id);
+  }
+
+  /// Obtém lista de IDs das calculadoras favoritas
+  Future<List<String>> getFavoriteCalculatorIds() async {
+    return await getFavoriteCalculators();
+  }
+
+  /// Adiciona calculadora aos favoritos (alias para compatibilidade)
+  Future<void> addFavoriteCalculator(String calculatorId) async {
+    await addToFavorites(calculatorId);
+  }
+
+  /// Remove calculadora dos favoritos (alias para compatibilidade)
+  Future<void> removeFavoriteCalculator(String calculatorId) async {
+    await removeFromFavorites(calculatorId);
+  }
+
+  /// Verifica se calculadora é favorita
+  Future<bool> isFavoriteCalculator(String calculatorId) async {
+    final favorites = await getFavoriteCalculators();
+    return favorites.contains(calculatorId);
+  }
+
+  /// Obtém estatísticas de uso de todas as calculadoras
+  Future<Map<String, int>> getCalculatorUsageStats() async {
+    final box = await _hiveService.getBox<Map>(_statsBoxName);
+    final stats = <String, int>{};
+    
+    for (final key in box.keys) {
+      final calculatorStats = box.get(key);
+      if (calculatorStats != null) {
+        final usageCount = calculatorStats['usageCount'] ?? 0;
+        stats[key.toString()] = usageCount as int;
+      }
+    }
+    
+    return stats;
   }
 }

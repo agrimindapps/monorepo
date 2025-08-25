@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../providers/auth_provider.dart';
 import '../../domain/entities/user_entity.dart';
+import '../providers/auth_provider.dart';
 
 /// Página de perfil do usuário
 /// 
@@ -177,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
             
             _buildDetailItem(
               'Conta criada em',
-              _formatDate(user.createdAt),
+              user.createdAt != null ? _formatDate(user.createdAt!) : 'Não informado',
               Icons.calendar_today,
             ),
             

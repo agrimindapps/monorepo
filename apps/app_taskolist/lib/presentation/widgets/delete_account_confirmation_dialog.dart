@@ -337,13 +337,13 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               RichText(
-                text: TextSpan(
-                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                text: const TextSpan(
+                  style: TextStyle(fontSize: 14, color: Colors.black87),
                   children: [
-                    const TextSpan(text: '2. Digite exatamente: '),
+                    TextSpan(text: '2. Digite exatamente: '),
                     TextSpan(
                       text: _requiredConfirmationText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
                       ),

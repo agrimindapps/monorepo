@@ -232,7 +232,7 @@ class _MenuButton extends StatelessWidget {
       elevation: 4,
       child: InkWell(
         onTap: onTap,
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,

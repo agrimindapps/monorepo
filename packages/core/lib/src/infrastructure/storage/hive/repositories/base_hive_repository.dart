@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../../../shared/utils/result.dart';
+
 import '../../../../shared/utils/app_error.dart';
-import '../interfaces/i_hive_repository.dart';
-import '../interfaces/i_hive_manager.dart';
+import '../../../../shared/utils/result.dart';
 import '../exceptions/storage_exceptions.dart';
+import '../interfaces/i_hive_manager.dart';
+import '../interfaces/i_hive_repository.dart';
 
 /// Implementação base para repositórios Hive
 /// Fornece operações CRUD genéricas com error handling robusto

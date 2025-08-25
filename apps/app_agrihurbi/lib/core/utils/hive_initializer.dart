@@ -1,16 +1,31 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../features/auth/data/models/user_model.dart';
-import '../../features/livestock/data/models/bovine_model.dart';
-import '../../features/livestock/data/models/equine_model.dart';
+// Import generated model adapters
+// import '../../features/auth/data/models/user_model.dart';
+// import '../../features/livestock/data/models/bovine_model.dart';
+// import '../../features/livestock/data/models/equine_model.dart';
 import '../../features/livestock/data/models/livestock_enums_adapter.dart';
+
+// Import weather models
+import '../../features/weather/data/models/rain_gauge_model.dart';
+import '../../features/weather/data/models/weather_measurement_model.dart';
+import '../../features/weather/data/models/weather_statistics_model.dart';
+
+// Import subscription models
+import '../../features/subscription/data/models/subscription_model.dart';
+
+// Import news models
+import '../../features/news/data/models/commodity_price_model.dart';
+import '../../features/news/data/models/news_article_model.dart';
 
 /// Inicializador do Hive para configuração de adapters
 /// 
 /// Centraliza o registro de todos os adapters Hive do app
 /// Garante que todos os modelos estejam disponíveis para persistência local
 class HiveInitializer {
+  // Private constructor to prevent instantiation
+  HiveInitializer._();
   /// Inicializa o Hive com todos os adapters necessários
   static Future<void> initialize() async {
     try {
@@ -25,6 +40,15 @@ class HiveInitializer {
       // Registrar adapters de livestock
       _registerLivestockAdapters();
       
+      // Registrar adapters de weather
+      _registerWeatherAdapters();
+      
+      // Registrar adapters de subscription
+      _registerSubscriptionAdapters();
+      
+      // Registrar adapters de news
+      _registerNewsAdapters();
+      
       debugPrint('HiveInitializer: Configuração do Hive concluída');
     } catch (e, stackTrace) {
       debugPrint('HiveInitializer: Erro na inicialização - $e');
@@ -37,10 +61,12 @@ class HiveInitializer {
   static void _registerAuthAdapters() {
     try {
       // UserModel - TypeId: 1
-      if (!Hive.isAdapterRegistered(1)) {
-        Hive.registerAdapter(UserModelAdapter());
-        debugPrint('HiveInitializer: UserModelAdapter registrado (TypeId: 1)');
-      }
+      // TODO: Uncomment when UserModelAdapter is generated
+      // if (!Hive.isAdapterRegistered(1)) {
+      //   Hive.registerAdapter(UserModelAdapter());
+      //   debugPrint('HiveInitializer: UserModelAdapter registrado (TypeId: 1)');
+      // }
+      debugPrint('HiveInitializer: Auth adapters skipped (awaiting code generation)');
     } catch (e) {
       debugPrint('HiveInitializer: Erro ao registrar adapters de auth - $e');
       rethrow;
@@ -50,20 +76,23 @@ class HiveInitializer {
   /// Registra adapters relacionados ao livestock
   static void _registerLivestockAdapters() {
     try {
+      // TODO: Uncomment when model adapters are generated
       // BovineModel - TypeId: 0
-      if (!Hive.isAdapterRegistered(0)) {
-        Hive.registerAdapter(BovineModelAdapter());
-        debugPrint('HiveInitializer: BovineModelAdapter registrado (TypeId: 0)');
-      }
+      // if (!Hive.isAdapterRegistered(0)) {
+      //   Hive.registerAdapter(BovineModelAdapter());
+      //   debugPrint('HiveInitializer: BovineModelAdapter registrado (TypeId: 0)');
+      // }
       
       // EquineModel - TypeId: 2
-      if (!Hive.isAdapterRegistered(2)) {
-        Hive.registerAdapter(EquineModelAdapter());
-        debugPrint('HiveInitializer: EquineModelAdapter registrado (TypeId: 2)');
-      }
+      // if (!Hive.isAdapterRegistered(2)) {
+      //   Hive.registerAdapter(EquineModelAdapter());
+      //   debugPrint('HiveInitializer: EquineModelAdapter registrado (TypeId: 2)');
+      // }
       
       // Enums adapters - TypeIds: 10-19
       _registerEnumAdapters();
+      
+      debugPrint('HiveInitializer: Livestock model adapters skipped (awaiting code generation)');
     } catch (e) {
       debugPrint('HiveInitializer: Erro ao registrar adapters de livestock - $e');
       rethrow;
@@ -111,6 +140,84 @@ class HiveInitializer {
     }
   }
   
+  /// Registra adapters relacionados ao weather
+  static void _registerWeatherAdapters() {
+    try {
+      // RainGaugeModel - TypeId: 51
+      if (!Hive.isAdapterRegistered(51)) {
+        Hive.registerAdapter(RainGaugeModelAdapter());
+        debugPrint('HiveInitializer: RainGaugeModelAdapter registrado (TypeId: 51)');
+      }
+      
+      // WeatherMeasurementModel - TypeId: 50
+      if (!Hive.isAdapterRegistered(50)) {
+        Hive.registerAdapter(WeatherMeasurementModelAdapter());
+        debugPrint('HiveInitializer: WeatherMeasurementModelAdapter registrado (TypeId: 50)');
+      }
+      
+      // WeatherStatisticsModel - TypeId: 52
+      if (!Hive.isAdapterRegistered(52)) {
+        Hive.registerAdapter(WeatherStatisticsModelAdapter());
+        debugPrint('HiveInitializer: WeatherStatisticsModelAdapter registrado (TypeId: 52)');
+      }
+      
+      debugPrint('HiveInitializer: Weather adapters registrados');
+    } catch (e) {
+      debugPrint('HiveInitializer: Erro ao registrar adapters de weather - $e');
+      rethrow;
+    }
+  }
+  
+  /// Registra adapters relacionados à subscription
+  static void _registerSubscriptionAdapters() {
+    try {
+      // SubscriptionModel - TypeId: 16
+      if (!Hive.isAdapterRegistered(16)) {
+        Hive.registerAdapter(SubscriptionModelAdapter());
+        debugPrint('HiveInitializer: SubscriptionModelAdapter registrado (TypeId: 16)');
+      }
+      
+      // SubscriptionTierModel - TypeId: 17
+      if (!Hive.isAdapterRegistered(17)) {
+        Hive.registerAdapter(SubscriptionTierModelAdapter());
+        debugPrint('HiveInitializer: SubscriptionTierModelAdapter registrado (TypeId: 17)');
+      }
+      
+      // PaymentMethodModel - TypeId: 21
+      if (!Hive.isAdapterRegistered(21)) {
+        Hive.registerAdapter(PaymentMethodModelAdapter());
+        debugPrint('HiveInitializer: PaymentMethodModelAdapter registrado (TypeId: 21)');
+      }
+      
+      debugPrint('HiveInitializer: Subscription adapters registrados');
+    } catch (e) {
+      debugPrint('HiveInitializer: Erro ao registrar adapters de subscription - $e');
+      rethrow;
+    }
+  }
+  
+  /// Registra adapters relacionados ao news
+  static void _registerNewsAdapters() {
+    try {
+      // CommodityPriceModel - TypeId: 30
+      if (!Hive.isAdapterRegistered(30)) {
+        Hive.registerAdapter(CommodityPriceModelAdapter());
+        debugPrint('HiveInitializer: CommodityPriceModelAdapter registrado (TypeId: 30)');
+      }
+      
+      // NewsArticleModel - TypeId: 31
+      if (!Hive.isAdapterRegistered(31)) {
+        Hive.registerAdapter(NewsArticleModelAdapter());
+        debugPrint('HiveInitializer: NewsArticleModelAdapter registrado (TypeId: 31)');
+      }
+      
+      debugPrint('HiveInitializer: News adapters registrados');
+    } catch (e) {
+      debugPrint('HiveInitializer: Erro ao registrar adapters de news - $e');
+      rethrow;
+    }
+  }
+
   /// Fecha todas as boxes abertas
   static Future<void> closeAll() async {
     try {

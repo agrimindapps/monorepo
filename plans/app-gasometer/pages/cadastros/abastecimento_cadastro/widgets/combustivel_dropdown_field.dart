@@ -17,7 +17,7 @@ class CombustivelDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Container(
+    return Obx(() => DecoratedBox(
           decoration: BoxDecoration(
             color: ThemeManager().isDark.value
                 ? Colors.grey.shade900

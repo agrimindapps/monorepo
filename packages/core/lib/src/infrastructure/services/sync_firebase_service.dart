@@ -1,15 +1,16 @@
 import 'dart:async';
-import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:dartz/dartz.dart';
 import 'dart:developer' as developer;
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../domain/entities/base_sync_entity.dart';
-import '../../domain/repositories/i_sync_repository.dart';
 import '../../domain/repositories/i_local_storage_repository.dart';
-import '../../shared/utils/failure.dart';
+import '../../domain/repositories/i_sync_repository.dart';
 import '../../shared/di/injection_container.dart';
+import '../../shared/utils/failure.dart';
 import 'connectivity_service.dart';
 
 /// Serviço unificado de sincronização offline-first com Firebase
@@ -426,7 +427,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       await _ensureInitialized();
 
       if (!_canSync()) {
-        return Left(NetworkFailure('Não é possível sincronizar: offline ou não autenticado'));
+        return const Left(NetworkFailure('Não é possível sincronizar: offline ou não autenticado'));
       }
 
       final unsyncedResult = await getUnsyncedItems();
@@ -678,7 +679,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       final collection = _firestore
           .collection('users')
-          .doc(_currentUserId!)
+          .doc(_currentUserId)
           .collection(collectionName);
 
       _firestoreSubscription = collection.snapshots().listen(
@@ -856,7 +857,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       final docRef = _firestore
           .collection('users')
-          .doc(_currentUserId!)
+          .doc(_currentUserId)
           .collection(collectionName)
           .doc(item.id);
 
@@ -893,7 +894,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       for (final item in items.take(config.batchSize)) {
         final docRef = _firestore
             .collection('users')
-            .doc(_currentUserId!)
+            .doc(_currentUserId)
             .collection(collectionName)
             .doc(item.id);
 
@@ -938,7 +939,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       final collection = _firestore
           .collection('users')
-          .doc(_currentUserId!)
+          .doc(_currentUserId)
           .collection(collectionName);
 
       Query query = collection;

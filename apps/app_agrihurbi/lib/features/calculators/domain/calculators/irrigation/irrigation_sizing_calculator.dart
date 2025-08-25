@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Dimensionamento de Sistema de Irrigação
 /// Calcula componentes do sistema: bomba, tubulação e aspersores
 class IrrigationSizingCalculator extends CalculatorEntity {
-  IrrigationSizingCalculator()
+  const IrrigationSizingCalculator()
       : super(
           id: 'irrigation_sizing',
           name: 'Dimensionamento de Irrigação',

@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'package:flutter/services.dart';
+
 import 'package:dartz/dartz.dart';
+import 'package:flutter/services.dart';
+
 import '../contracts/i_static_data_repository.dart';
 
 /// Serviço para carregamento de assets JSON

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../providers/body_condition_provider.dart';
 import '../../domain/entities/body_condition_output.dart';
+import '../providers/body_condition_provider.dart';
 
 /// Painel de histórico dos cálculos de condição corporal
 class BodyConditionHistoryPanel extends ConsumerWidget {
@@ -68,14 +68,14 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                 Expanded(
                   child: _buildStatItem(
                     'Total de Avaliações',
-                    '${stats['count']}',
+                    stats['count'].toString(),
                     Icons.assignment,
                   ),
                 ),
                 Expanded(
                   child: _buildStatItem(
                     'Score Médio',
-                    stats['averageScore'].toStringAsFixed(1),
+                    ((stats['averageScore'] as num?) ?? 0).toStringAsFixed(1),
                     Icons.trending_neutral,
                   ),
                 ),
@@ -87,7 +87,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                 Expanded(
                   child: _buildStatItem(
                     '% Peso Ideal',
-                    '${stats['idealPercentage'].toStringAsFixed(0)}%',
+                    '${((stats['idealPercentage'] as num?) ?? 0).toStringAsFixed(0)}%',
                     Icons.check_circle,
                     color: Colors.green,
                   ),
@@ -95,9 +95,9 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                 Expanded(
                   child: _buildStatItem(
                     'Tendência',
-                    _getTrendText(stats['trend']),
-                    _getTrendIcon(stats['trend']),
-                    color: _getTrendColor(stats['trend']),
+                    _getTrendText(((stats['trend'] as num?) ?? 0.0).toDouble()),
+                    _getTrendIcon(((stats['trend'] as num?) ?? 0.0).toDouble()),
+                    color: _getTrendColor(((stats['trend'] as num?) ?? 0.0).toDouble()),
                   ),
                 ),
               ],
@@ -166,7 +166,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
         leading: CircleAvatar(
           backgroundColor: Color(
             int.parse(result.statusColor.substring(1), radix: 16) + 0xFF000000
-          ).withOpacity(0.2),
+          ).withValues(alpha: 0.2),
           child: Text(
             '${result.bcsScore}',
             style: TextStyle(
@@ -290,7 +290,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                 child: _buildDetailMetric(
                   'Peso Ideal',
                   '${result.idealWeightEstimate!.toStringAsFixed(1)} kg',
-                  Icons.target,
+                  Icons.flag,
                 ),
               ),
             if (result.weightAdjustmentNeeded != 0)
@@ -324,9 +324,11 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
             decoration: BoxDecoration(
               color: Colors.blue.shade50,
               borderRadius: BorderRadius.circular(4),
-              border: Border.left(
-                width: 3,
-                color: _getRecommendationColor(result.recommendations.first.type),
+              border: Border(
+                left: BorderSide(
+                  width: 3,
+                  color: _getRecommendationColor((result.recommendations.first as BcsRecommendation).type),
+                ),
               ),
             ),
             child: Text(

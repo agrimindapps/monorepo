@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../entities/bovine_entity.dart';

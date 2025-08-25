@@ -134,11 +134,11 @@ class TarefaModel extends BaseSyncModel {
       plantaId: map['plantaId']?.toString() ?? '',
       tipoCuidado: map['tipoCuidado']?.toString() ?? '',
       dataExecucao: DateTime.parse(map['dataExecucao'] as String),
-      concluida: map['concluida'] ?? false,
+      concluida: (map['concluida'] as bool?) ?? false,
       observacoes: map['observacoes']?.toString(),
       dataConclusao:
           map['dataConclusao'] != null
-              ? DateTime.parse(map['dataConclusao'])
+              ? DateTime.parse(map['dataConclusao'] as String)
               : null,
     );
   }
@@ -189,11 +189,11 @@ class TarefaModel extends BaseSyncModel {
       plantaId: map['planta_id']?.toString() ?? '',
       tipoCuidado: map['tipo_cuidado']?.toString() ?? '',
       dataExecucao: DateTime.parse(map['data_execucao'] as String),
-      concluida: map['concluida'] ?? false,
+      concluida: (map['concluida'] as bool?) ?? false,
       observacoes: map['observacoes']?.toString(),
       dataConclusao:
           map['data_conclusao'] != null
-              ? DateTime.parse(map['data_conclusao'])
+              ? DateTime.parse(map['data_conclusao'] as String)
               : null,
     );
   }

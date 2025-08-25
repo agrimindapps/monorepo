@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Compostagem
 /// Calcula proporções ideais para compostagem e tempo de decomposição
 class CompostCalculator extends CalculatorEntity {
-  CompostCalculator()
+  const CompostCalculator()
       : super(
           id: 'compost_calculator',
           name: 'Calculadora de Compostagem',
@@ -202,14 +203,14 @@ class CompostCalculator extends CalculatorEntity {
             label: 'Material Marrom Necessário',
             value: CalculatorMath.roundTo(optimalProportions['brown_needed'] as double, 0),
             unit: 'kg',
-            description: 'Quantidade de ${brownMaterialType}',
+            description: 'Quantidade de $brownMaterialType',
             isPrimary: true,
           ),
           CalculationResultValue(
             label: 'Material Verde Necessário',
             value: CalculatorMath.roundTo(optimalProportions['green_needed'] as double, 0),
             unit: 'kg',
-            description: 'Quantidade de ${greenMaterialType}',
+            description: 'Quantidade de $greenMaterialType',
             isPrimary: true,
           ),
           CalculationResultValue(
@@ -578,7 +579,7 @@ class CompostCalculator extends CalculatorEntity {
     String compostType,
   ) {
     // Densidade média da mistura (kg/m³)
-    final double averageDensity = 400.0;
+    const double averageDensity = 400.0;
     
     // Volume inicial
     final double initialVolume = totalMaterial / averageDensity;

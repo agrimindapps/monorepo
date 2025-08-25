@@ -1,17 +1,24 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/error/exceptions.dart';
-import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
-import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/features/settings/data/datasources/settings_local_datasource.dart';
 import 'package:app_agrihurbi/features/settings/data/models/settings_model.dart';
+import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
+import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: SettingsRepository)
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _localDataSource;
+  final AuthProvider _authProvider;
 
-  const SettingsRepositoryImpl(this._localDataSource);
+  const SettingsRepositoryImpl(this._localDataSource, this._authProvider);
+
+  /// Get current user ID from auth provider
+  String _getCurrentUserId() {
+    return _authProvider.currentUser?.id ?? 'anonymous_user';
+  }
 
   @override
   Future<Either<Failure, SettingsEntity>> getSettings() async {
@@ -20,14 +27,14 @@ class SettingsRepositoryImpl implements SettingsRepository {
       if (settings != null) {
         return Right(settings);
       } else {
-        final defaultSettings = await _localDataSource.getDefaultSettings('current_user');
+        final defaultSettings = await _localDataSource.getDefaultSettings(_getCurrentUserId());
         await _localDataSource.saveSettings(defaultSettings);
         return Right(defaultSettings);
       }
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -38,9 +45,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       await _localDataSource.saveSettings(settingsModel);
       return Right(settingsModel);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -48,23 +55,23 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Either<Failure, SettingsEntity>> resetToDefaults() async {
     try {
       await _localDataSource.clearSettings();
-      final defaultSettings = await _localDataSource.getDefaultSettings('current_user');
+      final defaultSettings = await _localDataSource.getDefaultSettings(_getCurrentUserId());
       await _localDataSource.saveSettings(defaultSettings);
       return Right(defaultSettings);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
   @override
   Future<Either<Failure, SettingsEntity>> getDefaultSettings() async {
     try {
-      final defaultSettings = await _localDataSource.getDefaultSettings('current_user');
+      final defaultSettings = await _localDataSource.getDefaultSettings(_getCurrentUserId());
       return Right(defaultSettings);
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -74,9 +81,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       await _localDataSource.saveQuickPreference('app_theme', theme.name);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -87,7 +94,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       final theme = AppTheme.values.firstWhere((t) => t.name == themeStr, orElse: () => AppTheme.system);
       return Right(theme);
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -121,9 +128,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       await _localDataSource.saveQuickPreference('app_language', languageCode);
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -133,7 +140,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       final language = _localDataSource.getQuickPreference<String>('app_language') ?? 'pt_BR';
       return Right(language);
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -214,7 +221,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       final lastSync = timestampStr != null ? DateTime.tryParse(timestampStr) : null;
       return Right(lastSync);
     } catch (e) {
-      return Left(GeneralFailure('Unexpected error: $e'));
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
 
@@ -274,7 +281,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, BackupInfo>> createBackup({bool includeImages = false}) async {
-    return Left(GeneralFailure('Backup creation not implemented'));
+    return const Left(GeneralFailure(message: 'Backup creation not implemented'));
   }
 
   @override
@@ -297,7 +304,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     required DataExportFormat format,
     bool includeImages = false,
   }) async {
-    return Left(GeneralFailure('Export not implemented'));
+    return const Left(GeneralFailure(message: 'Export not implemented'));
   }
 
   @override
@@ -306,7 +313,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     required DataExportFormat format,
     bool includeImages = false,
   }) async {
-    return Left(GeneralFailure('Export not implemented'));
+    return const Left(GeneralFailure(message: 'Export not implemented'));
   }
 
   @override
@@ -346,7 +353,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, DeviceInfo>> getDeviceInfo() async {
-    return Right(DeviceInfo(
+    return const Right(DeviceInfo(
       platform: 'Flutter',
       version: 'Unknown',
       model: 'Unknown',
@@ -365,7 +372,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     
     return Right(DiagnosticInfo(
       appVersion: appVersion.fold((_) => AppVersionInfo(version: '1.0.0', buildNumber: '1', buildDate: DateTime.now(), gitCommit: 'unknown', isDebug: true), (info) => info),
-      deviceInfo: deviceInfo.fold((_) => DeviceInfo(platform: 'Flutter', version: 'Unknown', model: 'Unknown', brand: 'Unknown', totalMemory: 0, availableMemory: 0, totalStorage: 0, availableStorage: 0), (info) => info),
+      deviceInfo: deviceInfo.fold((_) => const DeviceInfo(platform: 'Flutter', version: 'Unknown', model: 'Unknown', brand: 'Unknown', totalMemory: 0, availableMemory: 0, totalStorage: 0, availableStorage: 0), (info) => info),
       systemMetrics: {},
       errorLogs: [],
       generatedAt: DateTime.now(),

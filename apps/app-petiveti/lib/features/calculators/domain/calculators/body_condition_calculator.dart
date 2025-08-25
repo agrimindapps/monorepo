@@ -1,17 +1,19 @@
+import '../entities/body_condition_input.dart';
+import '../entities/body_condition_output.dart';
 import '../entities/calculator.dart';
-import '../entities/calculation_result.dart';
 import '../entities/input_field.dart';
+import 'base_calculator.dart';
 
-/// Calculadora de Condição Corporal
+/// Calculadora de Condição Corporal usando nova arquitetura
 /// Avalia o estado nutricional do animal com base em parâmetros físicos
-class BodyConditionCalculator extends Calculator {
+class BodyConditionCalculator extends BaseCalculator<BodyConditionInput, BodyConditionOutput> {
   const BodyConditionCalculator();
 
   @override
-  String get id => 'body_condition';
+  String get id => CalculatorType.bodyCondition.id;
 
   @override
-  String get name => 'Condição Corporal';
+  String get name => 'Condição Corporal (BCS)';
 
   @override
   String get description => 
@@ -25,188 +27,197 @@ class BodyConditionCalculator extends Calculator {
   String get iconName => 'fitness_center';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   List<InputField> get inputFields => [
     const InputField(
-      id: 'species',
+      key: 'species',
       label: 'Espécie',
-      description: 'Tipo de animal',
       type: InputFieldType.dropdown,
-      options: ['Cão', 'Gato'],
+      options: ['dog', 'cat'],
       isRequired: true,
+      helperText: 'Tipo de animal para avaliação',
     ),
     const InputField(
-      id: 'ribs_palpation',
+      key: 'currentWeight',
+      label: 'Peso Atual',
+      type: InputFieldType.number,
+      unit: 'kg',
+      minValue: 0.1,
+      maxValue: 200.0,
+      isRequired: true,
+      helperText: 'Peso atual do animal em quilogramas',
+    ),
+    const InputField(
+      key: 'ribPalpation',
       label: 'Palpação das Costelas',
-      description: 'Facilidade para palpar as costelas',
       type: InputFieldType.dropdown,
-      options: [
-        'Muito difícil de palpar',
-        'Difícil de palpar',
-        'Palpável com pressão moderada',
-        'Facilmente palpável',
-        'Muito facilmente palpável'
-      ],
+      options: ['1', '2', '3', '4', '5'],
       isRequired: true,
+      helperText: 'Facilidade para palpar as costelas (1=muito difícil, 5=muito fácil)',
     ),
     const InputField(
-      id: 'waist_visibility',
-      label: 'Cintura Vista de Cima',
-      description: 'Visibilidade da cintura quando visto de cima',
+      key: 'waistVisibility',
+      label: 'Visibilidade da Cintura',
       type: InputFieldType.dropdown,
-      options: [
-        'Não visível',
-        'Pouco visível',
-        'Moderadamente visível',
-        'Bem visível',
-        'Muito pronunciada'
-      ],
+      options: ['1', '2', '3', '4', '5'],
       isRequired: true,
+      helperText: 'Visibilidade da cintura vista de cima (1=não visível, 5=muito pronunciada)',
     ),
     const InputField(
-      id: 'abdomen_profile',
+      key: 'abdominalProfile',
       label: 'Perfil Abdominal',
-      description: 'Formato do abdome visto de perfil',
       type: InputFieldType.dropdown,
-      options: [
-        'Pendular/Caído',
-        'Ligeiramente abaulado',
-        'Reto',
-        'Ligeiramente retraído',
-        'Muito retraído'
-      ],
+      options: ['1', '2', '3', '4', '5'],
       isRequired: true,
+      helperText: 'Perfil do abdomen visto de lado (1=pendular, 5=muito retraído)',
+    ),
+    const InputField(
+      key: 'idealWeight',
+      label: 'Peso Ideal (opcional)',
+      type: InputFieldType.number,
+      unit: 'kg',
+      minValue: 0.1,
+      maxValue: 200.0,
+      isRequired: false,
+      helperText: 'Peso ideal conhecido do animal',
+    ),
+    const InputField(
+      key: 'isNeutered',
+      label: 'Animal Castrado?',
+      type: InputFieldType.switch_,
+      isRequired: false,
+      defaultValue: false,
+    ),
+    const InputField(
+      key: 'animalAge',
+      label: 'Idade (opcional)',
+      type: InputFieldType.number,
+      unit: 'meses',
+      minValue: 1,
+      maxValue: 300,
+      isRequired: false,
+      helperText: 'Idade do animal em meses',
     ),
   ];
 
   @override
-  CalculationResult calculate(Map<String, dynamic> inputs) {
-    if (!validateInputs(inputs)) {
-      throw ArgumentError('Inputs inválidos para cálculo');
-    }
-
-    // Mapear respostas para pontuações
-    final ribsScore = _mapRibsScore(inputs['ribs_palpation'] as String);
-    final waistScore = _mapWaistScore(inputs['waist_visibility'] as String);
-    final abdomenScore = _mapAbdomenScore(inputs['abdomen_profile'] as String);
-
-    // Calcular média das pontuações
-    final score = ((ribsScore + waistScore + abdomenScore) / 3).round();
+  BodyConditionOutput performCalculation(BodyConditionInput input) {
+    // Calcular score BCS baseado nos parâmetros de entrada
+    final bcsScore = _calculateBcsScore(input);
     
-    final interpretation = _getInterpretation(score);
-    final recommendation = _getRecommendation(score);
-
-    return CalculationResult(
-      calculatorId: id,
-      timestamp: DateTime.now(),
-      inputs: inputs,
-      results: {
-        'score': score,
-        'interpretation': interpretation,
-        'recommendation': recommendation,
-      },
-      summary: 'Condição Corporal: $score/9 - $interpretation',
+    // Usar factory para criar output completo
+    return BodyConditionOutputFactory.fromBcsScore(
+      bcsScore: bcsScore,
+      currentWeight: input.currentWeight,
+      species: input.species.code,
+      idealWeight: input.idealWeight,
+      isNeutered: input.isNeutered,
+      animalAge: input.animalAge,
+      breed: input.animalBreed,
+      hasMetabolicConditions: input.hasMetabolicConditions,
     );
   }
 
   @override
-  bool validateInputs(Map<String, dynamic> inputs) {
-    return getValidationErrors(inputs).isEmpty;
+  List<String> getInputValidationErrors(BodyConditionInput input) {
+    return input.validate();
   }
 
   @override
-  List<String> getValidationErrors(Map<String, dynamic> inputs) {
-    final errors = <String>[];
-
-    for (final field in inputFields) {
-      if (field.isRequired && !inputs.containsKey(field.id)) {
-        errors.add('${field.label} é obrigatório');
-      }
-    }
-
-    return errors;
+  BodyConditionOutput createErrorResult(String message, [BodyConditionInput? input]) {
+    return BodyConditionOutputFactory.fromBcsScore(
+      bcsScore: 5, // Score neutro em caso de erro
+      currentWeight: input?.currentWeight ?? 0.0,
+      species: input?.species.code ?? 'dog',
+      idealWeight: input?.idealWeight,
+      isNeutered: input?.isNeutered ?? false,
+      animalAge: input?.animalAge,
+      breed: input?.animalBreed,
+      hasMetabolicConditions: input?.hasMetabolicConditions ?? false,
+    );
   }
 
-  int _mapRibsScore(String value) {
-    switch (value) {
-      case 'Muito difícil de palpar': return 1;
-      case 'Difícil de palpar': return 3;
-      case 'Palpável com pressão moderada': return 5;
-      case 'Facilmente palpável': return 7;
-      case 'Muito facilmente palpável': return 9;
-      default: return 5;
-    }
+  @override
+  BodyConditionInput createInputFromMap(Map<String, dynamic> inputs) {
+    return BodyConditionInput.fromMap(inputs);
   }
 
-  int _mapWaistScore(String value) {
-    switch (value) {
-      case 'Não visível': return 1;
-      case 'Pouco visível': return 3;
-      case 'Moderadamente visível': return 5;
-      case 'Bem visível': return 7;
-      case 'Muito pronunciada': return 9;
-      default: return 5;
-    }
+  @override
+  Map<String, dynamic> getInputParameters() {
+    return {
+      'species': {
+        'type': 'enum',
+        'label': 'Espécie',
+        'options': AnimalSpecies.values.map((e) => e.code).toList(),
+        'required': true,
+      },
+      'currentWeight': {
+        'type': 'double',
+        'label': 'Peso Atual (kg)',
+        'min': 0.1,
+        'max': 200.0,
+        'step': 0.1,
+        'required': true,
+      },
+      'ribPalpation': {
+        'type': 'enum',
+        'label': 'Palpação das Costelas',
+        'options': RibPalpation.values.map((e) => e.score.toString()).toList(),
+        'required': true,
+      },
+      'waistVisibility': {
+        'type': 'enum',
+        'label': 'Visibilidade da Cintura',
+        'options': WaistVisibility.values.map((e) => e.score.toString()).toList(),
+        'required': true,
+      },
+      'abdominalProfile': {
+        'type': 'enum',
+        'label': 'Perfil Abdominal',
+        'options': AbdominalProfile.values.map((e) => e.score.toString()).toList(),
+        'required': true,
+      },
+      'idealWeight': {
+        'type': 'double',
+        'label': 'Peso Ideal (kg)',
+        'min': 0.1,
+        'max': 200.0,
+        'step': 0.1,
+        'required': false,
+      },
+      'isNeutered': {
+        'type': 'bool',
+        'label': 'Animal Castrado?',
+        'required': false,
+      },
+      'animalAge': {
+        'type': 'int',
+        'label': 'Idade (meses)',
+        'min': 1,
+        'max': 300,
+        'step': 1,
+        'required': false,
+      },
+    };
   }
 
-  int _mapAbdomenScore(String value) {
-    switch (value) {
-      case 'Pendular/Caído': return 1;
-      case 'Ligeiramente abaulado': return 3;
-      case 'Reto': return 5;
-      case 'Ligeiramente retraído': return 7;
-      case 'Muito retraído': return 9;
-      default: return 5;
-    }
-  }
-
-  String _getInterpretation(int score) {
-    switch (score) {
-      case 1:
-        return 'Extremamente magro - Desnutrição severa';
-      case 2:
-        return 'Muito magro - Desnutrição moderada';
-      case 3:
-        return 'Magro - Abaixo do peso ideal';
-      case 4:
-        return 'Ligeiramente abaixo do peso';
-      case 5:
-        return 'Peso ideal - Condição corporal ótima';
-      case 6:
-        return 'Ligeiramente acima do peso';
-      case 7:
-        return 'Sobrepeso - Acima do peso ideal';
-      case 8:
-        return 'Obeso - Excesso de peso significativo';
-      case 9:
-        return 'Extremamente obeso - Obesidade severa';
-      default:
-        return 'Peso ideal';
-    }
-  }
-
-  String _getRecommendation(int score) {
-    switch (score) {
-      case 1:
-      case 2:
-        return 'Consulte um veterinário imediatamente. Necessária avaliação médica e plano nutricional específico.';
-      case 3:
-        return 'Aumente a quantidade de ração e monitore semanalmente. Consulte veterinário.';
-      case 4:
-        return 'Aumente ligeiramente a alimentação e monitore quinzenalmente.';
-      case 5:
-        return 'Mantenha a dieta atual. Monitoramento mensal é suficiente.';
-      case 6:
-        return 'Reduza ligeiramente a alimentação e aumente exercícios.';
-      case 7:
-        return 'Reduza 10-15% da alimentação e intensifique atividade física.';
-      case 8:
-      case 9:
-        return 'Consulte veterinário para plano de emagrecimento supervisionado.';
-      default:
-        return 'Mantenha a dieta atual e monitore regularmente.';
-    }
+  /// Calcula o score BCS baseado nos parâmetros de entrada
+  /// Usa média ponderada dos três parâmetros principais
+  int _calculateBcsScore(BodyConditionInput input) {
+    // Pesos para cada parâmetro na avaliação final
+    const ribWeight = 0.4; // 40% - mais importante
+    const waistWeight = 0.35; // 35% 
+    const abdominalWeight = 0.25; // 25%
+    
+    // Calcular score ponderado
+    final weightedScore = (input.ribPalpation.score * ribWeight) +
+                         (input.waistVisibility.score * waistWeight) +
+                         (input.abdominalProfile.score * abdominalWeight);
+    
+    // Converter para escala 1-9
+    // Score 1-5 dos parâmetros -> Score 1-9 BCS
+    final bcsScore = ((weightedScore - 1) * 2) + 1;
+    
+    // Arredondar e limitar entre 1-9
+    return bcsScore.round().clamp(1, 9);
   }
 }

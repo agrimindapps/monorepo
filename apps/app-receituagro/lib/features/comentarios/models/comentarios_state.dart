@@ -1,5 +1,5 @@
-import 'comentario_model.dart';
 import 'comentario_edit_state.dart';
+import 'comentario_model.dart';
 
 class ComentariosState {
   final List<ComentarioModel> comentarios;

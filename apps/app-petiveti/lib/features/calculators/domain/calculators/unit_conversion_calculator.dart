@@ -84,6 +84,34 @@ class UnitConversionInput extends CalculatorInput {
         toUnit,
         animalWeight,
       ];
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'category': category.name,
+      'value': value,
+      'fromUnit': fromUnit,
+      'toUnit': toUnit,
+      'animalWeight': animalWeight,
+    };
+  }
+
+  @override
+  UnitConversionInput copyWith({
+    UnitCategory? category,
+    double? value,
+    String? fromUnit,
+    String? toUnit,
+    double? animalWeight,
+  }) {
+    return UnitConversionInput(
+      category: category ?? this.category,
+      value: value ?? this.value,
+      fromUnit: fromUnit ?? this.fromUnit,
+      toUnit: toUnit ?? this.toUnit,
+      animalWeight: animalWeight ?? this.animalWeight,
+    );
+  }
 }
 
 class UnitConversionResult extends CalculationResult {
@@ -103,16 +131,16 @@ class UnitConversionResult extends CalculationResult {
     required this.conversionFactor,
     required this.relatedConversions,
     required this.veterinaryContext,
-    required super.timestamp,
-    required super.calculatorType,
-    super.notes,
+    required super.calculatorId,
+    required super.results,
+    super.recommendations = const [],
+    super.summary,
+    super.calculatedAt,
   });
 
-  @override
-  String get primaryResult => convertedValue.toStringAsFixed(4);
+  // primaryResult é herdado da classe base e retorna ResultItem?
 
-  @override
-  String get summary => '$fromUnitDisplay → $toUnitDisplay = $primaryResult';
+  // summary será definido no constructor quando criar o resultado
 
   @override
   List<Object?> get props => [
@@ -129,13 +157,16 @@ class UnitConversionResult extends CalculationResult {
 
 class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitConversionResult> {
   @override
+  String get id => 'unit_conversion';
+
+  @override
   String get name => 'Conversor de Unidades Veterinárias';
 
   @override
   String get description => 'Converte unidades comuns em medicina veterinária com contexto clínico';
 
   @override
-  UnitConversionResult calculate(UnitConversionInput input) {
+  UnitConversionResult performCalculation(UnitConversionInput input) {
     _validateInput(input);
 
     double convertedValue;
@@ -145,49 +176,64 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
     switch (input.category) {
       case UnitCategory.weight:
         final result = _convertWeight(input.value, input.fromUnit, input.toUnit);
-        convertedValue = result['value']!;
-        formula = result['formula']!;
-        factor = result['factor']!;
+        convertedValue = result['value']! as double;
+        formula = result['formula']! as String;
+        factor = result['factor']! as double;
         break;
 
       case UnitCategory.volume:
         final result = _convertVolume(input.value, input.fromUnit, input.toUnit);
-        convertedValue = result['value']!;
-        formula = result['formula']!;
-        factor = result['factor']!;
+        convertedValue = result['value']! as double;
+        formula = result['formula']! as String;
+        factor = result['factor']! as double;
         break;
 
       case UnitCategory.temperature:
         final result = _convertTemperature(input.value, input.fromUnit, input.toUnit);
-        convertedValue = result['value']!;
-        formula = result['formula']!;
-        factor = result['factor']!;
+        convertedValue = result['value']! as double;
+        formula = result['formula']! as String;
+        factor = result['factor']! as double;
         break;
 
       case UnitCategory.dosage:
         final result = _convertDosage(input.value, input.fromUnit, input.toUnit, input.animalWeight);
-        convertedValue = result['value']!;
-        formula = result['formula']!;
-        factor = result['factor']!;
+        convertedValue = result['value']! as double;
+        formula = result['formula']! as String;
+        factor = result['factor']! as double;
         break;
 
       case UnitCategory.pressure:
         final result = _convertPressure(input.value, input.fromUnit, input.toUnit);
-        convertedValue = result['value']!;
-        formula = result['formula']!;
-        factor = result['factor']!;
+        convertedValue = result['value']! as double;
+        formula = result['formula']! as String;
+        factor = result['factor']! as double;
         break;
 
       case UnitCategory.length:
         final result = _convertLength(input.value, input.fromUnit, input.toUnit);
-        convertedValue = result['value']!;
-        formula = result['formula']!;
-        factor = result['factor']!;
+        convertedValue = result['value']! as double;
+        formula = result['formula']! as String;
+        factor = result['factor']! as double;
         break;
     }
 
     final relatedConversions = _getRelatedConversions(input);
     final veterinaryContext = _getVeterinaryContext(input);
+
+    // Criar lista de ResultItem para o resultado estruturado
+    final results = <ResultItem>[
+      ResultItem(
+        label: 'Valor Convertido',
+        value: convertedValue.toStringAsFixed(4),
+        unit: _getUnitDisplay(input.toUnit),
+        severity: ResultSeverity.info,
+      ),
+      ResultItem(
+        label: 'Fórmula de Conversão',
+        value: formula,
+        severity: ResultSeverity.info,
+      ),
+    ];
 
     return UnitConversionResult(
       convertedValue: convertedValue,
@@ -197,8 +243,10 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
       conversionFactor: factor,
       relatedConversions: relatedConversions,
       veterinaryContext: veterinaryContext,
-      timestamp: DateTime.now(),
-      calculatorType: CalculatorType.unitConversion,
+      calculatorId: id,
+      results: results,
+      summary: '${input.value} ${_getUnitDisplay(input.fromUnit)} → ${convertedValue.toStringAsFixed(4)} ${_getUnitDisplay(input.toUnit)}',
+      calculatedAt: DateTime.now(),
     );
   }
 
@@ -565,6 +613,56 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
     };
 
     return displays[unit] ?? unit;
+  }
+
+  @override
+  List<String> getInputValidationErrors(UnitConversionInput input) {
+    final errors = <String>[];
+    if (input.value < 0) {
+      errors.add('Valor não pode ser negativo');
+    }
+    if (input.category == UnitCategory.dosage && input.animalWeight == null) {
+      errors.add('Peso do animal é obrigatório para conversões de dosagem');
+    }
+    if (input.animalWeight != null && input.animalWeight! <= 0) {
+      errors.add('Peso do animal deve ser maior que zero');
+    }
+    return errors;
+  }
+
+  @override
+  UnitConversionResult createErrorResult(String message, [UnitConversionInput? input]) {
+    return UnitConversionResult(
+      convertedValue: 0,
+      fromUnitDisplay: '',
+      toUnitDisplay: '',
+      conversionFormula: '',
+      conversionFactor: 0,
+      relatedConversions: const [],
+      veterinaryContext: const [],
+      calculatorId: id,
+      results: [ResultItem(
+        label: 'Erro',
+        value: message,
+        severity: ResultSeverity.danger,
+      )],
+      summary: 'Erro na conversão: $message',
+      calculatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  UnitConversionInput createInputFromMap(Map<String, dynamic> inputs) {
+    return UnitConversionInput(
+      category: UnitCategory.values.firstWhere(
+        (e) => e.name == inputs['category'],
+        orElse: () => UnitCategory.weight,
+      ),
+      value: (inputs['value'] as num?)?.toDouble() ?? 0.0,
+      fromUnit: inputs['fromUnit'] as String? ?? '',
+      toUnit: inputs['toUnit'] as String? ?? '',
+      animalWeight: (inputs['animalWeight'] as num?)?.toDouble(),
+    );
   }
 
   @override

@@ -307,7 +307,7 @@ class ExampleProvider extends ManagedProvider {
         _dataController.add(processData(data));
       },
       onError: (error, stack) {
-        _dataController.addError(error, stack);
+        _dataController.addError(error as Object? ?? 'Unknown error', stack as StackTrace? ?? StackTrace.empty);
       },
     );
     

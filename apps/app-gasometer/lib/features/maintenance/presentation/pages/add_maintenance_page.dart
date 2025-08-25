@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/presentation/widgets/validated_form_field.dart';
+
 import '../../../../core/interfaces/validation_result.dart';
+import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/presentation/widgets/widgets.dart';
+import '../../../../core/theme/design_tokens.dart';
 
 class AddMaintenancePage extends StatefulWidget {
   const AddMaintenancePage({super.key});
@@ -63,24 +66,20 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(),
-                    const SizedBox(height: 24),
+                    FormSpacing.section(),
                     _buildVehicleSelection(),
-                    const SizedBox(height: 16),
                     _buildBasicInfo(),
-                    const SizedBox(height: 16),
                     _buildCostAndOdometer(),
-                    const SizedBox(height: 16),
                     _buildDescription(),
-                    const SizedBox(height: 16),
                     _buildNextServiceDate(),
-                    const SizedBox(height: 32),
+                    FormSpacing.section(),
                     _buildActionButtons(),
                   ],
                 ),
@@ -94,10 +93,10 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXl),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         border: Border.all(
           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
         ),
@@ -105,10 +104,10 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
             ),
             child: Icon(
               Icons.build,
@@ -116,7 +115,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
               size: 24,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: GasometerDesignTokens.spacingLg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +123,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                 Text(
                   'Registrar Manutenção',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: GasometerDesignTokens.fontSizeXl,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -132,7 +131,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                 Text(
                   'Adicione informações sobre a manutenção realizada',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: GasometerDesignTokens.fontSizeMd,
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
@@ -145,270 +144,189 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
 
   Widget _buildVehicleSelection() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Veículo',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+    return FormSectionWidget.withTitle(
+      title: 'Veículo',
+      icon: Icons.directions_car,
+      content: Container(
+        padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingLg),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
+        ),
+        child: DropdownButton<String>(
+          value: _selectedVehicle.isEmpty ? null : _selectedVehicle,
+          hint: Text(
+            'Selecione o veículo',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Theme.of(context).colorScheme.outline),
-              ),
-              child: DropdownButton<String>(
-                value: _selectedVehicle.isEmpty ? null : _selectedVehicle,
-                hint: Text(
-                  'Selecione o veículo',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-                isExpanded: true,
-                underline: const SizedBox(),
-                icon: Icon(
-                  Icons.arrow_drop_down,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-                items: const [
-                  DropdownMenuItem(value: '1', child: Text('Honda Civic')),
-                  DropdownMenuItem(value: '2', child: Text('Toyota Corolla')),
-                ],
-                onChanged: (value) => setState(() => _selectedVehicle = value!),
-              ),
-            ),
+          ),
+          isExpanded: true,
+          underline: const SizedBox(),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+          items: const [
+            DropdownMenuItem(value: '1', child: Text('Honda Civic')),
+            DropdownMenuItem(value: '2', child: Text('Toyota Corolla')),
           ],
+          onChanged: (value) => setState(() => _selectedVehicle = value!),
         ),
       ),
     );
   }
 
   Widget _buildBasicInfo() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Informações Básicas',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
+    return FormSectionWidget.withTitle(
+      title: 'Informações Básicas',
+      icon: Icons.info_outline,
+      content: Column(
+        children: [
+          ValidatedFormField(
+            controller: _typeController,
+            label: 'Tipo de Manutenção',
+            hint: 'Ex: Troca de óleo, Revisão completa...',
+            required: true,
+            validationType: ValidationType.length,
+            minLength: 3,
+            maxLengthValidation: 100,
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'))],
+            onValidationChanged: (result) => _validationResults['type'] = result,
+          ),
+          FormSpacing.large(),
+          ValidatedFormField(
+            controller: _workshopController,
+            label: 'Oficina/Local',
+            hint: 'Nome da oficina ou local da manutenção',
+            required: true,
+            validationType: ValidationType.length,
+            minLength: 2,
+            maxLengthValidation: 100,
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)\/&]'))],
+            onValidationChanged: (result) => _validationResults['workshop'] = result,
+          ),
+          FormSpacing.large(),
+          FormFieldRow.standard(
+            children: [
+              Container(
+                padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingLg),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                ),
+                child: DropdownButton<String>(
+                  value: _selectedCategory,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'preventiva', child: Text('Preventiva')),
+                    DropdownMenuItem(value: 'corretiva', child: Text('Corretiva')),
+                  ],
+                  onChanged: (value) => setState(() => _selectedCategory = value!),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ValidatedFormField(
-              controller: _typeController,
-              label: 'Tipo de Manutenção',
-              hint: 'Ex: Troca de óleo, Revisão completa...',
-              required: true,
-              validationType: ValidationType.length,
-              minLength: 3,
-              maxLengthValidation: 100,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'))],
-              onValidationChanged: (result) => _validationResults['type'] = result,
-            ),
-            const SizedBox(height: 16),
-            ValidatedFormField(
-              controller: _workshopController,
-              label: 'Oficina/Local',
-              hint: 'Nome da oficina ou local da manutenção',
-              required: true,
-              validationType: ValidationType.length,
-              minLength: 2,
-              maxLengthValidation: 100,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)\/&]'))],
-              onValidationChanged: (result) => _validationResults['workshop'] = result,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Theme.of(context).colorScheme.outline),
-                    ),
-                    child: DropdownButton<String>(
-                      value: _selectedCategory,
-                      isExpanded: true,
-                      underline: const SizedBox(),
-                      icon: Icon(
-                        Icons.arrow_drop_down,
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: Container(
+                  padding: GasometerDesignTokens.paddingOnly(
+                    left: GasometerDesignTokens.spacingLg,
+                    right: GasometerDesignTokens.spacingLg,
+                    top: GasometerDesignTokens.spacingLg,
+                    bottom: GasometerDesignTokens.spacingLg,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 18,
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: 'preventiva', child: Text('Preventiva')),
-                        DropdownMenuItem(value: 'corretiva', child: Text('Corretiva')),
-                      ],
-                      onChanged: (value) => setState(() => _selectedCategory = value!),
-                    ),
+                      SizedBox(width: GasometerDesignTokens.spacingSm),
+                      Text(
+                        '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectDate(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Theme.of(context).colorScheme.outline),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 18,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildCostAndOdometer() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Valores e Medições',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+    return FormSectionWidget.withTitle(
+      title: 'Valores e Medições',
+      icon: Icons.monetization_on_outlined,
+      content: FormFieldRow.standard(
+        children: [
+          ValidatedFormField(
+            controller: _costController,
+            label: 'Custo',
+            hint: '0,00',
+            required: true,
+            validationType: ValidationType.money,
+            minValue: 0.0,
+            maxValue: 999999.99,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              prefixText: 'R\$ ',
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ValidatedFormField(
-                    controller: _costController,
-                    label: 'Custo',
-                    hint: '0,00',
-                    required: true,
-                    validationType: ValidationType.money,
-                    minValue: 0.0,
-                    maxValue: 999999.99,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      prefixText: 'R\$ ',
-                    ),
-                    onValidationChanged: (result) => _validationResults['cost'] = result,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ValidatedFormField(
-                    controller: _odometerController,
-                    label: 'Odômetro',
-                    hint: '0,0',
-                    required: true,
-                    validationType: ValidationType.decimal,
-                    minValue: 0.0,
-                    maxValue: 9999999.0,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
-                    decoration: const InputDecoration(
-                      suffixText: 'km',
-                    ),
-                    onValidationChanged: (result) => _validationResults['odometer'] = result,
-                  ),
-                ),
-              ],
+            onValidationChanged: (result) => _validationResults['cost'] = result,
+          ),
+          ValidatedFormField(
+            controller: _odometerController,
+            label: 'Odômetro',
+            hint: '0,0',
+            required: true,
+            validationType: ValidationType.decimal,
+            minValue: 0.0,
+            maxValue: 9999999.0,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
+            decoration: const InputDecoration(
+              suffixText: 'km',
             ),
-          ],
-        ),
+            onValidationChanged: (result) => _validationResults['odometer'] = result,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDescription() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Descrição',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ValidatedFormField(
-              controller: _descriptionController,
-              label: 'Detalhes da manutenção',
-              hint: 'Descreva os serviços realizados, peças trocadas, etc.',
-              required: true,
-              validationType: ValidationType.length,
-              minLength: 5,
-              maxLengthValidation: 500,
-              maxLines: 4,
-              maxLength: 500,
-              showCharacterCount: true,
-              onValidationChanged: (result) => _validationResults['description'] = result,
-            ),
-          ],
-        ),
+    return FormSectionWidget.withTitle(
+      title: 'Descrição',
+      icon: Icons.description_outlined,
+      content: ValidatedFormField(
+        controller: _descriptionController,
+        label: 'Detalhes da manutenção',
+        hint: 'Descreva os serviços realizados, peças trocadas, etc.',
+        required: true,
+        validationType: ValidationType.length,
+        minLength: 5,
+        maxLengthValidation: 500,
+        maxLines: 4,
+        maxLength: 500,
+        showCharacterCount: true,
+        onValidationChanged: (result) => _validationResults['description'] = result,
       ),
     );
   }
@@ -417,11 +335,11 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingCardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -432,25 +350,30 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                   color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: GasometerDesignTokens.spacingSm),
                 Text(
                   'Próxima Manutenção (Opcional)',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: GasometerDesignTokens.fontSizeLg,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: GasometerDesignTokens.spacingMd),
             InkWell(
               onTap: () => _selectNextServiceDate(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: GasometerDesignTokens.paddingOnly(
+                      left: GasometerDesignTokens.spacingLg,
+                      right: GasometerDesignTokens.spacingLg,
+                      top: GasometerDesignTokens.spacingLg,
+                      bottom: GasometerDesignTokens.spacingLg,
+                    ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                   border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: Row(
@@ -460,7 +383,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                       size: 18,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: GasometerDesignTokens.spacingSm),
                     Text(
                       _nextServiceDate != null
                           ? '${_nextServiceDate!.day.toString().padLeft(2, '0')}/${_nextServiceDate!.month.toString().padLeft(2, '0')}/${_nextServiceDate!.year}'
@@ -477,7 +400,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             ),
             if (_nextServiceDate != null)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
                 child: TextButton(
                   onPressed: () => setState(() => _nextServiceDate = null),
                   child: Text(
@@ -495,50 +418,42 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => context.pop(),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Theme.of(context).colorScheme.outline),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
-              ),
-            ),
+    return FormActionButtons.standard(
+      secondaryButton: OutlinedButton(
+        onPressed: () => context.pop(),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Theme.of(context).colorScheme.outline),
+          padding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingLg),
+          shape: RoundedRectangleBorder(
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
           ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 2,
-          child: ElevatedButton(
-            onPressed: _saveMaintenance,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text(
-              'Salvar Manutenção',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+        child: Text(
+          'Cancelar',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: GasometerDesignTokens.fontSizeLg,
           ),
         ),
-      ],
+      ),
+      primaryButton: ElevatedButton(
+        onPressed: _saveMaintenance,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          padding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingLg),
+          shape: RoundedRectangleBorder(
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
+          ),
+        ),
+        child: Text(
+          'Salvar Manutenção',
+          style: TextStyle(
+            fontSize: GasometerDesignTokens.fontSizeLg,
+            fontWeight: GasometerDesignTokens.fontWeightSemiBold,
+          ),
+        ),
+      ),
     );
   }
 

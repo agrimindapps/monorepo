@@ -35,11 +35,11 @@ class LivestockStatisticsProvider extends ChangeNotifier {
     DateTime.now().difference(_lastUpdate!).inMinutes > 30;
 
   // Getters específicos para estatísticas comuns
-  int get totalAnimals => _statistics?['totalAnimals'] ?? 0;
-  int get totalBovines => _statistics?['totalBovines'] ?? 0;
-  int get totalEquines => _statistics?['totalEquines'] ?? 0;
-  int get activeBovines => _statistics?['activeBovines'] ?? 0;
-  int get activeEquines => _statistics?['activeEquines'] ?? 0;
+  int get totalAnimals => (_statistics?['totalAnimals'] as int?) ?? 0;
+  int get totalBovines => (_statistics?['totalBovines'] as int?) ?? 0;
+  int get totalEquines => (_statistics?['totalEquines'] as int?) ?? 0;
+  int get activeBovines => (_statistics?['activeBovines'] as int?) ?? 0;
+  int get activeEquines => (_statistics?['activeEquines'] as int?) ?? 0;
   
   double get bovinesPercentage => totalAnimals > 0 
     ? (totalBovines / totalAnimals * 100) 

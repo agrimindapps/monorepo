@@ -125,16 +125,16 @@ class PragasHive extends HiveObject {
 
   factory PragasHive.fromJson(Map<String, dynamic> json) {
     return PragasHive(
-      objectId: json['objectId'] ?? '',
+      objectId: (json['objectId'] as String?) ?? '',
       createdAt: json['createdAt'] != null
           ? int.tryParse(json['createdAt'].toString()) ?? 0
           : 0,
       updatedAt: json['updatedAt'] != null
           ? int.tryParse(json['updatedAt'].toString()) ?? 0
           : 0,
-      idReg: json['idReg'] ?? '',
-      nomeComum: json['nomeComum'] ?? '',
-      nomeCientifico: json['nomeCientifico'] ?? '',
+      idReg: (json['idReg'] as String?) ?? '',
+      nomeComum: (json['nomeComum'] as String?) ?? '',
+      nomeCientifico: (json['nomeCientifico'] as String?) ?? '',
       dominio: json['dominio'] as String?,
       reino: json['reino'] as String?,
       subReino: json['subReino'] as String?,
@@ -157,7 +157,7 @@ class PragasHive extends HiveObject {
       subTribo: json['subTribo'] as String?,
       genero: json['genero'] as String?,
       especie: json['especie'] as String?,
-      tipoPraga: json['tipoPraga'] ?? '',
+      tipoPraga: (json['tipoPraga'] as String?) ?? '',
     );
   }
 

@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../repositories/plants_repository.dart';
 
 class DeletePlantUseCase implements UseCase<void, String> {
@@ -10,7 +11,7 @@ class DeletePlantUseCase implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String id) async {
     if (id.trim().isEmpty) {
-      return Left(ValidationFailure('ID da planta é obrigatório'));
+      return const Left(ValidationFailure('ID da planta é obrigatório'));
     }
 
     // Check if plant exists first

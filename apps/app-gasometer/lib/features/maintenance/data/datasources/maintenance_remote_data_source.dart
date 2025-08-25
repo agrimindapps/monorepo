@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../models/maintenance_model.dart';
 import '../../domain/entities/maintenance_entity.dart';
+import '../models/maintenance_model.dart';
 
 abstract class MaintenanceRemoteDataSource {
   Future<List<MaintenanceEntity>> getAllMaintenanceRecords();
@@ -223,7 +223,7 @@ class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
       notes: null,
       createdAt: model.createdAt ?? DateTime.now(),
       updatedAt: model.updatedAt ?? DateTime.now(),
-      metadata: {},
+      metadata: const {},
     );
   }
 

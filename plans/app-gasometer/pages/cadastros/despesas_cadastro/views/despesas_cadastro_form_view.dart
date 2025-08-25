@@ -1,14 +1,13 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:get/get.dart';
 
 // Project imports:
 import '../controller/despesas_cadastro_form_controller.dart';
+import '../widgets/despesa_descricao_section.dart';
 import '../widgets/despesa_info_section.dart';
 import '../widgets/despesa_valor_section.dart';
-import '../widgets/despesa_descricao_section.dart';
 
 class DespesaCadastroFormView extends StatelessWidget {
   const DespesaCadastroFormView({super.key});

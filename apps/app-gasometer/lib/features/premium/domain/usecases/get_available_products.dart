@@ -1,6 +1,7 @@
+import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core/core.dart' as core;
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';

@@ -45,8 +45,8 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
   void _shareContent() {
     // Implementar compartilhamento se necessário
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Compartilhamento disponível em breve'),
+      const SnackBar(
+        content: Text('Compartilhamento disponível em breve'),
         backgroundColor: PlantisColors.primary,
         behavior: SnackBarBehavior.floating,
       ),
@@ -106,13 +106,13 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   ),
                   child: Column(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.privacy_tip,
                         size: 48,
                         color: Colors.white,
                       ),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Política de Privacidade',
                         style: TextStyle(
                           color: Colors.white,
@@ -369,7 +369,7 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
                   ),
                   child: Column(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.verified_user,
                         color: PlantisColors.primary,
                         size: 32,
@@ -433,7 +433,7 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               color: PlantisColors.secondary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -446,7 +446,7 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
-              border: Border(
+              border: const Border(
                 left: BorderSide(
                   width: 4,
                   color: PlantisColors.secondary,

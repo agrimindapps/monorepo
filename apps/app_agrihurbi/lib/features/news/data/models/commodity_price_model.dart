@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
+import 'package:hive/hive.dart';
 
 part 'commodity_price_model.g.dart';
 
@@ -16,7 +16,7 @@ class CommodityPriceModel extends CommodityPriceEntity {
   final String commodityName;
   
   @HiveField(2)
-  final CommodityTypeModel type;
+  final CommodityTypeModel _type;
   
   @HiveField(3)
   final double currentPrice;
@@ -45,7 +45,7 @@ class CommodityPriceModel extends CommodityPriceEntity {
   const CommodityPriceModel({
     required this.id,
     required this.commodityName,
-    required this.type,
+    required CommodityTypeModel type,
     required this.currentPrice,
     required this.previousPrice,
     required this.changePercent,
@@ -54,10 +54,11 @@ class CommodityPriceModel extends CommodityPriceEntity {
     required this.market,
     required this.lastUpdated,
     this.history = const [],
-  }) : super(
+  }) : _type = type,
+       super(
           id: id,
           commodityName: commodityName,
-          type: type,
+          type: CommodityType.grains, // placeholder, será sobrescrito pelo getter
           currentPrice: currentPrice,
           previousPrice: previousPrice,
           changePercent: changePercent,
@@ -67,6 +68,10 @@ class CommodityPriceModel extends CommodityPriceEntity {
           lastUpdated: lastUpdated,
           history: history,
         );
+
+  /// Override getter to convert model type to domain type
+  @override
+  CommodityType get type => _type.toDomainType();
 
   /// Create from Entity
   factory CommodityPriceModel.fromEntity(CommodityPriceEntity entity) {
@@ -88,18 +93,18 @@ class CommodityPriceModel extends CommodityPriceEntity {
   /// Create from JSON (API response)
   factory CommodityPriceModel.fromJson(Map<String, dynamic> json) {
     return CommodityPriceModel(
-      id: json['id'] ?? '',
-      commodityName: json['name'] ?? '',
-      type: CommodityTypeModel.fromString(json['type'] ?? 'grains'),
-      currentPrice: (json['currentPrice'] ?? 0.0).toDouble(),
-      previousPrice: (json['previousPrice'] ?? 0.0).toDouble(),
-      changePercent: (json['changePercent'] ?? 0.0).toDouble(),
-      currency: json['currency'] ?? 'BRL',
-      unit: json['unit'] ?? 'kg',
-      market: json['market'] ?? 'BMF',
-      lastUpdated: DateTime.tryParse(json['lastUpdated'] ?? '') ?? DateTime.now(),
+      id: (json['id'] as String?) ?? '',
+      commodityName: (json['name'] as String?) ?? '',
+      type: CommodityTypeModel.fromString((json['type'] as String?) ?? 'grains'),
+      currentPrice: ((json['currentPrice'] as num?) ?? 0.0).toDouble(),
+      previousPrice: ((json['previousPrice'] as num?) ?? 0.0).toDouble(),
+      changePercent: ((json['changePercent'] as num?) ?? 0.0).toDouble(),
+      currency: (json['currency'] as String?) ?? 'BRL',
+      unit: (json['unit'] as String?) ?? 'kg',
+      market: (json['market'] as String?) ?? 'BMF',
+      lastUpdated: DateTime.tryParse((json['lastUpdated'] as String?) ?? '') ?? DateTime.now(),
       history: (json['history'] as List<dynamic>?)
-              ?.map((h) => HistoricalPriceModel.fromJson(h))
+              ?.map((h) => HistoricalPriceModel.fromJson(h as Map<String, dynamic>))
               .toList() ?? [],
     );
   }
@@ -138,7 +143,7 @@ class CommodityPriceModel extends CommodityPriceEntity {
     return CommodityPriceModel(
       id: id ?? this.id,
       commodityName: commodityName ?? this.commodityName,
-      type: type ?? this.type,
+      type: type ?? _type,
       currentPrice: currentPrice ?? this.currentPrice,
       previousPrice: previousPrice ?? this.previousPrice,
       changePercent: changePercent ?? this.changePercent,
@@ -292,6 +297,30 @@ enum CommodityTypeModel {
         return 'Fertilizantes';
     }
   }
+
+  /// Convert to domain entity type
+  CommodityType toDomainType() {
+    switch (this) {
+      case CommodityTypeModel.grains:
+        return CommodityType.grains;
+      case CommodityTypeModel.livestock:
+        return CommodityType.livestock;
+      case CommodityTypeModel.dairy:
+        return CommodityType.dairy;
+      case CommodityTypeModel.vegetables:
+        return CommodityType.vegetables;
+      case CommodityTypeModel.fruits:
+        return CommodityType.fruits;
+      case CommodityTypeModel.coffee:
+        return CommodityType.coffee;
+      case CommodityTypeModel.sugar:
+        return CommodityType.sugar;
+      case CommodityTypeModel.cotton:
+        return CommodityType.cotton;
+      case CommodityTypeModel.fertilizer:
+        return CommodityType.fertilizer;
+    }
+  }
 }
 
 /// Historical Price Model with Hive Serialization
@@ -328,9 +357,9 @@ class HistoricalPriceModel extends HistoricalPrice {
   /// Create from JSON
   factory HistoricalPriceModel.fromJson(Map<String, dynamic> json) {
     return HistoricalPriceModel(
-      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
-      price: (json['price'] ?? 0.0).toDouble(),
-      volume: (json['volume'] ?? 0.0).toDouble(),
+      date: DateTime.tryParse((json['date'] as String?) ?? '') ?? DateTime.now(),
+      price: ((json['price'] as num?) ?? 0.0).toDouble(),
+      volume: ((json['volume'] as num?) ?? 0.0).toDouble(),
     );
   }
 
@@ -396,16 +425,16 @@ class MarketSummaryModel extends MarketSummaryEntity {
   /// Create from JSON
   factory MarketSummaryModel.fromJson(Map<String, dynamic> json) {
     return MarketSummaryModel(
-      marketName: json['marketName'] ?? '',
-      lastUpdated: DateTime.tryParse(json['lastUpdated'] ?? '') ?? DateTime.now(),
+      marketName: (json['marketName'] as String?) ?? '',
+      lastUpdated: DateTime.tryParse((json['lastUpdated'] as String?) ?? '') ?? DateTime.now(),
       topGainers: (json['topGainers'] as List<dynamic>?)
-              ?.map((c) => CommodityPriceModel.fromJson(c))
+              ?.map((c) => CommodityPriceModel.fromJson(c as Map<String, dynamic>))
               .toList() ?? [],
       topLosers: (json['topLosers'] as List<dynamic>?)
-              ?.map((c) => CommodityPriceModel.fromJson(c))
+              ?.map((c) => CommodityPriceModel.fromJson(c as Map<String, dynamic>))
               .toList() ?? [],
-      marketIndex: (json['marketIndex'] ?? 0.0).toDouble(),
-      marketIndexChange: (json['marketIndexChange'] ?? 0.0).toDouble(),
+      marketIndex: ((json['marketIndex'] as num?) ?? 0.0).toDouble(),
+      marketIndexChange: ((json['marketIndexChange'] as num?) ?? 0.0).toDouble(),
     );
   }
 

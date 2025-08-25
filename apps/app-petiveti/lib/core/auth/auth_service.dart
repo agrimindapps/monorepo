@@ -1,9 +1,10 @@
 import 'package:dartz/dartz.dart';
-import '../error/failures.dart';
+
 import '../../features/auth/domain/entities/user.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/subscription/domain/entities/user_subscription.dart';
 import '../../features/subscription/domain/repositories/subscription_repository.dart';
+import '../error/failures.dart';
 
 /// Central authentication and authorization service
 class AuthService {
@@ -68,12 +69,12 @@ class AuthService {
   Future<Either<Failure, UserSubscription?>> getCurrentSubscription() async {
     final userResult = await getCurrentUser();
     if (userResult.isLeft()) {
-      return Left(AuthFailure(message: 'User not authenticated'));
+      return const Left(AuthFailure(message: 'User not authenticated'));
     }
     
     final user = userResult.getOrElse(() => null);
     if (user == null) {
-      return Left(AuthFailure(message: 'User not found'));
+      return const Left(AuthFailure(message: 'User not found'));
     }
 
     return await _subscriptionRepository.getCurrentSubscription(user.id);
@@ -93,7 +94,7 @@ class AuthService {
   Stream<Either<Failure, UserSubscription?>> watchSubscription() async* {
     await for (final userResult in watchAuthState()) {
       if (userResult.isLeft()) {
-        yield Left(userResult.swap().getOrElse(() => AuthFailure(message: 'Auth error')));
+        yield Left(userResult.swap().getOrElse(() => const AuthFailure(message: 'Auth error')));
         continue;
       }
 

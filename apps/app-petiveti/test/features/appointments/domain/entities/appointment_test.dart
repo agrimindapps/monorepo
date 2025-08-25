@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:app_petiveti/features/appointments/domain/entities/appointment.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Appointment Entity', () {

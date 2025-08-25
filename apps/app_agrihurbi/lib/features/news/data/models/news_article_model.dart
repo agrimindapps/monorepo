@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
+import 'package:hive/hive.dart';
 
 part 'news_article_model.g.dart';
 
@@ -34,7 +34,7 @@ class NewsArticleModel extends NewsArticleEntity {
   final DateTime publishedAt;
   
   @HiveField(8)
-  final NewsCategoryModel category;
+  final NewsCategoryModel _category;
   
   @HiveField(9)
   final List<String> tags;
@@ -54,11 +54,12 @@ class NewsArticleModel extends NewsArticleEntity {
     required this.sourceUrl,
     required this.imageUrl,
     required this.publishedAt,
-    required this.category,
+    required NewsCategoryModel category,
     required this.tags,
     this.isPremium = false,
     this.readTimeMinutes = 3,
-  }) : super(
+  }) : _category = category,
+       super(
           id: id,
           title: title,
           description: description,
@@ -67,11 +68,15 @@ class NewsArticleModel extends NewsArticleEntity {
           sourceUrl: sourceUrl,
           imageUrl: imageUrl,
           publishedAt: publishedAt,
-          category: category,
+          category: NewsCategory.crops, // placeholder, será sobrescrito pelo getter
           tags: tags,
           isPremium: isPremium,
           readTimeMinutes: readTimeMinutes,
         );
+
+  /// Override getter to convert model category to domain category
+  @override
+  NewsCategory get category => _category.toEntity();
 
   /// Create from Entity
   factory NewsArticleModel.fromEntity(NewsArticleEntity entity) {
@@ -94,18 +99,18 @@ class NewsArticleModel extends NewsArticleEntity {
   /// Create from JSON (RSS/API response)
   factory NewsArticleModel.fromJson(Map<String, dynamic> json) {
     return NewsArticleModel(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      content: json['content'] ?? '',
-      author: json['author'] ?? '',
-      sourceUrl: json['sourceUrl'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      publishedAt: DateTime.tryParse(json['publishedAt'] ?? '') ?? DateTime.now(),
-      category: NewsCategoryModel.fromString(json['category'] ?? 'crops'),
-      tags: List<String>.from(json['tags'] ?? []),
-      isPremium: json['isPremium'] ?? false,
-      readTimeMinutes: json['readTimeMinutes'] ?? 3,
+      id: (json['id'] as String?) ?? '',
+      title: (json['title'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
+      content: (json['content'] as String?) ?? '',
+      author: (json['author'] as String?) ?? '',
+      sourceUrl: (json['sourceUrl'] as String?) ?? '',
+      imageUrl: (json['imageUrl'] as String?) ?? '',
+      publishedAt: DateTime.tryParse((json['publishedAt'] as String?) ?? '') ?? DateTime.now(),
+      category: NewsCategoryModel.fromString((json['category'] as String?) ?? 'crops'),
+      tags: List<String>.from((json['tags'] as List?) ?? []),
+      isPremium: (json['isPremium'] as bool?) ?? false,
+      readTimeMinutes: (json['readTimeMinutes'] as int?) ?? 3,
     );
   }
 
@@ -151,7 +156,7 @@ class NewsArticleModel extends NewsArticleEntity {
       sourceUrl: sourceUrl ?? this.sourceUrl,
       imageUrl: imageUrl ?? this.imageUrl,
       publishedAt: publishedAt ?? this.publishedAt,
-      category: category ?? this.category,
+      category: category ?? _category,
       tags: tags ?? this.tags,
       isPremium: isPremium ?? this.isPremium,
       readTimeMinutes: readTimeMinutes ?? this.readTimeMinutes,

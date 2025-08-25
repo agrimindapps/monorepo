@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'user_entity.dart';
+
 import '../../shared/utils/failure.dart';
+import 'user_entity.dart';
 
 /// Resultado unificado para operações de autenticação no monorepo
 /// Fornece API consistente para todos os projetos/módulos
@@ -45,7 +46,7 @@ class AuthResult<T> {
           moduleName: moduleName,
         );
 
-  /// Converte Either<Failure, T> para AuthResult<T>
+  /// Converte Either&lt;Failure, T&gt; para AuthResult&lt;T&gt;
   factory AuthResult.fromEither(Either<Failure, T> either, [String? moduleName]) {
     return either.fold(
       (failure) => AuthResult.failure(
@@ -57,7 +58,7 @@ class AuthResult<T> {
     );
   }
 
-  /// Converte Future<Either<Failure, T>> para Future<AuthResult<T>>
+  /// Converte Future&lt;Either&lt;Failure, T&gt;&gt; para Future&lt;AuthResult&lt;T&gt;&gt;
   static Future<AuthResult<T>> fromFutureEither<T>(
     Future<Either<Failure, T>> futureEither, [
     String? moduleName,
@@ -147,7 +148,7 @@ typedef AuthVoidResult = AuthResult<void>;
 
 /// Extension methods para facilitar uso
 extension AuthResultExtension<T> on AuthResult<T> {
-  /// Converte para Either<Failure, T>
+  /// Converte para Either&lt;Failure, T&gt;
   Either<Failure, T> toEither() {
     if (success && data != null) {
       return Right(data as T);
@@ -174,6 +175,8 @@ extension AuthResultExtension<T> on AuthResult<T> {
 
 /// Factory methods convenientes para casos comuns
 class AuthResults {
+  // Private constructor to prevent instantiation
+  AuthResults._();
   /// Resultado de login bem-sucedido
   static AuthUserResult loginSuccess(UserEntity user, [String? moduleName]) {
     return AuthResult.success(user, moduleName);

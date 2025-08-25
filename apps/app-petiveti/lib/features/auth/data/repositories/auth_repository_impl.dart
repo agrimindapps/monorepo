@@ -32,7 +32,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : Left(AuthFailure(message: 'Falha na autenticação'));
+        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha na autenticação'));
       } catch (_) {
         return Left(CacheFailure(message: e.message));
       }
@@ -53,7 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : Left(AuthFailure(message: 'Falha na criação da conta'));
+        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha na criação da conta'));
       } catch (_) {
         return Left(CacheFailure(message: e.message));
       }
@@ -74,7 +74,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : Left(AuthFailure(message: 'Falha no login com Google'));
+        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Google'));
       } catch (_) {
         return Left(CacheFailure(message: e.message));
       }
@@ -95,7 +95,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : Left(AuthFailure(message: 'Falha no login com Apple'));
+        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Apple'));
       } catch (_) {
         return Left(CacheFailure(message: e.message));
       }
@@ -116,7 +116,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : Left(AuthFailure(message: 'Falha no login com Facebook'));
+        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Facebook'));
       } catch (_) {
         return Left(CacheFailure(message: e.message));
       }

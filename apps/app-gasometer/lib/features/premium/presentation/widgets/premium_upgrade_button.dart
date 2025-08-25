@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/premium_provider.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../providers/premium_provider.dart';
 
 class PremiumUpgradeButton extends StatelessWidget {
   const PremiumUpgradeButton({super.key});
@@ -37,7 +38,7 @@ class PremiumUpgradeButton extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.star,
                       color: Colors.white,
                       size: 48,
@@ -82,7 +83,7 @@ class PremiumUpgradeButton extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(
+                          const Icon(
                             Icons.arrow_forward,
                             color: Colors.white,
                             size: 18,
@@ -139,7 +140,7 @@ class PremiumUpgradeButton extends StatelessWidget {
                   Container(
                     width: 60,
                     height: 60,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: AppColors.premiumGradient,
                       shape: BoxShape.circle,
                     ),
@@ -150,7 +151,7 @@ class PremiumUpgradeButton extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     'GasOMeter Premium',
                     style: AppTextStyles.headlineMedium,
                   ),
@@ -201,7 +202,7 @@ class PremiumUpgradeButton extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Ver Planos e Preços',
                         style: AppTextStyles.buttonMedium,
                       ),

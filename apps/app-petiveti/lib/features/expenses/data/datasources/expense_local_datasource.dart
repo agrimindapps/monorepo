@@ -1,6 +1,5 @@
-import '../models/expense_model.dart';
 import '../../domain/entities/expense.dart';
-import '../../domain/entities/expense_summary.dart';
+import '../models/expense_model.dart';
 
 abstract class ExpenseLocalDataSource {
   Future<List<ExpenseModel>> getExpenses(String userId);

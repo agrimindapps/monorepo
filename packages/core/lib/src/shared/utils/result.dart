@@ -107,7 +107,7 @@ sealed class Result<T> {
   T getOrThrow() {
     return switch (this) {
       Success<T> success => success.data,
-      Error<T> error => throw error.error,
+      Error<T> error => throw Exception(error.error.toString()),
     };
   }
 

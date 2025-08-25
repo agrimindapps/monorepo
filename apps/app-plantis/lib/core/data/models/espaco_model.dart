@@ -123,10 +123,10 @@ class EspacoModel extends BaseSyncModel {
       moduleName: baseFields['moduleName'] as String?,
       nome: map['nome']?.toString() ?? '',
       descricao: map['descricao']?.toString(),
-      ativo: map['ativo'] ?? true,
+      ativo: (map['ativo'] as bool?) ?? true,
       dataCriacao:
           map['dataCriacao'] != null
-              ? DateTime.parse(map['dataCriacao'])
+              ? DateTime.parse(map['dataCriacao'] as String)
               : null,
     );
   }
@@ -172,10 +172,10 @@ class EspacoModel extends BaseSyncModel {
       moduleName: baseFields['moduleName'] as String?,
       nome: map['nome']?.toString() ?? '',
       descricao: map['descricao']?.toString(),
-      ativo: map['ativo'] ?? true,
+      ativo: (map['ativo'] as bool?) ?? true,
       dataCriacao:
           map['data_criacao'] != null
-              ? DateTime.parse(map['data_criacao'])
+              ? DateTime.parse(map['data_criacao'] as String)
               : null,
     );
   }

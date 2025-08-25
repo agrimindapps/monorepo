@@ -57,10 +57,10 @@ class FitossanitarioInfoHive extends HiveObject {
 
   factory FitossanitarioInfoHive.fromJson(Map<String, dynamic> json) {
     return FitossanitarioInfoHive(
-      objectId: json['objectId'] ?? '',
+      objectId: (json['objectId'] as String?) ?? '',
       createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
       updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
-      idReg: json['idReg'] ?? '',
+      idReg: (json['idReg'] as String?) ?? '',
       embalagens: json['embalagens'] as String?,
       tecnologia: json['tecnologia'] as String?,
       pHumanas: json['pHumanas'] as String?,
@@ -68,7 +68,7 @@ class FitossanitarioInfoHive extends HiveObject {
       manejoResistencia: json['manejoResistencia'] as String?,
       compatibilidade: json['compatibilidade'] as String?,
       manejoIntegrado: json['manejoIntegrado'] as String?,
-      fkIdDefensivo: json['fkIdDefensivo'] ?? '',
+      fkIdDefensivo: (json['fkIdDefensivo'] as String?) ?? '',
     );
   }
 

@@ -46,7 +46,7 @@ class DefensivoAppBarWidget extends StatelessWidget {
   }
 
   Widget _buildBackButton(BuildContext context, bool isDark) {
-    return Container(
+    return DecoratedBox(
       decoration: _buildGlassButtonDecoration(context, isDark),
       child: IconButton(
         icon: Icon(
@@ -91,7 +91,7 @@ class DefensivoAppBarWidget extends StatelessWidget {
   }
 
   Widget _buildFontSizeControls(BuildContext context, bool isDark) {
-    return Container(
+    return DecoratedBox(
       decoration: _buildGlassButtonDecoration(context, isDark),
       child: PopupMenuButton<double>(
         tooltip: 'Ajustar tamanho da fonte',

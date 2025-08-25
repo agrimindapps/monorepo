@@ -1,27 +1,29 @@
-import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dio/dio.dart';
-
-// Core Services Integration
-import 'package:core/core.dart' as core_lib;
-
+import 'package:app_agrihurbi/core/network/dio_client.dart';
 // Core
 import 'package:app_agrihurbi/core/network/network_info.dart';
-import 'package:app_agrihurbi/core/network/dio_client.dart';
 import 'package:app_agrihurbi/core/services/premium_service.dart';
-import 'package:app_agrihurbi/core/services/error_tracking_service.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+// Core Services Integration
+import 'package:core/core.dart' as core_lib;
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Import generated file
-import 'injection_container.config.dart';
+// Import generated file (will be created by code generation)
+// import 'injection_container.config.dart';
 
 final getIt = GetIt.instance;
 
-@InjectableInit()
-void configureDependencies() => getIt.init();
+// @InjectableInit()
+// void configureDependencies() => getIt.init();
+
+/// Placeholder for injectable configuration
+/// Run 'flutter packages pub run build_runner build' to generate
+void configureDependencies() {
+  // Generated code will be inserted here
+}
 
 /// Configure dependencies using @injectable + code generation
 /// 

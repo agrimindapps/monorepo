@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../di/injection_container.dart';
 import '../utils/navigation_service.dart';

@@ -29,7 +29,7 @@ class NoPlantsWidget extends StatelessWidget {
               size: 80,
               color: cores['textoTerciario'],
             ),
-            SizedBox(height: dimensoes['marginL']!),
+            SizedBox(height: dimensoes['marginL']),
             Text(
               'Nenhuma planta cadastrada',
               style: textStyles['h3']!.copyWith(
@@ -37,7 +37,7 @@ class NoPlantsWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: dimensoes['marginM']!),
+            SizedBox(height: dimensoes['marginM']),
             Text(
               'Adicione sua primeira planta para começar a cuidar dela com o Grow',
               style: textStyles['bodyLarge']!.copyWith(
@@ -46,7 +46,7 @@ class NoPlantsWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: dimensoes['marginXL']!),
+            SizedBox(height: dimensoes['marginXL']),
             if (onAddPlant != null)
               ElevatedButton.icon(
                 onPressed: onAddPlant,
@@ -61,7 +61,7 @@ class NoPlantsWidget extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(dimensoes['radiusCircular']! / 2),
                   ),
-                  elevation: dimensoes['elevationS']!,
+                  elevation: dimensoes['elevationS'],
                 ),
                 icon: const Icon(Icons.add),
                 label: Text(

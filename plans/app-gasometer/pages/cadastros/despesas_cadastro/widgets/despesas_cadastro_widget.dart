@@ -128,7 +128,7 @@ class DespesaCadastroWidgetState extends State<DespesaCadastroWidget>
             const DespesaCadastroFormView(),
             // Loading overlay
             Obx(() => controller.isLoading.value
-                ? Container(
+                ? ColoredBox(
                     color: Colors.black.withValues(alpha: 0.3),
                     child: Center(
                       child: Container(
@@ -147,7 +147,7 @@ class DespesaCadastroWidgetState extends State<DespesaCadastroWidget>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircularProgressIndicator(
+                            const CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Colors.red,
                               ),

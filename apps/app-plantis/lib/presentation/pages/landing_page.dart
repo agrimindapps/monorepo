@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../core/theme/colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
@@ -94,7 +95,7 @@ class _LandingPageState extends State<LandingPage>
   }
 
   Widget _buildSplashScreen() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -115,7 +116,7 @@ class _LandingPageState extends State<LandingPage>
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(Icons.eco, size: 80, color: Colors.white),
+              child: const Icon(Icons.eco, size: 80, color: Colors.white),
             ),
             const SizedBox(height: 24),
             const CircularProgressIndicator(
@@ -129,7 +130,7 @@ class _LandingPageState extends State<LandingPage>
   }
 
   Widget _buildRedirectingScreen() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -150,10 +151,10 @@ class _LandingPageState extends State<LandingPage>
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(Icons.eco, size: 80, color: Colors.white),
+              child: const Icon(Icons.eco, size: 80, color: Colors.white),
             ),
             const SizedBox(height: 24),
-            Text(
+            const Text(
               'Bem-vindo de volta!',
               style: TextStyle(
                 color: Colors.white,
@@ -173,7 +174,7 @@ class _LandingPageState extends State<LandingPage>
   }
 
   Widget _buildLandingContent() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -208,10 +209,10 @@ class _LandingPageState extends State<LandingPage>
       child: Row(
         children: [
           // Logo
-          Row(
+          const Row(
             children: [
               Icon(Icons.eco, size: 32, color: Colors.white),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Text(
                 'Plantis',
                 style: TextStyle(
@@ -236,7 +237,7 @@ class _LandingPageState extends State<LandingPage>
               ),
               elevation: 2,
             ),
-            child: Text(
+            child: const Text(
               'Entrar',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
@@ -264,7 +265,7 @@ class _LandingPageState extends State<LandingPage>
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.local_florist,
                       size: 100,
                       color: Colors.white,
@@ -273,7 +274,7 @@ class _LandingPageState extends State<LandingPage>
                   const SizedBox(height: 32),
 
                   // Main title
-                  Text(
+                  const Text(
                     'Cuide das Suas Plantas\ncom Amor e Tecnologia',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -311,7 +312,7 @@ class _LandingPageState extends State<LandingPage>
                         ),
                         elevation: 4,
                       ),
-                      child: Text(
+                      child: const Text(
                         'Começar Agora - É Grátis!',
                         style: TextStyle(
                           fontSize: 18,
@@ -334,7 +335,7 @@ class _LandingPageState extends State<LandingPage>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
       child: Column(
         children: [
-          Text(
+          const Text(
             'Por que escolher o Plantis?',
             style: TextStyle(
               color: PlantisColors.primary,
@@ -343,7 +344,7 @@ class _LandingPageState extends State<LandingPage>
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'Recursos pensados para transformar sua experiência com plantas',
             textAlign: TextAlign.center,
             style: TextStyle(color: PlantisColors.textSecondary, fontSize: 16),
@@ -410,7 +411,7 @@ class _LandingPageState extends State<LandingPage>
             children: [
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -419,7 +420,7 @@ class _LandingPageState extends State<LandingPage>
               const SizedBox(height: 8),
               Text(
                 description,
-                style: TextStyle(
+                style: const TextStyle(
                   color: PlantisColors.textSecondary,
                   fontSize: 16,
                   height: 1.5,
@@ -454,9 +455,9 @@ class _LandingPageState extends State<LandingPage>
       ),
       child: Column(
         children: [
-          Icon(Icons.eco, size: 60, color: Colors.white),
+          const Icon(Icons.eco, size: 60, color: Colors.white),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             'Pronto para começar sua jornada verde?',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -489,7 +490,7 @@ class _LandingPageState extends State<LandingPage>
                 ),
                 elevation: 4,
               ),
-              child: Text(
+              child: const Text(
                 'Começar Gratuitamente',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
@@ -514,11 +515,11 @@ class _LandingPageState extends State<LandingPage>
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.eco, size: 24, color: PlantisColors.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 'Plantis',
                 style: TextStyle(
@@ -530,7 +531,7 @@ class _LandingPageState extends State<LandingPage>
             ],
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'Cuidando das suas plantas com tecnologia e carinho.',
             textAlign: TextAlign.center,
             style: TextStyle(color: PlantisColors.textSecondary, fontSize: 14),

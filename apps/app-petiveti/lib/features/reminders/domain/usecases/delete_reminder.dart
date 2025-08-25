@@ -11,7 +11,7 @@ class DeleteReminder implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String reminderId) async {
     if (reminderId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do lembrete é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do lembrete é obrigatório'));
     }
 
     return await repository.deleteReminder(reminderId);

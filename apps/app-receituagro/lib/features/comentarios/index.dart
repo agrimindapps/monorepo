@@ -1,23 +1,17 @@
 // Main page
-export 'comentarios_page.dart';
-
-// Models
-export 'models/comentario_model.dart';
-export 'models/comentario_edit_state.dart';
-export 'models/comentarios_state.dart';
-
-// Services  
-export 'services/comentarios_service.dart';
-
-// Controllers
-export 'controller/comentarios_controller.dart';
-
 // Providers/Bindings  
 export 'bindings/comentarios_bindings.dart';
-
+export 'comentarios_page.dart';
 // Constants
 export 'constants/comentarios_design_tokens.dart';
-
+// Controllers
+export 'controller/comentarios_controller.dart';
+export 'models/comentario_edit_state.dart';
+// Models
+export 'models/comentario_model.dart';
+export 'models/comentarios_state.dart';
+// Services  
+export 'services/comentarios_service.dart';
 // Widgets
 export 'views/widgets/add_comentario_dialog.dart';
 export 'views/widgets/comentario_card.dart';

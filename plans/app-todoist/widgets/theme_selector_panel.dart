@@ -176,7 +176,7 @@ class ThemeSelectorPanel extends StatelessWidget {
         // Fechar o painel após selecionar
         Navigator.of(context).pop();
       },
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(

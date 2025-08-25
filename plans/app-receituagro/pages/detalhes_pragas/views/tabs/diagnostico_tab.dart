@@ -141,7 +141,7 @@ class _DiagnosticoTabState extends State<DiagnosticoTab>
     
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1E22) : Colors.grey.shade50,
           border: Border.all(
@@ -198,7 +198,7 @@ class _DiagnosticoTabState extends State<DiagnosticoTab>
   Widget _buildCulturaDropdown(BuildContext context,
       DetalhesPragasController controller, List<String> culturas, bool isDark) {
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E22) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),

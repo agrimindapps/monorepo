@@ -13,7 +13,7 @@ class GetMedicationById implements UseCase<Medication, String> {
   @override
   Future<Either<Failure, Medication>> call(String id) async {
     if (id.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do medicamento é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do medicamento é obrigatório'));
     }
     
     return await repository.getMedicationById(id);

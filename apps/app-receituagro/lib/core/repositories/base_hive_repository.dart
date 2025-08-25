@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:dartz/dartz.dart';
+import 'package:hive/hive.dart';
+
 import '../contracts/i_static_data_repository.dart';
 
 /// Repositório base para entidades Hive

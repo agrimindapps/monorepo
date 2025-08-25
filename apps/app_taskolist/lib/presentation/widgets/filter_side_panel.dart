@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/enums/task_filter.dart';
 import '../../core/theme/app_colors.dart';
+import '../pages/settings_page.dart';
 import '../providers/auth_providers.dart';
 import '../providers/task_providers.dart';
-import '../pages/settings_page.dart';
 
 class FilterSidePanel extends ConsumerStatefulWidget {
   final Function(TaskFilter filter, String? selectedTag) onFilterChanged;
@@ -81,7 +81,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
 
   void _loadAvailableTags() {
     // Obter todas as tasks para extrair tags
-    final tasksRequest = GetTasksRequest();
+    const tasksRequest = GetTasksRequest();
     ref.read(getTasksProvider(tasksRequest).future).then((tasks) {
       final tagsSet = <String>{};
       for (final task in tasks) {
@@ -333,7 +333,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
       child: Consumer(
         builder: (context, ref, child) {
           return FutureBuilder(
-            future: ref.read(getTasksProvider(GetTasksRequest()).future),
+            future: ref.read(getTasksProvider(const GetTasksRequest()).future),
             builder: (context, snapshot) {
               final tasks = snapshot.data ?? [];
               final pendingCount = tasks.where((t) => t.status.name == 'pending').length;
@@ -410,7 +410,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
@@ -540,7 +540,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                       const SizedBox(height: 2),
                       Text(
                         filter.description,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: AppColors.textSecondary,
@@ -626,7 +626,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                 ),
                 child: Text(
                   '${_availableTags.length}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.secondary,
@@ -663,7 +663,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                   size: 32,
                 ),
                 const SizedBox(height: 12),
-                Text(
+                const Text(
                   'Nenhuma tag encontrada',
                   style: TextStyle(
                     fontSize: 14,
@@ -672,7 +672,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'Crie tarefas com tags para organizá-las melhor',
                   style: TextStyle(
                     fontSize: 12,

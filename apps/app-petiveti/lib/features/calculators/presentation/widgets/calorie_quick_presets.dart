@@ -29,10 +29,10 @@ class CalorieQuickPresets extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: _getPresetColor(preset).withOpacity(0.1),
+                  color: _getPresetColor(preset).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getPresetColor(preset).withOpacity(0.3),
+                    color: _getPresetColor(preset).withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),

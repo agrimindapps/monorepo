@@ -5,7 +5,7 @@ class Subscription {
   static final subscriptionStatusProvider = 
     StreamProvider<SubscriptionStatus>((ref) async* {
       // TODO: Implement actual subscription status stream
-      yield SubscriptionStatus(
+      yield const SubscriptionStatus(
         isActive: false,
         expirationDate: null,
       );

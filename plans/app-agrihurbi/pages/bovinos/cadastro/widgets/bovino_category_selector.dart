@@ -53,7 +53,7 @@ class _BovinoCategorySelectorState extends State<BovinoCategorySelector> {
           ],
         ),
         const SizedBox(height: 8),
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(8),
@@ -206,7 +206,7 @@ class _BovinoTagSelectorState extends State<BovinoTagSelector> {
         ],
 
         // Seletor de categorias
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(8),

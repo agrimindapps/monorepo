@@ -83,7 +83,7 @@ class EmptyPlantsWidget extends StatelessWidget {
                   label: const Text('Limpar busca'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: PlantisColors.primary,
-                    side: BorderSide(color: PlantisColors.primary),
+                    side: const BorderSide(color: PlantisColors.primary),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,

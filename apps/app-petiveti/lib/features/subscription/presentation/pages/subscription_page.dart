@@ -145,7 +145,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -263,13 +263,13 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
       margin: const EdgeInsets.only(bottom: 16),
       child: Card(
         elevation: plan.isPopular ? 8 : 2,
-        child: Container(
+        child: DecoratedBox(
           decoration: plan.isPopular
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.blue, width: 2),
                 )
-              : null,
+              : const BoxDecoration(),
           child: Stack(
             children: [
               if (plan.isPopular)
@@ -371,7 +371,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -505,7 +505,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
           plan.id,
         );
 
-    if (success) {
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Assinatura do ${plan.title} ativada com sucesso!'),
@@ -516,7 +516,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   void _showCancelDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancelar Assinatura'),
@@ -545,7 +545,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   void _cancelSubscription() async {
     final success = await ref.read(subscriptionProvider.notifier).cancelSubscription(widget.userId);
 
-    if (success) {
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Assinatura cancelada com sucesso'),
@@ -558,7 +558,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   void _resumeSubscription() async {
     final success = await ref.read(subscriptionProvider.notifier).resumeSubscription(widget.userId);
 
-    if (success) {
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Assinatura retomada com sucesso'),
@@ -571,7 +571,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   void _restorePurchases() async {
     final success = await ref.read(subscriptionProvider.notifier).restorePurchases(widget.userId);
 
-    if (success) {
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Compras restauradas com sucesso'),

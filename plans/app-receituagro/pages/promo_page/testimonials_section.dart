@@ -198,7 +198,7 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
           radius: 25,
           backgroundImage: AssetImage(testimonial['image']),
           onBackgroundImageError: (exception, stackTrace) {},
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.grey.shade200,

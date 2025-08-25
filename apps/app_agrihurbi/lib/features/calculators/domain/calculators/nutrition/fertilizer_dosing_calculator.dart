@@ -1,14 +1,13 @@
-import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Dosagem de Fertilizantes
 /// Calcula dosagens precisas de fertilizantes líquidos e sólidos para aplicação foliar e fertirrigação
 class FertilizerDosingCalculator extends CalculatorEntity {
-  FertilizerDosingCalculator()
+  const FertilizerDosingCalculator()
       : super(
           id: 'fertilizer_dosing',
           name: 'Dosagem de Fertilizantes',
@@ -212,7 +211,7 @@ class FertilizerDosingCalculator extends CalculatorEntity {
           CalculationResultValue(
             label: 'Concentração Final',
             value: CalculatorMath.roundTo(calculations['final_concentration'] as double, 0),
-            unit: 'ppm ${primaryNutrient}',
+            unit: 'ppm $primaryNutrient',
             description: 'Concentração final do nutriente',
           ),
           CalculationResultValue(
@@ -490,7 +489,7 @@ class FertilizerDosingCalculator extends CalculatorEntity {
       warnings.add({
         'tipo': 'Água Salina',
         'severidade': 'Média',
-        'mensagem': 'Água com alta condutividade (${waterQuality} dS/m).',
+        'mensagem': 'Água com alta condutividade ($waterQuality dS/m).',
         'recomendacao': 'Monitorar CE final e ajustar concentrações'
       });
     }

@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../constants/odometer_constants.dart';
 import '../providers/odometer_form_provider.dart';
 import '../providers/odometer_provider.dart';
 import '../services/odometer_validation_service.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 
 class AddOdometerPage extends StatefulWidget {
   final OdometerEntity? odometer;
@@ -180,11 +181,15 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       title: 'Informações Básicas',
       icon: Icons.event_note,
       children: [
-        _buildOdometerField(),
-        const SizedBox(height: 12),
-        _buildRegistrationTypeField(),
-        const SizedBox(height: 12),
-        _buildDateTimeField(),
+        Column(
+          children: [
+            _buildOdometerField(),
+            const SizedBox(height: 12),
+            _buildRegistrationTypeField(),
+            const SizedBox(height: 12),
+            _buildDateTimeField(),
+          ],
+        ),
       ],
     );
   }
@@ -194,7 +199,11 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       title: 'Adicionais',
       icon: Icons.more_horiz,
       children: [
-        _buildDescriptionField(),
+        Column(
+          children: [
+            _buildDescriptionField(),
+          ],
+        ),
       ],
     );
   }

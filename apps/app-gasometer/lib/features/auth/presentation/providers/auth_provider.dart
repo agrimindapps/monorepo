@@ -1,18 +1,20 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/usecases/get_current_user.dart';
-import '../../domain/usecases/watch_auth_state.dart';
-import '../../domain/usecases/sign_in_with_email.dart';
-import '../../domain/usecases/sign_up_with_email.dart';
-import '../../domain/usecases/sign_in_anonymously.dart';
-import '../../domain/usecases/sign_out.dart';
-import '../../domain/usecases/update_profile.dart';
-import '../../domain/usecases/send_password_reset.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/platform_service.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/send_password_reset.dart';
+import '../../domain/usecases/sign_in_anonymously.dart';
+import '../../domain/usecases/sign_in_with_email.dart';
+import '../../domain/usecases/sign_out.dart';
+import '../../domain/usecases/sign_up_with_email.dart';
+import '../../domain/usecases/update_profile.dart';
+import '../../domain/usecases/watch_auth_state.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {

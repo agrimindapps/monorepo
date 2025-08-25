@@ -1,8 +1,9 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:core/core.dart' as core;
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// Tipos de upload disponíveis para o app-plantis
 enum ImageUploadType {

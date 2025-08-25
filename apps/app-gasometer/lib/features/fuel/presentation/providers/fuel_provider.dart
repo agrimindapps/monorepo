@@ -1,16 +1,17 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/fuel_record_entity.dart';
-import '../../domain/usecases/get_all_fuel_records.dart';
-import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
-import '../../domain/usecases/add_fuel_record.dart';
-import '../../domain/usecases/update_fuel_record.dart';
-import '../../domain/usecases/delete_fuel_record.dart';
-import '../../domain/usecases/search_fuel_records.dart';
-import '../../domain/usecases/get_fuel_analytics.dart';
 import '../../../../core/error/failures.dart';
+import '../../domain/entities/fuel_record_entity.dart';
+import '../../domain/usecases/add_fuel_record.dart';
+import '../../domain/usecases/delete_fuel_record.dart';
+import '../../domain/usecases/get_all_fuel_records.dart';
+import '../../domain/usecases/get_fuel_analytics.dart';
+import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
+import '../../domain/usecases/search_fuel_records.dart';
+import '../../domain/usecases/update_fuel_record.dart';
 
 @injectable
 class FuelProvider extends ChangeNotifier {

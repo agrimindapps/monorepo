@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
+import 'package:hive/hive.dart';
 
 part 'settings_model.g.dart';
 
@@ -7,38 +7,48 @@ part 'settings_model.g.dart';
 @HiveType(typeId: 23)
 class SettingsModel extends SettingsEntity {
   @HiveField(0)
+  @override
   final String userId;
   
   @HiveField(1)
-  final AppThemeModel theme;
+  @override
+  final AppTheme theme;
   
   @HiveField(2)
+  @override
   final String language;
   
   @HiveField(3)
+  @override
   final NotificationSettingsModel notifications;
   
   @HiveField(4)
+  @override
   final DataSettingsModel dataSettings;
   
   @HiveField(5)
+  @override
   final PrivacySettingsModel privacy;
   
   @HiveField(6)
+  @override
   final DisplaySettingsModel display;
   
   @HiveField(7)
+  @override
   final SecuritySettingsModel security;
   
   @HiveField(8)
+  @override
   final BackupSettingsModel backup;
   
   @HiveField(9)
+  @override
   final DateTime lastUpdated;
 
   const SettingsModel({
     required this.userId,
-    this.theme = AppThemeModel.system,
+    this.theme = AppTheme.system,
     this.language = 'pt_BR',
     this.notifications = const NotificationSettingsModel(),
     this.dataSettings = const DataSettingsModel(),
@@ -63,7 +73,7 @@ class SettingsModel extends SettingsEntity {
   factory SettingsModel.fromEntity(SettingsEntity entity) {
     return SettingsModel(
       userId: entity.userId,
-      theme: AppThemeModel.fromEntity(entity.theme),
+      theme: entity.theme,
       language: entity.language,
       notifications: NotificationSettingsModel.fromEntity(entity.notifications),
       dataSettings: DataSettingsModel.fromEntity(entity.dataSettings),
@@ -77,23 +87,35 @@ class SettingsModel extends SettingsEntity {
 
   factory SettingsModel.fromJson(Map<String, dynamic> json) {
     return SettingsModel(
-      userId: json['userId'] ?? '',
-      theme: AppThemeModel.fromString(json['theme'] ?? 'system'),
-      language: json['language'] ?? 'pt_BR',
-      notifications: NotificationSettingsModel.fromJson(json['notifications'] ?? {}),
-      dataSettings: DataSettingsModel.fromJson(json['dataSettings'] ?? {}),
-      privacy: PrivacySettingsModel.fromJson(json['privacy'] ?? {}),
-      display: DisplaySettingsModel.fromJson(json['display'] ?? {}),
-      security: SecuritySettingsModel.fromJson(json['security'] ?? {}),
-      backup: BackupSettingsModel.fromJson(json['backup'] ?? {}),
-      lastUpdated: DateTime.tryParse(json['lastUpdated'] ?? '') ?? DateTime.now(),
+      userId: json['userId']?.toString() ?? '',
+      theme: _parseThemeFromString(json['theme']?.toString() ?? 'system'),
+      language: json['language']?.toString() ?? 'pt_BR',
+      notifications: NotificationSettingsModel.fromJson(
+        (json['notifications'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+      ),
+      dataSettings: DataSettingsModel.fromJson(
+        (json['dataSettings'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+      ),
+      privacy: PrivacySettingsModel.fromJson(
+        (json['privacy'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+      ),
+      display: DisplaySettingsModel.fromJson(
+        (json['display'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+      ),
+      security: SecuritySettingsModel.fromJson(
+        (json['security'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+      ),
+      backup: BackupSettingsModel.fromJson(
+        (json['backup'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+      ),
+      lastUpdated: DateTime.tryParse(json['lastUpdated']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
-      'theme': theme.name,
+      'theme': theme.toString().split('.').last,
       'language': language,
       'notifications': notifications.toJson(),
       'dataSettings': dataSettings.toJson(),
@@ -104,50 +126,55 @@ class SettingsModel extends SettingsEntity {
       'lastUpdated': lastUpdated.toIso8601String(),
     };
   }
-}
 
-@HiveType(typeId: 24)
-enum AppThemeModel {
-  @HiveField(0) light,
-  @HiveField(1) dark,
-  @HiveField(2) system;
-
-  AppTheme toEntity() {
-    switch (this) {
-      case AppThemeModel.light: return AppTheme.light;
-      case AppThemeModel.dark: return AppTheme.dark;
-      case AppThemeModel.system: return AppTheme.system;
-    }
-  }
-
-  static AppThemeModel fromEntity(AppTheme theme) {
-    switch (theme) {
-      case AppTheme.light: return AppThemeModel.light;
-      case AppTheme.dark: return AppThemeModel.dark;
-      case AppTheme.system: return AppThemeModel.system;
-    }
-  }
-
-  static AppThemeModel fromString(String theme) {
+  static AppTheme _parseThemeFromString(String theme) {
     switch (theme.toLowerCase()) {
-      case 'light': return AppThemeModel.light;
-      case 'dark': return AppThemeModel.dark;
-      case 'system': return AppThemeModel.system;
-      default: return AppThemeModel.system;
+      case 'light':
+        return AppTheme.light;
+      case 'dark':
+        return AppTheme.dark;
+      case 'system':
+        return AppTheme.system;
+      default:
+        return AppTheme.system;
     }
   }
 }
+
 
 @HiveType(typeId: 25)
 class NotificationSettingsModel extends NotificationSettings {
-  @HiveField(0) final bool pushNotifications;
-  @HiveField(1) final bool newsNotifications;
-  @HiveField(2) final bool marketAlerts;
-  @HiveField(3) final bool weatherAlerts;
-  @HiveField(4) final bool animalReminders;
-  @HiveField(5) final bool calculatorReminders;
-  @HiveField(6) final String quietHoursStart;
-  @HiveField(7) final String quietHoursEnd;
+  @HiveField(0)
+  @override
+  final bool pushNotifications;
+  
+  @HiveField(1)
+  @override
+  final bool newsNotifications;
+  
+  @HiveField(2)
+  @override
+  final bool marketAlerts;
+  
+  @HiveField(3)
+  @override
+  final bool weatherAlerts;
+  
+  @HiveField(4)
+  @override
+  final bool animalReminders;
+  
+  @HiveField(5)
+  @override
+  final bool calculatorReminders;
+  
+  @HiveField(6)
+  @override
+  final String quietHoursStart;
+  
+  @HiveField(7)
+  @override
+  final String quietHoursEnd;
 
   const NotificationSettingsModel({
     this.pushNotifications = true,
@@ -184,14 +211,14 @@ class NotificationSettingsModel extends NotificationSettings {
 
   factory NotificationSettingsModel.fromJson(Map<String, dynamic> json) {
     return NotificationSettingsModel(
-      pushNotifications: json['pushNotifications'] ?? true,
-      newsNotifications: json['newsNotifications'] ?? true,
-      marketAlerts: json['marketAlerts'] ?? true,
-      weatherAlerts: json['weatherAlerts'] ?? true,
-      animalReminders: json['animalReminders'] ?? true,
-      calculatorReminders: json['calculatorReminders'] ?? false,
-      quietHoursStart: json['quietHoursStart'] ?? '22:00',
-      quietHoursEnd: json['quietHoursEnd'] ?? '07:00',
+      pushNotifications: json['pushNotifications'] as bool? ?? true,
+      newsNotifications: json['newsNotifications'] as bool? ?? true,
+      marketAlerts: json['marketAlerts'] as bool? ?? true,
+      weatherAlerts: json['weatherAlerts'] as bool? ?? true,
+      animalReminders: json['animalReminders'] as bool? ?? true,
+      calculatorReminders: json['calculatorReminders'] as bool? ?? false,
+      quietHoursStart: json['quietHoursStart'] as String? ?? '22:00',
+      quietHoursEnd: json['quietHoursEnd'] as String? ?? '07:00',
     );
   }
 
@@ -212,12 +239,29 @@ class NotificationSettingsModel extends NotificationSettings {
 // Similar pattern for other settings models...
 @HiveType(typeId: 26)
 class DataSettingsModel extends DataSettings {
-  @HiveField(0) final bool autoSync;
-  @HiveField(1) final bool wifiOnlySync;
-  @HiveField(2) final bool cacheImages;
-  @HiveField(3) final int cacheRetentionDays;
-  @HiveField(4) final bool compressBackups;
-  @HiveField(5) final DataExportFormatModel exportFormat;
+  @HiveField(0)
+  @override
+  final bool autoSync;
+  
+  @HiveField(1)
+  @override
+  final bool wifiOnlySync;
+  
+  @HiveField(2)
+  @override
+  final bool cacheImages;
+  
+  @HiveField(3)
+  @override
+  final int cacheRetentionDays;
+  
+  @HiveField(4)
+  @override
+  final bool compressBackups;
+  
+  @HiveField(5)
+  @override
+  final DataExportFormat exportFormat;
 
   const DataSettingsModel({
     this.autoSync = true,
@@ -225,7 +269,7 @@ class DataSettingsModel extends DataSettings {
     this.cacheImages = true,
     this.cacheRetentionDays = 30,
     this.compressBackups = true,
-    this.exportFormat = DataExportFormatModel.json,
+    this.exportFormat = DataExportFormat.json,
   }) : super(
           autoSync: autoSync,
           wifiOnlySync: wifiOnlySync,
@@ -242,18 +286,21 @@ class DataSettingsModel extends DataSettings {
       cacheImages: entity.cacheImages,
       cacheRetentionDays: entity.cacheRetentionDays,
       compressBackups: entity.compressBackups,
-      exportFormat: DataExportFormatModel.fromEntity(entity.exportFormat),
+      exportFormat: entity.exportFormat,
     );
   }
 
   factory DataSettingsModel.fromJson(Map<String, dynamic> json) {
     return DataSettingsModel(
-      autoSync: json['autoSync'] ?? true,
-      wifiOnlySync: json['wifiOnlySync'] ?? true,
-      cacheImages: json['cacheImages'] ?? true,
-      cacheRetentionDays: json['cacheRetentionDays'] ?? 30,
-      compressBackups: json['compressBackups'] ?? true,
-      exportFormat: DataExportFormatModel.fromString(json['exportFormat'] ?? 'json'),
+      autoSync: json['autoSync'] as bool? ?? true,
+      wifiOnlySync: json['wifiOnlySync'] as bool? ?? true,
+      cacheImages: json['cacheImages'] as bool? ?? true,
+      cacheRetentionDays: json['cacheRetentionDays'] as int? ?? 30,
+      compressBackups: json['compressBackups'] as bool? ?? true,
+      exportFormat: DataExportFormat.values.firstWhere(
+        (e) => e.name == (json['exportFormat'] as String? ?? 'json'),
+        orElse: () => DataExportFormat.json,
+      ),
     );
   }
 
@@ -269,46 +316,29 @@ class DataSettingsModel extends DataSettings {
   }
 }
 
-@HiveType(typeId: 27)
-enum DataExportFormatModel {
-  @HiveField(0) json,
-  @HiveField(1) csv,
-  @HiveField(2) excel;
-
-  DataExportFormat toEntity() {
-    switch (this) {
-      case DataExportFormatModel.json: return DataExportFormat.json;
-      case DataExportFormatModel.csv: return DataExportFormat.csv;
-      case DataExportFormatModel.excel: return DataExportFormat.excel;
-    }
-  }
-
-  static DataExportFormatModel fromEntity(DataExportFormat format) {
-    switch (format) {
-      case DataExportFormat.json: return DataExportFormatModel.json;
-      case DataExportFormat.csv: return DataExportFormatModel.csv;
-      case DataExportFormat.excel: return DataExportFormatModel.excel;
-    }
-  }
-
-  static DataExportFormatModel fromString(String format) {
-    switch (format.toLowerCase()) {
-      case 'json': return DataExportFormatModel.json;
-      case 'csv': return DataExportFormatModel.csv;
-      case 'excel': return DataExportFormatModel.excel;
-      default: return DataExportFormatModel.json;
-    }
-  }
-}
 
 // Simplified versions of remaining models...
 @HiveType(typeId: 28)
 class PrivacySettingsModel extends PrivacySettings {
-  @HiveField(0) final bool analyticsEnabled;
-  @HiveField(1) final bool crashReportingEnabled;
-  @HiveField(2) final bool shareUsageData;
-  @HiveField(3) final bool personalizedAds;
-  @HiveField(4) final bool locationTracking;
+  @HiveField(0)
+  @override
+  final bool analyticsEnabled;
+  
+  @HiveField(1)
+  @override
+  final bool crashReportingEnabled;
+  
+  @HiveField(2)
+  @override
+  final bool shareUsageData;
+  
+  @HiveField(3)
+  @override
+  final bool personalizedAds;
+  
+  @HiveField(4)
+  @override
+  final bool locationTracking;
 
   const PrivacySettingsModel({
     this.analyticsEnabled = true,
@@ -333,11 +363,11 @@ class PrivacySettingsModel extends PrivacySettings {
       );
 
   factory PrivacySettingsModel.fromJson(Map<String, dynamic> json) => PrivacySettingsModel(
-        analyticsEnabled: json['analyticsEnabled'] ?? true,
-        crashReportingEnabled: json['crashReportingEnabled'] ?? true,
-        shareUsageData: json['shareUsageData'] ?? false,
-        personalizedAds: json['personalizedAds'] ?? false,
-        locationTracking: json['locationTracking'] ?? false,
+        analyticsEnabled: json['analyticsEnabled'] as bool? ?? true,
+        crashReportingEnabled: json['crashReportingEnabled'] as bool? ?? true,
+        shareUsageData: json['shareUsageData'] as bool? ?? false,
+        personalizedAds: json['personalizedAds'] as bool? ?? false,
+        locationTracking: json['locationTracking'] as bool? ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -351,34 +381,16 @@ class PrivacySettingsModel extends PrivacySettings {
 
 @HiveType(typeId: 29)
 class DisplaySettingsModel extends DisplaySettings {
-  @HiveField(0) final double fontSize;
-  @HiveField(1) final bool highContrast;
-  @HiveField(2) final bool animations;
-  @HiveField(3) final bool showTutorials;
-  @HiveField(4) final String dateFormat;
-  @HiveField(5) final String timeFormat;
-  @HiveField(6) final String currency;
-  @HiveField(7) final String unitSystem;
-
   const DisplaySettingsModel({
-    this.fontSize = 1.0,
-    this.highContrast = false,
-    this.animations = true,
-    this.showTutorials = true,
-    this.dateFormat = 'dd/MM/yyyy',
-    this.timeFormat = 'HH:mm',
-    this.currency = 'BRL',
-    this.unitSystem = 'metric',
-  }) : super(
-          fontSize: fontSize,
-          highContrast: highContrast,
-          animations: animations,
-          showTutorials: showTutorials,
-          dateFormat: dateFormat,
-          timeFormat: timeFormat,
-          currency: currency,
-          unitSystem: unitSystem,
-        );
+    super.fontSize = 1.0,
+    super.highContrast = false,
+    super.animations = true,
+    super.showTutorials = true,
+    super.dateFormat = 'dd/MM/yyyy',
+    super.timeFormat = 'HH:mm',
+    super.currency = 'BRL',
+    super.unitSystem = 'metric',
+  });
 
   factory DisplaySettingsModel.fromEntity(DisplaySettings entity) => DisplaySettingsModel(
         fontSize: entity.fontSize,
@@ -392,14 +404,14 @@ class DisplaySettingsModel extends DisplaySettings {
       );
 
   factory DisplaySettingsModel.fromJson(Map<String, dynamic> json) => DisplaySettingsModel(
-        fontSize: (json['fontSize'] ?? 1.0).toDouble(),
-        highContrast: json['highContrast'] ?? false,
-        animations: json['animations'] ?? true,
-        showTutorials: json['showTutorials'] ?? true,
-        dateFormat: json['dateFormat'] ?? 'dd/MM/yyyy',
-        timeFormat: json['timeFormat'] ?? 'HH:mm',
-        currency: json['currency'] ?? 'BRL',
-        unitSystem: json['unitSystem'] ?? 'metric',
+        fontSize: (json['fontSize'] as num? ?? 1.0).toDouble(),
+        highContrast: json['highContrast'] as bool? ?? false,
+        animations: json['animations'] as bool? ?? true,
+        showTutorials: json['showTutorials'] as bool? ?? true,
+        dateFormat: json['dateFormat'] as String? ?? 'dd/MM/yyyy',
+        timeFormat: json['timeFormat'] as String? ?? 'HH:mm',
+        currency: json['currency'] as String? ?? 'BRL',
+        unitSystem: json['unitSystem'] as String? ?? 'metric',
       );
 
   Map<String, dynamic> toJson() => {
@@ -416,25 +428,13 @@ class DisplaySettingsModel extends DisplaySettings {
 
 @HiveType(typeId: 30)
 class SecuritySettingsModel extends SecuritySettings {
-  @HiveField(0) final bool biometricAuth;
-  @HiveField(1) final bool requireAuthOnOpen;
-  @HiveField(2) final int autoLockMinutes;
-  @HiveField(3) final bool hideDataInRecents;
-  @HiveField(4) final bool encryptBackups;
-
   const SecuritySettingsModel({
-    this.biometricAuth = false,
-    this.requireAuthOnOpen = false,
-    this.autoLockMinutes = 5,
-    this.hideDataInRecents = false,
-    this.encryptBackups = true,
-  }) : super(
-          biometricAuth: biometricAuth,
-          requireAuthOnOpen: requireAuthOnOpen,
-          autoLockMinutes: autoLockMinutes,
-          hideDataInRecents: hideDataInRecents,
-          encryptBackups: encryptBackups,
-        );
+    super.biometricAuth = false,
+    super.requireAuthOnOpen = false,
+    super.autoLockMinutes = 5,
+    super.hideDataInRecents = false,
+    super.encryptBackups = true,
+  });
 
   factory SecuritySettingsModel.fromEntity(SecuritySettings entity) => SecuritySettingsModel(
         biometricAuth: entity.biometricAuth,
@@ -445,11 +445,11 @@ class SecuritySettingsModel extends SecuritySettings {
       );
 
   factory SecuritySettingsModel.fromJson(Map<String, dynamic> json) => SecuritySettingsModel(
-        biometricAuth: json['biometricAuth'] ?? false,
-        requireAuthOnOpen: json['requireAuthOnOpen'] ?? false,
-        autoLockMinutes: json['autoLockMinutes'] ?? 5,
-        hideDataInRecents: json['hideDataInRecents'] ?? false,
-        encryptBackups: json['encryptBackups'] ?? true,
+        biometricAuth: json['biometricAuth'] as bool? ?? false,
+        requireAuthOnOpen: json['requireAuthOnOpen'] as bool? ?? false,
+        autoLockMinutes: json['autoLockMinutes'] as int? ?? 5,
+        hideDataInRecents: json['hideDataInRecents'] as bool? ?? false,
+        encryptBackups: json['encryptBackups'] as bool? ?? true,
       );
 
   Map<String, dynamic> toJson() => {
@@ -463,40 +463,34 @@ class SecuritySettingsModel extends SecuritySettings {
 
 @HiveType(typeId: 31)
 class BackupSettingsModel extends BackupSettings {
-  @HiveField(0) final bool autoBackup;
-  @HiveField(1) final BackupFrequencyModel frequency;
-  @HiveField(2) final bool includeImages;
-  @HiveField(3) final String? lastBackupDate;
-  @HiveField(4) final BackupStorageModel storage;
-
   const BackupSettingsModel({
-    this.autoBackup = true,
-    this.frequency = BackupFrequencyModel.weekly,
-    this.includeImages = false,
-    this.lastBackupDate,
-    this.storage = BackupStorageModel.cloud,
-  }) : super(
-          autoBackup: autoBackup,
-          frequency: frequency,
-          includeImages: includeImages,
-          lastBackupDate: lastBackupDate,
-          storage: storage,
-        );
+    super.autoBackup = true,
+    super.frequency = BackupFrequency.weekly,
+    super.includeImages = false,
+    super.lastBackupDate,
+    super.storage = BackupStorage.cloud,
+  });
 
   factory BackupSettingsModel.fromEntity(BackupSettings entity) => BackupSettingsModel(
         autoBackup: entity.autoBackup,
-        frequency: BackupFrequencyModel.fromEntity(entity.frequency),
+        frequency: entity.frequency,
         includeImages: entity.includeImages,
         lastBackupDate: entity.lastBackupDate,
-        storage: BackupStorageModel.fromEntity(entity.storage),
+        storage: entity.storage,
       );
 
   factory BackupSettingsModel.fromJson(Map<String, dynamic> json) => BackupSettingsModel(
-        autoBackup: json['autoBackup'] ?? true,
-        frequency: BackupFrequencyModel.fromString(json['frequency'] ?? 'weekly'),
-        includeImages: json['includeImages'] ?? false,
-        lastBackupDate: json['lastBackupDate'],
-        storage: BackupStorageModel.fromString(json['storage'] ?? 'cloud'),
+        autoBackup: json['autoBackup'] as bool? ?? true,
+        frequency: BackupFrequency.values.firstWhere(
+          (e) => e.name == (json['frequency'] as String? ?? 'weekly'),
+          orElse: () => BackupFrequency.weekly,
+        ),
+        includeImages: json['includeImages'] as bool? ?? false,
+        lastBackupDate: json['lastBackupDate'] as String?,
+        storage: BackupStorage.values.firstWhere(
+          (e) => e.name == (json['storage'] as String? ?? 'cloud'),
+          orElse: () => BackupStorage.cloud,
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -506,64 +500,4 @@ class BackupSettingsModel extends BackupSettings {
         'lastBackupDate': lastBackupDate,
         'storage': storage.name,
       };
-}
-
-@HiveType(typeId: 32)
-enum BackupFrequencyModel {
-  @HiveField(0) daily,
-  @HiveField(1) weekly,
-  @HiveField(2) monthly;
-
-  BackupFrequency toEntity() {
-    switch (this) {
-      case BackupFrequencyModel.daily: return BackupFrequency.daily;
-      case BackupFrequencyModel.weekly: return BackupFrequency.weekly;
-      case BackupFrequencyModel.monthly: return BackupFrequency.monthly;
-    }
-  }
-
-  static BackupFrequencyModel fromEntity(BackupFrequency frequency) {
-    switch (frequency) {
-      case BackupFrequency.daily: return BackupFrequencyModel.daily;
-      case BackupFrequency.weekly: return BackupFrequencyModel.weekly;
-      case BackupFrequency.monthly: return BackupFrequencyModel.monthly;
-    }
-  }
-
-  static BackupFrequencyModel fromString(String frequency) {
-    switch (frequency.toLowerCase()) {
-      case 'daily': return BackupFrequencyModel.daily;
-      case 'weekly': return BackupFrequencyModel.weekly;
-      case 'monthly': return BackupFrequencyModel.monthly;
-      default: return BackupFrequencyModel.weekly;
-    }
-  }
-}
-
-@HiveType(typeId: 33)
-enum BackupStorageModel {
-  @HiveField(0) local,
-  @HiveField(1) cloud;
-
-  BackupStorage toEntity() {
-    switch (this) {
-      case BackupStorageModel.local: return BackupStorage.local;
-      case BackupStorageModel.cloud: return BackupStorage.cloud;
-    }
-  }
-
-  static BackupStorageModel fromEntity(BackupStorage storage) {
-    switch (storage) {
-      case BackupStorage.local: return BackupStorageModel.local;
-      case BackupStorage.cloud: return BackupStorageModel.cloud;
-    }
-  }
-
-  static BackupStorageModel fromString(String storage) {
-    switch (storage.toLowerCase()) {
-      case 'local': return BackupStorageModel.local;
-      case 'cloud': return BackupStorageModel.cloud;
-      default: return BackupStorageModel.cloud;
-    }
-  }
 }

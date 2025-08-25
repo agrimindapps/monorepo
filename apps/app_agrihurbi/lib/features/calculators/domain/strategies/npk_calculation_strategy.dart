@@ -1,9 +1,10 @@
-import 'package:injectable/injectable.dart';
 import 'dart:math' as math;
 
-import '../interfaces/calculator_strategy.dart';
+import 'package:injectable/injectable.dart';
+
 import '../entities/calculation_result.dart';
 import '../entities/calculator_parameter.dart';
+import '../interfaces/calculator_strategy.dart';
 import '../repositories/calculator_data_repository.dart';
 
 /// Estratégia específica para cálculos NPK
@@ -142,10 +143,10 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
         if (numValue == null) {
           errors.add('${param.name} deve ser um número válido');
         } else {
-          if (param.minValue != null && numValue < param.minValue!) {
+          if (param.minValue != null && numValue < (param.minValue! as num)) {
             errors.add('${param.name} deve ser maior que ${param.minValue}');
           }
-          if (param.maxValue != null && numValue > param.maxValue!) {
+          if (param.maxValue != null && numValue > (param.maxValue! as num)) {
             errors.add('${param.name} deve ser menor que ${param.maxValue}');
           }
           sanitizedInputs[param.id] = numValue;

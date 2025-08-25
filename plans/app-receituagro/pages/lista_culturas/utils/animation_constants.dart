@@ -4,7 +4,7 @@
 /// constants used throughout the Lista Culturas module for consistent
 /// micro-interactions and transitions.
 
-library animation_constants;
+library;
 
 // Flutter imports:
 import 'package:flutter/material.dart';

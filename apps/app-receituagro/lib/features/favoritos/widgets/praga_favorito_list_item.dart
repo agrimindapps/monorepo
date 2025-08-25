@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/favorito_praga_model.dart';
+
 import '../constants/favoritos_design_tokens.dart';
+import '../models/favorito_praga_model.dart';
 
 class PragaFavoritoListItem extends StatelessWidget {
   final FavoritoPragaModel praga;
@@ -48,7 +49,7 @@ class PragaFavoritoListItem extends StatelessWidget {
                     color: FavoritosDesignTokens.pragasColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     FavoritosDesignTokens.pragasIcon,
                     color: FavoritosDesignTokens.pragasColor,
                     size: 24,

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
-import '../entities/subscription_entity.dart';
+
 import '../../shared/utils/failure.dart';
+import '../entities/subscription_entity.dart';
 
 /// Interface do repositório de assinaturas
 /// Define os contratos para operações de assinaturas via RevenueCat

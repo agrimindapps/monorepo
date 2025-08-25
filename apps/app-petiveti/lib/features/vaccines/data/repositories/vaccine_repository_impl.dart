@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/vaccine.dart';
 import '../../domain/repositories/vaccine_repository.dart';
 import '../datasources/vaccine_local_datasource.dart';

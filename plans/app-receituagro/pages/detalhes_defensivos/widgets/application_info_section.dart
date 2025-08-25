@@ -175,7 +175,7 @@ class _TtsButton extends StatelessWidget {
     return SizedBox(
       width: 48,
       height: 48,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(

@@ -51,7 +51,7 @@ extension PlantasThemeExtension on BuildContext {
 extension ThemeWidgetExtensions on Widget {
   /// Envolve o widget com um Container com cor de fundo adaptável
   Widget withPlantasBackground(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: context.plantasBackground,
       child: this,
     );
@@ -59,7 +59,7 @@ extension ThemeWidgetExtensions on Widget {
 
   /// Envolve o widget com um Container de card adaptável
   Widget withPlantasCard(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: context.plantasDecorations['card'],
       child: this,
     );

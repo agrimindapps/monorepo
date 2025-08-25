@@ -54,14 +54,14 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
       final doc = await _getPlantsCollection(userId).doc(id).get();
 
       if (!doc.exists) {
-        throw ServerFailure('Planta não encontrada');
+        throw const ServerFailure('Planta não encontrada');
       }
 
       final data = doc.data() as Map<String, dynamic>;
       final plant = PlantModel.fromJson({...data, 'id': doc.id});
 
       if (plant.isDeleted) {
-        throw ServerFailure('Planta não encontrada');
+        throw const ServerFailure('Planta não encontrada');
       }
 
       return plant;

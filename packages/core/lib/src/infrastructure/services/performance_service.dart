@@ -14,6 +14,7 @@ import '../../domain/repositories/i_performance_repository.dart';
 /// Implementação do serviço de monitoramento de performance
 class PerformanceService implements IPerformanceRepository {
   static final PerformanceService _instance = PerformanceService._internal();
+  /// Obtém a instância singleton do PerformanceService
   factory PerformanceService() => _instance;
   PerformanceService._internal();
 
@@ -373,11 +374,11 @@ class PerformanceService implements IPerformanceRepository {
       final result = await platform.invokeMethod('getMemoryInfo');
       
       return MemoryUsage(
-        usedMemory: result['usedMemory'] ?? 0,
-        totalMemory: result['totalMemory'] ?? 0,
-        availableMemory: result['availableMemory'] ?? 0,
-        heapSize: result['heapSize'],
-        nativeHeapSize: result['nativeHeapSize'],
+        usedMemory: (result['usedMemory'] as int?) ?? 0,
+        totalMemory: (result['totalMemory'] as int?) ?? 0,
+        availableMemory: (result['availableMemory'] as int?) ?? 0,
+        heapSize: result['heapSize'] as int?,
+        nativeHeapSize: result['nativeHeapSize'] as int?,
       );
     } catch (e) {
       // Fallback usando /proc/meminfo
@@ -420,9 +421,9 @@ class PerformanceService implements IPerformanceRepository {
       final result = await platform.invokeMethod('getMemoryUsage');
       
       return MemoryUsage(
-        usedMemory: result['used'] ?? 0,
-        totalMemory: result['total'] ?? 0,
-        availableMemory: result['available'] ?? 0,
+        usedMemory: (result['used'] as int?) ?? 0,
+        totalMemory: (result['total'] as int?) ?? 0,
+        availableMemory: (result['available'] as int?) ?? 0,
       );
     } catch (e) {
       debugPrint('❌ Error getting iOS memory usage: $e');
@@ -757,7 +758,7 @@ class PerformanceService implements IPerformanceRepository {
     _metricsCollectionTimer?.cancel();
     
     _metricsCollectionTimer = Timer.periodic(
-      Duration(seconds: 30), // Coletar métricas a cada 30s
+      const Duration(seconds: 30), // Coletar métricas a cada 30s
       (_) => _collectCurrentMetrics(),
     );
   }

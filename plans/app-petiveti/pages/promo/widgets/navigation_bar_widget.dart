@@ -301,7 +301,7 @@ class NavigationBarWidget extends StatelessWidget {
   }
 
   Widget _buildMobileMenuSheet(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: const BoxDecoration(
         color: PromoConstants.whiteColor,
         borderRadius: BorderRadius.only(

@@ -307,7 +307,7 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     _watchSubscription = stream.listen(
       (tasks) => state = AsyncValue.data(tasks),
       onError: (error, stackTrace) =>
-          state = AsyncValue.error(error, stackTrace),
+          state = AsyncValue.error(error as Object? ?? 'Unknown error', stackTrace as StackTrace? ?? StackTrace.empty),
       cancelOnError: false, // FIX: Não cancelar em caso de erro
     );
   }

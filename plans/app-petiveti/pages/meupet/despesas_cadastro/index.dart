@@ -97,9 +97,9 @@ class _DespesaFormDialogContentState extends State<DespesaFormDialogContent> {
             // Loading overlay
             Obx(() {
               if (controller.isLoadingReactive.value) {
-                return Container(
+                return const ColoredBox(
                   color: Colors.black54,
-                  child: const Center(
+                  child: Center(
                     child: CircularProgressIndicator(),
                   ),
                 );

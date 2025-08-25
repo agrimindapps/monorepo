@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/space.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 
@@ -39,7 +40,7 @@ class SpacesProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final result = await _getSpacesUseCase.call(NoParams());
+    final result = await _getSpacesUseCase.call(const NoParams());
 
     result.fold((failure) => _setError(_getErrorMessage(failure)), (spaces) {
       _spaces = spaces;

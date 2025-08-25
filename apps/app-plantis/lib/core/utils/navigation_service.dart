@@ -29,11 +29,11 @@ class NavigationService {
     if (context != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
+          content: const Row(
             children: [
-              const Icon(Icons.lock_outlined, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
-              const Expanded(
+              Icon(Icons.lock_outlined, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
                 child: Text(
                   'Acesso restrito! Faça login para continuar.',
                   style: TextStyle(

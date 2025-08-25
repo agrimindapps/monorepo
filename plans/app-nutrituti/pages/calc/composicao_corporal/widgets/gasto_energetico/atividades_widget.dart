@@ -157,7 +157,7 @@ class AtividadesWidget extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: ShadcnStyle.borderColor),

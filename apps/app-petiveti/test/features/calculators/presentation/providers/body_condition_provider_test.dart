@@ -1,9 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:app_petiveti/features/calculators/domain/entities/body_condition_input.dart';
-import 'package:app_petiveti/features/calculators/domain/entities/body_condition_output.dart';
 import 'package:app_petiveti/features/calculators/presentation/providers/body_condition_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('BodyConditionProvider', () {
@@ -33,7 +31,7 @@ void main() {
     test('should update input correctly', () {
       final notifier = container.read(bodyConditionProvider.notifier);
       
-      final newInput = BodyConditionInput(
+      const newInput = BodyConditionInput(
         species: AnimalSpecies.cat,
         currentWeight: 5.0,
         ribPalpation: RibPalpation.easy,
@@ -285,7 +283,7 @@ void main() {
 
         final error = container.read(bodyConditionErrorProvider);
         expect(error, isNotNull);
-        expect(error!, contains('inválidos'));
+        expect(error, contains('inválidos'));
       });
 
       test('should provide correct validation errors', () {

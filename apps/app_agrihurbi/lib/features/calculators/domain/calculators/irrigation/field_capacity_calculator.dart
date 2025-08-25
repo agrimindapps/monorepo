@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Capacidade de Campo
 /// Calcula a capacidade de retenção de água do solo e parâmetros hídricos
 class FieldCapacityCalculator extends CalculatorEntity {
-  FieldCapacityCalculator()
+  const FieldCapacityCalculator()
       : super(
           id: 'field_capacity',
           name: 'Capacidade de Campo',
@@ -119,7 +120,7 @@ class FieldCapacityCalculator extends CalculatorEntity {
       }
 
       // Cálculo da Capacidade de Campo (CC) usando equação de Saxton & Rawls
-      final double theta_s = _calculateSaturatedMoisture(clayContent, sandContent, organicMatter);
+      final double thetaS = _calculateSaturatedMoisture(clayContent, sandContent, organicMatter);
       final double theta_33 = _calculateFieldCapacity(clayContent, sandContent, organicMatter);
       final double theta_1500 = _calculateWiltingPoint(clayContent, sandContent, organicMatter);
 
@@ -133,8 +134,8 @@ class FieldCapacityCalculator extends CalculatorEntity {
 
       // Porosidade total
       final double totalPorosity = 1 - (bulkDensity / 2.65);
-      final double macroporosity = totalPorosity - theta_s;
-      final double microporosity = theta_s;
+      final double macroporosity = totalPorosity - thetaS;
+      final double microporosity = thetaS;
 
       // Lâmina para diferentes frações da água disponível
       final double lamina25 = availableWaterMm * 0.25;
@@ -243,20 +244,20 @@ class FieldCapacityCalculator extends CalculatorEntity {
 
   double _calculateSaturatedMoisture(double clay, double sand, double om) {
     // Equação de Saxton & Rawls (2006)
-    final double theta_s = 0.332 - 7.251e-4 * sand + 0.1276 * (math.log(clay) / math.ln10);
-    return math.min(0.7, math.max(0.3, theta_s + 0.02 * om));
+    final double thetaS = 0.332 - 7.251e-4 * sand + 0.1276 * (math.log(clay) / math.ln10);
+    return math.min(0.7, math.max(0.3, thetaS + 0.02 * om));
   }
 
   double _calculateFieldCapacity(double clay, double sand, double om) {
     // Capacidade de campo (-33 kPa)
-    final double theta_33_t = 0.299 - 2.92e-4 * sand + 0.1004 * (math.log(clay) / math.ln10);
-    return math.min(0.6, math.max(0.1, theta_33_t + 0.015 * om));
+    final double theta33T = 0.299 - 2.92e-4 * sand + 0.1004 * (math.log(clay) / math.ln10);
+    return math.min(0.6, math.max(0.1, theta33T + 0.015 * om));
   }
 
   double _calculateWiltingPoint(double clay, double sand, double om) {
     // Ponto de murcha (-1500 kPa)
-    final double theta_1500_t = 0.157 - 1.83e-4 * sand + 0.0663 * (math.log(clay) / math.ln10);
-    return math.min(0.4, math.max(0.02, theta_1500_t + 0.01 * om));
+    final double theta1500T = 0.157 - 1.83e-4 * sand + 0.0663 * (math.log(clay) / math.ln10);
+    return math.min(0.4, math.max(0.02, theta1500T + 0.01 * om));
   }
 
   int _calculateIrrigationFrequency(double availableWater, String soilType) {
@@ -335,7 +336,7 @@ class FieldCapacityCalculator extends CalculatorEntity {
 
     // Recomendação de manejo
     recommendations.add('Irrigue quando atingir 50-70% da água disponível.');
-    recommendations.add('Frequência recomendada: a cada ${frequency} dias.');
+    recommendations.add('Frequência recomendada: a cada $frequency dias.');
 
     return recommendations;
   }

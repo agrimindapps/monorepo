@@ -170,7 +170,7 @@ class MemoryMonitoringService {
   /// Get memory usage report
   MemoryReport getMemoryReport() {
     if (_snapshots.isEmpty) {
-      return MemoryReport(
+      return const MemoryReport(
         currentSnapshot: null,
         averageMemoryMB: null,
         peakMemoryMB: null,
@@ -227,7 +227,7 @@ class MemoryMonitoringService {
     }
 
     final totalImageCacheMB =
-        double.tryParse(current.imageCacheStats['totalSizeMB'] ?? '0') ?? 0;
+        double.tryParse((current.imageCacheStats['totalSizeMB'] as String?) ?? '0') ?? 0;
     if (totalImageCacheMB > 20) {
       recommendations.add(
         'Image cache is large (${totalImageCacheMB}MB) - consider clearing',

@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';
@@ -34,7 +35,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       // ALWAYS return local data first for instant UI response
@@ -90,7 +91,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       // ALWAYS get from local first for instant response
@@ -105,7 +106,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (localPlant != null) {
         return Right(localPlant);
       } else {
-        return Left(NotFoundFailure('Planta não encontrada'));
+        return const Left(NotFoundFailure('Planta não encontrada'));
       }
     } on CacheFailure catch (e) {
       return Left(e);
@@ -121,7 +122,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       final plantModel = PlantModel.fromEntity(plant);
@@ -163,7 +164,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       final plantModel = PlantModel.fromEntity(plant);
@@ -205,7 +206,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       // Always delete locally first
@@ -235,7 +236,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
@@ -276,7 +277,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (await networkInfo.isConnected) {
@@ -346,11 +347,11 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(ServerFailure('Usuário não autenticado'));
+        return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (!(await networkInfo.isConnected)) {
-        return Left(NetworkFailure('Sem conexão com a internet'));
+        return const Left(NetworkFailure('Sem conexão com a internet'));
       }
 
       // Get all local plants that need sync

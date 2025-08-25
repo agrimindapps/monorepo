@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'base_entity.dart';
+
 import '../../shared/enums/log_level.dart';
+import 'base_entity.dart';
 
 /// Modelo para entrada de log
 class LogEntry extends BaseEntity {
@@ -30,28 +31,36 @@ class LogEntry extends BaseEntity {
   /// Cor associada ao nível do log
   Color get logColor {
     switch (level) {
+      case LogLevel.trace:
+        return Colors.grey.shade300;
+      case LogLevel.debug:
+        return Colors.grey;
       case LogLevel.info:
         return Colors.blue;
       case LogLevel.warning:
         return Colors.orange;
       case LogLevel.error:
         return Colors.red;
-      case LogLevel.debug:
-        return Colors.grey;
+      case LogLevel.critical:
+        return Colors.red.shade900;
     }
   }
 
   /// Ícone associado ao nível do log
   IconData get logIcon {
     switch (level) {
+      case LogLevel.trace:
+        return Icons.code;
+      case LogLevel.debug:
+        return Icons.bug_report;
       case LogLevel.info:
         return Icons.info;
       case LogLevel.warning:
         return Icons.warning;
       case LogLevel.error:
         return Icons.error;
-      case LogLevel.debug:
-        return Icons.bug_report;
+      case LogLevel.critical:
+        return Icons.dangerous;
     }
   }
 

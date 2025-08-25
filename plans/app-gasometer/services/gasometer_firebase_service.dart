@@ -81,7 +81,7 @@ class GasometerFirebaseService {
         return false;
       }
 
-      final data = doc.data()!;
+      final data = doc.data();
       final isActive = data['isActive'] as bool? ?? false;
       final lastUpdated = data['lastUpdated'] as Timestamp?;
 
@@ -147,7 +147,7 @@ class GasometerFirebaseService {
 
       if (!doc.exists) return [];
 
-      final data = doc.data()!;
+      final data = doc.data();
       return [data]; // Por enquanto retorna apenas o documento atual
     } catch (e, stackTrace) {
       print('❌ Erro ao obter histórico de assinatura Gasometer: $e');
@@ -202,7 +202,7 @@ class GasometerFirebaseService {
 
       if (!doc.exists) return;
 
-      final data = doc.data()!;
+      final data = doc.data();
       final lastUpdated = data['lastUpdated'] as Timestamp?;
 
       if (lastUpdated != null) {
@@ -273,7 +273,7 @@ class GasometerFirebaseService {
         };
       }
 
-      final data = doc.data()!;
+      final data = doc.data();
       final isActive = data['isActive'] as bool? ?? false;
       final lastUpdated = data['lastUpdated'] as Timestamp?;
       final customerInfo = data['customerInfo'] as Map<String, dynamic>?;

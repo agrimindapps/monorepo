@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Serviço de notificações específico do GasOMeter
 class GasOMeterNotificationService {
@@ -328,10 +329,10 @@ class GasOMeterNotificationService {
       switch (type) {
         case 'maintenance_reminder':
           showMaintenanceReminderNotification(
-            vehicleName: data['vehicle_name'],
-            maintenanceType: data['maintenance_type'],
-            currentKm: data['current_km'],
-            maintenanceKm: data['maintenance_km'],
+            vehicleName: data['vehicle_name'] as String? ?? '',
+            maintenanceType: data['maintenance_type'] as String? ?? '',
+            currentKm: (data['current_km'] as num?)?.toDouble() ?? 0.0,
+            maintenanceKm: (data['maintenance_km'] as num?)?.toDouble() ?? 0.0,
           );
           break;
         // Adicionar outros tipos conforme necessário

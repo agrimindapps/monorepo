@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../core/di/injection_container.dart' as di;
 import '../providers/plant_form_provider.dart';
 import 'plant_form_modal.dart';
-import '../../../../core/di/injection_container.dart' as di;
 
 class PlantsFab extends StatelessWidget {
   final VoidCallback onScrollToTop;

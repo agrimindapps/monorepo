@@ -23,7 +23,7 @@ class FavoritoDiagnosticoModel {
 
   factory FavoritoDiagnosticoModel.fromMap(Map<String, dynamic> map) {
     return FavoritoDiagnosticoModel(
-      id: map['id'] ?? 0,
+      id: map['id'] as int? ?? 0,
       idReg: map['idReg']?.toString() ?? '',
       nome: map['nome']?.toString() ?? 'Diagnóstico desconhecido',
       descricao: map['descricao']?.toString(),

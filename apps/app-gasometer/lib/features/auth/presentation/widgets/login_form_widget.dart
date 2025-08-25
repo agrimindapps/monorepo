@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../controllers/login_controller.dart';
 import '../providers/auth_provider.dart';
-import 'auth_text_field_widget.dart';
 import 'auth_button_widget.dart';
+import 'auth_text_field_widget.dart';
 import 'social_login_buttons_widget.dart';
 
 /// Widget responsável apenas pelo formulário de login

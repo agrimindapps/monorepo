@@ -1,9 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
+import 'package:injectable/injectable.dart';
 
 /// Get News Use Case
 /// 

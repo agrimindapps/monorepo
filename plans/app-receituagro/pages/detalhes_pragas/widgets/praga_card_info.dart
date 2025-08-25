@@ -33,7 +33,7 @@ class PragaCardInfo extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DetalhesPragasDesignTokens.mediumSpacing),
-      child: Container(
+      child: DecoratedBox(
         decoration: DetalhesPragasDesignTokens.cardDecorationFlat(context,
           backgroundColor: isDark ? Colors.grey.shade900 : Colors.white),
         child: Padding(

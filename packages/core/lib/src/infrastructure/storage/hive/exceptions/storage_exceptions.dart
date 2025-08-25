@@ -1,5 +1,6 @@
 /// Exceções específicas para operações de storage com Hive
 /// Fornece hierarquia de exceções bem definida para diferentes cenários
+library;
 
 /// Exceção base para todas as operações de storage
 abstract class StorageException implements Exception {

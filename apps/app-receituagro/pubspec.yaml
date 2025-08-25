@@ -19,7 +19,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.7.0 <4.0.0"
+  sdk: '>=3.7.0 <4.0.0'
+  flutter: ">=3.10.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -44,16 +45,16 @@ dependencies:
   # Functional Programming
   dartz: ^0.10.1
 
-  # Firebase
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.1
-  firebase_analytics: ^12.0.0
-  firebase_crashlytics: ^5.0.0
-
-  # Local Storage
+  # Hive para storage local (necessário para geradores de código)
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  path_provider: ^2.1.5
+
+  # Firebase packages necessários para imports diretos
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.1
+  firebase_crashlytics: ^5.0.0
+
+  # Nota: outros serviços Firebase e path_provider vêm do core package
 
   # App Info
   package_info_plus: ^8.0.2
@@ -69,6 +70,8 @@ dependencies:
   font_awesome_flutter: ^10.7.0
   share_plus: ^11.1.0
 
+  http: any
+  path_provider: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -78,11 +81,16 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   
   # Code generation
   hive_generator: ^2.0.1
   build_runner: ^2.4.13
+  
+  # Testing packages
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

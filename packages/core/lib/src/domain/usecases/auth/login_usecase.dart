@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../base_usecase.dart';
-import '../../entities/user_entity.dart';
-import '../../repositories/i_auth_repository.dart';
-import '../../repositories/i_analytics_repository.dart';
+
 import '../../../shared/utils/failure.dart';
+import '../../entities/user_entity.dart';
+import '../../repositories/i_analytics_repository.dart';
+import '../../repositories/i_auth_repository.dart';
+import '../base_usecase.dart';
 
 /// Use case para fazer login com email e senha
 class LoginUseCase implements UseCase<UserEntity, LoginParams> {

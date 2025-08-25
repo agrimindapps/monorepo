@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum ParameterType {
   number,
+  integer,
   decimal,
   text,
   selection,
@@ -19,13 +20,16 @@ enum ParameterUnit {
   hectare,
   metro2,
   acre,
+  plantasha,
   // Volume
   litro,
   metro3,
   // Peso
   kg,
+  quilograma,
   tonelada,
   gramas,
+  grama,
   // Distância
   metro,
   centimetro,
@@ -44,7 +48,28 @@ enum ParameterUnit {
   // Nutrientes
   ppm,
   mgL,
-  mgdm3
+  mgdm3,
+  // Contadores e Scores
+  count,
+  escore,
+  // Livestock units
+  cabecas,
+  // Combined units
+  kgdia,
+  litrodia,
+  mcalkg,
+  litroha,
+  // Distance units
+  milimetro,
+  mmh,  // mm/h
+  // Soil/Chemistry units
+  cmolcdm3,  // cmolc/dm³
+  gcm3,      // g/cm³
+  dsm,       // dS/m
+  // Ratios
+  ratio,
+  // Type extension for integers  
+  integer
 }
 
 class CalculatorParameter extends Equatable {
@@ -83,11 +108,18 @@ class CalculatorParameter extends Equatable {
 
     switch (type) {
       case ParameterType.number:
+      case ParameterType.integer:
       case ParameterType.decimal:
         final num? numValue = double.tryParse(value.toString());
         if (numValue == null) return false;
-        if (minValue != null && numValue < minValue) return false;
-        if (maxValue != null && numValue > maxValue) return false;
+        if (minValue != null) {
+          final num? minNum = double.tryParse(minValue.toString());
+          if (minNum != null && numValue < minNum) return false;
+        }
+        if (maxValue != null) {
+          final num? maxNum = double.tryParse(maxValue.toString());
+          if (maxNum != null && numValue > maxNum) return false;
+        }
         break;
       case ParameterType.selection:
         if (options != null && !options!.contains(value.toString())) {
@@ -135,7 +167,16 @@ class CalculatorParameter extends Equatable {
       case ParameterUnit.tonelada:
         return 't';
       case ParameterUnit.gramas:
+      case ParameterUnit.grama:
         return 'g';
+      case ParameterUnit.quilograma:
+        return 'kg';
+      case ParameterUnit.plantasha:
+        return 'plantas/ha';
+      case ParameterUnit.count:
+        return 'unidades';
+      case ParameterUnit.escore:
+        return 'pts';
       case ParameterUnit.metro:
         return 'm';
       case ParameterUnit.centimetro:
@@ -162,6 +203,30 @@ class CalculatorParameter extends Equatable {
         return 'mg/L';
       case ParameterUnit.mgdm3:
         return 'mg/dm³';
+      case ParameterUnit.cabecas:
+        return 'cabeças';
+      case ParameterUnit.kgdia:
+        return 'kg/dia';
+      case ParameterUnit.litrodia:
+        return 'litros/dia';
+      case ParameterUnit.mcalkg:
+        return 'Mcal/kg';
+      case ParameterUnit.litroha:
+        return 'L/ha';
+      case ParameterUnit.milimetro:
+        return 'mm';
+      case ParameterUnit.mmh:
+        return 'mm/h';
+      case ParameterUnit.cmolcdm3:
+        return 'cmolc/dm³';
+      case ParameterUnit.gcm3:
+        return 'g/cm³';
+      case ParameterUnit.dsm:
+        return 'dS/m';
+      case ParameterUnit.ratio:
+        return '';
+      case ParameterUnit.integer:
+        return '';
       default:
         return '';
     }

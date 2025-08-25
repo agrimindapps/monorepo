@@ -51,6 +51,7 @@ class LazyLoadingManager extends ChangeNotifier {
       completer.complete(instance);
       _loadingFutures.remove(key);
       
+      // Use unawaited to indicate intentional fire-and-forget
       notifyListeners();
       return instance;
     } catch (error) {
@@ -69,7 +70,7 @@ class LazyLoadingManager extends ChangeNotifier {
   /// Pré-carrega providers com prioridade
   Future<void> preloadProviders(List<String> keys, {int? priority}) async {
     final futures = keys.where((key) => !isLoaded(key)).map((key) {
-      return getProvider(key);
+      return getProvider<dynamic>(key);
     });
 
     if (futures.isNotEmpty) {
@@ -110,8 +111,8 @@ class LazyLoadingManager extends ChangeNotifier {
   }
 }
 
-/// Mixin para facilitar o uso de lazy loading em widgets
-mixin LazyLoadingMixin<T extends StatefulWidget> on State<T> {
+/// Mixin para facilitar o uso de lazy loading
+mixin LazyLoadingMixin {
   final LazyLoadingManager _lazyManager = LazyLoadingManager();
 
   /// Carrega um provider de forma lazy
@@ -129,11 +130,10 @@ mixin LazyLoadingMixin<T extends StatefulWidget> on State<T> {
     return _lazyManager.isLoading(key);
   }
 
-  @override
-  void dispose() {
+  /// Limpa recursos do lazy loading
+  void disposeLazyLoading() {
     // Providers não são descarregados automaticamente no dispose
     // para permitir reutilização entre widgets
-    super.dispose();
   }
 }
 
@@ -160,117 +160,8 @@ class LazyProvider<T> {
   void unload() => _manager.unloadProvider(key);
 }
 
-/// Widget para exibir loading state durante lazy loading
-class LazyLoadingBuilder<T> extends StatefulWidget {
-  final String providerKey;
-  final Widget Function(BuildContext context, T provider) builder;
-  final Widget Function(BuildContext context)? loadingBuilder;
-  final Widget Function(BuildContext context, dynamic error)? errorBuilder;
-  final bool preload;
-
-  const LazyLoadingBuilder({
-    Key? key,
-    required this.providerKey,
-    required this.builder,
-    this.loadingBuilder,
-    this.errorBuilder,
-    this.preload = false,
-  }) : super(key: key);
-
-  @override
-  State<LazyLoadingBuilder<T>> createState() => _LazyLoadingBuilderState<T>();
-}
-
-class _LazyLoadingBuilderState<T> extends State<LazyLoadingBuilder<T>> {
-  final LazyLoadingManager _manager = LazyLoadingManager();
-  T? _provider;
-  dynamic _error;
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.preload) {
-      _loadProvider();
-    }
-  }
-
-  Future<void> _loadProvider() async {
-    if (_manager.isLoaded(widget.providerKey)) {
-      _provider = await _manager.getProvider<T>(widget.providerKey);
-      if (mounted) setState(() {});
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      _provider = await _manager.getProvider<T>(widget.providerKey);
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (error) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _error = error;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_error != null) {
-      return widget.errorBuilder?.call(context, _error) ??
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, color: Colors.red),
-                const SizedBox(height: 8),
-                Text('Erro: $_error'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _loadProvider,
-                  child: const Text('Tentar Novamente'),
-                ),
-              ],
-            ),
-          );
-    }
-
-    if (_provider == null || _isLoading) {
-      if (!widget.preload && _provider == null) {
-        _loadProvider();
-      }
-      
-      return widget.loadingBuilder?.call(context) ??
-          const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Carregando...'),
-              ],
-            ),
-          );
-    }
-
-    return widget.builder(context, _provider!);
-  }
-}
-
 /// Extensão para facilitar o uso do lazy loading
-extension LazyLoadingExtension on BuildContext {
-  /// Carrega um provider de forma lazy
-  Future<T> loadProvider<T>(String key) {
-    return LazyLoadingManager().getProvider<T>(key);
-  }
-}
+/// 
+/// Nota: Widget-dependent classes foram removidas para evitar
+/// dependências de UI em arquivos core. Implemente widgets
+/// específicos nos módulos de UI quando necessário.

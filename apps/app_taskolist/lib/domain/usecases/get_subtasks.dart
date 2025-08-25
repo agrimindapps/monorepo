@@ -1,7 +1,7 @@
-import '../entities/task_entity.dart';
-import '../repositories/task_repository.dart';
 import '../../core/usecases/usecase.dart';
 import '../../core/utils/typedef.dart';
+import '../entities/task_entity.dart';
+import '../repositories/task_repository.dart';
 
 class GetSubtasks extends UseCaseWithParams<List<TaskEntity>, GetSubtasksParams> {
   const GetSubtasks(this._repository);

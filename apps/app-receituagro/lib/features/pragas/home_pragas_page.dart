@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/models/pragas_hive.dart';
+import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
-import '../../core/models/pragas_hive.dart';
-import '../../core/repositories/pragas_hive_repository.dart';
-import '../../core/repositories/cultura_hive_repository.dart';
-import '../../core/di/injection_container.dart';
+import '../culturas/lista_culturas_page.dart';
 import 'detalhe_praga_page.dart';
 import 'lista_pragas_page.dart';
-import '../culturas/lista_culturas_page.dart';
 
 class HomePragasPage extends StatefulWidget {
   const HomePragasPage({super.key});

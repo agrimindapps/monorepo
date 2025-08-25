@@ -1,11 +1,11 @@
+import 'package:app_petiveti/core/error/failures.dart';
+import 'package:app_petiveti/features/animals/domain/entities/animal.dart';
+import 'package:app_petiveti/features/animals/domain/entities/animal_enums.dart';
+import 'package:app_petiveti/features/animals/domain/repositories/animal_repository.dart';
+import 'package:app_petiveti/features/animals/domain/usecases/add_animal.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'package:app_petiveti/core/error/failures.dart';
-import 'package:app_petiveti/features/animals/domain/entities/animal.dart';
-import 'package:app_petiveti/features/animals/domain/repositories/animal_repository.dart';
-import 'package:app_petiveti/features/animals/domain/usecases/add_animal.dart';
 
 class MockAnimalRepository extends Mock implements AnimalRepository {}
 
@@ -20,13 +20,14 @@ void main() {
 
   final testAnimal = Animal(
     id: '1',
+    userId: 'user1',
     name: 'Rex',
-    species: 'Cachorro',
+    species: AnimalSpecies.dog,
     breed: 'Labrador',
     birthDate: DateTime(2020, 1, 1),
-    gender: 'Macho',
+    gender: AnimalGender.male,
     color: 'Marrom',
-    currentWeight: 25.5,
+    weight: 25.5,
     createdAt: DateTime(2024, 1, 1),
     updatedAt: DateTime(2024, 1, 1),
   );
@@ -34,7 +35,7 @@ void main() {
   group('AddAnimal', () {
     test('should add animal when data is valid', () async {
       // arrange
-      when(mockRepository.addAnimal(any))
+      when(mockRepository.addAnimal(testAnimal))
           .thenAnswer((_) async => const Right(null));
 
       // act
@@ -50,13 +51,14 @@ void main() {
       // arrange
       final invalidAnimal = Animal(
         id: '1',
+        userId: 'user1',
         name: '',
-        species: 'Cachorro',
+        species: AnimalSpecies.dog,
         breed: 'Labrador',
         birthDate: DateTime(2020, 1, 1),
-        gender: 'Macho',
+        gender: AnimalGender.male,
         color: 'Marrom',
-        currentWeight: 25.5,
+        weight: 25.5,
         createdAt: DateTime(2024, 1, 1),
         updatedAt: DateTime(2024, 1, 1),
       );
@@ -73,13 +75,14 @@ void main() {
       // arrange
       final invalidAnimal = Animal(
         id: '1',
+        userId: 'user1',
         name: 'Rex',
-        species: '',
+        species: AnimalSpecies.dog,
         breed: 'Labrador',
         birthDate: DateTime(2020, 1, 1),
-        gender: 'Macho',
+        gender: AnimalGender.male,
         color: 'Marrom',
-        currentWeight: 25.5,
+        weight: 25.5,
         createdAt: DateTime(2024, 1, 1),
         updatedAt: DateTime(2024, 1, 1),
       );
@@ -96,13 +99,14 @@ void main() {
       // arrange
       final invalidAnimal = Animal(
         id: '1',
+        userId: 'user1',
         name: 'Rex',
-        species: 'Cachorro',
+        species: AnimalSpecies.dog,
         breed: 'Labrador',
         birthDate: DateTime(2020, 1, 1),
-        gender: 'Macho',
+        gender: AnimalGender.male,
         color: 'Marrom',
-        currentWeight: 0,
+        weight: 0,
         createdAt: DateTime(2024, 1, 1),
         updatedAt: DateTime(2024, 1, 1),
       );
@@ -117,7 +121,7 @@ void main() {
 
     test('should return CacheFailure when repository fails', () async {
       // arrange
-      when(mockRepository.addAnimal(any))
+      when(mockRepository.addAnimal(testAnimal))
           .thenAnswer((_) async => const Left(CacheFailure(message: 'Cache error')));
 
       // act

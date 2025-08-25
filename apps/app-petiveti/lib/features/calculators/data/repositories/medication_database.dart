@@ -10,13 +10,13 @@ class MedicationDatabase {
       name: 'Amoxicilina',
       activeIngredient: 'Amoxicilina',
       category: 'Antibiótico',
-      indications: [
+      indications: const [
         'Infecções respiratórias',
         'Infecções urinárias',
         'Infecções de pele',
         'Infecções odontológicas',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 10.0,
@@ -42,18 +42,18 @@ class MedicationDatabase {
           ageGroup: AgeGroup.puppy,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 50.0, unit: 'mg/ml', description: '50mg/ml'),
         MedicationConcentration(value: 125.0, unit: 'mg/ml', description: '125mg/ml'),
         MedicationConcentration(value: 250.0, unit: 'mg/ml', description: '250mg/ml'),
       ],
-      pharmaceuticalForms: ['Suspensão oral', 'Comprimido', 'Cápsula'],
-      recommendedFrequencies: [
+      pharmaceuticalForms: const ['Suspensão oral', 'Comprimido', 'Cápsula'],
+      recommendedFrequencies: const [
         AdministrationFrequency.twice,
         AdministrationFrequency.thrice,
       ],
-      administrationRoutes: ['Oral'],
-      contraindications: [
+      administrationRoutes: const ['Oral'],
+      contraindications: const [
         Contraindication(
           condition: 'Alergia à penicilina',
           reason: 'Risco de reação alérgica grave',
@@ -61,11 +61,11 @@ class MedicationDatabase {
           alternative: 'Cefalexina ou Enrofloxacina',
         ),
       ],
-      sideEffects: ['Diarreia', 'Vômitos', 'Perda de apetite'],
-      drugInteractions: ['Cloranfenicol', 'Tetraciclina'],
+      sideEffects: const ['Diarreia', 'Vômitos', 'Perda de apetite'],
+      drugInteractions: const ['Cloranfenicol', 'Tetraciclina'],
       pregnancyCategory: 'B',
       lactationSafety: 'Seguro com monitoramento',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: ['Monitorar função renal', 'Pode causar diarreia mais facilmente'],
       },
       storageInstructions: 'Armazenar em temperatura ambiente. Suspensão reconstituída: refrigerador por 14 dias.',
@@ -79,13 +79,13 @@ class MedicationDatabase {
       name: 'Meloxicam',
       activeIngredient: 'Meloxicam',
       category: 'Anti-inflamatório',
-      indications: [
+      indications: const [
         'Dor pós-operatória',
         'Artrite',
         'Inflamações músculo-esqueléticas',
         'Dor crônica',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 0.1,
@@ -103,14 +103,14 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 1.5, unit: 'mg/ml', description: '1,5mg/ml'),
         MedicationConcentration(value: 5.0, unit: 'mg/ml', description: '5mg/ml'),
       ],
-      pharmaceuticalForms: ['Suspensão oral', 'Comprimido', 'Injetável'],
-      recommendedFrequencies: [AdministrationFrequency.once],
-      administrationRoutes: ['Oral', 'Subcutânea', 'Intravenosa'],
-      contraindications: [
+      pharmaceuticalForms: const ['Suspensão oral', 'Comprimido', 'Injetável'],
+      recommendedFrequencies: const [AdministrationFrequency.once],
+      administrationRoutes: const ['Oral', 'Subcutânea', 'Intravenosa'],
+      contraindications: const [
         Contraindication(
           condition: 'Doença renal',
           reason: 'Pode piorar função renal',
@@ -127,11 +127,11 @@ class MedicationDatabase {
           isAbsolute: false,
         ),
       ],
-      sideEffects: ['Vômitos', 'Diarreia', 'Perda de apetite', 'Letargia'],
-      drugInteractions: ['Furosemida', 'Corticoides', 'Outros AINEs'],
+      sideEffects: const ['Vômitos', 'Diarreia', 'Perda de apetite', 'Letargia'],
+      drugInteractions: const ['Furosemida', 'Corticoides', 'Outros AINEs'],
       pregnancyCategory: 'C',
       lactationSafety: 'Evitar durante lactação',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'ATENÇÃO: Uso MUITO restrito em gatos',
           'Apenas primeira dose pós-cirúrgica',
@@ -150,13 +150,13 @@ class MedicationDatabase {
       name: 'Tramadol',
       activeIngredient: 'Cloridrato de Tramadol',
       category: 'Analgésico',
-      indications: [
+      indications: const [
         'Dor moderada a severa',
         'Dor pós-operatória',
         'Dor crônica',
         'Dor oncológica',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 2.0,
@@ -174,27 +174,27 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 50.0, unit: 'mg/ml', description: '50mg/ml'),
       ],
-      pharmaceuticalForms: ['Comprimido', 'Solução oral', 'Injetável'],
-      recommendedFrequencies: [
+      pharmaceuticalForms: const ['Comprimido', 'Solução oral', 'Injetável'],
+      recommendedFrequencies: const [
         AdministrationFrequency.twice,
         AdministrationFrequency.thrice,
       ],
-      administrationRoutes: ['Oral', 'Intramuscular', 'Intravenosa'],
-      contraindications: [
+      administrationRoutes: const ['Oral', 'Intramuscular', 'Intravenosa'],
+      contraindications: const [
         Contraindication(
           condition: 'Epilepsia',
           reason: 'Pode reduzir limiar convulsivo',
           isAbsolute: false,
         ),
       ],
-      sideEffects: ['Sedação', 'Náusea', 'Constipação', 'Salivação excessiva'],
-      drugInteractions: ['IMAOs', 'Serotoninérgicos', 'Depressores do SNC'],
+      sideEffects: const ['Sedação', 'Náusea', 'Constipação', 'Salivação excessiva'],
+      drugInteractions: const ['IMAOs', 'Serotoninérgicos', 'Depressores do SNC'],
       pregnancyCategory: 'C',
       lactationSafety: 'Usar com cautela',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'Metabolismo diferente dos cães',
           'Pode causar midríase',
@@ -212,13 +212,13 @@ class MedicationDatabase {
       name: 'Prednisolona',
       activeIngredient: 'Prednisolona',
       category: 'Corticoide',
-      indications: [
+      indications: const [
         'Inflamações alérgicas',
         'Doenças autoimunes',
         'Inflamações articulares',
         'Dermatites',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães e Gatos - dose anti-inflamatória
         DosageRange(
           minDose: 0.5,
@@ -241,17 +241,17 @@ class MedicationDatabase {
           applicableConditions: [SpecialCondition.healthy], // Para doenças autoimunes
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 5.0, unit: 'mg/ml', description: '5mg/ml'),
         MedicationConcentration(value: 20.0, unit: 'mg/ml', description: '20mg/ml'),
       ],
-      pharmaceuticalForms: ['Comprimido', 'Solução oral'],
-      recommendedFrequencies: [
+      pharmaceuticalForms: const ['Comprimido', 'Solução oral'],
+      recommendedFrequencies: const [
         AdministrationFrequency.once,
         AdministrationFrequency.twice,
       ],
-      administrationRoutes: ['Oral'],
-      contraindications: [
+      administrationRoutes: const ['Oral'],
+      contraindications: const [
         Contraindication(
           condition: 'Diabetes mellitus',
           reason: 'Pode descompensar diabetes',
@@ -263,17 +263,17 @@ class MedicationDatabase {
           isAbsolute: false,
         ),
       ],
-      sideEffects: [
+      sideEffects: const [
         'Poliúria/polidipsia',
         'Polifagia',
         'Ganho de peso',
         'Panting',
         'Imunossupressão',
       ],
-      drugInteractions: ['AINEs', 'Diuréticos', 'Insulina'],
+      drugInteractions: const ['AINEs', 'Diuréticos', 'Insulina'],
       pregnancyCategory: 'C',
       lactationSafety: 'Usar com cautela',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: ['Pode predispor a diabetes', 'Monitorar glicemia'],
       },
       storageInstructions: 'Armazenar em temperatura ambiente, proteger da umidade.',
@@ -287,13 +287,13 @@ class MedicationDatabase {
       name: 'Omeprazol',
       activeIngredient: 'Omeprazol',
       category: 'Protetor Gástrico',
-      indications: [
+      indications: const [
         'Úlcera gástrica',
         'Refluxo gastroesofágico',
         'Gastrite',
         'Prevenção de úlceras por AINEs',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 0.7,
@@ -309,19 +309,19 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 2.0, unit: 'mg/ml', description: '2mg/ml'),
         MedicationConcentration(value: 4.0, unit: 'mg/ml', description: '4mg/ml'),
       ],
-      pharmaceuticalForms: ['Cápsula', 'Comprimido', 'Suspensão oral'],
-      recommendedFrequencies: [AdministrationFrequency.once],
-      administrationRoutes: ['Oral'],
-      contraindications: [],
-      sideEffects: ['Raramente: diarreia leve', 'Alteração da flora intestinal'],
-      drugInteractions: ['Cetoconazol', 'Digoxina'],
+      pharmaceuticalForms: const ['Cápsula', 'Comprimido', 'Suspensão oral'],
+      recommendedFrequencies: const [AdministrationFrequency.once],
+      administrationRoutes: const ['Oral'],
+      contraindications: const [],
+      sideEffects: const ['Raramente: diarreia leve', 'Alteração da flora intestinal'],
+      drugInteractions: const ['Cetoconazol', 'Digoxina'],
       pregnancyCategory: 'B',
       lactationSafety: 'Seguro',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: ['Uso off-label em gatos', 'Estudos limitados'],
       },
       storageInstructions: 'Armazenar em local seco, temperatura ambiente.',
@@ -335,13 +335,13 @@ class MedicationDatabase {
       name: 'Furosemida',
       activeIngredient: 'Furosemida',
       category: 'Diurético',
-      indications: [
+      indications: const [
         'Insuficiência cardíaca congestiva',
         'Edema pulmonar',
         'Ascite',
         'Hipertensão',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 1.0,
@@ -359,17 +359,17 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 10.0, unit: 'mg/ml', description: '10mg/ml'),
         MedicationConcentration(value: 50.0, unit: 'mg/ml', description: '50mg/ml'),
       ],
-      pharmaceuticalForms: ['Comprimido', 'Solução injetável', 'Solução oral'],
-      recommendedFrequencies: [
+      pharmaceuticalForms: const ['Comprimido', 'Solução injetável', 'Solução oral'],
+      recommendedFrequencies: const [
         AdministrationFrequency.once,
         AdministrationFrequency.twice,
       ],
-      administrationRoutes: ['Oral', 'Intravenosa', 'Intramuscular'],
-      contraindications: [
+      administrationRoutes: const ['Oral', 'Intravenosa', 'Intramuscular'],
+      contraindications: const [
         Contraindication(
           condition: 'Desidratação severa',
           reason: 'Pode causar colapso circulatório',
@@ -381,16 +381,16 @@ class MedicationDatabase {
           isAbsolute: true,
         ),
       ],
-      sideEffects: [
+      sideEffects: const [
         'Desidratação',
         'Desequilíbrio eletrolítico',
         'Azotemia pré-renal',
         'Ototoxicidade (doses altas)',
       ],
-      drugInteractions: ['AINEs', 'Aminoglicosídeos', 'Lítio'],
+      drugInteractions: const ['AINEs', 'Aminoglicosídeos', 'Lítio'],
       pregnancyCategory: 'C',
       lactationSafety: 'Usar com cautela',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'Maior risco de desidratação',
           'Monitorar eletrólitos rigorosamente',
@@ -408,13 +408,13 @@ class MedicationDatabase {
       name: 'Enrofloxacina',
       activeIngredient: 'Enrofloxacina',
       category: 'Antibiótico Quinolona',
-      indications: [
+      indications: const [
         'Infecções por Gram-negativos',
         'Infecções urinárias complexas',
         'Infecções respiratórias',
         'Infecções de pele',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 5.0,
@@ -430,14 +430,14 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 25.0, unit: 'mg/ml', description: '25mg/ml'),
         MedicationConcentration(value: 50.0, unit: 'mg/ml', description: '50mg/ml'),
       ],
-      pharmaceuticalForms: ['Comprimido', 'Solução oral', 'Injetável'],
-      recommendedFrequencies: [AdministrationFrequency.once],
-      administrationRoutes: ['Oral', 'Subcutânea', 'Intravenosa'],
-      contraindications: [
+      pharmaceuticalForms: const ['Comprimido', 'Solução oral', 'Injetável'],
+      recommendedFrequencies: const [AdministrationFrequency.once],
+      administrationRoutes: const ['Oral', 'Subcutânea', 'Intravenosa'],
+      contraindications: const [
         Contraindication(
           condition: 'Filhotes em crescimento',
           reason: 'Pode afetar desenvolvimento da cartilagem',
@@ -449,11 +449,11 @@ class MedicationDatabase {
           isAbsolute: false,
         ),
       ],
-      sideEffects: ['Distúrbios gastrointestinais', 'Cristalúria', 'Artropatia (jovens)'],
-      drugInteractions: ['Antiácidos', 'Teofilina', 'Varfarina'],
+      sideEffects: const ['Distúrbios gastrointestinais', 'Cristalúria', 'Artropatia (jovens)'],
+      drugInteractions: const ['Antiácidos', 'Teofilina', 'Varfarina'],
       pregnancyCategory: 'C',
       lactationSafety: 'Evitar',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'PERIGO: Pode causar cegueira irreversível',
           'NÃO exceder 5mg/kg',
@@ -472,13 +472,13 @@ class MedicationDatabase {
       name: 'Metronidazol',
       activeIngredient: 'Metronidazol',
       category: 'Antiprotozoário',
-      indications: [
+      indications: const [
         'Giardíase',
         'Infecções anaeróbicas',
         'Colite',
         'Doença inflamatória intestinal',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 10.0,
@@ -494,30 +494,30 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 40.0, unit: 'mg/ml', description: '40mg/ml'),
       ],
-      pharmaceuticalForms: ['Comprimido', 'Suspensão oral'],
-      recommendedFrequencies: [AdministrationFrequency.twice],
-      administrationRoutes: ['Oral'],
-      contraindications: [
+      pharmaceuticalForms: const ['Comprimido', 'Suspensão oral'],
+      recommendedFrequencies: const [AdministrationFrequency.twice],
+      administrationRoutes: const ['Oral'],
+      contraindications: const [
         Contraindication(
           condition: 'Doença hepática severa',
           reason: 'Metabolismo hepático prejudicado',
           isAbsolute: false,
         ),
       ],
-      sideEffects: [
+      sideEffects: const [
         'Náusea',
         'Vômitos',
         'Perda de apetite',
         'Sabor metálico',
         'Neuropatia periférica (uso prolongado)',
       ],
-      drugInteractions: ['Varfarina', 'Álcool', 'Lítio'],
+      drugInteractions: const ['Varfarina', 'Álcool', 'Lítio'],
       pregnancyCategory: 'B',
       lactationSafety: 'Usar com cautela',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'Maior sensibilidade aos efeitos adversos',
           'Usar doses menores',
@@ -535,13 +535,13 @@ class MedicationDatabase {
       name: 'Gabapentina',
       activeIngredient: 'Gabapentina',
       category: 'Anticonvulsivante',
-      indications: [
+      indications: const [
         'Dor neuropática',
         'Epilepsia (adjuvante)',
         'Ansiedade (off-label)',
         'Dor crônica',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 5.0,
@@ -557,21 +557,21 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 50.0, unit: 'mg/ml', description: '50mg/ml'),
       ],
-      pharmaceuticalForms: ['Cápsula', 'Comprimido', 'Solução oral'],
-      recommendedFrequencies: [
+      pharmaceuticalForms: const ['Cápsula', 'Comprimido', 'Solução oral'],
+      recommendedFrequencies: const [
         AdministrationFrequency.twice,
         AdministrationFrequency.thrice,
       ],
-      administrationRoutes: ['Oral'],
-      contraindications: [],
-      sideEffects: ['Sedação', 'Ataxia', 'Fraqueza'],
-      drugInteractions: ['Antiácidos', 'Morfina'],
+      administrationRoutes: const ['Oral'],
+      contraindications: const [],
+      sideEffects: const ['Sedação', 'Ataxia', 'Fraqueza'],
+      drugInteractions: const ['Antiácidos', 'Morfina'],
       pregnancyCategory: 'C',
       lactationSafety: 'Dados limitados',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'Início com doses menores',
           'Monitorar coordenação',
@@ -589,12 +589,12 @@ class MedicationDatabase {
       name: 'Insulina NPH',
       activeIngredient: 'Insulina Humana NPH',
       category: 'Antidiabético',
-      indications: [
+      indications: const [
         'Diabetes mellitus tipo 1',
         'Diabetes mellitus tipo 2',
         'Cetoacidose diabética (com insulina rápida)',
       ],
-      dosageRanges: [
+      dosageRanges: const [
         // Cães
         DosageRange(
           minDose: 0.25,
@@ -610,28 +610,28 @@ class MedicationDatabase {
           species: Species.cat,
         ),
       ],
-      concentrations: [
+      concentrations: const [
         MedicationConcentration(value: 100.0, unit: 'UI/ml', description: '100UI/ml'),
       ],
-      pharmaceuticalForms: ['Suspensão injetável'],
-      recommendedFrequencies: [AdministrationFrequency.twice],
-      administrationRoutes: ['Subcutânea'],
-      contraindications: [
+      pharmaceuticalForms: const ['Suspensão injetável'],
+      recommendedFrequencies: const [AdministrationFrequency.twice],
+      administrationRoutes: const ['Subcutânea'],
+      contraindications: const [
         Contraindication(
           condition: 'Hipoglicemia',
           reason: 'Pode causar coma hipoglicêmico',
           isAbsolute: true,
         ),
       ],
-      sideEffects: [
+      sideEffects: const [
         'Hipoglicemia',
         'Reação no local da injeção',
         'Lipodistrofia',
       ],
-      drugInteractions: ['Corticoides', 'Beta-bloqueadores'],
+      drugInteractions: const ['Corticoides', 'Beta-bloqueadores'],
       pregnancyCategory: 'B',
       lactationSafety: 'Seguro',
-      speciesSpecificWarnings: {
+      speciesSpecificWarnings: const {
         Species.cat: [
           'Gatos podem entrar em remissão',
           'Monitoramento glicêmico rigoroso',

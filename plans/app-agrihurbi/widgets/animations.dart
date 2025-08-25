@@ -9,7 +9,7 @@
 /// - Transições suaves para navegação
 /// - Efeitos visuais para feedback
 
-library agrihurbi_animations;
+library;
 
 import 'package:flutter/material.dart';
 

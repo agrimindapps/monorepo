@@ -1,8 +1,5 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-
-import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/subscription/presentation/providers/subscription_provider.dart';
+import 'package:go_router/go_router.dart';
 
 /// Base abstract class for all authentication guards
 abstract class AuthGuard {
@@ -58,21 +55,21 @@ class UnauthenticatedGuard implements AuthGuard {
 
 /// Middleware factory for creating route guards
 class AuthMiddleware {
-  static String? Function(BuildContext, GoRouterState) authenticated() {
+  static Future<String?> Function(BuildContext, GoRouterState) authenticated() {
     return (context, state) async {
       final guard = AuthenticatedGuard();
       return await guard.check(context, state);
     };
   }
 
-  static String? Function(BuildContext, GoRouterState) premium() {
+  static Future<String?> Function(BuildContext, GoRouterState) premium() {
     return (context, state) async {
       final guard = PremiumGuard();
       return await guard.check(context, state);
     };
   }
 
-  static String? Function(BuildContext, GoRouterState) unauthenticated() {
+  static Future<String?> Function(BuildContext, GoRouterState) unauthenticated() {
     return (context, state) async {
       final guard = UnauthenticatedGuard();
       return await guard.check(context, state);
@@ -95,7 +92,7 @@ mixin PremiumFeatureAccess {
   }
   
   void showPremiumUpgrade(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Premium Required'),

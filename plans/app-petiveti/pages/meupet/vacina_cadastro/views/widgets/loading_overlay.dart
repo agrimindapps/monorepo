@@ -19,7 +19,7 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: FormStyles.getLoadingOverlayDecoration().copyWith(
         color: FormColors.loadingBackground.withValues(
           alpha: opacity ?? FormConstants.loadingOverlayOpacity,

@@ -109,7 +109,7 @@ class FirebaseService {
       final snapshot = await query.get();
       
       return snapshot.docs
-          .map((doc) => fromMap({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => fromMap({...(doc.data() as Map<String, dynamic>? ?? {}), 'id': doc.id}))
           .toList();
     } catch (e) {
       throw FirebaseException(
@@ -248,7 +248,7 @@ class FirebaseService {
 
     return query.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => fromMap({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => fromMap({...(doc.data() as Map<String, dynamic>? ?? {}), 'id': doc.id}))
           .toList();
     });
   }
@@ -302,13 +302,13 @@ class FirebaseService {
       case 'array-contains':
         return query.where(condition.field, arrayContains: condition.value);
       case 'array-contains-any':
-        return query.where(condition.field, arrayContainsAny: condition.value);
+        return query.where(condition.field, arrayContainsAny: (condition.value as Iterable<Object?>?) ?? []);
       case 'in':
-        return query.where(condition.field, whereIn: condition.value);
+        return query.where(condition.field, whereIn: (condition.value as Iterable<Object?>?) ?? []);
       case 'not-in':
-        return query.where(condition.field, whereNotIn: condition.value);
+        return query.where(condition.field, whereNotIn: (condition.value as Iterable<Object?>?) ?? []);
       case 'isNull':
-        return query.where(condition.field, isNull: condition.value);
+        return query.where(condition.field, isNull: (condition.value as bool?) ?? false);
       default:
         return query.where(condition.field, isEqualTo: condition.value);
     }

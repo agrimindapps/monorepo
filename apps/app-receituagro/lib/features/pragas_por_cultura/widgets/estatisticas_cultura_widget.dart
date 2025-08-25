@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/services/diagnostico_integration_service.dart';
+
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget que exibe estatísticas das pragas de uma cultura
 /// Mostra métricas agrupadas e filtros da cultura selecionada
@@ -103,18 +104,18 @@ class EstatisticasCulturaWidget extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.warning,
                   color: Colors.red,
                   size: 14,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   'ATENÇÃO',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.red,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -324,7 +325,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
     required Color color,
     required ValueChanged<String> onChanged,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: valor != opcoes.keys.first

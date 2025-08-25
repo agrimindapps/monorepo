@@ -12,11 +12,11 @@ class UpdateReminder implements UseCase<void, Reminder> {
   @override
   Future<Either<Failure, void>> call(Reminder reminder) async {
     if (reminder.title.trim().isEmpty) {
-      return Left(ValidationFailure('Título do lembrete é obrigatório'));
+      return const Left(ValidationFailure(message: 'Título do lembrete é obrigatório'));
     }
 
     if (reminder.isRecurring && (reminder.recurringDays == null || reminder.recurringDays! <= 0)) {
-      return Left(ValidationFailure('Intervalo de recorrência deve ser maior que zero'));
+      return const Left(ValidationFailure(message: 'Intervalo de recorrência deve ser maior que zero'));
     }
 
     return await repository.updateReminder(reminder);
@@ -52,7 +52,7 @@ class SnoozeReminder implements UseCase<void, SnoozeReminderParams> {
   @override
   Future<Either<Failure, void>> call(SnoozeReminderParams params) async {
     if (params.snoozeUntil.isBefore(DateTime.now())) {
-      return Left(ValidationFailure('Data de adiamento deve ser futura'));
+      return const Left(ValidationFailure(message: 'Data de adiamento deve ser futura'));
     }
 
     return await repository.snoozeReminder(params.reminderId, params.snoozeUntil);

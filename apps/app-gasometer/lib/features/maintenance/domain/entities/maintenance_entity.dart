@@ -380,4 +380,32 @@ class MaintenanceEntity extends Equatable {
   String toString() {
     return 'MaintenanceEntity(id: $id, type: ${type.displayName}, status: ${status.displayName}, cost: $formattedCost)';
   }
+
+  /// Converte a entidade para um mapa
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'userId': userId,
+      'vehicleId': vehicleId,
+      'type': type.name,
+      'status': status.name,
+      'title': title,
+      'description': description,
+      'cost': cost,
+      'serviceDate': serviceDate,
+      'odometer': odometer,
+      'workshopName': workshopName,
+      'workshopPhone': workshopPhone,
+      'workshopAddress': workshopAddress,
+      'nextServiceDate': nextServiceDate,
+      'nextServiceOdometer': nextServiceOdometer,
+      'photosPaths': photosPaths,
+      'invoicesPaths': invoicesPaths,
+      'parts': parts,
+      'notes': notes,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'metadata': metadata,
+    };
+  }
 }

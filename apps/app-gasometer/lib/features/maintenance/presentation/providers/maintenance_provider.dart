@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/maintenance_entity.dart';
-import '../../domain/usecases/get_all_maintenance_records.dart';
-import '../../domain/usecases/get_maintenance_records_by_vehicle.dart';
-import '../../domain/usecases/add_maintenance_record.dart';
-import '../../domain/usecases/update_maintenance_record.dart';
-import '../../domain/usecases/delete_maintenance_record.dart';
-import '../../domain/usecases/get_upcoming_maintenance_records.dart';
-import '../../domain/usecases/get_maintenance_analytics.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../domain/entities/maintenance_entity.dart';
+import '../../domain/usecases/add_maintenance_record.dart';
+import '../../domain/usecases/delete_maintenance_record.dart';
+import '../../domain/usecases/get_all_maintenance_records.dart';
+import '../../domain/usecases/get_maintenance_analytics.dart';
+import '../../domain/usecases/get_maintenance_records_by_vehicle.dart';
+import '../../domain/usecases/get_upcoming_maintenance_records.dart';
+import '../../domain/usecases/update_maintenance_record.dart';
 
 @injectable
 class MaintenanceProvider extends ChangeNotifier {
@@ -113,7 +113,7 @@ class MaintenanceProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final result = await _getAllMaintenanceRecords(NoParams());
+    final result = await _getAllMaintenanceRecords(const NoParams());
     
     result.fold(
       (failure) => _setError(failure.message),

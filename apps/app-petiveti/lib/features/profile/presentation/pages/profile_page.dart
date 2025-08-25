@@ -145,7 +145,7 @@ class ProfilePage extends ConsumerWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withValues(alpha: 0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -156,12 +156,12 @@ class ProfilePage extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.white.withOpacity(0.2),
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
             child: user?.photoUrl != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(40),
                     child: Image.network(
-                      user!.photoUrl!,
+                      user!.photoUrl! as String,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
@@ -182,7 +182,7 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            user?.displayName ?? 'Usuário',
+            (user?.displayName as String?) ?? 'Usuário',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -191,9 +191,9 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            user?.email ?? 'email@exemplo.com',
+            (user?.email as String?) ?? 'email@exemplo.com',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 14,
             ),
           ),

@@ -155,7 +155,7 @@ class DespesaInfoSectionWidget extends StatelessWidget {
 
   Widget _buildDataField(BuildContext context) {
     return Obx(() {
-      return Container(
+      return DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(
             color: ShadcnStyle.borderColor.withValues(alpha: 0.5),
@@ -177,14 +177,14 @@ class DespesaInfoSectionWidget extends StatelessWidget {
                   topRight: Radius.circular(7),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today,
                     size: 16,
                     color: Colors.blue,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     'Data e Hora',
                     style: TextStyle(

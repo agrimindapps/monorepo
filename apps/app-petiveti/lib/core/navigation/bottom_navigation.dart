@@ -31,12 +31,12 @@ class MainBottomNavigation extends ConsumerWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: Container(
+      bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, -2),
             ),
@@ -131,7 +131,7 @@ class _NavBarItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected 
-              ? colorScheme.primary.withOpacity(0.1)
+              ? colorScheme.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -141,7 +141,7 @@ class _NavBarItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               child: Icon(
-                isSelected ? tabInfo['selectedIcon'] : tabInfo['icon'],
+                (isSelected ? tabInfo['selectedIcon'] : tabInfo['icon']) as IconData? ?? Icons.home,
                 color: isSelected 
                     ? colorScheme.primary
                     : colorScheme.onSurfaceVariant,
@@ -157,7 +157,7 @@ class _NavBarItem extends StatelessWidget {
                     : colorScheme.onSurfaceVariant,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
-              child: Text(tabInfo['label']),
+              child: Text(tabInfo['label'] as String? ?? ''),
             ),
           ],
         ),

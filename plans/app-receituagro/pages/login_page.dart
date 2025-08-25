@@ -227,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
               topLeft: Radius.circular(20),
               bottomLeft: Radius.circular(20),
             ),
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,

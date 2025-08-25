@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../models/favorito_defensivo_model.dart';
+import '../models/favorito_diagnostico_model.dart';
+import '../models/favorito_praga_model.dart';
 import '../models/favoritos_data.dart';
 import '../models/view_mode.dart';
-import '../models/favorito_defensivo_model.dart';
-import '../models/favorito_praga_model.dart';
-import '../models/favorito_diagnostico_model.dart';
 import '../services/favoritos_data_service.dart';
 import '../services/favoritos_search_service.dart';
 import '../services/favoritos_ui_state_service.dart';

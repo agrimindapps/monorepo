@@ -27,7 +27,7 @@ class ReminderModel extends Reminder {
       userId: map['userId']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
-      scheduledDate: DateTime.fromMillisecondsSinceEpoch(map['scheduledDate'] ?? 0),
+      scheduledDate: DateTime.fromMillisecondsSinceEpoch((map['scheduledDate'] as int?) ?? 0),
       type: ReminderType.values.firstWhere(
         (e) => e.toString() == 'ReminderType.${map['type']}',
         orElse: () => ReminderType.general,
@@ -40,19 +40,19 @@ class ReminderModel extends Reminder {
         (e) => e.toString() == 'ReminderStatus.${map['status']}',
         orElse: () => ReminderStatus.active,
       ),
-      isRecurring: map['isRecurring'] ?? false,
-      recurringDays: map['recurringDays'],
+      isRecurring: (map['isRecurring'] as bool?) ?? false,
+      recurringDays: (map['recurringDays'] as int?),
       completedAt: map['completedAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['completedAt'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['completedAt'] as int))
           : null,
       snoozeUntil: map['snoozeUntil'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['snoozeUntil'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['snoozeUntil'] as int))
           : null,
       metadata: map['metadata'] != null 
-          ? Map<String, dynamic>.from(map['metadata'])
+          ? Map<String, dynamic>.from(map['metadata'] as Map)
           : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
     );
   }
 
@@ -98,6 +98,7 @@ class ReminderModel extends Reminder {
     );
   }
 
+  @override
   ReminderModel copyWith({
     String? id,
     String? animalId,

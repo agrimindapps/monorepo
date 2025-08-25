@@ -1,5 +1,5 @@
-import '../entities/expense_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../entities/expense_entity.dart';
 
 /// Serviço especializado para validação contextual de campos de despesas
 class ExpenseValidatorService {

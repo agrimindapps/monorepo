@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import 'calculator_management_provider.dart';
-import 'calculator_execution_provider.dart';
-import 'calculator_history_provider.dart';
-import 'calculator_favorites_provider.dart';
-import 'calculator_search_provider.dart';
-import '../../domain/entities/calculator_entity.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
+import 'calculator_execution_provider.dart';
+import 'calculator_favorites_provider.dart';
+import 'calculator_history_provider.dart';
+import 'calculator_management_provider.dart';
+import 'calculator_search_provider.dart';
 
 /// Provider coordenador que compõe funcionalidades de calculadoras
 /// 

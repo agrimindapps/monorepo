@@ -1,7 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_petiveti/features/calculators/domain/entities/calorie_input.dart';
 import 'package:app_petiveti/features/calculators/presentation/providers/calorie_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Calorie Calculator Integration Tests', () {
@@ -387,7 +387,7 @@ void main() {
         expect(result.calculationDetails.adjustmentsApplied, isNotEmpty);
         
         // Verify manual calculation
-        final expectedRer = 70 * (20.0 * 0.75); // Approximation
+        const expectedRer = 70 * (20.0 * 0.75); // Approximation
         expect(result.restingEnergyRequirement, 
                inInclusiveRange(expectedRer * 0.8, expectedRer * 1.2));
       });

@@ -1,18 +1,20 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../core/widgets/modern_header_widget.dart';
+
+import 'package:flutter/material.dart';
+
+import '../../core/di/injection_container.dart';
 import '../../core/models/pragas_hive.dart';
 import '../../core/repositories/pragas_hive_repository.dart';
-import '../../core/di/injection_container.dart';
-import 'models/praga_cultura_item_model.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import 'detalhe_praga_page.dart';
 import 'models/lista_pragas_cultura_state.dart';
+import 'models/praga_cultura_item_model.dart';
 import 'models/praga_view_mode.dart';
-import 'widgets/praga_cultura_search_field_widget.dart';
-import 'widgets/praga_cultura_tab_bar_widget.dart';
+import 'widgets/praga_cultura_empty_state_widget.dart';
 import 'widgets/praga_cultura_item_widget.dart';
 import 'widgets/praga_cultura_loading_skeleton_widget.dart';
-import 'widgets/praga_cultura_empty_state_widget.dart';
-import 'detalhe_praga_page.dart';
+import 'widgets/praga_cultura_search_field_widget.dart';
+import 'widgets/praga_cultura_tab_bar_widget.dart';
 
 class ListaPragasPorCulturaPage extends StatefulWidget {
   final String? culturaId;
@@ -79,6 +81,9 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
       
       // Converte para PragaCulturaItemModel
       final realData = pragasHive.map(_convertToPragaCulturaItem).toList();
+      
+      // Ordena alfabeticamente por nome comum
+      realData.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
       
       _updateState(_state.copyWith(
         pragasList: realData,
@@ -192,7 +197,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   void _handleItemTap(PragaCulturaItemModel praga) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => DetalhePragaPage(
           pragaName: praga.displayName,
           pragaScientificName: praga.nomeCientifico ?? 'Nome científico não disponível',
@@ -279,8 +284,12 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   }
 
   Widget _buildScrollableContent() {
-    return SingleChildScrollView(
-      child: _buildTabView(),
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildTabView(),
+        ),
+      ],
     );
   }
 
@@ -327,46 +336,50 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
       builder: (context, constraints) {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
         
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: 0.85,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+        // Calcula quantas linhas teremos
+        final rowCount = (pragas.length / crossAxisCount).ceil();
+        final itemHeight = constraints.maxWidth / crossAxisCount * (1 / 0.85); // childAspectRatio inverse
+        final totalHeight = (rowCount * itemHeight) + ((rowCount - 1) * 8) + 16; // spacing + padding
+        
+        return SizedBox(
+          height: totalHeight,
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(8),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: 0.85,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: pragas.length,
+            itemBuilder: (context, index) {
+              final praga = pragas[index];
+              return PragaCulturaItemWidget(
+                praga: praga,
+                viewMode: _state.viewMode,
+                isDark: _state.isDark,
+                onTap: () => _handleItemTap(praga),
+              );
+            },
           ),
-          itemCount: pragas.length,
-          itemBuilder: (context, index) {
-            final praga = pragas[index];
-            return PragaCulturaItemWidget(
-              praga: praga,
-              viewMode: _state.viewMode,
-              isDark: _state.isDark,
-              onTap: () => _handleItemTap(praga),
-            );
-          },
         );
       },
     );
   }
 
   Widget _buildListView(List<PragaCulturaItemModel> pragas) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(8),
-      itemCount: pragas.length,
-      itemBuilder: (context, index) {
-        final praga = pragas[index];
-        return PragaCulturaItemWidget(
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        ...pragas.map((praga) => PragaCulturaItemWidget(
           praga: praga,
           viewMode: _state.viewMode,
           isDark: _state.isDark,
           onTap: () => _handleItemTap(praga),
-        );
-      },
+        )),
+        const SizedBox(height: 8),
+      ],
     );
   }
 

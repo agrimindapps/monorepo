@@ -1,6 +1,7 @@
 import 'dart:math' as math;
-import 'calculator_entity.dart';
+
 import 'calculation_result.dart';
+import 'calculator_entity.dart';
 
 /// Engine genérico para registro e execução de calculadoras
 class CalculatorEngine {

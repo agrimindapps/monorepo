@@ -40,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+              background: DecoratedBox(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,

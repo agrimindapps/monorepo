@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../data/models/base_sync_model.dart';
-import './sync_queue.dart';
 import './sync_operations.dart';
-import 'interfaces/i_sync_repository.dart';
+import './sync_queue.dart';
 import 'interfaces/i_conflict_resolver.dart';
+import 'interfaces/i_sync_repository.dart';
 
 /// Service responsible for synchronization operations
 @singleton

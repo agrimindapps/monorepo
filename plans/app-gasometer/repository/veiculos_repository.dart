@@ -16,20 +16,18 @@ import '../types/result.dart';
 
 // Local imports
 
-/**
- * TODO (prioridade: MÉDIA): Extrair funções auxiliares (ex: checkBoxForRecords) para helpers reutilizáveis.
- * TODO (prioridade: MÉDIA): Centralizar mensagens de erro e textos em arquivo de constantes ou localization.
- * TODO (prioridade: MÉDIA): Adicionar tratamento para possíveis erros de null em operações com Hive e SharedPreferences.
- * TODO (prioridade: MÉDIA): Adicionar testes unitários para métodos de CRUD e verificação de lançamentos.
- * FIXME (prioridade: MÉDIA): O método _getById lança exceção se não encontrar veículo, mas retorna null no catch; padronizar comportamento.
- * FIXME (prioridade: MÉDIA): O método _delete apenas marca como inativo, considerar remoção física ou opção de restauração.
- * OPTIMIZE (prioridade: MÉDIA): Evitar abrir e fechar o box Hive em cada operação, usar cache ou gerenciar ciclo de vida do box.
- * NOTE (prioridade: BAIXA): O padrão singleton pode dificultar testes, considerar uso de injeção de dependência.
- * STYLE (prioridade: BAIXA): Padronizar espaçamentos e comentários para melhor legibilidade.
- * DOC (prioridade: BAIXA): Adicionar comentários explicativos nos métodos principais para facilitar manutenção.
- * TODO (prioridade: MÉDIA): Adicionar feedback visual para operações longas (ex: sincronização com Firestore).
- * TODO (prioridade: BAIXA): Adicionar logs mais detalhados para facilitar debug em produção.
- */
+/// TODO (prioridade: MÉDIA): Extrair funções auxiliares (ex: checkBoxForRecords) para helpers reutilizáveis.
+/// TODO (prioridade: MÉDIA): Centralizar mensagens de erro e textos em arquivo de constantes ou localization.
+/// TODO (prioridade: MÉDIA): Adicionar tratamento para possíveis erros de null em operações com Hive e SharedPreferences.
+/// TODO (prioridade: MÉDIA): Adicionar testes unitários para métodos de CRUD e verificação de lançamentos.
+/// FIXME (prioridade: MÉDIA): O método _getById lança exceção se não encontrar veículo, mas retorna null no catch; padronizar comportamento.
+/// FIXME (prioridade: MÉDIA): O método _delete apenas marca como inativo, considerar remoção física ou opção de restauração.
+/// OPTIMIZE (prioridade: MÉDIA): Evitar abrir e fechar o box Hive em cada operação, usar cache ou gerenciar ciclo de vida do box.
+/// NOTE (prioridade: BAIXA): O padrão singleton pode dificultar testes, considerar uso de injeção de dependência.
+/// STYLE (prioridade: BAIXA): Padronizar espaçamentos e comentários para melhor legibilidade.
+/// DOC (prioridade: BAIXA): Adicionar comentários explicativos nos métodos principais para facilitar manutenção.
+/// TODO (prioridade: MÉDIA): Adicionar feedback visual para operações longas (ex: sincronização com Firestore).
+/// TODO (prioridade: BAIXA): Adicionar logs mais detalhados para facilitar debug em produção.
 
 
 class VeiculosRepository {

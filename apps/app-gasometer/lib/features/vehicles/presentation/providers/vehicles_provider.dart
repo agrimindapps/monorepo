@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../../domain/usecases/add_vehicle.dart';
+import '../../domain/usecases/delete_vehicle.dart';
 import '../../domain/usecases/get_all_vehicles.dart';
 import '../../domain/usecases/get_vehicle_by_id.dart';
-import '../../domain/usecases/add_vehicle.dart';
-import '../../domain/usecases/update_vehicle.dart';
-import '../../domain/usecases/delete_vehicle.dart';
 import '../../domain/usecases/search_vehicles.dart';
-import '../../../../core/error/failures.dart';
+import '../../domain/usecases/update_vehicle.dart';
 
 @injectable
 class VehiclesProvider extends ChangeNotifier {
@@ -56,10 +57,9 @@ class VehiclesProvider extends ChangeNotifier {
   Future<void> _initialize() async {
     try {
       await loadVehicles();
-      _isInitialized = true;
-      notifyListeners();
     } catch (e) {
       _errorMessage = 'Erro ao inicializar: ${e.toString()}';
+    } finally {
       _isInitialized = true;
       notifyListeners();
     }

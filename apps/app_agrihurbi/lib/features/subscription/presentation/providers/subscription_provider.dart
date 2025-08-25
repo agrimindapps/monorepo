@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:app_agrihurbi/features/subscription/domain/usecases/manage_subscription.dart';
+import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 /// Subscription Provider for Premium Features Management
 /// 
@@ -10,13 +11,17 @@ import 'package:app_agrihurbi/features/subscription/domain/usecases/manage_subsc
 @injectable
 class SubscriptionProvider with ChangeNotifier {
   final ManageSubscription _manageSubscription;
+  final ManagePaymentMethods _managePaymentMethods;
 
-  SubscriptionProvider(this._manageSubscription);
+  SubscriptionProvider(
+    this._manageSubscription,
+    this._managePaymentMethods,
+  );
 
   // === STATE VARIABLES ===
 
   SubscriptionEntity? _currentSubscription;
-  List<SubscriptionTier> _availableTiers = SubscriptionTier.values;
+  final List<SubscriptionTier> _availableTiers = SubscriptionTier.values;
   List<PaymentMethod> _paymentMethods = [];
 
   bool _isLoadingSubscription = false;
@@ -70,8 +75,8 @@ class SubscriptionProvider with ChangeNotifier {
       final result = await _manageSubscription.getCurrentSubscription();
       
       result.fold(
-        (failure) => _setError('Erro ao carregar assinatura: ${failure.message}'),
-        (subscription) {
+        (Failure failure) => _setError('Erro ao carregar assinatura: ${failure.message}'),
+        (SubscriptionEntity? subscription) {
           _currentSubscription = subscription;
           notifyListeners();
         },
@@ -95,18 +100,18 @@ class SubscriptionProvider with ChangeNotifier {
     _clearMessages();
 
     try {
-      final result = await _manageSubscription.subscribe(
+      final result = await _manageSubscription.createSubscription(
         tier: tier,
         billingPeriod: billingPeriod,
-        paymentMethod: paymentMethod,
+        paymentMethod: paymentMethod!,
       );
       
       return result.fold(
-        (failure) {
+        (Failure failure) {
           _setError('Erro ao processar assinatura: ${failure.message}');
           return false;
         },
-        (subscription) {
+        (SubscriptionEntity subscription) {
           _currentSubscription = subscription;
           _setSuccess('Assinatura ${tier.displayName} ativada com sucesso!');
           notifyListeners();
@@ -131,7 +136,6 @@ class SubscriptionProvider with ChangeNotifier {
 
     try {
       final result = await _manageSubscription.upgradeSubscription(
-        subscriptionId: _currentSubscription!.id,
         newTier: newTier,
       );
       
@@ -165,7 +169,6 @@ class SubscriptionProvider with ChangeNotifier {
 
     try {
       final result = await _manageSubscription.downgradeSubscription(
-        subscriptionId: _currentSubscription!.id,
         newTier: newTier,
       );
       
@@ -199,8 +202,7 @@ class SubscriptionProvider with ChangeNotifier {
 
     try {
       final result = await _manageSubscription.cancelSubscription(
-        subscriptionId: _currentSubscription!.id,
-        reason: reason,
+        cancelImmediately: false,
       );
       
       return result.fold(
@@ -232,9 +234,7 @@ class SubscriptionProvider with ChangeNotifier {
     _clearMessages();
 
     try {
-      final result = await _manageSubscription.resumeSubscription(
-        subscriptionId: _currentSubscription!.id,
-      );
+      final result = await _manageSubscription.reactivateSubscription();
       
       return result.fold(
         (failure) {
@@ -261,7 +261,7 @@ class SubscriptionProvider with ChangeNotifier {
   /// Load payment methods
   Future<void> loadPaymentMethods() async {
     try {
-      final result = await _manageSubscription.getPaymentMethods();
+      final result = await _managePaymentMethods.getPaymentMethods();
       
       result.fold(
         (failure) => _setError('Erro ao carregar métodos de pagamento: ${failure.message}'),
@@ -278,7 +278,10 @@ class SubscriptionProvider with ChangeNotifier {
   /// Add payment method
   Future<bool> addPaymentMethod(PaymentMethod paymentMethod) async {
     try {
-      final result = await _manageSubscription.addPaymentMethod(paymentMethod);
+      final result = await _managePaymentMethods.addPaymentMethod(
+        type: paymentMethod.type,
+        token: paymentMethod.id,
+      );
       
       return result.fold(
         (failure) {
@@ -300,7 +303,7 @@ class SubscriptionProvider with ChangeNotifier {
   /// Remove payment method
   Future<bool> removePaymentMethod(String paymentMethodId) async {
     try {
-      final result = await _manageSubscription.removePaymentMethod(paymentMethodId);
+      final result = await _managePaymentMethods.removePaymentMethod(paymentMethodId);
       
       return result.fold(
         (failure) {
@@ -322,7 +325,7 @@ class SubscriptionProvider with ChangeNotifier {
   /// Set default payment method
   Future<bool> setDefaultPaymentMethod(String paymentMethodId) async {
     try {
-      final result = await _manageSubscription.setDefaultPaymentMethod(paymentMethodId);
+      final result = await _managePaymentMethods.setDefaultPaymentMethod(paymentMethodId);
       
       return result.fold(
         (failure) {
@@ -486,8 +489,4 @@ class SubscriptionProvider with ChangeNotifier {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

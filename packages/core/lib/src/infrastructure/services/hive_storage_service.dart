@@ -1,5 +1,6 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dartz/dartz.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import '../../domain/repositories/i_local_storage_repository.dart';
 import '../../shared/utils/failure.dart';
 
@@ -47,6 +48,15 @@ class HiveStorageService implements ILocalStorageRepository {
     } catch (e) {
       return Left(CacheFailure('Erro ao salvar dados: $e'));
     }
+  }
+
+  /// Alias para save para compatibilidade
+  Future<Either<Failure, void>> put<T>({
+    required String key,
+    required T data,
+    String? box,
+  }) async {
+    return save<T>(key: key, data: data, box: box);
   }
 
   @override
@@ -408,7 +418,7 @@ class HiveStorageService implements ILocalStorageRepository {
 
       return dataResult.fold((failure) => Left(failure), (offlineData) async {
         if (offlineData == null) {
-          return Left(CacheFailure('Dados não encontrados para sincronizar'));
+          return const Left(CacheFailure('Dados não encontrados para sincronizar'));
         }
 
         return saveOfflineData<dynamic>(

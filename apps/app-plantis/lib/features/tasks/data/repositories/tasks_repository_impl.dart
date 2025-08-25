@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart' hide Task;
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart' hide Task;
+
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/repositories/tasks_repository.dart';
@@ -297,14 +298,14 @@ class TasksRepositoryImpl implements TasksRepository {
       if (localTask != null) {
         return Right(localTask);
       } else {
-        return Left(NotFoundFailure('Tarefa não encontrada'));
+        return const Left(NotFoundFailure('Tarefa não encontrada'));
       }
     } on Exception {
       final localTask = await localDataSource.getTaskById(id);
       if (localTask != null) {
         return Right(localTask);
       }
-      return Left(ServerFailure('Erro ao buscar tarefa'));
+      return const Left(ServerFailure('Erro ao buscar tarefa'));
     }
   }
 
@@ -337,7 +338,7 @@ class TasksRepositoryImpl implements TasksRepository {
         return Right(offlineTask);
       }
     } on Exception {
-      return Left(ServerFailure('Erro ao adicionar tarefa'));
+      return const Left(ServerFailure('Erro ao adicionar tarefa'));
     }
   }
 
@@ -423,7 +424,7 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       if (!completedTask.isRecurring ||
           completedTask.recurringIntervalDays == null) {
-        return Left(
+        return const Left(
           ValidationFailure(
             'Tarefa não é recorrente ou não tem intervalo definido',
           ),

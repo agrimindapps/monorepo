@@ -263,7 +263,7 @@ class ListaDefensivosAgrupadosPage
   }
 
   Widget _buildDefensivosList() {
-    final context = Get.context!;
+    final context = Get.context;
     if (controller.state.isLoading &&
         controller.state.defensivosListFiltered.isEmpty) {
       return const LoadingIndicator();

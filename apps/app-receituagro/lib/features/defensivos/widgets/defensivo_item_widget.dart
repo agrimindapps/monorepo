@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/models/fitossanitario_hive.dart';
+
 import '../../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../../core/models/fitossanitario_hive.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
   final FitossanitarioHive defensivo;
   final bool isDark;
   final VoidCallback onTap;
   final bool isGridView;
+
+  // Cache estático para cores e ícones
+  static final Map<String, Color> _colorCache = {};
+  static final Map<String, IconData> _iconCache = {};
 
   const DefensivoItemWidget({
     super.key,
@@ -19,34 +24,58 @@ class DefensivoItemWidget extends StatelessWidget {
 
   Color get _getClassColor {
     final classe = defensivo.displayClass.toLowerCase();
-    if (classe.contains('herbicida') || classe.contains('herbic')) {
-      return Colors.green.shade700;
-    } else if (classe.contains('inseticida') || classe.contains('insetic')) {
-      return Colors.red.shade600;
-    } else if (classe.contains('fungicida') || classe.contains('fungic')) {
-      return Colors.blue.shade600;
-    } else if (classe.contains('acaricida') || classe.contains('acaric')) {
-      return Colors.orange.shade600;
-    } else if (classe.contains('bactericida') || classe.contains('bacteri')) {
-      return Colors.purple.shade600;
+    
+    // Verifica cache primeiro
+    if (_colorCache.containsKey(classe)) {
+      return _colorCache[classe]!;
     }
-    return const Color(0xFF2E7D32);
+    
+    // Computa cor e adiciona ao cache
+    Color color;
+    if (classe.contains('herbicida') || classe.contains('herbic')) {
+      color = Colors.green.shade700;
+    } else if (classe.contains('inseticida') || classe.contains('insetic')) {
+      color = Colors.red.shade600;
+    } else if (classe.contains('fungicida') || classe.contains('fungic')) {
+      color = Colors.blue.shade600;
+    } else if (classe.contains('acaricida') || classe.contains('acaric')) {
+      color = Colors.orange.shade600;
+    } else if (classe.contains('bactericida') || classe.contains('bacteri')) {
+      color = Colors.purple.shade600;
+    } else {
+      color = const Color(0xFF2E7D32);
+    }
+    
+    _colorCache[classe] = color;
+    return color;
   }
 
   IconData get _getClassIcon {
     final classe = defensivo.displayClass.toLowerCase();
-    if (classe.contains('herbicida') || classe.contains('herbic')) {
-      return FontAwesomeIcons.leaf;
-    } else if (classe.contains('inseticida') || classe.contains('insetic')) {
-      return FontAwesomeIcons.bug;
-    } else if (classe.contains('fungicida') || classe.contains('fungic')) {
-      return FontAwesomeIcons.droplet;
-    } else if (classe.contains('acaricida') || classe.contains('acaric')) {
-      return FontAwesomeIcons.spider;
-    } else if (classe.contains('bactericida') || classe.contains('bacteri')) {
-      return FontAwesomeIcons.virus;
+    
+    // Verifica cache primeiro
+    if (_iconCache.containsKey(classe)) {
+      return _iconCache[classe]!;
     }
-    return FontAwesomeIcons.sprayCan;
+    
+    // Computa ícone e adiciona ao cache
+    IconData icon;
+    if (classe.contains('herbicida') || classe.contains('herbic')) {
+      icon = FontAwesomeIcons.leaf;
+    } else if (classe.contains('inseticida') || classe.contains('insetic')) {
+      icon = FontAwesomeIcons.bug;
+    } else if (classe.contains('fungicida') || classe.contains('fungic')) {
+      icon = FontAwesomeIcons.droplet;
+    } else if (classe.contains('acaricida') || classe.contains('acaric')) {
+      icon = FontAwesomeIcons.spider;
+    } else if (classe.contains('bactericida') || classe.contains('bacteri')) {
+      icon = FontAwesomeIcons.virus;
+    } else {
+      icon = FontAwesomeIcons.sprayCan;
+    }
+    
+    _iconCache[classe] = icon;
+    return icon;
   }
 
   @override
@@ -59,7 +88,7 @@ class DefensivoItemWidget extends StatelessWidget {
   }
 
   Widget _buildListItem() {
-    final color = const Color(0xFF4CAF50); // Verde padrão como no mockup
+    const color = Color(0xFF4CAF50); // Verde padrão como no mockup
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -73,7 +102,7 @@ class DefensivoItemWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 4,
                 offset: const Offset(0, 2),
@@ -87,10 +116,10 @@ class DefensivoItemWidget extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   FontAwesomeIcons.leaf,
                   color: color,
                   size: 20,

@@ -2,24 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../navigation/bottom_navigation.dart';
-
-import '../../features/auth/presentation/pages/splash_page.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/animals/presentation/pages/animals_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
 import '../../features/appointments/presentation/widgets/add_appointment_form.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/calculators/presentation/pages/body_condition_page.dart';
+import '../../features/expenses/presentation/pages/expenses_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/reminders/presentation/pages/reminders_page.dart';
+import '../../features/subscription/presentation/pages/subscription_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
-import '../../features/reminders/presentation/pages/reminders_page.dart';
-import '../../features/expenses/presentation/pages/expenses_page.dart';
-import '../../features/subscription/presentation/pages/subscription_page.dart';
-import '../../features/profile/presentation/pages/profile_page.dart';
-import '../../features/calculators/presentation/pages/body_condition_page.dart';
+import '../navigation/bottom_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);

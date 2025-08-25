@@ -15,6 +15,13 @@ enum PlanStatus {
   pending,
 }
 
+enum PlanDuration {
+  weekly,
+  monthly,
+  yearly,
+  lifetime,
+}
+
 class SubscriptionPlan extends Equatable {
   final String id;
   final String productId;
@@ -89,7 +96,7 @@ class SubscriptionPlan extends Equatable {
 
   String get formattedPrice {
     if (isFree) return 'Grátis';
-    return '${currency} ${price.toStringAsFixed(2)}';
+    return '$currency ${price.toStringAsFixed(2)}';
   }
 
   String get billingPeriod {

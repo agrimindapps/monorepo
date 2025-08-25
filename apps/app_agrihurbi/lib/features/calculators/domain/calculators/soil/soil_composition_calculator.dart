@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Composição do Solo
 /// Analisa composição física e química do solo
 class SoilCompositionCalculator extends CalculatorEntity {
-  SoilCompositionCalculator()
+  const SoilCompositionCalculator()
       : super(
           id: 'soil_composition_calculator',
           name: 'Composição do Solo',
@@ -126,7 +127,8 @@ class SoilCompositionCalculator extends CalculatorEntity {
 
       // Validar soma das frações
       final double totalFractions = sandPercentage + siltPercentage + clayPercentage;
-      if (math.abs(totalFractions - 100.0) > 2.0) {
+      final double totalDiff = totalFractions - 100.0;
+      if ((totalDiff < 0 ? -totalDiff : totalDiff) > 2.0) {
         return CalculationError(
           calculatorId: id,
           errorMessage: 'A soma de areia, silte e argila deve ser próxima a 100%',
@@ -213,7 +215,7 @@ class SoilCompositionCalculator extends CalculatorEntity {
           ),
         ],
         recommendations: recommendations,
-        tableData: [],
+        tableData: const [],
       );
     } catch (e) {
       return CalculationError(

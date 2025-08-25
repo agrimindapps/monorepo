@@ -351,7 +351,7 @@ class ManutencoesPageView extends GetView<ManutencoesPageController> {
   }
 
   Widget _buildMonthsNavigation() {
-    return Obx(() => Container(
+    return Obx(() => DecoratedBox(
           decoration: BoxDecoration(
             color: ThemeManager().isDark.value
                 ? Colors.grey.shade900
@@ -708,14 +708,14 @@ class ManutencoesPageView extends GetView<ManutencoesPageController> {
                       ],
                       if (isCompleted) ...[
                         const SizedBox(height: 8),
-                        Row(
+                        const Row(
                           children: [
                             Icon(
                               Icons.check_circle,
                               size: 14,
                               color: Colors.green,
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: 4),
                             Text(
                               'Concluída',
                               style: TextStyle(
@@ -805,7 +805,7 @@ class ManutencoesPageView extends GetView<ManutencoesPageController> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.attach_money,
             size: 14,
             color: Colors.green,

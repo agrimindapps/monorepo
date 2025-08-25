@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/calculator_input.dart';
 import 'base_calculator.dart';
 
@@ -63,6 +64,82 @@ class HydrationInput extends CalculatorInput {
   });
 
   @override
+  Map<String, dynamic> toMap() {
+    return {
+      'weight': weight,
+      'dehydrationLevel': dehydrationLevel.index,
+      'bodyCondition': bodyCondition.index,
+      'activityLevel': activityLevel.index,
+      'environmentTemp': environmentTemp.index,
+      'isLactating': isLactating,
+      'hasKidneyDisease': hasKidneyDisease,
+      'hasHeartDisease': hasHeartDisease,
+      'hasVomiting': hasVomiting,
+      'hasDiarrhea': hasDiarrhea,
+      'currentIntake': currentIntake,
+      'hoursWithoutWater': hoursWithoutWater,
+    };
+  }
+
+  factory HydrationInput.fromMap(Map<String, dynamic> map) {
+    return HydrationInput(
+      weight: (map['weight'] is num) ? (map['weight'] as num).toDouble() : 0.0,
+      dehydrationLevel: (map['dehydrationLevel'] is int) ? DehydrationLevel.values[map['dehydrationLevel'] as int] : DehydrationLevel.none,
+      bodyCondition: (map['bodyCondition'] is int) ? BodyCondition.values[map['bodyCondition'] as int] : BodyCondition.ideal,
+      activityLevel: (map['activityLevel'] is int) ? ActivityLevel.values[map['activityLevel'] as int] : ActivityLevel.moderate,
+      environmentTemp: (map['environmentTemp'] is int) ? EnvironmentTemp.values[map['environmentTemp'] as int] : EnvironmentTemp.normal,
+      isLactating: (map['isLactating'] is bool) ? map['isLactating'] as bool : false,
+      hasKidneyDisease: (map['hasKidneyDisease'] is bool) ? map['hasKidneyDisease'] as bool : false,
+      hasHeartDisease: (map['hasHeartDisease'] is bool) ? map['hasHeartDisease'] as bool : false,
+      hasVomiting: (map['hasVomiting'] is bool) ? map['hasVomiting'] as bool : false,
+      hasDiarrhea: (map['hasDiarrhea'] is bool) ? map['hasDiarrhea'] as bool : false,
+      currentIntake: (map['currentIntake'] is num) ? (map['currentIntake'] as num).toDouble() : null,
+      hoursWithoutWater: (map['hoursWithoutWater'] is num) ? (map['hoursWithoutWater'] as num).toInt() : null,
+    );
+  }
+
+  @override
+  List<String> validate() {
+    final errors = <String>[];
+    if (weight <= 0) errors.add('Peso deve ser maior que zero');
+    if (weight > 100) errors.add('Peso muito alto (>100kg)');
+    if (currentIntake != null && currentIntake! < 0) errors.add('Ingestão atual não pode ser negativa');
+    if (hoursWithoutWater != null && hoursWithoutWater! < 0) errors.add('Horas sem água não pode ser negativo');
+    return errors;
+  }
+
+  @override
+  HydrationInput copyWith({
+    double? weight,
+    DehydrationLevel? dehydrationLevel,
+    BodyCondition? bodyCondition,
+    ActivityLevel? activityLevel,
+    EnvironmentTemp? environmentTemp,
+    bool? isLactating,
+    bool? hasKidneyDisease,
+    bool? hasHeartDisease,
+    bool? hasVomiting,
+    bool? hasDiarrhea,
+    double? currentIntake,
+    int? hoursWithoutWater,
+  }) {
+    return HydrationInput(
+      weight: weight ?? this.weight,
+      dehydrationLevel: dehydrationLevel ?? this.dehydrationLevel,
+      bodyCondition: bodyCondition ?? this.bodyCondition,
+      activityLevel: activityLevel ?? this.activityLevel,
+      environmentTemp: environmentTemp ?? this.environmentTemp,
+      isLactating: isLactating ?? this.isLactating,
+      hasKidneyDisease: hasKidneyDisease ?? this.hasKidneyDisease,
+      hasHeartDisease: hasHeartDisease ?? this.hasHeartDisease,
+      hasVomiting: hasVomiting ?? this.hasVomiting,
+      hasDiarrhea: hasDiarrhea ?? this.hasDiarrhea,
+      currentIntake: currentIntake ?? this.currentIntake,
+      hoursWithoutWater: hoursWithoutWater ?? this.hoursWithoutWater,
+    );
+  }
+
+  @override
   List<Object?> get props => [
         weight,
         dehydrationLevel,
@@ -104,16 +181,13 @@ class HydrationResult extends CalculationResult {
     required this.warnings,
     required this.requiresIVTherapy,
     required this.urgencyLevel,
-    required super.timestamp,
-    required super.calculatorType,
-    super.notes,
+    required super.calculatorId,
+    required super.results,
+    super.recommendations = const [],
+    super.summary,
+    super.calculatedAt,
   });
 
-  @override
-  String get primaryResult => '${totalDailyVolume.round()} mL/dia';
-
-  @override
-  String get summary => 'Hidratação: $primaryResult (${urgencyLevel})';
 
   @override
   List<Object?> get props => [
@@ -133,15 +207,26 @@ class HydrationResult extends CalculationResult {
 }
 
 class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult> {
+  const HydrationCalculator();
+  
+  @override
+  String get id => 'hydration';
+  
   @override
   String get name => 'Calculadora de Hidratação';
 
   @override
   String get description => 'Calcula necessidades hídricas e reposição de fluidos para animais';
+  
+  @override
+  CalculatorCategory get category => CalculatorCategory.treatment;
 
   @override
-  HydrationResult calculate(HydrationInput input) {
-    _validateInput(input);
+  String get iconName => 'water_drop';
+
+  @override
+  HydrationResult performCalculation(HydrationInput input) {
+    // Validação já feita pela BaseCalculator
 
     // Calcular necessidade base de água
     final dailyWaterNeeds = _calculateDailyWaterNeeds(input);
@@ -176,6 +261,51 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
     // Nível de urgência
     final urgencyLevel = _getUrgencyLevel(input);
 
+    // Criar ResultItems
+    final resultItems = [
+      ResultItem(
+        label: 'Volume Total Diário',
+        value: totalDailyVolume.round(),
+        unit: 'mL/dia',
+      ),
+      ResultItem(
+        label: 'Volume de Manutenção',
+        value: maintenanceVolume.round(),
+        unit: 'mL/dia',
+      ),
+      ResultItem(
+        label: 'Volume de Reposição',
+        value: replacementVolume.round(),
+        unit: 'mL',
+      ),
+      ResultItem(
+        label: 'Ingestão por Hora',
+        value: hourlyIntakeRecommendation.round(),
+        unit: 'mL/h',
+      ),
+    ];
+    
+    // Criar Recomendações
+    final recommendations = [
+      ...hydrationMethods.map((method) => Recommendation(
+        title: 'Método de Hidratação',
+        message: method,
+      )),
+      ...monitoringInstructions.map((instruction) => Recommendation(
+        title: 'Monitoramento',
+        message: instruction,
+      )),
+      ...warnings.map((warning) => Recommendation(
+        title: 'Atenção',
+        message: warning,
+        severity: warning.contains('EMERGÊNCIA') || warning.contains('CRÍTICA') 
+          ? ResultSeverity.danger 
+          : warning.contains('URGENTE') || warning.contains('ATENÇÃO')
+            ? ResultSeverity.warning
+            : ResultSeverity.info,
+      )),
+    ];
+
     return HydrationResult(
       dailyWaterNeeds: dailyWaterNeeds,
       maintenanceVolume: maintenanceVolume,
@@ -188,24 +318,56 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
       warnings: warnings,
       requiresIVTherapy: requiresIVTherapy,
       urgencyLevel: urgencyLevel,
-      timestamp: DateTime.now(),
-      calculatorType: CalculatorType.hydration,
+      calculatorId: id,
+      results: resultItems,
+      recommendations: recommendations,
+      summary: 'Hidratação: ${totalDailyVolume.round()} mL/dia ($urgencyLevel)',
+      calculatedAt: DateTime.now(),
     );
   }
 
-  void _validateInput(HydrationInput input) {
-    if (input.weight <= 0) {
-      throw ArgumentError('Peso deve ser maior que zero');
-    }
-    if (input.weight > 100) {
-      throw ArgumentError('Peso muito alto (>100kg)');
-    }
-    if (input.currentIntake != null && input.currentIntake! < 0) {
-      throw ArgumentError('Ingestão atual não pode ser negativa');
-    }
-    if (input.hoursWithoutWater != null && input.hoursWithoutWater! < 0) {
-      throw ArgumentError('Horas sem água não pode ser negativo');
-    }
+  @override
+  List<String> getInputValidationErrors(HydrationInput input) {
+    return input.validate();
+  }
+  
+  @override
+  HydrationResult createErrorResult(String message, [HydrationInput? input]) {
+    return HydrationResult(
+      dailyWaterNeeds: 0,
+      maintenanceVolume: 0,
+      replacementVolume: 0,
+      ongoingLossVolume: 0,
+      totalDailyVolume: 0,
+      hourlyIntakeRecommendation: 0,
+      hydrationMethods: const [],
+      monitoringInstructions: const [],
+      warnings: [message],
+      requiresIVTherapy: false,
+      urgencyLevel: 'Erro',
+      calculatorId: id,
+      results: [
+        ResultItem(
+          label: 'Erro',
+          value: message,
+          severity: ResultSeverity.danger,
+        ),
+      ],
+      recommendations: [
+        Recommendation(
+          title: 'Erro de Cálculo',
+          message: message,
+          severity: ResultSeverity.danger,
+        ),
+      ],
+      summary: 'Erro: $message',
+      calculatedAt: DateTime.now(),
+    );
+  }
+  
+  @override
+  HydrationInput createInputFromMap(Map<String, dynamic> inputs) {
+    return HydrationInput.fromMap(inputs);
   }
 
   double _calculateDailyWaterNeeds(HydrationInput input) {

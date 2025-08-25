@@ -27,6 +27,7 @@ class BovineModel extends BovineEntity {
     @HiveField(14) required super.tags,
     @HiveField(15) required super.breedingSystem,
     @HiveField(16) required super.purpose,
+    @HiveField(17) super.notes,
   });
 
   /// Converte o BovineModel para BovineEntity do domínio
@@ -49,6 +50,7 @@ class BovineModel extends BovineEntity {
       tags: tags,
       breedingSystem: breedingSystem,
       purpose: purpose,
+      notes: notes,
     );
   }
 
@@ -72,6 +74,7 @@ class BovineModel extends BovineEntity {
       tags: entity.tags,
       breedingSystem: entity.breedingSystem,
       purpose: entity.purpose,
+      notes: entity.notes,
     );
   }
 
@@ -188,6 +191,7 @@ class BovineModel extends BovineEntity {
     List<String>? tags,
     BreedingSystem? breedingSystem,
     String? purpose,
+    String? notes,
   }) {
     return BovineModel(
       id: id ?? this.id,
@@ -207,6 +211,7 @@ class BovineModel extends BovineEntity {
       tags: tags ?? this.tags,
       breedingSystem: breedingSystem ?? this.breedingSystem,
       purpose: purpose ?? this.purpose,
+      notes: notes ?? this.notes,
     );
   }
 

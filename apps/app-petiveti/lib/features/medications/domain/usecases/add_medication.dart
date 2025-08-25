@@ -14,23 +14,23 @@ class AddMedication implements UseCase<void, Medication> {
   Future<Either<Failure, void>> call(Medication medication) async {
     // Validate medication data
     if (medication.name.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'Nome do medicamento é obrigatório'));
+      return const Left(ValidationFailure(message: 'Nome do medicamento é obrigatório'));
     }
     
     if (medication.dosage.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'Dosagem é obrigatória'));
+      return const Left(ValidationFailure(message: 'Dosagem é obrigatória'));
     }
     
     if (medication.frequency.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'Frequência é obrigatória'));
+      return const Left(ValidationFailure(message: 'Frequência é obrigatória'));
     }
     
     if (medication.animalId.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do animal é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do animal é obrigatório'));
     }
     
     if (medication.startDate.isAfter(medication.endDate)) {
-      return Left(ValidationFailure(message: 'Data de início deve ser anterior à data de fim'));
+      return const Left(ValidationFailure(message: 'Data de início deve ser anterior à data de fim'));
     }
 
     // Check for potential conflicts

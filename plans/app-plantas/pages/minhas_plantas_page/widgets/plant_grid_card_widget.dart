@@ -34,7 +34,7 @@ class PlantGridCardWidget extends StatelessWidget {
         final tarefasPendentes = snapshot.data ?? [];
 
         return Card(
-          elevation: dimensoes['elevationS']!,
+          elevation: dimensoes['elevationS'],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(dimensoes['radiusL']!),
           ),
@@ -64,32 +64,32 @@ class PlantGridCardWidget extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: dimensoes['marginS']!),
+                  SizedBox(height: dimensoes['marginS']),
 
                   // Plant name
                   Text(
                     planta.nome ?? 'Sem nome',
                     style:
-                        PlantasDesignTokens.textStyles(context)['labelLarge']!,
+                        PlantasDesignTokens.textStyles(context)['labelLarge'],
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
 
-                  SizedBox(height: dimensoes['paddingXS']!),
+                  SizedBox(height: dimensoes['paddingXS']),
 
                   // Plant species
                   if (planta.especie?.isNotEmpty == true)
                     Text(
                       planta.especie ?? '',
                       style:
-                          PlantasDesignTokens.textStyles(context)['bodySmall']!,
+                          PlantasDesignTokens.textStyles(context)['bodySmall'],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                     ),
 
-                  SizedBox(height: dimensoes['marginS']!),
+                  SizedBox(height: dimensoes['marginS']),
 
                   // Task status indicator (compact version for grid)
                   Center(
@@ -178,9 +178,9 @@ class PlantGridCardWidget extends StatelessWidget {
                 Icon(
                   Icons.check_circle,
                   color: cores['sucesso'],
-                  size: dimensoes['iconXS']!,
+                  size: dimensoes['iconXS'],
                 ),
-                SizedBox(width: dimensoes['paddingXS']!),
+                SizedBox(width: dimensoes['paddingXS']),
                 Text(
                   'Em dia',
                   style: textStyles['caption']!.copyWith(
@@ -214,9 +214,9 @@ class PlantGridCardWidget extends StatelessWidget {
               Icon(
                 Icons.schedule,
                 color: cores['aviso'],
-                size: dimensoes['iconXS']!,
+                size: dimensoes['iconXS'],
               ),
-              SizedBox(width: dimensoes['paddingXS']!),
+              SizedBox(width: dimensoes['paddingXS']),
               Text(
                 '$pendingCount pendentes',
                 style: textStyles['caption']!.copyWith(

@@ -17,7 +17,7 @@ class PremiumHeaderWidget extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: plantasGradientes['premium']!,
+        gradient: plantasGradientes['premium'],
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
@@ -34,13 +34,13 @@ class PremiumHeaderWidget extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: plantasCores['textoClaro']!,
+              color: plantasCores['textoClaro'],
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.local_florist,
               size: 40,
-              color: plantasCores['primaria']!,
+              color: plantasCores['primaria'],
             ),
           ),
 

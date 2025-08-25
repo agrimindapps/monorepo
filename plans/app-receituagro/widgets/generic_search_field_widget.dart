@@ -73,7 +73,7 @@ class _GenericSearchFieldWidgetState extends State<GenericSearchFieldWidget> {
   Widget build(BuildContext context) {
     return Container(
       padding: widget.padding ?? const EdgeInsets.all(16.0),
-      child: Container(
+      child: DecoratedBox(
         decoration: _buildContainerDecoration(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),

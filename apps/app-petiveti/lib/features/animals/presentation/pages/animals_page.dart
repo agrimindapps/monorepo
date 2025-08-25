@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/animal.dart';
 import '../providers/animals_provider.dart';
+import '../widgets/add_animal_form.dart';
 import '../widgets/animal_card.dart';
 import '../widgets/empty_animals_state.dart';
-import '../widgets/add_animal_form.dart';
 
 class AnimalsPage extends ConsumerStatefulWidget {
   const AnimalsPage({super.key});
@@ -160,7 +160,7 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage> {
   }
 
   void _addAnimal(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => AddAnimalForm(
@@ -179,7 +179,7 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage> {
   }
 
   void _viewAnimalDetails(Animal animal) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(animal.name),
@@ -222,7 +222,7 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage> {
   }
 
   void _editAnimal(Animal animal) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => AddAnimalForm(
@@ -242,7 +242,7 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage> {
   }
 
   void _deleteAnimal(Animal animal) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Pet'),

@@ -1,9 +1,9 @@
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:mockito/mockito.dart';
 import 'package:get_it/get_it.dart';
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
 
 /// Test helpers for AgriHurbi app
 class TestHelpers {

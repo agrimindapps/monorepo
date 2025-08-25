@@ -33,16 +33,16 @@ class FavoritoItemHive extends HiveObject {
 
   factory FavoritoItemHive.fromJson(Map<String, dynamic> json) {
     return FavoritoItemHive(
-      objectId: json['objectId'] ?? '',
+      objectId: (json['objectId'] as String?) ?? '',
       createdAt: json['createdAt'] != null 
           ? int.tryParse(json['createdAt'].toString()) ?? 0 
           : 0,
       updatedAt: json['updatedAt'] != null 
           ? int.tryParse(json['updatedAt'].toString()) ?? 0 
           : 0,
-      tipo: json['tipo'] ?? '',
-      itemId: json['itemId'] ?? '',
-      itemData: json['itemData'] ?? '{}',
+      tipo: (json['tipo'] as String?) ?? '',
+      itemId: (json['itemId'] as String?) ?? '',
+      itemData: (json['itemData'] as String?) ?? '{}',
     );
   }
 

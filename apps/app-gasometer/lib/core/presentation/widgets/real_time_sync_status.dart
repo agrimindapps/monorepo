@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../interfaces/i_sync_service.dart';
+
+import 'package:flutter/material.dart';
+
 import '../../interfaces/i_connectivity_service.dart';
+import '../../interfaces/i_sync_service.dart';
 
 /// Real-time sync status widget that shows live sync progress
 /// Updates automatically with smooth animations
@@ -14,14 +16,14 @@ class RealTimeSyncStatus extends StatefulWidget {
   final VoidCallback? onTap;
 
   const RealTimeSyncStatus({
-    Key? key,
+    super.key,
     required this.syncService,
     required this.connectivityService,
     this.style = const RealTimeSyncStyle(),
     this.persistentDisplay = false,
     this.animationDuration = const Duration(milliseconds: 300),
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<RealTimeSyncStatus> createState() => _RealTimeSyncStatusState();
@@ -362,11 +364,11 @@ class PersistentSyncStatusBar extends StatelessWidget {
   final bool isCompact;
 
   const PersistentSyncStatusBar({
-    Key? key,
+    super.key,
     required this.syncService,
     required this.connectivityService,
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

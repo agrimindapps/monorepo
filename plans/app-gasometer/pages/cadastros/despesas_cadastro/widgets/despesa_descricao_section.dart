@@ -81,7 +81,7 @@ class DespesaDescricaoSectionWidget extends StatelessWidget {
   }
 
   Widget _buildDescricaoField() {
-    return Obx(() => Container(
+    return Obx(() => DecoratedBox(
           decoration: BoxDecoration(
             color: ThemeManager().isDark.value
                 ? Colors.grey.shade900

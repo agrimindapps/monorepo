@@ -167,10 +167,10 @@ mixin ErrorDisplayMixin {
 
   /// Mostra detalhes do erro em dialog
   void _showErrorDetails(BuildContext context, AppError error) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Detalhes do Erro'),
+        title: const Text('Detalhes do Erro'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +188,7 @@ mixin ErrorDisplayMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Fechar'),
+            child: const Text('Fechar'),
           ),
         ],
       ),
@@ -214,7 +214,7 @@ mixin ErrorDisplayMixin {
 class ErrorLogger {
   /// Registra erro no sistema de logging
   static void logError(AppError error) {
-    final errorData = error.toMap();
+    // final errorData = error.toMap(); // Unused variable removed
     
     if (kDebugMode) {
       print('🚨 AppError: ${error.message}');

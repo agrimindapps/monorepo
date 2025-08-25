@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/entities/calorie_output.dart';
 import '../providers/calorie_provider.dart';
-import '../widgets/calorie_step_indicator.dart';
+import '../widgets/calorie_activity_condition_step.dart';
 import '../widgets/calorie_basic_info_step.dart';
 import '../widgets/calorie_physiological_step.dart';
-import '../widgets/calorie_activity_condition_step.dart';
-import '../widgets/calorie_special_conditions_step.dart';
-import '../widgets/calorie_review_step.dart';
-import '../widgets/calorie_result_card.dart';
 import '../widgets/calorie_quick_presets.dart';
-import '../../domain/entities/calorie_input.dart';
+import '../widgets/calorie_result_card.dart';
+import '../widgets/calorie_review_step.dart';
+import '../widgets/calorie_special_conditions_step.dart';
+import '../widgets/calorie_step_indicator.dart';
 
 /// Página principal da Calculadora de Necessidades Calóricas
 /// Implementa formulário step-by-step para melhor UX
@@ -136,7 +136,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
         color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -260,7 +260,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border(
-          top: BorderSide(color: Colors.grey.withOpacity(0.2)),
+          top: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
         ),
       ),
       child: Row(

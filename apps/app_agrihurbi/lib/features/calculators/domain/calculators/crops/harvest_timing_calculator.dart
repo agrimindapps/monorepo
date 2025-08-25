@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Época de Colheita
 /// Calcula o momento ideal para colheita baseado em maturidade e condições
 class HarvestTimingCalculator extends CalculatorEntity {
-  HarvestTimingCalculator()
+  const HarvestTimingCalculator()
       : super(
           id: 'harvest_timing_calculator',
           name: 'Época de Colheita',
@@ -239,7 +240,7 @@ class HarvestTimingCalculator extends CalculatorEntity {
         int.parse(parts[0]), // dia
       );
     } catch (e) {
-      return DateTime.now().subtract(Duration(days: 120)); // Default 120 dias atrás
+      return DateTime.now().subtract(const Duration(days: 120)); // Default 120 dias atrás
     }
   }
 

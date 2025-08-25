@@ -135,7 +135,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
       if (!controller.headerLoading.value) return const SizedBox.shrink();
 
       return Positioned.fill(
-        child: Container(
+        child: ColoredBox(
           color: Colors.white.withValues(alpha: 0.7),
           child: const Center(
             child: SizedBox(
@@ -306,24 +306,24 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                VeiculosConstants.icones['carroOutline']!,
+                VeiculosConstants.icones['carroOutline'],
                 color: Colors.black54,
-                size: VeiculosConstants.dimensoes['tamanhoIconeSemDados']!,
+                size: VeiculosConstants.dimensoes['tamanhoIconeSemDados'],
               ),
             ),
             SizedBox(height: VeiculosConstants.dimensoes['espacamento']! + 8),
             Text(
               VeiculosConstants.paginaTitulos['semDadosTitulo']!,
               style: TextStyle(
-                fontSize: VeiculosConstants.tamanhosFonte['tituloSemDados']!,
+                fontSize: VeiculosConstants.tamanhosFonte['tituloSemDados'],
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: VeiculosConstants.dimensoes['paddingPequeno']!),
+            SizedBox(height: VeiculosConstants.dimensoes['paddingPequeno']),
             Text(
               VeiculosConstants.paginaTitulos['semDadosSubtitulo']!,
               style: TextStyle(
-                fontSize: VeiculosConstants.tamanhosFonte['subtituloSemDados']!,
+                fontSize: VeiculosConstants.tamanhosFonte['subtituloSemDados'],
               ),
             ),
           ],
@@ -392,7 +392,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
       child: Column(
         children: [
           _buildCardHeader(context, veiculo),
-          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']!),
+          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']),
           _buildCardContent(context, veiculo),
           _buildCardActions(context, veiculo),
         ],
@@ -412,16 +412,16 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
       child: Row(
         children: [
           CircleAvatar(
-            radius: VeiculosConstants.dimensoes['raioAvatar']!,
+            radius: VeiculosConstants.dimensoes['raioAvatar'],
             backgroundColor:
                 VeiculosThemeService.getAvatarBackgroundColor(context),
             child: Icon(
-              VeiculosConstants.icones['carro']!,
+              VeiculosConstants.icones['carro'],
               color: VeiculosThemeService.getIconColor(context),
-              size: VeiculosConstants.dimensoes['tamanhoIcone']!,
+              size: VeiculosConstants.dimensoes['tamanhoIcone'],
             ),
           ),
-          SizedBox(width: VeiculosConstants.dimensoes['espacamento']!),
+          SizedBox(width: VeiculosConstants.dimensoes['espacamento']),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,7 +429,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
                 Text(
                   VeiculosFormatterService.formatVehicleTitle(veiculo),
                   style: TextStyle(
-                    fontSize: VeiculosConstants.tamanhosFonte['titulo']!,
+                    fontSize: VeiculosConstants.tamanhosFonte['titulo'],
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
@@ -438,7 +438,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
                 Text(
                   VeiculosFormatterService.formatVehicleSubtitle(veiculo),
                   style: TextStyle(
-                    fontSize: VeiculosConstants.tamanhosFonte['subtitulo']!,
+                    fontSize: VeiculosConstants.tamanhosFonte['subtitulo'],
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -462,21 +462,21 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
             VeiculosFormatterService.formatFieldValue(veiculo.placa),
             VeiculosConstants.icones['placa']!,
           ),
-          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']!),
+          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']),
           _buildInfoRow(
             context,
             VeiculosConstants.rotulosCampos['combustivel']!,
             VeiculosFormatterService.formatCombustivel(veiculo.combustivel),
             VeiculosConstants.icones['combustivel']!,
           ),
-          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']!),
+          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']),
           _buildInfoRow(
             context,
             VeiculosConstants.rotulosCampos['odometroInicial']!,
             VeiculosFormatterService.formatOdometer(veiculo.odometroInicial),
             VeiculosConstants.icones['odometroInicial']!,
           ),
-          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']!),
+          Divider(height: VeiculosConstants.dimensoes['alturaDivisor']),
           _buildInfoRow(
             context,
             VeiculosConstants.rotulosCampos['odometroAtual']!,
@@ -494,14 +494,14 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
       children: [
         Icon(
           icon,
-          size: VeiculosConstants.dimensoes['tamanhoIconePequeno']!,
+          size: VeiculosConstants.dimensoes['tamanhoIconePequeno'],
           color: VeiculosThemeService.getInfoIconColor(context),
         ),
-        SizedBox(width: VeiculosConstants.dimensoes['paddingPequeno']!),
+        SizedBox(width: VeiculosConstants.dimensoes['paddingPequeno']),
         Text(
           label,
           style: TextStyle(
-            fontSize: VeiculosConstants.tamanhosFonte['rotuloInfo']!,
+            fontSize: VeiculosConstants.tamanhosFonte['rotuloInfo'],
           ),
         ),
         const Spacer(),
@@ -509,7 +509,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
           value,
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            fontSize: VeiculosConstants.tamanhosFonte['valorInfo']!,
+            fontSize: VeiculosConstants.tamanhosFonte['valorInfo'],
           ),
         ),
       ],
@@ -517,7 +517,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
   }
 
   Widget _buildCardActions(BuildContext context, VeiculoCar veiculo) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.vertical(
           bottom:
@@ -527,7 +527,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
       child: OverflowBar(
         children: [
           TextButton.icon(
-            icon: Icon(VeiculosConstants.icones['editar']!),
+            icon: Icon(VeiculosConstants.icones['editar']),
             label: Text(VeiculosConstants.botoes['editar']!),
             onPressed: () async {
               final result = await VeiculosCadastro(context, veiculo);
@@ -544,7 +544,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
   Widget _buildFloatingActionButton(BuildContext context) {
     // No need for Obx here as this button doesn't change based on reactive state
     return FloatingActionButton(
-      tooltip: VeiculosConstants.botoes['adicionar']!,
+      tooltip: VeiculosConstants.botoes['adicionar'],
       onPressed: () async {
         // Check vehicle limit first
         final canAdd = await controller.handleVeiculoCreation(context);
@@ -564,7 +564,7 @@ class VeiculosPageView extends GetView<VeiculosPageController> {
         // Removido o tratamento de erro para evitar mensagem desnecessária
         // quando o usuário cancela ou há erro de validação
       },
-      child: Icon(VeiculosConstants.icones['adicionar']!),
+      child: Icon(VeiculosConstants.icones['adicionar']),
     );
   }
 }

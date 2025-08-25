@@ -1,7 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
-import '../../../../core/network/dio_client.dart';
+import 'package:injectable/injectable.dart';
 
+import '../../../../core/network/dio_client.dart';
 import '../models/bovine_model.dart';
 import '../models/equine_model.dart';
 
@@ -54,7 +54,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       //     .map((item) => BovineModel.fromJson(item as Map<String, dynamic>))
       //     .toList();
     } catch (e) {
-      throw ServerFailure('Erro ao buscar bovinos');
+      throw const ServerFailure('Erro ao buscar bovinos');
     }
   }
 
@@ -64,7 +64,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       return null;
     } catch (e) {
-      throw ServerFailure('Erro ao buscar bovino por ID');
+      throw const ServerFailure('Erro ao buscar bovino por ID');
     }
   }
 
@@ -74,7 +74,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro ao criar bovino: $e');
+      throw Exception('Erro ao criar bovino: $e');
     }
   }
 
@@ -84,7 +84,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro ao atualizar bovino: $e');
+      throw Exception('Erro ao atualizar bovino: $e');
     }
   }
 
@@ -94,7 +94,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro ao deletar bovino: $e');
+      throw Exception('Erro ao deletar bovino: $e');
     }
   }
 
@@ -106,7 +106,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar chamada real para API quando estiver disponível
       return [];
     } catch (e) {
-      throw ServerFailure('Erro ao buscar equinos: $e');
+      throw Exception('Erro ao buscar equinos: $e');
     }
   }
 
@@ -116,7 +116,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       return null;
     } catch (e) {
-      throw ServerFailure('Erro ao buscar equino por ID: $e');
+      throw Exception('Erro ao buscar equino por ID: $e');
     }
   }
 
@@ -126,7 +126,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro ao criar equino: $e');
+      throw Exception('Erro ao criar equino: $e');
     }
   }
 
@@ -136,7 +136,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro ao atualizar equino: $e');
+      throw Exception('Erro ao atualizar equino: $e');
     }
   }
 
@@ -146,7 +146,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro ao deletar equino: $e');
+      throw Exception('Erro ao deletar equino: $e');
     }
   }
 
@@ -158,7 +158,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
       // TODO: Implementar sincronização quando API estiver disponível
       // Simula sucesso por enquanto
     } catch (e) {
-      throw ServerFailure('Erro na sincronização: $e');
+      throw Exception('Erro na sincronização: $e');
     }
   }
 }

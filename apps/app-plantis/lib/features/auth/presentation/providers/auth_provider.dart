@@ -1,9 +1,11 @@
 import 'dart:async';
+
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:core/core.dart';
-import '../../../../core/providers/analytics_provider.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/providers/analytics_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   final LoginUseCase _loginUseCase;

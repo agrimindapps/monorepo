@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
-import '../models/atualizacao_state.dart';
+
 import '../models/atualizacao_model.dart';
+import '../models/atualizacao_state.dart';
 import '../services/atualizacao_data_service.dart';
 import '../services/theme_service.dart';
 

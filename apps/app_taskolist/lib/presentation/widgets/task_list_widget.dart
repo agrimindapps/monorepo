@@ -29,15 +29,15 @@ class TaskListWidget extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, color: Colors.red, size: 48),
+            const Icon(Icons.error, color: Colors.red, size: 48),
             const SizedBox(height: 16),
-            Text('Erro ao carregar tarefas'),
+            const Text('Erro ao carregar tarefas'),
             const SizedBox(height: 8),
-            Text(error.toString(), style: TextStyle(fontSize: 12)),
+            Text(error.toString(), style: const TextStyle(fontSize: 12)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => ref.refresh(taskNotifierProvider),
-              child: Text('Tentar novamente'),
+              child: const Text('Tentar novamente'),
             ),
           ],
         ),
@@ -51,7 +51,7 @@ class TaskListWidget extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.task_alt, size: 48, color: Colors.grey),
+                const Icon(Icons.task_alt, size: 48, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
                   tasks.isEmpty 
@@ -93,7 +93,7 @@ class TaskListWidget extends ConsumerWidget {
 
     // Filtrar por tag primeiro (se especificada)
     if (selectedTag != null && selectedTag!.isNotEmpty) {
-      filtered = filtered.where((task) => task.tags.contains(selectedTag!)).toList();
+      filtered = filtered.where((task) => task.tags.contains(selectedTag)).toList();
     }
 
     // Aplicar filtro de tipo

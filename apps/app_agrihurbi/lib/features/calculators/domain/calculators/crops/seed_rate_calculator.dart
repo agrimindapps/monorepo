@@ -1,14 +1,13 @@
-import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Taxa de Semeadura
 /// Calcula quantidade ideal de sementes baseado em população e características
 class SeedRateCalculator extends CalculatorEntity {
-  SeedRateCalculator()
+  const SeedRateCalculator()
       : super(
           id: 'seed_rate_calculator',
           name: 'Taxa de Semeadura',
@@ -193,7 +192,7 @@ class SeedRateCalculator extends CalculatorEntity {
           ),
         ],
         recommendations: recommendations,
-        tableData: [],
+        tableData: const [],
       );
     } catch (e) {
       return CalculationError(

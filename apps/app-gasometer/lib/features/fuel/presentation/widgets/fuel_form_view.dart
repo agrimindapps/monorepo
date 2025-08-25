@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/fuel_form_provider.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
-import '../../domain/services/fuel_formatter_service.dart';
-import '../../core/constants/fuel_constants.dart';
+
+import '../../../../core/presentation/widgets/form_section_widget.dart';
+import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
-import '../../../../core/interfaces/validation_result.dart';
+import '../../../../core/theme/design_tokens.dart';
+import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../core/constants/fuel_constants.dart';
+import '../../domain/services/fuel_formatter_service.dart';
+import '../providers/fuel_form_provider.dart';
 
 /// Widget principal do formulário de abastecimento
 class FuelFormView extends StatelessWidget {
@@ -39,15 +42,15 @@ class FuelFormView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildVehicleInfoCard(context, vehicle),
-            const SizedBox(height: FuelConstants.sectionSpacing),
+            FormSpacing.section(),
             _buildFuelInfoSection(context, provider),
-            const SizedBox(height: FuelConstants.sectionSpacing),
+            FormSpacing.section(),
             _buildValuesSection(context, provider),
-            const SizedBox(height: FuelConstants.sectionSpacing),
+            FormSpacing.section(),
             _buildLocationSection(context, provider),
-            const SizedBox(height: FuelConstants.sectionSpacing),
+            FormSpacing.section(),
             _buildNotesSection(context, provider),
-            const SizedBox(height: 32),
+            SizedBox(height: GasometerDesignTokens.spacingXxxl),
           ],
         );
       },
@@ -85,153 +88,109 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildVehicleInfoCard(BuildContext context, VehicleEntity vehicle) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(
-              Icons.directions_car,
-              size: 40,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    vehicle.displayName,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+    return StandardCard.standard(
+      child: Row(
+        children: [
+          Icon(
+            Icons.directions_car,
+            size: GasometerDesignTokens.iconSizeAvatar,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingLg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  vehicle.displayName,
+                  style: TextStyle(
+                    fontSize: GasometerDesignTokens.fontSizeLg,
+                    fontWeight: GasometerDesignTokens.fontWeightBold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  const SizedBox(height: 4),
+                ),
+                SizedBox(height: GasometerDesignTokens.spacingXs),
+                Text(
+                  '${vehicle.color} • ${vehicle.licensePlate}',
+                  style: TextStyle(
+                    fontSize: GasometerDesignTokens.fontSizeMd,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                if (vehicle.tankCapacity != null) ...[
+                  SizedBox(height: GasometerDesignTokens.spacingXs),
                   Text(
-                    '${vehicle.color} • ${vehicle.licensePlate}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    'Tanque: ${vehicle.tankCapacity!.toStringAsFixed(0)}L',
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeSm,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  if (vehicle.tankCapacity != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tanque: ${vehicle.tankCapacity!.toStringAsFixed(0)}L',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Informações do Combustível',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildFuelTypeDropdown(context, provider),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildDateField(context, provider),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildFullTankSwitch(context, provider),
-          ],
-        ),
+    return FormSectionWidget.withTitle(
+      title: 'Informações do Combustível',
+      icon: Icons.local_gas_station,
+      content: Column(
+        children: [
+          _buildFuelTypeDropdown(context, provider),
+          FormSpacing.large(),
+          _buildDateField(context, provider),
+          FormSpacing.large(),
+          _buildFullTankSwitch(context, provider),
+        ],
       ),
     );
   }
 
   Widget _buildValuesSection(BuildContext context, FuelFormProvider provider) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Valores',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildLitersField(context, provider),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildPricePerLiterField(context, provider),
-                ),
-              ],
-            ),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildTotalPriceField(context, provider),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildOdometerField(context, provider),
-          ],
-        ),
+    return FormSectionWidget.withTitle(
+      title: 'Valores',
+      icon: Icons.attach_money,
+      content: Column(
+        children: [
+          FormFieldRow.standard(
+            children: [
+              _buildLitersField(context, provider),
+              _buildPricePerLiterField(context, provider),
+            ],
+          ),
+          FormSpacing.large(),
+          _buildTotalPriceField(context, provider),
+          FormSpacing.large(),
+          _buildOdometerField(context, provider),
+        ],
       ),
     );
   }
 
   Widget _buildLocationSection(BuildContext context, FuelFormProvider provider) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Local do Abastecimento',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildGasStationField(context, provider),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildGasStationBrandField(context, provider),
-          ],
-        ),
+    return FormSectionWidget.withTitle(
+      title: 'Local do Abastecimento',
+      icon: Icons.location_on,
+      content: Column(
+        children: [
+          _buildGasStationField(context, provider),
+          FormSpacing.large(),
+          _buildGasStationBrandField(context, provider),
+        ],
       ),
     );
   }
 
   Widget _buildNotesSection(BuildContext context, FuelFormProvider provider) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Observações',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: FuelConstants.fieldSpacing),
-            _buildNotesField(context, provider),
-          ],
-        ),
-      ),
+    return FormSectionWidget.withTitle(
+      title: 'Observações',
+      icon: Icons.note_add,
+      content: _buildNotesField(context, provider),
     );
   }
 

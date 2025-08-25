@@ -1,7 +1,8 @@
 import 'dart:async';
+
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core/core.dart';
 
 import '../data/models/sync_queue_item.dart';
 import 'sync_queue.dart';

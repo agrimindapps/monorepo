@@ -410,7 +410,7 @@ class WeatherCurrentCard extends StatelessWidget {
       case 'cloudy':
         return Icons.cloud;
       case 'partly_cloudy':
-        return Icons.partly_cloudy_day;
+        return Icons.cloud;
       case 'rain':
       case 'drizzle':
       case 'light_rain':

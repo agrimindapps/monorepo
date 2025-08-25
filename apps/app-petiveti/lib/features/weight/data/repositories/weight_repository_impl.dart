@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/weight.dart';
 import '../../domain/repositories/weight_repository.dart';
 import '../datasources/weight_local_datasource.dart';
@@ -60,7 +60,7 @@ class WeightRepositoryImpl implements WeightRepository {
     try {
       final weightModel = await localDataSource.getWeightById(id);
       if (weightModel == null) {
-        return Left(CacheFailure(message: 'Registro de peso não encontrado'));
+        return const Left(CacheFailure(message: 'Registro de peso não encontrado'));
       }
       return Right(weightModel.toEntity());
     } on CacheException catch (e) {
@@ -285,8 +285,8 @@ class WeightRepositoryImpl implements WeightRepository {
       )).toList();
       
       // Simple projections
-      final daysTo30 = 30.0;
-      final daysTo90 = 90.0;
+      const daysTo30 = 30.0;
+      const daysTo90 = 90.0;
       final lastWeight = weights.last.weight;
       
       final projectedWeightIn30Days = lastWeight + (slope * daysTo30);

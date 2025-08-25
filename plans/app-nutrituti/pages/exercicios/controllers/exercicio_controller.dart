@@ -75,8 +75,8 @@ class ExercicioController extends GetxController {
 
       // Carregar metas
       final metas = await _businessService.carregarMetas();
-      metaMinutosSemanal.value = metas['minutos']!;
-      metaCaloriasSemanal.value = metas['calorias']!;
+      metaMinutosSemanal.value = metas['minutos'];
+      metaCaloriasSemanal.value = metas['calorias'];
 
       // Calcular totais da semana atual
       _calcularTotaisSemana();
@@ -92,8 +92,8 @@ class ExercicioController extends GetxController {
 
   void _calcularTotaisSemana() {
     final totais = _statisticsService.calcularTotaisSemana(registros);
-    totalMinutosSemana.value = totais['minutos']!;
-    totalCaloriasSemana.value = totais['calorias']!;
+    totalMinutosSemana.value = totais['minutos'];
+    totalCaloriasSemana.value = totais['calorias'];
   }
 
   void _atualizarAchievements() {

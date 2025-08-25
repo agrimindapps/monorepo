@@ -52,14 +52,14 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
       final doc = await _getSpacesCollection(userId).doc(id).get();
 
       if (!doc.exists) {
-        throw ServerFailure('Espaço não encontrado');
+        throw const ServerFailure('Espaço não encontrado');
       }
 
       final data = doc.data() as Map<String, dynamic>;
       final space = SpaceModel.fromJson({...data, 'id': doc.id});
 
       if (space.isDeleted) {
-        throw ServerFailure('Espaço não encontrado');
+        throw const ServerFailure('Espaço não encontrado');
       }
 
       return space;

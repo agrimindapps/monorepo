@@ -1,13 +1,15 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
 import '../../domain/repositories/i_crashlytics_repository.dart';
-import '../../shared/utils/failure.dart';
 import '../../shared/config/environment_config.dart';
+import '../../shared/utils/failure.dart';
 
 /// Implementação concreta do repositório de crashlytics usando Firebase Crashlytics
 class FirebaseCrashlyticsService implements ICrashlyticsRepository {
   final FirebaseCrashlytics _crashlytics;
 
+  /// Cria uma instância do FirebaseCrashlyticsService
   FirebaseCrashlyticsService({
     FirebaseCrashlytics? crashlytics,
   }) : _crashlytics = crashlytics ?? FirebaseCrashlytics.instance;
@@ -24,7 +26,7 @@ class FirebaseCrashlyticsService implements ICrashlyticsRepository {
       // Adicionar informações de contexto
       if (additionalInfo != null) {
         for (final entry in additionalInfo.entries) {
-          await _crashlytics.setCustomKey(entry.key, entry.value);
+          await _crashlytics.setCustomKey(entry.key, entry.value as Object);
         }
       }
 
@@ -87,7 +89,7 @@ class FirebaseCrashlyticsService implements ICrashlyticsRepository {
     required dynamic value,
   }) async {
     try {
-      await _crashlytics.setCustomKey(key, value);
+      await _crashlytics.setCustomKey(key, value as Object);
       return const Right(null);
     } catch (e) {
       return Left(FirebaseFailure('Erro ao definir chave customizada: $e'));
@@ -100,7 +102,7 @@ class FirebaseCrashlyticsService implements ICrashlyticsRepository {
   }) async {
     try {
       for (final entry in keys.entries) {
-        await _crashlytics.setCustomKey(entry.key, entry.value);
+        await _crashlytics.setCustomKey(entry.key, entry.value as Object);
       }
       return const Right(null);
     } catch (e) {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../animals/presentation/providers/animals_provider.dart';
+import '../../domain/entities/appointment.dart';
 import '../providers/appointments_provider.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/empty_appointments_state.dart';
@@ -110,7 +111,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
   Widget _buildContent(
     BuildContext context,
     AppointmentState state,
-    List appointments,
+    List<dynamic> appointments,
     String? animalId,
   ) {
     if (animalId == null) {
@@ -193,7 +194,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: AppointmentCard(
-              appointment: appointment,
+              appointment: appointment as Appointment,
               onTap: () => context.push('/appointments/${appointment.id}'),
               onEdit: () => context.push('/appointments/${appointment.id}/edit'),
               onDelete: () => _showDeleteDialog(context, appointment),
@@ -204,7 +205,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, appointment) {
+  void _showDeleteDialog(BuildContext context, Appointment appointment) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

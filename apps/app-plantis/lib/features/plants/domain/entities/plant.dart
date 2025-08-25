@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:core/core.dart';
+import 'package:equatable/equatable.dart';
 
 class Plant extends BaseSyncEntity {
   final String name;
@@ -51,22 +51,22 @@ class Plant extends BaseSyncEntity {
   /// Convert from legacy PlantaModel to modern Plant entity
   factory Plant.fromPlantaModel(dynamic plantaModel) {
     return Plant(
-      id: plantaModel.id,
-      name: plantaModel.nome ?? '',
-      species: plantaModel.especie,
-      spaceId: plantaModel.espacoId,
-      imageBase64: plantaModel.fotoBase64,
-      imageUrls: plantaModel.imagePaths ?? [],
-      plantingDate: plantaModel.dataCadastro,
-      notes: plantaModel.observacoes,
-      createdAt: plantaModel.createdAt,
-      updatedAt: plantaModel.updatedAt,
-      lastSyncAt: plantaModel.lastSyncAt,
-      isDirty: plantaModel.isDirty,
-      isDeleted: plantaModel.isDeleted,
-      version: plantaModel.version,
-      userId: plantaModel.userId,
-      moduleName: plantaModel.moduleName,
+      id: plantaModel.id as String,
+      name: (plantaModel.nome as String?) ?? '',
+      species: plantaModel.especie as String?,
+      spaceId: plantaModel.espacoId as String?,
+      imageBase64: plantaModel.fotoBase64 as String?,
+      imageUrls: (plantaModel.imagePaths as List<dynamic>?)?.cast<String>() ?? [],
+      plantingDate: plantaModel.dataCadastro as DateTime?,
+      notes: plantaModel.observacoes as String?,
+      createdAt: plantaModel.createdAt as DateTime?,
+      updatedAt: plantaModel.updatedAt as DateTime?,
+      lastSyncAt: plantaModel.lastSyncAt as DateTime?,
+      isDirty: (plantaModel.isDirty as bool?) ?? false,
+      isDeleted: (plantaModel.isDeleted as bool?) ?? false,
+      version: (plantaModel.version as int?) ?? 1,
+      userId: plantaModel.userId as String?,
+      moduleName: plantaModel.moduleName as String?,
     );
   }
 

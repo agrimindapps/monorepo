@@ -2,8 +2,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/local_data_service.dart';
-import '../models/maintenance_model.dart';
 import '../../domain/entities/maintenance_entity.dart';
+import '../models/maintenance_model.dart';
 
 abstract class MaintenanceLocalDataSource {
   Future<List<MaintenanceEntity>> getAllMaintenanceRecords();
@@ -86,7 +86,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
       final existingData = _localDataService.getMaintenanceRecord(maintenance.id);
       
       if (existingData == null) {
-        throw CacheException('Registro não encontrado para atualização');
+        throw const CacheException('Registro não encontrado para atualização');
       }
       
       final updatedMaintenance = maintenance.copyWith(
@@ -110,7 +110,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
     try {
       final recordData = _localDataService.getMaintenanceRecord(id);
       if (recordData == null) {
-        throw CacheException('Registro não encontrado para exclusão');
+        throw const CacheException('Registro não encontrado para exclusão');
       }
       
       await _localDataService.deleteMaintenanceRecord(id);
@@ -191,7 +191,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
       notes: null,
       createdAt: model.createdAt ?? DateTime.now(),
       updatedAt: model.updatedAt ?? DateTime.now(),
-      metadata: {},
+      metadata: const {},
     );
   }
 

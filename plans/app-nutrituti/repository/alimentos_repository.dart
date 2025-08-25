@@ -19,7 +19,7 @@ class AlimentosRepository {
 
   AlimentosRepository._internal();
 
-  /** Classe começa Aqui */
+  /// Classe começa Aqui
   RxList<dynamic> listaAlimentos = <Map<String, dynamic>>[].obs;
   RxList<dynamic> listaAlimentosFiltrados = [].obs;
   RxBool isLoading = false.obs;

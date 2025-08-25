@@ -67,14 +67,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: NetworkImage('https://picsum.photos/1920/1080'),
             fit: BoxFit.cover,
           ),
         ),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.3),
           ),

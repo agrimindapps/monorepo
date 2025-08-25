@@ -1,23 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'firebase_options.dart';
 
 import 'core/database/hive_config.dart';
 import 'core/di/injection_container.dart' as di;
-import 'core/theme/app_theme.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/notification_actions_service.dart';
-import 'presentation/pages/home_page.dart';
-import 'presentation/widgets/auth_guard.dart';
-import 'presentation/providers/theme_provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/utils/notification_test_helper.dart';
+import 'firebase_options.dart';
 import 'infrastructure/services/analytics_service.dart';
 import 'infrastructure/services/crashlytics_service.dart';
-import 'infrastructure/services/performance_service.dart';
 import 'infrastructure/services/notification_service.dart';
-import 'core/utils/notification_test_helper.dart';
+import 'infrastructure/services/performance_service.dart';
+import 'presentation/pages/home_page.dart';
+import 'presentation/providers/theme_provider.dart';
+import 'presentation/widgets/auth_guard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -221,7 +221,7 @@ class _AppsSectionState extends State<AppsSection> {
   }
 
   Widget _buildAppCard(Map<String, dynamic> app) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: [

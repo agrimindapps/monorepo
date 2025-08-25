@@ -31,7 +31,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),
@@ -74,7 +74,7 @@ class FavoritosSearchFieldWidget extends StatelessWidget {
           ),
           if (onToggleViewMode != null) ...[
             const SizedBox(width: 12),
-            Container(
+            DecoratedBox(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(FavoritosDesignTokens.borderRadius),

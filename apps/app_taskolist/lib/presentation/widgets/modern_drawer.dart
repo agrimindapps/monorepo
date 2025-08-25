@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../providers/auth_providers.dart';
 import '../pages/settings_page.dart';
+import '../providers/auth_providers.dart';
 
 class ModernDrawer extends ConsumerWidget {
   const ModernDrawer({super.key});

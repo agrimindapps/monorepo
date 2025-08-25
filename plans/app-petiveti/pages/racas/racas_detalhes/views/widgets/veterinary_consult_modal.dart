@@ -24,7 +24,7 @@ class VeterinaryConsultModal extends StatelessWidget {
       maxChildSize: RacasDetalhesConstants.modalMaxSize,
       minChildSize: RacasDetalhesConstants.modalMinSize,
       builder: (context, scrollController) {
-        return Container(
+        return DecoratedBox(
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(

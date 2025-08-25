@@ -237,7 +237,7 @@ class _VolumeSanguineoInputFormState extends State<VolumeSanguineoInputForm> {
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: isDark
               ? ShadcnStyle.backgroundColor.withValues(alpha: 0.5)

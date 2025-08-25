@@ -18,7 +18,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       final reminders = await localDataSource.getReminders(userId);
       return Right(reminders);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar lembretes: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar lembretes: ${e.toString()}'));
     }
   }
 
@@ -28,7 +28,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       final reminders = await localDataSource.getRemindersByAnimal(animalId);
       return Right(reminders);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar lembretes do animal: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar lembretes do animal: ${e.toString()}'));
     }
   }
 
@@ -38,7 +38,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       final reminders = await localDataSource.getTodayReminders(userId);
       return Right(reminders);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar lembretes de hoje: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar lembretes de hoje: ${e.toString()}'));
     }
   }
 
@@ -48,7 +48,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       final reminders = await localDataSource.getOverdueReminders(userId);
       return Right(reminders);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar lembretes atrasados: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar lembretes atrasados: ${e.toString()}'));
     }
   }
 
@@ -58,7 +58,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       final reminders = await localDataSource.getUpcomingReminders(userId, days);
       return Right(reminders);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar próximos lembretes: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar próximos lembretes: ${e.toString()}'));
     }
   }
 
@@ -69,7 +69,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       await localDataSource.addReminder(reminderModel);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao adicionar lembrete: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao adicionar lembrete: ${e.toString()}'));
     }
   }
 
@@ -80,7 +80,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       await localDataSource.updateReminder(reminderModel);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao atualizar lembrete: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao atualizar lembrete: ${e.toString()}'));
     }
   }
 
@@ -90,7 +90,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       await localDataSource.deleteReminder(reminderId);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao deletar lembrete: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao deletar lembrete: ${e.toString()}'));
     }
   }
 
@@ -109,7 +109,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       await localDataSource.updateReminder(completedReminder);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao completar lembrete: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao completar lembrete: ${e.toString()}'));
     }
   }
 
@@ -128,7 +128,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       await localDataSource.updateReminder(snoozedReminder);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao adiar lembrete: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao adiar lembrete: ${e.toString()}'));
     }
   }
 

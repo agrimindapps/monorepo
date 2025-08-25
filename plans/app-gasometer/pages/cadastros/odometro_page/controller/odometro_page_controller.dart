@@ -222,7 +222,7 @@ class OdometroPageController extends GetxController with OdometroEventMixin {
       return 'Nenhum veículo';
     }
 
-    final vehicle = _selectedVehicle.value!;
+    final vehicle = _selectedVehicle.value;
     return '${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}';
   }
 

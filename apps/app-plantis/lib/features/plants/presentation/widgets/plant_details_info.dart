@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/plant.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../../domain/entities/plant.dart';
 
 class PlantDetailsInfo extends StatelessWidget {
   final Plant plant;

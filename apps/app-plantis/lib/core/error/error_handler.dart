@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 /// Centralizador para tratamento de erros da aplicação
 /// Responsável por logging, reporting e notificação de erros

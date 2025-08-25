@@ -104,7 +104,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Login com Google não disponível ainda'),
             backgroundColor: AppColors.info,
           ),

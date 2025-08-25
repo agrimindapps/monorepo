@@ -617,7 +617,7 @@ class PlantaFormView extends GetView<PlantaFormController> {
 
   void _showSpaceSelector() {
     Get.bottomSheet(
-      Container(
+      DecoratedBox(
         decoration: BoxDecoration(
           color: PlantasColors.surfaceColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -940,7 +940,7 @@ class PlantaFormView extends GetView<PlantaFormController> {
     int selectedDays = intervalo.value;
 
     Get.bottomSheet(
-      Container(
+      DecoratedBox(
         decoration: BoxDecoration(
           color: PlantasColors.surfaceColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),

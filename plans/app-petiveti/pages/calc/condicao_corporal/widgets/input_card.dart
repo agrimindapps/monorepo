@@ -56,7 +56,7 @@ class InputCard extends StatelessWidget {
   }
 
   Widget _buildEspecieDropdown(bool isDark) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isDark
             ? ShadcnStyle.backgroundColor.withValues(alpha: 0.5)

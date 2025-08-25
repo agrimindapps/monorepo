@@ -151,7 +151,7 @@ void main() {
       });
 
       test('deve aplicar múltiplos filtros', () {
-        final config = ExpenseFiltersConfig(
+        const config = ExpenseFiltersConfig(
           vehicleId: 'vehicle1',
           type: ExpenseType.fuel,
           searchQuery: 'combustível',

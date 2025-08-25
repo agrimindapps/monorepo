@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/body_condition_output.dart';
-import '../../domain/entities/calculation_result.dart';
 
 /// Widget para exibir resultado do cálculo de condição corporal
 class BodyConditionResultCard extends StatelessWidget {
@@ -48,7 +47,7 @@ class BodyConditionResultCard extends StatelessWidget {
   Widget _buildMainScoreCard() {
     return Card(
       color: Color(int.parse(result.statusColor.substring(1), radix: 16) + 0xFF000000)
-          .withOpacity(0.1),
+          .withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -127,15 +126,18 @@ class BodyConditionResultCard extends StatelessWidget {
 
   Widget _buildUrgencyIcon() {
     final urgencyData = _getUrgencyData();
+    final color = urgencyData['color'] as Color;
+    final icon = urgencyData['icon'] as IconData;
+    
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: urgencyData['color'].withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Icon(
-        urgencyData['icon'],
-        color: urgencyData['color'],
+        icon,
+        color: color,
         size: 24,
       ),
     );
@@ -207,7 +209,7 @@ class BodyConditionResultCard extends StatelessWidget {
           _buildMetricCard(
             title: 'Peso Ideal',
             value: '${result.idealWeightEstimate!.toStringAsFixed(1)} kg',
-            icon: Icons.target,
+            icon: Icons.flag,
             color: Colors.green,
           ),
         if (result.weightAdjustmentNeeded != 0)
@@ -220,8 +222,8 @@ class BodyConditionResultCard extends StatelessWidget {
         _buildMetricCard(
           title: 'Urgência',
           value: result.actionUrgency.displayName,
-          icon: _getUrgencyData()['icon'],
-          color: _getUrgencyData()['color'],
+          icon: _getUrgencyData()['icon'] as IconData,
+          color: _getUrgencyData()['color'] as Color,
         ),
       ],
     );
@@ -285,7 +287,7 @@ class BodyConditionResultCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            ...result.recommendations.map((rec) => _buildRecommendationItem(rec)),
+            ...result.recommendations.map((rec) => _buildRecommendationItem(rec as BcsRecommendation)),
           ],
         ),
       ),
@@ -299,9 +301,11 @@ class BodyConditionResultCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.left(
-          width: 4,
-          color: _getRecommendationColor(recommendation.type),
+        border: Border(
+          left: BorderSide(
+            width: 4,
+            color: _getRecommendationColor(recommendation.type),
+          ),
         ),
       ),
       child: Column(

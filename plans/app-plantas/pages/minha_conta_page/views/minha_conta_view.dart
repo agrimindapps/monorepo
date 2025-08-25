@@ -149,7 +149,7 @@ class MinhaContaView extends GetView<MinhaContaController> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFFFFD700), Color(0xFFFFA000)],

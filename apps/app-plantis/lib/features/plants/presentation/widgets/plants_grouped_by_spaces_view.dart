@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../domain/entities/plant.dart';
-import '../providers/spaces_provider.dart';
-import '../providers/plants_provider.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
+import '../../domain/entities/plant.dart';
+import '../providers/plants_provider.dart';
+import '../providers/spaces_provider.dart';
 import 'space_header_widget.dart';
 
 class PlantsGroupedBySpacesView extends StatefulWidget {

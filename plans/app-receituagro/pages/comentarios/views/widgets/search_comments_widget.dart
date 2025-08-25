@@ -22,7 +22,7 @@ class SearchCommentsWidget extends StatelessWidget {
 
     return Obx(() {
       final isDark = themeController.isDark.value;
-      return Container(
+      return DecoratedBox(
         decoration: BoxDecoration(
           color: isDark ? Colors.grey.shade900 : Colors.white,
           borderRadius: BorderRadius.circular(8),

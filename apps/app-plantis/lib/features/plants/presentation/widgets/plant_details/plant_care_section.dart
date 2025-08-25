@@ -248,7 +248,7 @@ class PlantCareSection extends StatelessWidget {
         {
           'icon': Icons.landscape_outlined,
           'title': 'Tipo de solo',
-          'value': config.soilType!,
+          'value': config.soilType,
           'color': Colors.brown,
         },
       if (config.idealTemperature != null)

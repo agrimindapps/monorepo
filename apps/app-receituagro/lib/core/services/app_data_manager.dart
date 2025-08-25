@@ -1,18 +1,20 @@
 import 'dart:developer' as developer;
+
 import 'package:dartz/dartz.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'hive_adapter_registry.dart';
-import 'data_initialization_service.dart';
-import 'asset_loader_service.dart';
-import 'version_manager_service.dart';
-import 'auto_version_control_service.dart';
+
 import '../repositories/cultura_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
+import 'asset_loader_service.dart';
+import 'auto_version_control_service.dart';
+import 'data_initialization_service.dart';
+import 'hive_adapter_registry.dart';
+import 'version_manager_service.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {

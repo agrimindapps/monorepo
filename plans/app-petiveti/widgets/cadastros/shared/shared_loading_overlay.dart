@@ -156,7 +156,7 @@ class SharedLoadingOverlay extends StatelessWidget {
       },
       child: GestureDetector(
         onTap: dismissible ? onDismiss : null,
-        child: Container(
+        child: ColoredBox(
           color: (backgroundColor ?? Colors.black).withValues(alpha: opacity),
           child: Center(
             child: _buildLoadingContent(context),

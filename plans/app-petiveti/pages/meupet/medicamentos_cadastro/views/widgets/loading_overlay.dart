@@ -19,7 +19,7 @@ class LoadingOverlay extends StatelessWidget {
       children: [
         child,
         if (isLoading)
-          Container(
+          ColoredBox(
             color: Colors.black.withValues(alpha: 0.3),
             child: Center(
               child: Card(

@@ -1,6 +1,6 @@
-import 'package:injectable/injectable.dart';
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
 

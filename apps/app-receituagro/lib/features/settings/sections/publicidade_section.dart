@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../constants/settings_design_tokens.dart';
-import '../services/premium_service.dart';
 import '../services/navigation_service.dart';
+import '../services/premium_service.dart';
 import '../widgets/section_title_widget.dart';
 
 /// Premium/Ads section following SOLID principles

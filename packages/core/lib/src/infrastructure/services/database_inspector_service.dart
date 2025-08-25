@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../domain/entities/database_record.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../domain/entities/custom_box_type.dart';
+import '../../domain/entities/database_record.dart';
 import '../../domain/entities/shared_preferences_record.dart';
 
 /// Sistema completo de inspeção e visualização de dados locais

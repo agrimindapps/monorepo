@@ -12,7 +12,7 @@ class DeleteAppointment implements UseCase<void, DeleteAppointmentParams> {
   @override
   Future<Either<Failure, void>> call(DeleteAppointmentParams params) async {
     if (params.id.isEmpty) {
-      return Left(ValidationFailure(message: 'ID da consulta é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID da consulta é obrigatório'));
     }
 
     return await repository.deleteAppointment(params.id);

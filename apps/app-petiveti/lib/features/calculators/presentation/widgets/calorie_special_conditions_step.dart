@@ -148,7 +148,7 @@ class _CalorieSpecialConditionsStepState extends State<CalorieSpecialConditionsS
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? Theme.of(context).primaryColor.withOpacity(0.1)
+                          ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                           : null,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
@@ -245,7 +245,7 @@ class _CalorieSpecialConditionsStepState extends State<CalorieSpecialConditionsS
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? _getMedicalConditionColor(condition).withOpacity(0.1)
+                          ? _getMedicalConditionColor(condition).withValues(alpha: 0.1)
                           : null,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(

@@ -8,7 +8,7 @@ class CacheService {
   factory CacheService() => _instance;
   CacheService._internal();
 
-  final Map<String, CacheEntry> _memoryCache = {};
+  final Map<String, CacheEntry<dynamic>> _memoryCache = {};
   SharedPreferences? _prefs;
 
   /// Duração padrão do cache (1 hora)
@@ -81,7 +81,7 @@ class CacheService {
 
   /// Verifica se existe uma entrada válida no cache
   Future<bool> has(String key) async {
-    final data = await get(key);
+    final data = await get<dynamic>(key);
     return data != null;
   }
 
@@ -119,7 +119,7 @@ class CacheService {
       final allKeys = _prefs!.getKeys().where((k) => k.startsWith(_cachePrefix));
       for (final diskKey in allKeys) {
         final key = diskKey.replaceFirst(_cachePrefix, '');
-        final entry = await _loadFromDisk(key);
+        final entry = await _loadFromDisk<dynamic>(key);
         if (entry != null && entry.isExpired) {
           await _prefs!.remove(diskKey);
         }
@@ -247,12 +247,12 @@ class CacheService {
       
       if (serializedData == null) return null;
       
-      final Map<String, dynamic> entryData = jsonDecode(serializedData);
+      final Map<String, dynamic> entryData = jsonDecode(serializedData) as Map<String, dynamic>;
       
       return CacheEntry<T>(
         data: _deserializeData<T>(entryData['data']),
-        timestamp: DateTime.fromMillisecondsSinceEpoch(entryData['timestamp']),
-        duration: Duration(milliseconds: entryData['duration']),
+        timestamp: DateTime.fromMillisecondsSinceEpoch(entryData['timestamp'] as int),
+        duration: Duration(milliseconds: entryData['duration'] as int),
       );
     } catch (e) {
       // Remove entrada corrompida

@@ -102,11 +102,11 @@ class TaskHistory extends Equatable {
 
   factory TaskHistory.fromFirebaseMap(Map<String, dynamic> map) {
     return TaskHistory(
-      id: map['id'] ?? '',
-      taskId: map['taskId'] ?? '',
-      originalTaskTitle: map['originalTaskTitle'] ?? '',
-      plantId: map['plantId'] ?? '',
-      plantName: map['plantName'] ?? '',
+      id: (map['id'] as String?) ?? '',
+      taskId: (map['taskId'] as String?) ?? '',
+      originalTaskTitle: (map['originalTaskTitle'] as String?) ?? '',
+      plantId: (map['plantId'] as String?) ?? '',
+      plantName: (map['plantName'] as String?) ?? '',
       taskType: task_entity.TaskType.values.firstWhere(
         (type) => type.key == map['taskType'],
         orElse: () => task_entity.TaskType.custom,
@@ -116,30 +116,30 @@ class TaskHistory extends Equatable {
         orElse: () => task_entity.TaskPriority.medium,
       ),
       originalDueDate: DateTime.fromMillisecondsSinceEpoch(
-        map['originalDueDate'] ?? 0,
+        (map['originalDueDate'] as int?) ?? 0,
       ),
-      completedAt: DateTime.fromMillisecondsSinceEpoch(map['completedAt'] ?? 0),
-      userId: map['userId'] ?? '',
-      notes: map['notes'],
-      photosUrls: List<String>.from(map['photosUrls'] ?? []),
+      completedAt: DateTime.fromMillisecondsSinceEpoch((map['completedAt'] as int?) ?? 0),
+      userId: (map['userId'] as String?) ?? '',
+      notes: map['notes'] as String?,
+      photosUrls: List<String>.from((map['photosUrls'] as List<dynamic>?) ?? []),
       timeSpent:
-          map['timeSpent'] != null ? Duration(minutes: map['timeSpent']) : null,
+          map['timeSpent'] != null ? Duration(minutes: (map['timeSpent'] as int)) : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
     );
   }
 
   factory TaskHistory.fromHiveMap(Map<String, dynamic> map) {
     return TaskHistory(
-      id: map['id'] ?? '',
-      taskId: map['taskId'] ?? '',
-      originalTaskTitle: map['originalTaskTitle'] ?? '',
-      plantId: map['plantId'] ?? '',
-      plantName: map['plantName'] ?? '',
+      id: (map['id'] as String?) ?? '',
+      taskId: (map['taskId'] as String?) ?? '',
+      originalTaskTitle: (map['originalTaskTitle'] as String?) ?? '',
+      plantId: (map['plantId'] as String?) ?? '',
+      plantName: (map['plantName'] as String?) ?? '',
       taskType: task_entity.TaskType.values.firstWhere(
         (type) => type.key == map['taskType'],
         orElse: () => task_entity.TaskType.custom,
@@ -149,20 +149,20 @@ class TaskHistory extends Equatable {
         orElse: () => task_entity.TaskPriority.medium,
       ),
       originalDueDate: DateTime.fromMillisecondsSinceEpoch(
-        map['originalDueDate'] ?? 0,
+        (map['originalDueDate'] as int?) ?? 0,
       ),
-      completedAt: DateTime.fromMillisecondsSinceEpoch(map['completedAt'] ?? 0),
-      userId: map['userId'] ?? '',
-      notes: map['notes'],
-      photosUrls: List<String>.from(map['photosUrls'] ?? []),
+      completedAt: DateTime.fromMillisecondsSinceEpoch((map['completedAt'] as int?) ?? 0),
+      userId: (map['userId'] as String?) ?? '',
+      notes: map['notes'] as String?,
+      photosUrls: List<String>.from((map['photosUrls'] as List<dynamic>?) ?? []),
       timeSpent:
-          map['timeSpent'] != null ? Duration(minutes: map['timeSpent']) : null,
+          map['timeSpent'] != null ? Duration(minutes: (map['timeSpent'] as int)) : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
     );
   }
 

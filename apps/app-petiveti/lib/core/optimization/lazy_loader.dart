@@ -148,7 +148,7 @@ class _LazyWidgetState<T> extends State<LazyWidget<T>> {
         }
         
         if (snapshot.hasData) {
-          return widget.builder(snapshot.data!);
+          return widget.builder(snapshot.data as T);
         }
         
         return const SizedBox.shrink();

@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../entities/space.dart';
 import '../repositories/spaces_repository.dart';
 
@@ -23,7 +24,7 @@ class GetSpaceByIdUseCase implements UseCase<Space, String> {
   Future<Either<Failure, Space>> call(String id) {
     if (id.trim().isEmpty) {
       return Future.value(
-        Left(ValidationFailure('ID do espaço é obrigatório')),
+        const Left(ValidationFailure('ID do espaço é obrigatório')),
       );
     }
     return repository.getSpaceById(id);
@@ -178,7 +179,7 @@ class DeleteSpaceUseCase implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String id) async {
     if (id.trim().isEmpty) {
-      return Left(ValidationFailure('ID do espaço é obrigatório'));
+      return const Left(ValidationFailure('ID do espaço é obrigatório'));
     }
 
     // Check if space exists first

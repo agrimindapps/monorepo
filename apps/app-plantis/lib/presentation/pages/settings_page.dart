@@ -1,14 +1,15 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
-import '../../core/theme/plantis_colors.dart';
-import '../widgets/settings_section.dart';
-import '../widgets/settings_item.dart';
-import '../../features/development/presentation/pages/data_inspector_page.dart';
+
 import '../../core/di/injection_container.dart' as di;
-import '../../core/services/test_data_generator_service.dart';
 import '../../core/services/data_cleaner_service.dart';
+import '../../core/services/test_data_generator_service.dart';
+import '../../core/theme/plantis_colors.dart';
+import '../../features/development/presentation/pages/data_inspector_page.dart';
+import '../widgets/settings_item.dart';
+import '../widgets/settings_section.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -364,7 +365,7 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.favorite,
                   color: PlantisColors.flower,
                   size: 16,
@@ -446,14 +447,14 @@ class SettingsPage extends StatelessWidget {
                   color: PlantisColors.leaf.withValues(alpha: 0.3),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 children: [
                   Icon(
                     Icons.info_outline,
                     color: PlantisColors.leaf,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Útil para demonstrações e testes',
@@ -489,8 +490,8 @@ class SettingsPage extends StatelessWidget {
                 navigator.pop(); // Close loading
 
                 scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: const Text('Dados de teste gerados com sucesso!'),
+                  const SnackBar(
+                    content: Text('Dados de teste gerados com sucesso!'),
                     backgroundColor: PlantisColors.primary,
                     behavior: SnackBarBehavior.floating,
                   ),
@@ -589,7 +590,7 @@ class SettingsPage extends StatelessWidget {
             ] else ...[
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.check_circle,
                     color: PlantisColors.leaf,
                     size: 20,
@@ -700,7 +701,7 @@ class SettingsPage extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               color: PlantisColors.primary,
             ),
             const SizedBox(height: 16),

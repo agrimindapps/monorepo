@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import '../../../../core/services/backup_service.dart';
+import 'package:flutter/material.dart';
+
 import '../../../../core/data/models/backup_model.dart';
+import '../../../../core/services/backup_service.dart';
 
 /// Provider para gerenciar configurações e operações de backup
 class BackupSettingsProvider extends ChangeNotifier {

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../../core/theme/colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
+import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
 import 'plant_image_section.dart';
 import 'plant_info_section.dart';
-import 'plant_care_section.dart';
-import 'plant_tasks_section.dart';
 import 'plant_notes_section.dart';
-import '../../../../../core/theme/colors.dart';
+import 'plant_tasks_section.dart';
 
 /// Widget principal da tela de detalhes da planta
 /// Responsável apenas pela estrutura visual e coordenação dos componentes

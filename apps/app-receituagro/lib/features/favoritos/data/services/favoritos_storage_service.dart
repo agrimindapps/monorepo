@@ -1,9 +1,10 @@
 import 'dart:developer' as developer;
-import '../../domain/entities/favorito_entity.dart';
-import '../../domain/repositories/i_favoritos_repository.dart';
+
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/services/receituagro_hive_service.dart';
-import '../../../../core/di/injection_container.dart';
+import '../../domain/entities/favorito_entity.dart';
+import '../../domain/repositories/i_favoritos_repository.dart';
 
 /// Implementação do storage local para favoritos usando Hive (Data Layer)
 /// Princípio: Single Responsibility - Apenas storage
@@ -323,9 +324,9 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
   }) {
     return FavoritoDefensivoEntity(
       id: id,
-      nomeComum: data['nomeComum'] ?? '',
-      ingredienteAtivo: data['ingredienteAtivo'] ?? '',
-      fabricante: data['fabricante'],
+      nomeComum: data['nomeComum'] as String? ?? '',
+      ingredienteAtivo: data['ingredienteAtivo'] as String? ?? '',
+      fabricante: data['fabricante'] as String?,
       adicionadoEm: DateTime.now(),
     );
   }
@@ -337,9 +338,9 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
   }) {
     return FavoritoPragaEntity(
       id: id,
-      nomeComum: data['nomeComum'] ?? '',
-      nomeCientifico: data['nomeCientifico'] ?? '',
-      tipoPraga: data['tipoPraga'] ?? '1',
+      nomeComum: data['nomeComum'] as String? ?? '',
+      nomeCientifico: data['nomeCientifico'] as String? ?? '',
+      tipoPraga: data['tipoPraga'] as String? ?? '1',
       adicionadoEm: DateTime.now(),
     );
   }
@@ -351,10 +352,10 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
   }) {
     return FavoritoDiagnosticoEntity(
       id: id,
-      nomePraga: data['nomePraga'] ?? '',
-      nomeDefensivo: data['nomeDefensivo'] ?? '',
-      cultura: data['cultura'] ?? '',
-      dosagem: data['dosagem'] ?? '',
+      nomePraga: data['nomePraga'] as String? ?? '',
+      nomeDefensivo: data['nomeDefensivo'] as String? ?? '',
+      cultura: data['cultura'] as String? ?? '',
+      dosagem: data['dosagem'] as String? ?? '',
       adicionadoEm: DateTime.now(),
     );
   }
@@ -366,8 +367,8 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
   }) {
     return FavoritoCulturaEntity(
       id: id,
-      nomeCultura: data['nomeCultura'] ?? '',
-      descricao: data['descricao'],
+      nomeCultura: data['nomeCultura'] as String? ?? '',
+      descricao: data['descricao'] as String?,
       adicionadoEm: DateTime.now(),
     );
   }

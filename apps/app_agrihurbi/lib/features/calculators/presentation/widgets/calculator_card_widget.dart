@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/calculator_entity.dart';
+
 import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 
 /// Widget de card para exibir uma calculadora na lista
 /// 

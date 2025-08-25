@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import 'backup_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
+
 import '../data/models/backup_model.dart';
+import 'backup_service.dart';
 
 /// Service responsável por agendar e executar backups automáticos
 @singleton

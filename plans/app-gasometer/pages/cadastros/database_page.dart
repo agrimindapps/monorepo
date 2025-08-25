@@ -53,7 +53,7 @@ class DebugDatabaseButton extends StatelessWidget {
     return Positioned(
       top: 50,
       right: 20,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.red.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(20),

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../core/widgets/modern_header_widget.dart';
-import '../../core/services/diagnostico_integration_service.dart';
+
+import '../../core/di/injection_container.dart';
 import '../../core/extensions/diagnostico_detalhado_extension.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
-import '../../core/di/injection_container.dart';
-import 'widgets/praga_por_cultura_card_widget.dart';
+import '../../core/services/diagnostico_integration_service.dart';
+import '../../core/widgets/modern_header_widget.dart';
 import 'widgets/cultura_selector_widget.dart';
 import 'widgets/estatisticas_cultura_widget.dart';
+import 'widgets/praga_por_cultura_card_widget.dart';
 
 /// Página que mostra pragas agrupadas por cultura
 /// Integra dados de PragasHive + CulturaHive + DiagnosticoHive + FitossanitarioHive
@@ -539,7 +540,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
                   return ListTile(
                     leading: const Icon(FontAwesomeIcons.vial, color: Colors.blue),
                     title: Text(defensivo),
-                    subtitle: Text('Defensivo disponível'),
+                    subtitle: const Text('Defensivo disponível'),
                     onTap: () {
                       Navigator.of(context).pop();
                       // Navegar para detalhes do defensivo

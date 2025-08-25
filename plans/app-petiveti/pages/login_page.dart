@@ -1174,7 +1174,7 @@ class _LoginPageState extends State<LoginPage>
                   left: 20,
                   child: Material(
                     color: Colors.transparent,
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
@@ -1257,7 +1257,7 @@ class _LoginPageState extends State<LoginPage>
               topLeft: Radius.circular(20),
               bottomLeft: Radius.circular(20),
             ),
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,

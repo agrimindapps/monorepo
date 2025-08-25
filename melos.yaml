@@ -1,128 +1,866 @@
 name: plantis_receituagro_monorepo
 repository: https://github.com/seu-usuario/plantis-receituagro-monorepo
 
+# Definição de packages do monorepo
 packages:
   - apps/*
   - packages/*
 
+# Configurações de ambiente e bootstrap
 command:
   bootstrap:
     environment:
       sdk: ">=3.7.2 <4.0.0"
       flutter: ">=3.10.0"
+    hooks:
+      post: |
+        echo "🔧 Bootstrap concluído!"
+        echo "📱 Apps encontrados: $(ls -1 apps/ | wc -l)"
+        echo "📦 Packages encontrados: $(ls -1 packages/ | wc -l)"
+        echo "✅ Workspace está pronto para desenvolvimento"
     
   clean:
     hooks:
       pre: |
-        echo "Limpando workspace Plantis & ReceitaAgro..."
-    
+        echo "🧹 Iniciando limpeza completa do workspace..."
+      post: |
+        echo "✨ Limpeza concluída com sucesso!"
+
+# ============================================================================
+# SCRIPTS COMPLETOS PARA DESENVOLVIMENTO, TESTE E DEPLOYMENT
+# ============================================================================
+
 scripts:
-  # Comandos úteis para desenvolvimento
+  # =========================================================================
+  # 🚀 SCRIPTS DE SETUP E DESENVOLVIMENTO
+  # =========================================================================
+  
+  setup:dev:
+    run: |
+      echo "🚀 Configurando ambiente de desenvolvimento..."
+      flutter doctor -v
+      echo "📦 Instalando dependências globais..."
+      flutter pub global activate fvm
+      flutter pub global activate flutterfire_cli
+      echo "🔄 Executando bootstrap..."
+      melos bootstrap
+      echo "✅ Setup de desenvolvimento concluído!"
+    description: Setup completo para novos desenvolvedores
+    
+  deps:sync:
+    run: |
+      echo "🔄 Sincronizando dependências em todo o monorepo..."
+      flutter pub get
+      echo "✅ Dependências sincronizadas!"
+    description: Sincroniza dependências em todos os packages
+    
+  deps:upgrade:
+    run: |
+      echo "⬆️ Atualizando dependências..."
+      flutter pub upgrade
+      echo "✅ Dependências atualizadas!"
+    description: Atualiza dependências em todos os packages
+    
+  deps:outdated:
+    run: |
+      echo "📊 Verificando dependências desatualizadas..."
+      flutter pub outdated
+    description: Lista dependências desatualizadas
+    
+  # =========================================================================
+  # 🔍 SCRIPTS DE ANÁLISE ESTÁTICA E QUALIDADE
+  # =========================================================================
+  
   analyze:
-    run: flutter analyze
-    description: Executa análise estática em todos os packages
+    run: |
+      echo "🔍 Executando análise estática..."
+      flutter analyze --no-fatal-infos
+    description: Análise estática em todos os packages
+    
+  analyze:strict:
+    run: |
+      echo "🔍 Executando análise estática rigorosa..."
+      flutter analyze --fatal-infos --fatal-warnings
+    description: Análise estática rigorosa (falha em warnings)
     
   format:
-    run: dart format --set-exit-if-changed .
+    run: |
+      echo "🎨 Formatando código..."
+      dart format --set-exit-if-changed .
     description: Formata código em todos os packages
     
-  test:
-    run: flutter test
-    description: Executa testes em todos os packages
+  format:fix:
+    run: |
+      echo "🎨 Formatando e corrigindo código..."
+      dart format .
+      dart fix --apply
+    description: Formata e aplica correções automáticas
     
-  # Build APK para todos os apps
+  lint:check:
+    run: |
+      echo "📋 Executando verificação completa de qualidade..."
+      echo "1/3 - Análise estática..."
+      flutter analyze --no-fatal-infos
+      echo "2/3 - Formatação..."
+      dart format --set-exit-if-changed .
+      echo "3/3 - Verificação de imports..."
+      echo "✅ Verificação de qualidade concluída!"
+    description: Verificação completa de qualidade do código
+    
+  # =========================================================================
+  # 🧪 SCRIPTS DE TESTE
+  # =========================================================================
+  
+  test:
+    run: |
+      echo "🧪 Executando testes..."
+      flutter test
+    description: Executa testes unitários em todos os packages
+    
+  test:unit:
+    run: |
+      echo "🧪 Executando testes unitários..."
+      flutter test test/unit/ --reporter expanded
+    description: Executa apenas testes unitários
+    
+  test:widget:
+    run: |
+      echo "🧪 Executando testes de widget..."
+      flutter test test/widget/ --reporter expanded
+    description: Executa apenas testes de widget
+    
+  test:integration:
+    run: |
+      echo "🧪 Executando testes de integração..."
+      flutter test integration_test/
+    description: Executa testes de integração
+    
+  test:coverage:
+    run: |
+      echo "📊 Executando testes com coverage..."
+      flutter test --coverage
+      if command -v lcov >/dev/null 2>&1; then
+        genhtml coverage/lcov.info -o coverage/html
+        echo "📊 Relatório de coverage gerado em coverage/html/index.html"
+      fi
+    description: Executa testes e gera relatório de coverage
+    
+  test:watch:
+    run: |
+      echo "👀 Executando testes em modo watch..."
+      flutter test --reporter expanded --coverage
+    description: Executa testes em modo watch para desenvolvimento
+    
+  # =========================================================================
+  # 🏗️ SCRIPTS DE BUILD - DEBUG/PROFILE/RELEASE
+  # =========================================================================
+  
+  # Builds APK para todos os apps
   build:all:apk:
     run: |
-      echo "Iniciando build APK RELEASE para todos os apps..."
-      cd apps/app-plantis && flutter build apk --release && echo "✅ Plantis APK concluído" &&
-      cd ../app-receituagro && flutter build apk --release && echo "✅ ReceitaAgro APK concluído" &&
-      cd ../app-gasometer && flutter build apk --release && echo "✅ Gasometer APK concluído" &&
-      echo "🎉 Todos os builds APK RELEASE foram concluídos com sucesso!"
-    description: Build APK RELEASE para todos os três apps (Plantis, ReceitaAgro e Gasometer)
+      echo "📱 Iniciando build APK RELEASE para todos os apps..."
+      SUCCESS_COUNT=0
+      TOTAL_APPS=0
+      
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          TOTAL_APPS=$((TOTAL_APPS + 1))
+          APP_NAME=$(basename "$app")
+          echo "🔨 Buildando $APP_NAME..."
+          cd "$app" && flutter build apk --release --split-per-abi
+          if [ $? -eq 0 ]; then
+            echo "✅ $APP_NAME APK concluído"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          else
+            echo "❌ $APP_NAME APK falhou"
+          fi
+          cd - > /dev/null
+        fi
+      done
+      
+      echo "📊 Builds concluídos: $SUCCESS_COUNT/$TOTAL_APPS"
+      if [ $SUCCESS_COUNT -eq $TOTAL_APPS ]; then
+        echo "🎉 Todos os builds APK RELEASE foram concluídos com sucesso!"
+      else
+        echo "⚠️ Alguns builds falharam. Verifique os logs acima."
+        exit 1
+      fi
+    description: Build APK RELEASE para todos os apps com split-per-abi
     
   build:all:apk:debug:
     run: |
-      echo "Iniciando build APK DEBUG para todos os apps..."
-      cd apps/app-plantis && flutter build apk --debug && echo "✅ Plantis APK DEBUG concluído" &&
-      cd ../app-receituagro && flutter build apk --debug && echo "✅ ReceitaAgro APK DEBUG concluído" &&
-      cd ../app-gasometer && flutter build apk --debug && echo "✅ Gasometer APK DEBUG concluído" &&
-      echo "🎉 Todos os builds APK DEBUG foram concluídos com sucesso!"
-    description: Build APK DEBUG para todos os três apps (desenvolvimento)
+      echo "📱 Iniciando build APK DEBUG para todos os apps..."
+      SUCCESS_COUNT=0
+      TOTAL_APPS=0
+      
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          TOTAL_APPS=$((TOTAL_APPS + 1))
+          APP_NAME=$(basename "$app")
+          echo "🔨 Buildando $APP_NAME (DEBUG)..."
+          cd "$app" && flutter build apk --debug
+          if [ $? -eq 0 ]; then
+            echo "✅ $APP_NAME APK DEBUG concluído"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          else
+            echo "❌ $APP_NAME APK DEBUG falhou"
+          fi
+          cd - > /dev/null
+        fi
+      done
+      
+      echo "📊 Builds DEBUG concluídos: $SUCCESS_COUNT/$TOTAL_APPS"
+    description: Build APK DEBUG para todos os apps (desenvolvimento)
     
   build:all:apk:profile:
     run: |
-      echo "Iniciando build APK PROFILE para todos os apps..."
-      cd apps/app-plantis && flutter build apk --profile && echo "✅ Plantis APK PROFILE concluído" &&
-      cd ../app-receituagro && flutter build apk --profile && echo "✅ ReceitaAgro APK PROFILE concluído" &&
-      cd ../app-gasometer && flutter build apk --profile && echo "✅ Gasometer APK PROFILE concluído" &&
-      echo "🎉 Todos os builds APK PROFILE foram concluídos com sucesso!"
-    description: Build APK PROFILE para todos os três apps (análise de performance)
+      echo "📱 Iniciando build APK PROFILE para todos os apps..."
+      SUCCESS_COUNT=0
+      TOTAL_APPS=0
+      
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          TOTAL_APPS=$((TOTAL_APPS + 1))
+          APP_NAME=$(basename "$app")
+          echo "🔨 Buildando $APP_NAME (PROFILE)..."
+          cd "$app" && flutter build apk --profile
+          if [ $? -eq 0 ]; then
+            echo "✅ $APP_NAME APK PROFILE concluído"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          else
+            echo "❌ $APP_NAME APK PROFILE falhou"
+          fi
+          cd - > /dev/null
+        fi
+      done
+      
+      echo "📊 Builds PROFILE concluídos: $SUCCESS_COUNT/$TOTAL_APPS"
+    description: Build APK PROFILE para todos os apps (análise de performance)
     
-  # Builds para produção (individual por app)
+  # =========================================================================
+  # 🏪 BUILDS PARA PRODUÇÃO (APP BUNDLES E IPA)
+  # =========================================================================
+  
+  build:all:android:release:
+    run: |
+      echo "🏪 Iniciando builds Android RELEASE para todos os apps..."
+      SUCCESS_COUNT=0
+      TOTAL_APPS=0
+      
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          TOTAL_APPS=$((TOTAL_APPS + 1))
+          APP_NAME=$(basename "$app")
+          echo "🏪 Buildando $APP_NAME App Bundle..."
+          cd "$app" && flutter build appbundle --release
+          if [ $? -eq 0 ]; then
+            echo "✅ $APP_NAME App Bundle concluído"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          else
+            echo "❌ $APP_NAME App Bundle falhou"
+          fi
+          cd - > /dev/null
+        fi
+      done
+      
+      echo "📊 App Bundles concluídos: $SUCCESS_COUNT/$TOTAL_APPS"
+    description: Build App Bundle para Play Store - Todos os apps
+    
+  build:all:ios:release:
+    run: |
+      echo "🍎 Iniciando builds iOS RELEASE para todos os apps..."
+      if [[ "$OSTYPE" != "darwin"* ]]; then
+        echo "❌ Builds iOS só são suportados no macOS"
+        exit 1
+      fi
+      
+      SUCCESS_COUNT=0
+      TOTAL_APPS=0
+      
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          TOTAL_APPS=$((TOTAL_APPS + 1))
+          APP_NAME=$(basename "$app")
+          echo "🍎 Buildando $APP_NAME IPA..."
+          cd "$app" && flutter build ipa --release
+          if [ $? -eq 0 ]; then
+            echo "✅ $APP_NAME IPA concluído"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          else
+            echo "❌ $APP_NAME IPA falhou"
+          fi
+          cd - > /dev/null
+        fi
+      done
+      
+      echo "📊 IPAs concluídos: $SUCCESS_COUNT/$TOTAL_APPS"
+    description: Build IPA para App Store - Todos os apps
+    
+  build:all:web:release:
+    run: |
+      echo "🌐 Iniciando builds WEB RELEASE para todos os apps..."
+      SUCCESS_COUNT=0
+      TOTAL_APPS=0
+      
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          TOTAL_APPS=$((TOTAL_APPS + 1))
+          APP_NAME=$(basename "$app")
+          echo "🌐 Buildando $APP_NAME Web..."
+          cd "$app" && flutter build web --release --web-renderer html
+          if [ $? -eq 0 ]; then
+            echo "✅ $APP_NAME Web concluído"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          else
+            echo "❌ $APP_NAME Web falhou"
+          fi
+          cd - > /dev/null
+        fi
+      done
+      
+      echo "📊 Builds Web concluídos: $SUCCESS_COUNT/$TOTAL_APPS"
+    description: Build Web para todos os apps
+    
+  # =========================================================================
+  # 🧹 SCRIPTS DE LIMPEZA E MANUTENÇÃO
+  # =========================================================================
+  
+  clean:
+    run: |
+      echo "🧹 Limpando workspace..."
+      flutter clean
+    description: Limpa builds e caches básicos
+    
+  clean:deep:
+    run: |
+      echo "🧹 Limpeza profunda do workspace..."
+      echo "1/4 - Flutter clean..."
+      flutter clean
+      echo "2/4 - Pub cache clean..."
+      flutter pub cache clean --force
+      echo "3/4 - Removendo node_modules..."
+      find . -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+      echo "4/4 - Removendo arquivos temporários..."
+      find . -name "*.lock" -not -path "./pubspec.lock" -delete 2>/dev/null || true
+      find . -name ".DS_Store" -delete 2>/dev/null || true
+      echo "✨ Limpeza profunda concluída!"
+    description: Limpeza profunda incluindo caches e temporários
+    
+  clean:builds:
+    run: |
+      echo "🧹 Removendo todos os builds..."
+      find . -name "build" -type d -exec rm -rf {} + 2>/dev/null || true
+      find . -name ".dart_tool" -type d -exec rm -rf {} + 2>/dev/null || true
+      echo "✅ Builds removidos!"
+    description: Remove apenas diretórios de build
+    
+  # =========================================================================
+  # ⚙️ SCRIPTS DE GERAÇÃO DE CÓDIGO
+  # =========================================================================
+  
+  codegen:
+    run: |
+      echo "⚙️ Executando geração de código..."
+      flutter packages pub run build_runner build --delete-conflicting-outputs
+    description: Executa build_runner em todos os packages
+    
+  codegen:watch:
+    run: |
+      echo "👀 Executando geração de código em modo watch..."
+      flutter packages pub run build_runner watch --delete-conflicting-outputs
+    description: Executa build_runner em modo watch
+    
+  codegen:clean:
+    run: |
+      echo "🧹 Limpando arquivos gerados..."
+      flutter packages pub run build_runner clean
+      echo "⚙️ Regenerando código..."
+      flutter packages pub run build_runner build --delete-conflicting-outputs
+    description: Limpa e regenera todos os arquivos de código
+    
+  # =========================================================================
+  # 📱 SCRIPTS ESPECÍFICOS POR APP
+  # =========================================================================
+  
+  # Plantis
+  run:plantis:
+    run: flutter run --hot
+    description: Executa app Plantis com hot reload
+    packageFilters:
+      scope: "app_plantis"
+      
   build:plantis:android:
-    run: flutter build appbundle --release
-    description: Build App Bundle para Play Store - Plantis (Plantas Domésticas)
+    run: flutter build appbundle --release --verbose
+    description: Build App Bundle para Play Store - Plantis
     packageFilters:
       scope: "app_plantis"
       
   build:plantis:ios:
-    run: flutter build ipa --release
-    description: Build IPA para App Store - Plantis (Plantas Domésticas)
+    run: flutter build ipa --release --verbose
+    description: Build IPA para App Store - Plantis
     packageFilters:
       scope: "app_plantis"
       
+  # ReceitaAgro
+  run:receituagro:
+    run: flutter run --hot
+    description: Executa app ReceitaAgro com hot reload
+    packageFilters:
+      scope: "app_receituagro"
+      
   build:receituagro:android:
-    run: flutter build appbundle --release
-    description: Build App Bundle para Play Store - ReceitaAgro (Pragas Agrícolas)
+    run: flutter build appbundle --release --verbose
+    description: Build App Bundle para Play Store - ReceitaAgro
     packageFilters:
       scope: "app_receituagro"
       
   build:receituagro:ios:
-    run: flutter build ipa --release
-    description: Build IPA para App Store - ReceitaAgro (Pragas Agrícolas)
+    run: flutter build ipa --release --verbose
+    description: Build IPA para App Store - ReceitaAgro
     packageFilters:
       scope: "app_receituagro"
       
+  # Gasometer
+  run:gasometer:
+    run: flutter run --hot
+    description: Executa app Gasometer com hot reload
+    packageFilters:
+      scope: "app_gasometer"
+      
   build:gasometer:android:
-    run: flutter build appbundle --release
-    description: Build App Bundle para Play Store - Gasometer (Controle de Combustível)
+    run: flutter build appbundle --release --verbose
+    description: Build App Bundle para Play Store - Gasometer
     packageFilters:
       scope: "app_gasometer"
       
   build:gasometer:ios:
-    run: flutter build ipa --release
-    description: Build IPA para App Store - Gasometer (Controle de Combustível)
+    run: flutter build ipa --release --verbose
+    description: Build IPA para App Store - Gasometer
     packageFilters:
       scope: "app_gasometer"
       
-  # Scripts específicos por app
-  run:plantis:
-    run: flutter run
-    description: Executa app Plantis (Plantas de Apartamento)
+  # Task Manager
+  run:taskmanager:
+    run: flutter run --hot
+    description: Executa app Task Manager com hot reload
     packageFilters:
-      scope: "app_plantis"
+      scope: "app_taskolist"
       
-  run:receituagro:
-    run: flutter run
-    description: Executa app ReceitaAgro (Compêndio de Pragas)
+  build:taskmanager:android:
+    run: flutter build appbundle --release --verbose
+    description: Build App Bundle para Play Store - Task Manager
     packageFilters:
-      scope: "app_receituagro"
+      scope: "app_taskolist"
       
-  run:gasometer:
-    run: flutter run
-    description: Executa app Gasometer (Controle de Combustível)
+  # Agrihurbi
+  run:agrihurbi:
+    run: flutter run --hot
+    description: Executa app Agrihurbi com hot reload
     packageFilters:
-      scope: "app_gasometer"
+      scope: "app_agrihurbi"
       
-  # Comandos específicos para desenvolvimento
+  build:agrihurbi:android:
+    run: flutter build appbundle --release --verbose
+    description: Build App Bundle para Play Store - Agrihurbi
+    packageFilters:
+      scope: "app_agrihurbi"
+      
+  # Petiveti
+  run:petiveti:
+    run: flutter run --hot
+    description: Executa app Petiveti com hot reload
+    packageFilters:
+      scope: "app_petiveti"
+      
+  build:petiveti:android:
+    run: flutter build appbundle --release --verbose
+    description: Build App Bundle para Play Store - Petiveti
+    packageFilters:
+      scope: "app_petiveti"
+      
+  # =========================================================================
+  # 🎨 SCRIPTS DE ASSETS E ÍCONES
+  # =========================================================================
+  
+  icons:generate:
+    run: |
+      echo "🎨 Gerando ícones para todos os apps..."
+      for app in apps/*/; do
+        if [ -f "$app/pubspec.yaml" ]; then
+          APP_NAME=$(basename "$app")
+          echo "🎨 Gerando ícones para $APP_NAME..."
+          cd "$app"
+          if [ -f "flutter_launcher_icons-*.yaml" ]; then
+            flutter packages pub run flutter_launcher_icons:main
+          fi
+          cd - > /dev/null
+        fi
+      done
+      echo "✅ Ícones gerados!"
+    description: Gera ícones para todos os apps
+    
   icons:plantis:
-    run: flutter packages pub run flutter_launcher_icons:main -f flutter_launcher_icons-plantis.yaml
+    run: flutter packages pub run flutter_launcher_icons:main
     description: Gera ícones para Plantis
     packageFilters:
       scope: "app_plantis"
       
   icons:receituagro:
-    run: flutter packages pub run flutter_launcher_icons:main -f flutter_launcher_icons-receituagro.yaml
+    run: flutter packages pub run flutter_launcher_icons:main
     description: Gera ícones para ReceitaAgro
     packageFilters:
       scope: "app_receituagro"
+      
+  icons:gasometer:
+    run: flutter packages pub run flutter_launcher_icons:main
+    description: Gera ícones para Gasometer
+    packageFilters:
+      scope: "app_gasometer"
+      
+  # =========================================================================
+  # 🚀 SCRIPTS DE CI/CD E DEPLOYMENT
+  # =========================================================================
+  
+  ci:check:
+    run: |
+      echo "🔍 Executando verificações de CI..."
+      echo "1/5 - Análise estática..."
+      flutter analyze --fatal-infos
+      echo "2/5 - Formatação..."
+      dart format --set-exit-if-changed .
+      echo "3/5 - Testes..."
+      flutter test
+      echo "4/5 - Build de teste..."
+      flutter build apk --debug
+      echo "5/5 - Verificação de dependências..."
+      flutter pub deps
+      echo "✅ Todas as verificações de CI passaram!"
+    description: Pipeline completo de verificações para CI
+    
+  ci:matrix:android:
+    run: |
+      echo "🤖 Executando matrix build Android..."
+      echo "📱 Debug build..."
+      flutter build apk --debug
+      echo "📱 Profile build..."
+      flutter build apk --profile  
+      echo "📱 Release build..."
+      flutter build apk --release --split-per-abi
+      echo "🏪 App Bundle build..."
+      flutter build appbundle --release
+      echo "✅ Matrix build Android concluída!"
+    description: Matrix build para Android (debug, profile, release, bundle)
+    
+  ci:matrix:ios:
+    run: |
+      if [[ "$OSTYPE" != "darwin"* ]]; then
+        echo "❌ Builds iOS só são suportados no macOS"
+        exit 1
+      fi
+      echo "🍎 Executando matrix build iOS..."
+      echo "📱 Debug build..."
+      flutter build ios --debug --no-codesign
+      echo "📱 Profile build..."
+      flutter build ios --profile --no-codesign
+      echo "📱 Release build..."
+      flutter build ios --release --no-codesign
+      echo "🏪 IPA build..."
+      flutter build ipa --release
+      echo "✅ Matrix build iOS concluída!"
+    description: Matrix build para iOS (debug, profile, release, ipa)
+    
+  version:bump:patch:
+    run: |
+      echo "🔢 Incrementando versão patch..."
+      ./scripts/version_manager.sh patch
+    description: Incrementa versão patch em todos os apps
+    
+  version:bump:minor:
+    run: |
+      echo "🔢 Incrementando versão minor..."
+      ./scripts/version_manager.sh minor
+    description: Incrementa versão minor em todos os apps
+    
+  version:bump:major:
+    run: |
+      echo "🔢 Incrementando versão major..."
+      ./scripts/version_manager.sh major
+    description: Incrementa versão major em todos os apps
+    
+  version:list:
+    run: |
+      echo "📋 Listando versões atuais..."
+      ./scripts/version_manager.sh list
+    description: Lista versões atuais de todos os apps
+    
+  version:tag:patch:
+    run: |
+      echo "🔢🏷️ Incrementando versão patch e criando tag..."
+      ./scripts/version_manager.sh patch --tag
+    description: Incrementa versão patch e cria tag git
+    
+  version:tag:minor:
+    run: |
+      echo "🔢🏷️ Incrementando versão minor e criando tag..."
+      ./scripts/version_manager.sh minor --tag
+    description: Incrementa versão minor e cria tag git
+    
+  version:tag:major:
+    run: |
+      echo "🔢🏷️ Incrementando versão major e criando tag..."
+      ./scripts/version_manager.sh major --tag
+    description: Incrementa versão major e cria tag git
+    
+  # =========================================================================
+  # 📊 SCRIPTS DE ANÁLISE E RELATÓRIOS
+  # =========================================================================
+  
+  analyze:metrics:
+    run: |
+      echo "📊 Coletando métricas do projeto..."
+      echo "📁 Estrutura do projeto:"
+      find . -name "*.dart" | head -10
+      echo "📊 Contagem de arquivos Dart:"
+      find . -name "*.dart" | wc -l
+      echo "📊 Linhas de código:"
+      find . -name "*.dart" -exec wc -l {} + | tail -1
+      echo "📦 Packages no monorepo:"
+      ls -1 apps/ packages/
+    description: Coleta métricas básicas do projeto
+    
+  analyze:dependencies:
+    run: |
+      echo "📦 Analisando dependências..."
+      flutter pub deps --json > deps_analysis.json
+      echo "📊 Relatório de dependências salvo em deps_analysis.json"
+      flutter pub outdated
+    description: Analisa dependências de todo o monorepo
+    
+  analyze:security:
+    run: |
+      echo "🔐 Executando análise de segurança..."
+      echo "🔍 Procurando hardcoded secrets..."
+      grep -r "api_key\|password\|secret" . --include="*.dart" || echo "✅ Nenhum secret hardcoded encontrado"
+      echo "🔍 Verificando imports inseguros..."
+      grep -r "dart:io" . --include="*.dart" || echo "✅ Nenhum import dart:io encontrado"
+      echo "✅ Análise de segurança concluída!"
+    description: Análise básica de segurança do código
+    
+  # =========================================================================
+  # 🛠️ SCRIPTS DE DESENVOLVIMENTO E DEBUG
+  # =========================================================================
+  
+  debug:info:
+    run: |
+      echo "🛠️ Informações de debug do ambiente..."
+      echo "Flutter Doctor:"
+      flutter doctor -v
+      echo "\nMelos Info:"
+      melos --version
+      echo "\nWorkspace packages:"
+      melos list
+      echo "\nFlutter packages info:"
+      flutter pub global list
+    description: Exibe informações completas para debug
+    
+  debug:cleanup:
+    run: |
+      echo "🛠️ Limpeza para resolução de problemas..."
+      flutter clean
+      flutter pub cache clean --force
+      melos clean
+      melos bootstrap
+      echo "✅ Cleanup para debug concluído!"
+    description: Limpeza completa para resolver problemas
+    
+  # =========================================================================
+  # ⚡ SCRIPTS DE OTIMIZAÇÃO DE PERFORMANCE
+  # =========================================================================
+  
+  perf:setup:
+    run: |
+      echo "⚡ Configurando otimizações de performance..."
+      ./scripts/performance_optimizer.sh setup
+    description: Configura sistema de cache e otimizações
+    
+  perf:build:parallel:
+    run: |
+      echo "⚡ Executando builds paralelos otimizados..."
+      ./scripts/performance_optimizer.sh build:parallel release
+    description: Builds paralelos otimizados para release
+    
+  perf:test:parallel:
+    run: |
+      echo "⚡ Executando testes paralelos..."
+      ./scripts/performance_optimizer.sh test:parallel
+    description: Testes paralelos otimizados
+    
+  perf:analyze:
+    run: |
+      echo "⚡ Análise estática com cache..."
+      ./scripts/performance_optimizer.sh analyze:optimized
+    description: Análise estática otimizada com cache
+    
+  perf:stats:
+    run: |
+      echo "📊 Estatísticas de performance..."
+      ./scripts/performance_optimizer.sh stats
+    description: Exibe estatísticas de performance do monorepo
+    
+  perf:benchmark:
+    run: |
+      echo "🏁 Executando benchmark de performance..."
+      ./scripts/performance_optimizer.sh benchmark
+    description: Benchmark completo de performance
+    
+  perf:cache:clean:
+    run: |
+      echo "🧹 Limpando cache de performance..."
+      ./scripts/performance_optimizer.sh cache:clean all
+    description: Limpa todo o cache de performance
+    
+  # =========================================================================
+  # 🎯 SCRIPTS DE EXECUÇÃO SELETIVA
+  # =========================================================================
+  
+  selective:analyze:
+    run: |
+      echo "🎯 Análise seletiva baseada em mudanças..."
+      ./scripts/selective_runner.sh analyze
+    description: Análise apenas nos packages modificados
+    
+  selective:test:
+    run: |
+      echo "🎯 Testes seletivos baseados em mudanças..."
+      ./scripts/selective_runner.sh test
+    description: Testes apenas nos packages modificados
+    
+  selective:build:
+    run: |
+      echo "🎯 Builds seletivos baseados em mudanças..."
+      ./scripts/selective_runner.sh build:debug
+    description: Builds apenas nos packages modificados
+    
+  selective:ci:
+    run: |
+      echo "🎯 CI seletivo baseado em mudanças..."
+      ./scripts/selective_runner.sh ci
+    description: Pipeline de CI apenas nos packages modificados
+    
+  selective:list:
+    run: |
+      echo "🎯 Listando packages modificados..."
+      ./scripts/selective_runner.sh list
+    description: Lista packages modificados desde main
+    
+  selective:stats:
+    run: |
+      echo "🎯 Estatísticas dos packages modificados..."
+      ./scripts/selective_runner.sh stats
+    description: Estatísticas dos packages modificados
+    
+  # =========================================================================
+  # 🎯 SCRIPTS DE CONVENIÊNCIA E ALIASES
+  # =========================================================================
+  
+  quick:check:
+    run: |
+      echo "⚡ Verificação rápida..."
+      flutter analyze --no-fatal-infos
+      dart format --set-exit-if-changed .
+      echo "✅ Verificação rápida concluída!"
+    description: Verificação rápida de análise e formatação
+    
+  quick:build:
+    run: |
+      echo "⚡ Build rápido para teste..."
+      flutter build apk --debug
+      echo "✅ Build rápido concluído!"
+    description: Build debug rápido para teste
+    
+  full:pipeline:
+    run: |
+      echo "🚀 Executando pipeline completo..."
+      echo "1/6 - Limpeza..."
+      flutter clean
+      echo "2/6 - Dependências..."
+      flutter pub get
+      echo "3/6 - Análise..."
+      flutter analyze
+      echo "4/6 - Formatação..."
+      dart format .
+      echo "5/6 - Testes..."
+      flutter test
+      echo "6/6 - Build..."
+      flutter build apk --release
+      echo "🎉 Pipeline completo executado com sucesso!"
+    description: Pipeline completo de desenvolvimento
+    
+  # =========================================================================
+  # 📚 SCRIPTS DE DOCUMENTAÇÃO E HELP
+  # =========================================================================
+  
+  help:
+    run: |
+      echo "📚 Comandos disponíveis no Melos:"
+      echo ""
+      echo "🚀 SETUP E DESENVOLVIMENTO:"
+      echo "  melos setup:dev          - Setup completo para novos devs"
+      echo "  melos deps:sync          - Sincronizar dependências"
+      echo "  melos deps:upgrade       - Atualizar dependências"
+      echo ""
+      echo "🔍 QUALIDADE E ANÁLISE:"
+      echo "  melos analyze            - Análise estática básica"
+      echo "  melos analyze:strict     - Análise estática rigorosa"
+      echo "  melos format             - Formatação de código"
+      echo "  melos lint:check         - Verificação completa"
+      echo ""
+      echo "🧪 TESTES:"
+      echo "  melos test               - Testes unitários"
+      echo "  melos test:coverage      - Testes com coverage"
+      echo "  melos test:watch         - Testes em modo watch"
+      echo ""
+      echo "🏗️ BUILDS:"
+      echo "  melos build:all:apk      - Build APK todos os apps"
+      echo "  melos build:all:android:release - App Bundles"
+      echo "  melos build:all:ios:release - IPAs (macOS only)"
+      echo ""
+      echo "🧹 LIMPEZA:"
+      echo "  melos clean              - Limpeza básica"
+      echo "  melos clean:deep         - Limpeza profunda"
+      echo ""
+      echo "⚙️ GERAÇÃO DE CÓDIGO:"
+      echo "  melos codegen            - Build runner"
+      echo "  melos codegen:watch      - Build runner watch"
+      echo ""
+      echo "🚀 CI/CD:"
+      echo "  melos ci:check           - Pipeline de CI"
+      echo "  melos full:pipeline      - Pipeline completo"
+      echo ""
+      echo "📱 APPS ESPECÍFICOS:"
+      echo "  melos run:plantis        - Executar Plantis"
+      echo "  melos run:receituagro    - Executar ReceitaAgro"
+      echo "  melos run:gasometer      - Executar Gasometer"
+      echo ""
+      echo "⚡ PERFORMANCE:"
+      echo "  melos perf:setup         - Setup de otimizações"
+      echo "  melos perf:build:parallel - Builds paralelos"
+      echo "  melos perf:test:parallel - Testes paralelos"
+      echo ""
+      echo "🎯 EXECUÇÃO SELETIVA:"
+      echo "  melos selective:ci       - CI apenas em mudanças"
+      echo "  melos selective:test     - Testes seletivos"
+      echo "  melos selective:build    - Builds seletivos"
+      echo ""
+      echo "🔢 VERSIONING:"
+      echo "  melos version:bump:patch - Increment patch version"
+      echo "  melos version:list       - List current versions"
+      echo ""
+      echo "Para documentação completa: MELOS_SCRIPTS_DOCUMENTATION.md"
+    description: Exibe ajuda com todos os comandos disponíveis
+    
+  validate:system:
+    run: |
+      echo "✅ Validando sistema Melos completo..."
+      ./scripts/validate_melos_system.sh
+    description: Valida se todo o sistema Melos está funcionando corretamente

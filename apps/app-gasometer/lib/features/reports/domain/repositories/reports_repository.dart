@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
-import '../entities/report_summary_entity.dart';
 import '../entities/report_comparison_entity.dart';
+import '../entities/report_summary_entity.dart';
 
 abstract class ReportsRepository {
   // Generate reports

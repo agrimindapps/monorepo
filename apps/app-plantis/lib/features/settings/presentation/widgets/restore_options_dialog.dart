@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/plantis_colors.dart';
+
 import '../../../../core/data/models/backup_model.dart';
+import '../../../../core/theme/plantis_colors.dart';
 
 /// Dialog para escolher opções de restauração do backup
 class RestoreOptionsDialog extends StatefulWidget {
@@ -33,7 +34,7 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               color: PlantisColors.leaf.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.restore,
               color: PlantisColors.leaf,
               size: 20,
@@ -205,7 +206,7 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.warning_amber,
                     color: Colors.orange,
                     size: 18,

@@ -1,6 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:core/core.dart';
 
 /// Exemplo de uso da nova infraestrutura Hive do Core
 /// Demonstra como usar HiveManager, BaseHiveRepository e CoreHiveStorageService

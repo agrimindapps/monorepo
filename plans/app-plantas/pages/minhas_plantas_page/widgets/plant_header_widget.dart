@@ -30,25 +30,25 @@ class PlantHeaderWidget extends StatelessWidget {
           children: [
             // Plant icon with custom illustration or photo
             _buildPlantIcon(context),
-            SizedBox(width: dimensoes['paddingM']!),
+            SizedBox(width: dimensoes['paddingM']),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     planta.nome ?? 'Planta',
-                    style: textStyles['labelLarge']!,
+                    style: textStyles['labelLarge'],
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: dimensoes['paddingXS']!),
+                  SizedBox(height: dimensoes['paddingXS']),
                   Row(
                     children: [
                       if (planta.especie?.isNotEmpty == true) ...[
                         Flexible(
                           child: Text(
                             planta.especie!,
-                            style: textStyles['bodySmall']!,
+                            style: textStyles['bodySmall'],
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -68,14 +68,14 @@ class PlantHeaderWidget extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.location_on_outlined,
-                                size: dimensoes['iconXS']!,
+                                size: dimensoes['iconXS'],
                                 color: cores['textoTerciario'],
                               ),
                               const SizedBox(width: 2),
                               Flexible(
                                 child: Text(
                                   _getSpaceName(),
-                                  style: textStyles['bodySmall']!,
+                                  style: textStyles['bodySmall'],
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -99,8 +99,8 @@ class PlantHeaderWidget extends StatelessWidget {
     const dimensoes = PlantasDesignTokens.dimensoes;
 
     return Container(
-      width: dimensoes['iconXL']!,
-      height: dimensoes['iconXL']!,
+      width: dimensoes['iconXL'],
+      height: dimensoes['iconXL'],
       decoration: BoxDecoration(
         color: cores['primaria']!.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(dimensoes['radiusM']!),
@@ -119,8 +119,8 @@ class PlantHeaderWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: ImageService.base64ToImage(
               planta.fotoBase64,
-              width: PlantasDesignTokens.dimensoes['iconXL']!,
-              height: PlantasDesignTokens.dimensoes['iconXL']!,
+              width: PlantasDesignTokens.dimensoes['iconXL'],
+              height: PlantasDesignTokens.dimensoes['iconXL'],
               fit: BoxFit.cover,
             ) ??
             _buildDefaultPlantIcon(context),

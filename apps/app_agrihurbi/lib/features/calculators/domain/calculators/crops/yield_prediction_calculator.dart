@@ -1,14 +1,13 @@
-import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Predição de Produtividade
 /// Estima produtividade baseada em condições da cultura e manejo
 class YieldPredictionCalculator extends CalculatorEntity {
-  YieldPredictionCalculator()
+  const YieldPredictionCalculator()
       : super(
           id: 'yield_prediction_calculator',
           name: 'Predição de Produtividade',
@@ -201,7 +200,7 @@ class YieldPredictionCalculator extends CalculatorEntity {
           ),
         ],
         recommendations: recommendations,
-        tableData: [],
+        tableData: const [],
       );
     } catch (e) {
       return CalculationError(

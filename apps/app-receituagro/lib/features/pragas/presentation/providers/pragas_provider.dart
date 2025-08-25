@@ -70,14 +70,30 @@ class PragasProvider extends ChangeNotifier {
   /// Carrega todas as pragas
   Future<void> loadAllPragas() async {
     await _executeUseCase(() async {
-      _pragas = await _getPragasUseCase.execute();
+      final result = await _getPragasUseCase.execute();
+      result.fold(
+        (failure) => throw Exception(failure.message),
+        (pragas) {
+          // Ordena alfabeticamente por nome comum
+          pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+          _pragas = pragas;
+        },
+      );
     });
   }
 
   /// Carrega pragas por tipo
   Future<void> loadPragasByTipo(String tipo) async {
     await _executeUseCase(() async {
-      _pragas = await _getPragasByTipoUseCase.execute(tipo);
+      final result = await _getPragasByTipoUseCase.execute(tipo);
+      result.fold(
+        (failure) => throw Exception(failure.message),
+        (pragas) {
+          // Ordena alfabeticamente por nome comum
+          pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+          _pragas = pragas;
+        },
+      );
     });
   }
 
@@ -97,6 +113,8 @@ class PragasProvider extends ChangeNotifier {
   Future<void> loadPragasByCultura(String culturaId) async {
     await _executeUseCase(() async {
       _pragas = await _getPragasByCulturaUseCase.execute(culturaId);
+      // Ordena alfabeticamente por nome comum
+      _pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
     });
   }
 
@@ -104,6 +122,8 @@ class PragasProvider extends ChangeNotifier {
   Future<void> searchPragas(String searchTerm) async {
     await _executeUseCase(() async {
       _pragas = await _searchPragasUseCase.execute(searchTerm);
+      // Ordena resultados da busca alfabeticamente
+      _pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
     });
   }
 

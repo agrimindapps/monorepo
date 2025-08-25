@@ -1,10 +1,11 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import '../entities/plant.dart';
-import '../repositories/plants_repository.dart';
+
 import '../../../../core/data/models/planta_config_model.dart';
 import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
+import '../entities/plant.dart';
+import '../repositories/plants_repository.dart';
 
 class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
   final PlantsRepository repository;

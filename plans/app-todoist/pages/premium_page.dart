@@ -60,7 +60,7 @@ class _TodoistPremiumPageState extends State<TodoistPremiumPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+              background: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -158,7 +158,7 @@ class _TodoistPremiumPageState extends State<TodoistPremiumPage> {
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(

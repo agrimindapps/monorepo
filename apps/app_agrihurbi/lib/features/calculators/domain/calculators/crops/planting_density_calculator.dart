@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Densidade de Plantio
 /// Calcula densidade ótima de plantio, espaçamento e população de plantas
 class PlantingDensityCalculator extends CalculatorEntity {
-  PlantingDensityCalculator()
+  const PlantingDensityCalculator()
       : super(
           id: 'planting_density_calculator',
           name: 'Densidade de Plantio',
@@ -690,7 +691,7 @@ class PlantingDensityCalculator extends CalculatorEntity {
     }
 
     // Margem de segurança (5%)
-    final double safetyMargin = 1.05;
+    const double safetyMargin = 1.05;
     final double finalSeedQuantity = totalSeeds * safetyMargin;
     final double finalSeedWeight = seedWeightKg * safetyMargin;
 
@@ -765,7 +766,7 @@ class PlantingDensityCalculator extends CalculatorEntity {
     final int populationDifference = optimalPop - currentPopulation;
     
     String recommendation = '';
-    if (math.abs(populationDifference) <= optimalPop * 0.05) {
+    if ((populationDifference < 0 ? -populationDifference : populationDifference) <= optimalPop * 0.05) {
       recommendation = 'População adequada - manter densidade atual';
     } else if (populationDifference > 0) {
       recommendation = 'Aumentar densidade de plantio';
@@ -782,7 +783,7 @@ class PlantingDensityCalculator extends CalculatorEntity {
   }
 
   String _getAdjustmentJustification(int difference, String cropType) {
-    if (math.abs(difference) <= 5000) {
+    if ((difference < 0 ? -difference : difference) <= 5000) {
       return 'Densidade próxima ao ótimo - ajustes mínimos necessários';
     } else if (difference > 0) {
       return 'Densidade baixa pode reduzir produtividade e aumentar competição com plantas daninhas';
@@ -839,7 +840,8 @@ class PlantingDensityCalculator extends CalculatorEntity {
   }
 
   String _assessCompliance(int current, int standard) {
-    final double deviation = math.abs((current - standard) / standard) * 100;
+    final double value = (current - standard) / standard;
+    final double deviation = (value < 0 ? -value : value) * 100;
     
     if (deviation <= 10) {
       return 'Conforme padrão técnico';
@@ -985,7 +987,7 @@ class PlantingDensityCalculator extends CalculatorEntity {
 
     // Recomendações por densidade
     final int adjustment = adjustmentRecommendations['population_adjustment'] as int;
-    if (math.abs(adjustment) > 10000) {
+    if ((adjustment < 0 ? -adjustment : adjustment) > 10000) {
       recommendations.add('Densidade significativamente diferente do ótimo - revisar população de plantas.');
     }
 

@@ -1,7 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math' as math;
 
 import '../../../core/errors/failures.dart';
 import '../../providers/auth_providers.dart';
@@ -236,7 +237,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                             ),
                           ],
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.visibility_off_rounded,
                           color: Colors.white,
                           size: 24,
@@ -312,9 +313,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                 color: const Color(0xFFFF9800).withAlpha(51),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.warning_amber_rounded,
-                                color: const Color(0xFFFF6F00),
+                                color: Color(0xFFFF6F00),
                                 size: 18,
                               ),
                             ),
@@ -362,7 +363,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         child: const Text('Cancelar'),
                       ),
                       const SizedBox(width: 12),
-                      Container(
+                      DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
@@ -545,7 +546,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     final isDarkMode = theme.brightness == Brightness.dark;
     
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -783,7 +784,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
+        const Text(
           'Bem-vindo de volta!',
           style: TextStyle(
             fontSize: 24,

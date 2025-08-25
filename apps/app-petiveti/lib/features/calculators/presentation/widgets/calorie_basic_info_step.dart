@@ -182,12 +182,12 @@ class _CalorieBasicInfoStepState extends State<CalorieBasicInfoStep> {
   Widget _buildWeightField() {
     return TextFormField(
       controller: _weightController,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Peso Atual *',
         hintText: 'Ex: 25.5',
         suffixText: 'kg',
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.scale),
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.scale),
         helperText: 'Peso atual do animal em quilogramas',
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -201,12 +201,12 @@ class _CalorieBasicInfoStepState extends State<CalorieBasicInfoStep> {
   Widget _buildIdealWeightField() {
     return TextFormField(
       controller: _idealWeightController,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Peso Ideal',
         hintText: 'Ex: 23.0',
         suffixText: 'kg',
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.favorite),
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.favorite),
         helperText: 'Peso ideal/alvo (opcional)',
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -220,12 +220,12 @@ class _CalorieBasicInfoStepState extends State<CalorieBasicInfoStep> {
   Widget _buildAgeField() {
     return TextFormField(
       controller: _ageController,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Idade *',
         hintText: 'Ex: 36',
         suffixText: 'meses',
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.cake),
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.cake),
         helperText: 'Idade do animal em meses',
       ),
       keyboardType: TextInputType.number,

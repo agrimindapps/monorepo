@@ -3,7 +3,7 @@
 /// Widget que cria um cabeçalho com animações suaves para melhorar
 /// a percepção visual das páginas principais.
 
-library animated_page_header;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -71,7 +71,7 @@ class AnimatedPageHeader extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
-                          icon!,
+                          icon,
                           size: 24,
                           color: fgColor,
                         ),

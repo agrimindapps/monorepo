@@ -18,64 +18,53 @@ abstract class Failure extends Equatable {
 // Server failures
 class ServerFailure extends Failure {
   const ServerFailure({
-    required String message,
-    String? code,
-    dynamic details,
-  }) : super(
-    message: message,
-    code: code,
-    details: details,
-  );
+    required super.message,
+    super.code,
+    super.details,
+  });
 }
 
 // Cache failures
 class CacheFailure extends Failure {
   const CacheFailure({
-    required String message,
-    String? code,
-    dynamic details,
-  }) : super(
-    message: message,
-    code: code,
-    details: details,
-  );
+    required super.message,
+    super.code,
+    super.details,
+  });
 }
 
 // Network failures
 class NetworkFailure extends Failure {
   const NetworkFailure({
-    required String message,
-    String? code,
-    dynamic details,
-  }) : super(
-    message: message,
-    code: code,
-    details: details,
-  );
+    required super.message,
+    super.code,
+    super.details,
+  });
 }
 
 // Validation failures
 class ValidationFailure extends Failure {
   const ValidationFailure({
-    required String message,
-    String? code,
-    dynamic details,
-  }) : super(
-    message: message,
-    code: code,
-    details: details,
-  );
+    required super.message,
+    super.code,
+    super.details,
+  });
 }
 
 // Authentication failures
 class AuthFailure extends Failure {
   const AuthFailure({
-    required String message,
-    String? code,
-    dynamic details,
-  }) : super(
-    message: message,
-    code: code,
-    details: details,
-  );
+    required super.message,
+    super.code,
+    super.details,
+  });
+}
+
+// Not found failures
+class NotFoundFailure extends Failure {
+  const NotFoundFailure({
+    required super.message,
+    super.code,
+    super.details,
+  });
 }

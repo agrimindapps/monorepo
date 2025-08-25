@@ -1,5 +1,8 @@
-import '../entities/calculation_result.dart';
 import 'package:equatable/equatable.dart';
+
+import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
+import '../entities/input_field.dart';
 
 enum InsulinType {
   regular,
@@ -50,26 +53,186 @@ class DiabetesInsulinInput extends Equatable {
 
 class DiabetesInsulinResult extends CalculationResult {
   const DiabetesInsulinResult({
-    required String calculatorId,
-    required List<ResultItem> results,
-    List<Recommendation> recommendations = const [],
-    String? summary,
-    DateTime? calculatedAt,
-  }) : super(
-          calculatorId: calculatorId,
-          results: results,
-          recommendations: recommendations,
-          summary: summary,
-          calculatedAt: calculatedAt,
-        );
+    required super.calculatorId,
+    required super.results,
+    super.recommendations,
+    super.summary,
+    super.calculatedAt,
+  });
 }
 
-class DiabetesInsulinCalculator {
-  static const String id = 'diabetes_insulin';
-  static const String name = 'Calculadora de Insulina para Diabetes';
-  static const String description = 'Calcula dosagem de insulina baseada no peso, nível de glicose e tipo de diabetes';
+class DiabetesInsulinCalculator extends Calculator {
+  const DiabetesInsulinCalculator();
 
-  static DiabetesInsulinResult calculate(DiabetesInsulinInput input) {
+  @override
+  String get id => 'diabetes_insulin';
+  
+  @override
+  String get name => 'Calculadora de Insulina para Diabetes';
+  
+  @override
+  String get description => 'Calcula dosagem de insulina baseada no peso, nível de glicose e tipo de diabetes';
+  
+  @override
+  CalculatorCategory get category => CalculatorCategory.medication;
+  
+  @override
+  String get iconName => 'medication';
+  
+  @override
+  String get version => '1.0.0';
+  
+  @override
+  List<InputField> get inputFields => [
+    const InputField(
+      key: 'weight',
+      label: 'Peso do animal',
+      type: InputFieldType.number,
+      unit: 'kg',
+      minValue: 0.1,
+      maxValue: 100.0,
+      isRequired: true,
+      helperText: 'Peso do animal em quilogramas',
+    ),
+    const InputField(
+      key: 'glucoseLevel',
+      label: 'Nível de glicose',
+      type: InputFieldType.number,
+      unit: 'mg/dL',
+      minValue: 20.0,
+      maxValue: 1000.0,
+      isRequired: true,
+      helperText: 'Nível atual de glicose no sangue',
+    ),
+    const InputField(
+      key: 'insulinType',
+      label: 'Tipo de insulina',
+      type: InputFieldType.dropdown,
+      options: ['regular', 'nph', 'lente', 'ultralente'],
+      isRequired: true,
+      helperText: 'Tipo de insulina a ser administrada',
+    ),
+    const InputField(
+      key: 'diabetesType',
+      label: 'Tipo de diabetes',
+      type: InputFieldType.dropdown,
+      options: ['type1', 'type2', 'gestational'],
+      isRequired: true,
+      helperText: 'Tipo de diabetes do animal',
+    ),
+    const InputField(
+      key: 'isFirstDose',
+      label: 'É a primeira dose?',
+      type: InputFieldType.switch_,
+      isRequired: true,
+      defaultValue: false,
+    ),
+    const InputField(
+      key: 'previousDose',
+      label: 'Dose anterior (UI)',
+      type: InputFieldType.number,
+      unit: 'UI',
+      minValue: 0.0,
+      maxValue: 100.0,
+      isRequired: false,
+      helperText: 'Dose anterior administrada (se aplicável)',
+    ),
+    const InputField(
+      key: 'timeSinceLastDose',
+      label: 'Horas desde última dose',
+      type: InputFieldType.number,
+      unit: 'horas',
+      minValue: 1,
+      maxValue: 48,
+      isRequired: false,
+      helperText: 'Tempo decorrido desde a última administração',
+    ),
+    const InputField(
+      key: 'isEmergency',
+      label: 'É uma emergência?',
+      type: InputFieldType.switch_,
+      isRequired: true,
+      defaultValue: false,
+    ),
+  ];
+
+  @override
+  CalculationResult calculate(Map<String, dynamic> inputs) {
+    final input = _createInputFromMap(inputs);
+    return _calculateInternal(input);
+  }
+
+  @override
+  bool validateInputs(Map<String, dynamic> inputs) {
+    return getValidationErrors(inputs).isEmpty;
+  }
+
+  @override
+  List<String> getValidationErrors(Map<String, dynamic> inputs) {
+    final errors = <String>[];
+
+    for (final field in inputFields) {
+      if (field.isRequired && !inputs.containsKey(field.key)) {
+        errors.add('${field.label} é obrigatório');
+      }
+    }
+
+    if (inputs.containsKey('weight')) {
+      final weight = inputs['weight'];
+      if (weight is! double && weight is! int) {
+        errors.add('Peso deve ser um número');
+      } else if ((weight as num) <= 0) {
+        errors.add('Peso deve ser maior que zero');
+      }
+    }
+
+    if (inputs.containsKey('glucoseLevel')) {
+      final glucose = inputs['glucoseLevel'];
+      if (glucose is! double && glucose is! int) {
+        errors.add('Nível de glicose deve ser um número');
+      } else if ((glucose as num) <= 0) {
+        errors.add('Nível de glicose deve ser maior que zero');
+      } else if (glucose > 1000) {
+        errors.add('Nível de glicose muito alto (>1000 mg/dL)');
+      }
+    }
+
+    return errors;
+  }
+
+  DiabetesInsulinInput _createInputFromMap(Map<String, dynamic> inputs) {
+    return DiabetesInsulinInput(
+      weight: (inputs['weight'] as num).toDouble(),
+      glucoseLevel: (inputs['glucoseLevel'] as num).toDouble(),
+      insulinType: _parseInsulinType(inputs['insulinType'] as String),
+      diabetesType: _parseDiabetesType(inputs['diabetesType'] as String),
+      isFirstDose: inputs['isFirstDose'] as bool? ?? false,
+      previousDose: inputs['previousDose'] != null ? (inputs['previousDose'] as num).toDouble() : null,
+      timeSinceLastDose: inputs['timeSinceLastDose'] != null ? (inputs['timeSinceLastDose'] as num).toInt() : null,
+      isEmergency: inputs['isEmergency'] as bool? ?? false,
+    );
+  }
+
+  InsulinType _parseInsulinType(String value) {
+    switch (value.toLowerCase()) {
+      case 'regular': return InsulinType.regular;
+      case 'nph': return InsulinType.nph;
+      case 'lente': return InsulinType.lente;
+      case 'ultralente': return InsulinType.ultralente;
+      default: return InsulinType.regular;
+    }
+  }
+
+  DiabetesType _parseDiabetesType(String value) {
+    switch (value.toLowerCase()) {
+      case 'type1': return DiabetesType.type1;
+      case 'type2': return DiabetesType.type2;
+      case 'gestational': return DiabetesType.gestational;
+      default: return DiabetesType.type1;
+    }
+  }
+
+  static DiabetesInsulinResult _calculateInternal(DiabetesInsulinInput input) {
     _validateInput(input);
 
     // Calcular dose base de insulina
@@ -138,7 +301,7 @@ class DiabetesInsulinCalculator {
     }).toList();
 
     return DiabetesInsulinResult(
-      calculatorId: id,
+      calculatorId: 'diabetes_insulin',
       results: results,
       recommendations: recommendations,
       summary: 'Dose de insulina: ${finalDoseUnits.toStringAsFixed(2)} UI ($route)',
@@ -297,62 +460,4 @@ class DiabetesInsulinCalculator {
            finalDose > input.weight * 0.8;
   }
 
-  static Map<String, dynamic> getInputParameters() {
-    return {
-      'weight': {
-        'type': 'double',
-        'label': 'Peso do animal (kg)',
-        'min': 0.1,
-        'max': 100.0,
-        'step': 0.1,
-        'required': true,
-      },
-      'glucoseLevel': {
-        'type': 'double',
-        'label': 'Nível de glicose (mg/dL)',
-        'min': 20.0,
-        'max': 1000.0,
-        'step': 1.0,
-        'required': true,
-      },
-      'insulinType': {
-        'type': 'enum',
-        'label': 'Tipo de insulina',
-        'options': InsulinType.values,
-        'required': true,
-      },
-      'diabetesType': {
-        'type': 'enum',
-        'label': 'Tipo de diabetes',
-        'options': DiabetesType.values,
-        'required': true,
-      },
-      'isFirstDose': {
-        'type': 'bool',
-        'label': 'É a primeira dose?',
-        'required': true,
-      },
-      'previousDose': {
-        'type': 'double',
-        'label': 'Dose anterior (UI)',
-        'min': 0.0,
-        'max': 100.0,
-        'step': 0.1,
-        'required': false,
-      },
-      'timeSinceLastDose': {
-        'type': 'int',
-        'label': 'Horas desde última dose',
-        'min': 1,
-        'max': 48,
-        'step': 1,
-        'required': false,
-      },
-      'isEmergency': {
-        'type': 'bool',
-        'label': 'É uma emergência?',
-        'required': true,
-      },
-    };
-  }
 }

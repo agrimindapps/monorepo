@@ -1,5 +1,5 @@
-import 'package:injectable/injectable.dart';
 import 'package:hive/hive.dart';
+import 'package:injectable/injectable.dart';
 
 import '../data/models/conflict_history_model.dart';
 

@@ -1,14 +1,13 @@
-import 'dart:math';
+import '../entities/medication_data.dart';
 import '../entities/medication_dosage_input.dart';
 import '../entities/medication_dosage_output.dart';
-import '../entities/medication_data.dart';
 import 'calculator_strategy.dart';
 
 /// Strategy para cálculo de dosagem de medicamentos
 class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInput, MedicationDosageOutput> {
   final List<MedicationData> _medicationsDatabase;
 
-  const MedicationDosageStrategy(this._medicationsDatabase);
+  MedicationDosageStrategy(this._medicationsDatabase);
 
   @override
   MedicationDosageOutput calculate(MedicationDosageInput input) {
@@ -249,7 +248,7 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
     // Verificar lactação
     if (input.specialConditions.contains(SpecialCondition.lactating) && 
         !medicationData.isSafeForLactation()) {
-      alerts.add(SafetyAlert(
+      alerts.add(const SafetyAlert(
         type: AlertType.conditionContraindication,
         level: AlertLevel.caution,
         message: 'Uso durante lactação pode afetar filhotes',
@@ -422,10 +421,45 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
   }
 
   @override
-  bool validateInput(MedicationDosageInput input) {
-    return input.weight > 0 && 
-           input.weight <= 100 && 
-           input.medicationId.isNotEmpty &&
-           _getMedicationData(input.medicationId) != null;
+  List<String> validateInput(MedicationDosageInput input) {
+    final errors = <String>[];
+    
+    if (input.weight <= 0) {
+      errors.add('Peso deve ser maior que zero');
+    }
+    
+    if (input.weight > 100) {
+      errors.add('Peso muito alto (máximo 100kg)');
+    }
+    
+    if (input.medicationId.isEmpty) {
+      errors.add('ID do medicamento é obrigatório');
+    } else if (_getMedicationData(input.medicationId) == null) {
+      errors.add('Medicamento não encontrado');
+    }
+    
+    return errors;
   }
+
+  @override
+  String get id => 'medication_dosage_calculator';
+
+  @override
+  String get name => 'Calculadora de Dosagem de Medicamentos';
+
+  @override
+  String get description => 'Calcula dosagens seguras de medicamentos para animais';
+
+  @override
+  String get version => '1.0.0';
+
+  @override
+  List<Object?> get props => [id, version];
+
+  @override
+  bool? get stringify => null;
+
+  // Implementação explícita do isInputValid para garantir compatibilidade
+  @override
+  bool isInputValid(MedicationDosageInput input) => validateInput(input).isEmpty;
 }

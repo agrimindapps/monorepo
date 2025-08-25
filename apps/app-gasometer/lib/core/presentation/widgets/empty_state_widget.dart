@@ -15,7 +15,7 @@ class EmptyStateWidget extends StatelessWidget {
   final bool isCompact;
 
   const EmptyStateWidget({
-    Key? key,
+    super.key,
     required this.title,
     this.message,
     this.icon,
@@ -26,7 +26,7 @@ class EmptyStateWidget extends StatelessWidget {
     this.secondaryButtonText,
     this.style = const EmptyStateStyle(),
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   /// Factory for empty expenses
   factory EmptyStateWidget.expenses({
@@ -190,7 +190,7 @@ class EmptyStateWidget extends StatelessWidget {
         children: [
           if (icon != null) ...[
             Icon(
-              icon!,
+              icon,
               size: style.iconSize ?? 32.0,
               color: style.iconColor ?? theme.colorScheme.onSurface.withOpacity(0.5),
             ),
@@ -270,7 +270,7 @@ class EmptyStateWidget extends StatelessWidget {
 
   Widget _buildIllustration(ThemeData theme) {
     if (illustrationAsset != null) {
-      return Container(
+      return SizedBox(
         width: style.illustrationSize ?? 120.0,
         height: style.illustrationSize ?? 120.0,
         child: Image.asset(
@@ -289,7 +289,7 @@ class EmptyStateWidget extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(
-          icon!,
+          icon,
           size: style.iconSize ?? 64.0,
           color: style.iconColor ?? theme.colorScheme.primary.withOpacity(0.7),
         ),
@@ -321,11 +321,11 @@ class EmptyStateWidget extends StatelessWidget {
       buttons.add(
         TextButton(
           onPressed: onSecondaryAction,
-          child: Text(secondaryButtonText ?? 'Learn More'),
           style: TextButton.styleFrom(
             foregroundColor: style.secondaryButtonColor ?? theme.colorScheme.primary,
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
           ),
+          child: Text(secondaryButtonText ?? 'Learn More'),
         ),
       );
     }
@@ -368,11 +368,11 @@ class AnimatedEmptyState extends StatefulWidget {
   final Duration delay;
 
   const AnimatedEmptyState({
-    Key? key,
+    super.key,
     required this.emptyWidget,
     this.animationDuration = const Duration(milliseconds: 500),
     this.delay = const Duration(milliseconds: 200),
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedEmptyState> createState() => _AnimatedEmptyStateState();

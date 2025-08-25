@@ -1,15 +1,15 @@
-import 'package:dartz/dartz.dart';
-import 'package:core/core.dart' hide UserEntity;
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart' hide UserEntity;
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../domain/entities/user_entity.dart';
+import '../../domain/failures/auth_failures.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/user_model.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../domain/failures/auth_failures.dart';
 
 /// Implementação do repositório de autenticação seguindo Clean Architecture
 /// 
@@ -171,11 +171,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final cachedUser = await _localDataSource.getLastUser();
       
       if (cachedUser == null) {
-        return Left(ValidationFailure('Nenhum usuário logado para atualizar'));
+        return const Left(ValidationFailure('Nenhum usuário logado para atualizar'));
       }
       
       if (cachedUser.id != userId) {
-        return Left(ValidationFailure('ID do usuário não corresponde ao logado'));
+        return const Left(ValidationFailure('ID do usuário não corresponde ao logado'));
       }
       
       // Se tem conectividade, busca dados atualizados
@@ -209,7 +209,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isLoggedIn() async {
     try {
       final cachedUser = await _localDataSource.getLastUser();
-      return cachedUser != null && cachedUser.isActive;
+      return cachedUser != null && cachedUser.isEmailVerified;
     } catch (e) {
       debugPrint('AuthRepositoryImpl: Erro ao verificar login - $e');
       return false;
@@ -229,14 +229,13 @@ class AuthRepositoryImpl implements AuthRepository {
       final cachedUser = await _localDataSource.getLastUser();
       
       if (cachedUser == null || cachedUser.id != userId) {
-        return Left(ValidationFailure('Usuário não encontrado'));
+        return const Left(ValidationFailure('Usuário não encontrado'));
       }
       
       // Prepara dados atualizados
       final updatedUser = cachedUser.copyWith(
-        name: name ?? cachedUser.name,
-        phone: phone ?? cachedUser.phone,
-        profileImageUrl: profileImageUrl ?? cachedUser.profileImageUrl,
+        displayName: name ?? cachedUser.displayName,
+        photoUrl: profileImageUrl ?? cachedUser.photoUrl,
       );
       
       // Salva localmente primeiro

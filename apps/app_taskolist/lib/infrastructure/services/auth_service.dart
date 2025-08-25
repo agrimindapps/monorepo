@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart';
+
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../core/di/injection_container.dart' as di;
-import '../../domain/usecases/update_profile.dart';
-import '../../domain/usecases/delete_account.dart';
 import '../../domain/entities/user_entity.dart' as local_entities;
+import '../../domain/usecases/delete_account.dart';
+import '../../domain/usecases/update_profile.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 

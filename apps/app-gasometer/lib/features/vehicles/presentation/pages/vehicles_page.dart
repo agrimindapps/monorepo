@@ -147,10 +147,9 @@ class _OptimizedHeader extends StatelessWidget {
 class _OptimizedVehiclesContent extends StatelessWidget {
   
   Future<void> _navigateToAddVehicle(BuildContext context) async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (context) => const AddVehiclePage(),
-      ),
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => const AddVehiclePage(),
     );
     
     // Se resultado for true, atualizar lista
@@ -171,14 +170,32 @@ class _OptimizedVehiclesContent extends StatelessWidget {
       builder: (context, data, child) {
         final (isLoading, isInitialized, vehicles, errorMessage) = data;
         
-        if (!isInitialized || isLoading) {
+        // Mostrar loading apenas se não inicializou ainda
+        if (!isInitialized) {
           return _LoadingState();
         }
         
+        // Mostrar erro se houver
         if (errorMessage != null) {
           return _ErrorState(errorMessage: errorMessage);
         }
         
+        // Se ainda está carregando mas já inicializou, mostrar loading compacto
+        if (isLoading) {
+          return Column(
+            children: [
+              if (vehicles.isNotEmpty) _VehicleGrid(vehicles: vehicles),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          );
+        }
+        
+        // Mostrar empty state se não houver veículos
         if (vehicles.isEmpty) {
           return EnhancedEmptyState.generic(
             icon: Icons.directions_car_outlined,
@@ -500,10 +517,9 @@ class _VehicleCardActions extends StatelessWidget {
       'combustivel': vehicle.supportedFuels.isNotEmpty ? vehicle.supportedFuels.first.displayName : 'Gasolina',
     };
     
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (context) => AddVehiclePage(vehicle: vehicleMap),
-      ),
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AddVehiclePage(vehicle: vehicleMap),
     );
     
     // Se resultado for true, atualizar lista
@@ -564,10 +580,9 @@ class _OptimizedFloatingActionButton extends StatelessWidget {
   }
   
   void _addVehicle(BuildContext context) async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (context) => const AddVehiclePage(),
-      ),
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => const AddVehiclePage(),
     );
     
     // Se resultado for true, atualizar lista

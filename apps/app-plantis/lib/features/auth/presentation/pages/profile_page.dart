@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:core/core.dart';
-import '../providers/auth_provider.dart' as auth_providers;
-import '../../../../core/theme/colors.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/theme/colors.dart';
+import '../providers/auth_provider.dart' as auth_providers;
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -169,15 +170,15 @@ class ProfilePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Plan Header
-                        Row(
+                        const Row(
                           children: [
                             Icon(
                               Icons.star_outline,
                               color: PlantisColors.primary,
                               size: 24,
                             ),
-                            const SizedBox(width: 12),
-                            const Text(
+                            SizedBox(width: 12),
+                            Text(
                               'Plano Gratuito',
                               style: TextStyle(
                                 color: Colors.white,
@@ -272,7 +273,7 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Configurations Card
-                  Container(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       color: const Color(0xFF2A2A2A),
                       borderRadius: BorderRadius.circular(16.0),
@@ -290,7 +291,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.notifications_outlined,
                               color: PlantisColors.primary,
                               size: 20,
@@ -345,7 +346,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.dark_mode_outlined,
                               color: PlantisColors.primary,
                               size: 20,
@@ -421,7 +422,7 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Support Card
-                  Container(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       color: const Color(0xFF2A2A2A),
                       borderRadius: BorderRadius.circular(16.0),
@@ -439,7 +440,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.feedback_outlined,
                               color: PlantisColors.primary,
                               size: 20,
@@ -494,7 +495,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.star_outline,
                               color: PlantisColors.primary,
                               size: 20,
@@ -539,7 +540,7 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Legal Card
-                  Container(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       color: const Color(0xFF2A2A2A),
                       borderRadius: BorderRadius.circular(16.0),
@@ -557,7 +558,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.shield_outlined,
                               color: PlantisColors.primary,
                               size: 20,
@@ -606,7 +607,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.description_outlined,
                               color: PlantisColors.primary,
                               size: 20,
@@ -655,7 +656,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.info_outline,
                               color: PlantisColors.primary,
                               size: 20,
@@ -702,7 +703,7 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Development Card
-                  Container(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       color: const Color(0xFF2A2A2A),
                       borderRadius: BorderRadius.circular(16.0),
@@ -1057,7 +1058,7 @@ Para mais informações, entre em contato conosco.''',
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(
+                child: const Text(
                   'Fechar',
                   style: TextStyle(color: PlantisColors.primary),
                 ),
@@ -1108,7 +1109,7 @@ Estes termos podem ser atualizados periodicamente.''',
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(
+                child: const Text(
                   'Fechar',
                   style: TextStyle(color: PlantisColors.primary),
                 ),
@@ -1151,7 +1152,7 @@ Estes termos podem ser atualizados periodicamente.''',
                   ),
                   const SizedBox(height: 16),
 
-                  Center(
+                  const Center(
                     child: Text(
                       'PlantApp',
                       style: TextStyle(
@@ -1187,7 +1188,7 @@ Estes termos podem ser atualizados periodicamente.''',
 
                   const SizedBox(height: 16),
 
-                  Text(
+                  const Text(
                     'RECURSOS:',
                     style: TextStyle(
                       color: Colors.white,
@@ -1213,7 +1214,7 @@ Estes termos podem ser atualizados periodicamente.''',
 
                   const SizedBox(height: 16),
 
-                  Text(
+                  const Text(
                     'Desenvolvido com ❤️ para amantes de plantas',
                     style: TextStyle(
                       color: PlantisColors.primary,
@@ -1228,7 +1229,7 @@ Estes termos podem ser atualizados periodicamente.''',
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(
+                child: const Text(
                   'Fechar',
                   style: TextStyle(color: PlantisColors.primary),
                 ),
@@ -1271,7 +1272,7 @@ Estes termos podem ser atualizados periodicamente.''',
                     ),
                   );
                 },
-                child: Text(
+                child: const Text(
                   'Executar',
                   style: TextStyle(color: PlantisColors.primary),
                 ),

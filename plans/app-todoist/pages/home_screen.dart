@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: _buildBackgroundDecoration(context),
         child: Column(
           children: [
@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCustomAppBar() {
-    return Obx(() => Container(
+    return Obx(() => DecoratedBox(
           decoration: BoxDecoration(
             color: TodoistColors.backgroundColor,
           ),

@@ -19,7 +19,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       final expenses = await localDataSource.getExpenses(userId);
       return Right(expenses);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar despesas: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar despesas: ${e.toString()}'));
     }
   }
 
@@ -29,7 +29,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       final expenses = await localDataSource.getExpensesByAnimal(animalId);
       return Right(expenses);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar despesas do animal: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar despesas do animal: ${e.toString()}'));
     }
   }
 
@@ -43,7 +43,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       final expenses = await localDataSource.getExpensesByDateRange(userId, startDate, endDate);
       return Right(expenses);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar despesas por período: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar despesas por período: ${e.toString()}'));
     }
   }
 
@@ -56,7 +56,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       final expenses = await localDataSource.getExpensesByCategory(userId, category);
       return Right(expenses);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar despesas por categoria: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao buscar despesas por categoria: ${e.toString()}'));
     }
   }
 
@@ -67,7 +67,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       final summary = ExpenseSummary.fromExpenses(expenses);
       return Right(summary);
     } catch (e) {
-      return Left(CacheFailure('Erro ao gerar resumo de despesas: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao gerar resumo de despesas: ${e.toString()}'));
     }
   }
 
@@ -78,7 +78,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       await localDataSource.addExpense(expenseModel);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao adicionar despesa: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao adicionar despesa: ${e.toString()}'));
     }
   }
 
@@ -89,7 +89,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       await localDataSource.updateExpense(expenseModel);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao atualizar despesa: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao atualizar despesa: ${e.toString()}'));
     }
   }
 
@@ -99,7 +99,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       await localDataSource.deleteExpense(expenseId);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao deletar despesa: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao deletar despesa: ${e.toString()}'));
     }
   }
 

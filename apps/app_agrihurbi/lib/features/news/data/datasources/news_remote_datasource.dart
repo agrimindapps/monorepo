@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
-import 'package:dio/dio.dart';
-import 'package:xml/xml.dart';
 import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:app_agrihurbi/core/network/dio_client.dart';
-import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
+import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
+import 'package:injectable/injectable.dart';
+import 'package:xml/xml.dart';
 
 /// News Remote Data Source
 /// 
@@ -75,9 +74,18 @@ class NewsRemoteDataSource {
         queryParameters: params,
       );
 
-      final List<dynamic> articlesJson = response.data['articles'] ?? [];
+      final articlesData = response.data['articles'];
+      if (articlesData is! List) {
+        throw const ServerException('Invalid response format: articles should be a list');
+      }
+      final List<dynamic> articlesJson = articlesData;
       return articlesJson
-          .map((json) => NewsArticleModel.fromJson(json))
+          .map((json) {
+            if (json is! Map<String, dynamic>) {
+              throw const ServerException('Invalid article format: expected Map<String, dynamic>');
+            }
+            return NewsArticleModel.fromJson(json);
+          })
           .toList();
     } catch (e) {
       throw ServerException('Failed to search news: $e');
@@ -98,9 +106,18 @@ class NewsRemoteDataSource {
         },
       );
 
-      final List<dynamic> articlesJson = response.data['articles'] ?? [];
+      final articlesData = response.data['articles'];
+      if (articlesData is! List) {
+        throw const ServerException('Invalid response format: articles should be a list');
+      }
+      final List<dynamic> articlesJson = articlesData;
       return articlesJson
-          .map((json) => NewsArticleModel.fromJson(json))
+          .map((json) {
+            if (json is! Map<String, dynamic>) {
+              throw const ServerException('Invalid article format: expected Map<String, dynamic>');
+            }
+            return NewsArticleModel.fromJson(json);
+          })
           .toList();
     } catch (e) {
       throw ServerException('Failed to fetch premium news: $e');
@@ -123,9 +140,18 @@ class NewsRemoteDataSource {
         queryParameters: params,
       );
 
-      final List<dynamic> pricesJson = response.data['commodities'] ?? [];
+      final commoditiesData = response.data['commodities'];
+      if (commoditiesData is! List) {
+        throw const ServerException('Invalid response format: commodities should be a list');
+      }
+      final List<dynamic> pricesJson = commoditiesData;
       return pricesJson
-          .map((json) => CommodityPriceModel.fromJson(json))
+          .map((json) {
+            if (json is! Map<String, dynamic>) {
+              throw const ServerException('Invalid commodity format: expected Map<String, dynamic>');
+            }
+            return CommodityPriceModel.fromJson(json);
+          })
           .toList();
     } catch (e) {
       throw ServerException('Failed to fetch commodity prices: $e');
@@ -147,9 +173,18 @@ class NewsRemoteDataSource {
         },
       );
 
-      final List<dynamic> historyJson = response.data['history'] ?? [];
+      final historyData = response.data['history'];
+      if (historyData is! List) {
+        throw const ServerException('Invalid response format: history should be a list');
+      }
+      final List<dynamic> historyJson = historyData;
       return historyJson
-          .map((json) => HistoricalPriceModel.fromJson(json))
+          .map((json) {
+            if (json is! Map<String, dynamic>) {
+              throw const ServerException('Invalid history format: expected Map<String, dynamic>');
+            }
+            return HistoricalPriceModel.fromJson(json);
+          })
           .toList();
     } catch (e) {
       throw ServerException('Failed to fetch commodity history: $e');
@@ -160,7 +195,10 @@ class NewsRemoteDataSource {
   Future<MarketSummaryModel> fetchMarketSummary() async {
     try {
       final response = await _client.get('/api/v1/markets/summary');
-      return MarketSummaryModel.fromJson(response.data);
+      if (response.data is! Map<String, dynamic>) {
+        throw const ServerException('Invalid response format: expected Map<String, dynamic>');
+      }
+      return MarketSummaryModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
       throw ServerException('Failed to fetch market summary: $e');
     }

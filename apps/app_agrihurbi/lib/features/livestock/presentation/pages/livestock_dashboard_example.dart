@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/livestock_coordinator_provider.dart';
 import '../../domain/entities/bovine_entity.dart';
+import '../providers/livestock_coordinator_provider.dart';
 
 /// Exemplo de uso do sistema refatorado seguindo Single Responsibility Principle
 /// 

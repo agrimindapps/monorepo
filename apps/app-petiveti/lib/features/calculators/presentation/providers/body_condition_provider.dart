@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/body_condition_input.dart';
 import '../../domain/entities/body_condition_output.dart';
+import '../../domain/entities/calculation_result.dart';
 import '../../domain/strategies/body_condition_strategy.dart';
 import '../../domain/strategies/calculator_strategy.dart';
 
@@ -234,9 +235,9 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
       // Tentar reconstruir input do resultado (limitado aos dados disponíveis)
       // Em implementação real, seria melhor salvar o input junto com output
       final reconstructedInput = state.input.copyWith(
-        currentWeight: historicalResult.results
+        currentWeight: (historicalResult.results
             .firstWhere((r) => r.label == 'Peso Atual', orElse: () => const ResultItem(label: '', value: 0.0))
-            .value,
+            .value as num?)?.toDouble(),
       );
       
       updateInput(reconstructedInput);

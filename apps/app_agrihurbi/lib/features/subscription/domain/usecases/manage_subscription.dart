@@ -1,9 +1,9 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:app_agrihurbi/features/subscription/domain/repositories/subscription_repository.dart';
+import 'package:core/core.dart' show Failure;
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 /// Manage Subscription Use Case
 /// 

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../core/widgets/modern_header_widget.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../core/models/fitossanitario_hive.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../core/extensions/fitossanitario_hive_extension.dart';
-import '../../core/di/injection_container.dart';
-import 'lista_defensivos_page.dart';
+import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'lista_defensivos_agrupados_page.dart';
+import 'lista_defensivos_page.dart';
 
 class HomeDefensivosPage extends StatefulWidget {
   const HomeDefensivosPage({super.key});

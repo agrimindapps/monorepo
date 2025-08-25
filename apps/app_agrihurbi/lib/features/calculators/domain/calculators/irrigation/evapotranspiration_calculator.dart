@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Evapotranspiração de Referência (ETo)
 /// Calcula ETo pelo método de Penman-Monteith (FAO-56)
 class EvapotranspirationCalculator extends CalculatorEntity {
-  EvapotranspirationCalculator()
+  const EvapotranspirationCalculator()
       : super(
           id: 'evapotranspiration',
           name: 'Evapotranspiração (ETo)',

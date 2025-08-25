@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Pastejo
 /// Calcula capacidade de suporte, rotação de pastagens e manejo do pastejo
 class GrazingCalculator extends CalculatorEntity {
-  GrazingCalculator()
+  const GrazingCalculator()
       : super(
           id: 'grazing_calculator',
           name: 'Calculadora de Pastejo',
@@ -421,11 +422,11 @@ class GrazingCalculator extends CalculatorEntity {
         ? 'transição'
         : 'ano_todo';
 
-    final double seasonalFactor = seasonalFactors[seasonKey]?.toDouble() ?? 0.85;
+    final double seasonalFactor = (seasonalFactors[seasonKey] as num?)?.toDouble() ?? 0.85;
 
     // Ajuste por fertilidade
     String fertilityKey = soilFertility.toLowerCase().replaceAll(' ', '_');
-    final double fertilityFactor = fertilityFactors[fertilityKey]?.toDouble() ?? 1.0;
+    final double fertilityFactor = (fertilityFactors[fertilityKey] as num?)?.toDouble() ?? 1.0;
 
     // Produção total ajustada
     final double adjustedProduction = baseProduction * seasonalFactor * fertilityFactor;
@@ -499,7 +500,7 @@ class GrazingCalculator extends CalculatorEntity {
     double exitHeight,
   ) {
     final double availableForage = forageProduction['available_forage'] as double;
-    final double dailyConsumptionUA = 450 * 0.025; // 450 kg × 2.5% = 11.25 kg MS/dia
+    const double dailyConsumptionUA = 450 * 0.025; // 450 kg × 2.5% = 11.25 kg MS/dia
 
     // Eficiência de pastejo por sistema
     final Map<String, double> grazingEfficiency = {

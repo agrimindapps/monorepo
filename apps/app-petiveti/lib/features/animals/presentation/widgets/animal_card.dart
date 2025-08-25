@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/animal.dart';
+import '../../domain/entities/animal_enums.dart';
 
 class AnimalCard extends StatelessWidget {
   final Animal animal;
@@ -39,14 +40,14 @@ class AnimalCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
-                              animal.species.toLowerCase() == 'dog' ? Icons.pets : Icons.pets,
+                              animal.species == AnimalSpecies.dog ? Icons.pets : Icons.pets,
                               color: Theme.of(context).colorScheme.onPrimary,
                             );
                           },
                         ),
                       )
                     : Icon(
-                        animal.species.toLowerCase() == 'dog' ? Icons.pets : Icons.pets,
+                        animal.species == AnimalSpecies.dog ? Icons.pets : Icons.pets,
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
               ),

@@ -3,7 +3,7 @@
 /// This file contains all skeleton loading configuration constants
 /// including shimmer effects, timing, and visual parameters.
 
-library skeleton_constants;
+library;
 
 // Flutter imports:
 import 'package:flutter/material.dart';

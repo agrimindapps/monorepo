@@ -34,7 +34,7 @@ class SettingsSection extends StatelessWidget {
               ),
             ),
           ),
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),

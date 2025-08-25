@@ -1,7 +1,8 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import '../data/models/planta_config_model.dart';
+import 'package:dartz/dartz.dart';
+
 import '../data/models/legacy/tarefa_model.dart';
+import '../data/models/planta_config_model.dart';
 import '../utils/task_schedule_calculator.dart';
 
 /// Serviço central para geração automática de tarefas baseado na configuração das plantas
@@ -181,7 +182,7 @@ class TaskGenerationService {
     required String careType,
   }) {
     if (plantaId.isEmpty) {
-      return Left(ValidationFailure('ID da planta é obrigatório'));
+      return const Left(ValidationFailure('ID da planta é obrigatório'));
     }
 
     if (!careTypeInfo.containsKey(careType)) {

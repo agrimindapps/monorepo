@@ -1,8 +1,8 @@
+import 'package:core/core.dart' show Failure;
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart' as core_lib;
 
 /// Result type that can contain either a Failure or a success value
-typedef Result<T> = Either<core_lib.Failure, T>;
+typedef Result<T> = Either<Failure, T>;
 
 /// Future that returns a Result type
 typedef ResultFuture<T> = Future<Result<T>>;

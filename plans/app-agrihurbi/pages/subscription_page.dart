@@ -236,7 +236,7 @@ class _AgriHurbiSubscriptionPageState extends State<AgriHurbiSubscriptionPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+              background: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
@@ -450,7 +450,7 @@ class _AgriHurbiSubscriptionPageState extends State<AgriHurbiSubscriptionPage> {
               final package = offering!.availablePackages[index];
               final isPopular = index == 0; // Primeiro plano como popular
 
-              return Container(
+              return DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(

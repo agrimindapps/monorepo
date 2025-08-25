@@ -1,13 +1,14 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core/core.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../../../../core/error/exceptions.dart' as core_exceptions;
+import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/entities/equine_entity.dart';
-import '../../domain/entities/animal_base_entity.dart';
-import '../../domain/repositories/livestock_repository.dart';
 import '../../domain/failures/livestock_failures.dart';
+import '../../domain/repositories/livestock_repository.dart';
 import '../datasources/livestock_local_datasource.dart';
 import '../datasources/livestock_remote_datasource.dart';
 import '../models/bovine_model.dart';
@@ -495,7 +496,7 @@ class LivestockRepositoryImpl implements LivestockRepository {
   Failure _handleException(dynamic exception) {
     if (exception is CacheException) {
       return LivestockFailure(message: exception.message);
-    } else if (exception is ServerException) {
+    } else if (exception is core_exceptions.ServerException) {
       return LivestockFailure(message: exception.message);
     } else {
       return LivestockFailure(message: 'Erro inesperado: $exception');

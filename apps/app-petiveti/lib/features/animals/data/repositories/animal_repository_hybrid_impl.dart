@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -22,7 +22,8 @@ class AnimalRepositoryHybridImpl implements AnimalRepository {
 
   Future<bool> get isConnected async {
     final result = await connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    return result.contains(ConnectivityResult.wifi) || 
+           result.contains(ConnectivityResult.mobile);
   }
 
   String get userId {
@@ -185,7 +186,7 @@ class AnimalRepositoryHybridImpl implements AnimalRepository {
   Future<Either<Failure, void>> syncAnimals() async {
     try {
       if (!(await isConnected)) {
-        return Left(ServerFailure(message: 'Sem conexão com a internet'));
+        return const Left(ServerFailure(message: 'Sem conexão com a internet'));
       }
 
       // Get local and remote data

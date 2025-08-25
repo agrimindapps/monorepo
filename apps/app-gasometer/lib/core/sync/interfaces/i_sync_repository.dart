@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../error/failures.dart';
 import '../../data/models/base_sync_model.dart';
+import '../../error/failures.dart';
 
 /// Repository interface for synchronization operations
 abstract class ISyncRepository<T extends BaseSyncModel> {

@@ -1,8 +1,9 @@
 import 'package:hive/hive.dart';
-import '../../domain/entities/expense_entity.dart';
-import '../models/expense_model.dart';
+
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
+import '../../domain/entities/expense_entity.dart';
+import '../models/expense_model.dart';
 
 /// Repository para persistência de despesas usando Hive com cache strategy
 class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpensesRepository {
@@ -10,6 +11,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   late Box<ExpenseModel> _box;
 
   /// Inicializa o repositório
+  @override
   Future<void> initialize() async {
     _box = await Hive.openBox<ExpenseModel>(_boxName);
     
@@ -21,6 +23,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Salva nova despesa
+  @override
   Future<ExpenseEntity?> saveExpense(ExpenseEntity expense) async {
     try {
       final model = _entityToModel(expense);
@@ -43,6 +46,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Atualiza despesa existente
+  @override
   Future<ExpenseEntity?> updateExpense(ExpenseEntity expense) async {
     try {
       if (!_box.containsKey(expense.id)) {
@@ -69,6 +73,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Remove despesa por ID
+  @override
   Future<bool> deleteExpense(String expenseId) async {
     try {
       await _box.delete(expenseId);
@@ -86,6 +91,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Busca despesa por ID
+  @override
   Future<ExpenseEntity?> getExpenseById(String expenseId) async {
     try {
       // Verificar cache primeiro
@@ -110,6 +116,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Carrega todas as despesas
+  @override
   Future<List<ExpenseEntity>> getAllExpenses() async {
     try {
       // Verificar cache primeiro
@@ -132,6 +139,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Carrega despesas por veículo
+  @override
   Future<List<ExpenseEntity>> getExpensesByVehicle(String vehicleId) async {
     try {
       // Verificar cache primeiro
@@ -156,6 +164,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Carrega despesas por tipo
+  @override
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type) async {
     try {
       final models = _box.values
@@ -168,6 +177,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Carrega despesas por período
+  @override
   Future<List<ExpenseEntity>> getExpensesByPeriod(DateTime start, DateTime end) async {
     try {
       final startMs = start.millisecondsSinceEpoch;
@@ -186,6 +196,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Busca despesas por texto
+  @override
   Future<List<ExpenseEntity>> searchExpenses(String query) async {
     try {
       final lowerQuery = query.toLowerCase();
@@ -201,6 +212,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Carrega estatísticas básicas
+  @override
   Future<Map<String, dynamic>> getStats() async {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
@@ -228,6 +240,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Verifica se há despesas duplicadas
+  @override
   Future<List<ExpenseEntity>> findDuplicates() async {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
@@ -260,6 +273,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   }
 
   /// Limpa todas as despesas (apenas para debug/reset)
+  @override
   Future<void> clearAllExpenses() async {
     try {
       await _box.clear();

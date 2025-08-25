@@ -157,7 +157,7 @@ class FiltrosDefensivosWidget extends StatelessWidget {
     required Color color,
     required ValueChanged<String> onChanged,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: valor != opcoes.keys.first

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculator_parameter.dart';
+
 import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../providers/calculator_provider_simple.dart';
 import '../widgets/calculation_result_display.dart';
 import '../widgets/parameter_input_widget.dart';

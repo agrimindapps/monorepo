@@ -21,7 +21,7 @@ class FilterModalWidget extends StatelessWidget {
       minChildSize: RacasListaConstants.modalMinSize,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
+        return DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: RacasListaConstants.modalBorderRadius,

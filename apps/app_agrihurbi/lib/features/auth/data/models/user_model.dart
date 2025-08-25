@@ -1,6 +1,6 @@
-import 'package:hive/hive.dart';
-import 'package:app_agrihurbi/features/auth/domain/entities/user_entity.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
+import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 
 part 'user_model.g.dart';
 
@@ -14,57 +14,65 @@ class UserModel extends UserEntity {
   final String userModelId;
   
   @HiveField(1)
-  final String userModelName;
-  
-  @HiveField(2)
   final String userModelEmail;
   
+  @HiveField(2)
+  final String userModelDisplayName;
+  
   @HiveField(3)
-  final String? userModelPhone;
+  final String? userModelPhotoUrl;
   
   @HiveField(4)
-  final String? userModelProfileImageUrl;
+  final bool userModelIsEmailVerified;
   
   @HiveField(5)
-  final DateTime userModelCreatedAt;
-  
-  @HiveField(6)
   final DateTime? userModelLastLoginAt;
   
+  @HiveField(6)
+  final AuthProvider userModelProvider;
+  
   @HiveField(7)
-  final bool userModelIsActive;
+  final DateTime? userModelCreatedAt;
+  
+  @HiveField(8)
+  final DateTime? userModelUpdatedAt;
 
   const UserModel({
     required this.userModelId,
-    required this.userModelName,
     required this.userModelEmail,
-    this.userModelPhone,
-    this.userModelProfileImageUrl,
-    required this.userModelCreatedAt,
+    required this.userModelDisplayName,
+    this.userModelPhotoUrl,
+    this.userModelIsEmailVerified = false,
     this.userModelLastLoginAt,
-    this.userModelIsActive = true,
+    this.userModelProvider = AuthProvider.email,
+    this.userModelCreatedAt,
+    this.userModelUpdatedAt,
   }) : super(
     id: userModelId,
-    name: userModelName,
     email: userModelEmail,
-    phone: userModelPhone,
-    profileImageUrl: userModelProfileImageUrl,
-    createdAt: userModelCreatedAt,
+    displayName: userModelDisplayName,
+    photoUrl: userModelPhotoUrl,
+    isEmailVerified: userModelIsEmailVerified,
     lastLoginAt: userModelLastLoginAt,
-    isActive: userModelIsActive,
+    provider: userModelProvider,
+    phone: null, // Valor padrão para compatibilidade
+    isActive: true, // Valor padrão para compatibilidade
+    createdAt: userModelCreatedAt,
+    updatedAt: userModelUpdatedAt,
   );
 
   /// Converte o UserModel para UserEntity do domínio
   UserEntity toEntity() {
     return UserEntity(
       id: id,
-      name: name,
+      displayName: displayName,
       email: email,
-      phone: phone,
-      profileImageUrl: profileImageUrl,
-      createdAt: createdAt,
+      photoUrl: photoUrl,
+      isEmailVerified: isEmailVerified,
       lastLoginAt: lastLoginAt,
-      isActive: isActive,
+      provider: provider,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 
@@ -72,13 +80,14 @@ class UserModel extends UserEntity {
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       userModelId: entity.id,
-      userModelName: entity.name,
+      userModelDisplayName: entity.displayName,
       userModelEmail: entity.email,
-      userModelPhone: entity.phone,
-      userModelProfileImageUrl: entity.profileImageUrl,
-      userModelCreatedAt: entity.createdAt,
+      userModelPhotoUrl: entity.photoUrl,
+      userModelIsEmailVerified: entity.isEmailVerified,
       userModelLastLoginAt: entity.lastLoginAt,
-      userModelIsActive: entity.isActive,
+      userModelProvider: entity.provider,
+      userModelCreatedAt: entity.createdAt,
+      userModelUpdatedAt: entity.updatedAt,
     );
   }
 
@@ -86,31 +95,39 @@ class UserModel extends UserEntity {
   factory UserModel.fromJson(DataMap json) {
     return UserModel(
       userModelId: json['id'] as String,
-      userModelName: json['name'] as String,
+      userModelDisplayName: json['displayName'] as String,
       userModelEmail: json['email'] as String,
-      userModelPhone: json['phone'] as String?,
-      userModelProfileImageUrl: json['profile_image_url'] as String?,
-      userModelCreatedAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
-      userModelLastLoginAt: json['last_login_at'] != null
-          ? DateTime.parse(json['last_login_at'] as String)
+      userModelPhotoUrl: json['photoUrl'] as String?,
+      userModelIsEmailVerified: json['isEmailVerified'] as bool? ?? false,
+      userModelLastLoginAt: json['lastLoginAt'] != null
+          ? DateTime.parse(json['lastLoginAt'] as String)
           : null,
-      userModelIsActive: json['is_active'] as bool? ?? true,
+      userModelProvider: AuthProvider.values.firstWhere(
+        (p) => p.name == (json['provider'] as String? ?? 'email'),
+        orElse: () => AuthProvider.email,
+      ),
+      userModelCreatedAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      userModelUpdatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 
   /// Converte o UserModel para um JSON Map (Supabase/API)
+  @override
   DataMap toJson() {
     return {
       'id': id,
-      'name': name,
+      'displayName': displayName,
       'email': email,
-      'phone': phone,
-      'profile_image_url': profileImageUrl,
-      'created_at': createdAt.toIso8601String(),
-      'last_login_at': lastLoginAt?.toIso8601String(),
-      'is_active': isActive,
+      'photoUrl': photoUrl,
+      'isEmailVerified': isEmailVerified,
+      'lastLoginAt': lastLoginAt?.toIso8601String(),
+      'provider': provider.name,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -118,34 +135,37 @@ class UserModel extends UserEntity {
   @override
   UserModel copyWith({
     String? id,
-    String? name,
+    String? displayName,
     String? email,
-    String? phone,
-    String? profileImageUrl,
-    DateTime? createdAt,
+    String? photoUrl,
+    bool? isEmailVerified,
     DateTime? lastLoginAt,
+    AuthProvider? provider,
+    String? phone,
     bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
+    // Ignorar phone e isActive pois UserModel não os implementa localmente
     return UserModel(
       userModelId: id ?? this.id,
-      userModelName: name ?? this.name,
+      userModelDisplayName: displayName ?? this.displayName,
       userModelEmail: email ?? this.email,
-      userModelPhone: phone ?? this.phone,
-      userModelProfileImageUrl: profileImageUrl ?? this.profileImageUrl,
-      userModelCreatedAt: createdAt ?? this.createdAt,
+      userModelPhotoUrl: photoUrl ?? this.photoUrl,
+      userModelIsEmailVerified: isEmailVerified ?? this.isEmailVerified,
       userModelLastLoginAt: lastLoginAt ?? this.lastLoginAt,
-      userModelIsActive: isActive ?? this.isActive,
+      userModelProvider: provider ?? this.provider,
+      userModelCreatedAt: createdAt ?? this.createdAt,
+      userModelUpdatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   /// Factory para criar instância vazia para formulários
   factory UserModel.empty() {
-    return UserModel(
+    return const UserModel(
       userModelId: '',
-      userModelName: '',
+      userModelDisplayName: '',
       userModelEmail: '',
-      userModelCreatedAt: DateTime.now(),
-      userModelIsActive: true,
     );
   }
 }

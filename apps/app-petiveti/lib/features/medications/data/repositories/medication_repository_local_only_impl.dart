@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/medication.dart';
 import '../../domain/repositories/medication_repository.dart';
 import '../datasources/medication_local_datasource.dart';
@@ -84,7 +84,7 @@ class MedicationRepositoryLocalOnlyImpl implements MedicationRepository {
     try {
       final medicationModel = await localDataSource.getMedicationById(id);
       if (medicationModel == null) {
-        return Left(CacheFailure(message: 'Medicamento não encontrado'));
+        return const Left(CacheFailure(message: 'Medicamento não encontrado'));
       }
       return Right(medicationModel.toEntity());
     } on CacheException catch (e) {

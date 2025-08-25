@@ -1,14 +1,13 @@
-import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Adubação Orgânica
 /// Calcula quantidade necessária de adubos orgânicos baseado na análise do solo
 class OrganicFertilizerCalculator extends CalculatorEntity {
-  OrganicFertilizerCalculator()
+  const OrganicFertilizerCalculator()
       : super(
           id: 'organic_fertilizer',
           name: 'Adubação Orgânica',
@@ -185,7 +184,7 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
             label: 'Total para a Área',
             value: CalculatorMath.roundTo(totalFertilizerWet, 1),
             unit: 'toneladas',
-            description: 'Quantidade total de adubo para ${area} ha',
+            description: 'Quantidade total de adubo para $area ha',
           ),
           CalculationResultValue(
             label: 'Base Seca por Hectare',

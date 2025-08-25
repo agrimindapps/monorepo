@@ -27,7 +27,7 @@ class FavoritoPragaModel {
 
   factory FavoritoPragaModel.fromMap(Map<String, dynamic> map) {
     return FavoritoPragaModel(
-      id: map['id'] ?? 0,
+      id: map['id'] as int? ?? 0,
       idReg: map['idReg']?.toString() ?? '',
       nomeComum: map['nomeComum']?.toString() ?? 'Praga desconhecida',
       nomeSecundario: map['nomeSecundario']?.toString(),

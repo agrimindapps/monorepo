@@ -1,11 +1,11 @@
-import '../../../core/services/diagnostico_integration_service.dart';
+import '../../../core/repositories/cultura_hive_repository.dart';
 import '../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/repositories/pragas_hive_repository.dart';
-import '../../../core/repositories/cultura_hive_repository.dart';
+import '../../../core/services/diagnostico_integration_service.dart';
 import '../models/favorito_defensivo_model.dart';
-import '../models/favorito_praga_model.dart';
 import '../models/favorito_diagnostico_model.dart';
+import '../models/favorito_praga_model.dart';
 
 /// Serviço de cache inteligente para favoritos
 /// Evita consultas repetitivas e otimiza performance

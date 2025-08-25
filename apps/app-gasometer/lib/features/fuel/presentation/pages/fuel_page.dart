@@ -7,6 +7,7 @@ import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../providers/fuel_provider.dart';
 
@@ -19,7 +20,6 @@ class FuelPage extends StatefulWidget {
 
 class _FuelPageState extends State<FuelPage> {
   String _selectedFilter = 'all';
-  String _searchQuery = '';
   String? _selectedVehicleId;
 
   @override
@@ -151,57 +151,6 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-  Widget _buildFilters(BuildContext context) {
-    return TextField(
-      onChanged: (value) {
-        setState(() => _searchQuery = value);
-        
-        // Perform search using the provider
-        final fuelProvider = context.read<FuelProvider>();
-        if (value.isNotEmpty) {
-          fuelProvider.searchFuelRecords(value);
-        } else {
-          fuelProvider.clearSearch();
-        }
-      },
-      decoration: InputDecoration(
-        hintText: 'Buscar por veículo ou posto...',
-        prefixIcon: Icon(
-          Icons.search, 
-          size: GasometerDesignTokens.iconSizeButton,
-        ),
-        contentPadding: GasometerDesignTokens.paddingOnly(
-          left: GasometerDesignTokens.spacingLg,
-          right: GasometerDesignTokens.spacingLg,
-          top: GasometerDesignTokens.spacingMd,
-          bottom: GasometerDesignTokens.spacingMd,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusInput,
-          ),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusInput,
-          ),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusInput,
-          ),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary, 
-            width: 2,
-          ),
-        ),
-        filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-    );
-  }
 
   Widget _buildContent(BuildContext context, FuelProvider fuelProvider, VehiclesProvider vehiclesProvider) {
     return Column(
@@ -224,8 +173,6 @@ class _FuelPageState extends State<FuelPage> {
           },
           showEmptyOption: true,
         ),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildFilters(context),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         
         // Show loading state
@@ -554,11 +501,16 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
+    final vehiclesProvider = context.watch<VehiclesProvider>();
+    final hasSelectedVehicle = vehiclesProvider.vehicles.isNotEmpty;
+    
     return Semantics(
-      label: 'Registrar novo abastecimento',
-      hint: 'Abre formulário para cadastrar um novo abastecimento',
+      label: hasSelectedVehicle ? 'Registrar novo abastecimento' : 'Selecione um veículo primeiro',
+      hint: hasSelectedVehicle 
+          ? 'Abre formulário para cadastrar um novo abastecimento'
+          : 'É necessário ter pelo menos um veículo cadastrado',
       child: FloatingActionButton(
-        onPressed: () => context.go('/fuel/add'),
+        onPressed: hasSelectedVehicle ? () => context.go('/fuel/add') : _showSelectVehicleMessage,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         shape: RoundedRectangleBorder(
@@ -566,13 +518,46 @@ class _FuelPageState extends State<FuelPage> {
             GasometerDesignTokens.radiusLg,
           ),
         ),
-        tooltip: 'Novo Abastecimento',
+        tooltip: hasSelectedVehicle 
+            ? 'Novo Abastecimento'
+            : 'Cadastre um veículo primeiro',
         child: Icon(
           Icons.add,
           size: GasometerDesignTokens.iconSizeLg,
         ),
       ),
     );
+  }
+
+  void _showSelectVehicleMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Cadastre um veículo primeiro para registrar abastecimentos'),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: GasometerDesignTokens.borderRadius(
+            GasometerDesignTokens.radiusInput,
+          ),
+        ),
+        action: SnackBarAction(
+          label: 'Cadastrar',
+          onPressed: () => _showAddVehicleDialog(context),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddVehicleDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => const AddVehiclePage(),
+    );
+    
+    // Se resultado for true, recarregar veículos
+    if (result == true && context.mounted) {
+      await context.read<VehiclesProvider>().loadVehicles();
+    }
   }
 
   void _showRecordDetails(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {

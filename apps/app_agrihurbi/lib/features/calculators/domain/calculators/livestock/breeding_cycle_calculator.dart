@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Ciclo Reprodutivo
 /// Calcula e planeja ciclos reprodutivos para diferentes espécies pecuárias
 class BreedingCycleCalculator extends CalculatorEntity {
-  BreedingCycleCalculator()
+  const BreedingCycleCalculator()
       : super(
           id: 'breeding_cycle_calculator',
           name: 'Ciclo Reprodutivo',
@@ -622,13 +623,13 @@ class BreedingCycleCalculator extends CalculatorEntity {
         },
         {
           'evento': 'Diagnóstico de Gestação',
-          'data': breedingDate.add(Duration(days: 30)).toString().split(' ')[0],
+          'data': breedingDate.add(const Duration(days: 30)).toString().split(' ')[0],
           'dias': 30,
           'observacao': 'Primeiro diagnóstico (ultrassom/palpação)'
         },
         {
           'evento': 'Confirmação de Gestação',
-          'data': breedingDate.add(Duration(days: 60)).toString().split(' ')[0],
+          'data': breedingDate.add(const Duration(days: 60)).toString().split(' ')[0],
           'dias': 60,
           'observacao': 'Confirmação da gestação'
         },

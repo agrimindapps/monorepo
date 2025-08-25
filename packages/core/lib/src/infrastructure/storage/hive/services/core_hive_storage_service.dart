@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
-import '../../../../shared/utils/result.dart';
+
 import '../../../../shared/utils/app_error.dart';
-import '../interfaces/i_storage_service.dart';
-import '../interfaces/i_hive_manager.dart';
+import '../../../../shared/utils/result.dart';
 import '../exceptions/storage_exceptions.dart';
+import '../interfaces/i_hive_manager.dart';
+import '../interfaces/i_storage_service.dart';
 import 'hive_manager.dart';
 
 /// Implementação concreta do serviço de storage usando Hive
@@ -34,7 +35,7 @@ class CoreHiveStorageService implements IBoxStorageService {
       if (_appName == null || _appName!.isEmpty) {
         return Result.error(
           AppErrorFactory.fromException(
-            HiveInitializationException('App name is required in config'),
+            const HiveInitializationException('App name is required in config'),
             null,
           ),
         );
@@ -91,7 +92,7 @@ class CoreHiveStorageService implements IBoxStorageService {
       debugPrint('$serviceName: Health check completed successfully');
       return Result.success(healthData);
 
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('$serviceName: Health check failed - $e');
       final errorData = {
         'serviceName': serviceName,
@@ -321,7 +322,7 @@ class CoreHiveStorageService implements IBoxStorageService {
         'serviceName': serviceName,
         'appName': _appName,
         'backupTimestamp': DateTime.now().toIso8601String(),
-        'statistics': statisticsResult.data!,
+        'statistics': statisticsResult.data,
         'note': 'Full backup functionality requires box-level implementation',
       };
 
@@ -381,7 +382,7 @@ class CoreHiveStorageService implements IBoxStorageService {
     debugPrint('$serviceName: Restore functionality requires specific implementation');
     return Result.error(
       AppErrorFactory.fromException(
-        HiveInitializationException('Restore functionality not implemented yet'),
+        const HiveInitializationException('Restore functionality not implemented yet'),
         null,
       ),
     );
@@ -403,7 +404,7 @@ class CoreHiveStorageService implements IBoxStorageService {
     if (!confirm) {
       return Result.error(
         AppErrorFactory.fromException(
-          HiveInitializationException('Clear all data operation requires explicit confirmation'),
+          const HiveInitializationException('Clear all data operation requires explicit confirmation'),
           null,
         ),
       );
@@ -508,7 +509,7 @@ class CoreHiveStorageService implements IBoxStorageService {
     if (!_isInitialized) {
       return Result.error(
         AppErrorFactory.fromException(
-          HiveInitializationException('Storage service not initialized. Call initialize() first.'),
+          const HiveInitializationException('Storage service not initialized. Call initialize() first.'),
           null,
         ),
       );

@@ -1,10 +1,10 @@
+import 'package:core/core.dart' as core_lib;
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
-import 'package:get_it/get_it.dart';
 
-import '../entities/user_entity.dart' hide UserEntity;
+import '../../../../core/error/failures.dart';
+import '../../../../core/utils/typedef.dart';
 import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';
 
@@ -13,16 +13,15 @@ import '../repositories/auth_repository.dart';
 /// Implementa UseCase que retorna a entidade do usuário criado em caso de sucesso
 /// Inclui validações de email, senha, nome e segurança
 @lazySingleton
-class RegisterUseCase implements UseCase<local_user.UserEntity, RegisterParams> {
+class RegisterUseCase {
   final AuthRepository repository;
-  final FirebaseAnalyticsService _analyticsService;
+  final core_lib.FirebaseAnalyticsService _analyticsService;
   
-  const RegisterUseCase(
+  RegisterUseCase(
     this.repository,
-  ) : _analyticsService = const FirebaseAnalyticsService();
+  ) : _analyticsService = core_lib.FirebaseAnalyticsService();
   
-  @override
-  Future<Either<Failure, local_user.UserEntity>> call(RegisterParams params) async {
+  ResultFuture<local_user.UserEntity> call(RegisterParams params) async {
     final startTime = DateTime.now();
     
     try {
@@ -47,7 +46,7 @@ class RegisterUseCase implements UseCase<local_user.UserEntity, RegisterParams> 
             'email_domain': params.email.split('@').last,
           },
         );
-        return Left(ValidationFailure(validation));
+        return Left(ValidationFailure(message: validation));
       }
       
       // Normalizar dados
@@ -64,7 +63,7 @@ class RegisterUseCase implements UseCase<local_user.UserEntity, RegisterParams> 
             'email_domain': params.email.split('@').last,
           },
         );
-        return Left(ValidationFailure('Email já está em uso'));
+        return const Left(ValidationFailure(message: 'Email já está em uso'));
       }
       
       // Executar registro no repository

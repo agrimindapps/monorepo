@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Drenagem
 /// Calcula sistemas de drenagem agrícola e escoamento
 class DrainageCalculator extends CalculatorEntity {
-  DrainageCalculator()
+  const DrainageCalculator()
       : super(
           id: 'drainage_calculator',
           name: 'Calculadora de Drenagem',
@@ -210,7 +211,7 @@ class DrainageCalculator extends CalculatorEntity {
           ),
         ],
         recommendations: recommendations,
-        tableData: [],
+        tableData: const [],
       );
     } catch (e) {
       return CalculationError(
@@ -411,7 +412,7 @@ class DrainageCalculator extends CalculatorEntity {
     final double permeability = soilParams['permeability'] as double;
     
     // Fórmula de Hooghoudt simplificada
-    final double drainDepth = 1.2; // metros
+    const double drainDepth = 1.2; // metros
     final double drainageRate = drainageCoeff / 1000; // m/dia
     
     // Espaçamento baseado na permeabilidade

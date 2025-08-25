@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/plant_form_provider.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../providers/plant_form_provider.dart';
 
 class PlantFormCareConfig extends StatefulWidget {
   const PlantFormCareConfig({super.key});

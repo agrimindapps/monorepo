@@ -1,6 +1,7 @@
 import 'dart:math' as math;
-import '../entities/calculator.dart';
+
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/input_field.dart' as input;
 
 /// Resultado da calculadora de peso ideal
@@ -147,12 +148,12 @@ class IdealWeightCalculator extends Calculator {
       ),
       ResultItem(
         label: 'Diferença de Peso',
-        value: calculationData['weight_difference'],
+        value: calculationData['weight_difference'] as double,
         unit: 'kg',
-        severity: _getWeightDifferenceSeverity(calculationData['weight_difference']),
-        description: calculationData['weight_difference'] > 0 
+        severity: _getWeightDifferenceSeverity(calculationData['weight_difference'] as double),
+        description: (calculationData['weight_difference'] as double) > 0 
             ? 'Animal precisa ganhar peso'
-            : calculationData['weight_difference'] < 0 
+            : (calculationData['weight_difference'] as double) < 0 
                 ? 'Animal precisa perder peso'
                 : 'Peso adequado',
       ),
@@ -169,7 +170,7 @@ class IdealWeightCalculator extends Calculator {
       ),
     ];
 
-    if (calculationData['estimated_weeks'] != null && calculationData['estimated_weeks'] > 0) {
+    if (calculationData['estimated_weeks'] != null && (calculationData['estimated_weeks'] as num) > 0) {
       results.add(
         ResultItem(
           label: 'Tempo Estimado para Meta',
@@ -193,7 +194,7 @@ class IdealWeightCalculator extends Calculator {
       results: results,
       recommendations: recommendations,
       summary: 'Peso ideal: ${calculationData['ideal_weight']}kg | '
-               'Diferença: ${calculationData['weight_difference'] >= 0 ? '+' : ''}${calculationData['weight_difference']}kg',
+               'Diferença: ${(calculationData['weight_difference'] as double) >= 0 ? '+' : ''}${calculationData['weight_difference']}kg',
       calculatedAt: DateTime.now(),
     );
   }

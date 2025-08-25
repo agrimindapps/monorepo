@@ -1,6 +1,6 @@
-import '../../domain/entities/expense.dart';
-import '../../../../core/network/firebase_service.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/firebase_service.dart';
+import '../../domain/entities/expense.dart';
 import '../models/expense_model.dart';
 
 abstract class ExpenseRemoteDataSource {
@@ -32,7 +32,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
           WhereCondition('userId', isEqualTo: userId),
         ],
         orderBy: [
-          OrderByCondition('date', descending: true),
+          const OrderByCondition('date', descending: true),
         ],
         fromMap: ExpenseModel.fromMap,
       );
@@ -41,7 +41,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar despesas do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -56,7 +55,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
           WhereCondition('animalId', isEqualTo: animalId),
         ],
         orderBy: [
-          OrderByCondition('date', descending: true),
+          const OrderByCondition('date', descending: true),
         ],
         fromMap: ExpenseModel.fromMap,
       );
@@ -65,7 +64,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar despesas por animal do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -81,7 +79,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
           WhereCondition('date', isLessThanOrEqualTo: endDate.toIso8601String()),
         ],
         orderBy: [
-          OrderByCondition('date', descending: true),
+          const OrderByCondition('date', descending: true),
         ],
         fromMap: ExpenseModel.fromMap,
       );
@@ -90,7 +88,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar despesas por período do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -105,7 +102,7 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
           WhereCondition('category', isEqualTo: category.name),
         ],
         orderBy: [
-          OrderByCondition('date', descending: true),
+          const OrderByCondition('date', descending: true),
         ],
         fromMap: ExpenseModel.fromMap,
       );
@@ -114,7 +111,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar despesas por categoria do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -132,7 +128,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao buscar despesa do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -156,7 +151,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao adicionar despesa no servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -178,7 +172,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao atualizar despesa no servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -193,7 +186,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao deletar despesa do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -207,14 +199,13 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
           WhereCondition('userId', isEqualTo: userId),
         ],
         orderBy: [
-          OrderByCondition('date', descending: true),
+          const OrderByCondition('date', descending: true),
         ],
         fromMap: ExpenseModel.fromMap,
       );
     } catch (e) {
       throw ServerException(
         message: 'Erro ao escutar despesas do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }
@@ -230,7 +221,6 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw ServerException(
         message: 'Erro ao escutar despesa do servidor: ${e.toString()}',
-        statusCode: 500,
       );
     }
   }

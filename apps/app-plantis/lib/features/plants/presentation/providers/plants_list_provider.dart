@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
+
+import '../../../../core/error/error_adapter.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';
-import '../../../../core/error/error_adapter.dart';
 
 class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
   final PlantsRepository _plantsRepository;

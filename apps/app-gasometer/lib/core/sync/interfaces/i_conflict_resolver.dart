@@ -1,6 +1,6 @@
+import '../../data/models/base_sync_model.dart';
 import '../models/conflict_data.dart';
 import '../strategies/conflict_resolution_strategy.dart';
-import '../../data/models/base_sync_model.dart';
 
 /// Interface for conflict resolution
 abstract class IConflictResolver<T extends BaseSyncModel> {

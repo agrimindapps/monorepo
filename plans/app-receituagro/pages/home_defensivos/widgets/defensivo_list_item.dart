@@ -55,7 +55,7 @@ class _DefensivoListItemState extends State<DefensivoListItem> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: _isHovered
                       ? Colors.green.withValues(alpha: 0.05)

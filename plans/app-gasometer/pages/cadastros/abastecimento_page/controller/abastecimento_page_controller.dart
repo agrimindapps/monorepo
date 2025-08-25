@@ -271,7 +271,7 @@ class AbastecimentoPageController extends GetxController {
       return 'Nenhum veículo';
     }
 
-    final vehicle = selectedVehicle.value!;
+    final vehicle = selectedVehicle.value;
     return '${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}';
   }
 

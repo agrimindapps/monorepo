@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/plant.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../../domain/entities/plant.dart';
 
 class PlantDetailsCare extends StatelessWidget {
   final Plant plant;
@@ -52,7 +53,7 @@ class PlantDetailsCare extends StatelessWidget {
                   context,
                   icon: Icons.eco,
                   title: 'Fertilização',
-                  interval: plant.config!.fertilizingIntervalDays!,
+                  interval: plant.config!.fertilizingIntervalDays,
                   unit: 'dias',
                   color: PlantisColors.primary,
                   nextDate: _calculateNextFertilizing(),
@@ -64,7 +65,7 @@ class PlantDetailsCare extends StatelessWidget {
                   context,
                   icon: Icons.content_cut,
                   title: 'Poda',
-                  interval: plant.config!.pruningIntervalDays!,
+                  interval: plant.config!.pruningIntervalDays,
                   unit: 'dias',
                   color: Colors.orange,
                   nextDate: _calculateNextPruning(),

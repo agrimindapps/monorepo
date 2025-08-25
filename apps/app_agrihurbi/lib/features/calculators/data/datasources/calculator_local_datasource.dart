@@ -1,14 +1,14 @@
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculation_history.dart';
-import '../../domain/calculators/irrigation/water_need_calculator.dart';
-import '../../domain/calculators/irrigation/irrigation_sizing_calculator.dart';
 import '../../domain/calculators/irrigation/evapotranspiration_calculator.dart';
 import '../../domain/calculators/irrigation/field_capacity_calculator.dart';
+import '../../domain/calculators/irrigation/irrigation_sizing_calculator.dart';
 import '../../domain/calculators/irrigation/irrigation_time_calculator.dart';
+import '../../domain/calculators/irrigation/water_need_calculator.dart';
 import '../../domain/calculators/nutrition/organic_fertilizer_calculator.dart';
+import '../../domain/entities/calculation_history.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 
 /// Interface para datasource local de calculadoras
 abstract class CalculatorLocalDataSource {
@@ -36,12 +36,12 @@ abstract class CalculatorLocalDataSource {
 class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
   // Cache de calculadoras disponíveis
   static final List<CalculatorEntity> _availableCalculators = [
-    WaterNeedCalculator(),
-    IrrigationSizingCalculator(),
-    EvapotranspirationCalculator(),
-    FieldCapacityCalculator(),
-    IrrigationTimeCalculator(),
-    OrganicFertilizerCalculator(),
+    const WaterNeedCalculator(),
+    const IrrigationSizingCalculator(),
+    const EvapotranspirationCalculator(),
+    const FieldCapacityCalculator(),
+    const IrrigationTimeCalculator(),
+    const OrganicFertilizerCalculator(),
   ];
 
   // Simulação de armazenamento local (em produção seria Hive)
@@ -51,7 +51,7 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
   @override
   Future<List<CalculatorEntity>> getAllCalculators() async {
     // Simula delay de carregamento
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     
     return List<CalculatorEntity>.from(_availableCalculators);
   }

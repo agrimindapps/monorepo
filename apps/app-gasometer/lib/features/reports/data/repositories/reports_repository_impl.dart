@@ -3,8 +3,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-import '../../domain/entities/report_summary_entity.dart';
 import '../../domain/entities/report_comparison_entity.dart';
+import '../../domain/entities/report_summary_entity.dart';
 import '../../domain/repositories/reports_repository.dart';
 import '../datasources/reports_data_source.dart';
 

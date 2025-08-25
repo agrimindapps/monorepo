@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
 
-import '../../domain/entities/user_entity.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../domain/entities/module_auth_config.dart';
+import '../../domain/entities/user_entity.dart';
 
 /// Serviço de cache de autenticação compartilhado entre módulos do monorepo
 /// Permite persistir e recuperar informações de usuário por módulo

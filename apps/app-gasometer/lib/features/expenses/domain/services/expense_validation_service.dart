@@ -1,7 +1,8 @@
 import 'package:injectable/injectable.dart';
-import '../entities/expense_entity.dart';
+
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/expense_constants.dart';
+import '../entities/expense_entity.dart';
 
 /// Serviço avançado para validação contextual de registros de despesas
 /// 

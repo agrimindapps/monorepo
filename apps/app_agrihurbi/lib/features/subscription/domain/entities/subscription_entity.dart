@@ -164,3 +164,4 @@ enum PaymentType {
   const PaymentType(this.displayName);
   final String displayName;
 }
+

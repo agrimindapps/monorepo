@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
+
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:injectable/injectable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
+
 import '../models/backup_model.dart';
 
 /// Interface do repositório de backup
@@ -37,7 +38,7 @@ class BackupRepository implements IBackupRepository {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       // Converte backup para bytes
@@ -69,7 +70,7 @@ class BackupRepository implements IBackupRepository {
           
           // Timeout para o upload
           final result = await uploadTask.timeout(
-            Duration(seconds: _timeoutSeconds),
+            const Duration(seconds: _timeoutSeconds),
           );
 
           if (result.state == TaskState.success) {
@@ -85,7 +86,7 @@ class BackupRepository implements IBackupRepository {
         }
       }
 
-      return Left(NetworkFailure('Falha no upload após $_maxRetries tentativas'));
+      return const Left(NetworkFailure('Falha no upload após $_maxRetries tentativas'));
     } catch (e) {
       return Left(_handleError(e));
     }
@@ -96,7 +97,7 @@ class BackupRepository implements IBackupRepository {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final path = '$_backupsPath/$userId/';
@@ -158,7 +159,7 @@ class BackupRepository implements IBackupRepository {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final path = '$_backupsPath/${user.id}/$backupId';
@@ -168,7 +169,7 @@ class BackupRepository implements IBackupRepository {
       for (int attempt = 0; attempt < _maxRetries; attempt++) {
         try {
           final bytes = await ref.getData().timeout(
-            Duration(seconds: _timeoutSeconds),
+            const Duration(seconds: _timeoutSeconds),
           );
 
           if (bytes != null) {
@@ -182,7 +183,7 @@ class BackupRepository implements IBackupRepository {
         }
       }
 
-      return Left(NetworkFailure('Falha no download após $_maxRetries tentativas'));
+      return const Left(NetworkFailure('Falha no download após $_maxRetries tentativas'));
     } catch (e) {
       return Left(_handleError(e));
     }
@@ -193,7 +194,7 @@ class BackupRepository implements IBackupRepository {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final path = '$_backupsPath/${user.id}/$backupId';
@@ -249,15 +250,15 @@ class BackupRepository implements IBackupRepository {
     if (error is FirebaseException) {
       switch (error.code) {
         case 'storage/unauthorized':
-          return AuthFailure('Acesso negado ao storage');
+          return const AuthFailure('Acesso negado ao storage');
         case 'storage/canceled':
-          return NetworkFailure('Upload cancelado');
+          return const NetworkFailure('Upload cancelado');
         case 'storage/quota-exceeded':
-          return StorageFailure('Cota de armazenamento excedida');
+          return const StorageFailure('Cota de armazenamento excedida');
         case 'storage/invalid-format':
-          return ValidationFailure('Formato de arquivo inválido');
+          return const ValidationFailure('Formato de arquivo inválido');
         case 'storage/object-not-found':
-          return NotFoundFailure('Backup não encontrado');
+          return const NotFoundFailure('Backup não encontrado');
         default:
           return NetworkFailure('Erro no Firebase Storage: ${error.message}');
       }
@@ -265,7 +266,7 @@ class BackupRepository implements IBackupRepository {
 
     if (error.toString().contains('TimeoutException') || 
         error.toString().contains('timeout')) {
-      return NetworkFailure('Timeout na operação de backup');
+      return const NetworkFailure('Timeout na operação de backup');
     }
 
     return UnknownFailure('Erro inesperado: ${error.toString()}');

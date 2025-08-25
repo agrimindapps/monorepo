@@ -270,7 +270,7 @@ class _TaskDetailSidePanelState extends State<TaskDetailSidePanel> {
         const SizedBox(height: 8),
 
         // Container agrupando todas as opções
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFE1E1E1)),
             borderRadius: BorderRadius.circular(8),

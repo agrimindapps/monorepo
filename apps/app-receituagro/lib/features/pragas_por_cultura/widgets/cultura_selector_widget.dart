@@ -92,7 +92,7 @@ class CulturaSelectorWidget extends StatelessWidget {
           )['nome']
         : null;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: culturaIdSelecionada != null

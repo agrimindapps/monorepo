@@ -1,24 +1,22 @@
-import 'package:get_it/get_it.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../infrastructure/services/firebase_auth_service.dart';
-import '../../infrastructure/services/mock_analytics_service.dart';
+import '../../domain/repositories/i_analytics_repository.dart';
+import '../../domain/repositories/i_auth_repository.dart';
+import '../../domain/repositories/i_crashlytics_repository.dart';
+import '../../domain/repositories/i_local_storage_repository.dart';
+import '../../domain/repositories/i_storage_repository.dart';
+import '../../domain/repositories/i_subscription_repository.dart';
+import '../../domain/usecases/auth/login_usecase.dart';
+import '../../domain/usecases/auth/logout_usecase.dart';
 import '../../infrastructure/services/firebase_analytics_service.dart';
+import '../../infrastructure/services/firebase_auth_service.dart';
 import '../../infrastructure/services/firebase_crashlytics_service.dart';
 import '../../infrastructure/services/firebase_storage_service.dart';
 import '../../infrastructure/services/hive_storage_service.dart';
+import '../../infrastructure/services/mock_analytics_service.dart';
 import '../../infrastructure/services/revenue_cat_service.dart';
 import '../../shared/config/environment_config.dart';
-
-import '../../domain/repositories/i_auth_repository.dart';
-import '../../domain/repositories/i_analytics_repository.dart';
-import '../../domain/repositories/i_crashlytics_repository.dart';
-import '../../domain/repositories/i_storage_repository.dart';
-import '../../domain/repositories/i_local_storage_repository.dart';
-import '../../domain/repositories/i_subscription_repository.dart';
-
-import '../../domain/usecases/auth/login_usecase.dart';
-import '../../domain/usecases/auth/logout_usecase.dart';
 
 final GetIt getIt = GetIt.instance;
 

@@ -139,7 +139,7 @@ class CalculationResultDisplay extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            _formatValue(result.primaryValue!),
+            _formatValue(result.primaryValue),
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               color: Theme.of(context).colorScheme.onPrimary,
               fontWeight: FontWeight.bold,

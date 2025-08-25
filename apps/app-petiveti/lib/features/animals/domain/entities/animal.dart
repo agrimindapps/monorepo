@@ -1,70 +1,84 @@
 import 'package:equatable/equatable.dart';
+import 'animal_enums.dart';
 
 class Animal extends Equatable {
   final String id;
+  final String userId;
   final String name;
-  final String species; // Dog or Cat
-  final String breed;
-  final DateTime birthDate;
-  final String gender; // Male or Female
-  final String color;
-  final double currentWeight;
-  final String? photo;
+  final AnimalSpecies species;
+  final String? breed;
+  final AnimalGender gender;
+  final DateTime? birthDate;
+  final double? weight;
+  final AnimalSize? size;
+  final String? color;
+  final String? microchipNumber;
   final String? notes;
+  final String? photoUrl;
+  final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final bool isDeleted;
 
   const Animal({
     required this.id,
+    required this.userId,
     required this.name,
     required this.species,
-    required this.breed,
-    required this.birthDate,
+    this.breed,
     required this.gender,
-    required this.color,
-    required this.currentWeight,
-    this.photo,
+    this.birthDate,
+    this.weight,
+    this.size,
+    this.color,
+    this.microchipNumber,
     this.notes,
+    this.photoUrl,
+    this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
-    this.isDeleted = false,
   });
 
   Animal copyWith({
     String? id,
+    String? userId,
     String? name,
-    String? species,
+    AnimalSpecies? species,
     String? breed,
+    AnimalGender? gender,
     DateTime? birthDate,
-    String? gender,
+    double? weight,
+    AnimalSize? size,
     String? color,
-    double? currentWeight,
-    String? photo,
+    String? microchipNumber,
     String? notes,
+    String? photoUrl,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
-    bool? isDeleted,
   }) {
     return Animal(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       name: name ?? this.name,
       species: species ?? this.species,
       breed: breed ?? this.breed,
-      birthDate: birthDate ?? this.birthDate,
       gender: gender ?? this.gender,
+      birthDate: birthDate ?? this.birthDate,
+      weight: weight ?? this.weight,
+      size: size ?? this.size,
       color: color ?? this.color,
-      currentWeight: currentWeight ?? this.currentWeight,
-      photo: photo ?? this.photo,
+      microchipNumber: microchipNumber ?? this.microchipNumber,
       notes: notes ?? this.notes,
+      photoUrl: photoUrl ?? this.photoUrl,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 
   int get ageInDays {
-    return DateTime.now().difference(birthDate).inDays;
+    if (birthDate == null) return 0;
+    return DateTime.now().difference(birthDate!).inDays;
   }
 
   int get ageInMonths {
@@ -76,6 +90,7 @@ class Animal extends Equatable {
   }
 
   String get displayAge {
+    if (birthDate == null) return 'Idade não informada';
     if (ageInYears > 0) {
       return '$ageInYears ${ageInYears == 1 ? 'ano' : 'anos'}';
     } else if (ageInMonths > 0) {
@@ -85,20 +100,28 @@ class Animal extends Equatable {
     }
   }
 
+  // Helper getter for backwards compatibility  
+  double get currentWeight => weight ?? 0.0;
+  String? get photo => photoUrl;
+  bool get isDeleted => !isActive;
+
   @override
   List<Object?> get props => [
         id,
+        userId,
         name,
         species,
         breed,
-        birthDate,
         gender,
+        birthDate,
+        weight,
+        size,
         color,
-        currentWeight,
-        photo,
+        microchipNumber,
         notes,
+        photoUrl,
+        isActive,
         createdAt,
         updatedAt,
-        isDeleted,
       ];
 }

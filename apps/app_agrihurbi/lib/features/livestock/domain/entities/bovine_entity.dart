@@ -42,6 +42,7 @@ class BovineEntity extends AnimalBaseEntity {
     required this.tags,
     required this.breedingSystem,
     required this.purpose,
+    this.notes,
   });
 
   /// Tipo específico do animal
@@ -68,6 +69,9 @@ class BovineEntity extends AnimalBaseEntity {
   /// Finalidade específica da criação
   final String purpose;
 
+  /// Observações adicionais sobre o bovino
+  final String? notes;
+
   @override
   List<Object?> get props => [
         ...super.props,
@@ -79,6 +83,7 @@ class BovineEntity extends AnimalBaseEntity {
         tags,
         breedingSystem,
         purpose,
+        notes,
       ];
 
   /// Cria uma cópia da entidade com campos atualizados
@@ -101,6 +106,7 @@ class BovineEntity extends AnimalBaseEntity {
     List<String>? tags,
     BreedingSystem? breedingSystem,
     String? purpose,
+    String? notes,
   }) {
     return BovineEntity(
       id: id ?? this.id,
@@ -120,6 +126,7 @@ class BovineEntity extends AnimalBaseEntity {
       tags: tags ?? this.tags,
       breedingSystem: breedingSystem ?? this.breedingSystem,
       purpose: purpose ?? this.purpose,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -140,6 +147,7 @@ class BovineEntity extends AnimalBaseEntity {
       tags: [],
       breedingSystem: BreedingSystem.extensive,
       purpose: '',
+      notes: null,
     );
   }
 

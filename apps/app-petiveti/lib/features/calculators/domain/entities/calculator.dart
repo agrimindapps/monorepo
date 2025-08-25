@@ -17,16 +17,6 @@ enum CalculatorCategory {
   final String description;
 }
 
-/// Tipo de input para os campos das calculadoras
-enum InputFieldType {
-  text,
-  number,
-  dropdown,
-  slider,
-  switch_,
-  radio,
-}
-
 /// Entidade abstrata base para todas as calculadoras
 /// Implementa Strategy Pattern para diferentes tipos de cálculos
 abstract class Calculator extends Equatable {

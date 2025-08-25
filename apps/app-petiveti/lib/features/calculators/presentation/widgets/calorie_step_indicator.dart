@@ -38,8 +38,8 @@ class CalorieStepIndicator extends StatelessWidget {
                       color: isCompleted 
                           ? theme.primaryColor
                           : isCurrent
-                              ? theme.primaryColor.withOpacity(0.8)
-                              : theme.disabledColor.withOpacity(0.3),
+                              ? theme.primaryColor.withValues(alpha: 0.8)
+                              : theme.disabledColor.withValues(alpha: 0.3),
                       border: Border.all(
                         color: isActive 
                             ? theme.primaryColor 
@@ -49,7 +49,7 @@ class CalorieStepIndicator extends StatelessWidget {
                     ),
                     child: Center(
                       child: isCompleted
-                          ? Icon(
+                          ? const Icon(
                               Icons.check,
                               color: Colors.white,
                               size: 18,
@@ -73,7 +73,7 @@ class CalorieStepIndicator extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         color: isCompleted
                             ? theme.primaryColor
-                            : theme.disabledColor.withOpacity(0.3),
+                            : theme.disabledColor.withValues(alpha: 0.3),
                       ),
                     ),
                 ],
@@ -94,7 +94,7 @@ class CalorieStepIndicator extends StatelessWidget {
         // Indicador de progresso linear
         LinearProgressIndicator(
           value: isComplete ? 1.0 : (currentStep + 1) / totalSteps,
-          backgroundColor: theme.disabledColor.withOpacity(0.3),
+          backgroundColor: theme.disabledColor.withValues(alpha: 0.3),
           valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
         ),
         

@@ -1,12 +1,15 @@
 import 'package:get_it/get_it.dart';
+
+import '../domain/entities/calculation_result.dart';
+import '../domain/entities/calculator_category.dart';
+import '../domain/entities/calculator_entity.dart';
+import '../domain/entities/calculator_parameter.dart';
+import '../domain/registry/calculator_registry.dart';
 import '../domain/services/calculator_engine.dart';
 import '../domain/services/calculator_favorites_service.dart';
-import '../domain/services/unit_conversion_service.dart';
 import '../domain/services/result_formatter_service.dart';
-import '../domain/services/calculator_error_handler.dart';
+import '../domain/services/unit_conversion_service.dart';
 import '../domain/validation/parameter_validator.dart';
-import '../domain/registry/calculator_registry.dart';
-import '../domain/entities/calculator_entity.dart';
 import '../presentation/providers/calculator_provider_simple.dart';
 
 /// Service Locator para facilitar acesso aos serviços de calculadoras

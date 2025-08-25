@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/premium_provider.dart';
-import '../widgets/premium_status_card.dart';
-import '../widgets/premium_features_list.dart';
-import '../widgets/premium_upgrade_button.dart';
-import '../widgets/premium_products_list.dart';
-import '../widgets/premium_dev_controls.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../providers/premium_provider.dart';
+import '../widgets/premium_dev_controls.dart';
+import '../widgets/premium_features_list.dart';
+import '../widgets/premium_products_list.dart';
+import '../widgets/premium_status_card.dart';
+import '../widgets/premium_upgrade_button.dart';
 
 class PremiumPage extends StatelessWidget {
   const PremiumPage({super.key});
@@ -43,7 +44,7 @@ class PremiumPage extends StatelessWidget {
                     const SizedBox(height: 24),
                     
                     // Lista de funcionalidades premium
-                    Text(
+                    const Text(
                       'Funcionalidades Premium',
                       style: AppTextStyles.headlineSmall,
                     ),
@@ -60,7 +61,7 @@ class PremiumPage extends StatelessWidget {
                       
                       const SizedBox(height: 24),
                       
-                      Text(
+                      const Text(
                         'Planos Disponíveis',
                         style: AppTextStyles.headlineSmall,
                       ),

@@ -325,14 +325,14 @@ class ParameterValidator {
     final numValue = value is num ? value.toDouble() : double.tryParse(value.toString());
     if (numValue == null) return ValidationResult.success(parameter.id);
 
-    if (parameter.minValue != null && numValue < parameter.minValue!) {
+    if (parameter.minValue != null && numValue < (parameter.minValue as num)) {
       return ValidationResult.error(
         parameter.id,
         'Valor deve ser maior ou igual a ${parameter.minValue}',
       );
     }
 
-    if (parameter.maxValue != null && numValue > parameter.maxValue!) {
+    if (parameter.maxValue != null && numValue > (parameter.maxValue as num)) {
       return ValidationResult.error(
         parameter.id,
         'Valor deve ser menor ou igual a ${parameter.maxValue}',

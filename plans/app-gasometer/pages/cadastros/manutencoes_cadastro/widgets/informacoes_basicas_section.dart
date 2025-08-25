@@ -87,7 +87,7 @@ class InformacoesBasicasSectionWidget extends StatelessWidget {
     return Obx(() => TextFormField(
           textAlign: TextAlign.right,
           decoration: InputDecoration(
-            labelText: ManutencaoConstants.fieldLabels['odometro']!,
+            labelText: ManutencaoConstants.fieldLabels['odometro'],
             hintText: 'Digite o odômetro atual',
             suffix: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -150,7 +150,7 @@ class InformacoesBasicasSectionWidget extends StatelessWidget {
 
   Widget _buildDataField(BuildContext context) {
     return Obx(() {
-      return Container(
+      return DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(
             color: ShadcnStyle.borderColor.withValues(alpha: 0.5),

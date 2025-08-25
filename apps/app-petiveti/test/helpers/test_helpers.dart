@@ -1,13 +1,12 @@
+import 'package:app_petiveti/core/cache/cache_service.dart';
+import 'package:app_petiveti/core/notifications/notification_service.dart';
+import 'package:app_petiveti/core/performance/performance_service.dart';
+import 'package:app_petiveti/core/storage/hive_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:app_petiveti/core/storage/hive_service.dart';
-import 'package:app_petiveti/core/cache/cache_service.dart';
-import 'package:app_petiveti/core/performance/performance_service.dart';
-import 'package:app_petiveti/core/notifications/notification_service.dart';
 
 /// Helpers para configuração de testes
 class TestHelpers {
@@ -96,7 +95,7 @@ class TestHelpers {
       'dosage': '250mg',
       'frequency': '2x/dia',
       'startDate': DateTime.now().toIso8601String(),
-      'endDate': DateTime.now().add(Duration(days: 7)).toIso8601String(),
+      'endDate': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
       'type': 'antibiotic',
       'createdAt': DateTime.now().toIso8601String(),
       'updatedAt': DateTime.now().toIso8601String(),
@@ -114,7 +113,7 @@ class TestHelpers {
       'animalId': animalId ?? 'test_animal_001',
       'title': title ?? 'Consulta de rotina',
       'description': 'Check-up geral do animal',
-      'dateTime': DateTime.now().add(Duration(days: 1)).toIso8601String(),
+      'dateTime': DateTime.now().add(const Duration(days: 1)).toIso8601String(),
       'veterinarianName': 'Dr. João Silva',
       'clinicName': 'Clínica Veterinária Central',
       'type': 'checkup',
@@ -135,8 +134,8 @@ class TestHelpers {
       'animalId': animalId ?? 'test_animal_001',
       'name': name ?? 'V10',
       'description': 'Vacina múltipla',
-      'applicationDate': DateTime.now().subtract(Duration(days: 30)).toIso8601String(),
-      'nextDoseDate': DateTime.now().add(Duration(days: 335)).toIso8601String(),
+      'applicationDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+      'nextDoseDate': DateTime.now().add(const Duration(days: 335)).toIso8601String(),
       'veterinarianName': 'Dr. Maria Santos',
       'clinicName': 'Clínica Veterinária Central',
       'batch': 'ABC123',
@@ -194,7 +193,7 @@ class TestHelpers {
 
   /// Simula delay de rede
   static Future<void> simulateNetworkDelay([Duration? delay]) async {
-    await Future.delayed(delay ?? Duration(milliseconds: 100));
+    await Future.delayed(delay ?? const Duration(milliseconds: 100));
   }
 }
 
@@ -255,7 +254,7 @@ extension TestWidgetTesterExtensions on WidgetTester {
       if (finder.evaluate().isNotEmpty) {
         return;
       }
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
     
     throw TimeoutException('Widget not found within timeout', timeout);

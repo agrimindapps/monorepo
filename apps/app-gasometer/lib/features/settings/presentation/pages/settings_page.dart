@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:core/core.dart';
-import 'database_inspector_page.dart';
-import '../../../../core/services/data_generator_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
 import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../core/services/data_generator_service.dart';
+import '../../../../core/theme/design_tokens.dart';
+import 'database_inspector_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -22,7 +26,7 @@ class SettingsPage extends StatelessWidget {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
                       child: _buildContent(context),
                     ),
                   ),
@@ -37,81 +41,74 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark 
-          ? const Color(0xFF2C2C2E) 
-          : const Color(0xFF2C2C2E),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(20),
         ),
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.local_gas_station,
-                  color: Colors.white,
-                  size: 28,
-                ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'GasOMeter',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Text(
-                      'Gerencie suas preferências',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
+              child: const Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 28,
               ),
-              Consumer<ThemeProvider>(
-                builder: (context, themeProvider, _) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Configurações',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    child: IconButton(
-                      onPressed: () => _showThemeDialog(context, themeProvider),
-                      icon: Icon(
-                        themeProvider.themeMode == ThemeMode.dark
-                          ? Icons.brightness_2
-                          : themeProvider.themeMode == ThemeMode.light
-                            ? Icons.brightness_high
-                            : Icons.brightness_auto,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                  ),
+                  Text(
+                    'Gerencie suas preferências',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: () => _showThemeDialog(context, themeProvider),
+                    icon: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                        ? Icons.brightness_2
+                        : themeProvider.themeMode == ThemeMode.light
+                          ? Icons.brightness_high
+                          : Icons.brightness_auto,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -121,17 +118,17 @@ class SettingsPage extends StatelessWidget {
     return Column(
       children: [
         _buildAccountSection(context),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildAppearanceSection(context),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildNotificationSection(context),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildDevelopmentSection(context),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildSupportSection(context),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildInformationSection(context),
-        const SizedBox(height: 24),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildLogoutButton(context),
       ],
     );
@@ -148,7 +145,7 @@ class SettingsPage extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
           child: Column(
             children: [
@@ -160,8 +157,8 @@ class SettingsPage extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.person,
-                  size: 40,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  size: GasometerDesignTokens.iconSizeXxl,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
                 ),
               ),
               const SizedBox(height: 16),
@@ -179,7 +176,7 @@ class SettingsPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 ),
               ),
               const SizedBox(height: 20),
@@ -187,21 +184,22 @@ class SettingsPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     // TODO: Navigate to login
                     _showSnackBar(context, 'Funcionalidade em desenvolvimento');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2C2C2E),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    padding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingMd),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                     ),
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.login, size: 18),
+                      Icon(Icons.login, size: GasometerDesignTokens.iconSizeButton - 2),
                       SizedBox(width: 8),
                       Text('Fazer Login', style: TextStyle(fontSize: 16)),
                     ],
@@ -215,7 +213,7 @@ class SettingsPage extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
           child: Column(
             children: [
@@ -230,7 +228,7 @@ class SettingsPage extends StatelessWidget {
                     child: const Icon(
                       Icons.star,
                       color: Colors.white,
-                      size: 24,
+                      size: GasometerDesignTokens.iconSizeListItem,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -251,7 +249,7 @@ class SettingsPage extends StatelessWidget {
                           'Desbloqueie recursos avançados e tenha a\nmelhor experiência',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                           ),
                         ),
                       ],
@@ -284,12 +282,12 @@ class SettingsPage extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: const Color(0xFFFFA500).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusSm),
           ),
           child: Icon(
             icon,
             color: const Color(0xFFFFA500),
-            size: 16,
+            size: GasometerDesignTokens.iconSizeXs,
           ),
         ),
         const SizedBox(width: 12),
@@ -309,7 +307,7 @@ class SettingsPage extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
@@ -335,7 +333,7 @@ class SettingsPage extends StatelessWidget {
               onTap: () => _showThemeDialog(context, themeProvider),
               trailing: Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
               ),
             );
           },
@@ -392,7 +390,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () => _showGenerateDataDialog(context),
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -403,7 +401,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () => _showAdvancedClearDataDialog(context),
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -420,7 +418,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -444,7 +442,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -458,7 +456,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -472,7 +470,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -486,7 +484,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -510,7 +508,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -520,21 +518,24 @@ class SettingsPage extends StatelessWidget {
   Widget _buildLogoutButton(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingXl),
       child: ElevatedButton(
-        onPressed: () => _showLogoutDialog(context),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          _showLogoutDialog(context);
+        },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFE53E3E),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          foregroundColor: Theme.of(context).colorScheme.onError,
+          padding: GasometerDesignTokens.paddingVertical(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusLg),
           ),
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.logout, size: 20),
+            Icon(Icons.logout, size: GasometerDesignTokens.iconSizeButton),
             SizedBox(width: 8),
             Text(
               'Sair do Módulo',
@@ -558,7 +559,7 @@ class SettingsPage extends StatelessWidget {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       color: Theme.of(context).colorScheme.surface,
@@ -573,12 +574,12 @@ class SettingsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                   ),
                   child: Icon(
                     icon,
                     color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+                    size: GasometerDesignTokens.iconSizeButton,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -609,16 +610,19 @@ class SettingsPage extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      onTap: onTap != null ? () {
+        HapticFeedback.lightImpact();
+        onTap();
+      } : null,
+      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         child: Row(
           children: [
             Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              size: 24,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+              size: GasometerDesignTokens.iconSizeListItem,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -638,7 +642,7 @@ class SettingsPage extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -724,7 +728,7 @@ class SettingsPage extends StatelessWidget {
         themeProvider.setThemeMode(mode);
         Navigator.of(context).pop();
       },
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Row(
@@ -733,7 +737,7 @@ class SettingsPage extends StatelessWidget {
               icon,
               color: isSelected 
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -753,7 +757,7 @@ class SettingsPage extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -862,7 +866,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
             // Configuração número de veículos
             Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Text(
                     'Número de veículos:',
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -902,7 +906,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
             // Configuração meses de histórico
             Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Text(
                     'Meses de histórico:',
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -946,7 +950,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -975,7 +979,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                   border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                 ),
                 child: Column(
@@ -983,7 +987,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 16),
+                        const Icon(Icons.check_circle, color: Colors.green, size: 16),
                         const SizedBox(width: 6),
                         Text(
                           'Última geração concluída:',
@@ -1020,7 +1024,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
             foregroundColor: Colors.white,
           ),
           child: _isGenerating
-              ? Row(
+              ? const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
@@ -1031,8 +1035,8 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Gerando...'),
+                    SizedBox(width: 8),
+                    Text('Gerando...'),
                   ],
                 )
               : const Text('Gerar Dados'),
@@ -1182,7 +1186,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                 border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
               child: Column(
@@ -1190,7 +1194,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.warning, color: Colors.red, size: 20),
+                      const Icon(Icons.warning, color: Colors.red, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'ATENÇÃO - AÇÃO IRREVERSÍVEL',
@@ -1214,14 +1218,9 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
             const SizedBox(height: 20),
             
             if (_isLoading) ...[
-              const Center(
-                child: Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Carregando estatísticas...'),
-                  ],
-                ),
+              const CentralizedLoadingWidget(
+                message: 'Carregando estatísticas...',
+                showMessage: true,
               ),
             ] else if (_currentStats != null) ...[
               // Current Stats
@@ -1229,7 +1228,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1252,7 +1251,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
               const SizedBox(height: 20),
               
               // Clear Type Selection
-              Text(
+              const Text(
                 'Tipo de Limpeza:',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -1262,8 +1261,8 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
               const SizedBox(height: 12),
               
               RadioListTile<String>(
-                title: Text('Limpeza Completa'),
-                subtitle: Text('Remove todos os dados da aplicação'),
+                title: const Text('Limpeza Completa'),
+                subtitle: const Text('Remove todos os dados da aplicação'),
                 value: 'all',
                 groupValue: _selectedClearType,
                 onChanged: (value) {
@@ -1272,8 +1271,8 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
               ),
               
               RadioListTile<String>(
-                title: Text('Limpeza Seletiva'),
-                subtitle: Text('Escolha módulos específicos para limpar'),
+                title: const Text('Limpeza Seletiva'),
+                subtitle: const Text('Escolha módulos específicos para limpar'),
                 value: 'selective',
                 groupValue: _selectedClearType,
                 onChanged: (value) {
@@ -1288,12 +1287,12 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(color: Theme.of(context).colorScheme.outline),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Selecione os módulos para limpar:',
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
@@ -1301,7 +1300,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                       ..._dataCleaner.getModuleSummary().entries.map((entry) {
                         return CheckboxListTile(
                           title: Text(entry.key),
-                          subtitle: Text(entry.value, style: TextStyle(fontSize: 12)),
+                          subtitle: Text(entry.value, style: const TextStyle(fontSize: 12)),
                           value: _selectedModules.contains(entry.key),
                           onChanged: (checked) {
                             setState(() {
@@ -1328,7 +1327,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                   border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                 ),
                 child: Column(
@@ -1336,7 +1335,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 16),
+                        const Icon(Icons.check_circle, color: Colors.green, size: 16),
                         const SizedBox(width: 6),
                         Text(
                           'Última limpeza concluída:',
@@ -1371,7 +1370,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
             foregroundColor: Colors.white,
           ),
           child: _isClearing
-              ? Row(
+              ? const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
@@ -1382,8 +1381,8 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Limpando...'),
+                    SizedBox(width: 8),
+                    Text('Limpando...'),
                   ],
                 )
               : Text(_selectedClearType == 'all' ? 'Limpar Tudo' : 'Limpar Selecionados'),
@@ -1456,7 +1455,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
           final moduleResult = await _dataCleaner.clearModuleData(module);
           result['totalClearedBoxes'] += (moduleResult['clearedBoxes'] as List).length;
           if (moduleResult['errors'] != null) {
-            (result['errors'] as List).addAll(moduleResult['errors']);
+            (result['errors'] as List).addAll(moduleResult['errors'] as Iterable? ?? []);
           }
         }
         

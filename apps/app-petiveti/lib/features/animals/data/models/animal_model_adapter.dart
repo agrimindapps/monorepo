@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
+
+import '../../domain/entities/animal_enums.dart';
 import 'animal_model.dart';
-import '../../domain/entities/animal.dart';
 
 class AnimalModelAdapter extends TypeAdapter<AnimalModel> {
   @override

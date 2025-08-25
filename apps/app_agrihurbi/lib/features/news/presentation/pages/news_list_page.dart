@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/presentation/providers/news_provider.dart';
+import 'package:app_agrihurbi/features/news/presentation/widgets/commodity_prices_widget.dart';
 import 'package:app_agrihurbi/features/news/presentation/widgets/news_article_card.dart';
 import 'package:app_agrihurbi/features/news/presentation/widgets/news_filter_widget.dart';
-import 'package:app_agrihurbi/features/news/presentation/widgets/commodity_prices_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// News List Page
 /// 
@@ -118,7 +119,7 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   Widget _buildTabBar() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(

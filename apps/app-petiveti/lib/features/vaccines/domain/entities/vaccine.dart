@@ -33,7 +33,7 @@ class Vaccine extends Equatable {
     this.isRequired = true,
     this.isCompleted = false,
     this.reminderDate,
-    this.status = VaccineStatus.applied,
+    this.status = VaccineStatus.scheduled,
     required this.createdAt,
     required this.updatedAt,
     this.isDeleted = false,
@@ -89,7 +89,7 @@ class Vaccine extends Equatable {
 
   bool get isPending {
     if (nextDueDate == null || isCompleted) return false;
-    return nextDueDate!.isAfter(DateTime.now()) && status == VaccineStatus.pending;
+    return nextDueDate!.isAfter(DateTime.now()) && status == VaccineStatus.scheduled;
   }
 
   bool get isOverdue {
@@ -137,10 +137,12 @@ class Vaccine extends Equatable {
     switch (status) {
       case VaccineStatus.applied:
         return 'Aplicada';
-      case VaccineStatus.pending:
-        return 'Pendente';
-      case VaccineStatus.expired:
+      case VaccineStatus.scheduled:
+        return 'Agendada';
+      case VaccineStatus.overdue:
         return 'Vencida';
+      case VaccineStatus.completed:
+        return 'Completa';
       case VaccineStatus.cancelled:
         return 'Cancelada';
     }
@@ -233,8 +235,53 @@ class Vaccine extends Equatable {
 }
 
 enum VaccineStatus {
-  applied,
-  pending,
-  expired,
-  cancelled,
+  scheduled,  // Agendada (ex-pending)
+  applied,    // Aplicada
+  overdue,    // Atrasada (ex-expired)
+  completed,  // Completa
+  cancelled,  // Cancelada
+}
+
+extension VaccineStatusExtension on VaccineStatus {
+  String get displayText {
+    switch (this) {
+      case VaccineStatus.scheduled:
+        return 'Agendada';
+      case VaccineStatus.applied:
+        return 'Aplicada';
+      case VaccineStatus.overdue:
+        return 'Atrasada';
+      case VaccineStatus.completed:
+        return 'Completa';
+      case VaccineStatus.cancelled:
+        return 'Cancelada';
+    }
+  }
+
+  int get priority {
+    switch (this) {
+      case VaccineStatus.overdue:
+        return 0;
+      case VaccineStatus.scheduled:
+        return 1;
+      case VaccineStatus.applied:
+        return 2;
+      case VaccineStatus.completed:
+        return 3;
+      case VaccineStatus.cancelled:
+        return 4;
+    }
+  }
+
+  bool get isActive {
+    switch (this) {
+      case VaccineStatus.scheduled:
+      case VaccineStatus.applied:
+      case VaccineStatus.overdue:
+        return true;
+      case VaccineStatus.completed:
+      case VaccineStatus.cancelled:
+        return false;
+    }
+  }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 
 /// Serviço de otimização e monitoramento de performance
 class PerformanceService {
@@ -411,7 +410,7 @@ class SlowOperation {
 }
 
 /// Extension para facilitar uso do PerformanceService
-extension PerformanceExtensions on Future {
+extension PerformanceExtensions on Future<dynamic> {
   /// Monitora esta Future automaticamente
   Future<T> withPerformanceTracking<T>(String operationName, {Map<String, dynamic>? metadata}) {
     return PerformanceService().monitorAsync(operationName, () => this as Future<T>, metadata: metadata);

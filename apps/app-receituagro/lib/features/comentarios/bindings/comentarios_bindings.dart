@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/interfaces/i_premium_service.dart';
+import '../comentarios_page.dart';
 import '../controller/comentarios_controller.dart';
 import '../services/comentarios_service.dart';
 import '../services/mock_comentarios_repository.dart';
-import '../../../core/interfaces/i_premium_service.dart';
-import '../comentarios_page.dart';
 
 /// Mock implementation of IPremiumService for comentarios module
 class _MockPremiumService extends ChangeNotifier implements IPremiumService {

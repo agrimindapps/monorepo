@@ -328,9 +328,9 @@ class ScreenshotsSectionWidget extends StatelessWidget {
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
-                            return Container(
+                            return const ColoredBox(
                               color: PromoConstants.backgroundColor,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.image_not_supported,
                                 size: 60,
                                 color: PromoConstants.textColor,
@@ -338,7 +338,7 @@ class ScreenshotsSectionWidget extends StatelessWidget {
                             );
                           },
                         )
-                      : Container(
+                      : ColoredBox(
                           color: PromoConstants.backgroundColor,
                           child: Icon(
                             Icons.phone_android,

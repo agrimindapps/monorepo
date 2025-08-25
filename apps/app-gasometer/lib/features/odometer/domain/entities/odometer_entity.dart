@@ -75,17 +75,17 @@ class OdometerEntity extends Equatable {
       id: map['id']?.toString() ?? '',
       vehicleId: map['vehicleId']?.toString() ?? '',
       userId: map['userId']?.toString() ?? '',
-      value: (map['value'] ?? 0.0).toDouble(),
+      value: (map['value'] as num?)?.toDouble() ?? 0.0,
       registrationDate: DateTime.fromMillisecondsSinceEpoch(
-        map['registrationDate'] ?? DateTime.now().millisecondsSinceEpoch,
+        (map['registrationDate'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
       ),
       description: map['description']?.toString() ?? '',
       type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
       createdAt: DateTime.fromMillisecondsSinceEpoch(
-        map['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
+        (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
       ),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(
-        map['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch,
+        (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
       ),
       metadata: map['metadata'] as Map<String, dynamic>?,
     );

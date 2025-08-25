@@ -85,7 +85,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
@@ -105,13 +105,13 @@ class _PromotionalPageState extends State<PromotionalPage>
                       ),
                       child: Column(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.stars,
                             size: 64,
                             color: Colors.white,
                           ),
                           const SizedBox(height: 16),
-                          Text(
+                          const Text(
                             'Eleve o cuidado das suas plantas\nao próximo nível',
                             style: TextStyle(
                               color: Colors.white,
@@ -311,7 +311,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                   color: PlantisColors.flower,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
+                child: const Text(
                   'OFERTA ESPECIAL',
                   style: TextStyle(
                     color: Colors.white,
@@ -334,7 +334,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                TextSpan(
+                const TextSpan(
                   text: '12,90',
                   style: TextStyle(
                     color: PlantisColors.primary,
@@ -353,7 +353,7 @@ class _PromotionalPageState extends State<PromotionalPage>
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Primeiro mês por apenas R\$ 4,90',
             style: TextStyle(
               color: PlantisColors.flower,
@@ -396,7 +396,7 @@ class _PromotionalPageState extends State<PromotionalPage>
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.eco,
                 color: PlantisColors.leaf,
                 size: 28,
@@ -448,7 +448,7 @@ class _PromotionalPageState extends State<PromotionalPage>
             width: 8,
             height: 8,
             margin: const EdgeInsets.only(top: 6, right: 12),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: PlantisColors.primary,
               shape: BoxShape.circle,
             ),
@@ -532,7 +532,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                     Row(
                       children: List.generate(
                         testimonial['rating'] as int,
-                        (index) => Icon(
+                        (index) => const Icon(
                           Icons.star,
                           color: PlantisColors.sun,
                           size: 16,
@@ -553,7 +553,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                     const SizedBox(height: 8),
                     Text(
                       testimonial['name'] as String,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: PlantisColors.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -596,7 +596,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
@@ -604,7 +604,7 @@ class _PromotionalPageState extends State<PromotionalPage>
                   color: Colors.white,
                   size: 24,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Text(
                   'Começar Teste Gratuito',
                   style: TextStyle(
@@ -627,13 +627,13 @@ class _PromotionalPageState extends State<PromotionalPage>
               child: OutlinedButton(
                 onPressed: () => _showMoreInfo(context),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: PlantisColors.primary),
+                  side: const BorderSide(color: PlantisColors.primary),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: Text(
+                child: const Text(
                   'Saber Mais',
                   style: TextStyle(
                     color: PlantisColors.primary,
@@ -647,13 +647,13 @@ class _PromotionalPageState extends State<PromotionalPage>
               child: OutlinedButton(
                 onPressed: () => _shareApp(context),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: PlantisColors.secondary),
+                  side: const BorderSide(color: PlantisColors.secondary),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: Text(
+                child: const Text(
                   'Compartilhar',
                   style: TextStyle(
                     color: PlantisColors.secondary,
@@ -770,8 +770,8 @@ class _PromotionalPageState extends State<PromotionalPage>
 
   void _showMoreInfo(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Mais informações disponíveis em breve!'),
+      const SnackBar(
+        content: Text('Mais informações disponíveis em breve!'),
         backgroundColor: PlantisColors.secondary,
         behavior: SnackBarBehavior.floating,
       ),
@@ -780,8 +780,8 @@ class _PromotionalPageState extends State<PromotionalPage>
 
   void _shareApp(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Compartilhamento disponível em breve!'),
+      const SnackBar(
+        content: Text('Compartilhamento disponível em breve!'),
         backgroundColor: PlantisColors.water,
         behavior: SnackBarBehavior.floating,
       ),

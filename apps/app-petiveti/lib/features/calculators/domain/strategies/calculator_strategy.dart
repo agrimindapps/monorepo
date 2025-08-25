@@ -85,10 +85,10 @@ class InvalidInputException extends CalculationException {
   final List<String> validationErrors;
 
   const InvalidInputException(
-    String message,
+    super.message,
     this.validationErrors, {
-    String? errorCode,
-  }) : super(message, errorCode: errorCode);
+    super.errorCode,
+  });
 
   @override
   String toString() => 'InvalidInputException: $message\nErrors: ${validationErrors.join(', ')}';

@@ -70,7 +70,7 @@ class CarouselItem extends StatelessWidget {
   }
 
   Widget _buildPlaceholderContainer(Color cardColor, IconData pragaIcon) {
-    return Container(
+    return ColoredBox(
       color: cardColor,
       child: Center(
         child: Icon(

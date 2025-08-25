@@ -6,8 +6,6 @@ import '../../domain/entities/user_subscription.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../datasources/subscription_local_datasource.dart';
 import '../datasources/subscription_remote_datasource.dart';
-import '../models/subscription_plan_model.dart';
-import '../models/user_subscription_model.dart';
 
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
   final SubscriptionLocalDataSource localDataSource;
@@ -31,12 +29,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         final cachedPlans = await localDataSource.getAvailablePlans();
         return Right(cachedPlans);
       } on CacheException catch (_) {
-        return Left(ServerFailure(e.message));
+        return Left(ServerFailure(message: e.message));
       }
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure('Erro inesperado ao buscar planos: $e'));
+      return Left(ServerFailure(message: 'Erro inesperado ao buscar planos: $e'));
     }
   }
 
@@ -59,12 +57,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         final cachedSubscription = await localDataSource.getCurrentSubscription(userId);
         return Right(cachedSubscription);
       } on CacheException catch (e) {
-        return Left(CacheFailure(e.message));
+        return Left(CacheFailure(message: e.message));
       }
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure('Erro inesperado ao buscar assinatura: $e'));
+      return Left(ServerFailure(message: 'Erro inesperado ao buscar assinatura: $e'));
     }
   }
 
@@ -76,11 +74,11 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await localDataSource.cacheSubscription(subscription);
       return Right(subscription);
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure('Erro inesperado ao processar assinatura: $e'));
+      return Left(ServerFailure(message: 'Erro inesperado ao processar assinatura: $e'));
     }
   }
 
@@ -89,7 +87,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     try {
       final subscription = await localDataSource.getCurrentSubscription(userId);
       if (subscription == null) {
-        return Left(NotFoundFailure('Assinatura não encontrada'));
+        return const Left(NotFoundFailure(message: 'Assinatura não encontrada'));
       }
 
       final cancelledSubscription = subscription.copyWith(
@@ -101,7 +99,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await localDataSource.cacheSubscription(cancelledSubscription);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao cancelar assinatura: ${e.toString()}'));
+      return Left(ServerFailure(message: 'Erro ao cancelar assinatura: ${e.toString()}'));
     }
   }
 
@@ -110,7 +108,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     try {
       final subscription = await localDataSource.getCurrentSubscription(userId);
       if (subscription == null) {
-        return Left(NotFoundFailure('Assinatura não encontrada'));
+        return const Left(NotFoundFailure(message: 'Assinatura não encontrada'));
       }
 
       final pausedSubscription = subscription.copyWith(
@@ -122,7 +120,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await localDataSource.cacheSubscription(pausedSubscription);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao pausar assinatura: ${e.toString()}'));
+      return Left(ServerFailure(message: 'Erro ao pausar assinatura: ${e.toString()}'));
     }
   }
 
@@ -131,7 +129,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     try {
       final subscription = await localDataSource.getCurrentSubscription(userId);
       if (subscription == null) {
-        return Left(NotFoundFailure('Assinatura não encontrada'));
+        return const Left(NotFoundFailure(message: 'Assinatura não encontrada'));
       }
 
       final resumedSubscription = subscription.copyWith(
@@ -143,7 +141,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await localDataSource.cacheSubscription(resumedSubscription);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao retomar assinatura: ${e.toString()}'));
+      return Left(ServerFailure(message: 'Erro ao retomar assinatura: ${e.toString()}'));
     }
   }
 
@@ -152,7 +150,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     try {
       final currentSubscription = await localDataSource.getCurrentSubscription(userId);
       if (currentSubscription == null) {
-        return Left(NotFoundFailure('Assinatura atual não encontrada'));
+        return const Left(NotFoundFailure(message: 'Assinatura atual não encontrada'));
       }
 
       final plans = await localDataSource.getAvailablePlans();
@@ -167,7 +165,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await localDataSource.cacheSubscription(upgradedSubscription);
       return Right(upgradedSubscription);
     } catch (e) {
-      return Left(ServerFailure('Erro ao fazer upgrade: ${e.toString()}'));
+      return Left(ServerFailure(message: 'Erro ao fazer upgrade: ${e.toString()}'));
     }
   }
 
@@ -178,7 +176,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await Future.delayed(const Duration(seconds: 1));
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao restaurar compras: ${e.toString()}'));
+      return Left(ServerFailure(message: 'Erro ao restaurar compras: ${e.toString()}'));
     }
   }
 
@@ -189,7 +187,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await Future.delayed(const Duration(milliseconds: 500));
       return const Right(true);
     } catch (e) {
-      return Left(ServerFailure('Erro ao validar recibo: ${e.toString()}'));
+      return Left(ServerFailure(message: 'Erro ao validar recibo: ${e.toString()}'));
     }
   }
 

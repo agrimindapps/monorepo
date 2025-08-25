@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/plant.dart';
+
 import '../../../../core/theme/colors.dart';
+import '../../domain/entities/plant.dart';
 
 /// Enhanced Plant Card siguiendo principios SOLID
 /// S - Responsabilidad única: Solo renderiza información de una planta

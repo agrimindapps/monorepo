@@ -126,7 +126,7 @@ class _BottomNavigatorState extends State<BottomNavigator>
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(

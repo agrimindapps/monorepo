@@ -1,6 +1,8 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -31,25 +33,14 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> getAllMaintenanceRecords() async {
     try {
-      if (await _isConnected) {
-        final remoteRecords = await remoteDataSource.getAllMaintenanceRecords();
-        // Cache remote data locally
-        for (final record in remoteRecords) {
-          await localDataSource.addMaintenanceRecord(record);
-        }
-        return Right(remoteRecords);
-      } else {
-        final localRecords = await localDataSource.getAllMaintenanceRecords();
-        return Right(localRecords);
-      }
-    } on ServerException catch (e) {
-      // Fallback to local data on server error
-      try {
-        final localRecords = await localDataSource.getAllMaintenanceRecords();
-        return Right(localRecords);
-      } on CacheException {
-        return Left(ServerFailure(e.message));
-      }
+      // OFFLINE FIRST: Sempre retorna dados locais primeiro
+      final localRecords = await localDataSource.getAllMaintenanceRecords();
+      
+      // Sync em background se conectado (não bloqueia o retorno)
+      unawaited(_syncAllMaintenanceRecordsInBackground());
+      
+      return Right(localRecords);
+      
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
@@ -57,27 +48,61 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     }
   }
 
+  /// Sync em background sem bloquear a UI
+  Future<void> _syncAllMaintenanceRecordsInBackground() async {
+    try {
+      final isConnected = await _isConnected;
+      if (!isConnected) return;
+
+      // Sync remoto sem aguardar
+      unawaited(remoteDataSource.getAllMaintenanceRecords().then((remoteRecords) async {
+        // Atualizar cache local
+        for (final record in remoteRecords) {
+          await localDataSource.addMaintenanceRecord(record);
+        }
+      }).catchError((Object error) {
+        // Sync falhou, mas não afeta a funcionalidade local
+        print('Background maintenance sync failed: $error');
+      }));
+    } catch (e) {
+      // Ignorar erros de sync em background
+      print('Background maintenance sync error: $e');
+    }
+  }
+
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> getMaintenanceRecordsByVehicle(String vehicleId) async {
     try {
-      if (await _isConnected) {
-        final remoteRecords = await remoteDataSource.getMaintenanceRecordsByVehicle(vehicleId);
-        return Right(remoteRecords);
-      } else {
-        final localRecords = await localDataSource.getMaintenanceRecordsByVehicle(vehicleId);
-        return Right(localRecords);
-      }
-    } on ServerException catch (e) {
-      try {
-        final localRecords = await localDataSource.getMaintenanceRecordsByVehicle(vehicleId);
-        return Right(localRecords);
-      } on CacheException {
-        return Left(ServerFailure(e.message));
-      }
+      // OFFLINE FIRST: Sempre retorna dados locais primeiro
+      final localRecords = await localDataSource.getMaintenanceRecordsByVehicle(vehicleId);
+      
+      // Sync em background se conectado
+      unawaited(_syncMaintenanceRecordsByVehicleInBackground(vehicleId));
+      
+      return Right(localRecords);
+      
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  /// Sync de registros por veículo em background
+  Future<void> _syncMaintenanceRecordsByVehicleInBackground(String vehicleId) async {
+    try {
+      final isConnected = await _isConnected;
+      if (!isConnected) return;
+
+      unawaited(remoteDataSource.getMaintenanceRecordsByVehicle(vehicleId).then((remoteRecords) async {
+        for (final record in remoteRecords) {
+          await localDataSource.addMaintenanceRecord(record);
+        }
+      }).catchError((Object error) {
+        print('Background maintenance vehicle sync failed: $error');
+      }));
+    } catch (e) {
+      print('Background maintenance vehicle sync error: $e');
     }
   }
 
@@ -203,7 +228,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     try {
       return remoteDataSource.watchMaintenanceRecords()
           .map((records) => Right<Failure, List<MaintenanceEntity>>(records))
-          .handleError((error) => Left<Failure, List<MaintenanceEntity>>(
+          .handleError((Object error) => Left<Failure, List<MaintenanceEntity>>(
                 ServerFailure(error.toString()),
               ));
     } catch (e) {
@@ -216,7 +241,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     try {
       return remoteDataSource.watchMaintenanceRecordsByVehicle(vehicleId)
           .map((records) => Right<Failure, List<MaintenanceEntity>>(records))
-          .handleError((error) => Left<Failure, List<MaintenanceEntity>>(
+          .handleError((Object error) => Left<Failure, List<MaintenanceEntity>>(
                 ServerFailure(error.toString()),
               ));
     } catch (e) {

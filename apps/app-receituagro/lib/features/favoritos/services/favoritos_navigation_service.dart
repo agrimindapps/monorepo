@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
-import '../models/favorito_defensivo_model.dart';
-import '../models/favorito_praga_model.dart';
-import '../models/favorito_diagnostico_model.dart';
 import '../../DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../../pragas/detalhe_praga_page.dart';
 import '../../DetalheDiagnostico/detalhe_diagnostico_page.dart';
+import '../../pragas/detalhe_praga_page.dart';
+import '../models/favorito_defensivo_model.dart';
+import '../models/favorito_diagnostico_model.dart';
+import '../models/favorito_praga_model.dart';
 
 /// Serviço de navegação inteligente para favoritos
 /// Usa dados reais dos repositórios para navegação correta

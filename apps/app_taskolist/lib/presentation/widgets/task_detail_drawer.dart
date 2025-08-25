@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/task_entity.dart';
 import '../providers/task_providers.dart';
-import 'subtask_list_widget.dart';
 import 'notes_expansion_dialog.dart';
-import 'task_header_card.dart';
-import 'task_details_card.dart';
+import 'subtask_list_widget.dart';
 import 'task_comments_section.dart';
+import 'task_details_card.dart';
+import 'task_header_card.dart';
 
 class TaskDetailDrawer extends ConsumerStatefulWidget {
   final TaskEntity task;

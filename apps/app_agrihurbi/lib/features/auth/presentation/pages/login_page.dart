@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
+import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 /// Login page
 class LoginPage extends StatefulWidget {

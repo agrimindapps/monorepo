@@ -11,6 +11,8 @@ class UserEntity extends BaseEntity {
     this.isEmailVerified = false,
     this.lastLoginAt,
     this.provider = AuthProvider.email,
+    this.phone,
+    this.isActive = true,
     super.createdAt,
     super.updatedAt,
   });
@@ -33,6 +35,12 @@ class UserEntity extends BaseEntity {
   /// Provedor de autenticação usado
   final AuthProvider provider;
 
+  /// Telefone do usuário (opcional)
+  final String? phone;
+
+  /// Status ativo do usuário
+  final bool isActive;
+
   /// Retorna true se o usuário tem foto de perfil
   bool get hasProfilePhoto => photoUrl != null && photoUrl!.isNotEmpty;
 
@@ -44,6 +52,12 @@ class UserEntity extends BaseEntity {
     return '${names[0][0]}${names[names.length - 1][0]}'.toUpperCase();
   }
 
+  /// Alias para photoUrl para compatibilidade
+  String? get profileImageUrl => photoUrl;
+
+  /// Alias para displayName para compatibilidade
+  String get name => displayName;
+
   @override
   BaseEntity copyWith({
     String? id,
@@ -53,6 +67,8 @@ class UserEntity extends BaseEntity {
     bool? isEmailVerified,
     DateTime? lastLoginAt,
     AuthProvider? provider,
+    String? phone,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -64,6 +80,8 @@ class UserEntity extends BaseEntity {
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       provider: provider ?? this.provider,
+      phone: phone ?? this.phone,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -79,6 +97,8 @@ class UserEntity extends BaseEntity {
       'isEmailVerified': isEmailVerified,
       'lastLoginAt': lastLoginAt?.toIso8601String(),
       'provider': provider.name,
+      'phone': phone,
+      'isActive': isActive,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -99,6 +119,8 @@ class UserEntity extends BaseEntity {
         (p) => p.name == (json['provider'] as String),
         orElse: () => AuthProvider.email,
       ),
+      phone: json['phone'] as String?,
+      isActive: json['isActive'] as bool? ?? true,
       createdAt: json['createdAt'] != null 
         ? DateTime.parse(json['createdAt'] as String) 
         : null,
@@ -117,6 +139,8 @@ class UserEntity extends BaseEntity {
         isEmailVerified,
         lastLoginAt,
         provider,
+        phone,
+        isActive,
       ];
 }
 

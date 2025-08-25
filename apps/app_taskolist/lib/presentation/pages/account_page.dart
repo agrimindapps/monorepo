@@ -1,13 +1,13 @@
+import 'package:core/core.dart' show UserEntity, AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart' show UserEntity, AuthProvider;
 
 import '../../core/theme/app_colors.dart';
+import '../../domain/entities/subscription_status.dart';
+import '../pages/notification_settings_page.dart';
+import '../pages/premium_page.dart';
 import '../providers/auth_providers.dart';
 import '../providers/subscription_providers.dart';
-import '../../domain/entities/subscription_status.dart';
-import '../pages/premium_page.dart';
-import '../pages/notification_settings_page.dart';
 import '../widgets/delete_account_confirmation_dialog.dart';
 
 class AccountPage extends ConsumerStatefulWidget {
@@ -101,7 +101,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 ? NetworkImage(user.photoUrl!)
                 : null,
               child: user.photoUrl == null
-                ? Icon(
+                ? const Icon(
                     Icons.person,
                     size: 40,
                     color: AppColors.primaryColor,

@@ -24,7 +24,7 @@ class GetCurrentSubscription implements UseCase<UserSubscription?, String> {
   @override
   Future<Either<Failure, UserSubscription?>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
     return await repository.getCurrentSubscription(userId);
   }
@@ -48,11 +48,11 @@ class SubscribeToPlan implements UseCase<UserSubscription, SubscribeToPlanParams
   @override
   Future<Either<Failure, UserSubscription>> call(SubscribeToPlanParams params) async {
     if (params.userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
 
     if (params.planId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do plano é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do plano é obrigatório'));
     }
 
     return await repository.subscribeToPlan(params.userId, params.planId);
@@ -67,7 +67,7 @@ class CancelSubscription implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
     return await repository.cancelSubscription(userId);
   }
@@ -81,7 +81,7 @@ class PauseSubscription implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
     return await repository.pauseSubscription(userId);
   }
@@ -95,7 +95,7 @@ class ResumeSubscription implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
     return await repository.resumeSubscription(userId);
   }
@@ -119,11 +119,11 @@ class UpgradePlan implements UseCase<UserSubscription, UpgradePlanParams> {
   @override
   Future<Either<Failure, UserSubscription>> call(UpgradePlanParams params) async {
     if (params.userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
 
     if (params.newPlanId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do novo plano é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do novo plano é obrigatório'));
     }
 
     return await repository.upgradePlan(params.userId, params.newPlanId);
@@ -138,7 +138,7 @@ class RestorePurchases implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return Left(ValidationFailure('ID do usuário é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
     }
     return await repository.restorePurchases(userId);
   }
@@ -152,7 +152,7 @@ class ValidateReceipt implements UseCase<bool, String> {
   @override
   Future<Either<Failure, bool>> call(String receiptData) async {
     if (receiptData.trim().isEmpty) {
-      return Left(ValidationFailure('Dados do recibo são obrigatórios'));
+      return const Left(ValidationFailure(message: 'Dados do recibo são obrigatórios'));
     }
     return await repository.validateReceipt(receiptData);
   }

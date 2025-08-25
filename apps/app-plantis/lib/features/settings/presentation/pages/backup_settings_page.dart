@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import '../../../../core/theme/plantis_colors.dart';
-import '../../../../core/services/backup_service.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../core/data/models/backup_model.dart';
-import '../../../../presentation/widgets/settings_section.dart';
+import '../../../../core/services/backup_service.dart';
+import '../../../../core/theme/plantis_colors.dart';
 import '../../../../presentation/widgets/settings_item.dart';
+import '../../../../presentation/widgets/settings_section.dart';
 import '../providers/backup_settings_provider.dart';
 import '../widgets/backup_list_item.dart';
 import '../widgets/restore_options_dialog.dart';
@@ -102,7 +103,7 @@ class BackupSettingsPage extends StatelessWidget {
                     color: PlantisColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.cloud_upload,
                     color: PlantisColors.primary,
                     size: 24,
@@ -173,7 +174,7 @@ class BackupSettingsPage extends StatelessWidget {
               LinearProgressIndicator(
                 value: provider.backupProgress,
                 backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation<Color>(PlantisColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.primary),
               ),
               const SizedBox(height: 8),
               Text(
@@ -191,7 +192,7 @@ class BackupSettingsPage extends StatelessWidget {
               LinearProgressIndicator(
                 value: provider.restoreProgress,
                 backgroundColor: PlantisColors.leaf.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation<Color>(PlantisColors.leaf),
+                valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.leaf),
               ),
               const SizedBox(height: 8),
               Text(
@@ -212,7 +213,7 @@ class BackupSettingsPage extends StatelessWidget {
                   provider.createBackup();
                 } : null,
                 icon: provider.isCreatingBackup 
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
@@ -417,14 +418,14 @@ class BackupSettingsPage extends StatelessWidget {
                   color: PlantisColors.sun.withValues(alpha: 0.3),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 children: [
                   Icon(
                     Icons.star,
                     color: PlantisColors.sun,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Funcionalidade Premium Exclusiva',
@@ -565,7 +566,7 @@ class BackupSettingsPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Tem certeza que deseja deletar este backup?'),
+            const Text('Tem certeza que deseja deletar este backup?'),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),

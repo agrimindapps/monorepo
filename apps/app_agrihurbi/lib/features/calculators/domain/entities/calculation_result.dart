@@ -114,6 +114,12 @@ class CalculationResult extends Equatable {
     return primary?.value;
   }
 
+  /// Alias para values para compatibilidade
+  List<CalculationResultValue> get results => values;
+
+  /// Alias para metadata para compatibilidade
+  Map<String, dynamic>? get additionalData => metadata;
+
   /// Adiciona métodos de serialização
   Map<String, dynamic> toJson() {
     return {
@@ -192,16 +198,13 @@ class CalculationResult extends Equatable {
 
 class CalculationError extends CalculationResult {
   CalculationError({
-    required String calculatorId,
-    required String errorMessage,
-    required Map<String, dynamic> inputs,
+    required super.calculatorId,
+    required String super.errorMessage,
+    required super.inputs,
   }) : super(
-          calculatorId: calculatorId,
           calculatedAt: DateTime.now(),
-          inputs: inputs,
           type: ResultType.single,
           values: const [],
           isValid: false,
-          errorMessage: errorMessage,
         );
 }

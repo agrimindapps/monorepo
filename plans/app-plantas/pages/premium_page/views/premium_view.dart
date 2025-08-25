@@ -18,7 +18,7 @@ class PremiumView extends GetView<PremiumController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-          body: Container(
+          body: DecoratedBox(
             decoration: BoxDecoration(
               color: PlantasColors.backgroundColor,
             ),

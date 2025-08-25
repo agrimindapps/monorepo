@@ -1,5 +1,6 @@
-import 'package:hive/hive.dart';
 import 'dart:developer' as developer;
+
+import 'package:hive/hive.dart';
 
 /// Serviço simplificado de preferências usando Hive
 /// Resolve TODOs de preferências do settings_page.dart

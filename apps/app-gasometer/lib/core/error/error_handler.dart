@@ -22,7 +22,7 @@ class Result<T> {
   Result<U> map<U>(U Function(T data) callback) {
     if (isSuccess && data != null) {
       try {
-        return Result.success(callback(data!));
+        return Result.success(callback(data as T));
       } catch (e, stackTrace) {
         final error = UnexpectedError(
           message: 'Error in map operation: $e',
@@ -45,7 +45,7 @@ class Result<T> {
   /// Execute callback and return new result
   Result<U> flatMap<U>(Result<U> Function(T data) callback) {
     if (isSuccess && data != null) {
-      return callback(data!);
+      return callback(data as T);
     }
     return Result.failure(error!);
   }
@@ -69,7 +69,7 @@ class Result<T> {
     U Function(T data) onSuccess,
   ) {
     return isSuccess && data != null 
-        ? onSuccess(data!) 
+        ? onSuccess(data as T) 
         : onError(error!);
   }
 
@@ -186,7 +186,7 @@ class ErrorHandler {
         lastError = _convertToAppError(e, stackTrace);
 
         _logger.logError(
-          lastError!,
+          lastError,
           stackTrace: stackTrace,
           additionalContext: {
             'operation': operationName,
@@ -197,7 +197,7 @@ class ErrorHandler {
         );
 
         // Don't retry if it's the last attempt or if error shouldn't be retried
-        if (attempt >= policy.maxAttempts || !policy.shouldRetry(lastError!)) {
+        if (attempt >= policy.maxAttempts || !policy.shouldRetry(lastError)) {
           break;
         }
 
@@ -238,7 +238,7 @@ class ErrorHandler {
     return source
         .map<Result<T>>((data) => Result.success(data))
         .handleError((error, stackTrace) {
-          final appError = _convertToAppError(error, stackTrace);
+          final appError = _convertToAppError(error, stackTrace as StackTrace?);
           
           _logger.logError(
             appError,
@@ -307,7 +307,7 @@ class ErrorHandler {
     return execute(
       operation,
       policy: policy,
-      operationName: '${providerName}.${methodName}',
+      operationName: '$providerName.$methodName',
       context: {
         'provider': providerName,
         'method': methodName,
@@ -327,7 +327,7 @@ class ErrorHandler {
     return execute(
       operation,
       policy: policy,
-      operationName: '${repositoryName}.${methodName}',
+      operationName: '$repositoryName.$methodName',
       context: {
         'repository': repositoryName,
         'method': methodName,
@@ -347,7 +347,7 @@ class ErrorHandler {
     return execute(
       operation,
       policy: policy,
-      operationName: '${screenName}.${actionName}',
+      operationName: '$screenName.$actionName',
       context: {
         'screen': screenName,
         'action': actionName,

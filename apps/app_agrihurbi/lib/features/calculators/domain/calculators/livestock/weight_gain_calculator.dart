@@ -1,14 +1,15 @@
 import 'dart:math' as math;
-import '../../entities/calculator_entity.dart';
-import '../../entities/calculator_category.dart';
-import '../../entities/calculator_parameter.dart';
+
 import '../../entities/calculation_result.dart';
+import '../../entities/calculator_category.dart';
 import '../../entities/calculator_engine.dart';
+import '../../entities/calculator_entity.dart';
+import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Ganho de Peso
 /// Calcula ganho de peso esperado, conversão alimentar e performance animal
 class WeightGainCalculator extends CalculatorEntity {
-  WeightGainCalculator()
+  const WeightGainCalculator()
       : super(
           id: 'weight_gain_calculator',
           name: 'Ganho de Peso Animal',
@@ -189,7 +190,7 @@ class WeightGainCalculator extends CalculatorEntity {
 
       // Calcular ganho de peso potencial
       final Map<String, dynamic> weightGainPotential = _calculateWeightGainPotential(
-        availableEnergy, currentWeight, animalCategory, geneticPotential, healthStatus, speciesData);
+        availableEnergy, currentWeight, animalCategory, geneticPotential, healthStatus, speciesData, animalSpecies);
 
       // Calcular conversão alimentar
       final Map<String, dynamic> feedConversion = _calculateFeedConversion(
@@ -399,7 +400,8 @@ class WeightGainCalculator extends CalculatorEntity {
 
     // Ajuste por temperatura
     if (temperature < 5 || temperature > 30) {
-      final double tempStress = math.abs(temperature - 20) * 0.01;
+      final double tempDiff = temperature - 20;
+      final double tempStress = (tempDiff < 0 ? -tempDiff : tempDiff) * 0.01;
       maintenanceEnergy *= (1 + math.min(tempStress, 0.25));
     }
 
@@ -462,6 +464,7 @@ class WeightGainCalculator extends CalculatorEntity {
     String geneticPotential,
     String healthStatus,
     Map<String, dynamic> speciesData,
+    String animalSpecies,
   ) {
     final double energyForGain = availableEnergy['available_energy_for_gain'] as double;
     final double gainEfficiency = speciesData['gain_energy_efficiency'] as double;
@@ -474,9 +477,9 @@ class WeightGainCalculator extends CalculatorEntity {
     // Ganho potencial baseado na energia (4.92 Mcal EL/kg ganho para bovinos)
     double energyBasedGain = 0.0;
     if (netEnergyForGain > 0) {
-      final double energyPerKgGain = species.contains('Bovino') ? 4.92 
-          : species.contains('Suíno') ? 6.8
-          : species.contains('Frango') ? 5.2
+      final double energyPerKgGain = animalSpecies.contains('Bovino') ? 4.92 
+          : animalSpecies.contains('Suíno') ? 6.8
+          : animalSpecies.contains('Frango') ? 5.2
           : 5.0;
       energyBasedGain = netEnergyForGain / energyPerKgGain;
     }
@@ -690,7 +693,7 @@ class WeightGainCalculator extends CalculatorEntity {
     
     // Consumo relativo (% do peso vivo)
     // Necessário peso atual para calcular - assumindo peso médio
-    final double relativeFeedIntake = 2.5; // Estimativa genérica
+    const double relativeFeedIntake = 2.5; // Estimativa genérica
 
     return {
       'performance_index': performanceIndex,

@@ -61,7 +61,7 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
+              background: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -161,7 +161,7 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
       elevation: 16,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       color: isDark ? const Color(0xFF2E7D32) : Colors.white,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           gradient: LinearGradient(
@@ -632,7 +632,7 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: isDark ? const Color(0xFF2E7D32) : Colors.white,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(

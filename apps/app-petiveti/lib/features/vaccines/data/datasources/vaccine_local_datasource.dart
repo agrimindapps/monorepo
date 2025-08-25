@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
+
 import '../../../../core/storage/hive_service.dart';
 import '../models/vaccine_model.dart';
-import '../../domain/entities/vaccine.dart';
 
 abstract class VaccineLocalDataSource {
   /// Basic CRUD operations

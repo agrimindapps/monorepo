@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import 'bovines_filter_provider.dart';
 import 'bovines_management_provider.dart';
 import 'equines_management_provider.dart';
-import 'bovines_filter_provider.dart';
 import 'livestock_search_provider.dart';
 import 'livestock_statistics_provider.dart';
 import 'livestock_sync_provider.dart';

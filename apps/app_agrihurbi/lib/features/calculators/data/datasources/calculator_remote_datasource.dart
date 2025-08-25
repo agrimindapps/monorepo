@@ -1,11 +1,12 @@
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
+
 import '../../../../core/network/dio_client.dart';
-import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculation_history.dart';
+import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_category.dart';
+import '../../domain/entities/calculator_entity.dart';
 
 /// Data Source remoto para calculadoras
 /// 
@@ -59,7 +60,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       
       // Mock temporário para testes
       await Future.delayed(const Duration(milliseconds: 300));
-      return Left(NotFoundFailure('Calculadora não encontrada'));
+      return const Left(NotFoundFailure('Calculadora não encontrada'));
     } catch (e) {
       return Left(ServerFailure('Erro ao carregar calculadora: ${e.toString()}'));
     }
@@ -112,7 +113,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       
       // Mock temporário para testes
       await Future.delayed(const Duration(milliseconds: 1000));
-      return Left(ServerFailure('Serviço de cálculo temporariamente indisponível'));
+      return const Left(ServerFailure('Serviço de cálculo temporariamente indisponível'));
     } catch (e) {
       return Left(ServerFailure('Erro ao executar cálculo: ${e.toString()}'));
     }

@@ -164,7 +164,7 @@ class InputFieldsWidget extends StatelessWidget {
   Widget _buildGeneroDropdown(bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: ShadcnStyle.borderColor),

@@ -25,12 +25,12 @@ class PremiumFooterWidget extends GetView<PremiumController> {
               icon: Icon(
                 Icons.restore,
                 size: 20,
-                color: plantasCores['primaria']!,
+                color: plantasCores['primaria'],
               ),
               label: Text(
                 'Restaurar Compras',
                 style: TextStyle(
-                  color: plantasCores['primaria']!,
+                  color: plantasCores['primaria'],
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -45,7 +45,7 @@ class PremiumFooterWidget extends GetView<PremiumController> {
           child: Text(
             'Termos de Uso e Política de Privacidade',
             style: TextStyle(
-              color: plantasCores['textoSecundario']!,
+              color: plantasCores['textoSecundario'],
               fontSize: 14,
               decoration: TextDecoration.underline,
             ),
@@ -71,7 +71,7 @@ class PremiumFooterWidget extends GetView<PremiumController> {
                   Icon(
                     Icons.info_outline,
                     size: 20,
-                    color: plantasCores['textoSecundario']!,
+                    color: plantasCores['textoSecundario'],
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -79,7 +79,7 @@ class PremiumFooterWidget extends GetView<PremiumController> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: plantasCores['texto']!,
+                      color: plantasCores['texto'],
                     ),
                   ),
                 ],
@@ -110,14 +110,14 @@ class PremiumFooterWidget extends GetView<PremiumController> {
             Icon(
               Icons.support_agent,
               size: 16,
-              color: plantasCores['textoSecundario']!,
+              color: plantasCores['textoSecundario'],
             ),
             const SizedBox(width: 6),
             Text(
               'Precisa de ajuda? Entre em contato conosco',
               style: TextStyle(
                 fontSize: 12,
-                color: plantasCores['textoSecundario']!,
+                color: plantasCores['textoSecundario'],
               ),
             ),
           ],
@@ -139,7 +139,7 @@ class PremiumFooterWidget extends GetView<PremiumController> {
             height: 6,
             margin: const EdgeInsets.only(top: 6, right: 12),
             decoration: BoxDecoration(
-              color: plantasCores['primaria']!,
+              color: plantasCores['primaria'],
               shape: BoxShape.circle,
             ),
           ),
@@ -148,7 +148,7 @@ class PremiumFooterWidget extends GetView<PremiumController> {
               text,
               style: TextStyle(
                 fontSize: 14,
-                color: plantasCores['textoSecundario']!,
+                color: plantasCores['textoSecundario'],
                 height: 1.4,
               ),
             ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/services/image_service.dart';
+import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/spaces_provider.dart';
-import '../../domain/usecases/spaces_usecases.dart';
-import '../../../../core/services/image_service.dart';
-import '../../../../core/di/injection_container.dart' as di;
 import 'space_selector_widget.dart';
 
 class PlantFormBasicInfo extends StatefulWidget {
@@ -107,7 +108,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               child: GestureDetector(
                 onTap: () => _showRemoveImageDialog(context, provider, 0),
                 child: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
@@ -187,13 +188,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                     : null,
             icon:
                 provider.isUploadingImages
-                    ? SizedBox(
+                    ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                    : Icon(Icons.camera_alt),
-            label: Text('Câmera'),
+                    : const Icon(Icons.camera_alt),
+            label: const Text('Câmera'),
           ),
         ),
         const SizedBox(width: 16),
@@ -205,13 +206,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                     : null,
             icon:
                 provider.isUploadingImages
-                    ? SizedBox(
+                    ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                    : Icon(Icons.photo_library),
-            label: Text('Galeria'),
+                    : const Icon(Icons.photo_library),
+            label: const Text('Galeria'),
           ),
         ),
       ],
@@ -227,12 +228,12 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('Remover Imagem'),
-            content: Text('Deseja remover esta imagem?'),
+            title: const Text('Remover Imagem'),
+            content: const Text('Deseja remover esta imagem?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text('Cancelar'),
+                child: const Text('Cancelar'),
               ),
               TextButton(
                 onPressed: () {
@@ -242,7 +243,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text('Remover'),
+                child: const Text('Remover'),
               ),
             ],
           ),
@@ -566,7 +567,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
         } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erro ao criar espaço. Tente novamente.'),
+              content: const Text('Erro ao criar espaço. Tente novamente.'),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

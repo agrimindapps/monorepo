@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/interfaces/i_premium_service.dart';
+import '../../core/models/pragas_hive.dart';
+import '../../core/repositories/favoritos_hive_repository.dart';
+import '../../core/repositories/pragas_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
-import '../comentarios/services/comentarios_service.dart';
 import '../comentarios/models/comentario_model.dart';
-import '../../core/repositories/favoritos_hive_repository.dart';
-import '../../core/repositories/pragas_hive_repository.dart';
-import '../../core/models/pragas_hive.dart';
-import '../../core/di/injection_container.dart';
-import '../../core/interfaces/i_premium_service.dart';
+import '../comentarios/services/comentarios_service.dart';
 
 
 // Models for diagnostic system
@@ -747,10 +748,10 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.comment_outlined,
               size: 64,
-              color: const Color(0xFF4CAF50),
+              color: Color(0xFF4CAF50),
             ),
             const SizedBox(height: 16),
             Text(
@@ -1150,7 +1151,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                             MaterialPageRoute(
                               builder: (context) => DetalheDefensivoPage(
                                 defensivoName: nome,
-                                fabricante: _defensivoData?['fabricante'] ?? 'Fabricante Desconhecido',
+                                fabricante: _defensivoData?['fabricante'] as String? ?? 'Fabricante Desconhecido',
                               ),
                             ),
                           );

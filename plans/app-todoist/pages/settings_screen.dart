@@ -38,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 floating: false,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
+                  background: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,

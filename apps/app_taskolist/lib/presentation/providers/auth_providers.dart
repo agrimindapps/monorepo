@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:core/core.dart' as core;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../infrastructure/services/crashlytics_service.dart';
 import '../../infrastructure/services/auth_service.dart';
+import '../../infrastructure/services/crashlytics_service.dart';
 
 // Provider para o TaskManagerAuthService
 final taskManagerAuthServiceProvider = Provider<TaskManagerAuthService>((ref) {
@@ -142,7 +143,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   void _init() {
     _subscription = _authService.currentUser.listen(
       (user) => state = AsyncValue.data(user),
-      onError: (error, stackTrace) => state = AsyncValue.error(error, stackTrace),
+      onError: (error, stackTrace) => state = AsyncValue.error(error as Object? ?? 'Unknown error', stackTrace as StackTrace? ?? StackTrace.empty),
     );
   }
 
@@ -212,7 +213,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
         throw failure; // Propagar o erro para quem chamou
       },
       (user) {
-        print('✅ AuthNotifier: Login anônimo bem-sucedido: ${user?.id}');
+        print('✅ AuthNotifier: Login anônimo bem-sucedido: ${user.id}');
         state = AsyncValue.data(user);
       },
     );

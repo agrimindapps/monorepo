@@ -25,13 +25,13 @@ class PlantActionsMenu extends StatelessWidget {
       icon: Icon(
         Icons.more_vert,
         color: cores['textoSecundario'],
-        size: dimensoes['iconS']!,
+        size: dimensoes['iconS'],
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(dimensoes['radiusM']!),
       ),
       color: cores['fundoCard'], // Cor temática do fundo
-      elevation: dimensoes['elevationL']!,
+      elevation: dimensoes['elevationL'],
       offset: Offset(0, dimensoes['marginS']!),
       surfaceTintColor: cores['fundoCard'], // Remove tinta de superfície
       shadowColor: cores['sombra'], // Cor temática da sombra
@@ -43,12 +43,12 @@ class PlantActionsMenu extends StatelessWidget {
               Icon(
                 Icons.edit_outlined,
                 color: cores['info'],
-                size: dimensoes['iconS']!,
+                size: dimensoes['iconS'],
               ),
-              SizedBox(width: dimensoes['paddingM']!),
+              SizedBox(width: dimensoes['paddingM']),
               Text(
                 I18nService.editPlantAction,
-                style: textStyles['labelLarge']!,
+                style: textStyles['labelLarge'],
               ),
             ],
           ),
@@ -60,12 +60,12 @@ class PlantActionsMenu extends StatelessWidget {
               Icon(
                 Icons.delete_outline,
                 color: cores['erro'],
-                size: dimensoes['iconS']!,
+                size: dimensoes['iconS'],
               ),
-              SizedBox(width: dimensoes['paddingM']!),
+              SizedBox(width: dimensoes['paddingM']),
               Text(
                 I18nService.removePlantAction,
-                style: textStyles['labelLarge']!,
+                style: textStyles['labelLarge'],
               ),
             ],
           ),

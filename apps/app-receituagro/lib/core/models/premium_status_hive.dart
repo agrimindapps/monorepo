@@ -110,11 +110,11 @@ class PremiumStatusHive extends HiveObject {
     // Adaptar conforme estrutura real do SubscriptionEntity
     return PremiumStatusHive(
       userId: userId,
-      isActive: subscriptionEntity?.isActive ?? false,
-      expiryDateTimestamp: subscriptionEntity?.expiryDate?.millisecondsSinceEpoch,
-      planType: subscriptionEntity?.planType,
-      subscriptionId: subscriptionEntity?.id,
-      productId: subscriptionEntity?.productId,
+      isActive: (subscriptionEntity?.isActive as bool?) ?? false,
+      expiryDateTimestamp: subscriptionEntity?.expiryDate?.millisecondsSinceEpoch as int?,
+      planType: subscriptionEntity?.planType as String?,
+      subscriptionId: subscriptionEntity?.id as String?,
+      productId: subscriptionEntity?.productId as String?,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );

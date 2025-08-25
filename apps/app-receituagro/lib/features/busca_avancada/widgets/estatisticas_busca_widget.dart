@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/services/diagnostico_integration_service.dart';
+
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget que exibe estatísticas dos resultados da busca
 /// Mostra informações agrupadas e métricas importantes

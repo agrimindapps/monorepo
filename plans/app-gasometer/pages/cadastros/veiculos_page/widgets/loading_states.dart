@@ -408,7 +408,7 @@ class LoadingOverlay extends StatelessWidget {
 
     return PopScope(
       canPop: dismissible,
-      child: Container(
+      child: ColoredBox(
         color: Colors.black54,
         child: Center(
           child: Card(

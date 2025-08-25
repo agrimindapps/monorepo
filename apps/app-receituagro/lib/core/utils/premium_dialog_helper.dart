@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 /// Helper class to manage premium dialog behavior for anonymous users
 class PremiumDialogHelper {

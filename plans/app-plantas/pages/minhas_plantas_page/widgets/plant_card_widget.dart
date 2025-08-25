@@ -142,7 +142,7 @@ class _PlantCardUI extends StatelessWidget {
         vertical: dimensoes['marginS']!,
       ),
       child: Card(
-        elevation: dimensoes['elevationS']!,
+        elevation: dimensoes['elevationS'],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(dimensoes['radiusL']!),
         ),
@@ -155,9 +155,9 @@ class _PlantCardUI extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                SizedBox(height: dimensoes['marginM']!),
+                SizedBox(height: dimensoes['marginM']),
                 _buildTaskStatus(),
-                SizedBox(height: dimensoes['marginS']!),
+                SizedBox(height: dimensoes['marginS']),
               ],
             ),
           ),

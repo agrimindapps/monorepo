@@ -94,15 +94,15 @@ class AddExpense implements UseCase<void, Expense> {
   @override
   Future<Either<Failure, void>> call(Expense expense) async {
     if (expense.title.trim().isEmpty) {
-      return Left(ValidationFailure('Título da despesa é obrigatório'));
+      return const Left(ValidationFailure(message: 'Título da despesa é obrigatório'));
     }
 
     if (expense.amount <= 0) {
-      return Left(ValidationFailure('Valor da despesa deve ser maior que zero'));
+      return const Left(ValidationFailure(message: 'Valor da despesa deve ser maior que zero'));
     }
 
     if (expense.expenseDate.isAfter(DateTime.now().add(const Duration(days: 1)))) {
-      return Left(ValidationFailure('Data da despesa não pode ser futura'));
+      return const Left(ValidationFailure(message: 'Data da despesa não pode ser futura'));
     }
 
     return await repository.addExpense(expense);
@@ -117,11 +117,11 @@ class UpdateExpense implements UseCase<void, Expense> {
   @override
   Future<Either<Failure, void>> call(Expense expense) async {
     if (expense.title.trim().isEmpty) {
-      return Left(ValidationFailure('Título da despesa é obrigatório'));
+      return const Left(ValidationFailure(message: 'Título da despesa é obrigatório'));
     }
 
     if (expense.amount <= 0) {
-      return Left(ValidationFailure('Valor da despesa deve ser maior que zero'));
+      return const Left(ValidationFailure(message: 'Valor da despesa deve ser maior que zero'));
     }
 
     return await repository.updateExpense(expense);
@@ -136,7 +136,7 @@ class DeleteExpense implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String expenseId) async {
     if (expenseId.trim().isEmpty) {
-      return Left(ValidationFailure('ID da despesa é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID da despesa é obrigatório'));
     }
 
     return await repository.deleteExpense(expenseId);

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../core/widgets/modern_header_widget.dart';
-import '../../core/widgets/praga_image_widget.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../core/di/injection_container.dart';
+import '../../core/extensions/diagnostico_hive_extension.dart';
+import '../../core/interfaces/i_premium_service.dart';
 import '../../core/models/diagnostico_hive.dart';
 import '../../core/repositories/diagnostico_hive_repository.dart';
 import '../../core/repositories/favoritos_hive_repository.dart';
-import '../../core/extensions/diagnostico_hive_extension.dart';
-import '../../core/di/injection_container.dart';
-import '../../core/interfaces/i_premium_service.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/praga_image_widget.dart';
 
 class DetalheDiagnosticoPage extends StatefulWidget {
   final String diagnosticoId;

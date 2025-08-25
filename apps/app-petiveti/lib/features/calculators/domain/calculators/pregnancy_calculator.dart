@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/calculator_input.dart';
 import 'base_calculator.dart';
 
@@ -35,6 +36,77 @@ class PregnancyInput extends CalculatorInput {
   });
 
   @override
+  Map<String, dynamic> toMap() {
+    return {
+      'species': species.name,
+      'matingDate': matingDate.millisecondsSinceEpoch,
+      'motherWeight': motherWeight,
+      'expectedLitterSize': expectedLitterSize,
+      'isFirstPregnancy': isFirstPregnancy,
+      'lastUltrasoundDate': lastUltrasoundDate?.millisecondsSinceEpoch,
+      'confirmedPuppies': confirmedPuppies,
+    };
+  }
+
+  factory PregnancyInput.fromMap(Map<String, dynamic> map) {
+    return PregnancyInput(
+      species: AnimalSpecies.values.firstWhere((e) => e.name == map['species']),
+      matingDate: DateTime.fromMillisecondsSinceEpoch(map['matingDate'] as int),
+      motherWeight: (map['motherWeight'] as num?)?.toDouble() ?? 0.0,
+      expectedLitterSize: (map['expectedLitterSize'] as num?)?.toInt(),
+      isFirstPregnancy: map['isFirstPregnancy'] as bool? ?? false,
+      lastUltrasoundDate: map['lastUltrasoundDate'] != null 
+          ? DateTime.fromMillisecondsSinceEpoch(map['lastUltrasoundDate'] as int)
+          : null,
+      confirmedPuppies: (map['confirmedPuppies'] as num?)?.toInt(),
+    );
+  }
+
+  @override
+  List<String> validate() {
+    final errors = <String>[];
+    
+    if (motherWeight <= 0) {
+      errors.add('Peso da mãe deve ser maior que zero');
+    }
+    if (matingDate.isAfter(DateTime.now())) {
+      errors.add('Data do acasalamento não pode ser futura');
+    }
+    
+    final daysSinceMating = DateTime.now().difference(matingDate).inDays;
+    if (daysSinceMating < 0) {
+      errors.add('Data do acasalamento inválida');
+    }
+    
+    if (expectedLitterSize != null && expectedLitterSize! <= 0) {
+      errors.add('Tamanho esperado da ninhada deve ser maior que zero');
+    }
+    
+    return errors;
+  }
+
+  @override
+  PregnancyInput copyWith({
+    AnimalSpecies? species,
+    DateTime? matingDate,
+    double? motherWeight,
+    int? expectedLitterSize,
+    bool? isFirstPregnancy,
+    DateTime? lastUltrasoundDate,
+    int? confirmedPuppies,
+  }) {
+    return PregnancyInput(
+      species: species ?? this.species,
+      matingDate: matingDate ?? this.matingDate,
+      motherWeight: motherWeight ?? this.motherWeight,
+      expectedLitterSize: expectedLitterSize ?? this.expectedLitterSize,
+      isFirstPregnancy: isFirstPregnancy ?? this.isFirstPregnancy,
+      lastUltrasoundDate: lastUltrasoundDate ?? this.lastUltrasoundDate,
+      confirmedPuppies: confirmedPuppies ?? this.confirmedPuppies,
+    );
+  }
+
+  @override
   List<Object?> get props => [
         species,
         matingDate,
@@ -60,7 +132,7 @@ class PregnancyResult extends CalculationResult {
   final List<PregnancyMilestone> upcomingMilestones;
   final bool isOverdue;
 
-  const PregnancyResult({
+  PregnancyResult({
     required this.gestationDays,
     required this.estimatedDueDate,
     required this.earliestDueDate,
@@ -73,16 +145,36 @@ class PregnancyResult extends CalculationResult {
     required this.careInstructions,
     required this.upcomingMilestones,
     required this.isOverdue,
-    required super.timestamp,
-    required super.calculatorType,
-    super.notes,
-  });
+  }) : super(
+         calculatorId: CalculatorType.pregnancy.id,
+         results: [
+           ResultItem(
+             label: 'Dias restantes',
+             value: daysRemaining,
+             unit: 'dias',
+             severity: daysRemaining <= 7 ? ResultSeverity.warning : ResultSeverity.info,
+           ),
+           ResultItem(
+             label: 'Dias de gestação',
+             value: gestationDays,
+             unit: 'dias',
+           ),
+           ResultItem(
+             label: 'Calorias diárias recomendadas',
+             value: recommendedDailyCalories.toStringAsFixed(0),
+             unit: 'kcal',
+           ),
+           ResultItem(
+             label: 'Peso recomendado',
+             value: recommendedWeight.toStringAsFixed(1),
+             unit: 'kg',
+           ),
+         ],
+         recommendations: const [],
+         summary: 'Gestação: $gestationDays dias - $daysRemaining dias restantes',
+         calculatedAt: DateTime.now(),
+       );
 
-  @override
-  String get primaryResult => '$daysRemaining dias restantes';
-
-  @override
-  String get summary => 'Gestação: $gestationDays dias (${currentStage.name}) - $primaryResult';
 
   @override
   List<Object?> get props => [
@@ -117,6 +209,10 @@ class PregnancyMilestone {
 }
 
 class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult> {
+  const PregnancyCalculator();
+  @override
+  String get id => CalculatorType.pregnancy.id;
+
   @override
   String get name => 'Calculadora de Gestação';
 
@@ -124,8 +220,17 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
   String get description => 'Calcula período gestacional, data do parto e recomendações nutricionais';
 
   @override
-  PregnancyResult calculate(PregnancyInput input) {
-    _validateInput(input);
+  CalculatorCategory get category => CalculatorCategory.health;
+
+  @override
+  String get iconName => 'pregnant_woman';
+
+  @override
+  PregnancyResult performCalculation(PregnancyInput input) {
+    final validationErrors = getInputValidationErrors(input);
+    if (validationErrors.isNotEmpty) {
+      return createErrorResult(validationErrors.first, input);
+    }
 
     final now = DateTime.now();
     final gestationDays = now.difference(input.matingDate).inDays;
@@ -172,26 +277,37 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
       careInstructions: careInstructions,
       upcomingMilestones: upcomingMilestones,
       isOverdue: isOverdue,
-      timestamp: DateTime.now(),
-      calculatorType: CalculatorType.pregnancy,
     );
   }
 
-  void _validateInput(PregnancyInput input) {
-    if (input.motherWeight <= 0) {
-      throw ArgumentError('Peso da mãe deve ser maior que zero');
-    }
-    if (input.matingDate.isAfter(DateTime.now())) {
-      throw ArgumentError('Data do acasalamento não pode ser futura');
-    }
-    
-    final maxGestationDays = _getTotalGestationDays(input.species) + 14;
-    final daysSinceMating = DateTime.now().difference(input.matingDate).inDays;
-    
-    if (daysSinceMating > maxGestationDays) {
-      throw ArgumentError('Data do acasalamento muito antiga para gestação ativa');
-    }
+  @override
+  List<String> getInputValidationErrors(PregnancyInput input) {
+    return input.validate();
   }
+
+  @override
+  PregnancyResult createErrorResult(String message, [PregnancyInput? input]) {
+    return PregnancyResult(
+      gestationDays: 0,
+      estimatedDueDate: DateTime.now(),
+      earliestDueDate: DateTime.now(),
+      latestDueDate: DateTime.now(),
+      currentStage: PregnancyStage.early,
+      daysRemaining: 0,
+      recommendedDailyCalories: 0,
+      recommendedWeight: 0,
+      nutritionalRecommendations: const [],
+      careInstructions: ['ERRO: $message'],
+      upcomingMilestones: const [],
+      isOverdue: false,
+    );
+  }
+
+  @override
+  PregnancyInput createInputFromMap(Map<String, dynamic> inputs) {
+    return PregnancyInput.fromMap(inputs);
+  }
+
 
   int _getTotalGestationDays(AnimalSpecies species) {
     switch (species) {
@@ -223,7 +339,7 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
 
   double _calculateDailyCalories(PregnancyInput input, PregnancyStage stage) {
     // Calorias base: ~70 * peso^0.75 para manutenção
-    double baseCalories = 70 * math.pow(input.motherWeight, 0.75);
+    double baseCalories = 70 * math.pow(input.motherWeight, 0.75).toDouble();
     
     switch (stage) {
       case PregnancyStage.early:
@@ -363,41 +479,41 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
     
     if (species == AnimalSpecies.dog) {
       milestones.addAll([
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 14,
           title: 'Implantação',
           description: 'Embriões se implantam no útero',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 25,
           title: 'Primeiro Ultrassom',
           description: 'Confirmação da gestação por ultrassom',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 30,
           title: 'Desenvolvimento Fetal',
           description: 'Órgãos começam a se formar',
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 40,
           title: 'Segundo Ultrassom',
           description: 'Contagem de filhotes',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 50,
           title: 'Preparação do Parto',
           description: 'Instinto de nidificação aumenta',
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 58,
           title: 'Monitoramento Intensivo',
           description: 'Verificar temperatura 2x/dia',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 63,
           title: 'Data Prevista do Parto',
           description: 'Parto esperado',
@@ -407,41 +523,41 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
     } else {
       // Gatos
       milestones.addAll([
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 15,
           title: 'Implantação',
           description: 'Embriões se implantam no útero',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 21,
           title: 'Primeiro Ultrassom',
           description: 'Confirmação da gestação',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 35,
           title: 'Desenvolvimento Fetal',
           description: 'Estruturas corporais se formam',
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 45,
           title: 'Segundo Ultrassom',
           description: 'Contagem de filhotes',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 55,
           title: 'Preparação do Parto',
           description: 'Comportamento de nidificação',
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 62,
           title: 'Monitoramento Final',
           description: 'Verificar sinais de parto',
           isImportant: true,
         ),
-        PregnancyMilestone(
+        const PregnancyMilestone(
           day: 65,
           title: 'Data Prevista do Parto',
           description: 'Parto esperado',
@@ -459,7 +575,7 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
       'species': {
         'type': 'enum',
         'label': 'Espécie',
-        'options': AnimalSpecies.values,
+        'options': AnimalSpecies.values.map((e) => e.name).toList(),
         'required': true,
       },
       'matingDate': {

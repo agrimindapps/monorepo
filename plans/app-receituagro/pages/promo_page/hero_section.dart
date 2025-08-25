@@ -159,7 +159,7 @@ class HeroSection extends StatelessWidget {
   }
 
   Widget _buildHeroImage() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [

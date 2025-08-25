@@ -183,13 +183,13 @@ class RemindersNotifier extends StateNotifier<RemindersState> {
 
 final remindersProvider = StateNotifierProvider<RemindersNotifier, RemindersState>((ref) {
   return RemindersNotifier(
-    sl<GetReminders>(),
-    sl<GetTodayReminders>(),
-    sl<GetOverdueReminders>(),
-    sl<AddReminder>(),
-    sl<UpdateReminder>(),
-    sl<CompleteReminder>(),
-    sl<SnoozeReminder>(),
-    sl<DeleteReminder>(),
+    getIt<GetReminders>(),
+    getIt<GetTodayReminders>(),
+    getIt<GetOverdueReminders>(),
+    getIt<AddReminder>(),
+    getIt<UpdateReminder>(),
+    getIt<CompleteReminder>(),
+    getIt<SnoozeReminder>(),
+    getIt<DeleteReminder>(),
   );
 });

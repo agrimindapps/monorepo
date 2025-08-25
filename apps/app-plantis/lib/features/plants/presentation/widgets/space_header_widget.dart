@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/spaces_provider.dart';
+
 import '../../domain/usecases/spaces_usecases.dart';
+import '../providers/spaces_provider.dart';
 
 class SpaceHeaderWidget extends StatefulWidget {
   final String? spaceId;

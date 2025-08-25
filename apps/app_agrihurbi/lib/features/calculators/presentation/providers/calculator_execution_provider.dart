@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/calculator_entity.dart';
 import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/execute_calculation.dart';
 
 /// Provider especializado para execução de cálculos
@@ -180,7 +180,7 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   /// Valida inputs obrigatórios
   ValidationResult validateRequiredInputs() {
     if (_activeCalculator == null) {
-      return ValidationResult(
+      return const ValidationResult(
         isValid: false,
         errors: ['Nenhuma calculadora ativa'],
         missingInputs: [],

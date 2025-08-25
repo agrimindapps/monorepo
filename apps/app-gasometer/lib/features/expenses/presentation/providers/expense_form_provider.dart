@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/expense_form_model.dart';
+
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_validator_service.dart';
-import '../../core/constants/expense_constants.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../models/expense_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de despesas
 class ExpenseFormProvider extends ChangeNotifier {
@@ -176,7 +178,7 @@ class ExpenseFormProvider extends ChangeNotifier {
   void _onDescriptionChanged() {
     _descriptionDebounceTimer?.cancel();
     _descriptionDebounceTimer = Timer(
-      Duration(milliseconds: ExpenseConstants.descriptionDebounceMs),
+      const Duration(milliseconds: ExpenseConstants.descriptionDebounceMs),
       () {
         // Verificar se o provider ainda está ativo
         if (_descriptionDebounceTimer == null) return;
@@ -198,7 +200,7 @@ class ExpenseFormProvider extends ChangeNotifier {
   void _onAmountChanged() {
     _amountDebounceTimer?.cancel();
     _amountDebounceTimer = Timer(
-      Duration(milliseconds: ExpenseConstants.amountDebounceMs),
+      const Duration(milliseconds: ExpenseConstants.amountDebounceMs),
       () {
         // Verificar se o provider ainda está ativo
         if (_amountDebounceTimer == null) return;
@@ -212,7 +214,7 @@ class ExpenseFormProvider extends ChangeNotifier {
   void _onOdometerChanged() {
     _odometerDebounceTimer?.cancel();
     _odometerDebounceTimer = Timer(
-      Duration(milliseconds: ExpenseConstants.odometerDebounceMs),
+      const Duration(milliseconds: ExpenseConstants.odometerDebounceMs),
       () {
         // Verificar se o provider ainda está ativo
         if (_odometerDebounceTimer == null) return;

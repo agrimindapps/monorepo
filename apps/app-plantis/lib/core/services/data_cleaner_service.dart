@@ -1,8 +1,9 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../features/plants/domain/repositories/plants_repository.dart';
-import '../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
+import '../../features/tasks/domain/repositories/tasks_repository.dart';
 
 class DataCleanerService {
   final PlantsRepository plantsRepository;
@@ -21,7 +22,7 @@ class DataCleanerService {
       final plantsResult = await plantsRepository.getPlants();
 
       if (plantsResult.isLeft()) {
-        return Left(ServerFailure('Erro ao obter plantas'));
+        return const Left(ServerFailure('Erro ao obter plantas'));
       }
 
       final plants = plantsResult.getOrElse(() => []);
@@ -30,7 +31,7 @@ class DataCleanerService {
       final tasksResult = await tasksRepository.getTasks();
 
       if (tasksResult.isLeft()) {
-        return Left(ServerFailure('Erro ao obter tarefas'));
+        return const Left(ServerFailure('Erro ao obter tarefas'));
       }
 
       final tasks = tasksResult.getOrElse(() => []);

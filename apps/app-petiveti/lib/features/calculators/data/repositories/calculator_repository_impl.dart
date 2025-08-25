@@ -1,21 +1,14 @@
+import '../../domain/calculators/anesthesia_calculator.dart';
+import '../../domain/calculators/body_condition_calculator.dart';
+import '../../domain/calculators/caloric_needs_calculator.dart';
+import '../../domain/calculators/hydration_calculator.dart';
+import '../../domain/calculators/medication_dosage_calculator.dart';
+import '../../domain/calculators/pregnancy_calculator.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculator.dart';
 import '../../domain/repositories/calculator_repository.dart';
 import '../datasources/calculator_local_datasource.dart';
 import '../models/calculation_history_model.dart';
-import '../../domain/calculators/medication_dosage_calculator.dart';
-import '../../domain/calculators/caloric_needs_calculator.dart';
-import '../../domain/calculators/fluid_therapy_calculator.dart';
-import '../../domain/calculators/anesthesia_calculator.dart';
-import '../../domain/calculators/pregnancy_calculator.dart';
-import '../../domain/calculators/body_condition_calculator.dart';
-import '../../domain/calculators/diabetes_insulin_calculator.dart';
-import '../../domain/calculators/hydration_calculator.dart';
-import '../../domain/calculators/unit_conversion_calculator.dart';
-import '../../domain/calculators/advanced_diet_calculator.dart';
-import '../../domain/calculators/animal_age_calculator.dart';
-import '../../domain/calculators/ideal_weight_calculator.dart';
-import '../../domain/calculators/pregnancy_birth_calculator.dart';
 
 /// Implementação do repositório de calculadoras
 class CalculatorRepositoryImpl implements CalculatorRepository {
@@ -25,19 +18,13 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
 
   // Cache estático das calculadoras para melhor performance
   static final List<Calculator> _calculators = [
-    MedicationDosageCalculator(),
-    CaloricNeedsCalculator(),
-    FluidTherapyCalculator(),
-    AnesthesiaCalculator(),
-    PregnancyCalculator(),
-    BodyConditionCalculator(),
-    DiabetesInsulinCalculator(),
-    HydrationCalculator(),
-    UnitConversionCalculator(),
-    AdvancedDietCalculator(),
-    AnimalAgeCalculator(),
-    IdealWeightCalculator(),
-    PregnancyBirthCalculator(),
+    const AnesthesiaCalculator(),
+    const BodyConditionCalculator(),
+    const CaloricNeedsCalculator(),
+    const HydrationCalculator(),
+    const MedicationDosageCalculator(),
+    const PregnancyCalculator(),
+    // Outras calculadoras serão adicionadas gradualmente conforme são corrigidas
   ];
 
   @override

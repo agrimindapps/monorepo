@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/expenses_paginated_provider.dart';
+
+import '../../../../core/widgets/paginated_list_view.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_formatter_service.dart';
-import '../../../../core/widgets/paginated_list_view.dart';
+import '../providers/expenses_paginated_provider.dart';
 
 /// Widget de lista paginada de despesas com lazy loading
 class ExpensesPaginatedList extends StatelessWidget {
@@ -147,7 +148,7 @@ class ExpensesPaginatedList extends StatelessWidget {
               ],
               
               // Informações adicionais
-              if (showVehicleInfo || expense.establishmentName?.isNotEmpty == true) ...[
+              if (showVehicleInfo || expense.establishmentName.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [

@@ -1,5 +1,5 @@
-import '../entities/calculator.dart';
 import '../entities/calculation_result.dart';
+import '../entities/calculator.dart';
 import '../entities/input_field.dart' as input;
 
 /// Resultado da calculadora de gestação e parto
@@ -170,9 +170,9 @@ class PregnancyBirthCalculator extends Calculator {
       ),
       ResultItem(
         label: 'Fase Atual da Gestação',
-        value: currentPhase['name'],
+        value: currentPhase['name']?.toString(),
         severity: ResultSeverity.info,
-        description: currentPhase['description'],
+        description: currentPhase['description']?.toString(),
       ),
     ];
 
@@ -183,7 +183,7 @@ class PregnancyBirthCalculator extends Calculator {
       recommendations.add(
         Recommendation(
           title: 'Fase ${phase['name']} (${phase['start']}-${phase['end']} dias)',
-          message: phase['description'],
+          message: phase['description']?.toString() ?? '',
           severity: ResultSeverity.info,
         ),
       );
@@ -345,7 +345,7 @@ class PregnancyBirthCalculator extends Calculator {
     final phases = _getGestationPhases(species);
     
     for (final phase in phases) {
-      if (gestationDay >= phase['start'] && gestationDay <= phase['end']) {
+      if (gestationDay >= (phase['start'] as num) && gestationDay <= (phase['end'] as num)) {
         return phase;
       }
     }
@@ -428,17 +428,17 @@ class PregnancyBirthCalculator extends Calculator {
 
     if (daysToDelivery <= 7) {
       recommendations.addAll([
-        Recommendation(
+        const Recommendation(
           title: 'Preparação para o Parto',
           message: 'Prepare um local tranquilo e limpo para o parto',
           severity: ResultSeverity.warning,
         ),
-        Recommendation(
+        const Recommendation(
           title: 'Monitoramento',
           message: 'Monitore a temperatura corporal diariamente - queda indica parto iminente',
           severity: ResultSeverity.warning,
         ),
-        Recommendation(
+        const Recommendation(
           title: 'Veterinário',
           message: 'Tenha contato do veterinário disponível 24h',
           severity: ResultSeverity.danger,
@@ -446,12 +446,12 @@ class PregnancyBirthCalculator extends Calculator {
       ]);
     } else if (daysToDelivery <= 14) {
       recommendations.addAll([
-        Recommendation(
+        const Recommendation(
           title: 'Preparação',
           message: 'Comece a preparar o ambiente para o parto',
           severity: ResultSeverity.info,
         ),
-        Recommendation(
+        const Recommendation(
           title: 'Nutrição',
           message: 'Aumente gradualmente a quantidade de ração de alta qualidade',
           severity: ResultSeverity.info,
@@ -462,7 +462,7 @@ class PregnancyBirthCalculator extends Calculator {
     // Recomendações gerais baseadas na fase da gestação
     if (gestationDay >= 45) {
       recommendations.add(
-        Recommendation(
+        const Recommendation(
           title: 'Exercícios',
           message: 'Reduza exercícios intensos, prefira caminhadas curtas',
           severity: ResultSeverity.info,
@@ -472,7 +472,7 @@ class PregnancyBirthCalculator extends Calculator {
 
     if (gestationDay >= 35) {
       recommendations.add(
-        Recommendation(
+        const Recommendation(
           title: 'Alimentação',
           message: 'Aumente a frequência das refeições para 3-4 vezes ao dia',
           severity: ResultSeverity.info,

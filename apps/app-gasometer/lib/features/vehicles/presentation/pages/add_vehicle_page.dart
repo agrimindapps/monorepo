@@ -1,16 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
+
+import '../../../../core/interfaces/validation_result.dart';
+import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
-import '../../../../core/presentation/widgets/validated_form_field.dart';
-import '../../../../core/validation/validation_service.dart';
-import '../../../../core/interfaces/validation_result.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicles_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 
 class AddVehiclePage extends StatefulWidget {
   final Map<String, dynamic>? vehicle;
@@ -59,15 +61,15 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
 
   void _populateFields() {
     final vehicle = widget.vehicle!;
-    _marcaController.text = vehicle['marca'] ?? '';
-    _modeloController.text = vehicle['modelo'] ?? '';
+    _marcaController.text = vehicle['marca'] as String? ?? '';
+    _modeloController.text = vehicle['modelo'] as String? ?? '';
     _anoController.text = vehicle['ano']?.toString() ?? '';
-    _corController.text = vehicle['cor'] ?? '';
-    _placaController.text = vehicle['placa'] ?? '';
-    _chassiController.text = vehicle['chassi'] ?? '';
-    _renavamController.text = vehicle['renavam'] ?? '';
+    _corController.text = vehicle['cor'] as String? ?? '';
+    _placaController.text = vehicle['placa'] as String? ?? '';
+    _chassiController.text = vehicle['chassi'] as String? ?? '';
+    _renavamController.text = vehicle['renavam'] as String? ?? '';
     _odometroController.text = vehicle['odometroInicial']?.toString() ?? '';
-    _selectedCombustivel = vehicle['combustivel'] ?? 'Flex';
+    _selectedCombustivel = vehicle['combustivel'] as String? ?? 'Flex';
   }
 
   @override
@@ -105,13 +107,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildFormTitle(isEditing),
-            const SizedBox(height: 24),
+            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildIdentificationSection(),
-            const SizedBox(height: 24),
+            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildTechnicalSection(),
-            const SizedBox(height: 24),
+            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildDocumentationSection(),
-            const SizedBox(height: 24),
+            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildAdditionalInfoSection(),
           ],
         ),
@@ -124,8 +126,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       child: Text(
         isEditing ? 'Editar Veículo' : 'Cadastrar Veículo',
         style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+          fontSize: GasometerDesignTokens.fontSizeXxl,
+          fontWeight: GasometerDesignTokens.fontWeightBold,
           color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
@@ -149,7 +151,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
           onValidationChanged: (result) => _validationResults['marca'] = result,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
           controller: _modeloController,
           label: 'Modelo',
@@ -161,13 +163,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
           onValidationChanged: (result) => _validationResults['modelo'] = result,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         Row(
           children: [
             Expanded(
               child: _buildYearDropdown(),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: GasometerDesignTokens.spacingMd),
             Expanded(
               child: ValidatedFormField(
                 controller: _corController,
@@ -222,7 +224,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             setState(() {});
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
           controller: _placaController,
           label: 'Placa',
@@ -240,7 +242,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             setState(() {});
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
           controller: _chassiController,
           label: 'Chassi (opcional)',
@@ -259,7 +261,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             setState(() {});
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
           controller: _renavamController,
           label: 'Renavam (opcional)',
@@ -303,27 +305,29 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             Text(
               'Foto do Veículo',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+                fontSize: GasometerDesignTokens.fontSizeLg,
+                fontWeight: GasometerDesignTokens.fontWeightMedium,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
               ' (opcional)',
               style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                fontSize: GasometerDesignTokens.fontSizeMd,
+                color: Theme.of(context).colorScheme.onSurface.withValues(
+                  alpha: GasometerDesignTokens.opacitySecondary,
+                ),
                 fontStyle: FontStyle.italic,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).colorScheme.outline),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusLg),
           ),
           child: Column(
             children: [
@@ -331,8 +335,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(GasometerDesignTokens.radiusLg),
                       ),
                       child: Image.file(
                         _vehicleImage!,
@@ -348,13 +352,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                       right: 8,
                       child: CircleAvatar(
                         backgroundColor: Theme.of(context).colorScheme.error,
-                        radius: 16,
+                        radius: GasometerDesignTokens.spacingLg,
                         child: IconButton(
                           onPressed: _removePhoto,
                           icon: Icon(
                             Icons.close,
                             color: Theme.of(context).colorScheme.onError,
-                            size: 16,
+                            size: GasometerDesignTokens.iconSizeXs,
                           ),
                           padding: EdgeInsets.zero,
                         ),
@@ -364,7 +368,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 ),
                 const Divider(height: 1),
                 Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -378,23 +382,27 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 ),
               ] else ...[
                 Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXxxl),
                   child: Column(
                     children: [
                       Icon(
                         Icons.directions_car,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                        size: GasometerDesignTokens.iconSizeXxxl + 16,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(
+                          alpha: GasometerDesignTokens.opacityHint,
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: GasometerDesignTokens.spacingLg),
                       Text(
                         'Nenhuma foto selecionada',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(
+                            alpha: GasometerDesignTokens.opacitySecondary,
+                          ),
+                          fontSize: GasometerDesignTokens.fontSizeLg,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: GasometerDesignTokens.spacingLg),
                       ElevatedButton.icon(
                         onPressed: _showImageSourceDialog,
                         icon: const Icon(Icons.add_a_photo),
@@ -402,9 +410,11 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
+                          padding: GasometerDesignTokens.paddingOnly(
+                            left: GasometerDesignTokens.spacingXxl,
+                            right: GasometerDesignTokens.spacingXxl,
+                            top: GasometerDesignTokens.spacingMd,
+                            bottom: GasometerDesignTokens.spacingMd,
                           ),
                         ),
                       ),
@@ -456,7 +466,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
   void _showImageSourceDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -664,12 +674,12 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         Text(
           'Tipo de Combustível',
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontSize: GasometerDesignTokens.fontSizeMd,
+            fontWeight: GasometerDesignTokens.fontWeightMedium,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -898,7 +908,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       
       // Criar entidade do veículo
       final vehicleEntity = VehicleEntity(
-        id: widget.vehicle?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.vehicle?['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userId: context.read<AuthProvider>().userId,
         name: '${_sanitizeInput(_marcaController.text)} ${_sanitizeInput(_modeloController.text)}',
         brand: _sanitizeInput(_marcaController.text),
@@ -920,22 +930,34 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       );
       
       // Salvar via provider
+      bool success;
       if (widget.vehicle != null) {
-        await vehiclesProvider.updateVehicle(vehicleEntity);
+        success = await vehiclesProvider.updateVehicle(vehicleEntity);
       } else {
-        await vehiclesProvider.addVehicle(vehicleEntity);
+        success = await vehiclesProvider.addVehicle(vehicleEntity);
       }
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.vehicle != null 
-                ? 'Veículo atualizado com sucesso!' 
-                : 'Veículo cadastrado com sucesso!'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
-        Navigator.of(context).pop(true); // Retorna true para indicar sucesso
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.vehicle != null 
+                  ? 'Veículo atualizado com sucesso!' 
+                  : 'Veículo cadastrado com sucesso!'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+          Navigator.of(context).pop(true); // Retorna true para indicar sucesso
+        } else {
+          // Se falhou, mostrar o erro do provider se disponível
+          final errorMessage = vehiclesProvider.errorMessage ?? 'Erro desconhecido ao salvar veículo';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao salvar veículo: $errorMessage'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

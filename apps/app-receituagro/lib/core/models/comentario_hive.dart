@@ -50,16 +50,16 @@ class ComentarioHive extends HiveObject {
 
   factory ComentarioHive.fromJson(Map<String, dynamic> json) {
     return ComentarioHive(
-      objectId: json['objectId'],
+      objectId: json['objectId'] as String?,
       createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) : null,
       updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) : null,
-      idReg: json['idReg'] ?? '',
+      idReg: (json['idReg'] as String?) ?? '',
       status: json['status'] != null ? json['status'] as bool : true,
-      titulo: json['titulo'] ?? '',
-      conteudo: json['conteudo'] ?? '',
-      ferramenta: json['ferramenta'] ?? '',
-      pkIdentificador: json['pkIdentificador'] ?? '',
-      userId: json['userId'] ?? '',
+      titulo: (json['titulo'] as String?) ?? '',
+      conteudo: (json['conteudo'] as String?) ?? '',
+      ferramenta: (json['ferramenta'] as String?) ?? '',
+      pkIdentificador: (json['pkIdentificador'] as String?) ?? '',
+      userId: (json['userId'] as String?) ?? '',
     );
   }
 

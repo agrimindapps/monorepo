@@ -58,7 +58,7 @@ class DefensivoListItem extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: avatarColor,

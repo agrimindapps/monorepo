@@ -1,15 +1,18 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:dartz/dartz.dart';
 import 'dart:developer' as developer;
+
+import 'package:dartz/dartz.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
 import '../../domain/repositories/i_analytics_repository.dart';
-import '../../shared/utils/failure.dart';
 import '../../shared/config/environment_config.dart';
+import '../../shared/utils/failure.dart';
 
 /// Implementação concreta do repositório de analytics usando Firebase Analytics
 class FirebaseAnalyticsService implements IAnalyticsRepository {
   final FirebaseAnalytics? _analytics;
 
+  /// Cria uma instância do FirebaseAnalyticsService
   FirebaseAnalyticsService({
     FirebaseAnalytics? analytics,
   }) : _analytics = analytics ?? (kIsWeb ? null : FirebaseAnalytics.instance);
@@ -62,6 +65,11 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
     } catch (e) {
       return Left(FirebaseFailure('Erro ao definir propriedades: $e'));
     }
+  }
+
+  /// Define uma única propriedade do usuário
+  Future<Either<Failure, void>> setUserProperty(String name, String value) async {
+    return await setUserProperties(properties: {name: value});
   }
 
   @override
@@ -338,7 +346,7 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
         // Limita tamanho de strings
         sanitized[key] = value.length > 100 ? value.substring(0, 100) : value;
       } else if (value is num || value is bool) {
-        sanitized[key] = value;
+        sanitized[key] = value as Object;
       } else if (value != null) {
         // Converte outros tipos para string
         final stringValue = value.toString();

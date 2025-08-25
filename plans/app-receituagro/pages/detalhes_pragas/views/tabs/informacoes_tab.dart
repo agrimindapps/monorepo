@@ -515,7 +515,7 @@ class InformacoesTab extends GetView<DetalhesPragasController> {
     return Container(
       margin: const EdgeInsets.only(bottom: DetalhesPragasDesignTokens.mediumSpacing),
       child: Obx(() {
-        return Container(
+        return DecoratedBox(
           decoration: DetalhesPragasDesignTokens.cardDecorationFlat(context,
             backgroundColor: isDark ? const Color(0xFF222228) : Colors.white),
           child: Padding(

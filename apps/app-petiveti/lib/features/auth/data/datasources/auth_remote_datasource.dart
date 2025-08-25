@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../models/user_model.dart';
 import '../../domain/entities/user.dart' as domain;
+import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> signInWithEmail(String email, String password);
@@ -45,7 +45,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (credential.user == null) {
-        throw ServerException(message: 'Falha na autenticação');
+        throw const ServerException(message: 'Falha na autenticação');
       }
 
       // Update last login
@@ -68,7 +68,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (credential.user == null) {
-        throw ServerException(message: 'Falha na criação da conta');
+        throw const ServerException(message: 'Falha na criação da conta');
       }
 
       // Update display name if provided
@@ -97,7 +97,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       
       if (googleUser == null) {
-        throw ServerException(message: 'Login com Google cancelado pelo usuário');
+        throw const ServerException(message: 'Login com Google cancelado pelo usuário');
       }
 
       // Obtain the auth details from the request
@@ -113,7 +113,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userCredential = await firebaseAuth.signInWithCredential(credential);
       
       if (userCredential.user == null) {
-        throw ServerException(message: 'Falha no login com Google');
+        throw const ServerException(message: 'Falha no login com Google');
       }
 
       // Create or update user document in Firestore
@@ -139,7 +139,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       // Create Firebase credential
-      final oauthCredential = firebase_auth.OAuthProvider("apple.com").credential(
+      final oauthCredential = firebase_auth.OAuthProvider('apple.com').credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
@@ -148,7 +148,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userCredential = await firebaseAuth.signInWithCredential(oauthCredential);
       
       if (userCredential.user == null) {
-        throw ServerException(message: 'Falha no login com Apple');
+        throw const ServerException(message: 'Falha no login com Apple');
       }
 
       // Create or update user document with Apple-specific data
@@ -172,7 +172,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final LoginResult result = await FacebookAuth.instance.login();
 
       if (result.status != LoginStatus.success) {
-        throw ServerException(message: 'Login com Facebook cancelado ou falhou');
+        throw const ServerException(message: 'Login com Facebook cancelado ou falhou');
       }
 
       // Create a credential from the access token
@@ -184,7 +184,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userCredential = await firebaseAuth.signInWithCredential(facebookAuthCredential);
       
       if (userCredential.user == null) {
-        throw ServerException(message: 'Falha no login com Facebook');
+        throw const ServerException(message: 'Falha no login com Facebook');
       }
 
       // Create or update user document in Firestore
@@ -229,7 +229,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final user = firebaseAuth.currentUser;
       if (user == null) {
-        throw ServerException(message: 'Usuário não está logado');
+        throw const ServerException(message: 'Usuário não está logado');
       }
 
       await user.sendEmailVerification();
@@ -256,7 +256,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final user = firebaseAuth.currentUser;
       if (user == null) {
-        throw ServerException(message: 'Usuário não está logado');
+        throw const ServerException(message: 'Usuário não está logado');
       }
 
       // Update Firebase Auth profile
@@ -286,7 +286,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final user = firebaseAuth.currentUser;
       if (user == null) {
-        throw ServerException(message: 'Usuário não está logado');
+        throw const ServerException(message: 'Usuário não está logado');
       }
 
       // Delete user document from Firestore
@@ -330,11 +330,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         role: _parseUserRole(firestoreData?['role']),
         provider: _parseAuthProvider(firebaseUser.providerData),
         isEmailVerified: firebaseUser.emailVerified,
-        isPremium: firestoreData?['isPremium'] ?? false,
+        isPremium: (firestoreData?['isPremium'] as bool?) ?? false,
         premiumExpiresAt: firestoreData?['premiumExpiresAt'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(firestoreData!['premiumExpiresAt'])
+            ? DateTime.fromMillisecondsSinceEpoch(firestoreData!['premiumExpiresAt'] as int)
             : null,
-        metadata: firestoreData?['metadata'],
+        metadata: firestoreData?['metadata'] as Map<String, dynamic>?,
         createdAt: firebaseUser.metadata.creationTime ?? now,
         updatedAt: now,
         lastLoginAt: firebaseUser.metadata.lastSignInTime,

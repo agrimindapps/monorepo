@@ -1,7 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:app_petiveti/features/calculators/domain/entities/calorie_input.dart';
-import 'package:app_petiveti/features/calculators/domain/strategies/calorie_calculator_strategy.dart';
 import 'package:app_petiveti/features/calculators/domain/strategies/calculator_strategy.dart';
+import 'package:app_petiveti/features/calculators/domain/strategies/calorie_calculator_strategy.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CalorieCalculatorStrategy', () {
@@ -200,7 +200,7 @@ void main() {
         // Assert
         // Para lactação: DER = RER × base_factor + RER × (0.25 × number_of_offspring)
         // Lactating base factor = 2.0, bonus = 0.25 × 4 = 1.0
-        final expectedMultiplier = 2.0 + 1.0; // 3.0 total
+        const expectedMultiplier = 2.0 + 1.0; // 3.0 total
         final expectedDer = result.restingEnergyRequirement * expectedMultiplier * 1.2 * 1.0; // moderate activity, ideal BCS
         expect(result.dailyEnergyRequirement, closeTo(expectedDer, 100));
       });
@@ -221,7 +221,7 @@ void main() {
 
         // Assert
         // Growth factor = 3.0, active = 1.6
-        final expectedMultiplier = 3.0 * 1.6 * 1.1; // age adjustment for young
+        const expectedMultiplier = 3.0 * 1.6 * 1.1; // age adjustment for young
         expect(result.dailyEnergyRequirement, greaterThan(result.restingEnergyRequirement * 4));
       });
 
@@ -241,7 +241,7 @@ void main() {
 
         // Assert
         // Senior factor = 1.2, light activity = 1.0, overweight = 0.8, senior age adjustment = 0.95
-        final expectedMultiplier = 1.2 * 1.0 * 0.8 * 0.95;
+        const expectedMultiplier = 1.2 * 1.0 * 0.8 * 0.95;
         expect(result.dailyEnergyRequirement, closeTo(result.restingEnergyRequirement * expectedMultiplier, 100));
       });
     });
@@ -332,7 +332,7 @@ void main() {
 
         // Assert
         // Lactating animals need 2.5x more water
-        final expectedWater = 4.0 * 60 * 2.5; // 600ml
+        const expectedWater = 4.0 * 60 * 2.5; // 600ml
         expect(result.waterRequirement, closeTo(expectedWater, 100));
       });
     });

@@ -1,5 +1,5 @@
-import '../entities/expense_entity.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../entities/expense_entity.dart';
 import 'expense_formatter_service.dart';
 
 /// Serviço especializado para calcular estatísticas de despesas

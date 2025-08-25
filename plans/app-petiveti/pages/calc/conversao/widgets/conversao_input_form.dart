@@ -66,7 +66,7 @@ class ConversaoInputForm extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Divider(),
                   const SizedBox(height: 20),
-                  Container(
+                  DecoratedBox(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(

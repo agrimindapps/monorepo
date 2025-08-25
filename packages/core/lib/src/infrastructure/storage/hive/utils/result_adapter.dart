@@ -1,5 +1,5 @@
-import '../../../../shared/utils/result.dart';
 import '../../../../shared/utils/app_error.dart';
+import '../../../../shared/utils/result.dart';
 import '../exceptions/storage_exceptions.dart';
 
 /// Utilitários para conversão entre exceções de storage e AppError

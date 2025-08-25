@@ -193,7 +193,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         'Login Anônimo',
                         style: TextStyle(
@@ -212,7 +212,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'O Login Anônimo permite que você:',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
@@ -262,14 +262,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               color: AppColors.warning.withAlpha(51),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.warning_amber_rounded,
                               color: AppColors.warning,
                               size: 16,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Expanded(
+                          const Expanded(
                             child: Text(
                               'Atenção: Seus dados serão perdidos quando você sair do app',
                               style: TextStyle(
@@ -418,7 +418,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
               height: 1.2,

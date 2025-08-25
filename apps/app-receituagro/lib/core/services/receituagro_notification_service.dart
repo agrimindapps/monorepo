@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Interface para o serviço de notificações do ReceitaAgro
 abstract class IReceitaAgroNotificationService {
@@ -343,8 +344,8 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
       switch (type) {
         case 'application_reminder':
           showApplicationReminderNotification(
-            defensiveName: data['defensive_name'],
-            plantName: data['plant_name'],
+            defensiveName: (data['defensive_name'] as String?) ?? '',
+            plantName: (data['plant_name'] as String?) ?? '',
             applicationDate: newDate,
           );
           break;

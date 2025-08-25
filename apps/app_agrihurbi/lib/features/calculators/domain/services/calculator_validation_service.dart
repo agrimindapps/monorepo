@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
-import '../interfaces/calculator_strategy.dart';
+
 import '../entities/calculator_parameter.dart';
+import '../interfaces/calculator_strategy.dart';
 import '../repositories/calculator_data_repository.dart';
 
 /// Service especializado em validação de parâmetros de calculadoras

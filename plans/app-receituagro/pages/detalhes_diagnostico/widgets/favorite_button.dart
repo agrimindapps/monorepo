@@ -21,7 +21,7 @@ class FavoriteButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isFavorite ? Colors.pink.shade50 : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),

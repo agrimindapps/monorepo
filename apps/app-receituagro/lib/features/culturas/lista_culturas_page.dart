@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../core/widgets/modern_header_widget.dart';
-import '../pragas/lista_pragas_por_cultura_page.dart';
+
+import 'package:flutter/material.dart';
+
+import '../../core/di/injection_container.dart';
 import '../../core/models/cultura_hive.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
-import '../../core/di/injection_container.dart';
-import 'widgets/cultura_search_field.dart';
+import '../../core/widgets/modern_header_widget.dart';
+import '../pragas/lista_pragas_por_cultura_page.dart';
 import 'widgets/cultura_item_widget.dart';
+import 'widgets/cultura_search_field.dart';
 import 'widgets/empty_state_widget.dart';
 import 'widgets/loading_skeleton_widget.dart';
 
@@ -56,6 +58,8 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
         setState(() {
           _allCulturas.clear();
           _allCulturas.addAll(culturas);
+          // Ordena alfabeticamente por nome da cultura
+          _allCulturas.sort((a, b) => a.cultura.compareTo(b.cultura));
           _filteredCulturas = List.from(_allCulturas);
           _isLoading = false;
         });
@@ -101,6 +105,8 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
 
     if (mounted) {
       setState(() {
+        // Ordena resultados filtrados alfabeticamente
+        filtered.sort((a, b) => a.cultura.compareTo(b.cultura));
         _filteredCulturas = filtered;
         _isSearching = false;
       });
@@ -129,7 +135,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
   void _onCulturaTap(CulturaHive cultura) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => ListaPragasPorCulturaPage(
           culturaId: cultura.idReg,
           culturaNome: cultura.cultura,
@@ -214,7 +220,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
       return EmptyStateWidget(
         isDark: isDark,
         message: 'Erro ao carregar culturas',
-        subtitle: _errorMessage!,
+        subtitle: _errorMessage,
       );
     } else if (_filteredCulturas.isEmpty) {
       return EmptyStateWidget(

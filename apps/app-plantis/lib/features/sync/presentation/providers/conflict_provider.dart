@@ -73,11 +73,11 @@ class ConflictProvider extends ChangeNotifier {
 
       final conflictHistory = ConflictHistoryModel.create(
         modelType: conflictData.modelType,
-        modelId: conflictData.localData.id,
+        modelId: conflictData.localData.id as String,
         resolutionStrategy: strategy.toString(),
-        localData: conflictData.localData.toMap(),
-        remoteData: conflictData.remoteData.toMap(),
-        resolvedData: resolvedData.toMap(),
+        localData: conflictData.localData.toMap() as Map<String, dynamic>,
+        remoteData: conflictData.remoteData.toMap() as Map<String, dynamic>,
+        resolvedData: resolvedData.toMap() as Map<String, dynamic>,
         autoResolved: strategy != ConflictResolutionStrategy.manual,
       );
 

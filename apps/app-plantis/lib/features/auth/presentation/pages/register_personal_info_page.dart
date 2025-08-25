@@ -55,10 +55,10 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.email, color: Colors.orange, size: 24),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Text(
                         'Email já cadastrado',
                         style: TextStyle(
@@ -89,12 +89,12 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             _emailController.clear();
                           },
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: PlantisColors.primary),
+                            side: const BorderSide(color: PlantisColors.primary),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Usar outro email',
                             style: TextStyle(color: PlantisColors.primary),
                           ),
@@ -155,7 +155,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.eco, size: 32, color: PlantisColors.primary),
+                      const Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
                         'PlantApp',
@@ -202,7 +202,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                       Expanded(
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'Cadastrar',
                               style: TextStyle(
                                 color: Colors.black87,
@@ -263,7 +263,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Name field
-                        Text(
+                        const Text(
                           'Nome completo',
                           style: TextStyle(
                             color: PlantisColors.primary,
@@ -281,7 +281,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                           ),
                           decoration: InputDecoration(
                             hintText: 'Ex: João Silva',
-                            prefixIcon: Icon(
+                            prefixIcon: const Icon(
                               Icons.person_outline,
                               color: PlantisColors.primary,
                             ),
@@ -303,7 +303,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: PlantisColors.primary,
                                 width: 2,
                               ),
@@ -332,7 +332,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                           ),
                           decoration: InputDecoration(
                             hintText: 'Email',
-                            prefixIcon: Icon(
+                            prefixIcon: const Icon(
                               Icons.email_outlined,
                               color: PlantisColors.primary,
                             ),
@@ -354,7 +354,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: PlantisColors.primary,
                                 width: 2,
                               ),
@@ -381,7 +381,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                               child: OutlinedButton(
                                 onPressed: () => context.pop(),
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
+                                  side: const BorderSide(
                                     color: PlantisColors.primary,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -391,7 +391,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                                     vertical: 16,
                                   ),
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Voltar',
                                   style: TextStyle(
                                     color: PlantisColors.primary,
@@ -429,7 +429,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                         const SizedBox(height: 24),
 
                         // Terms text
-                        Center(
+                        const Center(
                           child: Text(
                             'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
                             textAlign: TextAlign.center,

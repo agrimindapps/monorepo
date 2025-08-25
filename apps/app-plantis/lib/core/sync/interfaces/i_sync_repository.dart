@@ -1,6 +1,7 @@
-import 'package:dartz/dartz.dart';
-import '../../data/models/base_sync_model.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../data/models/base_sync_model.dart';
 
 /// Repository interface for synchronization operations
 abstract class ISyncRepository<T extends BaseSyncModel> {

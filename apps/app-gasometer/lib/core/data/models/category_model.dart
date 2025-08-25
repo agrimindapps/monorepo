@@ -89,7 +89,7 @@ class CategoryModel extends BaseSyncModel {
       version: baseFields['version'] as int,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-      categoria: map['categoria']?.toInt() ?? 0,
+      categoria: (map['categoria'] as num?)?.toInt() ?? 0,
       descricao: map['descricao']?.toString() ?? '',
     );
   }
@@ -130,7 +130,7 @@ class CategoryModel extends BaseSyncModel {
       version: baseFields['version'] as int,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-      categoria: map['categoria']?.toInt() ?? 0,
+      categoria: (map['categoria'] as num?)?.toInt() ?? 0,
       descricao: map['descricao']?.toString() ?? '',
     );
   }

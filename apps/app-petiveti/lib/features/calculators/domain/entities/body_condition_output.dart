@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'calculation_result.dart';
 
 /// Enum para classificação da condição corporal
@@ -46,18 +45,16 @@ enum NutritionalRecommendationType {
 class BcsRecommendation extends Recommendation {
   const BcsRecommendation({
     required this.type,
-    required String title,
+    required super.title,
     required this.description,
     required this.actionSteps,
     this.targetWeightRange,
     this.expectedTimeframe,
     this.monitoringFrequency,
     this.additionalNotes,
-    ResultSeverity severity = ResultSeverity.info,
+    super.severity,
   }) : super(
-    title: title,
     message: description,
-    severity: severity,
   );
 
   final NutritionalRecommendationType type;
@@ -253,11 +250,11 @@ class BodyConditionOutputFactory {
           value: currentWeight.toStringAsFixed(1),
           unit: 'kg',
         ),
-        if (weightEstimate != null) ResultItem(
-          label: 'Peso Ideal Estimado',
-          value: weightEstimate.toStringAsFixed(1),
-          unit: 'kg',
-        ),
+        ResultItem(
+        label: 'Peso Ideal Estimado',
+        value: weightEstimate.toStringAsFixed(1),
+        unit: 'kg',
+      ),
         if (weightAdjustment != 0) ResultItem(
           label: weightAdjustment > 0 ? 'Peso a Ganhar' : 'Peso a Perder',
           value: weightAdjustment.abs().toStringAsFixed(1),
@@ -345,7 +342,7 @@ class BodyConditionOutputFactory {
         type: NutritionalRecommendationType.increaseFood,
         title: 'Programa de Ganho de Peso',
         description: 'Animal abaixo do peso ideal necessita aumento controlado da alimentação.',
-        actionSteps: [
+        actionSteps: const [
           'Aumentar porção diária em 20-30%',
           'Dividir em 3-4 refeições menores',
           'Considerar ração hipercalórica de qualidade',
@@ -363,7 +360,7 @@ class BodyConditionOutputFactory {
         type: NutritionalRecommendationType.decreaseFood,
         title: 'Programa de Emagrecimento',
         description: 'Animal acima do peso ideal necessita redução controlada da alimentação.',
-        actionSteps: [
+        actionSteps: const [
           'Reduzir porção diária em 20-25%',
           'Aumentar frequência de refeições (menor quantidade)',
           'Trocar por ração light/dietética se necessário',
@@ -378,7 +375,7 @@ class BodyConditionOutputFactory {
       ));
     } else {
       // Animal no peso ideal - manter
-      recommendations.add(BcsRecommendation(
+      recommendations.add(const BcsRecommendation(
         type: NutritionalRecommendationType.maintain,
         title: 'Manutenção da Condição Ideal',
         description: 'Animal em peso ideal. Manter rotina atual de alimentação e exercícios.',
@@ -395,7 +392,7 @@ class BodyConditionOutputFactory {
 
     // Recomendações especiais para animais castrados
     if (isNeutered) {
-      recommendations.add(BcsRecommendation(
+      recommendations.add(const BcsRecommendation(
         type: NutritionalRecommendationType.specializedDiet,
         title: 'Considerações para Animal Castrado',
         description: 'Animais castrados tendem a ter metabolismo mais lento.',
@@ -410,7 +407,7 @@ class BodyConditionOutputFactory {
 
     // Recomendações para condições metabólicas
     if (hasMetabolicConditions) {
-      recommendations.add(BcsRecommendation(
+      recommendations.add(const BcsRecommendation(
         type: NutritionalRecommendationType.specializedDiet,
         title: 'Manejo de Condições Metabólicas',
         description: 'Condições metabólicas requerem abordagem nutricional específica.',

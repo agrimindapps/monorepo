@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
-import '../providers/plants_provider.dart';
+
 import '../../domain/entities/plant.dart';
+import '../providers/plants_provider.dart';
 
 /// Granular selectors to minimize widget rebuilds
 /// Each selector listens only to specific parts of the provider state

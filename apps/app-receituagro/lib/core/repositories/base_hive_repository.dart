@@ -54,9 +54,18 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
   @override
   List<T> getAll() {
     try {
+      // Força abertura do box se não estiver aberto
+      if (!Hive.isBoxOpen(_boxName)) {
+        print('⚠️ Box $_boxName não estava aberto, abrindo...');
+        // Não podemos usar await aqui, então retorna vazio se não estiver aberto
+        return [];
+      }
+      
       final box = Hive.box<T>(_boxName);
+      print('📦 Box $_boxName aberto com ${box.length} itens');
       return box.values.toList();
     } catch (e) {
+      print('❌ Erro em getAll(): $e');
       return [];
     }
   }

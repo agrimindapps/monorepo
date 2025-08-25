@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 
-import '../../core/di/injection_container.dart';
-import '../../core/models/pragas_hive.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
-import '../../core/repositories/pragas_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
 import '../culturas/lista_culturas_page.dart';
 import 'detalhe_praga_page.dart';
 import 'lista_pragas_page.dart';
+import 'presentation/providers/pragas_provider.dart';
 
 class HomePragasPage extends StatefulWidget {
   const HomePragasPage({super.key});
@@ -19,26 +19,22 @@ class HomePragasPage extends StatefulWidget {
 
 class _HomePragasPageState extends State<HomePragasPage> {
   final PageController _pageController = PageController(viewportFraction: 0.6);
-  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
-  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+  final CulturaHiveRepository _culturaRepository = GetIt.instance<CulturaHiveRepository>();
   
   int _currentCarouselIndex = 0;
-  bool _isLoading = true;
   
-  // Contadores reais
-  int _totalInsetos = 0;
-  int _totalDoencas = 0;
-  int _totalPlantas = 0;
+  // Contador de culturas (ainda usa repository legacy)
   int _totalCulturas = 0;
-  
-  // Listas para dados reais
-  List<PragasHive> _recentPragas = [];
-  List<PragasHive> _suggestedPragas = [];
 
   @override
   void initState() {
     super.initState();
-    _loadRealData();
+    _loadCulturaData();
+    
+    // Inicializa pragas usando Provider após o build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PragasProvider>().initialize();
+    });
   }
 
   @override
@@ -47,40 +43,18 @@ class _HomePragasPageState extends State<HomePragasPage> {
     super.dispose();
   }
 
-  Future<void> _loadRealData() async {
+  Future<void> _loadCulturaData() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-      
-      final pragas = _pragasRepository.getAll();
       final culturas = _culturaRepository.getAll();
-      
-      // Calcular totais reais por tipo de praga
-      _totalInsetos = pragas.where((p) => p.tipoPraga == '1').length;
-      _totalDoencas = pragas.where((p) => p.tipoPraga == '2').length;
-      _totalPlantas = pragas.where((p) => p.tipoPraga == '3').length;
-      _totalCulturas = culturas.length;
-      
-      // Últimas pragas acessadas (simulação com pragas aleatórias)
-      _recentPragas = pragas.take(7).toList();
-      
-      // Sugestões de pragas para o carrossel
-      _suggestedPragas = pragas.take(5).toList();
       
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _totalCulturas = culturas.length;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
-          // Em caso de erro, manter valores padrão
-          _totalInsetos = 0;
-          _totalDoencas = 0;
-          _totalPlantas = 0;
           _totalCulturas = 0;
         });
       }
@@ -92,42 +66,50 @@ class _HomePragasPageState extends State<HomePragasPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildModernHeader(context, isDark),
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
-                        _buildStatsGrid(context),
-                        const SizedBox(height: 24),
-                        _buildSuggestionsSection(context),
-                        const SizedBox(height: 24),
-                        _buildRecentAccessSection(context),
-                        const SizedBox(height: 80), // Espaço para bottom navigation
+    return ChangeNotifierProvider.value(
+      value: GetIt.instance<PragasProvider>(),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Consumer<PragasProvider>(
+            builder: (context, provider, child) {
+              return Column(
+                children: [
+                  _buildModernHeader(context, isDark, provider),
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 20),
+                              _buildStatsGrid(context, provider),
+                              const SizedBox(height: 24),
+                              _buildSuggestionsSection(context, provider),
+                              const SizedBox(height: 24),
+                              _buildRecentAccessSection(context, provider),
+                              const SizedBox(height: 80), // Espaço para bottom navigation
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ],
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildModernHeader(BuildContext context, bool isDark) {
+  Widget _buildModernHeader(BuildContext context, bool isDark, PragasProvider provider) {
     String subtitle = 'Carregando pragas...';
-    if (!_isLoading) {
-      final total = _totalInsetos + _totalDoencas + _totalPlantas;
+    if (!provider.isLoading && provider.stats != null) {
+      final stats = provider.stats!;
+      final total = stats.insetos + stats.doencas + stats.plantas;
       subtitle = 'Identifique e controle $total pragas';
     }
     
@@ -141,7 +123,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  Widget _buildStatsGrid(BuildContext context) {
+  Widget _buildStatsGrid(BuildContext context, PragasProvider provider) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -158,9 +140,9 @@ class _HomePragasPageState extends State<HomePragasPage> {
             final useVerticalLayout = isSmallDevice || availableWidth < 320;
 
             if (useVerticalLayout) {
-              return _buildVerticalMenuLayout(availableWidth);
+              return _buildVerticalMenuLayout(availableWidth, provider);
             } else {
-              return _buildGridMenuLayout(availableWidth, context);
+              return _buildGridMenuLayout(availableWidth, context, provider);
             }
           },
         ),
@@ -168,7 +150,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  Widget _buildVerticalMenuLayout(double availableWidth) {
+  Widget _buildVerticalMenuLayout(double availableWidth, PragasProvider provider) {
     final theme = Theme.of(context);
     final buttonWidth = availableWidth - 16;
     final standardColor = theme.colorScheme.primary;
@@ -177,7 +159,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalInsetos',
+          count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
           title: 'Insetos',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'insetos'),
@@ -186,7 +168,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalDoencas',
+          count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
           title: 'Doenças',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'doencas'),
@@ -195,7 +177,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalPlantas',
+          count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
           title: 'Plantas',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'plantas'),
@@ -204,7 +186,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalCulturas',
+          count: '$_totalCulturas',
           title: 'Culturas',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'culturas'),
@@ -215,7 +197,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  Widget _buildGridMenuLayout(double availableWidth, BuildContext context) {
+  Widget _buildGridMenuLayout(double availableWidth, BuildContext context, PragasProvider provider) {
     final theme = Theme.of(context);
     final isMediumDevice = MediaQuery.of(context).size.width < 600;
     final buttonWidth = isMediumDevice ? (availableWidth - 32) / 3 : (availableWidth - 40) / 3;
@@ -227,7 +209,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalInsetos',
+              count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'insetos'),
@@ -236,7 +218,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
             ),
             const SizedBox(width: 8),
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalDoencas',
+              count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'doencas'),
@@ -245,7 +227,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
             ),
             const SizedBox(width: 8),
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalPlantas',
+              count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'plantas'),
@@ -256,7 +238,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
         ),
         const SizedBox(height: 8),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalCulturas',
+          count: '$_totalCulturas',
           title: 'Culturas',
           width: isMediumDevice ? availableWidth - 16 : availableWidth * 0.75,
           onTap: () => _navigateToCategory(context, 'culturas'),
@@ -384,7 +366,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  Widget _buildSuggestionsSection(BuildContext context) {
+  Widget _buildSuggestionsSection(BuildContext context, PragasProvider provider) {
     final theme = Theme.of(context);
     
     return Column(
@@ -414,15 +396,15 @@ class _HomePragasPageState extends State<HomePragasPage> {
           ),
         ),
         const SizedBox(height: 12),
-        _buildCarousel(),
+        _buildCarousel(provider),
         const SizedBox(height: 12),
-        _buildDotIndicators(),
+        _buildDotIndicators(provider),
       ],
     );
   }
 
-  Widget _buildCarousel() {
-    final suggestions = _getSuggestionsList();
+  Widget _buildCarousel(PragasProvider provider) {
+    final suggestions = _getSuggestionsList(provider);
     
     if (suggestions.isEmpty) {
       return _buildEmptyCarousel();
@@ -657,8 +639,8 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  Widget _buildDotIndicators() {
-    final suggestions = _getSuggestionsList();
+  Widget _buildDotIndicators(PragasProvider provider) {
+    final suggestions = _getSuggestionsList(provider);
     
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -725,12 +707,12 @@ class _HomePragasPageState extends State<HomePragasPage> {
     }
   }
 
-  List<Map<String, dynamic>> _getSuggestionsList() {
-    if (_isLoading || _suggestedPragas.isEmpty) {
+  List<Map<String, dynamic>> _getSuggestionsList(PragasProvider provider) {
+    if (provider.isLoading || provider.suggestedPragas.isEmpty) {
       return [];
     }
     
-    return _suggestedPragas.map((praga) {
+    return provider.suggestedPragas.map((praga) {
       String emoji = '🐛';
       String type = 'Inseto';
       
@@ -758,7 +740,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
     }).toList();
   }
 
-  Widget _buildRecentAccessSection(BuildContext context) {
+  Widget _buildRecentAccessSection(BuildContext context, PragasProvider provider) {
     final theme = Theme.of(context);
     
     return Column(
@@ -788,9 +770,9 @@ class _HomePragasPageState extends State<HomePragasPage> {
           ),
         ),
         const SizedBox(height: 12),
-        _isLoading
+        provider.isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _recentPragas.isEmpty
+            : provider.recentPragas.isEmpty
                 ? const Center(
                     child: Text(
                       'Nenhuma praga acessada recentemente',
@@ -798,7 +780,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                     ),
                   )
                 : Column(
-                    children: _recentPragas.map((praga) {
+                    children: provider.recentPragas.map((praga) {
                       String emoji = '🐛';
                       String type = 'Inseto';
                       
@@ -941,7 +923,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
   void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => DetalhePragaPage(
           pragaName: pragaName,
           pragaScientificName: scientificName,
@@ -956,7 +938,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       case 'culturas':
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => const ListaCulturasPage(),
           ),
         );
@@ -964,7 +946,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       case 'insetos':
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => const ListaPragasPage(pragaType: '1'), // Tipo 1 = Insetos
           ),
         );
@@ -972,7 +954,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       case 'doencas':
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => const ListaPragasPage(pragaType: '2'), // Tipo 2 = Doenças
           ),
         );
@@ -980,7 +962,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       case 'plantas':
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => const ListaPragasPage(pragaType: '3'), // Tipo 3 = Plantas Daninhas
           ),
         );
@@ -988,7 +970,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
       default:
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => const ListaPragasPage(),
           ),
         );

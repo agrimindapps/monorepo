@@ -22,7 +22,7 @@ import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  // Ensure Flutter bindings are initialized
+  // Ensure Flutter bindings are initialized first
   WidgetsFlutterBinding.ensureInitialized();
 
   // Set preferred orientations

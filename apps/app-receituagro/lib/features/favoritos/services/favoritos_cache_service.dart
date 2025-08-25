@@ -49,13 +49,18 @@ class FavoritosCacheService {
       return _defensivosCache[cacheKey]!.data;
     }
 
-    // Busca dados frescos
-    final favoritosDefensivos = _favoritosRepository.getFavoritosByTipo('defensivos');
+    // Busca dados frescos usando método async para garantir que o box esteja aberto
+    final favoritosDefensivos = await _favoritosRepository.getFavoritosByTipoAsync('defensivos');
     final List<FavoritoDefensivoModel> defensivosCompletos = [];
     
+    print('🔍 [CacheService] Processando ${favoritosDefensivos.length} favoritos de defensivos...');
+    
     for (final favorito in favoritosDefensivos) {
+      print('📝 Buscando defensivo com ID: ${favorito.itemId}');
       final defensivo = _fitossanitarioRepository.getById(favorito.itemId);
+      
       if (defensivo != null) {
+        print('✅ Defensivo encontrado: ${defensivo.nomeComum}');
         defensivosCompletos.add(FavoritoDefensivoModel(
           id: defensivo.hashCode,
           idReg: defensivo.objectId ?? favorito.itemId,
@@ -68,6 +73,8 @@ class FavoritosCacheService {
           modoAcao: defensivo.modoAcao,
           dataCriacao: DateTime.fromMillisecondsSinceEpoch(favorito.createdAt),
         ));
+      } else {
+        print('❌ Defensivo não encontrado para ID: ${favorito.itemId}');
       }
     }
 
@@ -85,9 +92,11 @@ class FavoritosCacheService {
       return _pragasCache[cacheKey]!.data;
     }
 
-    // Busca dados frescos
-    final favoritosPragas = _favoritosRepository.getFavoritosByTipo('pragas');
+    // Busca dados frescos usando método async para garantir que o box esteja aberto
+    final favoritosPragas = await _favoritosRepository.getFavoritosByTipoAsync('pragas');
     final List<FavoritoPragaModel> pragasCompletas = [];
+    
+    print('🔍 [CacheService] Processando ${favoritosPragas.length} favoritos de pragas...');
     
     // Pré-carrega cache de culturas relacionadas
     await _preloadCulturaRelations();
@@ -133,7 +142,7 @@ class FavoritosCacheService {
     }
 
     // Busca dados frescos
-    final favoritosDiagnosticos = _favoritosRepository.getFavoritosByTipo('diagnosticos');
+    final favoritosDiagnosticos = await _favoritosRepository.getFavoritosByTipoAsync('diagnosticos');
     final List<FavoritoDiagnosticoModel> diagnosticosCompletos = [];
     
     for (final favorito in favoritosDiagnosticos) {

@@ -72,6 +72,8 @@ dependencies:
 
   http: any
   path_provider: any
+  shared_preferences: any
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

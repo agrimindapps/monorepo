@@ -218,13 +218,13 @@ class GetDefensivosFiltersUseCase {
 
       // Verifica se algum resultado é erro
       if (classesResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar classes agronômicas'));
+        return const Left(CacheFailure('Erro ao carregar classes agronômicas'));
       }
       if (fabricantesResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar fabricantes'));
+        return const Left(CacheFailure('Erro ao carregar fabricantes'));
       }
       if (ingredientesResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar ingredientes ativos'));
+        return const Left(CacheFailure('Erro ao carregar ingredientes ativos'));
       }
 
       final filtersData = DefensivosFiltersData(

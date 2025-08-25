@@ -21,24 +21,24 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
 
   /// Busca diagnósticos por defensivo de forma assíncrona
   Future<List<DiagnosticoHive>> findByDefensivo(String fkIdDefensivo) async {
-    return await findBy((item) => item.fkIdDefensivo == fkIdDefensivo);
+    return findBy((item) => item.fkIdDefensivo == fkIdDefensivo);
   }
 
   /// Busca diagnósticos por cultura de forma assíncrona
   Future<List<DiagnosticoHive>> findByCultura(String fkIdCultura) async {
-    return await findBy((item) => item.fkIdCultura == fkIdCultura);
+    return findBy((item) => item.fkIdCultura == fkIdCultura);
   }
 
   /// Busca diagnósticos por cultura e defensivo de forma assíncrona
   Future<List<DiagnosticoHive>> findByCulturaAndDefensivo(
       String fkIdCultura, String fkIdDefensivo) async {
-    return await findBy((item) => 
+    return findBy((item) => 
         item.fkIdCultura == fkIdCultura && item.fkIdDefensivo == fkIdDefensivo);
   }
 
   /// Busca diagnósticos por praga
   Future<List<DiagnosticoHive>> findByPraga(String fkIdPraga) async {
-    return await findBy((item) => item.fkIdPraga == fkIdPraga);
+    return findBy((item) => item.fkIdPraga == fkIdPraga);
   }
 
   /// Busca diagnósticos complexa por múltiplos critérios
@@ -50,7 +50,7 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
     List<String>? defensivoIds,
     List<String>? pragaIds,
   }) async {
-    return await findBy((diagnostico) {
+    return findBy((diagnostico) {
       bool matches = true;
 
       // Critério único de cultura
@@ -140,7 +140,7 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
 
   /// Obter estatísticas de diagnósticos
   Future<Map<String, dynamic>> getDiagnosticoStats() async {
-    final diagnosticos = await getAll();
+    final diagnosticos = getAll();
     
     // Contar relações únicas
     final culturaDefensivoRelations = <String>{};
@@ -181,7 +181,7 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
         pragaId: pragaFilter,
       );
     } else {
-      diagnosticos = await getAll();
+      diagnosticos = getAll();
     }
 
     final startIndex = page * limit;
@@ -197,7 +197,7 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
 
   /// Validar integridade dos dados de diagnóstico
   Future<List<Map<String, dynamic>>> validateDataIntegrity() async {
-    final diagnosticos = await getAll();
+    final diagnosticos = getAll();
     final issues = <Map<String, dynamic>>[];
 
     for (final diagnostico in diagnosticos) {

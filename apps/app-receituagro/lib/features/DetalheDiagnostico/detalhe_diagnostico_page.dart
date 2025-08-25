@@ -1149,15 +1149,6 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage> {
           ),
         );
       }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Diagnóstico ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     }
   }
 

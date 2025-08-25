@@ -21,7 +21,7 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
 
   /// Busca cultura por nome de forma assíncrona
   Future<CulturaHive?> findByName(String cultura) async {
-    final results = await findBy((item) => 
+    final results = findBy((item) => 
         item.cultura.toLowerCase() == cultura.toLowerCase());
     return results.isNotEmpty ? results.first : null;
   }
@@ -33,13 +33,13 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
 
   /// Lista todas as culturas ativas de forma assíncrona
   Future<List<CulturaHive>> getActiveCulturas() async {
-    return await getAll();
+    return getAll();
   }
 
   /// Busca culturas por padrão no nome
   Future<List<CulturaHive>> searchByName(String pattern) async {
     final lowerPattern = pattern.toLowerCase();
-    return await findBy((cultura) => 
+    return findBy((cultura) => 
         cultura.cultura.toLowerCase().contains(lowerPattern));
   }
 
@@ -49,7 +49,7 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
     String? familia,
     bool? isAtiva,
   }) async {
-    return await findBy((cultura) {
+    return findBy((cultura) {
       bool matches = true;
       
       if (nome != null) {
@@ -66,7 +66,7 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
 
   /// Obter estatísticas das culturas
   Future<Map<String, dynamic>> getCulturaStats() async {
-    final culturas = await getAll();
+    final culturas = getAll();
     
     return {
       'total': culturas.length,
@@ -101,6 +101,6 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
 
   /// Buscar cultura por ID
   Future<CulturaHive?> findByIdReg(String idReg) async {
-    return await getById(idReg);
+    return getById(idReg);
   }
 }

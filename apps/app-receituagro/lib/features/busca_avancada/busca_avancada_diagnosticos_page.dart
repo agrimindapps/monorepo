@@ -51,6 +51,11 @@ class _BuscaAvancadaDiagnosticosPageState extends State<BuscaAvancadaDiagnostico
     _carregarDadosDropdowns();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _carregarDadosDropdowns() async {
     try {
       // Carregar culturas

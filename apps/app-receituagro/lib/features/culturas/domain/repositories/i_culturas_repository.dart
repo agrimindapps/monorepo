@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 
 import '../entities/cultura_entity.dart';
 

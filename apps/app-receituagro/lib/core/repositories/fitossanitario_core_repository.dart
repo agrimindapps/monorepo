@@ -21,31 +21,31 @@ class FitossanitarioCoreRepository extends CoreBaseHiveRepository<Fitossanitario
 
   /// Busca defensivo por nome comum
   Future<FitossanitarioHive?> findByNomeComum(String nomeComum) async {
-    final results = await findBy((item) => 
+    final results = findBy((item) => 
         item.nomeComum.toLowerCase() == nomeComum.toLowerCase());
     return results.isNotEmpty ? results.first : null;
   }
 
   /// Lista defensivos por classe agronômica
   Future<List<FitossanitarioHive>> findByClasseAgronomica(String classeAgronomica) async {
-    return await findBy((item) => 
+    return findBy((item) => 
         item.classeAgronomica?.toLowerCase() == classeAgronomica.toLowerCase());
   }
 
   /// Lista defensivos por fabricante
   Future<List<FitossanitarioHive>> findByFabricante(String fabricante) async {
-    return await findBy((item) => 
+    return findBy((item) => 
         item.fabricante?.toLowerCase() == fabricante.toLowerCase());
   }
 
   /// Lista defensivos ativos/comercializados
   Future<List<FitossanitarioHive>> getActiveDefensivos() async {
-    return await findBy((item) => item.status && item.comercializado == 1);
+    return findBy((item) => item.status && item.comercializado == 1);
   }
 
   /// Lista defensivos elegíveis
   Future<List<FitossanitarioHive>> getElegibleDefensivos() async {
-    return await findBy((item) => item.elegivel);
+    return findBy((item) => item.elegivel);
   }
 
   /// Busca defensivos que contêm o texto no nome comum
@@ -119,7 +119,7 @@ class FitossanitarioCoreRepository extends CoreBaseHiveRepository<Fitossanitario
 
   /// Lista todas as classes agronômicas únicas (não nulas)
   Future<List<String>> getAllClassesAgronomicas() async {
-    final all = await getAll();
+    final all = getAll();
     final classes = all
         .where((item) => item.classeAgronomica != null && item.classeAgronomica!.isNotEmpty)
         .map((item) => item.classeAgronomica!)
@@ -131,7 +131,7 @@ class FitossanitarioCoreRepository extends CoreBaseHiveRepository<Fitossanitario
 
   /// Lista todos os fabricantes únicos (não nulos)
   Future<List<String>> getAllFabricantes() async {
-    final all = await getAll();
+    final all = getAll();
     final fabricantes = all
         .where((item) => item.fabricante != null && item.fabricante!.isNotEmpty)
         .map((item) => item.fabricante!)
@@ -143,7 +143,7 @@ class FitossanitarioCoreRepository extends CoreBaseHiveRepository<Fitossanitario
 
   /// Lista todos os ingredientes ativos únicos (não nulos)
   Future<List<String>> getAllIngredientesAtivos() async {
-    final all = await getAll();
+    final all = getAll();
     final ingredientes = all
         .where((item) => item.ingredienteAtivo != null && item.ingredienteAtivo!.isNotEmpty)
         .map((item) => item.ingredienteAtivo!)
@@ -162,7 +162,7 @@ class FitossanitarioCoreRepository extends CoreBaseHiveRepository<Fitossanitario
     bool? apenasAtivos,
     bool? apenasElegiveis,
   }) async {
-    final all = await getAll();
+    final all = getAll();
     
     return all.where((item) {
       // Filtro por nome comum

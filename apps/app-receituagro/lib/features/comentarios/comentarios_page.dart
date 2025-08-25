@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../core/widgets/modern_header_widget.dart';
-import 'controller/comentarios_controller.dart';
-import 'models/comentario_model.dart';
-import 'services/comentarios_service.dart';
+import 'constants/comentarios_design_tokens.dart';
+import 'domain/entities/comentario_entity.dart';
+import 'presentation/providers/comentarios_provider.dart';
 
 class ComentariosPage extends StatelessWidget {
   final String? pkIdentificador;
@@ -19,16 +19,8 @@ class ComentariosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) {
-        final controller = ComentariosController(
-          service: di.sl<ComentariosService>(),
-        );
-        // Configura filtros antes do carregamento inicial
-        controller.pkIdentificador = pkIdentificador;
-        controller.ferramenta = ferramenta;
-        return controller;
-      },
+    return ChangeNotifierProvider.value(
+      value: di.sl<ComentariosProvider>(),
       child: _ComentariosPageContent(
         pkIdentificador: pkIdentificador,
         ferramenta: ferramenta,
@@ -37,7 +29,7 @@ class ComentariosPage extends StatelessWidget {
   }
 }
 
-class _ComentariosPageContent extends StatelessWidget {
+class _ComentariosPageContent extends StatefulWidget {
   final String? pkIdentificador;
   final String? ferramenta;
   
@@ -45,6 +37,38 @@ class _ComentariosPageContent extends StatelessWidget {
     this.pkIdentificador,
     this.ferramenta,
   });
+
+  @override
+  State<_ComentariosPageContent> createState() => _ComentariosPageContentState();
+}
+
+class _ComentariosPageContentState extends State<_ComentariosPageContent> {
+  bool _dataInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize data loading in initState instead of build method
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
+  }
+
+  Future<void> _initializeData() async {
+    if (_dataInitialized) return;
+    
+    final provider = context.read<ComentariosProvider>();
+    await provider.ensureDataLoaded(
+      context: widget.pkIdentificador,
+      tool: widget.ferramenta,
+    );
+    
+    if (mounted) {
+      setState(() {
+        _dataInitialized = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,25 +80,19 @@ class _ComentariosPageContent extends StatelessWidget {
           children: [
             _buildModernHeader(context, isDark),
             Expanded(
-              child: Consumer<ComentariosController>(
-                builder: (context, controller, child) {
-                  final state = controller.state;
-                  
-                  if (state.isLoading) {
+              child: Consumer<ComentariosProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   
-                  if (state.error != null) {
+                  if (provider.error != null) {
                     return Center(
-                      child: Text('Erro: ${state.error}'),
+                      child: Text('Erro: ${provider.error}'),
                     );
                   }
                   
-                  // Se não há filtros (página principal), mostra todos os comentários
-                  // Se há filtros, mostra apenas os filtrados
-                  final comentariosParaMostrar = (pkIdentificador == null && ferramenta == null)
-                      ? state.comentarios
-                      : state.comentariosFiltrados;
+                  final comentariosParaMostrar = provider.comentarios;
                   
                   if (comentariosParaMostrar.isEmpty) {
                     return _buildEmptyState();
@@ -87,12 +105,10 @@ class _ComentariosPageContent extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: Consumer<ComentariosController>(
-        builder: (context, controller, child) {
-          // Por enquanto, sempre mostra o botão
-          // A validação de limites será feita no momento do clique
+      floatingActionButton: Consumer<ComentariosProvider>(
+        builder: (context, provider, child) {
           return FloatingActionButton(
-            onPressed: () => _onAddComentario(context, controller),
+            onPressed: provider.isOperating ? null : () => _onAddComentario(context, provider),
             child: const Icon(Icons.add),
           );
         },
@@ -101,20 +117,18 @@ class _ComentariosPageContent extends StatelessWidget {
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return Consumer<ComentariosController>(
-      builder: (context, controller, child) {
-        final state = controller.state;
-        
+    return Consumer<ComentariosProvider>(
+      builder: (context, provider, child) {
         String subtitle;
-        if (state.isLoading) {
+        if (provider.isLoading) {
           subtitle = 'Carregando comentários...';
         } else {
-          final total = state.comentarios.length;
-          final filtrados = state.comentariosFiltrados.length;
+          final total = provider.totalCount;
+          final filtered = provider.comentarios.length;
           
-          if (pkIdentificador != null || ferramenta != null) {
+          if (widget.pkIdentificador != null || widget.ferramenta != null) {
             // Comentários filtrados por contexto
-            subtitle = filtrados > 0 ? '$filtrados comentários para este contexto' : 'Nenhum comentário neste contexto';
+            subtitle = filtered > 0 ? '$filtered comentários para este contexto' : 'Nenhum comentário neste contexto';
           } else {
             // Todos os comentários
             subtitle = total > 0 ? '$total comentários' : 'Suas anotações pessoais';
@@ -174,7 +188,7 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildComentariosList(List<ComentarioModel> comentarios) {
+  Widget _buildComentariosList(List<ComentarioEntity> comentarios) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: comentarios.length,
@@ -185,7 +199,7 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildComentarioCard(ComentarioModel comentario, BuildContext context) {
+  Widget _buildComentarioCard(ComentarioEntity comentario, BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
@@ -348,16 +362,18 @@ class _ComentariosPageContent extends StatelessWidget {
     }
   }
 
-  void _onAddComentario(BuildContext context, ComentariosController controller) {
-    showDialog(
+  void _onAddComentario(BuildContext context, ComentariosProvider provider) {
+    showDialog<void>(
       context: context,
       builder: (context) => AddCommentDialog(
-        origem: ferramenta ?? 'Comentários',
-        itemName: pkIdentificador != null ? 'Item $pkIdentificador' : 'Comentário direto',
-        pkIdentificador: pkIdentificador,
-        ferramenta: ferramenta,
+        origem: widget.ferramenta ?? 'Comentários',
+        itemName: widget.pkIdentificador != null ? 'Item ${widget.pkIdentificador}' : 'Comentário direto',
+        pkIdentificador: widget.pkIdentificador,
+        ferramenta: widget.ferramenta,
         onSave: (content) async {
-          await controller.addComentario(content);
+          // Criar entidade a partir do conteúdo
+          final comentario = _createComentarioFromContent(content);
+          await provider.addComentario(comentario);
         },
         onCancel: () {
           // Callback opcional para cancelamento
@@ -366,8 +382,8 @@ class _ComentariosPageContent extends StatelessWidget {
     );
   }
 
-  void _deleteComentario(BuildContext context, ComentarioModel comentario) {
-    showDialog(
+  void _deleteComentario(BuildContext context, ComentarioEntity comentario) {
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Comentário'),
@@ -380,9 +396,9 @@ class _ComentariosPageContent extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // Busca o controller atual
-              final controller = context.read<ComentariosController>();
-              controller.deleteComentario(comentario);
+              // Busca o provider atual
+              final provider = context.read<ComentariosProvider>();
+              provider.deleteComentario(comentario.id);
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
@@ -395,7 +411,7 @@ class _ComentariosPageContent extends StatelessWidget {
   }
 
   void _showInfoDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sobre Comentários'),
@@ -411,6 +427,22 @@ class _ComentariosPageContent extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Helper method to create ComentarioEntity from content
+  ComentarioEntity _createComentarioFromContent(String content) {
+    final now = DateTime.now();
+    return ComentarioEntity(
+      id: 'TEMP_${now.millisecondsSinceEpoch}',
+      idReg: 'REG_${now.millisecondsSinceEpoch}',
+      titulo: 'Comentário', // Pode ser melhorado para extrair título do conteúdo
+      conteudo: content,
+      ferramenta: widget.ferramenta ?? 'Comentários',
+      pkIdentificador: widget.pkIdentificador ?? '',
+      status: true,
+      createdAt: now,
+      updatedAt: now,
     );
   }
 }
@@ -440,19 +472,25 @@ class AddCommentDialog extends StatefulWidget {
 class _AddCommentDialogState extends State<AddCommentDialog> {
   final TextEditingController _commentController = TextEditingController();
   final ValueNotifier<String> _contentNotifier = ValueNotifier<String>('');
-  final int _maxLength = 300;
-  final int _minLength = 5;
+  static const int _maxLength = ComentariosDesignTokens.maxCommentLength;
+  static const int _minLength = ComentariosDesignTokens.minCommentLength;
 
   @override
   void initState() {
     super.initState();
-    _commentController.addListener(() {
+    _commentController.addListener(_onContentChanged);
+  }
+
+  void _onContentChanged() {
+    if (mounted) {
       _contentNotifier.value = _commentController.text;
-    });
+    }
   }
 
   @override
   void dispose() {
+    // Remove listener before disposing to prevent memory leaks
+    _commentController.removeListener(_onContentChanged);
     _commentController.dispose();
     _contentNotifier.dispose();
     super.dispose();
@@ -466,15 +504,15 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(ComentariosDesignTokens.dialogBorderRadius),
       ),
-      insetPadding: const EdgeInsets.all(16),
+      insetPadding: ComentariosDesignTokens.defaultPadding,
       child: Container(
         width: double.maxFinite,
-        constraints: const BoxConstraints(maxHeight: 500),
+        constraints: const BoxConstraints(maxHeight: ComentariosDesignTokens.maxDialogHeight),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: isDark ? ComentariosDesignTokens.dialogBackgroundDark : Colors.white,
+          borderRadius: BorderRadius.circular(ComentariosDesignTokens.dialogBorderRadius),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -506,10 +544,10 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 12, top: 12, bottom: 8),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFF8F9FA),
+        color: isDark ? ComentariosDesignTokens.dialogHeaderDark : ComentariosDesignTokens.dialogHeaderLight,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(ComentariosDesignTokens.dialogBorderRadius),
+          topRight: Radius.circular(ComentariosDesignTokens.dialogBorderRadius),
         ),
       ),
       child: Row(
@@ -517,12 +555,12 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+              color: ComentariosDesignTokens.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.add,
-              color: Color(0xFF4CAF50),
+              color: ComentariosDesignTokens.primaryColor,
               size: 20,
             ),
           ),

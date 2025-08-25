@@ -98,8 +98,8 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         _isSearching = false;
         _filteredDefensivos = List.from(_allDefensivos);
         _currentPage = 0;
-        _loadPage();
       });
+      _loadPage(); // Chamado fora do setState para evitar rebuild desnecessário
       return;
     }
 
@@ -123,14 +123,15 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     }).toList();
 
     if (mounted) {
+      // Ordena resultados fora do setState para otimizar performance
+      filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
+      
       setState(() {
-        // Ordena resultados filtrados alfabeticamente
-        filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
         _filteredDefensivos = filtered;
         _isSearching = false;
         _currentPage = 0;
-        _loadPage(); // Recarrega primeira página com resultados filtrados
       });
+      _loadPage(); // Recarrega primeira página com resultados filtrados
     }
   }
 
@@ -143,14 +144,20 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   }
 
   void _toggleSort() {
-    setState(() {
-      _isAscending = !_isAscending;
-      _filteredDefensivos.sort((a, b) {
-        return _isAscending
-            ? a.displayName.compareTo(b.displayName)
-            : b.displayName.compareTo(a.displayName);
-      });
+    final wasAscending = _isAscending;
+    
+    // Operação custosa fora do setState
+    _filteredDefensivos.sort((a, b) {
+      return !wasAscending
+          ? a.displayName.compareTo(b.displayName)
+          : b.displayName.compareTo(a.displayName);
     });
+    
+    setState(() {
+      _isAscending = !wasAscending;
+      _currentPage = 0;
+    });
+    _loadPage();
   }
 
   void _toggleViewMode(ViewMode viewMode) {
@@ -392,7 +399,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
       showBackButton: true,
       showActions: true,
       isDark: isDark,
-      rightIcon: _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha,
+      rightIcon: _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha_outlined,
       onRightIconPressed: _toggleSort,
       onBackPressed: () => Navigator.of(context).pop(),
     );

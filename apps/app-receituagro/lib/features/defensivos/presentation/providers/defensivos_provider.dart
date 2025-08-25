@@ -240,7 +240,7 @@ class DefensivosProvider extends ChangeNotifier {
     if (_getRecentUseCase == null) return;
     
     await _executeUseCase(() async {
-      final result = await _getRecentUseCase!.call(limit: limit);
+      final result = await _getRecentUseCase.call(limit: limit);
       result.fold(
         (failure) => throw Exception(failure.message),
         (defensivos) => _recentDefensivos = defensivos,

@@ -1021,13 +1021,6 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
           backgroundColor: Colors.red,
         ),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.pragaName} ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
-          backgroundColor: Colors.green,
-        ),
-      );
     }
   }
 

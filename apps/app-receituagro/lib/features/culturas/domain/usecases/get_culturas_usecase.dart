@@ -34,7 +34,7 @@ class GetCulturaByIdUseCase {
   Future<Either<Failure, CulturaEntity?>> call(String id) async {
     try {
       if (id.trim().isEmpty) {
-        return Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
       }
 
       return await _repository.getById(id);
@@ -70,7 +70,7 @@ class GetCulturaByNomeUseCase {
   Future<Either<Failure, CulturaEntity?>> call(String nome) async {
     try {
       if (nome.trim().isEmpty) {
-        return Left(ValidationFailure('Nome da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('Nome da cultura não pode ser vazio'));
       }
 
       return await _repository.getByNome(nome.trim());
@@ -94,7 +94,7 @@ class SearchCulturasByNomeUseCase {
       }
 
       if (searchTerm.trim().length < 2) {
-        return Left(ValidationFailure('Termo de busca deve ter pelo menos 2 caracteres'));
+        return const Left(ValidationFailure('Termo de busca deve ter pelo menos 2 caracteres'));
       }
 
       return await _repository.searchByNome(searchTerm.trim());
@@ -114,7 +114,7 @@ class SearchCulturasByFamiliaUseCase {
   Future<Either<Failure, List<CulturaEntity>>> call(String familia) async {
     try {
       if (familia.trim().isEmpty) {
-        return Left(ValidationFailure('Família não pode ser vazia'));
+        return const Left(ValidationFailure('Família não pode ser vazia'));
       }
 
       return await _repository.searchByFamilia(familia.trim());
@@ -157,7 +157,7 @@ class SearchCulturasWithFiltersUseCase {
 
       // Validação de nome mínimo se presente
       if (filters.nome != null && filters.nome!.trim().length < 2) {
-        return Left(ValidationFailure('Nome deve ter pelo menos 2 caracteres'));
+        return const Left(ValidationFailure('Nome deve ter pelo menos 2 caracteres'));
       }
 
       return await _repository.searchWithFilters(filters);
@@ -193,7 +193,7 @@ class GetPopularCulturasUseCase {
   Future<Either<Failure, List<CulturaPopular>>> call({int limit = 10}) async {
     try {
       if (limit <= 0) {
-        return Left(ValidationFailure('Limite deve ser maior que zero'));
+        return const Left(ValidationFailure('Limite deve ser maior que zero'));
       }
 
       return await _repository.getPopularCulturas(limit: limit);
@@ -216,11 +216,11 @@ class GetRelatedCulturasUseCase {
   }) async {
     try {
       if (culturaId.trim().isEmpty) {
-        return Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
       }
 
       if (limit <= 0) {
-        return Left(ValidationFailure('Limite deve ser maior que zero'));
+        return const Left(ValidationFailure('Limite deve ser maior que zero'));
       }
 
       return await _repository.getRelatedCulturas(culturaId, limit: limit);
@@ -240,7 +240,7 @@ class CheckCulturaExistsUseCase {
   Future<Either<Failure, bool>> call(String id) async {
     try {
       if (id.trim().isEmpty) {
-        return Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
       }
 
       return await _repository.exists(id);
@@ -260,7 +260,7 @@ class CheckCulturaExistsByNomeUseCase {
   Future<Either<Failure, bool>> call(String nome) async {
     try {
       if (nome.trim().isEmpty) {
-        return Left(ValidationFailure('Nome da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('Nome da cultura não pode ser vazio'));
       }
 
       return await _repository.existsByNome(nome.trim());
@@ -292,13 +292,13 @@ class GetCulturaFiltersDataUseCase {
 
       // Verifica se algum resultado é erro
       if (familiasResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar famílias'));
+        return const Left(CacheFailure('Erro ao carregar famílias'));
       }
       if (categoriasResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar categorias'));
+        return const Left(CacheFailure('Erro ao carregar categorias'));
       }
       if (tiposResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar tipos'));
+        return const Left(CacheFailure('Erro ao carregar tipos'));
       }
 
       final filtersData = CulturaFiltersData(
@@ -325,7 +325,7 @@ class ValidateCulturaDataUseCase {
     try {
       // Validações básicas
       if (!cultura.isValid) {
-        return Left(ValidationFailure('Dados da cultura são inválidos'));
+        return const Left(ValidationFailure('Dados da cultura são inválidos'));
       }
 
       // Validação via repository (pode verificar duplicatas, etc.)
@@ -350,7 +350,7 @@ class SearchCulturasByPatternUseCase {
       }
 
       if (pattern.trim().length < 2) {
-        return Left(ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'));
+        return const Left(ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'));
       }
 
       return await _repository.searchByPattern(pattern.trim());

@@ -280,7 +280,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       if (filters.tipoAplicacao != null) {
         diagnosticos = diagnosticos.where((d) => 
-          d.aplicacao.tiposDisponiveis.contains(filters.tipoAplicacao!)).toList();
+          d.aplicacao.tiposDisponiveis.contains(filters.tipoAplicacao)).toList();
       }
 
       if (filters.completude != null) {
@@ -312,7 +312,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final originalResult = await getById(diagnosticoId);
       if (originalResult.isLeft()) {
-        return Left(CacheFailure('Diagnóstico original não encontrado'));
+        return const Left(CacheFailure('Diagnóstico original não encontrado'));
       }
 
       final original = originalResult.fold((l) => null, (r) => r);

@@ -23,6 +23,31 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
     return findBy((item) => item.tipo == tipo);
   }
 
+  /// Versão async para garantir que o box esteja aberto
+  Future<List<FavoritoItemHive>> getAllAsync() async {
+    try {
+      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
+      print('📦 [getAllAsync] Box aberto com ${box.length} itens');
+      return box.values.toList();
+    } catch (e) {
+      print('❌ [getAllAsync] Erro: $e');
+      return [];
+    }
+  }
+
+  /// Versão async para buscar por tipo
+  Future<List<FavoritoItemHive>> getFavoritosByTipoAsync(String tipo) async {
+    try {
+      final all = await getAllAsync();
+      final filtered = all.where((item) => item.tipo == tipo).toList();
+      print('🔍 [getFavoritosByTipoAsync] Tipo $tipo: ${filtered.length} itens');
+      return filtered;
+    } catch (e) {
+      print('❌ [getFavoritosByTipoAsync] Erro: $e');
+      return [];
+    }
+  }
+
   /// Verifica se um item é favorito
   bool isFavorito(String tipo, String itemId) {
     final key = '${tipo}_$itemId';

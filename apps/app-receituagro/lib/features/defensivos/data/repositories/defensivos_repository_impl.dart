@@ -294,7 +294,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       // Busca o defensivo original
       final originalResult = await getById(defensivoId);
       if (originalResult.isLeft()) {
-        return Left(CacheFailure('Defensivo original não encontrado'));
+        return const Left(CacheFailure('Defensivo original não encontrado'));
       }
 
       final original = originalResult.fold(

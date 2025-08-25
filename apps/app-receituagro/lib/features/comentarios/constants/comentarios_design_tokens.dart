@@ -9,6 +9,11 @@ class ComentariosDesignTokens {
   static const Color warningTextColor = Color(0xFFFF6F00);
   static const Color errorColor = Color(0xFFF44336);
   static const Color successColor = Color(0xFF4CAF50);
+  
+  // Dialog specific colors (moved from hardcoded values)
+  static const Color dialogBackgroundDark = Color(0xFF1E1E1E);
+  static const Color dialogHeaderDark = Color(0xFF2D2D2D);
+  static const Color dialogHeaderLight = Color(0xFFF8F9FA);
 
   // Icons
   static const IconData commentIcon = FontAwesomeIcons.commentDots;
@@ -26,8 +31,10 @@ class ComentariosDesignTokens {
   static const double maxPageWidth = 1120.0;
   static const double maxDialogWidth = 400.0;
   static const double defaultBorderRadius = 12.0;
+  static const double dialogBorderRadius = 20.0; // Moved from hardcoded value
   static const double cardElevation = 2.0;
   static const double fabBottomPadding = 60.0;
+  static const double maxDialogHeight = 500.0; // Moved from hardcoded value
 
   // Padding & Margins
   static const EdgeInsets defaultPadding = EdgeInsets.all(16.0);
@@ -41,6 +48,7 @@ class ComentariosDesignTokens {
 
   // Text constraints
   static const int minCommentLength = 5;
+  static const int maxCommentLength = 300; // Moved from hardcoded value
   static const int maxSearchLength = 100;
 
   // Premium limits (temporariamente sem limites)

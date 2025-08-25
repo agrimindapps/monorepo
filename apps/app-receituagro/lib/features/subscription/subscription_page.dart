@@ -27,6 +27,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     _loadSubscriptionData();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> _loadSubscriptionData() async {
     setState(() => _isLoading = true);
 

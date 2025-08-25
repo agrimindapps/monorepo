@@ -1,51 +1,52 @@
 import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
+import '../../features/culturas/data/repositories/culturas_repository_impl.dart';
+// Culturas Clean Architecture
+import '../../features/culturas/domain/repositories/i_culturas_repository.dart';
+import '../../features/culturas/domain/usecases/get_culturas_usecase.dart';
+import '../../features/culturas/presentation/providers/culturas_provider.dart';
+import '../../features/defensivos/data/repositories/defensivos_repository_impl.dart';
 // Defensivos Clean Architecture
 import '../../features/defensivos/domain/repositories/i_defensivos_repository.dart';
 import '../../features/defensivos/domain/usecases/get_defensivos_usecase.dart';
 import '../../features/defensivos/domain/usecases/search_defensivos_usecase.dart';
-import '../../features/defensivos/data/repositories/defensivos_repository_impl.dart';
 import '../../features/defensivos/presentation/providers/defensivos_provider.dart';
-
-// Culturas Clean Architecture
-import '../../features/culturas/domain/repositories/i_culturas_repository.dart';
-import '../../features/culturas/domain/usecases/get_culturas_usecase.dart';
-import '../../features/culturas/data/repositories/culturas_repository_impl.dart';
-import '../../features/culturas/presentation/providers/culturas_provider.dart';
-
+import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 // Diagnósticos Clean Architecture
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
-import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
 import '../../features/favoritos/data/repositories/favoritos_repository_impl.dart';
 import '../../features/favoritos/data/services/favoritos_storage_service.dart' as fav_services;
 import '../../features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart';
 import '../../features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart';
 import '../../features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart';
+import '../../features/favoritos/favoritos_di.dart';
 import '../../features/favoritos/services/favoritos_cache_service.dart';
 import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
+import '../../features/settings/di/settings_di.dart';
 import '../interfaces/i_premium_service.dart';
 import '../repositories/comentarios_hive_repository.dart';
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/favoritos_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/premium_hive_repository.dart';
-import '../services/diagnostico_integration_service.dart';
 // New Core-based repositories
 import '../repositories/cultura_core_repository.dart';
+import '../repositories/cultura_hive_repository.dart';
 import '../repositories/diagnostico_core_repository.dart';
+import '../repositories/diagnostico_hive_repository.dart';
 import '../repositories/favoritos_core_repository.dart';
+import '../repositories/favoritos_hive_repository.dart';
 import '../repositories/fitossanitario_core_repository.dart';
+import '../repositories/fitossanitario_hive_repository.dart';
+import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/pragas_core_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
+import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
+import '../services/diagnostico_integration_service.dart';
 import '../services/navigation_service.dart';
 import '../services/premium_service_real.dart';
 import '../services/receituagro_notification_service.dart';
@@ -557,6 +558,15 @@ Future<void> init() async {
   
   // ===== MÓDULOS ESPECÍFICOS =====
   
+  // Configurar DI do módulo de Favoritos  
+  FavoritosDI.registerDependencies();
+  
   // Configurar DI do módulo de Pragas
   PragasDI.configure();
+  
+  // Configurar DI do módulo de Comentários
+  ComentariosDI.register(sl);
+  
+  // Configurar DI do módulo de Settings
+  SettingsDI.register(sl);
 }

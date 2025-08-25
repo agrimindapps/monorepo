@@ -372,10 +372,6 @@ class CulturasProvider extends ChangeNotifier {
     _errorMessage = null;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
 /// Estados da view de culturas

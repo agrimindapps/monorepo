@@ -167,7 +167,10 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     }
     
     // Sort by name
-    filtered.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+    filtered.sort((a, b) {
+      final comparison = a.nomeComum.compareTo(b.nomeComum);
+      return _state.isAscending ? comparison : -comparison;
+    });
     
     _updateState(_state.copyWith(pragasFiltered: filtered));
   }
@@ -184,6 +187,11 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
 
   void _toggleViewMode(PragaViewMode mode) {
     _updateState(_state.copyWith(viewMode: mode));
+  }
+
+  void _toggleSort() {
+    _updateState(_state.copyWith(isAscending: !_state.isAscending));
+    _applyCurrentFilter();
   }
 
   void _setTabIndex(int index) {
@@ -234,10 +242,14 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
           : 'Pragas por Cultura',
       subtitle: _getHeaderSubtitle(),
       leftIcon: Icons.agriculture_outlined,
+      rightIcon: _state.isAscending 
+          ? Icons.arrow_upward_outlined 
+          : Icons.arrow_downward_outlined,
       isDark: _state.isDark,
       showBackButton: true,
-      showActions: false,
+      showActions: true,
       onBackPressed: () => Navigator.of(context).pop(),
+      onRightIconPressed: _toggleSort,
     );
   }
 

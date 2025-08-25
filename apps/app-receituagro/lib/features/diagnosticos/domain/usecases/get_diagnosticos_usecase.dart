@@ -31,7 +31,7 @@ class GetDiagnosticoByIdUseCase {
   Future<Either<Failure, DiagnosticoEntity?>> call(String id) async {
     try {
       if (id.trim().isEmpty) {
-        return Left(ValidationFailure('ID do diagnóstico não pode ser vazio'));
+        return const Left(ValidationFailure('ID do diagnóstico não pode ser vazio'));
       }
 
       return await _repository.getById(id);
@@ -54,10 +54,10 @@ class GetRecomendacoesUseCase {
   }) async {
     try {
       if (idCultura.trim().isEmpty) {
-        return Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
       }
       if (idPraga.trim().isEmpty) {
-        return Left(ValidationFailure('ID da praga não pode ser vazio'));
+        return const Left(ValidationFailure('ID da praga não pode ser vazio'));
       }
 
       return await _repository.getRecomendacoesPara(
@@ -80,7 +80,7 @@ class GetDiagnosticosByDefensivoUseCase {
   Future<Either<Failure, List<DiagnosticoEntity>>> call(String idDefensivo) async {
     try {
       if (idDefensivo.trim().isEmpty) {
-        return Left(ValidationFailure('ID do defensivo não pode ser vazio'));
+        return const Left(ValidationFailure('ID do defensivo não pode ser vazio'));
       }
 
       return await _repository.getByDefensivo(idDefensivo);
@@ -99,7 +99,7 @@ class GetDiagnosticosByCulturaUseCase {
   Future<Either<Failure, List<DiagnosticoEntity>>> call(String idCultura) async {
     try {
       if (idCultura.trim().isEmpty) {
-        return Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
       }
 
       return await _repository.getByCultura(idCultura);
@@ -118,7 +118,7 @@ class GetDiagnosticosByPragaUseCase {
   Future<Either<Failure, List<DiagnosticoEntity>>> call(String idPraga) async {
     try {
       if (idPraga.trim().isEmpty) {
-        return Left(ValidationFailure('ID da praga não pode ser vazio'));
+        return const Left(ValidationFailure('ID da praga não pode ser vazio'));
       }
 
       return await _repository.getByPraga(idPraga);
@@ -171,13 +171,13 @@ class ValidateCompatibilidadeUseCase {
   }) async {
     try {
       if (idDefensivo.trim().isEmpty) {
-        return Left(ValidationFailure('ID do defensivo não pode ser vazio'));
+        return const Left(ValidationFailure('ID do defensivo não pode ser vazio'));
       }
       if (idCultura.trim().isEmpty) {
-        return Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
       }
       if (idPraga.trim().isEmpty) {
-        return Left(ValidationFailure('ID da praga não pode ser vazio'));
+        return const Left(ValidationFailure('ID da praga não pode ser vazio'));
       }
 
       return await _repository.validarCompatibilidade(
@@ -204,7 +204,7 @@ class SearchDiagnosticosByPatternUseCase {
       }
 
       if (pattern.trim().length < 2) {
-        return Left(ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'));
+        return const Left(ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'));
       }
 
       return await _repository.searchByPattern(pattern.trim());
@@ -235,23 +235,23 @@ class GetDiagnosticoFiltersDataUseCase {
       final unidadesResult = futures[3];
 
       if (defensivosResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar defensivos'));
+        return const Left(CacheFailure('Erro ao carregar defensivos'));
       }
       if (culturasResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar culturas'));
+        return const Left(CacheFailure('Erro ao carregar culturas'));
       }
       if (pragasResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar pragas'));
+        return const Left(CacheFailure('Erro ao carregar pragas'));
       }
       if (unidadesResult.isLeft()) {
-        return Left(CacheFailure('Erro ao carregar unidades'));
+        return const Left(CacheFailure('Erro ao carregar unidades'));
       }
 
       final filtersData = DiagnosticoFiltersData(
-        defensivos: defensivosResult.fold((l) => <String>[], (r) => r as List<String>),
-        culturas: culturasResult.fold((l) => <String>[], (r) => r as List<String>),
-        pragas: pragasResult.fold((l) => <String>[], (r) => r as List<String>),
-        unidadesMedida: unidadesResult.fold((l) => <String>[], (r) => r as List<String>),
+        defensivos: defensivosResult.fold((l) => <String>[], (r) => r),
+        culturas: culturasResult.fold((l) => <String>[], (r) => r),
+        pragas: pragasResult.fold((l) => <String>[], (r) => r),
+        unidadesMedida: unidadesResult.fold((l) => <String>[], (r) => r),
         tiposAplicacao: TipoAplicacao.values, // Todos os tipos disponíveis
       );
 

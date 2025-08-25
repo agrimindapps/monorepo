@@ -68,7 +68,7 @@ class DiagnosticoMapper {
   }
 
   static DiagnosticosStats statsFromHiveStats(dynamic hiveStats) {
-    return DiagnosticosStats(
+    return const DiagnosticosStats(
       total: 0,
       completos: 0,
       parciais: 0,

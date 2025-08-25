@@ -380,7 +380,7 @@ class DiagnosticosProvider extends ChangeNotifier {
         return false;
       },
       (filtersData) {
-        _filtersData = filtersData as DiagnosticoFiltersData;
+        _filtersData = filtersData;
         return true;
       },
     );
@@ -428,10 +428,6 @@ class DiagnosticosProvider extends ChangeNotifier {
     _errorMessage = null;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
 /// Estados da view de diagnósticos

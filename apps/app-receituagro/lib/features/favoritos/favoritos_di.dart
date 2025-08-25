@@ -128,6 +128,12 @@ class FavoritosDI {
       ),
     );
 
+    _getIt.registerLazySingleton<GetCulturasFavoritosUseCase>(
+      () => GetCulturasFavoritosUseCase(
+        repository: _getIt<IFavoritosCulturasRepository>(),
+      ),
+    );
+
     // Use Cases de modificação
     _getIt.registerLazySingleton<AddDefensivoFavoritoUseCase>(
       () => AddDefensivoFavoritoUseCase(

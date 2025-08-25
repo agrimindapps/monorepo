@@ -350,7 +350,7 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
   void _loadGroupItems(DefensivoAgrupadoItemModel groupItem) async {
     _updateState(_state.copyWith(isLoading: true));
     
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 800));
     
     // Generate mock items for this group
     final groupItems = List.generate(8, (index) {

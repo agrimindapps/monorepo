@@ -38,6 +38,11 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
     _loadRealData();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> _loadRealData() async {
     try {
       setState(() {

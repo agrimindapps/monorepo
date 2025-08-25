@@ -7,6 +7,7 @@ class ListaPragasCulturaState {
   final bool isLoading;
   final bool isSearching;
   final bool isDark;
+  final bool isAscending;
   final PragaViewMode viewMode;
   final int tabIndex;
   final List<PragaCulturaItemModel> pragasList;
@@ -20,6 +21,7 @@ class ListaPragasCulturaState {
     this.isLoading = false,
     this.isSearching = false,
     this.isDark = false,
+    this.isAscending = true,
     this.viewMode = PragaViewMode.grid,
     this.tabIndex = 0,
     this.pragasList = const [],
@@ -54,6 +56,7 @@ class ListaPragasCulturaState {
     bool? isLoading,
     bool? isSearching,
     bool? isDark,
+    bool? isAscending,
     PragaViewMode? viewMode,
     int? tabIndex,
     List<PragaCulturaItemModel>? pragasList,
@@ -67,6 +70,7 @@ class ListaPragasCulturaState {
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
       isDark: isDark ?? this.isDark,
+      isAscending: isAscending ?? this.isAscending,
       viewMode: viewMode ?? this.viewMode,
       tabIndex: tabIndex ?? this.tabIndex,
       pragasList: pragasList ?? this.pragasList,

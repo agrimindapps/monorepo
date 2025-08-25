@@ -233,7 +233,7 @@ class CulturasRepositoryImpl implements ICulturasRepository {
       // Busca a cultura original
       final originalResult = await getById(culturaId);
       if (originalResult.isLeft()) {
-        return Left(CacheFailure('Cultura original não encontrada'));
+        return const Left(CacheFailure('Cultura original não encontrada'));
       }
 
       final original = originalResult.fold(
@@ -375,7 +375,7 @@ class CulturasRepositoryImpl implements ICulturasRepository {
     try {
       // Validações básicas
       if (!cultura.isValid) {
-        return Right(false);
+        return const Right(false);
       }
 
       // Verifica se já existe cultura com mesmo nome (exceto ela mesma)

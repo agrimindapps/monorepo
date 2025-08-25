@@ -11,6 +11,7 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/models/comentario_model.dart';
 import '../comentarios/services/comentarios_service.dart';
+import '../navigation/bottom_nav_wrapper.dart';
 
 
 // Modelo de dados para diagnóstico
@@ -64,7 +65,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   List<ComentarioModel> _comentarios = [];
   bool _isLoadingComments = false;
   final TextEditingController _commentController = TextEditingController();
-  final bool _hasReachedMaxComments = false;
+  bool _hasReachedMaxComments = false;
   final int _maxComentarios = 5; // default valor
   
   // Estado dos diagnósticos
@@ -286,28 +287,31 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: Column(
-              children: [
-                _buildModernHeader(context),
-                Expanded(
-                  child: isLoading
-                      ? _buildLoadingState(context)
-                      : hasError
-                          ? _buildErrorState(context)
-                          : _buildContent(context),
-                ),
-              ],
+    return BottomNavWrapper(
+      selectedIndex: 0, // Defensivos é o índice 0
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildModernHeader(context),
+                  Expanded(
+                    child: isLoading
+                        ? _buildLoadingState(context)
+                        : hasError
+                            ? _buildErrorState(context)
+                            : _buildContent(context),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+        floatingActionButton: _buildFloatingActionButton(context),
       ),
-      floatingActionButton: _buildFloatingActionButton(context),
     );
   }
 
@@ -675,8 +679,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  theme.colorScheme.primary.withValues(alpha: 0.8),
-                  theme.colorScheme.primary.withValues(alpha: 0.9),
+                  const Color(0xFF4CAF50).withValues(alpha: 0.8),
+                  const Color(0xFF4CAF50).withValues(alpha: 0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -723,35 +727,35 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                   'Ingrediente Ativo',
                   caracteristicas['ingredienteAtivo']!,
                   FontAwesomeIcons.flask,
-                  theme.colorScheme.primary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Nome Técnico',
                   caracteristicas['nomeTecnico']!,
                   FontAwesomeIcons.tag,
-                  theme.colorScheme.primary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Toxicologia',
                   caracteristicas['toxico']!,
                   FontAwesomeIcons.skull,
-                  theme.colorScheme.primary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Inflamável',
                   caracteristicas['inflamavel']!,
                   FontAwesomeIcons.fire,
-                  theme.colorScheme.primary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Corrosivo',
                   caracteristicas['corrosivo']!,
                   FontAwesomeIcons.droplet,
-                  theme.colorScheme.primary,
+                  const Color(0xFF4CAF50),
                 ),
               ],
             ),
@@ -795,8 +799,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  theme.colorScheme.secondary.withValues(alpha: 0.8),
-                  theme.colorScheme.secondary.withValues(alpha: 0.9),
+                  const Color(0xFF4CAF50).withValues(alpha: 0.8),
+                  const Color(0xFF4CAF50).withValues(alpha: 0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -843,35 +847,35 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                   'Modo de Ação',
                   caracteristicas['modoAcao']!,
                   FontAwesomeIcons.gear,
-                  theme.colorScheme.secondary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Classe Agronômica',
                   caracteristicas['classeAgronomica']!,
                   FontAwesomeIcons.seedling,
-                  theme.colorScheme.secondary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Classe Ambiental',
                   caracteristicas['classAmbiental']!,
                   FontAwesomeIcons.leaf,
-                  theme.colorScheme.secondary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Formulação',
                   caracteristicas['formulacao']!,
                   FontAwesomeIcons.flask,
-                  theme.colorScheme.secondary,
+                  const Color(0xFF4CAF50),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoItem(
                   'Registro MAPA',
                   caracteristicas['mapa']!,
                   FontAwesomeIcons.map,
-                  theme.colorScheme.secondary,
+                  const Color(0xFF4CAF50),
                 ),
               ],
             ),
@@ -1011,7 +1015,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       return const SizedBox.shrink();
     }
 
-    final accentColor = theme.colorScheme.tertiary;
+    const accentColor = Color(0xFF4CAF50); // Verde padrão do app
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -1566,91 +1570,288 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Botão para adicionar novo comentário
-          if (_comentarios.length < _maxComentarios)
-            _buildAddCommentButton(),
+          // Add new comment section
+          _buildAddCommentSection(),
+          const SizedBox(height: 24),
           
-          if (_comentarios.length >= _maxComentarios)
-            _buildLimitReachedWidget(),
-          
-          const SizedBox(height: 16),
-          
-          // Lista de comentários
-          if (_comentarios.isEmpty)
+          // Comments list
+          if (_isLoadingComments)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (_comentarios.isEmpty)
             _buildEmptyCommentsState()
           else
-            ..._comentarios.asMap().entries.map((entry) {
-              final index = entry.key;
-              final comentario = entry.value;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildComentarioCard(comentario, index),
-              );
-            }),
-          
+            _buildCommentsList(),
+            
           const SizedBox(height: 80), // Espaço para bottom navigation
         ],
       ),
     );
   }
 
-  Widget _buildAddCommentButton() {
+  Widget _buildAddCommentSection() {
     final theme = Theme.of(context);
     
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.add_comment,
-            size: 48,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Adicionar Comentário',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.comment_outlined,
+                  color: Color(0xFF4CAF50),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Adicionar comentário',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Compartilhe sua experiência com este defensivo',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: _showAddCommentDialog,
-            icon: const Icon(Icons.edit),
-            label: const Text('Escrever Comentário'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _commentController,
+              maxLines: 4,
+              maxLength: 300,
+              decoration: InputDecoration(
+                hintText: 'Compartilhe sua experiência sobre este defensivo...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: theme.colorScheme.surface,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    _commentController.clear();
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _addComment,
+                  child: const Text('Adicionar'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildCommentsList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _comentarios.length,
+      itemBuilder: (context, index) {
+        final comentario = _comentarios[index];
+        return _buildCommentCard(comentario);
+      },
+    );
+  }
+  
+  Widget _buildCommentCard(ComentarioModel comentario) {
+    final theme = Theme.of(context);
+    
+    return Dismissible(
+      key: Key(comentario.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 30,
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Confirmar exclusão'),
+              content: const Text('Tem certeza que deseja excluir este comentário?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Excluir'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        _deleteComment(comentario.id);
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.person,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Anônimo',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    _formatDate(comentario.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                comentario.conteudo,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurface,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  void _addComment() async {
+    final content = _commentController.text.trim();
+    
+    if (!_comentariosService.isValidContent(content)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_comentariosService.getValidationErrorMessage()),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (!_comentariosService.canAddComentario(_comentarios.length)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Limite de comentários atingido. Assine o plano premium para mais.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    final newComment = ComentarioModel(
+      id: _comentariosService.generateId(),
+      idReg: _comentariosService.generateIdReg(),
+      titulo: '',
+      conteudo: content,
+      ferramenta: 'defensivos',
+      pkIdentificador: _defensivoData?.idReg ?? widget.defensivoName,
+      status: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    
+    try {
+      await _comentariosService.addComentario(newComment);
+      
+      if (mounted) {
+        setState(() {
+          _comentarios.add(newComment);
+          _commentController.clear();
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comentário adicionado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+  
+  void _deleteComment(String commentId) async {
+    try {
+      await _comentariosService.deleteComentario(commentId);
+
+      if (mounted) {
+        setState(() {
+          _comentarios.removeWhere((comment) => comment.id == commentId);
+          _hasReachedMaxComments = !_comentariosService.canAddComentario(_comentarios.length);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comentário excluído'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir comentário: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildLimitReachedWidget() {
@@ -1715,32 +1916,63 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     
     return Center(
       child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 32),
         padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.comment_outlined,
-              size: 64,
-              color: Color(0xFF4CAF50),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_comment_outlined,
+                size: 48,
+                color: Color(0xFF4CAF50),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               'Nenhum comentário ainda',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Seja o primeiro a comentar sobre este defensivo',
+              'Compartilhe sua experiência com este defensivo.\nSua opinião ajuda outros produtores!',
               style: TextStyle(
                 fontSize: 14,
                 color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _showAddCommentDialog,
+              icon: const Icon(Icons.add_comment, size: 20),
+              label: const Text('Adicionar Primeiro Comentário'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ],
         ),
@@ -2121,7 +2353,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Comentário editado com sucesso!'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF4CAF50),
       ),
     );
   }
@@ -2431,13 +2663,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         SnackBar(
           content: Text('Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito'),
           backgroundColor: Colors.red,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.defensivoName} ${isFavorited ? 'adicionado' : 'removido'} dos favoritos'),
-          backgroundColor: Colors.green,
         ),
       );
     }

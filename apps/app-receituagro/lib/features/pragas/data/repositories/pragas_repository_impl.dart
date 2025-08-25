@@ -1,19 +1,22 @@
+import 'package:get_it/get_it.dart';
+import '../../../../core/models/pragas_hive.dart';
+import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
 
 /// Implementação do repositório de pragas usando Hive (Data Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
 class PragasRepositoryImpl implements IPragasRepository {
+  final PragasHiveRepository _hiveRepository;
+
+  PragasRepositoryImpl({PragasHiveRepository? hiveRepository})
+      : _hiveRepository = hiveRepository ?? GetIt.instance<PragasHiveRepository>();
   
   @override
   Future<List<PragaEntity>> getAll() async {
     try {
-      // TODO: Implementar com ReceitaAgroHiveService quando disponível
-      // final hivePragas = ReceitaAgroHiveService.getPragas();
-      // return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
-      
-      // Mock implementation por enquanto
-      return [];
+      final hivePragas = _hiveRepository.getAll();
+      return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao carregar todas as pragas: $e');
     }
@@ -26,12 +29,8 @@ class PragasRepositoryImpl implements IPragasRepository {
         throw ArgumentError('ID não pode ser vazio');
       }
 
-      // TODO: Implementar com ReceitaAgroHiveService quando disponível
-      // final hivePraga = ReceitaAgroHiveService.getPragaById(id);
-      // return hivePraga != null ? PragaEntity.fromHive(hivePraga) : null;
-      
-      // Mock implementation por enquanto
-      return null;
+      final hivePraga = _hiveRepository.getById(id);
+      return hivePraga != null ? PragaEntity.fromHive(hivePraga) : null;
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar praga por ID: $e');
     }
@@ -40,8 +39,8 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<List<PragaEntity>> getByTipo(String tipo) async {
     try {
-      final allPragas = await getAll();
-      return allPragas.where((praga) => praga.tipoPraga == tipo).toList();
+      final hivePragas = _hiveRepository.findByTipo(tipo);
+      return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar pragas por tipo: $e');
     }
@@ -52,13 +51,15 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       if (searchTerm.isEmpty) return [];
 
-      final allPragas = await getAll();
+      final allPragas = _hiveRepository.getAll();
       final term = searchTerm.toLowerCase();
       
-      return allPragas.where((praga) =>
+      final filteredPragas = allPragas.where((praga) =>
         praga.nomeComum.toLowerCase().contains(term) ||
         praga.nomeCientifico.toLowerCase().contains(term)
       ).toList();
+      
+      return filteredPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar pragas por nome: $e');
     }
@@ -69,8 +70,8 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       if (familia.isEmpty) return [];
 
-      final allPragas = await getAll();
-      return allPragas.where((praga) => praga.familia == familia).toList();
+      final hivePragas = _hiveRepository.findByFamilia(familia);
+      return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar pragas por família: $e');
     }
@@ -81,12 +82,10 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       if (culturaId.isEmpty) return [];
 
-      // TODO: Implementar com ReceitaAgroHiveService quando disponível
-      // Busca diagnósticos para a cultura
-      // final diagnosticos = ReceitaAgroHiveService.getDiagnosticosByPragaCultura('', culturaId);
-      
-      // Mock implementation por enquanto
-      return [];
+      // Por enquanto retorna todas as pragas
+      // TODO: Implementar busca por cultura usando DiagnosticoHiveRepository
+      final allPragas = _hiveRepository.getAll();
+      return allPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar pragas por cultura: $e');
     }
@@ -95,7 +94,7 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<int> getCountByTipo(String tipo) async {
     try {
-      final pragasByTipo = await getByTipo(tipo);
+      final pragasByTipo = _hiveRepository.findByTipo(tipo);
       return pragasByTipo.length;
     } catch (e) {
       throw PragasRepositoryException('Erro ao contar pragas por tipo: $e');
@@ -105,8 +104,7 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<int> getTotalCount() async {
     try {
-      final allPragas = await getAll();
-      return allPragas.length;
+      return _hiveRepository.count;
     } catch (e) {
       throw PragasRepositoryException('Erro ao contar total de pragas: $e');
     }
@@ -116,35 +114,26 @@ class PragasRepositoryImpl implements IPragasRepository {
 /// Implementação do repositório de histórico usando LocalStorage
 /// Princípio: Single Responsibility - Apenas gerencia histórico
 class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
-  final IPragasRepository _pragasRepository;
-  // Aqui você injetaria o LocalStorageService via DI
-  // final ILocalStorageService _localStorage;
+  final PragasHiveRepository _hiveRepository;
 
   static const int _maxRecentItems = 7;
   static const int _maxSuggestedItems = 5;
 
   PragasHistoryRepositoryImpl({
-    required IPragasRepository pragasRepository,
-    // required ILocalStorageService localStorage,
-  }) : _pragasRepository = pragasRepository;
-       // _localStorage = localStorage;
+    PragasHiveRepository? hiveRepository,
+  }) : _hiveRepository = hiveRepository ?? GetIt.instance<PragasHiveRepository>();
 
   @override
   Future<List<PragaEntity>> getRecentlyAccessed() async {
     try {
-      // TODO: Implementar com LocalStorage real
-      // final accessedIds = await _localStorage.getRecentItems('acessadosPragas');
-      final accessedIds = <String>[]; // Mock por enquanto
+      // Por enquanto retorna algumas pragas aleatórias como "recentes"
+      // TODO: Implementar com LocalStorage real para histórico
+      final allPragas = _hiveRepository.getAll();
+      if (allPragas.isEmpty) return [];
       
-      final recentPragas = <PragaEntity>[];
-      for (final id in accessedIds.take(_maxRecentItems)) {
-        final praga = await _pragasRepository.getById(id);
-        if (praga != null) {
-          recentPragas.add(praga);
-        }
-      }
-      
-      return recentPragas;
+      // Pega algumas pragas como mock de recentes
+      final recentHivePragas = allPragas.take(_maxRecentItems).toList();
+      return recentHivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao carregar pragas recentes: $e');
     }
@@ -167,12 +156,13 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
   @override
   Future<List<PragaEntity>> getSuggested(int limit) async {
     try {
-      final allPragas = await _pragasRepository.getAll();
+      final allPragas = _hiveRepository.getAll();
       if (allPragas.isEmpty) return [];
 
       // Algoritmo simples de sugestão (pode ser melhorado)
-      allPragas.shuffle();
-      return allPragas.take(limit.clamp(1, _maxSuggestedItems)).toList();
+      final shuffledPragas = List<PragasHive>.from(allPragas)..shuffle();
+      final suggestedHivePragas = shuffledPragas.take(limit.clamp(1, _maxSuggestedItems)).toList();
+      return suggestedHivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar pragas sugeridas: $e');
     }

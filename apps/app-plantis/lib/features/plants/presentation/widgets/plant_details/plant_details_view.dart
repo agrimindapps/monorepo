@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../core/theme/colors.dart';
 import '../../../domain/entities/plant.dart';
+import '../../../../tasks/presentation/providers/tasks_provider.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
 import 'plant_care_section.dart';
@@ -25,7 +26,7 @@ class PlantDetailsView extends StatefulWidget {
 
 class _PlantDetailsViewState extends State<PlantDetailsView>
     with TickerProviderStateMixin {
-  late PlantDetailsController _controller;
+  PlantDetailsController? _controller;
   late TabController _tabController;
 
   @override
@@ -35,18 +36,21 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
     // Inicializar controller
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<PlantDetailsProvider>();
-      _controller = PlantDetailsController(
-        context: context,
-        provider: provider,
-      );
-      _controller.loadPlant(widget.plantId);
+      if (mounted) {
+        final provider = context.read<PlantDetailsProvider>();
+        _controller = PlantDetailsController(
+          context: context,
+          provider: provider,
+        );
+        _controller!.loadPlant(widget.plantId);
+      }
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _controller = null;
     super.dispose();
   }
 
@@ -59,18 +63,25 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           theme.brightness == Brightness.dark
               ? const Color(0xFF1C1C1E)
               : theme.colorScheme.surface,
-      body: Consumer<PlantDetailsProvider>(
-        builder: (context, provider, child) {
+      // Optimized with Selector - only rebuilds when plant loading state changes
+      body: Selector<PlantDetailsProvider, Map<String, dynamic>>(
+        selector: (context, provider) => {
+          'isLoading': provider.isLoading,
+          'hasError': provider.hasError,
+          'plant': provider.plant,
+          'errorMessage': provider.errorMessage,
+        },
+        builder: (context, plantData, child) {
           // Estados de loading e erro
-          if (provider.isLoading && provider.plant == null) {
+          if ((plantData['isLoading'] as bool) && plantData['plant'] == null) {
             return _buildLoadingState(context);
           }
 
-          if (provider.hasError && provider.plant == null) {
-            return _buildErrorState(context, provider.errorMessage);
+          if ((plantData['hasError'] as bool) && plantData['plant'] == null) {
+            return _buildErrorState(context, plantData['errorMessage'] as String?);
           }
 
-          final plant = provider.plant;
+          final plant = plantData['plant'] as Plant?;
           if (plant == null) {
             return _buildLoadingState(context);
           }
@@ -79,12 +90,14 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           return _buildMainContent(context, plant);
         },
       ),
-      floatingActionButton: Consumer<PlantDetailsProvider>(
-        builder: (context, provider, child) {
-          if (provider.plant == null) return const SizedBox.shrink();
+      // Optimized FloatingActionButton - only rebuilds when plant changes
+      floatingActionButton: Selector<PlantDetailsProvider, Plant?>(
+        selector: (context, provider) => provider.plant,
+        builder: (context, plant, child) {
+          if (plant == null) return const SizedBox.shrink();
 
           return FloatingActionButton(
-            onPressed: () => _controller.showEditOptions(provider.plant!),
+            onPressed: () => _controller?.showEditOptions(plant),
             backgroundColor: PlantisColors.primary,
             child: const Icon(Icons.edit, color: Colors.white),
           );
@@ -137,13 +150,13 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => _controller.refresh(widget.plantId),
+                  onPressed: () => _controller?.refresh(widget.plantId),
                   icon: const Icon(Icons.refresh),
                   label: const Text('Tentar novamente'),
                 ),
                 const SizedBox(width: 16),
                 TextButton(
-                  onPressed: () => _controller.goBack(),
+                  onPressed: () => _controller?.goBack(),
                   child: const Text('Voltar'),
                 ),
               ],
@@ -193,7 +206,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       foregroundColor: theme.colorScheme.onSurface,
       elevation: 0,
       leading: IconButton(
-        onPressed: () => _controller.goBack(),
+        onPressed: () => _controller?.goBack(),
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -212,7 +225,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
       actions: [
         IconButton(
-          onPressed: () => _controller.showMoreOptions(plant),
+          onPressed: () => _controller?.showMoreOptions(plant),
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(

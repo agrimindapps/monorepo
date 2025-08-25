@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../domain/entities/plant.dart';
 import 'optimized_plant_image_widget.dart';
 
@@ -39,7 +40,7 @@ class PlantCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap ?? () => context.push('/plants/${plant.id}'),
+          onTap: onTap ?? () => context.push(AppRouter.plantDetailsPath(plant.id)),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -190,7 +191,7 @@ class PlantCard extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    context.push('/plants/${plant.id}/edit');
+                    context.push('/plants/edit/${plant.id}');
                   },
                 ),
                 ListTile(
@@ -204,7 +205,7 @@ class PlantCard extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    context.push('/plants/${plant.id}');
+                    context.push(AppRouter.plantDetailsPath(plant.id));
                   },
                 ),
                 ListTile(

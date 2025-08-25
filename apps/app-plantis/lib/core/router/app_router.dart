@@ -47,12 +47,15 @@ class AppRouter {
   static const String backupSettings = '/backup-settings';
   static const String account = '/account';
 
+  /// Helper method to navigate to plant details
+  static String plantDetailsPath(String plantId) => '/plants/$plantId';
+
   static GoRouter router(BuildContext context) {
     final authProvider = context.read<AuthProvider>();
 
     return GoRouter(
       navigatorKey: NavigationService.instance.navigatorKey,
-      initialLocation: landing,
+      initialLocation: promotional,
       refreshListenable: authProvider,
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
@@ -95,12 +98,6 @@ class AppRouter {
 
         // Se não autenticado e tentando acessar rota protegida
         if (!isAuthenticated && isAccessingProtectedRoute) {
-          // Só mostra mensagem se não está inicializando modo anônimo
-          if (isInitialized) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              NavigationService.instance.showAccessDeniedMessage();
-            });
-          }
           return login;
         }
 
@@ -161,8 +158,15 @@ class AppRouter {
                   name: 'plant-details',
                   builder: (context, state) {
                     final plantId = state.pathParameters['id']!;
-                    return ChangeNotifierProvider(
-                      create: (context) => sl<PlantDetailsProvider>(),
+                    return MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider(
+                          create: (context) => sl<PlantDetailsProvider>(),
+                        ),
+                        ChangeNotifierProvider(
+                          create: (context) => sl<TasksProvider>(),
+                        ),
+                      ],
                       child: PlantDetailsPage(plantId: plantId),
                     );
                   },

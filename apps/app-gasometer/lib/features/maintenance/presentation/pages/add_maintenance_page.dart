@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../domain/entities/maintenance_entity.dart';
+import '../providers/maintenance_provider.dart';
 
 class AddMaintenancePage extends StatefulWidget {
   const AddMaintenancePage({super.key});
@@ -168,10 +172,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             Icons.arrow_drop_down,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
-          items: const [
-            DropdownMenuItem(value: '1', child: Text('Honda Civic')),
-            DropdownMenuItem(value: '2', child: Text('Toyota Corolla')),
-          ],
+          items: _buildVehicleDropdownItems(),
           onChanged: (value) => setState(() => _selectedVehicle = value!),
         ),
       ),
@@ -504,16 +505,74 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       return;
     }
 
-    // Aqui você implementaria a lógica para salvar a manutenção
-    // Por exemplo: chamar um repository, service, etc.
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Manutenção salva com sucesso!'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-    );
-    
-    context.pop();
+    try {
+      // Criar entidade de manutenção com dados do formulário
+      final maintenanceEntity = MaintenanceEntity(
+        id: DateTime.now().millisecondsSinceEpoch.toString(), // ID temporário
+        userId: 'current_user', // TODO: Obter do sistema de autenticação
+        vehicleId: _selectedVehicle, 
+        type: MaintenanceType.preventive, // TODO: Mapear do _typeController
+        status: MaintenanceStatus.completed,
+        title: _typeController.text.trim(),
+        description: _descriptionController.text.trim(),
+        cost: double.tryParse(_costController.text.replaceAll(',', '.')) ?? 0.0,
+        serviceDate: _selectedDate,
+        odometer: double.tryParse(_odometerController.text.replaceAll(',', '.')) ?? 0.0,
+        workshopName: _workshopController.text.isNotEmpty ? _workshopController.text.trim() : null,
+        workshopPhone: null, // TODO: Adicionar campo se necessário
+        workshopAddress: null, // TODO: Adicionar campo se necessário
+        nextServiceDate: null, // TODO: Implementar lógica de próximo serviço
+        nextServiceOdometer: null,
+        photosPaths: const [],
+        invoicesPaths: const [],
+        parts: const {},
+        notes: null,
+      );
+
+      // Usar o provider para salvar
+      final maintenanceProvider = Provider.of<MaintenanceProvider>(context, listen: false);
+      final success = await maintenanceProvider.addMaintenanceRecord(maintenanceEntity);
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Manutenção salva com sucesso!'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+          context.pop();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao salvar: ${maintenanceProvider.errorMessage ?? "Erro desconhecido"}'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao salvar manutenção: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Constrói os itens do dropdown de veículos
+  List<DropdownMenuItem<String>> _buildVehicleDropdownItems() {
+    return Provider.of<VehiclesProvider>(context, listen: false)
+        .vehicles
+        .map((vehicle) => DropdownMenuItem<String>(
+              value: vehicle.id,
+              child: Text('${vehicle.brand} ${vehicle.model}'),
+            ))
+        .toList();
   }
 }

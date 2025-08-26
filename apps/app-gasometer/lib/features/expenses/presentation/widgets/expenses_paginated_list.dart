@@ -1,325 +1,205 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/widgets/paginated_list_view.dart';
+import '../../../../core/interfaces/i_expenses_repository.dart';
+import '../../../../core/presentation/theme/app_theme.dart';
+import '../../../../core/presentation/widgets/empty_state_widget.dart';
+import '../../../../core/presentation/widgets/error_state_widget.dart';
 import '../../domain/entities/expense_entity.dart';
-import '../../domain/services/expense_formatter_service.dart';
 import '../providers/expenses_paginated_provider.dart';
 
-/// Widget de lista paginada de despesas com lazy loading
-class ExpensesPaginatedList extends StatelessWidget {
-  final VoidCallback? onExpenseTap;
-  final bool showVehicleInfo;
-  final PaginationConfig? paginationConfig;
-
+/// Widget de lista paginada eficiente para despesas
+/// Implementa infinite scrolling com lazy loading real
+class ExpensesPaginatedList extends StatefulWidget {
+  final Widget Function(BuildContext context, ExpenseEntity expense, int index) itemBuilder;
+  final Widget? loadingBuilder;
+  final Widget? errorBuilder;
+  final Widget? emptyBuilder;
+  final EdgeInsets? padding;
+  final double? itemExtent;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+  final ScrollController? controller;
+  
   const ExpensesPaginatedList({
     super.key,
-    this.onExpenseTap,
-    this.showVehicleInfo = false,
-    this.paginationConfig,
+    required this.itemBuilder,
+    this.loadingBuilder,
+    this.errorBuilder,
+    this.emptyBuilder,
+    this.padding,
+    this.itemExtent,
+    this.shrinkWrap = false,
+    this.physics,
+    this.controller,
   });
 
   @override
+  State<ExpensesPaginatedList> createState() => _ExpensesPaginatedListState();
+}
+
+class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
+  late ScrollController _scrollController;
+  
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = widget.controller ?? ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _scrollController.dispose();
+    } else {
+      _scrollController.removeListener(_onScroll);
+    }
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      // User reached the bottom, load next page
+      final provider = context.read<ExpensesPaginatedProvider>();
+      if (provider.hasNextPage && !provider.isLoadingMore) {
+        provider.loadNextPage();
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Usar Selector para otimizar rebuilds - só reconstrói quando dados relevantes mudam
-    return Selector<ExpensesPaginatedProvider, (bool, String?, String)>(
-      selector: (context, provider) => (
-        provider.isLoading,
-        provider.error,
-        'expenses_${provider.hashCode}',
-      ),
-      builder: (context, data, child) {
-        final (isLoading, error, cacheKey) = data;
-        final provider = Provider.of<ExpensesPaginatedProvider>(context, listen: false);
-        
-        return PaginatedListView<ExpenseEntity>(
-          loadPage: provider.loadPage,
-          itemBuilder: _buildExpenseItem,
-          separatorBuilder: _buildSeparator,
-          emptyWidget: _buildEmptyWidget(context),
-          loadingWidget: _buildLoadingWidget(context),
-          errorBuilder: _buildErrorWidget,
-          config: paginationConfig ?? const PaginationConfig(
-            pageSize: 15, // Menor para melhor performance
-            initialPageSize: 20,
-            scrollThreshold: 0.7,
-          ),
-          cacheKey: cacheKey,
-          enableVirtualization: true,
-          padding: const EdgeInsets.all(16),
-        );
+    return Consumer<ExpensesPaginatedProvider>(
+      builder: (context, provider, child) {
+        // Initial loading state
+        if (provider.isInitial && provider.isLoading) {
+          return _buildInitialLoading();
+        }
+
+        // Error state
+        if (provider.hasError) {
+          return _buildError(provider);
+        }
+
+        // Empty state
+        if (provider.isEmpty) {
+          return _buildEmpty();
+        }
+
+        // Main list with items
+        return _buildList(provider);
       },
     );
   }
 
-  Widget _buildExpenseItem(BuildContext context, ExpenseEntity expense, int index) {
-    // Cache do formatter para evitar instanciação repetida
-    final formatter = ExpenseFormatterService();
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onExpenseTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header com título e valor
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      expense.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    formatter.formatAmount(expense.amount),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 8),
-              
-              // Tipo e data
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: expense.type.color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: expense.type.color.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          expense.type.icon,
-                          size: 14,
-                          color: expense.type.color,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          expense.type.displayName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: expense.type.color,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const Spacer(),
-                  
-                  Text(
-                    formatter.formatDate(expense.date),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              
-              // Descrição se houver
-              if (expense.description.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  expense.description,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              
-              // Informações adicionais
-              if (showVehicleInfo || expense.establishmentName.isNotEmpty == true) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    ...[
-                    Icon(
-                      Icons.store,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        expense.establishmentName,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                    
-                    if (expense.odometer > 0) ...[
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.speed,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        formatter.formatOdometer(expense.odometer),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-              
-              // Indicadores especiais
-              if (expense.amount >= 1000.0) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.trending_up,
-                        size: 12,
-                        color: Colors.orange[700],
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        'Alto valor',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.orange[700],
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildInitialLoading() {
+    if (widget.loadingBuilder != null) {
+      return widget.loadingBuilder!;
+    }
 
-  Widget _buildSeparator(BuildContext context, int index) {
-    return const SizedBox(height: 8);
-  }
-
-  Widget _buildEmptyWidget(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 80,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhuma despesa encontrada',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Adicione uma nova despesa ou ajuste os filtros',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[500],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingWidget(BuildContext context) {
     return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Carregando despesas...'),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Carregando despesas...'),
+        ],
       ),
     );
   }
 
-  Widget _buildErrorWidget(String error, VoidCallback retry) {
-    return Builder(
-      builder: (context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 80,
-                color: Colors.red[400],
+  Widget _buildError(ExpensesPaginatedProvider provider) {
+    if (widget.errorBuilder != null) {
+      return widget.errorBuilder!;
+    }
+
+    return ErrorStateWidget(
+      title: 'Erro ao carregar despesas',
+      message: provider.error?.displayMessage ?? 'Erro desconhecido',
+      onRetry: provider.hasError ? provider.retry : null,
+    );
+  }
+
+  Widget _buildEmpty() {
+    if (widget.emptyBuilder != null) {
+      return widget.emptyBuilder!;
+    }
+
+    final hasFilters = context.read<ExpensesPaginatedProvider>().hasActiveFilters;
+    
+    return EmptyStateWidget(
+      icon: Icons.receipt_long,
+      title: hasFilters ? 'Nenhuma despesa encontrada' : 'Nenhuma despesa cadastrada',
+      message: hasFilters
+          ? 'Tente ajustar os filtros para encontrar despesas'
+          : 'Adicione sua primeira despesa para começar a acompanhar os gastos',
+      onAction: hasFilters
+          ? () => context.read<ExpensesPaginatedProvider>().clearFilters()
+          : null,
+    );
+  }
+
+  Widget _buildList(ExpensesPaginatedProvider provider) {
+    final itemCount = provider.itemCount + (provider.hasNextPage ? 1 : 0);
+    
+    return RefreshIndicator(
+      onRefresh: provider.refresh,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: widget.padding ?? const EdgeInsets.all(16),
+        physics: widget.physics,
+        shrinkWrap: widget.shrinkWrap,
+        itemExtent: widget.itemExtent,
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          // Loading more indicator at the bottom
+          if (index >= provider.itemCount) {
+            return _buildLoadMoreIndicator(provider);
+          }
+
+          // Regular expense item
+          final expense = provider.items[index];
+          return widget.itemBuilder(context, expense, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadMoreIndicator(ExpensesPaginatedProvider provider) {
+    if (provider.isLoadingMore) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Carregando mais despesas...',
+              style: AppTheme.textStyles.bodySmall?.copyWith(
+                color: AppTheme.colors.onSurfaceVariant,
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Erro ao carregar despesas',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.red[700],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: retry,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Tentar novamente'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // End of list indicator
+    return Container(
+      padding: const EdgeInsets.all(16),
+      alignment: Alignment.center,
+      child: Text(
+        'Todas as despesas foram carregadas',
+        style: AppTheme.textStyles.bodySmall?.copyWith(
+          color: AppTheme.colors.onSurfaceVariant,
         ),
       ),
     );
@@ -328,146 +208,172 @@ class ExpensesPaginatedList extends StatelessWidget {
 
 /// Widget de filtros para a lista paginada
 class ExpensesPaginatedFilters extends StatelessWidget {
-  const ExpensesPaginatedFilters({super.key});
+  final bool showStats;
+  final VoidCallback? onFiltersChanged;
+  
+  const ExpensesPaginatedFilters({
+    super.key,
+    this.showStats = true,
+    this.onFiltersChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Selector para otimizar rebuilds dos filtros
-    return Selector<ExpensesPaginatedProvider, (bool, String)>(
-      selector: (context, provider) => (
-        provider.hasActiveFilters,
-        provider.filtersConfig.searchQuery ?? '',
-      ),
-      builder: (context, filterData, child) {
-        final (hasActiveFilters, searchQuery) = filterData;
-        final provider = Provider.of<ExpensesPaginatedProvider>(context, listen: false);
-        
-        return Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    Icon(
-                      Icons.filter_alt,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Filtros',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (hasActiveFilters)
-                      TextButton(
-                        onPressed: provider.clearFilters,
-                        child: const Text('Limpar'),
-                      ),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Busca - Widget otimizado para reconstruir apenas quando necessário
-                _OptimizedSearchField(
-                  initialValue: searchQuery,
-                  onChanged: provider.search,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Filtros rápidos - Widget cache para chips
-                _OptimizedFilterChips(
-                  onFilterChanged: () => provider.clearFilters(),
-                ),
-              ],
-            ),
-          ),
+    return Consumer<ExpensesPaginatedProvider>(
+      builder: (context, provider, child) {
+        return Column(
+          children: [
+            // Sort controls
+            _buildSortControls(context, provider),
+            
+            // Stats summary if available
+            if (showStats && provider.stats != null) ...[
+              const SizedBox(height: 8),
+              _buildStatsCard(provider.stats!),
+            ],
+            
+            // Active filters indicator
+            if (provider.hasActiveFilters) ...[
+              const SizedBox(height: 8),
+              _buildActiveFiltersIndicator(context, provider),
+            ],
+          ],
         );
       },
     );
   }
-}
 
-/// Widget otimizado para campo de busca
-class _OptimizedSearchField extends StatefulWidget {
-  final String initialValue;
-  final ValueChanged<String> onChanged;
-  
-  const _OptimizedSearchField({
-    required this.initialValue,
-    required this.onChanged,
-  });
-  
-  @override
-  State<_OptimizedSearchField> createState() => _OptimizedSearchFieldState();
-}
-
-class _OptimizedSearchFieldState extends State<_OptimizedSearchField> {
-  late final TextEditingController _controller;
-  
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
-  }
-  
-  @override
-  void didUpdateWidget(_OptimizedSearchField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialValue != widget.initialValue) {
-      _controller.text = widget.initialValue;
-    }
-  }
-  
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      decoration: const InputDecoration(
-        hintText: 'Buscar despesas...',
-        prefixIcon: Icon(Icons.search),
-        border: OutlineInputBorder(),
+  Widget _buildSortControls(BuildContext context, ExpensesPaginatedProvider provider) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.sort, size: 20),
+            const SizedBox(width: 8),
+            const Text('Ordenar por:'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                children: ExpenseSortBy.values.map((sortBy) {
+                  final isActive = provider.sortBy == sortBy;
+                  return FilterChip(
+                    label: Text(_getSortLabel(sortBy)),
+                    selected: isActive,
+                    onSelected: (_) => provider.toggleSortOrder(sortBy),
+                    avatar: isActive && provider.sortOrder == SortOrder.ascending
+                        ? const Icon(Icons.keyboard_arrow_up, size: 16)
+                        : isActive && provider.sortOrder == SortOrder.descending
+                        ? const Icon(Icons.keyboard_arrow_down, size: 16)
+                        : null,
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
-      onChanged: widget.onChanged,
     );
   }
-}
 
-/// Widget otimizado para chips de filtro
-class _OptimizedFilterChips extends StatelessWidget {
-  final VoidCallback onFilterChanged;
-  
-  const _OptimizedFilterChips({
-    required this.onFilterChanged,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
+  Widget _buildStatsCard(Map<String, dynamic> stats) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildStatItem(
+              'Total',
+              'R\$ ${(stats['totalAmount'] as double? ?? 0).toStringAsFixed(2)}',
+              Icons.attach_money,
+            ),
+            _buildStatItem(
+              'Qtd',
+              (stats['totalRecords'] as int? ?? 0).toString(),
+              Icons.receipt,
+            ),
+            _buildStatItem(
+              'Média',
+              'R\$ ${(stats['averageAmount'] as double? ?? 0).toStringAsFixed(2)}',
+              Icons.trending_up,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon) {
+    return Column(
       children: [
-        FilterChip(
-          selected: false,
-          label: const Text('Todos'),
-          onSelected: (selected) {
-            onFilterChanged();
-          },
+        Icon(icon, size: 20),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTheme.textStyles.titleSmall,
+        ),
+        Text(
+          label,
+          style: AppTheme.textStyles.bodySmall,
         ),
       ],
     );
   }
-}
 
+  Widget _buildActiveFiltersIndicator(
+    BuildContext context, 
+    ExpensesPaginatedProvider provider,
+  ) {
+    return Card(
+      color: AppTheme.colors.primary.withValues(alpha: 0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Icon(
+              Icons.filter_alt,
+              color: AppTheme.colors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Filtros ativos - ${provider.itemCount} resultado(s)',
+                style: AppTheme.textStyles.bodySmall?.copyWith(
+                  color: AppTheme.colors.onSurface,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                provider.clearFilters();
+                onFiltersChanged?.call();
+              },
+              child: Text(
+                'Limpar',
+                style: TextStyle(color: AppTheme.colors.primary),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getSortLabel(ExpenseSortBy sortBy) {
+    switch (sortBy) {
+      case ExpenseSortBy.date:
+        return 'Data';
+      case ExpenseSortBy.amount:
+        return 'Valor';
+      case ExpenseSortBy.type:
+        return 'Tipo';
+      case ExpenseSortBy.description:
+        return 'Descrição';
+      case ExpenseSortBy.odometer:
+        return 'Km';
+    }
+  }
+}

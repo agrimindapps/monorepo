@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -11,6 +12,52 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'lista_defensivos_agrupados_page.dart';
 import 'lista_defensivos_page.dart';
+
+/// Model for statistics data computed in background
+class DefensivosStatistics {
+  final int totalDefensivos;
+  final int totalFabricantes;
+  final int totalModoAcao;
+  final int totalIngredienteAtivo;
+  final int totalClasseAgronomica;
+  final List<FitossanitarioHive> recentDefensivos;
+  final List<FitossanitarioHive> newDefensivos;
+
+  const DefensivosStatistics({
+    required this.totalDefensivos,
+    required this.totalFabricantes,
+    required this.totalModoAcao,
+    required this.totalIngredienteAtivo,
+    required this.totalClasseAgronomica,
+    required this.recentDefensivos,
+    required this.newDefensivos,
+  });
+}
+
+/// Static function for compute() - calculates statistics in background isolate
+/// Performance optimization: Prevents UI thread blocking during heavy statistical calculations
+DefensivosStatistics _calculateDefensivosStatistics(List<FitossanitarioHive> defensivos) {
+  // Calculate real statistics - moved to background thread to prevent UI blocking
+  final totalDefensivos = defensivos.length;
+  final totalFabricantes = defensivos.map((d) => d.displayFabricante).toSet().length;
+  final totalModoAcao = defensivos.map((d) => d.displayModoAcao).where((m) => m.isNotEmpty).toSet().length;
+  final totalIngredienteAtivo = defensivos.map((d) => d.displayIngredient).where((i) => i.isNotEmpty).toSet().length;
+  final totalClasseAgronomica = defensivos.map((d) => d.displayClass).where((c) => c.isNotEmpty).toSet().length;
+  
+  // Process recent and new defensivos
+  final recentDefensivos = defensivos.take(3).toList();
+  final newDefensivos = defensivos.take(4).toList();
+
+  return DefensivosStatistics(
+    totalDefensivos: totalDefensivos,
+    totalFabricantes: totalFabricantes,
+    totalModoAcao: totalModoAcao,
+    totalIngredienteAtivo: totalIngredienteAtivo,
+    totalClasseAgronomica: totalClasseAgronomica,
+    recentDefensivos: recentDefensivos,
+    newDefensivos: newDefensivos,
+  );
+}
 
 class HomeDefensivosPage extends StatefulWidget {
   const HomeDefensivosPage({super.key});
@@ -51,22 +98,22 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
         _isLoading = true;
       });
       
+      // Carrega dados do repositório na main thread (necessário para Hive)
       final defensivos = _repository.getActiveDefensivos();
       
-      // Calcular totais reais
-      _totalDefensivos = defensivos.length;
-      _totalFabricantes = defensivos.map((d) => d.displayFabricante).toSet().length;
-      _totalModoAcao = defensivos.map((d) => d.displayModoAcao).where((m) => m.isNotEmpty).toSet().length;
-      _totalIngredienteAtivo = defensivos.map((d) => d.displayIngredient).where((i) => i.isNotEmpty).toSet().length;
-      _totalClasseAgronomica = defensivos.map((d) => d.displayClass).where((c) => c.isNotEmpty).toSet().length;
-      
-      // Últimos acessados (simulação com defensivos aleatórios)
-      _recentDefensivos = defensivos.take(3).toList();
-      
-      // Novos defensivos (últimos por data de registro)
-      _newDefensivos = defensivos.take(4).toList();
+      // Performance optimization: Move heavy statistical calculations to background thread
+      final statistics = await compute(_calculateDefensivosStatistics, defensivos);
       
       if (mounted) {
+        // Apply calculated statistics
+        _totalDefensivos = statistics.totalDefensivos;
+        _totalFabricantes = statistics.totalFabricantes;
+        _totalModoAcao = statistics.totalModoAcao;
+        _totalIngredienteAtivo = statistics.totalIngredienteAtivo;
+        _totalClasseAgronomica = statistics.totalClasseAgronomica;
+        _recentDefensivos = statistics.recentDefensivos;
+        _newDefensivos = statistics.newDefensivos;
+        
         setState(() {
           _isLoading = false;
         });

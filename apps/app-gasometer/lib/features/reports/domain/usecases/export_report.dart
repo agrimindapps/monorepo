@@ -27,23 +27,3 @@ class ExportReportToCSVParams extends UseCaseParams {
   List<Object> get props => [report];
 }
 
-@lazySingleton
-class ExportReportToPDF implements UseCase<String, ExportReportToPDFParams> {
-  final ReportsRepository repository;
-
-  ExportReportToPDF(this.repository);
-
-  @override
-  Future<Either<Failure, String>> call(ExportReportToPDFParams params) async {
-    return await repository.exportReportToPDF(params.report);
-  }
-}
-
-class ExportReportToPDFParams extends UseCaseParams {
-  final ReportSummaryEntity report;
-
-  const ExportReportToPDFParams({required this.report});
-
-  @override
-  List<Object> get props => [report];
-}

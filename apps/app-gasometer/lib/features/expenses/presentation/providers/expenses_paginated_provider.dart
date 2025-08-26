@@ -1,262 +1,228 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
 
-import '../../../../core/widgets/paginated_list_view.dart';
-import '../../data/repositories/expenses_repository.dart';
+import '../../../../core/interfaces/i_expenses_repository.dart';
+import '../../../../core/providers/base_provider.dart';
+import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
+import '../../domain/services/expense_statistics_service.dart';
 
-/// Provider de despesas com suporte a paginação e lazy loading
-class ExpensesPaginatedProvider extends ChangeNotifier with PaginatedProvider<ExpenseEntity> {
-  final ExpensesRepository _repository;
-  final ExpenseFiltersService _filtersService = ExpenseFiltersService();
+/// Provider especializado em paginação eficiente de despesas
+/// Implementa real pagination sem carregar todos os dados em memória
+class ExpensesPaginatedProvider extends BaseProvider with PaginatedProviderMixin<ExpenseEntity> {
+  final IExpensesRepository _repository;
+  final ExpenseStatisticsService _statisticsService = ExpenseStatisticsService();
 
-  // Configuração de filtros
+  // Filtros ativos
   ExpenseFiltersConfig _filtersConfig = const ExpenseFiltersConfig();
   
-  // Estado
-  bool _isLoading = false;
-  String? _error;
+  // Sort configuration
+  ExpenseSortBy _sortBy = ExpenseSortBy.date;
+  SortOrder _sortOrder = SortOrder.descending;
+  
+  // Statistics cache for current filter set
+  Map<String, dynamic>? _cachedStats;
 
   ExpensesPaginatedProvider(this._repository);
 
-  // Getters
+  // Getters públicos
   ExpenseFiltersConfig get filtersConfig => _filtersConfig;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
+  ExpenseSortBy get sortBy => _sortBy;
+  SortOrder get sortOrder => _sortOrder;
   bool get hasActiveFilters => _filtersConfig.hasActiveFilters;
+  Map<String, dynamic>? get stats => _cachedStats;
 
-  /// Implementação do método abstrato para carregar páginas
   @override
-  Future<List<ExpenseEntity>> fetchPage(int page, int pageSize) async {
-    try {
-      _setLoading(true);
-      _clearError();
+  int getPageSize() => ExpenseConstants.defaultPageSize;
 
-      // Carregar todas as despesas (necessário para filtros locais)
-      // Em um cenário real, isso seria otimizado no backend
-      List<ExpenseEntity> allExpenses;
-      
-      if (_filtersConfig.vehicleId != null) {
-        allExpenses = await _repository.getExpensesByVehicle(_filtersConfig.vehicleId!);
-      } else {
-        allExpenses = await _repository.getAllExpenses();
-      }
+  /// Implementa a busca paginada real do mixin
+  @override
+  Future<List<ExpenseEntity>> fetchPage(int page) async {
+    logInfo('Fetching page $page with filters', metadata: {
+      'page': page,
+      'pageSize': getPageSize(),
+      'sortBy': _sortBy.name,
+      'sortOrder': _sortOrder.name,
+      'hasFilters': hasActiveFilters,
+    });
 
-      // Aplicar filtros
-      final filteredExpenses = _filtersService.applyFilters(allExpenses, _filtersConfig);
+    final result = await _repository.getExpensesPaginated(
+      page: page,
+      pageSize: getPageSize(),
+      vehicleId: _filtersConfig.vehicleId,
+      type: _filtersConfig.type,
+      startDate: _filtersConfig.startDate,
+      endDate: _filtersConfig.endDate,
+      sortBy: _sortBy,
+      sortOrder: _sortOrder,
+    );
 
-      // Simular paginação local
-      final startIndex = page * pageSize;
-      final endIndex = (startIndex + pageSize).clamp(0, filteredExpenses.length);
-      
-      if (startIndex >= filteredExpenses.length) {
-        return []; // Não há mais dados
-      }
-
-      return filteredExpenses.sublist(startIndex, endIndex);
-      
-    } catch (e) {
-      _setError('Erro ao carregar despesas: $e');
-      rethrow;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  /// Carrega página específica com filtros
-  Future<List<ExpenseEntity>> loadPageWithFilters(
-    int page, 
-    int pageSize, 
-    ExpenseFiltersConfig filters,
-  ) async {
-    // Atualizar filtros se mudaram
-    if (_filtersConfig != filters) {
-      _filtersConfig = filters;
-      clearPageCache(); // Limpar cache quando filtros mudam
+    // Cache stats only for first page
+    if (page == 0) {
+      await _updateStatsForCurrentFilters();
     }
 
-    return loadPage(page, pageSize);
+    logInfo('Page $page fetched successfully', metadata: {
+      'itemsReturned': result.items.length,
+      'totalItems': result.totalItems,
+      'hasNext': result.hasNext,
+    });
+
+    return result.items;
   }
 
-  // ===========================================
-  // FILTROS
-  // ===========================================
+  /// Aplica filtros e recarrega dados
+  Future<void> applyFilters(ExpenseFiltersConfig newFilters) async {
+    if (_filtersConfig == newFilters) return;
+
+    logInfo('Applying new filters', metadata: {
+      'previousFilters': _filtersConfig.toString(),
+      'newFilters': newFilters.toString(),
+    });
+
+    _filtersConfig = newFilters;
+    _cachedStats = null; // Invalidate stats cache
+    
+    await loadFirstPage(); // This will trigger a complete reload
+  }
+
+  /// Atualiza ordenação
+  Future<void> setSortBy(ExpenseSortBy sortBy, SortOrder sortOrder) async {
+    if (_sortBy == sortBy && _sortOrder == sortOrder) return;
+
+    logInfo('Changing sort order', metadata: {
+      'previousSort': '${_sortBy.name} ${_sortOrder.name}',
+      'newSort': '${sortBy.name} ${sortOrder.name}',
+    });
+
+    _sortBy = sortBy;
+    _sortOrder = sortOrder;
+    
+    await loadFirstPage(); // Reload with new sort
+  }
 
   /// Aplica filtro por veículo
-  void filterByVehicle(String? vehicleId) {
-    final newConfig = _filtersConfig.copyWith(
+  Future<void> filterByVehicle(String? vehicleId) async {
+    final newFilters = _filtersConfig.copyWith(
       vehicleId: vehicleId,
       clearVehicleId: vehicleId == null,
     );
-    
-    if (newConfig != _filtersConfig) {
-      _filtersConfig = newConfig;
-      clearPageCache();
-      notifyListeners();
-    }
+    await applyFilters(newFilters);
   }
 
   /// Aplica filtro por tipo
-  void filterByType(ExpenseType? type) {
-    final newConfig = _filtersConfig.copyWith(
+  Future<void> filterByType(ExpenseType? type) async {
+    final newFilters = _filtersConfig.copyWith(
       type: type,
       clearType: type == null,
     );
-    
-    if (newConfig != _filtersConfig) {
-      _filtersConfig = newConfig;
-      clearPageCache();
-      notifyListeners();
-    }
+    await applyFilters(newFilters);
   }
 
   /// Aplica filtro por período
-  void filterByPeriod(DateTime? start, DateTime? end) {
-    final newConfig = _filtersConfig.copyWith(
+  Future<void> filterByPeriod(DateTime? start, DateTime? end) async {
+    final newFilters = _filtersConfig.copyWith(
       startDate: start,
       endDate: end,
       clearDates: start == null && end == null,
     );
-    
-    if (newConfig != _filtersConfig) {
-      _filtersConfig = newConfig;
-      clearPageCache();
-      notifyListeners();
-    }
+    await applyFilters(newFilters);
   }
 
-  /// Aplica busca por texto
-  void search(String query) {
-    final newConfig = _filtersConfig.copyWith(searchQuery: query);
-    
-    if (newConfig != _filtersConfig) {
-      _filtersConfig = newConfig;
-      clearPageCache();
-      notifyListeners();
-    }
-  }
-
-  /// Define ordenação
-  void setSortBy(String field, {bool? ascending}) {
-    final newConfig = _filtersConfig.copyWith(
-      sortBy: field,
-      sortAscending: ascending ?? 
-          (_filtersConfig.sortBy == field ? !_filtersConfig.sortAscending : false),
-    );
-    
-    if (newConfig != _filtersConfig) {
-      _filtersConfig = newConfig;
-      clearPageCache();
-      notifyListeners();
-    }
+  /// Aplica busca por texto (note: this may affect performance for large datasets)
+  Future<void> search(String query) async {
+    final newFilters = _filtersConfig.copyWith(searchQuery: query);
+    await applyFilters(newFilters);
   }
 
   /// Limpa todos os filtros
-  void clearFilters() {
-    final newConfig = _filtersConfig.cleared();
+  Future<void> clearFilters() async {
+    await applyFilters(const ExpenseFiltersConfig());
+  }
+
+  /// Toggle sort order for the same field
+  Future<void> toggleSortOrder(ExpenseSortBy sortBy) async {
+    SortOrder newOrder;
+    if (_sortBy == sortBy) {
+      // Same field, toggle order
+      newOrder = _sortOrder == SortOrder.ascending ? SortOrder.descending : SortOrder.ascending;
+    } else {
+      // Different field, default to descending
+      newOrder = SortOrder.descending;
+    }
     
-    if (newConfig != _filtersConfig) {
-      _filtersConfig = newConfig;
-      clearPageCache();
-      notifyListeners();
-    }
+    await setSortBy(sortBy, newOrder);
   }
 
-  // ===========================================
-  // OPERAÇÕES ESPECÍFICAS
-  // ===========================================
-
-  /// Busca despesa por ID nas páginas carregadas
-  ExpenseEntity? findExpenseById(String expenseId) {
+  /// Atualiza estatísticas para o conjunto de filtros atual
+  Future<void> _updateStatsForCurrentFilters() async {
     try {
-      return allItems.firstWhere((e) => e.id == expenseId);
+      // For stats, we need all filtered data, but this is a separate concern
+      // In production, this should ideally be computed server-side or cached
+      final allFilteredExpenses = await _repository.getExpensesWithFilters(
+        vehicleId: _filtersConfig.vehicleId,
+        type: _filtersConfig.type,
+        startDate: _filtersConfig.startDate,
+        endDate: _filtersConfig.endDate,
+        searchText: _filtersConfig.searchQuery.isNotEmpty ? _filtersConfig.searchQuery : null,
+      );
+
+      _cachedStats = _statisticsService.calculateStats(allFilteredExpenses);
+      notifyListeners();
+
+      logInfo('Stats updated for current filters', metadata: {
+        'totalExpenses': allFilteredExpenses.length,
+        'totalAmount': _cachedStats?['totalAmount'] ?? 0,
+      });
     } catch (e) {
-      return null;
+      logWarning('Failed to update stats', metadata: {'error': e.toString()});
+      // Don't fail the whole operation if stats fail
     }
   }
 
-  /// Obtém despesas carregadas por tipo
-  List<ExpenseEntity> getLoadedExpensesByType(ExpenseType type) {
-    return allItems.where((e) => e.type == type).toList();
+  /// Busca despesa específica na lista paginada atual
+  ExpenseEntity? findInCurrentPage(String expenseId) {
+    return items.where((expense) => expense.id == expenseId).firstOrNull;
   }
 
-  /// Obtém despesas carregadas de alto valor
-  List<ExpenseEntity> getLoadedHighValueExpenses({double threshold = 1000.0}) {
-    return allItems.where((e) => e.amount >= threshold).toList();
-  }
-
-  /// Força recarregamento de todas as páginas
-  Future<void> refresh() async {
-    clearPageCache();
-    notifyListeners();
-  }
-
-  /// Adiciona nova despesa ao cache local (otimização)
-  void addExpenseToCache(ExpenseEntity expense) {
-    // Filtrar para verificar se corresponde aos filtros atuais
-    final filteredExpense = _filtersService.applyFilters([expense], _filtersConfig);
-    if (filteredExpense.isNotEmpty) {
-      // Limpar cache para forçar recarregamento com novo item
-      clearPageCache();
-      notifyListeners();
-    }
-  }
-
-  /// Remove despesa do cache local (otimização)
-  void removeExpenseFromCache(String expenseId) {
-    // Limpar cache para forçar recarregamento sem o item removido
-    clearPageCache();
-    notifyListeners();
-  }
-
-  /// Atualiza despesa no cache local (otimização)
-  void updateExpenseInCache(ExpenseEntity updatedExpense) {
-    // Limpar cache para forçar recarregamento com item atualizado
-    clearPageCache();
-    notifyListeners();
-  }
-
-  // ===========================================
-  // MÉTODOS AUXILIARES
-  // ===========================================
-
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _setError(String error) {
-    _error = error;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    if (_error != null) {
-      _error = null;
-      notifyListeners();
-    }
-  }
-
-  /// Limpa erro atual
-  void clearError() {
-    _clearError();
-  }
-
-  /// Obtém estatísticas de performance
-  Map<String, dynamic> getPerformanceStats() {
+  /// Obtém contexto da paginação atual para debug/logging
+  Map<String, dynamic> getPaginationContext() {
     return {
-      'cacheStats': getCacheStats(),
-      'filtersActive': hasActiveFilters,
-      'currentFilters': {
-        'vehicleId': _filtersConfig.vehicleId,
-        'type': _filtersConfig.type?.name,
-        'searchQuery': _filtersConfig.searchQuery,
-        'sortBy': _filtersConfig.sortBy,
-        'sortAscending': _filtersConfig.sortAscending,
-        'hasDateFilter': _filtersConfig.startDate != null || _filtersConfig.endDate != null,
-      },
+      'currentPage': currentPage,
+      'itemCount': itemCount,
+      'hasNextPage': hasNextPage,
+      'isLoadingMore': isLoadingMore,
+      'pageSize': getPageSize(),
+      'sortBy': _sortBy.name,
+      'sortOrder': _sortOrder.name,
+      'activeFilters': _filtersConfig.hasActiveFilters,
+      'filterDetails': _filtersConfig.toString(),
     };
+  }
+
+  /// Override the retry method to provide specific context
+  @override
+  void onRetry() {
+    logInfo('Retrying paginated expenses load', metadata: getPaginationContext());
+    refresh();
+  }
+
+  /// Método de conveniência para recarregar mantendo página atual
+  Future<void> reloadCurrentPage() async {
+    final currentPageBackup = currentPage;
+    await refresh();
+    
+    // Try to restore to the same page if possible
+    if (currentPageBackup > 0 && hasNextPage) {
+      for (int i = 0; i < currentPageBackup && hasNextPage; i++) {
+        await loadNextPage();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _cachedStats = null;
+    super.dispose();
   }
 }

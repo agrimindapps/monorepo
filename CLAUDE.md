@@ -3,8 +3,10 @@
 ## 🏢 Monorepo Structure
 - **app-gasometer**: Vehicle control (Provider + Hive + Analytics)
 - **app-plantis**: Plant care (Provider + Notifications + Scheduling)
-- **app_task_manager**: Task management (Riverpod + Clean Architecture)
+- **app_taskolist**: Task management (Riverpod + Clean Architecture)
 - **app-receituagro**: Agricultural diagnostics (Provider + Static Data + Hive)
+- **app-petiveti**: Pet care management
+- **app_agrihurbi**: Agricultural management
 - **packages/core**: Shared services (Firebase, RevenueCat, Hive)
 
 ## 🤖 Agent Usage Patterns

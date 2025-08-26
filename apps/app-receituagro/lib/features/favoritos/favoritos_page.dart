@@ -29,10 +29,8 @@ class _FavoritosPageState extends State<FavoritosPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     
-    // Inicializa o provider após o build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FavoritosProvider>().initialize();
-    });
+    // Inicialização será feita pelo Provider quando criado
+    // Removido acesso direto ao context.read aqui para evitar race condition
   }
 
   @override
@@ -47,7 +45,14 @@ class _FavoritosPageState extends State<FavoritosPage>
     final theme = Theme.of(context);
     
     return ChangeNotifierProvider(
-      create: (_) => FavoritosDI.get<FavoritosProvider>(),
+      // ARCHITECTURAL FIX: Provider initialization with auto-loading
+      // Fix para race condition - provider agora inicializa automaticamente
+      create: (_) {
+        final provider = FavoritosDI.get<FavoritosProvider>();
+        // Inicializa o provider imediatamente após criação
+        provider.initialize();
+        return provider;
+      },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
@@ -325,10 +330,10 @@ class _FavoritosPageState extends State<FavoritosPage>
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (defensivo.ingredienteAtivo.isNotEmpty == true) ...[
+                  if (defensivo.ingredienteAtivo?.isNotEmpty == true) ...[
                     const SizedBox(height: 4),
                     Text(
-                      defensivo.ingredienteAtivo,
+                      defensivo.ingredienteAtivo ?? '',
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),

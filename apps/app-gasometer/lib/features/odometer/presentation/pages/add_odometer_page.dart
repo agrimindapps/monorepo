@@ -71,15 +71,24 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   }
   
   void _setupFormControllers() {
-    // Setup listeners for reactive updates
-    _formProvider.addListener(_updateControllersFromProvider);
-    
-    // Setup controllers with initial values
-    _updateControllersFromProvider();
-    
-    // Add listeners for user input
-    _odometerController.addListener(_onOdometerChanged);
-    _descriptionController.addListener(_onDescriptionChanged);
+    try {
+      // Setup listeners for reactive updates
+      _formProvider.addListener(_updateControllersFromProvider);
+      
+      // Setup controllers with initial values
+      _updateControllersFromProvider();
+      
+      // Add listeners for user input
+      _odometerController.addListener(_onOdometerChanged);
+      _descriptionController.addListener(_onDescriptionChanged);
+    } catch (e) {
+      // Em caso de erro, limpar listeners já adicionados
+      _formProvider.removeListener(_updateControllersFromProvider);
+      _odometerController.removeListener(_onOdometerChanged);
+      _descriptionController.removeListener(_onDescriptionChanged);
+      debugPrint('Error setting up form controllers: $e');
+      rethrow;
+    }
   }
   
   void _updateControllersFromProvider() {

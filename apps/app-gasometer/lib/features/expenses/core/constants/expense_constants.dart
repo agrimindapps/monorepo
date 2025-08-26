@@ -41,6 +41,7 @@ class ExpenseConstants {
   
   // Cache
   static const int maxCacheSize = 100;
+  static const int defaultPageSize = 20;
   
   // Debounce timers (milliseconds)
   static const int amountDebounceMs = 300;
@@ -195,6 +196,16 @@ class ExpenseConstants {
   // Configurações de relatórios
   static const double reportAmountThousands = 1000.0;
   static const double reportAmountMillions = 1000000.0;
+  
+  // Configurações de paginação
+  static const int defaultPageSize = 20;
+  static const int maxPageSize = 100;
+  static const int minPageSize = 5;
+  
+  // Configurações de imagem
+  static const int imageMaxWidth = 1200;
+  static const int imageMaxHeight = 1200;
+  static const int imageQuality = 85;
   
   ExpenseConstants._(); // Previne instanciação
 }

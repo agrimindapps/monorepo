@@ -34,6 +34,14 @@ class ExpenseModel extends BaseSyncModel {
   final int data;
   @HiveField(15)
   final double odometro;
+  @HiveField(16)
+  final String? receiptImagePath;
+  @HiveField(17)
+  final String? location;
+  @HiveField(18)
+  final String? notes;
+  @HiveField(19)
+  final Map<String, dynamic> metadata;
 
   ExpenseModel({
     required this.id,
@@ -51,6 +59,10 @@ class ExpenseModel extends BaseSyncModel {
     this.valor = 0.0,
     this.data = 0,
     this.odometro = 0.0,
+    this.receiptImagePath,
+    this.location,
+    this.notes,
+    this.metadata = const {},
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -76,6 +88,10 @@ class ExpenseModel extends BaseSyncModel {
     required double valor,
     required int data,
     required double odometro,
+    String? receiptImagePath,
+    String? location,
+    String? notes,
+    Map<String, dynamic> metadata = const {},
   }) {
     final now = DateTime.now();
     final expenseId = id ?? now.millisecondsSinceEpoch.toString();
@@ -92,6 +108,10 @@ class ExpenseModel extends BaseSyncModel {
       valor: valor,
       data: data,
       odometro: odometro,
+      receiptImagePath: receiptImagePath,
+      location: location,
+      notes: notes,
+      metadata: metadata,
     );
   }
 
@@ -115,6 +135,10 @@ class ExpenseModel extends BaseSyncModel {
       valor: (map['valor'] as num? ?? 0.0).toDouble(),
       data: (map['data'] as num?)?.toInt() ?? 0,
       odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
+      receiptImagePath: map['receiptImagePath']?.toString(),
+      location: map['location']?.toString(),
+      notes: map['notes']?.toString(),
+      metadata: Map<String, dynamic>.from((map['metadata'] as Map<dynamic, dynamic>?) ?? {}),
     );
   }
 
@@ -128,6 +152,10 @@ class ExpenseModel extends BaseSyncModel {
       'valor': valor,
       'data': data,
       'odometro': odometro,
+      'receiptImagePath': receiptImagePath,
+      'location': location,
+      'notes': notes,
+      'metadata': metadata,
     });
   }
 
@@ -143,6 +171,10 @@ class ExpenseModel extends BaseSyncModel {
       'valor': valor,
       'data': data,
       'odometro': odometro,
+      'receipt_image_path': receiptImagePath,
+      'location': location,
+      'notes': notes,
+      'metadata': metadata,
     };
   }
 
@@ -168,6 +200,10 @@ class ExpenseModel extends BaseSyncModel {
       valor: (map['valor'] as num? ?? 0.0).toDouble(),
       data: (map['data'] as num?)?.toInt() ?? 0,
       odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
+      receiptImagePath: map['receipt_image_path']?.toString(),
+      location: map['location']?.toString(),
+      notes: map['notes']?.toString(),
+      metadata: Map<String, dynamic>.from((map['metadata'] as Map<dynamic, dynamic>?) ?? {}),
     );
   }
 
@@ -189,6 +225,10 @@ class ExpenseModel extends BaseSyncModel {
     double? valor,
     int? data,
     double? odometro,
+    String? receiptImagePath,
+    String? location,
+    String? notes,
+    Map<String, dynamic>? metadata,
   }) {
     return ExpenseModel(
       id: id ?? this.id,
@@ -206,6 +246,10 @@ class ExpenseModel extends BaseSyncModel {
       valor: valor ?? this.valor,
       data: data ?? this.data,
       odometro: odometro ?? this.odometro,
+      receiptImagePath: receiptImagePath ?? this.receiptImagePath,
+      location: location ?? this.location,
+      notes: notes ?? this.notes,
+      metadata: metadata ?? this.metadata,
     );
   }
 
@@ -236,6 +280,6 @@ class ExpenseModel extends BaseSyncModel {
 
   @override
   String toString() {
-    return 'ExpenseModel(id: $id, veiculoId: $veiculoId, tipo: $tipo, descricao: $descricao, valor: $valor)';
+    return 'ExpenseModel(id: $id, veiculoId: $veiculoId, tipo: $tipo, descricao: $descricao, valor: $valor, receiptImagePath: $receiptImagePath, location: $location)';
   }
 }

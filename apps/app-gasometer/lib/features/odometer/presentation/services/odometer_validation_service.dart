@@ -11,6 +11,12 @@ import '../constants/odometer_constants.dart';
 /// This service provides advanced validation that considers vehicle context,
 /// such as validating against the vehicle's initial and current odometer readings.
 class OdometerValidationService {
+  // Validation constants
+  static const double maxAllowedRollbackKm = 100.0;
+  static const double maxDailyIncreaseKm = 2000.0;
+  static const int maxHistoryYears = 5;
+  static const double significantOdometerDifferenceThreshold = 1000.0;
+  static const double typicalKmPerYear = 15000.0;
   final VehiclesProvider _vehiclesProvider;
 
   OdometerValidationService(this._vehiclesProvider);
@@ -70,7 +76,19 @@ class OdometerValidationService {
     }
   }
 
-  /// Performs advanced contextual validation
+  /// Performs advanced contextual validation with business rules
+  ///
+  /// This method implements complex validation logic that considers:
+  /// - Vehicle-specific constraints and history
+  /// - Rollback limits for error corrections
+  /// - Realistic daily usage patterns
+  /// - Historical consistency checks
+  ///
+  /// [vehicle] The vehicle entity to validate against
+  /// [odometerValue] The new odometer reading to validate
+  /// [currentOdometerId] Optional ID of existing reading being edited
+  /// 
+  /// Returns [OdometerContextValidationResult] with validation status and detailed error information
   Future<OdometerContextValidationResult> _performContextualValidation({
     required VehicleEntity vehicle,
     required double odometerValue,
@@ -78,28 +96,27 @@ class OdometerValidationService {
   }) async {
     // Check if value is significantly lower than current odometer
     // (allows for small corrections but prevents major rollbacks)
-    const double maxRollbackKm = 100.0; // Allow up to 100km rollback for corrections
     
-    if (vehicle.currentOdometer - odometerValue > maxRollbackKm) {
+    if (vehicle.currentOdometer - odometerValue > maxAllowedRollbackKm) {
       return OdometerContextValidationResult(
         isValid: false,
         errorMessage: 'O valor está muito abaixo da quilometragem atual do veículo. '
-            'Máximo de ${maxRollbackKm.toInt()} km de diferença permitido para correções.',
+            'Máximo de ${maxAllowedRollbackKm.toInt()} km de diferença permitido para correções.',
         errorType: ValidationErrorType.significantRollback,
       );
     }
 
-    // Check for unrealistic daily increases (more than 2000km per day)
-    const double maxDailyIncrease = 2000.0;
+    // Check for unrealistic daily increases
+    
     final daysSinceLastUpdate = DateTime.now().difference(vehicle.updatedAt).inDays;
     
     if (daysSinceLastUpdate > 0) {
       final dailyIncrease = (odometerValue - vehicle.currentOdometer) / daysSinceLastUpdate;
-      if (dailyIncrease > maxDailyIncrease) {
+      if (dailyIncrease > maxDailyIncreaseKm) {
         return OdometerContextValidationResult(
           isValid: false,
           errorMessage: 'Aumento diário muito alto (${dailyIncrease.toInt()} km/dia). '
-              'Máximo recomendado: ${maxDailyIncrease.toInt()} km/dia.',
+              'Máximo recomendado: ${maxDailyIncreaseKm.toInt()} km/dia.',
           errorType: ValidationErrorType.unrealisticIncrease,
           isWarning: true, // This is a warning, not a hard error
         );
@@ -117,7 +134,22 @@ class OdometerValidationService {
     return const OdometerContextValidationResult(isValid: true);
   }
 
-  /// Validates a complete odometer form with full context
+  /// Validates a complete odometer form with comprehensive business rules
+  ///
+  /// This method performs end-to-end form validation including:
+  /// - Basic field validation (required fields, format checks)
+  /// - Advanced contextual validation (vehicle history, business rules)
+  /// - Warning generation for edge cases that need user attention
+  /// - Integration with vehicle provider for real-time data validation
+  ///
+  /// [vehicleId] The ID of the vehicle for this odometer reading
+  /// [odometerValue] The odometer value to validate
+  /// [registrationDate] The date/time of the odometer reading
+  /// [description] Optional description for the reading
+  /// [type] The type of odometer registration (trip, maintenance, etc.)
+  /// [currentOdometerId] Optional ID when editing existing readings
+  ///
+  /// Returns [FormContextValidationResult] with validation status, errors, and warnings
   Future<FormContextValidationResult> validateFormWithContext({
     required String vehicleId,
     required double odometerValue,
@@ -180,10 +212,10 @@ class OdometerValidationService {
       return OdometerConstants.validationMessages['dataFutura']!;
     }
 
-    // Check for dates too far in the past (more than 5 years)
-    final fiveYearsAgo = DateTime.now().subtract(const Duration(days: 365 * 5));
-    if (date.isBefore(fiveYearsAgo)) {
-      return 'Data muito antiga. Registros anteriores a 5 anos não são permitidos.';
+    // Check for dates too far in the past
+    final maxYearsAgo = DateTime.now().subtract(const Duration(days: 365 * maxHistoryYears));
+    if (date.isBefore(maxYearsAgo)) {
+      return 'Data muito antiga. Registros anteriores a $maxHistoryYears anos não são permitidos.';
     }
 
     // Check for dates in the far future (more than 1 hour ahead, accounting for timezone issues)
@@ -195,7 +227,18 @@ class OdometerValidationService {
     return null;
   }
 
-  /// Gets validation suggestions based on current context
+  /// Generates intelligent validation suggestions based on vehicle context
+  ///
+  /// This method analyzes the current vehicle and user input to provide helpful suggestions:
+  /// - Typical odometer values based on vehicle age and usage patterns
+  /// - Current vehicle odometer reading for reference
+  /// - Contextual warnings about unusual values
+  /// - Correction suggestions for common data entry errors
+  ///
+  /// [vehicleId] The ID of the vehicle to analyze
+  /// [odometerValue] The current user input to analyze
+  ///
+  /// Returns a list of [ValidationSuggestion] objects with helpful recommendations
   Future<List<ValidationSuggestion>> getValidationSuggestions({
     required String vehicleId,
     required double odometerValue,
@@ -221,7 +264,7 @@ class OdometerValidationService {
       }
 
       // Suggest current vehicle odometer if significantly different
-      if ((odometerValue - vehicle.currentOdometer).abs() > 1000) {
+      if ((odometerValue - vehicle.currentOdometer).abs() > significantOdometerDifferenceThreshold) {
         suggestions.add(ValidationSuggestion(
           type: SuggestionType.currentValue,
           message: 'Quilometragem atual do veículo: ${vehicle.currentOdometer.toInt()} km',

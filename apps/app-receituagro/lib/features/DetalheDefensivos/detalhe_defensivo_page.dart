@@ -11,6 +11,7 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/models/comentario_model.dart';
 import '../comentarios/services/comentarios_service.dart';
+import '../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../navigation/bottom_nav_wrapper.dart';
 
 
@@ -161,90 +162,72 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     }
   }
 
-  void _loadDiagnosticos() {
-    // Simula diagnósticos para diferentes culturas
-    _diagnosticos = [
-      DiagnosticoModel(
-        id: '1',
-        nome: '2,4 D Amina 840 SI',
-        ingredienteAtivo: '2,4-D-dimetilamina (720 g/L)',
-        dosagem: '2,0 L/ha',
-        cultura: 'Arroz',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '2',
-        nome: 'Glifosato Nortox',
-        ingredienteAtivo: 'Glifosato (480 g/L)',
-        dosagem: '3,0 L/ha',
-        cultura: 'Arroz',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '3',
-        nome: '2,4-D Nortox',
-        ingredienteAtivo: '2,4-D + Equivalente ácido (867 g/L)',
-        dosagem: '1,5 L/ha',
-        cultura: 'Braquiária',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '4',
-        nome: 'Ametrina Atanor 50 SC',
-        ingredienteAtivo: 'Ametrina (500 g/L)',
-        dosagem: '4,0 L/ha',
-        cultura: 'Cana-de-açúcar',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '5',
-        nome: 'Roundup Original DI',
-        ingredienteAtivo: 'Glifosato (445 g/L)',
-        dosagem: '6,0 L/ha',
-        cultura: 'Cana-de-açúcar',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '6',
-        nome: 'Paraquat Syngenta',
-        ingredienteAtivo: 'Paraquat (200 g/L)',
-        dosagem: '2,5 L/ha',
-        cultura: 'Café',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '7',
-        nome: 'Atrazina Nortox SC',
-        ingredienteAtivo: 'Atrazina (500 g/L)',
-        dosagem: '5,0 L/ha',
-        cultura: 'Milho',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '8',
-        nome: 'Glifosato Monsanto',
-        ingredienteAtivo: 'Glifosato (480 g/L)',
-        dosagem: '3,0 L/ha',
-        cultura: 'Soja',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '9',
-        nome: 'Flex 25 WG',
-        ingredienteAtivo: 'Fomesafen (250 g/kg)',
-        dosagem: '0,8 kg/ha',
-        cultura: 'Soja',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '10',
-        nome: 'Select 240 EC',
-        ingredienteAtivo: 'Cletodim (240 g/L)',
-        dosagem: '0,5 L/ha',
-        cultura: 'Soja',
-        grupo: 'Herbicida',
-      ),
-    ];
+  /// Carrega diagnósticos reais relacionados ao defensivo atual
+  void _loadDiagnosticos() async {
+    // Busca diagnósticos reais do repositório usando o nome do defensivo
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      
+      // Busca o defensivo atual para obter seu ID
+      final defensivos = _fitossanitarioRepository.getAll();
+      final defensivoAtual = defensivos.where((d) => 
+        d.nomeComum == widget.defensivoName || 
+        d.nomeTecnico == widget.defensivoName
+      ).firstOrNull;
+      
+      if (defensivoAtual != null) {
+        // Usa o repositório de diagnósticos para buscar diagnósticos relacionados
+        final diagnosticosRepository = sl<DiagnosticosRepositoryImpl>();
+        final result = await diagnosticosRepository.getByDefensivo(defensivoAtual.idReg);
+        
+        result.fold(
+          (failure) {
+            // Em caso de falha, inicializa lista vazia
+            debugPrint('Erro ao carregar diagnósticos: ${failure.toString()}');
+            _diagnosticos = [];
+            setState(() {
+              isLoading = false;
+              hasError = true;
+            });
+          },
+          (diagnosticosEntities) {
+            // Converte entidades para o modelo usado na UI
+            _diagnosticos = diagnosticosEntities.map((entity) {
+              return DiagnosticoModel(
+                id: entity.id,
+                nome: entity.nomeDefensivo ?? widget.defensivoName,
+                ingredienteAtivo: entity.idDefensivo, // Pode ser melhorado conforme estrutura
+                dosagem: entity.dosagem.toString(),
+                cultura: entity.nomeCultura ?? 'Não especificado',
+                grupo: entity.nomePraga ?? 'Não especificado',
+              );
+            }).toList();
+            
+            setState(() {
+              isLoading = false;
+              hasError = false;
+            });
+          },
+        );
+      } else {
+        // Defensivo não encontrado, inicializa lista vazia
+        _diagnosticos = [];
+        setState(() {
+          isLoading = false;
+          hasError = true;
+        });
+      }
+      
+    } catch (e) {
+      debugPrint('Erro ao carregar diagnósticos: $e');
+      _diagnosticos = [];
+      setState(() {
+        isLoading = false;
+        hasError = true;
+      });
+    }
   }
 
   void _loadRealData() async {

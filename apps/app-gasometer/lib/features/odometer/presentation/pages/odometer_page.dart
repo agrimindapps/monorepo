@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../domain/entities/odometer_entity.dart';
+import '../providers/odometer_provider.dart';
 import 'add_odometer_page.dart';
 
 class OdometerPage extends StatefulWidget {
@@ -18,7 +20,6 @@ class _OdometerPageState extends State<OdometerPage> {
   String? _selectedVehicleId;
   int _currentMonthIndex = 0;
   bool _showStatistics = true;
-  final bool _isLoading = false;
 
   final List<String> _months = [
     'Jan 25',
@@ -34,50 +35,33 @@ class _OdometerPageState extends State<OdometerPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOdometerData();
+    });
   }
 
-  final List<Map<String, dynamic>> _odometers = [
-    {
-      'id': 1,
-      'date': DateTime(2025, 8, 15),
-      'odometer': 25420.5,
-      'difference': 120.3,
-      'description': 'Viagem para o trabalho',
-    },
-    {
-      'id': 2,
-      'date': DateTime(2025, 8, 12),
-      'odometer': 25300.2,
-      'difference': 85.0,
-      'description': 'Compras no shopping',
-    },
-    {
-      'id': 3,
-      'date': DateTime(2025, 8, 10),
-      'odometer': 25215.2,
-      'difference': 45.8,
-      'description': 'Consulta médica',
-    },
-    {
-      'id': 4,
-      'date': DateTime(2025, 8, 8),
-      'odometer': 25169.4,
-      'difference': 32.1,
-      'description': '',
-    },
-  ];
+  void _loadOdometerData() {
+    if (_selectedVehicleId != null && _selectedVehicleId!.isNotEmpty) {
+      Provider.of<OdometerProvider>(context, listen: false)
+          .loadOdometerReadings(_selectedVehicleId!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildControls(),
-            Expanded(child: _buildContent()),
-          ],
+        child: Consumer<OdometerProvider>(
+          builder: (context, odometerProvider, child) {
+            return Column(
+              children: [
+                _buildHeader(),
+                _buildControls(),
+                Expanded(child: _buildContent(odometerProvider)),
+              ],
+            );
+          },
         ),
       ),
       floatingActionButton: _buildFloatingActionButton(),
@@ -475,10 +459,41 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   void _editOdometer(Map<String, dynamic> odometer) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => AddOdometerPage(odometer: OdometerEntity.fromMap(odometer)),
-    );
+    try {
+      // Usar provider para converter e validar dados
+      final provider = Provider.of<OdometerProvider>(context, listen: false);
+      final odometerEntity = await provider.convertMapToEntity(odometer);
+      
+      if (odometerEntity == null) {
+        // Mostrar erro se conversão falhar
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Erro ao carregar dados do odômetro'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+        return;
+      }
+      
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => AddOdometerPage(odometer: odometerEntity),
+      );
+    } catch (e) {
+      // Tratamento de erro adequado
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao abrir editor: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+      debugPrint('Error editing odometer: $e');
+      return;
+    }
     
     if (result != null && mounted) {
       setState(() {

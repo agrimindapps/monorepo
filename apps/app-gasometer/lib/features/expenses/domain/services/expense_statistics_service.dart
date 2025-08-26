@@ -2,11 +2,28 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../entities/expense_entity.dart';
 import 'expense_formatter_service.dart';
 
-/// Serviço especializado para calcular estatísticas de despesas
+/// Serviço especializado para calcular estatísticas abrangentes de despesas
+/// 
+/// Fornece análise detalhada incluindo:
+/// - Totais e médias por período
+/// - Agrupamento e análise por tipo de despesa
+/// - Identificação de despesas extremas (maior/menor)
+/// - Cálculos mensais projetados
+/// - Formatação monetária consistente
 class ExpenseStatisticsService {
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
 
   /// Calcula estatísticas completas de uma lista de despesas
+  /// 
+  /// Retorna um mapa com todas as métricas estatísticas:
+  /// - `totalAmount`: Valor total das despesas
+  /// - `averageAmount`: Média aritmética dos valores
+  /// - `expensesByType`: Agrupamento por tipo de despesa
+  /// - `expensesCountByType`: Contagem por tipo
+  /// - `mostExpensiveType`: Tipo de despesa que mais gasta
+  /// - `highestExpense`/`lowestExpense`: Valores extremos
+  /// 
+  /// Todos os valores monetários possuem versão formatada (`*Formatted`)
   Map<String, dynamic> calculateStats(List<ExpenseEntity> expenses) {
     if (expenses.isEmpty) {
       return _emptyStats();
@@ -16,18 +33,18 @@ class ExpenseStatisticsService {
     final averageAmount = totalAmount / expenses.length;
     
     // Agrupar por tipo
-    final byType = <ExpenseType, double>{};
-    final countByType = <ExpenseType, int>{};
+    final expensesByType = <ExpenseType, double>{};
+    final expensesCountByType = <ExpenseType, int>{};
     
     for (final expense in expenses) {
-      byType[expense.type] = (byType[expense.type] ?? 0) + expense.amount;
-      countByType[expense.type] = (countByType[expense.type] ?? 0) + 1;
+      expensesByType[expense.type] = (expensesByType[expense.type] ?? 0) + expense.amount;
+      expensesCountByType[expense.type] = (expensesCountByType[expense.type] ?? 0) + 1;
     }
 
     // Encontrar tipo mais caro
     ExpenseType? mostExpensiveType;
     double maxTypeAmount = 0;
-    byType.forEach((type, amount) {
+    expensesByType.forEach((type, amount) {
       if (amount > maxTypeAmount) {
         maxTypeAmount = amount;
         mostExpensiveType = type;
@@ -57,9 +74,9 @@ class ExpenseStatisticsService {
       'averageAmountFormatted': _formatter.formatAmount(averageAmount),
       'monthlyAmount': monthlyAmount,
       'monthlyAmountFormatted': _formatter.formatAmount(monthlyAmount),
-      'byType': byType.map((k, v) => MapEntry(k.displayName, v)),
-      'byTypeFormatted': byType.map((k, v) => MapEntry(k.displayName, _formatter.formatAmount(v))),
-      'countByType': countByType.map((k, v) => MapEntry(k.displayName, v)),
+      'expensesByType': expensesByType.map((k, v) => MapEntry(k.displayName, v)),
+      'expensesByTypeFormatted': expensesByType.map((k, v) => MapEntry(k.displayName, _formatter.formatAmount(v))),
+      'expensesCountByType': expensesCountByType.map((k, v) => MapEntry(k.displayName, v)),
       'mostExpensiveType': mostExpensiveType?.displayName,
       'mostExpensiveTypeAmount': maxTypeAmount,
       'mostExpensiveTypeAmountFormatted': _formatter.formatAmount(maxTypeAmount),
@@ -248,9 +265,9 @@ class ExpenseStatisticsService {
       'averageAmountFormatted': _formatter.formatAmount(0.0),
       'monthlyAmount': 0.0,
       'monthlyAmountFormatted': _formatter.formatAmount(0.0),
-      'byType': <String, double>{},
-      'byTypeFormatted': <String, String>{},
-      'countByType': <String, int>{},
+      'expensesByType': <String, double>{},
+      'expensesByTypeFormatted': <String, String>{},
+      'expensesCountByType': <String, int>{},
       'mostExpensiveType': null,
       'mostExpensiveTypeAmount': 0.0,
       'mostExpensiveTypeAmountFormatted': _formatter.formatAmount(0.0),

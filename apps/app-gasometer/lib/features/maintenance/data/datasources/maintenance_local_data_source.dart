@@ -4,6 +4,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/local_data_service.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../models/maintenance_model.dart';
+import '../mappers/maintenance_mapper.dart';
 
 abstract class MaintenanceLocalDataSource {
   Future<List<MaintenanceEntity>> getAllMaintenanceRecords();
@@ -28,7 +29,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
   Future<List<MaintenanceEntity>> getAllMaintenanceRecords() async {
     try {
       final records = _localDataService.getAllMaintenanceRecords()
-          .map((record) => _mapToEntity(MaintenanceModel.fromHiveMap(record)))
+          .map((record) => MaintenanceMapper.modelToEntity(MaintenanceModel.fromHiveMap(record)))
           .toList();
       
       // Sort by date descending
@@ -44,7 +45,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
     try {
       final records = _localDataService.getAllMaintenanceRecords()
           .where((record) => record['veiculoId'] == vehicleId)
-          .map((record) => _mapToEntity(MaintenanceModel.fromHiveMap(record)))
+          .map((record) => MaintenanceMapper.modelToEntity(MaintenanceModel.fromHiveMap(record)))
           .toList();
       
       // Sort by date descending
@@ -63,7 +64,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
       if (recordData == null) return null;
       
       final model = MaintenanceModel.fromHiveMap(recordData);
-      return _mapToEntity(model);
+      return MaintenanceMapper.modelToEntity(model);
     } catch (e) {
       throw CacheException('Erro ao buscar registro por ID: ${e.toString()}');
     }
@@ -72,7 +73,7 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
   @override
   Future<MaintenanceEntity> addMaintenanceRecord(MaintenanceEntity maintenance) async {
     try {
-      final model = _mapToModel(maintenance);
+      final model = MaintenanceMapper.entityToModel(maintenance);
       await _localDataService.saveMaintenanceRecord(maintenance.id, model.toHiveMap());
       return maintenance;
     } catch (e) {
@@ -93,10 +94,8 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
         updatedAt: DateTime.now(),
       );
       
-      final model = _mapToModel(updatedMaintenance).copyWith(
-        isDirty: true,
-        updatedAt: DateTime.now(),
-      );
+      final existingModel = MaintenanceModel.fromHiveMap(existingData);
+      final model = MaintenanceMapper.updateModelFromEntity(existingModel, updatedMaintenance);
       
       await _localDataService.saveMaintenanceRecord(updatedMaintenance.id, model.toHiveMap());
       return updatedMaintenance;
@@ -163,79 +162,5 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
   Stream<List<MaintenanceEntity>> watchMaintenanceRecordsByVehicle(String vehicleId) {
     return watchMaintenanceRecords()
         .map((records) => records.where((record) => record.vehicleId == vehicleId).toList());
-  }
-
-  // Helper methods
-  MaintenanceEntity _mapToEntity(MaintenanceModel model) {
-    return MaintenanceEntity(
-      id: model.id,
-      userId: model.userId ?? '',
-      vehicleId: model.veiculoId,
-      type: _mapStringToMaintenanceType(model.tipo),
-      status: model.concluida ? MaintenanceStatus.completed : MaintenanceStatus.pending,
-      title: model.tipo, // Using type as title for now
-      description: model.descricao,
-      cost: model.valor,
-      serviceDate: DateTime.fromMillisecondsSinceEpoch(model.data),
-      odometer: model.odometro.toDouble(),
-      workshopName: null, // Not available in current model
-      workshopPhone: null,
-      workshopAddress: null,
-      nextServiceDate: model.proximaRevisao != null 
-          ? DateTime.fromMillisecondsSinceEpoch(model.proximaRevisao!) 
-          : null,
-      nextServiceOdometer: null,
-      photosPaths: const [],
-      invoicesPaths: const [],
-      parts: const {},
-      notes: null,
-      createdAt: model.createdAt ?? DateTime.now(),
-      updatedAt: model.updatedAt ?? DateTime.now(),
-      metadata: const {},
-    );
-  }
-
-  MaintenanceModel _mapToModel(MaintenanceEntity entity) {
-    return MaintenanceModel.create(
-      id: entity.id,
-      userId: entity.userId.isEmpty ? null : entity.userId,
-      veiculoId: entity.vehicleId,
-      tipo: _mapMaintenanceTypeToString(entity.type),
-      descricao: entity.description,
-      valor: entity.cost,
-      data: entity.serviceDate.millisecondsSinceEpoch,
-      odometro: entity.odometer.toInt(),
-      proximaRevisao: entity.nextServiceDate?.millisecondsSinceEpoch,
-      concluida: entity.status == MaintenanceStatus.completed,
-    );
-  }
-
-  MaintenanceType _mapStringToMaintenanceType(String type) {
-    switch (type.toLowerCase()) {
-      case 'preventiva':
-        return MaintenanceType.preventive;
-      case 'corretiva':
-        return MaintenanceType.corrective;
-      case 'revisão':
-      case 'revisao':
-        return MaintenanceType.inspection;
-      case 'emergencial':
-        return MaintenanceType.emergency;
-      default:
-        return MaintenanceType.preventive;
-    }
-  }
-
-  String _mapMaintenanceTypeToString(MaintenanceType type) {
-    switch (type) {
-      case MaintenanceType.preventive:
-        return 'Preventiva';
-      case MaintenanceType.corrective:
-        return 'Corretiva';
-      case MaintenanceType.inspection:
-        return 'Revisão';
-      case MaintenanceType.emergency:
-        return 'Emergencial';
-    }
   }
 }

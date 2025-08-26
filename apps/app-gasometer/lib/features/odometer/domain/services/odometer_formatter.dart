@@ -10,6 +10,15 @@ class OdometerFormatter {
   /// Maximum decimal places for odometer values
   static const int decimalPlaces = 2;
   
+  /// Zero value formatted with unit
+  static const String zeroValueWithKm = '0,00 km';
+  
+  /// Threshold for adding thousands separator
+  static const double thousandsSeparatorThreshold = 1000.0;
+  
+  /// Group size for thousands separator
+  static const int thousandsGroupSize = 3;
+  
   /// Formats a double value to Brazilian decimal format
   ///
   /// Example: 1234.56 -> "1234,56"
@@ -52,14 +61,14 @@ class OdometerFormatter {
   ///
   /// Example: 1234.56 -> "1.234,56 km"
   static String formatOdometerWithUnit(double value, {String unit = 'km'}) {
-    if (value == 0.0) return '0,00 $unit';
+    if (value == 0.0) return unit == 'km' ? zeroValueWithKm : '0,00 $unit';
     
     // Format with thousands separator
     String formatted = value.toStringAsFixed(decimalPlaces);
     formatted = formatted.replaceAll(dotSeparator, decimalSeparator);
     
     // Add thousands separator (simple implementation)
-    if (value >= 1000) {
+    if (value >= thousandsSeparatorThreshold) {
       final parts = formatted.split(decimalSeparator);
       String integerPart = parts[0];
       String decimalPart = parts.length > 1 ? parts[1] : '00';
@@ -68,7 +77,7 @@ class OdometerFormatter {
       String result = '';
       int count = 0;
       for (int i = integerPart.length - 1; i >= 0; i--) {
-        if (count > 0 && count % 3 == 0) {
+        if (count > 0 && count % thousandsGroupSize == 0) {
           result = '.$result';
         }
         result = integerPart[i] + result;
@@ -81,9 +90,25 @@ class OdometerFormatter {
     return '$formatted $unit';
   }
   
-  /// Cleans and formats input text for consistent display
+  /// Cleans and formats input text with comprehensive validation rules
   ///
-  /// Used in TextFormField formatters
+  /// This method implements sophisticated input processing for odometer values:
+  /// - Removes invalid characters (keeping only digits, commas, and dots)
+  /// - Normalizes decimal separators to Brazilian format (comma)
+  /// - Handles multiple decimal separator edge cases
+  /// - Enforces decimal place limitations for data consistency
+  /// - Maintains user input flow while ensuring data integrity
+  ///
+  /// Processing steps:
+  /// 1. Strip non-numeric characters except decimal separators
+  /// 2. Convert dots to commas for Brazilian locale
+  /// 3. Resolve multiple decimal separators (keeps first, merges rest)
+  /// 4. Truncate excessive decimal places
+  ///
+  /// Used primarily in TextFormField input formatters for real-time validation
+  ///
+  /// [input] The raw user input string
+  /// Returns cleaned and formatted string ready for display and processing
   static String cleanAndFormatInput(String input) {
     if (input.isEmpty) return input;
     

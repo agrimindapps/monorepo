@@ -15,7 +15,6 @@ import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/promo/presentation/pages/terms_conditions_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/vehicles/presentation/pages/vehicle_details_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/main_navigation.dart';
 import '../services/platform_service.dart';
@@ -71,15 +70,6 @@ class AppRouter {
               builder: (context, state) => const VehiclesPage(),
             ),
             
-            // Vehicle Details (sub-route of home)
-            GoRoute(
-              path: '/vehicle-details/:vehicleId',
-              name: 'vehicle_details',
-              builder: (context, state) {
-                final vehicleId = state.pathParameters['vehicleId']!;
-                return VehicleDetailsPage(vehicleId: vehicleId);
-              },
-            ),
             
             // Odometer
             GoRoute(

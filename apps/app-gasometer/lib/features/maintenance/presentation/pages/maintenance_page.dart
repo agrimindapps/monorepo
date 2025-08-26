@@ -353,15 +353,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
           ),
         ),
         SizedBox(height: GasometerDesignTokens.spacingLg),
-        ..._filteredRecords.map((record) => _buildRecordCard(record.toMap())),
+        ..._filteredRecords.map((record) => _buildRecordCard(record)),
       ],
     );
   }
 
-  Widget _buildRecordCard(Map<String, dynamic> record) {
-    final date = record['date'] as DateTime? ?? DateTime.now();
+  Widget _buildRecordCard(MaintenanceEntity record) {
+    final date = record.serviceDate;
     final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    final isPreventive = record['category'] == 'preventiva';
+    final isPreventive = record.type == MaintenanceType.preventive;
 
     return Card(
       elevation: 0,
@@ -402,7 +402,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                           children: [
                             Expanded(
                               child: Text(
-                                record['type'] as String? ?? '',
+                                record.title,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -424,7 +424,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                         Row(
                           children: [
                             Text(
-                              record['vehicleName'] as String? ?? '',
+                              'Veículo: ${record.vehicleId}', // TODO: Buscar nome do veículo
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -439,7 +439,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                             ),
                             SizedBox(width: GasometerDesignTokens.spacingSm),
                             Text(
-                              record['workshop'] as String? ?? '',
+                              record.workshopName ?? 'Oficina não informada',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),

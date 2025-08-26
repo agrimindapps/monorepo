@@ -55,7 +55,7 @@ class RouteGuard {
   RouteType _getRouteType(String location) {
     const publicRoutes = ['/privacy', '/terms'];
     const authOnlyRoutes = ['/promo', '/login'];
-    const appRoutes = ['/', '/vehicle-details', '/odometer', '/fuel', '/maintenance', '/reports', '/settings', '/profile'];
+    const appRoutes = ['/', '/odometer', '/fuel', '/maintenance', '/reports', '/settings', '/profile'];
 
     if (publicRoutes.any((route) => location.startsWith(route))) {
       return RouteType.alwaysPublic;

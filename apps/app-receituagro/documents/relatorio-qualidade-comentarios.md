@@ -268,10 +268,10 @@ class ComentariosProvider extends ChangeNotifier {
 
 **Problema**: Use cases tem validações parciais, falta implementar checks de duplicação e limites premium.
 
-### **8. [TESTING] - Estrutura Não Testável**
+### **8. [MODULARITY] - Estrutura Com Acoplamento Forte**
 **Impact**: 🔥 Médio | **Effort**: ⚡ 6-8 horas
 
-**Problema**: Código bem estruturado mas falta interfaces mockáveis para testes automatizados.
+**Problema**: Código bem estruturado mas com acoplamento forte que dificulta modularidade.
 
 ---
 
@@ -361,7 +361,7 @@ class ComentariosProvider extends ChangeNotifier {
 ### **Technical Debt Priority**
 1. **P0**: Issues #1, #2, #3 (Arquitetura e Memory)
 2. **P1**: Issues #4, #5, #6 (Performance e UX)
-3. **P2**: Issues #7, #8 (Validation e Testing)
+3. **P2**: Issues #7, #8 (Validation e Modularity)
 
 ---
 

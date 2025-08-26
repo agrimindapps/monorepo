@@ -60,6 +60,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
   ExpenseFormProvider? _formProvider;
   late Future<ExpenseFormProvider> _initializationFuture;
   
+  // Progress tracking for better UX
+  String _currentStep = '';
+  double _progress = 0.0;
+  
   @override
   void initState() {
     super.initState();
@@ -72,37 +76,41 @@ class _AddExpensePageState extends State<AddExpensePage> {
     try {
       debugPrint('🚀 Iniciando inicialização do AddExpensePage...');
       
-      // Verificar se o widget ainda está montado
+      // Step 1: Verificações iniciais
+      _updateProgress('Verificando estado da aplicação...', 0.1);
       if (!mounted) {
         throw StateError('Widget was disposed during initialization');
       }
       
+      // Step 2: Inicializando provider de veículos
+      _updateProgress('Carregando dados de veículos...', 0.3);
       final vehiclesProvider = context.read<VehiclesProvider>();
       
-      // Verificar se o VehiclesProvider foi inicializado
       if (!vehiclesProvider.isInitialized) {
         debugPrint('🚗 Inicializando VehiclesProvider...');
         await vehiclesProvider.initialize();
       }
       
-      // Criar o FormProvider
+      // Step 3: Criando provider do formulário
+      _updateProgress('Configurando formulário...', 0.5);
       final formProvider = ExpenseFormProvider(
         vehiclesProvider,
         initialVehicleId: widget.vehicleId,
         userId: widget.userId,
       );
 
-      // Verificar novamente se o widget ainda está montado após operações assíncronas
       if (!mounted) {
         formProvider.dispose();
         throw StateError('Widget was disposed during provider initialization');
       }
 
-      // Inicializar com dados existentes se for edição
+      // Step 4: Inicializando dados específicos
       if (widget.expenseToEdit != null) {
+        _updateProgress('Carregando dados da despesa...', 0.7);
         debugPrint('✏️ Inicializando para edição...');
         await formProvider.initializeWithExpense(widget.expenseToEdit!);
       } else {
+        _updateProgress('Preparando nova despesa...', 0.7);
         debugPrint('➕ Inicializando para nova despesa...');
         await formProvider.initialize(
           vehicleId: widget.vehicleId,
@@ -110,12 +118,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
         );
       }
 
-      // Verificar mais uma vez se o widget ainda está montado
       if (!mounted) {
         formProvider.dispose();
         throw StateError('Widget was disposed during form initialization');
       }
       
+      // Step 5: Finalizando
+      _updateProgress('Finalizando...', 1.0);
       debugPrint('✅ Inicialização do AddExpensePage concluída com sucesso');
       _formProvider = formProvider;
       return formProvider;
@@ -140,6 +149,16 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
   
+  /// Atualiza o progresso da inicialização
+  void _updateProgress(String step, double progress) {
+    if (mounted) {
+      setState(() {
+        _currentStep = step;
+        _progress = progress;
+      });
+    }
+  }
+
   /// Formata erro de forma mais amigável para o usuário
   String _getFormattedError(dynamic error) {
     final errorString = error.toString();
@@ -228,22 +247,77 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   /// Estado de carregamento melhorado com progress indicators
   Widget _buildLoadingState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Inicializando formulário...'),
-          SizedBox(height: 8),
-          Text(
-            'Carregando dados do veículo e configurações',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Progress circular with percentage
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(
+                    value: _progress,
+                    strokeWidth: 6,
+                    backgroundColor: AppTheme.colors.outline.withValues(alpha: 0.2),
+                  ),
+                ),
+                Text(
+                  '${(_progress * 100).round()}%',
+                  style: AppTheme.textStyles.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            Text(
+              'Inicializando formulário',
+              style: AppTheme.textStyles.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            // Current step indicator
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.colors.surfaceVariant.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppTheme.colors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _currentStep,
+                    style: AppTheme.textStyles.bodySmall?.copyWith(
+                      color: AppTheme.colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Linear progress bar
+            LinearProgressIndicator(
+              value: _progress,
+              backgroundColor: AppTheme.colors.outline.withValues(alpha: 0.2),
+              minHeight: 6,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -369,7 +443,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
           if (formProvider.formModel.lastError != null ||
               expensesProvider.error != null) ...[
             _buildErrorCard(
-              formProvider.formModel.lastError ?? expensesProvider.error!,
+              formProvider.formModel.lastError ?? expensesProvider.error?.toString() ?? '',
             ),
             const SizedBox(height: 16),
           ],

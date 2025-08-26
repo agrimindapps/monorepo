@@ -38,10 +38,9 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
 
-    // Carrega pragas usando GetIt diretamente para evitar erro de Provider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      GetIt.instance<PragasProvider>().loadPragasByTipo(_currentPragaType);
-    });
+    // ARCHITECTURAL FIX: Remove direct GetIt access, use Provider pattern
+    // Inicialização será feita pelo Provider quando criado
+    // Removido acesso direto ao GetIt para seguir padrão Provider
   }
 
   @override
@@ -69,7 +68,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   void _performDebouncedSearch(String searchText) {
-    final provider = GetIt.instance<PragasProvider>();
+    // ARCHITECTURAL FIX: Using context.read instead of GetIt.instance
+    final provider = context.read<PragasProvider>();
     if (searchText.trim().isEmpty) {
       provider.loadPragasByTipo(_currentPragaType);
     } else {
@@ -87,8 +87,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       _searchText = '';
     });
 
-    // Recarrega pragas do tipo atual
-    GetIt.instance<PragasProvider>().loadPragasByTipo(_currentPragaType);
+    // ARCHITECTURAL FIX: Using context.read instead of GetIt.instance
+    context.read<PragasProvider>().loadPragasByTipo(_currentPragaType);
   }
 
   void _toggleViewMode(PragaViewMode mode) {
@@ -104,7 +104,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
     // TODO: Implementar ordenação no PragasProvider
     // Por enquanto recarrega os dados
-    final provider = GetIt.instance<PragasProvider>();
+    // ARCHITECTURAL FIX: Using context.read instead of GetIt.instance
+    final provider = context.read<PragasProvider>();
     if (_searchText.isEmpty) {
       provider.loadPragasByTipo(_currentPragaType);
     } else {
@@ -132,8 +133,17 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ChangeNotifierProvider.value(
-      value: GetIt.instance<PragasProvider>(),
+    // ARCHITECTURAL FIX: Create Provider properly with initialization
+    // Fix para anti-pattern GetIt - criação adequada do Provider
+    return ChangeNotifierProvider(
+      create: (_) {
+        final provider = GetIt.instance<PragasProvider>();
+        // Initialize provider with current praga type
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          provider.loadPragasByTipo(_currentPragaType);
+        });
+        return provider;
+      },
       child: Scaffold(
         body: SafeArea(
           child: Center(

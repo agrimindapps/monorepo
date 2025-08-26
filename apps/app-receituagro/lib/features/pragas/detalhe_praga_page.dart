@@ -11,6 +11,7 @@ import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/models/comentario_model.dart';
 import '../comentarios/services/comentarios_service.dart';
+import '../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 
 
 // Models for diagnostic system
@@ -56,6 +57,9 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   bool isFavorited = false;
   bool isPremium = false; // Status premium carregado do service
   PragasHive? _pragaData; // Dados reais da praga
+  
+  // Correção Memory Leak: Referência para o listener do premium service
+  VoidCallback? _premiumStatusListener;
   
   // Comment system state
   List<ComentarioModel> _comentarios = [];
@@ -114,89 +118,75 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
       isPremium = _premiumService.isPremium;
     });
     
-    // Escuta mudanças no status premium
-    _premiumService.addListener(() {
+    // Correção Memory Leak: Armazena referência do listener para remoção posterior
+    _premiumStatusListener = () {
       if (mounted) {
         setState(() {
           isPremium = _premiumService.isPremium;
         });
       }
-    });
+    };
+    
+    // Escuta mudanças no status premium
+    _premiumService.addListener(_premiumStatusListener!);
   }
   
-  void _loadRealData() {
+  /// Carrega dados reais da praga e diagnósticos relacionados
+  void _loadRealData() async {
     // Inicializa dados da praga
     setState(() {
       _comentarios = [];
     });
     
-    // Carrega diagnósticos reais relacionados à praga
-    _diagnosticos = [
-      DiagnosticoModel(
-        id: '1',
-        nome: '2,4 D Amina 840 SI',
-        ingredienteAtivo: '2,4-D-dimetilamina (720 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Soja',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '2',
-        nome: 'Ametrina Atanor 50 SC',
-        ingredienteAtivo: 'Ametrina (500 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Milho',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '3',
-        nome: 'Glifosato Roundup',
-        ingredienteAtivo: 'Glifosato (480 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Algodão',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '4',
-        nome: 'Atrazina Nortox',
-        ingredienteAtivo: 'Atrazina (500 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Café',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '5',
-        nome: 'Paraquat Gramoxone',
-        ingredienteAtivo: 'Paraquat (200 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Citros',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '6',
-        nome: 'Diuron Karmex',
-        ingredienteAtivo: 'Diuron (800 g/kg)',
-        dosagem: '••• g/ha',
-        cultura: 'Cana-de-açúcar',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '7',
-        nome: 'Metribuzin Lexone',
-        ingredienteAtivo: 'Metribuzin (480 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Soja',
-        grupo: 'Herbicida',
-      ),
-      DiagnosticoModel(
-        id: '8',
-        nome: 'Bentazon Basagran',
-        ingredienteAtivo: 'Bentazon (600 g/L)',
-        dosagem: '••• mg/L',
-        cultura: 'Milho',
-        grupo: 'Herbicida',
-      ),
-    ];
+    try {
+      // Busca a praga atual para obter seu ID
+      final pragas = _pragasRepository.getAll();
+      final pragaAtual = pragas.where((p) => 
+        p.nomeComum == widget.pragaName || 
+        p.nomeCientifico == widget.pragaScientificName
+      ).firstOrNull;
+      
+      if (pragaAtual != null) {
+        _pragaData = pragaAtual;
+        
+        // Usa o repositório de diagnósticos para buscar diagnósticos relacionados à praga
+        final diagnosticosRepository = sl<DiagnosticosRepositoryImpl>();
+        final result = await diagnosticosRepository.getByPraga(pragaAtual.idReg);
+        
+        result.fold(
+          (failure) {
+            // Em caso de falha, inicializa lista vazia
+            debugPrint('Erro ao carregar diagnósticos para praga: ${failure.toString()}');
+            _diagnosticos = [];
+          },
+          (diagnosticosEntities) {
+            // Converte entidades para o modelo usado na UI
+            _diagnosticos = diagnosticosEntities.map((entity) {
+              return DiagnosticoModel(
+                id: entity.id,
+                nome: entity.nomeDefensivo ?? 'Defensivo não especificado',
+                ingredienteAtivo: entity.idDefensivo, // Pode ser melhorado conforme estrutura
+                dosagem: entity.dosagem.toString(),
+                cultura: entity.nomeCultura ?? 'Não especificado',
+                grupo: entity.nomePraga ?? widget.pragaName,
+              );
+            }).toList();
+          },
+        );
+      } else {
+        // Praga não encontrada no repositório, inicializa lista vazia
+        debugPrint('Praga não encontrada no repositório: ${widget.pragaName}');
+        _diagnosticos = [];
+      }
+      
+      // Atualiza a UI
+      setState(() {});
+      
+    } catch (e) {
+      debugPrint('Erro ao carregar dados da praga: $e');
+      _diagnosticos = [];
+      setState(() {});
+    }
   }
 
   Future<void> _loadComentarios() async {
@@ -239,6 +229,14 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   void dispose() {
     _tabController.dispose();
     _commentController.dispose();
+    
+    // Correção Memory Leak: Remove o listener do premium service
+    // O listener foi adicionado na linha 130 mas nunca removido
+    if (_premiumStatusListener != null) {
+      _premiumService.removeListener(_premiumStatusListener!);
+      _premiumStatusListener = null;
+    }
+    
     super.dispose();
   }
 

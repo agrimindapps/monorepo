@@ -248,7 +248,7 @@ class ExpenseFiltersService {
   /// Obtém despesas de alto valor (acima do threshold)
   List<ExpenseEntity> getHighValueExpenses(
     List<ExpenseEntity> expenses,
-    {double threshold = 1000.0}
+    {double threshold = ExpenseConstants.reportAmountThousands}
   ) {
     return expenses.where((e) => e.amount >= threshold).toList();
   }

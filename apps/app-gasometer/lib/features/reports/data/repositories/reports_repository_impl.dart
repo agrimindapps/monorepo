@@ -93,9 +93,14 @@ class ReportsRepositoryImpl implements ReportsRepository {
         return const Left(ValidationFailure('ID do veículo é obrigatório'));
       }
 
-      // Generate both reports
-      final currentResult = await generateMonthlyReport(vehicleId, currentMonth);
-      final previousResult = await generateMonthlyReport(vehicleId, previousMonth);
+      // Generate both reports in parallel for better performance
+      final results = await Future.wait([
+        generateMonthlyReport(vehicleId, currentMonth),
+        generateMonthlyReport(vehicleId, previousMonth),
+      ]);
+      
+      final currentResult = results[0];
+      final previousResult = results[1];
 
       return currentResult.fold(
         (failure) => Left(failure),
@@ -128,9 +133,14 @@ class ReportsRepositoryImpl implements ReportsRepository {
         return const Left(ValidationFailure('ID do veículo é obrigatório'));
       }
 
-      // Generate both reports
-      final currentResult = await generateYearlyReport(vehicleId, currentYear);
-      final previousResult = await generateYearlyReport(vehicleId, previousYear);
+      // Generate both reports in parallel for better performance
+      final results = await Future.wait([
+        generateYearlyReport(vehicleId, currentYear),
+        generateYearlyReport(vehicleId, previousYear),
+      ]);
+      
+      final currentResult = results[0];
+      final previousResult = results[1];
 
       return currentResult.fold(
         (failure) => Left(failure),
@@ -156,100 +166,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, List<ReportSummaryEntity>>> generateFleetReport(List<String> vehicleIds, DateTime startDate, DateTime endDate) async {
-    try {
-      if (vehicleIds.isEmpty) {
-        return const Left(ValidationFailure('Lista de veículos não pode estar vazia'));
-      }
 
-      if (startDate.isAfter(endDate)) {
-        return const Left(ValidationFailure('Data inicial não pode ser posterior à data final'));
-      }
-
-      final reports = await _dataSource.generateFleetReport(vehicleIds, startDate, endDate);
-      return Right(reports);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao gerar relatório da frota: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<ReportSummaryEntity>>> getMonthlyReportsHistory(String vehicleId, int year) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (year < 2000 || year > DateTime.now().year + 1) {
-        return const Left(ValidationFailure('Ano inválido'));
-      }
-
-      final List<ReportSummaryEntity> reports = [];
-
-      for (int month = 1; month <= 12; month++) {
-        final monthDate = DateTime(year, month);
-        final result = await generateMonthlyReport(vehicleId, monthDate);
-        
-        result.fold(
-          (failure) {
-            // Skip months with errors but don't fail the entire operation
-          },
-          (report) {
-            if (report.hasData) {
-              reports.add(report);
-            }
-          },
-        );
-      }
-
-      return Right(reports);
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao buscar histórico mensal: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<ReportSummaryEntity>>> getYearlyReportsHistory(String vehicleId, int startYear, int endYear) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (startYear > endYear) {
-        return const Left(ValidationFailure('Ano inicial não pode ser posterior ao ano final'));
-      }
-
-      if (endYear > DateTime.now().year + 1) {
-        return const Left(ValidationFailure('Ano final inválido'));
-      }
-
-      final List<ReportSummaryEntity> reports = [];
-
-      for (int year = startYear; year <= endYear; year++) {
-        final result = await generateYearlyReport(vehicleId, year);
-        
-        result.fold(
-          (failure) {
-            // Skip years with errors but don't fail the entire operation
-          },
-          (report) {
-            if (report.hasData) {
-              reports.add(report);
-            }
-          },
-        );
-      }
-
-      return Right(reports);
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao buscar histórico anual: ${e.toString()}'));
-    }
-  }
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> getFuelEfficiencyTrends(String vehicleId, int months) async {
@@ -342,13 +259,4 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, String>> exportReportToPDF(ReportSummaryEntity report) async {
-    try {
-      // PDF export would require pdf library - returning placeholder for now
-      return const Left(UnexpectedFailure('Exportação para PDF não implementada ainda'));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao exportar para PDF: ${e.toString()}'));
-    }
-  }
 }

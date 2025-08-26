@@ -27,7 +27,7 @@ class OdometerProvider extends ChangeNotifier {
     _initialize();
   }
 
-  /// Inicializa o provider
+  /// Initializes the provider
   Future<void> _initialize() async {
     await _repository.initialize();
     await loadOdometers();
@@ -309,7 +309,7 @@ class OdometerProvider extends ChangeNotifier {
     }
   }
 
-  /// Busca leituras por texto
+  /// Searches readings by text
   Future<List<OdometerEntity>> searchOdometerReadings(String query) async {
     try {
       return await _repository.searchOdometerReadings(query);
@@ -319,7 +319,7 @@ class OdometerProvider extends ChangeNotifier {
     }
   }
 
-  /// Carrega leituras por período
+  /// Loads readings by period
   Future<List<OdometerEntity>> getOdometerReadingsByPeriod(DateTime start, DateTime end) async {
     try {
       return await _repository.getOdometerReadingsByPeriod(start, end);
@@ -329,7 +329,7 @@ class OdometerProvider extends ChangeNotifier {
     }
   }
 
-  /// Carrega leituras por tipo
+  /// Loads readings by type
   Future<List<OdometerEntity>> getOdometerReadingsByType(OdometerType type) async {
     try {
       return await _repository.getOdometerReadingsByType(type);
@@ -339,7 +339,7 @@ class OdometerProvider extends ChangeNotifier {
     }
   }
 
-  /// Busca duplicatas
+  /// Finds duplicates
   Future<List<OdometerEntity>> findDuplicateReadings() async {
     try {
       return await _repository.findDuplicates();
@@ -349,7 +349,7 @@ class OdometerProvider extends ChangeNotifier {
     }
   }
 
-  /// Limpa todas as leituras (apenas debug)
+  /// Clears all readings (debug only)
   Future<void> clearAllReadings() async {
     try {
       await _repository.clearAllOdometerReadings();
@@ -357,6 +357,50 @@ class OdometerProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error clearing all readings: $e');
+    }
+  }
+
+  /// Converts a Map to OdometerEntity with validation
+  /// 
+  /// This method provides a safe conversion with proper error handling
+  /// and validation, following Clean Architecture principles
+  Future<OdometerEntity?> convertMapToEntity(Map<String, dynamic> map) async {
+    try {
+      // Validar estrutura básica do map
+      if (!map.containsKey('id') || map['id'] == null || map['id'].toString().isEmpty) {
+        debugPrint('Invalid odometer data: missing or empty id');
+        return null;
+      }
+
+      // Validar campos obrigatórios
+      final requiredFields = ['vehicleId', 'userId', 'value', 'date'];
+      for (final field in requiredFields) {
+        if (!map.containsKey(field) || map[field] == null) {
+          debugPrint('Invalid odometer data: missing required field $field');
+          return null;
+        }
+      }
+
+      // Converter com validação de tipos
+      final entity = OdometerEntity.fromMap(map);
+      
+      // Validar regras de negócio usando o service
+      final validationResult = await _validationService.validateOdometerReading(
+        entity.vehicleId,
+        entity.value,
+        context: 'editing',
+      );
+      
+      if (!validationResult.isValid) {
+        debugPrint('Odometer validation failed: ${validationResult.errorMessage}');
+        // Retorna entity mesmo com validation error para permitir edição
+        // mas registra o warning
+      }
+      
+      return entity;
+    } catch (e) {
+      debugPrint('Error converting map to OdometerEntity: $e');
+      return null;
     }
   }
 }

@@ -12,6 +12,7 @@ import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../../domain/entities/fuel_type_mapper.dart';
 import '../providers/vehicles_provider.dart';
 
 class AddVehiclePage extends StatefulWidget {
@@ -69,7 +70,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     _chassiController.text = vehicle['chassi'] as String? ?? '';
     _renavamController.text = vehicle['renavam'] as String? ?? '';
     _odometroController.text = vehicle['odometroInicial']?.toString() ?? '';
-    _selectedCombustivel = vehicle['combustivel'] as String? ?? 'Flex';
+    _selectedCombustivel = vehicle['combustivel'] as String? ?? 'Gasolina';
   }
 
   @override
@@ -593,14 +594,38 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
   Widget _buildCombustivelSelector() {
-    final combustiveis = [
-      {'name': 'Gasolina', 'icon': Icons.local_gas_station},
-      {'name': 'Etanol', 'icon': Icons.eco},
-      {'name': 'Diesel', 'icon': Icons.local_shipping},
-      {'name': 'Diesel S-10', 'icon': Icons.local_gas_station},
-      {'name': 'GNV', 'icon': Icons.circle},
-      {'name': 'Energia Elétrica', 'icon': Icons.electric_car},
-    ];
+    // Usar FuelTypeMapper para gerar lista de combustíveis dinamicamente
+    final combustiveis = FuelTypeMapper.availableFuelStrings.map((fuelName) {
+      IconData icon;
+      switch (fuelName) {
+        case 'Gasolina':
+          icon = Icons.local_gas_station;
+          break;
+        case 'Etanol':
+          icon = Icons.eco;
+          break;
+        case 'Diesel':
+          icon = Icons.local_shipping;
+          break;
+        case 'Diesel S-10':
+          icon = Icons.local_gas_station;
+          break;
+        case 'GNV':
+        case 'Gás':
+          icon = Icons.circle;
+          break;
+        case 'Energia Elétrica':
+        case 'Elétrico':
+          icon = Icons.electric_car;
+          break;
+        case 'Híbrido':
+          icon = Icons.ev_station;
+          break;
+        default:
+          icon = Icons.local_gas_station;
+      }
+      return {'name': fuelName, 'icon': icon};
+    }).toList();
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -658,12 +683,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
 
-  // Sanitização de entrada para prevenir XSS
+  // Sanitização robusta de entrada para prevenir XSS e injeções
   String _sanitizeInput(String input) {
     return input
         .trim()
-        .replaceAll(RegExp(r'[<>"\\&%$#@!*()[\]{}]'), '')
-        .replaceAll(RegExp(r'\s+'), ' ');
+        .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
+        .replaceAll(RegExp(r'[&<>"\'`]'), '') // Remove dangerous chars (otimizado)
+        .replaceAll(RegExp(r'\s+'), ' '); // Normalize whitespace
   }
 
   Future<void> _submitForm() async {
@@ -689,17 +715,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     try {
       final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
       
-      // Mapear combustível string para FuelType
-      final fuelTypeMap = {
-        'Gasolina': FuelType.gasoline,
-        'Etanol': FuelType.ethanol,
-        'Diesel': FuelType.diesel,
-        'Diesel S-10': FuelType.diesel,
-        'GNV': FuelType.gas,
-        'Energia Elétrica': FuelType.electric,
-      };
-      
-      final fuelType = fuelTypeMap[_selectedCombustivel] ?? FuelType.gasoline;
+      // Usar FuelTypeMapper centralizado para conversão
+      final fuelType = FuelTypeMapper.fromString(_selectedCombustivel);
       final odometroValue = double.tryParse(_odometroController.text.replaceAll(',', '.')) ?? 0.0;
       
       // Criar entidade do veículo

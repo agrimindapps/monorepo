@@ -4,18 +4,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/error/app_error.dart';
+import '../../../../core/providers/base_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_formatter_service.dart';
-import '../../domain/services/expense_validator_service.dart';
+import '../../domain/services/expense_validation_service.dart';
 import '../models/expense_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de despesas
-class ExpenseFormProvider extends ChangeNotifier {
+class ExpenseFormProvider extends BaseProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
-  final ExpenseValidatorService _validator = ExpenseValidatorService();
+  final ExpenseValidationService _validator = const ExpenseValidationService();
   final VehiclesProvider _vehiclesProvider;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -85,77 +87,77 @@ class ExpenseFormProvider extends ChangeNotifier {
 
   /// Inicializa o formulário com dados do veículo selecionado
   Future<void> initialize({String? vehicleId, String? userId}) async {
-    try {
-      final selectedVehicleId = vehicleId ?? _formModel.vehicleId;
-      
-      if (selectedVehicleId.isEmpty) {
-        throw Exception('Nenhum veículo selecionado');
-      }
+    await executeOperation(
+      () async {
+        final selectedVehicleId = vehicleId ?? _formModel.vehicleId;
+        
+        if (selectedVehicleId.isEmpty) {
+          throw const BusinessLogicError(
+            message: 'No vehicle selected for expense form',
+            userFriendlyMessage: 'Nenhum veículo selecionado',
+          );
+        }
 
-      _formModel = ExpenseFormModel.initial(selectedVehicleId, userId ?? '');
-      
-      // Carregar dados do veículo
-      await _loadVehicleData(selectedVehicleId);
-      
-      // Configurar estado inicial dos campos
-      _updateTextControllers();
-      
-      _isInitialized = true;
-      notifyListeners();
-    } catch (e) {
-      _formModel = _formModel.copyWith(
-        lastError: 'Erro ao inicializar: $e',
-        isLoading: false,
-      );
-      notifyListeners();
-    }
+        _formModel = ExpenseFormModel.initial(selectedVehicleId, userId ?? '');
+        
+        // Carregar dados do veículo
+        await _loadVehicleData(selectedVehicleId);
+        
+        // Configurar estado inicial dos campos
+        _updateTextControllers();
+        
+        _isInitialized = true;
+      },
+      operationName: 'initialize',
+      parameters: {
+        'vehicleId': vehicleId,
+        'userId': userId,
+      },
+    );
   }
 
   /// Inicializa com uma despesa existente para edição
   Future<void> initializeWithExpense(ExpenseEntity expense) async {
-    try {
-      _formModel = ExpenseFormModel.fromExpenseEntity(expense);
-      
-      // Carregar dados do veículo
-      await _loadVehicleData(expense.vehicleId);
-      
-      // Configurar campos com dados da despesa
-      _updateTextControllers();
-      
-      _isInitialized = true;
-      notifyListeners();
-    } catch (e) {
-      _formModel = _formModel.copyWith(
-        lastError: 'Erro ao carregar despesa: $e',
-        isLoading: false,
-      );
-      notifyListeners();
-    }
+    await executeOperation(
+      () async {
+        _formModel = ExpenseFormModel.fromExpenseEntity(expense);
+        
+        // Carregar dados do veículo
+        await _loadVehicleData(expense.vehicleId);
+        
+        // Configurar campos com dados da despesa
+        _updateTextControllers();
+        
+        _isInitialized = true;
+      },
+      operationName: 'initializeWithExpense',
+      parameters: {
+        'expenseId': expense.id,
+        'vehicleId': expense.vehicleId,
+      },
+    );
   }
 
   /// Carrega dados do veículo selecionado
   Future<void> _loadVehicleData(String vehicleId) async {
-    try {
-      _formModel = _formModel.copyWith(isLoading: true);
-      notifyListeners();
-
-      final vehicle = await _vehiclesProvider.getVehicleById(vehicleId);
-      
-      if (vehicle != null) {
-        _formModel = _formModel.copyWith(
-          vehicle: vehicle,
-          odometer: vehicle.currentOdometer,
-          isLoading: false,
-        );
-      } else {
-        throw Exception('Veículo não encontrado');
-      }
-    } catch (e) {
-      _formModel = _formModel.copyWith(
-        lastError: 'Erro ao carregar veículo: $e',
-        isLoading: false,
-      );
-    }
+    final vehicle = await executeDataOperation(
+      () => _vehiclesProvider.getVehicleById(vehicleId),
+      operationName: '_loadVehicleData',
+      parameters: {'vehicleId': vehicleId},
+      showLoading: false,
+      onSuccess: (vehicle) {
+        if (vehicle != null) {
+          _formModel = _formModel.copyWith(
+            vehicle: vehicle,
+            odometer: vehicle.currentOdometer,
+          );
+        } else {
+          throw const VehicleNotFoundError(
+            technicalDetails: 'Vehicle data not found in provider',
+          );
+        }
+      },
+    );
   }
 
   /// Atualiza controllers com valores do modelo
@@ -321,28 +323,29 @@ class ExpenseFormProvider extends ChangeNotifier {
 
   /// Adiciona foto do comprovante
   Future<void> addReceiptImage() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        // TODO: Implementar salvamento da imagem em local seguro
-        _formModel = _formModel.copyWith(
-          receiptImagePath: image.path,
-          hasChanges: true,
+    await executeDataOperation(
+      () async {
+        final XFile? image = await _imagePicker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: ExpenseConstants.imageMaxWidth.toDouble(),
+          maxHeight: ExpenseConstants.imageMaxHeight.toDouble(),
+          imageQuality: ExpenseConstants.imageQuality,
         );
-        notifyListeners();
-      }
-    } catch (e) {
-      _formModel = _formModel.copyWith(
-        lastError: 'Erro ao adicionar foto: $e',
-      );
-      notifyListeners();
-    }
+
+        if (image != null) {
+          // TODO: Implementar salvamento da imagem em local seguro
+          _formModel = _formModel.copyWith(
+            receiptImagePath: image.path,
+            hasChanges: true,
+          );
+          notifyListeners();
+          return image.path;
+        }
+        return null;
+      },
+      operationName: 'addReceiptImage',
+      showLoading: false,
+    );
   }
 
   /// Remove foto do comprovante
@@ -476,8 +479,9 @@ class ExpenseFormProvider extends ChangeNotifier {
   /// Verifica se tem imagem do comprovante
   bool get hasReceiptImage => _formModel.hasReceipt;
 
-  /// Limpa os erros do formulário
-  void clearError() {
+  /// Limpa os erros do formulário e provider
+  void clearFormErrors() {
+    clearError(); // BaseProvider method
     _formModel = _formModel.copyWith(
       lastError: null,
       errors: const {},

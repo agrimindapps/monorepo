@@ -14,13 +14,6 @@ abstract class ReportsRepository {
   Future<Either<Failure, ReportComparisonEntity>> compareMonthlyReports(String vehicleId, DateTime currentMonth, DateTime previousMonth);
   Future<Either<Failure, ReportComparisonEntity>> compareYearlyReports(String vehicleId, int currentYear, int previousYear);
   
-  // Get aggregated data for multiple vehicles
-  Future<Either<Failure, List<ReportSummaryEntity>>> generateFleetReport(List<String> vehicleIds, DateTime startDate, DateTime endDate);
-  
-  // Historical data
-  Future<Either<Failure, List<ReportSummaryEntity>>> getMonthlyReportsHistory(String vehicleId, int year);
-  Future<Either<Failure, List<ReportSummaryEntity>>> getYearlyReportsHistory(String vehicleId, int startYear, int endYear);
-  
   // Analytics insights
   Future<Either<Failure, Map<String, dynamic>>> getFuelEfficiencyTrends(String vehicleId, int months);
   Future<Either<Failure, Map<String, dynamic>>> getCostAnalysis(String vehicleId, DateTime startDate, DateTime endDate);
@@ -28,5 +21,4 @@ abstract class ReportsRepository {
   
   // Export reports
   Future<Either<Failure, String>> exportReportToCSV(ReportSummaryEntity report);
-  Future<Either<Failure, String>> exportReportToPDF(ReportSummaryEntity report);
 }

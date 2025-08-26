@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../models/stat_data.dart';
+import '../providers/reports_provider.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
@@ -19,11 +21,16 @@ class _ReportsPageState extends State<ReportsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+      final reportsProvider = Provider.of<ReportsProvider>(context, listen: false);
       
       if (vehiclesProvider.vehicles.isNotEmpty) {
+        final vehicleId = vehiclesProvider.vehicles.first.id;
         setState(() {
-          _selectedVehicleId = vehiclesProvider.vehicles.first.id;
+          _selectedVehicleId = vehicleId;
         });
+        
+        // Load reports data for the selected vehicle
+        reportsProvider.loadAllReportsForVehicle(vehicleId);
       }
     });
   }
@@ -48,6 +55,12 @@ class _ReportsPageState extends State<ReportsPage> {
                           setState(() {
                             _selectedVehicleId = vehicleId;
                           });
+                          
+                          // Load new reports data when vehicle changes
+                          if (vehicleId != null) {
+                            final reportsProvider = Provider.of<ReportsProvider>(context, listen: false);
+                            reportsProvider.loadAllReportsForVehicle(vehicleId);
+                          }
                         },
                       ),
                       const SizedBox(height: 24),
@@ -74,7 +87,7 @@ class _ReportsPageState extends State<ReportsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Color(0xFF2C2C2E),
+          color: const Color(0xFF2C2C2E),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -122,75 +135,106 @@ class _ReportsPageState extends State<ReportsPage> {
 
 
   Widget _buildFuelSection(BuildContext context) {
-    return _buildStatSection(
-      context,
-      title: 'Abastecimento',
-      icon: Icons.local_gas_station,
-      iconColor: const Color(0xFF4299E1),
-      stats: [
-        _StatData(
-          label: 'Este Ano',
-          value: 'R\$ 0,00',
-          comparison: 'Ano Anterior',
-          comparisonValue: 'R\$ 0,00',
-        ),
-        _StatData(
-          label: 'Este Mês',
-          value: 'R\$ 0,00',
-          comparison: 'Mês Anterior',
-          comparisonValue: 'R\$ 0,00',
-        ),
-      ],
+    return Consumer<ReportsProvider>(
+      builder: (context, reportsProvider, child) {
+        final currentMonthStats = reportsProvider.getCurrentMonthStats();
+        final currentYearStats = reportsProvider.getCurrentYearStats();
+        final monthlyComparisons = reportsProvider.getMonthlyComparisons();
+        final yearlyComparisons = reportsProvider.getYearlyComparisons();
+        
+        return _buildStatSection(
+          context,
+          title: 'Abastecimento',
+          icon: Icons.local_gas_station,
+          iconColor: const Color(0xFF4299E1),
+          stats: [
+            StatData(
+              label: 'Este Ano',
+              value: currentYearStats['fuel_spent'] ?? 'R\$ 0,00',
+              comparison: 'Ano Anterior',
+              comparisonValue: yearlyComparisons['fuel_spent'] ?? 'R\$ 0,00',
+              percentage: yearlyComparisons['fuel_spent_growth'] != '0%' ? yearlyComparisons['fuel_spent_growth'] : null,
+              isPositive: _isPositiveGrowth(yearlyComparisons['fuel_spent_growth']),
+            ),
+            StatData(
+              label: 'Este Mês',
+              value: currentMonthStats['fuel_spent'] ?? 'R\$ 0,00',
+              comparison: 'Mês Anterior',
+              comparisonValue: monthlyComparisons['fuel_spent'] ?? 'R\$ 0,00',
+              percentage: monthlyComparisons['fuel_spent_growth'] != '0%' ? monthlyComparisons['fuel_spent_growth'] : null,
+              isPositive: _isPositiveGrowth(monthlyComparisons['fuel_spent_growth']),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildConsumptionSection(BuildContext context) {
-    return _buildStatSection(
-      context,
-      title: 'Combustível',
-      icon: Icons.local_gas_station,
-      iconColor: const Color(0xFF48BB78),
-      stats: [
-        _StatData(
-          label: 'Este Ano',
-          value: '0,0L',
-          comparison: 'Ano Anterior',
-          comparisonValue: '0,0L',
-        ),
-        _StatData(
-          label: 'Este Mês',
-          value: '0,0L',
-          comparison: 'Mês Anterior',
-          comparisonValue: '0,0L',
-        ),
-      ],
+    return Consumer<ReportsProvider>(
+      builder: (context, reportsProvider, child) {
+        final currentMonthStats = reportsProvider.getCurrentMonthStats();
+        final currentYearStats = reportsProvider.getCurrentYearStats();
+        final monthlyComparisons = reportsProvider.getMonthlyComparisons();
+        final yearlyComparisons = reportsProvider.getYearlyComparisons();
+        
+        return _buildStatSection(
+          context,
+          title: 'Combustível',
+          icon: Icons.local_gas_station,
+          iconColor: const Color(0xFF48BB78),
+          stats: [
+            StatData(
+              label: 'Este Ano',
+              value: currentYearStats['fuel_liters'] ?? '0,0L',
+              comparison: 'Ano Anterior',
+              comparisonValue: yearlyComparisons['fuel_liters'] ?? '0,0L',
+            ),
+            StatData(
+              label: 'Este Mês',
+              value: currentMonthStats['fuel_liters'] ?? '0,0L',
+              comparison: 'Mês Anterior',
+              comparisonValue: monthlyComparisons['fuel_liters'] ?? '0,0L',
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildDistanceSection(BuildContext context) {
-    return _buildStatSection(
-      context,
-      title: 'Distância',
-      icon: Icons.speed,
-      iconColor: const Color(0xFF9F7AEA),
-      stats: [
-        _StatData(
-          label: 'Este Ano',
-          value: '- 8.250 km',
-          comparison: 'Ano Anterior',
-          comparisonValue: '- 5.550 km',
-          percentage: '48.6%',
-          isPositive: true,
-        ),
-        _StatData(
-          label: 'Este Mês',
-          value: '150 km',
-          comparison: 'Mês Anterior',
-          comparisonValue: '300 km',
-          percentage: '50.0%',
-          isPositive: false,
-        ),
-      ],
+    return Consumer<ReportsProvider>(
+      builder: (context, reportsProvider, child) {
+        final currentMonthStats = reportsProvider.getCurrentMonthStats();
+        final currentYearStats = reportsProvider.getCurrentYearStats();
+        final monthlyComparisons = reportsProvider.getMonthlyComparisons();
+        final yearlyComparisons = reportsProvider.getYearlyComparisons();
+        
+        return _buildStatSection(
+          context,
+          title: 'Distância',
+          icon: Icons.speed,
+          iconColor: const Color(0xFF9F7AEA),
+          stats: [
+            StatData(
+              label: 'Este Ano',
+              value: currentYearStats['distance'] ?? '0 km',
+              comparison: 'Ano Anterior',
+              comparisonValue: yearlyComparisons['distance'] ?? '0 km',
+              percentage: yearlyComparisons['distance_growth'] != '0%' ? yearlyComparisons['distance_growth'] : null,
+              isPositive: _isPositiveGrowth(yearlyComparisons['distance_growth']),
+            ),
+            StatData(
+              label: 'Este Mês',
+              value: currentMonthStats['distance'] ?? '0 km',
+              comparison: 'Mês Anterior',
+              comparisonValue: monthlyComparisons['distance'] ?? '0 km',
+              percentage: monthlyComparisons['distance_growth'] != '0%' ? monthlyComparisons['distance_growth'] : null,
+              isPositive: _isPositiveGrowth(monthlyComparisons['distance_growth']),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -199,7 +243,7 @@ class _ReportsPageState extends State<ReportsPage> {
     required String title,
     required IconData icon,
     required Color iconColor,
-    required List<_StatData> stats,
+    required List<StatData> stats,
   }) {
     return Card(
       elevation: 0,
@@ -246,7 +290,7 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
-  Widget _buildStatRow(BuildContext context, _StatData stat) {
+  Widget _buildStatRow(BuildContext context, StatData stat) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -346,22 +390,12 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
+  bool? _isPositiveGrowth(String? percentage) {
+    if (percentage == null || percentage == '0%') return null;
+    final cleanPercentage = percentage.replaceAll('%', '').replaceAll('+', '');
+    final growth = double.tryParse(cleanPercentage);
+    return growth != null ? growth > 0 : null;
+  }
+
 }
 
-class _StatData {
-  final String label;
-  final String value;
-  final String comparison;
-  final String comparisonValue;
-  final String? percentage;
-  final bool? isPositive;
-
-  _StatData({
-    required this.label,
-    required this.value,
-    required this.comparison,
-    required this.comparisonValue,
-    this.percentage,
-    this.isPositive,
-  });
-}

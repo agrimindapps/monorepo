@@ -9,6 +9,7 @@ import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/fuel/presentation/providers/fuel_provider.dart';
 import 'features/maintenance/presentation/providers/maintenance_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
+import 'features/reports/presentation/providers/reports_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
 
 class GasOMeterApp extends StatelessWidget {
@@ -43,13 +44,17 @@ class GasOMeterApp extends StatelessWidget {
           create: (_) => sl<MaintenanceProvider>(),
         ),
         
+        // Reports Provider
+        ChangeNotifierProvider(
+          create: (_) => sl<ReportsProvider>(),
+        ),
+        
         // Theme Provider
         ChangeNotifierProvider(
           create: (_) => ThemeProvider()..initialize(),
         ),
         
         // TODO: Adicionar outros providers quando criados
-        // - ReportsProvider
         // - AnalyticsProvider
       ],
       builder: (context, child) {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -16,6 +17,11 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final MaintenanceRemoteDataSource remoteDataSource;
   final MaintenanceLocalDataSource localDataSource;
   final Connectivity connectivity;
+
+  // Controle de sync em background
+  Completer<void>? _syncInProgress;
+  Timer? _debounceTimer;
+  static const Duration _debounceDelay = Duration(seconds: 5);
 
   MaintenanceRepositoryImpl({
     required this.remoteDataSource,
@@ -37,7 +43,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       final localRecords = await localDataSource.getAllMaintenanceRecords();
       
       // Sync em background se conectado (não bloqueia o retorno)
-      unawaited(_syncAllMaintenanceRecordsInBackground());
+      _scheduleSyncInBackground();
       
       return Right(localRecords);
       
@@ -48,26 +54,56 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     }
   }
 
+  /// Agenda sync em background com debounce para evitar múltiplas operações
+  void _scheduleSyncInBackground() {
+    // Cancelar timer anterior se existir
+    _debounceTimer?.cancel();
+    
+    // Agendar novo sync com debounce
+    _debounceTimer = Timer(_debounceDelay, () {
+      unawaited(_syncAllMaintenanceRecordsInBackground());
+    });
+  }
+
   /// Sync em background sem bloquear a UI
   Future<void> _syncAllMaintenanceRecordsInBackground() async {
+    // Verificar se já existe sync em progresso
+    if (_syncInProgress != null && !_syncInProgress!.isCompleted) {
+      return; // Sync já em andamento, evitar duplicação
+    }
+    
+    _syncInProgress = Completer<void>();
+    
     try {
       final isConnected = await _isConnected;
-      if (!isConnected) return;
+      if (!isConnected) {
+        _syncInProgress!.complete();
+        return;
+      }
 
-      // Sync remoto sem aguardar
-      unawaited(remoteDataSource.getAllMaintenanceRecords().then((remoteRecords) async {
-        // Atualizar cache local
-        for (final record in remoteRecords) {
-          await localDataSource.addMaintenanceRecord(record);
-        }
-      }).catchError((Object error) {
-        // Sync falhou, mas não afeta a funcionalidade local
-        print('Background maintenance sync failed: $error');
-      }));
+      // Sync remoto com controle adequado
+      final remoteRecords = await remoteDataSource.getAllMaintenanceRecords();
+      
+      // Atualizar cache local
+      for (final record in remoteRecords) {
+        await localDataSource.addMaintenanceRecord(record);
+      }
+      
+      // Sync bem-sucedido
+      _syncInProgress!.complete();
+      
     } catch (e) {
-      // Ignorar erros de sync em background
-      print('Background maintenance sync error: $e');
+      // Log estruturado ao invés de print
+      // TODO: Implementar logger adequado
+      debugPrint('Background maintenance sync error: $e');
+      _syncInProgress!.complete();
     }
+  }
+
+  /// Limpar recursos quando necessário
+  void dispose() {
+    _debounceTimer?.cancel();
+    _syncInProgress?.complete();
   }
 
   @override
@@ -99,10 +135,15 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           await localDataSource.addMaintenanceRecord(record);
         }
       }).catchError((Object error) {
-        print('Background maintenance vehicle sync failed: $error');
+        // Log error adequadamente sem print em produção
+        debugPrint('Background maintenance vehicle sync failed: $error');
       }));
     } catch (e) {
-      print('Background maintenance vehicle sync error: $e');
+      // Log error adequadamente sem print em produção
+      debugPrint('Background maintenance vehicle sync error: $e');
+    } finally {
+      // Garantir que o Completer sempre seja finalizado
+      _syncInProgress?.complete();
     }
   }
 

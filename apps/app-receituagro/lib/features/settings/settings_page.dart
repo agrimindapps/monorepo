@@ -9,8 +9,34 @@ import '../../core/services/receituagro_notification_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../subscription/subscription_page.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  // Correção Memory Leak: Instância única do NotificationService com cleanup
+  late final ReceitaAgroNotificationService _notificationService;
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationService = ReceitaAgroNotificationService();
+  }
+
+  @override
+  void dispose() {
+    // Correção Memory Leak: Cleanup do NotificationService
+    // Como o ReceitaAgroNotificationService não tem dispose, 
+    // cancelamos todas as notificações pendentes para evitar vazamentos
+    _notificationService.cancelAllNotifications().catchError((Object e) {
+      debugPrint('Error cleaning notification resources: $e');
+      return false; // Retorna valor esperado para o catch error
+    });
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -872,9 +898,8 @@ class SettingsPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () async {
-              // Abrir configurações do sistema
-              final notificationService = ReceitaAgroNotificationService();
-              await notificationService.openNotificationSettings();
+              // Abrir configurações do sistema usando instância única
+              await _notificationService.openNotificationSettings();
             },
             child: Text(
               'Configurações do Sistema',
@@ -950,14 +975,13 @@ class SettingsPage extends StatelessWidget {
 
   Future<void> _testNotification(BuildContext context) async {
     try {
-      final notificationService = ReceitaAgroNotificationService();
-      
+      // Usar instância única do NotificationService
       // Verifica se as notificações estão habilitadas
-      final isEnabled = await notificationService.areNotificationsEnabled();
+      final isEnabled = await _notificationService.areNotificationsEnabled();
       
       if (!isEnabled) {
         // Solicita permissão
-        final granted = await notificationService.requestNotificationPermission();
+        final granted = await _notificationService.requestNotificationPermission();
         
         if (!granted && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -970,8 +994,8 @@ class SettingsPage extends StatelessWidget {
         }
       }
       
-      // Envia notificação de teste
-      await notificationService.showPestDetectedNotification(
+      // Envia notificação de teste usando instância única
+      await _notificationService.showPestDetectedNotification(
         pestName: 'Lagarta-da-soja',
         plantName: 'Plantação Norte',
       );

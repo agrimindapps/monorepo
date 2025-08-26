@@ -108,7 +108,7 @@ class ReportsProvider extends ChangeNotifier {
       (report) {
         _currentMonthReport = report;
         if (kDebugMode) {
-          debugPrint('📊 Relatório mensal gerado para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Monthly report generated for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -134,7 +134,7 @@ class ReportsProvider extends ChangeNotifier {
       (report) {
         _currentYearReport = report;
         if (kDebugMode) {
-          debugPrint('📊 Relatório anual gerado para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Yearly report generated for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -163,7 +163,7 @@ class ReportsProvider extends ChangeNotifier {
       (report) {
         _customReport = report;
         if (kDebugMode) {
-          debugPrint('📊 Relatório personalizado gerado para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Custom report generated for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -196,7 +196,7 @@ class ReportsProvider extends ChangeNotifier {
       (comparison) {
         _monthlyComparison = comparison;
         if (kDebugMode) {
-          debugPrint('📊 Comparação mensal gerada para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Monthly comparison generated for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -228,7 +228,7 @@ class ReportsProvider extends ChangeNotifier {
       (comparison) {
         _yearlyComparison = comparison;
         if (kDebugMode) {
-          debugPrint('📊 Comparação anual gerada para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Yearly comparison generated for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -253,7 +253,7 @@ class ReportsProvider extends ChangeNotifier {
       (trends) {
         _efficiencyTrends = trends;
         if (kDebugMode) {
-          debugPrint('📊 Tendências de eficiência carregadas para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Efficiency trends loaded for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -285,7 +285,7 @@ class ReportsProvider extends ChangeNotifier {
       (analysis) {
         _costAnalysis = analysis;
         if (kDebugMode) {
-          debugPrint('📊 Análise de custos carregada para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Cost analysis loaded for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -310,7 +310,7 @@ class ReportsProvider extends ChangeNotifier {
       (patterns) {
         _usagePatterns = patterns;
         if (kDebugMode) {
-          debugPrint('📊 Padrões de uso carregados para veículo ${id.substring(0, 8)}...');
+          debugPrint('[REPORTS] Usage patterns loaded for vehicle ${id.substring(0, 8)}...');
         }
       },
     );
@@ -353,7 +353,7 @@ class ReportsProvider extends ChangeNotifier {
       (failure) => _handleError(failure),
       (content) {
         csvContent = content;
-        debugPrint('📊 Relatório exportado para CSV');
+        debugPrint('[REPORTS] Report exported to CSV');
       },
     );
 
@@ -464,11 +464,12 @@ class ReportsProvider extends ChangeNotifier {
 
   void _handleError(Failure failure) {
     _errorMessage = _mapFailureToMessage(failure);
-    debugPrint('📊 Erro no ReportsProvider: $_errorMessage');
+    debugPrint('[REPORTS] Error in ReportsProvider: $_errorMessage');
     notifyListeners();
   }
 
   String _mapFailureToMessage(Failure failure) {
+    // General failures
     if (failure is ValidationFailure) {
       return failure.message;
     } else if (failure is NetworkFailure) {
@@ -477,8 +478,38 @@ class ReportsProvider extends ChangeNotifier {
       return 'Erro do servidor. Tente novamente mais tarde.';
     } else if (failure is CacheFailure) {
       return 'Erro no armazenamento local. Tente reiniciar o app.';
-    } else {
-      return 'Erro inesperado. Tente novamente.';
+    } else if (failure is UnexpectedFailure) {
+      return 'Erro inesperado: ${failure.message}';
+    }
+    // Authentication failures
+    else if (failure is AuthenticationFailure) {
+      return 'Erro de autenticação. Faça login novamente.';
+    } else if (failure is AuthorizationFailure) {
+      return 'Acesso negado. Verifique suas permissões.';
+    }
+    // Vehicle specific failures
+    else if (failure is VehicleNotFoundFailure) {
+      return 'Veículo não encontrado.';
+    } else if (failure is DuplicateVehicleFailure) {
+      return 'Veículo duplicado encontrado.';
+    }
+    // Fuel specific failures
+    else if (failure is InvalidFuelDataFailure) {
+      return 'Dados de combustível inválidos.';
+    }
+    // Maintenance specific failures
+    else if (failure is MaintenanceNotFoundFailure) {
+      return 'Manutenção não encontrada.';
+    }
+    // Sync failures
+    else if (failure is SyncFailure) {
+      return 'Erro de sincronização. Tente novamente.';
+    } else if (failure is OfflineFailure) {
+      return 'Sem conexão. Algumas funcionalidades podem não estar disponíveis.';
+    }
+    // Default case
+    else {
+      return 'Erro inesperado: ${failure.message}';
     }
   }
 

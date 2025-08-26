@@ -56,34 +56,6 @@ class _VehiclesPageState extends State<VehiclesPage> {
       floatingActionButton: _OptimizedFloatingActionButton(),
     );
   }
-
-  // Widget removido - agora usando _OptimizedHeader
-
-  // Widget removido - agora usando _OptimizedVehiclesContent
-
-  // Widget removido - agora usando _OptimizedVehiclesContent
-
-  // Widget removido - agora usando _OptimizedVehiclesContent
-
-  // Widget removido - agora usando _OptimizedVehiclesContent
-
-  // Widget removido - agora usando componentes otimizados
-
-  // Widget removido - agora usando componentes otimizados
-
-  // Widget removido - agora usando componentes otimizados
-
-  // Widget removido - agora usando componentes otimizados
-
-  // Widget removido - agora usando componentes otimizados
-
-  // Widget removido - agora usando _OptimizedFloatingActionButton
-
-  // Método removido - agora usando provider
-
-  // Método removido - agora usando provider
-
-  // Método removido - agora usando provider
 }
 
 /// Header otimizado com Selector para performance
@@ -435,7 +407,7 @@ class _VehicleCardContent extends StatelessWidget {
           SizedBox(height: GasometerDesignTokens.spacingMd),
           CardInfoRow(
             label: 'Km Inicial',
-            value: '${vehicle.currentOdometer.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km',
+            value: '${(vehicle.metadata['initialOdometer'] ?? vehicle.metadata['odometroInicial'] ?? 0).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km',
             icon: Icons.speed,
           ),
           SizedBox(height: GasometerDesignTokens.spacingMd),

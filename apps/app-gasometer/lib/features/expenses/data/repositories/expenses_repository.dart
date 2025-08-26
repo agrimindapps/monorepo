@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:hive/hive.dart';
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
+import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../models/expense_model.dart';
 
@@ -17,9 +20,44 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
     
     // Inicializar cache com configurações otimizadas para expenses
     initializeCache(
-      maxSize: 150, // Mais entradas para expenses frequentes
-      defaultTtl: const Duration(minutes: 10), // TTL maior para dados financeiros
+      maxSize: 200, // Mais entradas para expenses frequentes
+      defaultTtl: const Duration(minutes: 45), // TTL otimizado para dados financeiros (45 min)
     );
+    
+    // Aquecimento de cache para dados frequentemente acessados (em background)
+    unawaited(_warmupCache());
+  }
+
+  /// Aquece o cache com dados frequentemente acessados
+  Future<void> _warmupCache() async {
+    try {
+      // Carregar todas as despesas para o cache (em background)
+      unawaited(getAllExpenses());
+      
+      // Carregar estatísticas básicas
+      unawaited(getStats());
+      
+      // Se há despesas, carregar as mais recentes
+      final recentModels = _box.values
+          .where((model) => !model.isDeleted)
+          .toList()
+        ..sort((a, b) => b.data.compareTo(a.data));
+      
+      if (recentModels.isNotEmpty) {
+        // Cache das últimas 10 despesas individualmente
+        for (int i = 0; i < recentModels.length && i < 10; i++) {
+          final entity = _modelToEntity(recentModels[i]);
+          cacheEntity(entityCacheKey(entity.id), entity);
+        }
+        
+        // Carregar despesas do último mês (período comum de consulta)
+        final lastMonth = DateTime.now().subtract(const Duration(days: 30));
+        unawaited(getExpensesByPeriod(lastMonth, DateTime.now()));
+      }
+    } catch (e) {
+      // Warmup não deve travar a inicialização
+      print('Cache warmup failed (non-critical): $e');
+    }
   }
 
   /// Salva nova despesa
@@ -76,13 +114,23 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   @override
   Future<bool> deleteExpense(String expenseId) async {
     try {
+      // Buscar dados antes de deletar para invalidação seletiva
+      final expenseToDelete = _box.get(expenseId);
+      
       await _box.delete(expenseId);
       
       // Remover do cache
       invalidateCache(entityCacheKey(expenseId));
       
-      // Invalidar todos os caches de listas (não sabemos veículo/tipo)
-      clearAllCache();
+      // Invalidação seletiva baseada na despesa removida
+      if (expenseToDelete != null) {
+        invalidateListCache('all_expenses');
+        invalidateListCache(vehicleCacheKey(expenseToDelete.veiculoId, 'expenses'));
+        invalidateListCache(typeCacheKey(expenseToDelete.tipo, 'expenses'));
+      } else {
+        // Fallback para invalidação completa apenas se não conseguir dados específicos
+        invalidateListCache('all_expenses');
+      }
       
       return true;
     } catch (e) {
@@ -167,10 +215,22 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   @override
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type) async {
     try {
+      // Verificar cache primeiro
+      final cacheKey = typeCacheKey(type.name, 'expenses');
+      final cached = getCachedList(cacheKey);
+      if (cached != null) {
+        return cached;
+      }
+      
       final models = _box.values
           .where((model) => model.tipo == type.name && !model.isDeleted)
           .toList();
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      
+      // Cache o resultado
+      cacheList(cacheKey, entities);
+      
+      return entities;
     } catch (e) {
       throw Exception('Erro ao carregar despesas por tipo: $e');
     }
@@ -180,6 +240,13 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   @override
   Future<List<ExpenseEntity>> getExpensesByPeriod(DateTime start, DateTime end) async {
     try {
+      // Cache key baseado no período
+      final periodKey = 'period_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
+      final cached = getCachedList(periodKey);
+      if (cached != null) {
+        return cached;
+      }
+      
       final startMs = start.millisecondsSinceEpoch;
       final endMs = end.millisecondsSinceEpoch;
       
@@ -189,7 +256,12 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
                !model.isDeleted;
       }).toList();
       
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      
+      // Cache com TTL menor para buscas por período (20 min)
+      cacheList(periodKey, entities, ttl: const Duration(minutes: 20));
+      
+      return entities;
     } catch (e) {
       throw Exception('Erro ao carregar despesas por período: $e');
     }
@@ -199,13 +271,25 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   @override
   Future<List<ExpenseEntity>> searchExpenses(String query) async {
     try {
+      // Cache para buscas (queries muito específicas, TTL menor)
+      final searchKey = 'search_${query.toLowerCase().replaceAll(' ', '_')}';
+      final cached = getCachedList(searchKey);
+      if (cached != null) {
+        return cached;
+      }
+      
       final lowerQuery = query.toLowerCase();
       final models = _box.values.where((model) {
         return !model.isDeleted && 
                model.descricao.toLowerCase().contains(lowerQuery);
       }).toList();
       
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      
+      // Cache com TTL bem menor para buscas (10 min)
+      cacheList(searchKey, entities, ttl: const Duration(minutes: 10));
+      
+      return entities;
     } catch (e) {
       throw Exception('Erro ao buscar despesas: $e');
     }
@@ -293,6 +377,10 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
       valor: entity.amount,
       data: entity.date.millisecondsSinceEpoch,
       odometro: entity.odometer,
+      receiptImagePath: entity.receiptImagePath,
+      location: entity.location,
+      notes: entity.notes,
+      metadata: entity.metadata,
     );
   }
 
@@ -310,12 +398,12 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
       amount: model.valor,
       date: DateTime.fromMillisecondsSinceEpoch(model.data),
       odometer: model.odometro,
-      location: null, // Não disponível no modelo legacy
-      notes: null, // Não disponível no modelo legacy
-      receiptImagePath: null, // Não disponível no modelo legacy
+      receiptImagePath: model.receiptImagePath,
+      location: model.location,
+      notes: model.notes,
       createdAt: model.createdAt ?? DateTime.now(),
       updatedAt: model.updatedAt ?? DateTime.now(),
-      metadata: const {},
+      metadata: model.metadata,
     );
   }
 
@@ -361,6 +449,22 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
     String? searchText,
   }) async {
     try {
+      // Cache key complexa baseada nos filtros
+      final filterKey = _buildFilterCacheKey(
+        vehicleId: vehicleId,
+        type: type,
+        startDate: startDate,
+        endDate: endDate,
+        minAmount: minAmount,
+        maxAmount: maxAmount,
+        searchText: searchText,
+      );
+      
+      final cached = getCachedList(filterKey);
+      if (cached != null) {
+        return cached;
+      }
+      
       final models = _box.values.where((model) {
         if (model.isDeleted) return false;
         
@@ -381,17 +485,45 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
         return true;
       }).toList();
       
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      
+      // Cache com TTL médio para filtros (25 min)
+      cacheList(filterKey, entities, ttl: const Duration(minutes: 25));
+      
+      return entities;
     } catch (e) {
       throw Exception('Erro ao filtrar despesas: $e');
     }
+  }
+
+  /// Constrói chave de cache para filtros complexos
+  String _buildFilterCacheKey({
+    String? vehicleId,
+    ExpenseType? type,
+    DateTime? startDate,
+    DateTime? endDate,
+    double? minAmount,
+    double? maxAmount,
+    String? searchText,
+  }) {
+    final parts = <String>['filter'];
+    
+    if (vehicleId != null) parts.add('v_$vehicleId');
+    if (type != null) parts.add('t_${type.name}');
+    if (startDate != null) parts.add('sd_${startDate.millisecondsSinceEpoch}');
+    if (endDate != null) parts.add('ed_${endDate.millisecondsSinceEpoch}');
+    if (minAmount != null) parts.add('min_$minAmount');
+    if (maxAmount != null) parts.add('max_$maxAmount');
+    if (searchText != null) parts.add('q_${searchText.toLowerCase().replaceAll(' ', '_')}');
+    
+    return parts.join('_');
   }
 
   /// Paginated expenses
   @override
   Future<PagedResult<ExpenseEntity>> getExpensesPaginated({
     int page = 0,
-    int pageSize = 20,
+    int pageSize = ExpenseConstants.defaultPageSize,
     String? vehicleId,
     ExpenseType? type,
     DateTime? startDate,

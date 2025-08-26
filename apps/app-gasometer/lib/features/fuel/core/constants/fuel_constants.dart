@@ -52,6 +52,38 @@ class FuelConstants {
   static const String futureDateError = 'Data não pode ser futura';
   static const String tooOldDateError = 'Data muito antiga';
   
+  // Labels de formulário
+  static const String fuelTypeLabel = 'Tipo de Combustível';
+  static const String dateLabel = 'Data';
+  static const String fullTankLabel = 'Tanque Cheio';
+  static const String fullTankSubtitle = 'Marque se encheu completamente o tanque';
+  static const String litersLabel = 'Litros';
+  static const String pricePerLiterLabel = 'Preço/Litro';
+  static const String totalPriceLabel = 'Valor Total';
+  static const String odometerLabel = 'Odômetro';
+  static const String gasStationLabel = 'Nome do Posto (opcional)';
+  static const String gasStationHint = 'Ex: Shell, Petrobras, Ipiranga...';
+  static const String gasStationBrandLabel = 'Bandeira/Rede (opcional)';
+  static const String gasStationBrandHint = 'Ex: BR, Shell Select...';
+  static const String notesLabel = 'Observações (opcional)';
+  static const String notesHint = 'Adicione comentários sobre este abastecimento...';
+  
+  // Mensagens do formulário
+  static const String noVehicleSelected = 'Nenhum veículo selecionado';
+  static const String selectVehicleMessage = 'Selecione um veículo primeiro para registrar o abastecimento.';
+  static const String loadingFormMessage = 'Carregando formulário...';
+  
+  // Seções do formulário
+  static const String fuelInfoSection = 'Informações do Combustível';
+  static const String valuesSection = 'Valores';
+  static const String locationSection = 'Local do Abastecimento';
+  static const String notesSection = 'Observações';
+  
+  // Placeholders
+  static const String litersPlaceholder = '0,000';
+  static const String pricePlaceholder = '0,000';
+  static const String odometerPlaceholder = '0,0';
+  
   // Unidades de medida
   static const String litersUnit = 'L';
   static const String kilometerUnit = 'km';

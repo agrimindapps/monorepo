@@ -9,18 +9,18 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
   static const String _boxName = 'odometer';
   late Box<OdometerModel> _box;
 
-  /// Inicializa o repositório
+  /// Initializes the repository
   Future<void> initialize() async {
     _box = await Hive.openBox<OdometerModel>(_boxName);
     
-    // Inicializar cache com configurações otimizadas para odômetro
+    // Initialize cache with optimized settings for odometer
     initializeCache(
       maxSize: 100,
       defaultTtl: const Duration(minutes: 8), // TTL médio para leituras de odômetro
     );
   }
 
-  /// Salva nova leitura de odômetro
+  /// Saves new odometer reading
   Future<OdometerEntity?> saveOdometerReading(OdometerEntity reading) async {
     try {
       final model = _entityToModel(reading);
@@ -31,7 +31,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Atualiza leitura de odômetro existente
+  /// Updates existing odometer reading
   Future<OdometerEntity?> updateOdometerReading(OdometerEntity reading) async {
     try {
       if (!_box.containsKey(reading.id)) {
@@ -46,7 +46,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Remove leitura de odômetro por ID
+  /// Removes odometer reading by ID
   Future<bool> deleteOdometerReading(String readingId) async {
     try {
       await _box.delete(readingId);
@@ -56,7 +56,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Busca leitura de odômetro por ID
+  /// Finds odometer reading by ID
   Future<OdometerEntity?> getOdometerReadingById(String readingId) async {
     try {
       final model = _box.get(readingId);
@@ -66,7 +66,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Carrega todas as leituras de odômetro
+  /// Loads all odometer readings
   Future<List<OdometerEntity>> getAllOdometerReadings() async {
     try {
       // Verificar cache primeiro
@@ -88,7 +88,18 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Carrega leituras de odômetro por veículo
+  /// Loads odometer readings by vehicle with caching optimization
+  ///
+  /// This method implements a comprehensive loading strategy:
+  /// - Checks cache first for improved performance
+  /// - Filters deleted records automatically
+  /// - Sorts results by date (most recent first)
+  /// - Maintains cache consistency for frequent access patterns
+  ///
+  /// [vehicleId] The unique identifier of the vehicle
+  ///
+  /// Returns a sorted list of [OdometerEntity] objects for the specified vehicle
+  /// Throws [Exception] if data access fails
   Future<List<OdometerEntity>> getOdometerReadingsByVehicle(String vehicleId) async {
     try {
       // Verificar cache primeiro
@@ -116,7 +127,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Carrega leituras de odômetro por tipo
+  /// Loads odometer readings by type
   Future<List<OdometerEntity>> getOdometerReadingsByType(OdometerType type) async {
     try {
       final typeString = _typeToString(type);
@@ -133,7 +144,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Carrega leituras de odômetro por período
+  /// Loads odometer readings by period
   Future<List<OdometerEntity>> getOdometerReadingsByPeriod(DateTime start, DateTime end) async {
     try {
       final startMs = start.millisecondsSinceEpoch;
@@ -154,7 +165,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Busca a última leitura de um veículo
+  /// Finds the last reading for a vehicle
   Future<OdometerEntity?> getLastOdometerReading(String vehicleId) async {
     try {
       final models = _box.values
@@ -173,7 +184,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Busca leituras de odômetro por texto
+  /// Searches odometer readings by text
   Future<List<OdometerEntity>> searchOdometerReadings(String query) async {
     try {
       final lowerQuery = query.toLowerCase();
@@ -191,7 +202,25 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Carrega estatísticas básicas por veículo
+  /// Loads comprehensive vehicle statistics with intelligent calculations
+  ///
+  /// This method performs complex statistical analysis on odometer data:
+  /// - Aggregates total record count for the vehicle
+  /// - Calculates current odometer reading from latest entry
+  /// - Identifies chronological first and last readings
+  /// - Computes total distance traveled based on reading span
+  /// - Handles edge cases (no data, single reading, etc.)
+  ///
+  /// [vehicleId] The unique identifier of the vehicle
+  ///
+  /// Returns a map containing:
+  /// - 'totalRecords': Number of odometer readings
+  /// - 'currentOdometer': Latest odometer value
+  /// - 'firstReading': Earliest odometer reading entity
+  /// - 'lastReading': Latest odometer reading entity
+  /// - 'totalDistance': Calculated distance between first and last readings
+  ///
+  /// Throws [Exception] if statistical calculation fails
   Future<Map<String, dynamic>> getVehicleStats(String vehicleId) async {
     try {
       final models = _box.values
@@ -227,7 +256,22 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Verifica se há leituras duplicadas
+  /// Detects potential duplicate odometer readings using intelligent algorithms
+  ///
+  /// This method implements sophisticated duplicate detection logic:
+  /// - Compares readings for the same vehicle
+  /// - Considers small odometer value differences (< 1.0 km) as potential duplicates
+  /// - Analyzes temporal proximity (within 1 day) for duplicate detection
+  /// - Accounts for user error patterns in data entry
+  /// - Excludes already deleted records from analysis
+  ///
+  /// Detection criteria:
+  /// - Same vehicle ID
+  /// - Odometer values within 1 km of each other
+  /// - Registration dates within 1 day of each other
+  ///
+  /// Returns a list of [OdometerEntity] objects that are potential duplicates
+  /// Throws [Exception] if duplicate analysis fails
   Future<List<OdometerEntity>> findDuplicates() async {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
@@ -257,7 +301,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     }
   }
 
-  /// Limpa todas as leituras (apenas para debug/reset)
+  /// Clears all readings (debug/reset only)
   Future<void> clearAllOdometerReadings() async {
     try {
       await _box.clear();
@@ -314,7 +358,7 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
     try {
       await _box.close();
     } catch (e) {
-      // Log error mas não trava
+      // Log error but don't crash
       print('Erro ao fechar box de odômetro: $e');
     }
   }

@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../../domain/entities/fuel_type_mapper.dart';
 
 part 'vehicle_model.g.dart';
 
@@ -62,7 +63,7 @@ class VehicleModel extends BaseSyncModel {
     this.ano = 0,
     this.placa = '',
     this.odometroInicial = 0.0,
-    this.combustivel = 0,
+    this.combustivel = 0, // Default gasoline index
     this.renavan = '',
     this.chassi = '',
     this.cor = '',
@@ -121,7 +122,7 @@ class VehicleModel extends BaseSyncModel {
     required int ano,
     required String placa,
     required double odometroInicial,
-    int combustivel = 0,
+    int combustivel = 0, // Default gasoline index
     String renavan = '',
     String chassi = '',
     String cor = '',
@@ -174,7 +175,7 @@ class VehicleModel extends BaseSyncModel {
       ano: (map['ano'] as num?)?.toInt() ?? 0,
       placa: map['placa']?.toString() ?? '',
       odometroInicial: (map['odometroInicial'] as num? ?? 0.0).toDouble(),
-      combustivel: (map['combustivel'] as num?)?.toInt() ?? 0,
+      combustivel: (map['combustivel'] as num?)?.toInt() ?? FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
@@ -248,7 +249,7 @@ class VehicleModel extends BaseSyncModel {
       ano: (map['ano'] as num?)?.toInt() ?? 0,
       placa: map['placa']?.toString() ?? '',
       odometroInicial: (map['odometro_inicial'] as num?)?.toDouble() ?? 0.0,
-      combustivel: (map['combustivel'] as num?)?.toInt() ?? 0,
+      combustivel: (map['combustivel'] as num?)?.toInt() ?? FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
@@ -282,7 +283,7 @@ class VehicleModel extends BaseSyncModel {
       color: cor,
       licensePlate: placa,
       type: VehicleType.car, // Default to car, you may want to map this properly
-      supportedFuels: [FuelType.values[combustivel]], // Map from int to FuelType
+      supportedFuels: [FuelTypeMapper.fromIndex(combustivel)], // Map from int to FuelType using FuelTypeMapper
       currentOdometer: odometroAtual,
       createdAt: createdAt ?? DateTime.now(),
       updatedAt: updatedAt ?? DateTime.now(),
@@ -311,8 +312,8 @@ class VehicleModel extends BaseSyncModel {
       placa: entity.licensePlate,
       odometroInicial: (entity.metadata['odometroInicial'] as num?)?.toDouble() ?? 0.0,
       combustivel: entity.supportedFuels.isNotEmpty 
-          ? entity.supportedFuels.first.index 
-          : 0,
+          ? FuelTypeMapper.toIndex(entity.supportedFuels.first) 
+          : FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: entity.metadata['renavan']?.toString() ?? '',
       chassi: entity.metadata['chassi']?.toString() ?? '',
       cor: entity.color,

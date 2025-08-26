@@ -38,6 +38,9 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
   
   DefensivosAgrupadosState _state = const DefensivosAgrupadosState();
   late DefensivosAgrupadosCategory _category;
+  
+  // Performance optimization: Track initialization to prevent multiple didChangeDependencies calls
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -45,13 +48,27 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     _category = DefensivosAgrupadosCategory.fromString(widget.tipoAgrupamento);
     _searchController.addListener(_onSearchChanged);
     _configureStatusBar();
+    
+    // Performance optimization: Initialize state and load data in initState instead of didChangeDependencies
+    // This prevents multiple expensive operations from running unnecessarily
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initializeState();
+        _loadInitialData();
+      }
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeState();
-    _loadInitialData();
+    
+    // Performance optimization: Only run expensive operations once
+    // Prevent multiple calls to _initializeState and _loadInitialData
+    if (!_isInitialized) {
+      _isInitialized = true;
+      // State initialization moved to initState for better performance
+    }
   }
 
   @override
@@ -74,12 +91,22 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
   }
 
   void _initializeState() {
+    // Performance optimization: Only update state if mounted and values have changed
     if (mounted) {
-      _state = _state.copyWith(
-        categoria: widget.tipoAgrupamento,
-        title: _category.title,
-        isDark: Theme.of(context).brightness == Brightness.dark,
-      );
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final categoria = widget.tipoAgrupamento;
+      final title = _category.title;
+      
+      // Only update if values actually changed to prevent unnecessary rebuilds
+      if (_state.categoria != categoria || 
+          _state.title != title || 
+          _state.isDark != isDark) {
+        _state = _state.copyWith(
+          categoria: categoria,
+          title: title,
+          isDark: isDark,
+        );
+      }
     }
   }
 
@@ -90,19 +117,33 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
       // Carrega dados reais do repositório Hive
       final defensivosHive = _repository.getActiveDefensivos();
       
+      // Performance optimization: Early exit if no data
+      if (defensivosHive.isEmpty) {
+        _updateState(_state.copyWith(
+          defensivosList: <DefensivoAgrupadoItemModel>[],
+          defensivosListFiltered: <DefensivoAgrupadoItemModel>[],
+          isLoading: false,
+        ));
+        return;
+      }
+      
       // Converte e agrupa dados conforme o tipo de agrupamento
       final realData = _convertAndGroupData(defensivosHive);
       
-      _updateState(_state.copyWith(
-        defensivosList: realData,
-        defensivosListFiltered: realData,
-        isLoading: false,
-      ));
+      if (mounted) {
+        _updateState(_state.copyWith(
+          defensivosList: realData,
+          defensivosListFiltered: realData,
+          isLoading: false,
+        ));
+      }
       
     } catch (e) {
-      _updateState(_state.copyWith(
-        isLoading: false,
-      ));
+      if (mounted) {
+        _updateState(_state.copyWith(
+          isLoading: false,
+        ));
+      }
     }
   }
 
@@ -278,10 +319,16 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
   }
 
   void _applyCurrentFilter() {
-    final searchText = _state.searchText.toLowerCase();
+    // Performance optimization: Early exit if no data to filter
+    if (_state.defensivosList.isEmpty) {
+      _updateState(_state.copyWith(defensivosListFiltered: <DefensivoAgrupadoItemModel>[]));
+      return;
+    }
     
+    final searchText = _state.searchText.toLowerCase();
     List<DefensivoAgrupadoItemModel> filtered = _state.defensivosList;
     
+    // Performance optimization: Only filter if search text exists
     if (searchText.isNotEmpty) {
       filtered = filtered.where((item) {
         return item.line1.toLowerCase().contains(searchText) ||
@@ -290,11 +337,13 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
       }).toList();
     }
     
-    // Sort by name
-    filtered.sort((a, b) {
-      final comparison = a.line1.compareTo(b.line1);
-      return _state.isAscending ? comparison : -comparison;
-    });
+    // Performance optimization: Only sort if list is not empty
+    if (filtered.isNotEmpty) {
+      filtered.sort((a, b) {
+        final comparison = a.line1.compareTo(b.line1);
+        return _state.isAscending ? comparison : -comparison;
+      });
+    }
     
     _updateState(_state.copyWith(defensivosListFiltered: filtered));
   }
@@ -347,27 +396,85 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     _loadGroupItems(item);
   }
 
+  /// Carrega itens reais de um grupo específico baseado no tipo de agrupamento
   void _loadGroupItems(DefensivoAgrupadoItemModel groupItem) async {
     _updateState(_state.copyWith(isLoading: true));
     
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    try {
+      // Carrega todos os defensivos do repositório
+      final allDefensivos = _repository.getActiveDefensivos();
+      
+      // Filtra defensivos pertencentes ao grupo selecionado
+      final groupItems = _getDefensivosForGroup(groupItem, allDefensivos);
+      
+      _updateState(_state.copyWith(
+        defensivosList: groupItems,
+        defensivosListFiltered: groupItems,
+        isLoading: false,
+      ));
+      
+    } catch (e) {
+      // Em caso de erro, mostra lista vazia e log do erro
+      debugPrint('Erro ao carregar itens do grupo: $e');
+      
+      _updateState(_state.copyWith(
+        defensivosList: [],
+        defensivosListFiltered: [],
+        isLoading: false,
+      ));
+    }
+  }
+  
+  /// Filtra defensivos que pertencem ao grupo selecionado
+  List<DefensivoAgrupadoItemModel> _getDefensivosForGroup(
+    DefensivoAgrupadoItemModel groupItem, 
+    List<FitossanitarioHive> allDefensivos,
+  ) {
+    final List<FitossanitarioHive> filteredDefensivos;
     
-    // Generate mock items for this group
-    final groupItems = List.generate(8, (index) {
+    // Filtra baseado no tipo de agrupamento
+    switch (_category) {
+      case DefensivosAgrupadosCategory.fabricantes:
+        filteredDefensivos = allDefensivos.where(
+          (d) => d.fabricante == groupItem.line1,
+        ).toList();
+        break;
+        
+      case DefensivosAgrupadosCategory.classeAgronomica:
+        filteredDefensivos = allDefensivos.where(
+          (d) => d.classeAgronomica == groupItem.line1,
+        ).toList();
+        break;
+        
+      case DefensivosAgrupadosCategory.ingredienteAtivo:
+        filteredDefensivos = allDefensivos.where(
+          (d) => d.ingredienteAtivo == groupItem.line1,
+        ).toList();
+        break;
+        
+      case DefensivosAgrupadosCategory.modoAcao:
+        filteredDefensivos = allDefensivos.where(
+          (d) => d.modoAcao == groupItem.line1,
+        ).toList();
+        break;
+        
+      default:
+        filteredDefensivos = allDefensivos;
+    }
+    
+    // Converte para DefensivoAgrupadoItemModel com dados reais
+    return filteredDefensivos.map((defensivo) {
       return DefensivoAgrupadoItemModel(
-        idReg: '${groupItem.idReg}_item_$index',
-        line1: 'Item ${index + 1} - ${groupItem.displayTitle}',
-        line2: 'Produto específico do grupo',
-        ingredienteAtivo: 'Ingrediente ${index + 1}',
+        idReg: defensivo.idReg,
+        line1: defensivo.nomeComum.isNotEmpty ? defensivo.nomeComum : defensivo.nomeTecnico,
+        line2: defensivo.ingredienteAtivo ?? 'Ingrediente não informado',
+        ingredienteAtivo: defensivo.ingredienteAtivo,
         categoria: 'defensivo',
+        fabricante: defensivo.fabricante,
+        classeAgronomica: defensivo.classeAgronomica,
+        modoAcao: defensivo.modoAcao,
       );
-    });
-    
-    _updateState(_state.copyWith(
-      defensivosList: groupItems,
-      defensivosListFiltered: groupItems,
-      isLoading: false,
-    ));
+    }).toList()..sort((a, b) => a.line1.compareTo(b.line1));
   }
 
   bool _canNavigateBack() {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/design/design_tokens.dart';
@@ -16,6 +17,29 @@ import 'widgets/praga_cultura_item_widget.dart';
 import 'widgets/praga_cultura_loading_skeleton_widget.dart';
 import 'widgets/praga_cultura_search_field_widget.dart';
 import 'widgets/praga_cultura_tab_bar_widget.dart';
+
+/// Static function for compute() - processes pragas data in background isolate
+/// Performance optimization: Prevents UI thread blocking during heavy data operations
+List<PragaCulturaItemModel> _convertAndSortPragasData(List<PragasHive> pragasHive) {
+  // Converte para PragaCulturaItemModel
+  final realData = pragasHive.map((praga) {
+    return PragaCulturaItemModel(
+      idReg: praga.idReg,
+      nomeComum: praga.nomeComum,
+      nomeSecundario: null, // PragasHive não tem este campo
+      nomeCientifico: praga.nomeCientifico,
+      nomeImagem: null, // PragasHive não tem este campo
+      tipoPraga: praga.tipoPraga,
+      categoria: praga.classe ?? praga.ordem ?? praga.familia, // Usa classe, ordem ou família
+      grupo: praga.familia ?? praga.genero, // Usa família ou gênero
+    );
+  }).toList();
+  
+  // Ordena alfabeticamente por nome comum
+  realData.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+  
+  return realData;
+}
 
 class ListaPragasPorCulturaPage extends StatefulWidget {
   final String? culturaId;
@@ -77,28 +101,36 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     try {
       _updateState(_state.copyWith(isLoading: true));
       
-      // Carrega todas as pragas do repositório Hive
-      final pragasHive = _repository.getAll();
+      // Carrega e processa dados em background thread para evitar bloqueio da UI
+      final realData = await _processDataInBackground();
       
-      // Converte para PragaCulturaItemModel
-      final realData = pragasHive.map(_convertToPragaCulturaItem).toList();
-      
-      // Ordena alfabeticamente por nome comum
-      realData.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
-      
-      _updateState(_state.copyWith(
-        pragasList: realData,
-        pragasFiltered: realData,
-        isLoading: false,
-      ));
-      
-      _applyCurrentFilter();
+      if (mounted) {
+        _updateState(_state.copyWith(
+          pragasList: realData,
+          pragasFiltered: realData,
+          isLoading: false,
+        ));
+        
+        _applyCurrentFilter();
+      }
       
     } catch (e) {
-      _updateState(_state.copyWith(
-        isLoading: false,
-      ));
+      if (mounted) {
+        _updateState(_state.copyWith(
+          isLoading: false,
+        ));
+      }
     }
+  }
+
+  /// Processa dados de pragas em background usando compute() para evitar bloqueio da UI thread
+  /// Performance optimization: Move heavy operations to isolate to prevent UI freezing
+  Future<List<PragaCulturaItemModel>> _processDataInBackground() async {
+    // Carrega dados do repositório na main thread (necessário para Hive)
+    final pragasHive = _repository.getAll();
+    
+    // Move processamento pesado para background thread
+    return compute(_convertAndSortPragasData, pragasHive);
   }
   
   /// Converte PragasHive para PragaCulturaItemModel
@@ -150,15 +182,18 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   }
 
   void _applyCurrentFilter() {
+    // Performance optimization: Early exit if data is not loaded yet
+    if (_state.pragasList.isEmpty) return;
+    
     final searchText = _state.searchText.toLowerCase();
     final currentTipoPraga = _state.currentTipoPraga;
     
     List<PragaCulturaItemModel> filtered = _state.pragasList;
     
-    // Filter by tab (tipo de praga)
+    // Performance optimization: Filter by tab first (most restrictive filter)
     filtered = filtered.where((praga) => praga.tipoPraga == currentTipoPraga).toList();
     
-    // Filter by search text
+    // Performance optimization: Only apply text search if needed
     if (searchText.isNotEmpty) {
       filtered = filtered.where((praga) {
         return praga.nomeComum.toLowerCase().contains(searchText) ||
@@ -167,11 +202,13 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
       }).toList();
     }
     
-    // Sort by name
-    filtered.sort((a, b) {
-      final comparison = a.nomeComum.compareTo(b.nomeComum);
-      return _state.isAscending ? comparison : -comparison;
-    });
+    // Performance optimization: Sort only if list is not empty
+    if (filtered.isNotEmpty) {
+      filtered.sort((a, b) {
+        final comparison = a.nomeComum.compareTo(b.nomeComum);
+        return _state.isAscending ? comparison : -comparison;
+      });
+    }
     
     _updateState(_state.copyWith(pragasFiltered: filtered));
   }

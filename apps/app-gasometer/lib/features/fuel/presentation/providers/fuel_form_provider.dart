@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/fuel_constants.dart';
+import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../../domain/services/fuel_validator_service.dart';
 import '../models/fuel_form_model.dart';
@@ -15,6 +16,9 @@ class FuelFormProvider extends ChangeNotifier {
   final FuelFormatterService _formatter = FuelFormatterService();
   final FuelValidatorService _validator = FuelValidatorService();
   final VehiclesProvider _vehiclesProvider;
+  
+  // For odometer validation
+  double? _lastOdometerReading;
 
   // Controllers para campos de texto
   final TextEditingController litersController = TextEditingController();
@@ -44,6 +48,7 @@ class FuelFormProvider extends ChangeNotifier {
   FuelFormModel get formModel => _formModel;
   bool get isInitialized => _isInitialized;
   bool get isCalculating => _isCalculating;
+  double? get lastOdometerReading => _lastOdometerReading;
 
   void _initializeControllers() {
     // Adicionar listeners para reagir a mudanças nos campos
@@ -57,10 +62,21 @@ class FuelFormProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Cancelar timers
+    // Cancelar timers de forma segura
     _litersDebounceTimer?.cancel();
+    _litersDebounceTimer = null;
     _priceDebounceTimer?.cancel();
+    _priceDebounceTimer = null;
     _odometerDebounceTimer?.cancel();
+    _odometerDebounceTimer = null;
+
+    // Remove listeners primeiro
+    litersController.removeListener(_onLitersChanged);
+    pricePerLiterController.removeListener(_onPricePerLiterChanged);
+    odometerController.removeListener(_onOdometerChanged);
+    gasStationController.removeListener(_onGasStationChanged);
+    gasStationBrandController.removeListener(_onGasStationBrandChanged);
+    notesController.removeListener(_onNotesChanged);
 
     // Dispose controllers
     litersController.dispose();
@@ -110,6 +126,10 @@ class FuelFormProvider extends ChangeNotifier {
       final vehicle = await _vehiclesProvider.getVehicleById(vehicleId);
       
       if (vehicle != null) {
+        // Set the last odometer reading from the vehicle's current odometer
+        // This could be enhanced to fetch the actual last fuel record's odometer
+        _lastOdometerReading = vehicle.currentOdometer;
+        
         _formModel = _formModel.copyWith(
           vehicle: vehicle,
           odometer: vehicle.currentOdometer,
@@ -328,6 +348,7 @@ class FuelFormProvider extends ChangeNotifier {
         return _validator.validateOdometer(
           value,
           currentOdometer: _formModel.vehicle?.currentOdometer,
+          lastRecordOdometer: _lastOdometerReading,
         );
       case 'gasStationName':
         return _validator.validateGasStationName(value);
@@ -349,6 +370,7 @@ class FuelFormProvider extends ChangeNotifier {
       gasStationName: gasStationController.text,
       notes: notesController.text,
       vehicle: _formModel.vehicle,
+      lastRecordOdometer: _lastOdometerReading,
     );
 
     _formModel = _formModel.copyWith(errors: errors);
@@ -379,5 +401,27 @@ class FuelFormProvider extends ChangeNotifier {
       lastError: null,
     );
     notifyListeners();
+  }
+
+  /// Carrega dados de um registro existente para edição
+  Future<void> loadFromFuelRecord(FuelRecordEntity record) async {
+    try {
+      // Atualizar o modelo do formulário com dados do registro
+      _formModel = FuelFormModel.fromFuelRecord(record);
+      
+      // Carregar dados do veículo associado
+      await _loadVehicleData(record.veiculoId);
+      
+      // Atualizar os controllers com os valores do registro
+      _updateTextControllers();
+      
+      notifyListeners();
+    } catch (e) {
+      _formModel = _formModel.copyWith(
+        lastError: 'Erro ao carregar registro: $e',
+        isLoading: false,
+      );
+      notifyListeners();
+    }
   }
 }

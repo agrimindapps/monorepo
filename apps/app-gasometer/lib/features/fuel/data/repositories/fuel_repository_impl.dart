@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -74,11 +75,11 @@ class FuelRepositoryImpl implements FuelRepository {
         }
       }).catchError((Object error) {
         // Sync falhou, mas não afeta a funcionalidade local
-        print('Background fuel sync failed: $error');
+        debugPrint('Background fuel sync failed: $error');
       }));
     } catch (e) {
       // Ignorar erros de sync em background
-      print('Background fuel sync error: $e');
+      debugPrint('Background fuel sync error: $e');
     }
   }
 
@@ -114,10 +115,10 @@ class FuelRepositoryImpl implements FuelRepository {
           await localDataSource.addFuelRecord(record);
         }
       }).catchError((Object error) {
-        print('Background fuel vehicle sync failed: $error');
+        debugPrint('Background fuel vehicle sync failed: $error');
       }));
     } catch (e) {
-      print('Background fuel vehicle sync error: $e');
+      debugPrint('Background fuel vehicle sync error: $e');
     }
   }
 

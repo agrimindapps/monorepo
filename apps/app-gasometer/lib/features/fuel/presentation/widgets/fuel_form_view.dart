@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
 import '../../../../core/presentation/widgets/form_section_widget.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
@@ -10,7 +11,6 @@ import '../../core/constants/fuel_constants.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../providers/fuel_form_provider.dart';
 
-/// Widget principal do formulário de abastecimento
 class FuelFormView extends StatelessWidget {
   final FuelFormProvider formProvider;
   final VoidCallback? onSubmit;
@@ -26,8 +26,8 @@ class FuelFormView extends StatelessWidget {
     return Consumer<FuelFormProvider>(
       builder: (context, provider, _) {
         if (!provider.isInitialized) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return const CentralizedLoadingWidget(
+            message: FuelConstants.loadingFormMessage,
           );
         }
 
@@ -72,12 +72,12 @@ class FuelFormView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Nenhum veículo selecionado',
+                FuelConstants.noVehicleSelected,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               const Text(
-                'Selecione um veículo primeiro para registrar o abastecimento.',
+                FuelConstants.selectVehicleMessage,
                 textAlign: TextAlign.center,
               ),
             ],
@@ -88,56 +88,59 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildVehicleInfoCard(BuildContext context, VehicleEntity vehicle) {
-    return StandardCard.standard(
-      child: Row(
-        children: [
-          Icon(
-            Icons.directions_car,
-            size: GasometerDesignTokens.iconSizeAvatar,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingLg),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  vehicle.displayName,
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeLg,
-                    fontWeight: GasometerDesignTokens.fontWeightBold,
-                    color: Theme.of(context).colorScheme.onSurface,
+    return Semantics(
+      label: 'Veículo selecionado: ${vehicle.displayName}, ${vehicle.color}, placa ${vehicle.licensePlate}${vehicle.tankCapacity != null ? ", tanque ${vehicle.tankCapacity!.toStringAsFixed(0)} litros" : ""}',
+      child: StandardCard.standard(
+        child: Row(
+          children: [
+            Icon(
+              Icons.directions_car,
+              size: GasometerDesignTokens.iconSizeAvatar,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            SizedBox(width: GasometerDesignTokens.spacingLg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    vehicle.displayName,
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeLg,
+                      fontWeight: GasometerDesignTokens.fontWeightBold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                SizedBox(height: GasometerDesignTokens.spacingXs),
-                Text(
-                  '${vehicle.color} • ${vehicle.licensePlate}',
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeMd,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                if (vehicle.tankCapacity != null) ...[
                   SizedBox(height: GasometerDesignTokens.spacingXs),
                   Text(
-                    'Tanque: ${vehicle.tankCapacity!.toStringAsFixed(0)}L',
+                    '${vehicle.color} • ${vehicle.licensePlate}',
                     style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeSm,
+                      fontSize: GasometerDesignTokens.fontSizeMd,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  if (vehicle.tankCapacity != null) ...[
+                    SizedBox(height: GasometerDesignTokens.spacingXs),
+                    Text(
+                      'Tanque: ${vehicle.tankCapacity!.toStringAsFixed(0)}L',
+                      style: TextStyle(
+                        fontSize: GasometerDesignTokens.fontSizeSm,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
-      title: 'Informações do Combustível',
+      title: FuelConstants.fuelInfoSection,
       icon: Icons.local_gas_station,
       content: Column(
         children: [
@@ -153,7 +156,7 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildValuesSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
-      title: 'Valores',
+      title: FuelConstants.valuesSection,
       icon: Icons.attach_money,
       content: Column(
         children: [
@@ -174,7 +177,7 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildLocationSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
-      title: 'Local do Abastecimento',
+      title: FuelConstants.locationSection,
       icon: Icons.location_on,
       content: Column(
         children: [
@@ -188,7 +191,7 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildNotesSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
-      title: 'Observações',
+      title: FuelConstants.notesSection,
       icon: Icons.note_add,
       content: _buildNotesField(context, provider),
     );
@@ -201,7 +204,7 @@ class FuelFormView extends StatelessWidget {
     return DropdownButtonFormField<FuelType>(
       value: provider.formModel.fuelType,
       decoration: const InputDecoration(
-        labelText: 'Tipo de Combustível',
+        labelText: FuelConstants.fuelTypeLabel,
         prefixIcon: Icon(Icons.local_gas_station),
         border: OutlineInputBorder(),
       ),
@@ -223,7 +226,7 @@ class FuelFormView extends StatelessWidget {
   Widget _buildDateField(BuildContext context, FuelFormProvider provider) {
     return TextFormField(
       decoration: const InputDecoration(
-        labelText: 'Data',
+        labelText: FuelConstants.dateLabel,
         prefixIcon: Icon(Icons.calendar_today),
         border: OutlineInputBorder(),
       ),
@@ -246,12 +249,18 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildFullTankSwitch(BuildContext context, FuelFormProvider provider) {
-    return SwitchListTile(
-      title: const Text('Tanque Cheio'),
-      subtitle: const Text('Marque se encheu completamente o tanque'),
-      value: provider.formModel.fullTank,
-      onChanged: (value) => provider.updateFullTank(value),
-      secondary: const Icon(Icons.water_drop),
+    return Semantics(
+      label: provider.formModel.fullTank 
+        ? 'Tanque cheio ativado'
+        : 'Tanque cheio desativado',
+      hint: 'Toque para alterar se o tanque foi completamente abastecido',
+      child: SwitchListTile(
+        title: const Text(FuelConstants.fullTankLabel),
+        subtitle: const Text(FuelConstants.fullTankSubtitle),
+        value: provider.formModel.fullTank,
+        onChanged: (value) => provider.updateFullTank(value),
+        secondary: const Icon(Icons.water_drop),
+      ),
     );
   }
 
@@ -259,8 +268,8 @@ class FuelFormView extends StatelessWidget {
     final vehicle = provider.formModel.vehicle;
     return ValidatedFormField(
       controller: provider.litersController,
-      label: 'Litros',
-      hint: '0,000',
+      label: FuelConstants.litersLabel,
+      hint: FuelConstants.litersPlaceholder,
       prefixIcon: Icons.local_gas_station,
       required: true,
       validationType: ValidationType.fuelLiters,
@@ -270,17 +279,15 @@ class FuelFormView extends StatelessWidget {
       decoration: const InputDecoration(
         suffixText: 'L',
       ),
-      onValidationChanged: (result) {
-        // Pode adicionar callback se necessário
-      },
+      onValidationChanged: (result) {},
     );
   }
 
   Widget _buildPricePerLiterField(BuildContext context, FuelFormProvider provider) {
     return ValidatedFormField(
       controller: provider.pricePerLiterController,
-      label: 'Preço/Litro',
-      hint: '0,000',
+      label: FuelConstants.pricePerLiterLabel,
+      hint: FuelConstants.pricePlaceholder,
       required: true,
       validationType: ValidationType.fuelPrice,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -288,9 +295,7 @@ class FuelFormView extends StatelessWidget {
       decoration: const InputDecoration(
         prefixText: 'R\$ ',
       ),
-      onValidationChanged: (result) {
-        // Pode adicionar callback se necessário
-      },
+      onValidationChanged: (result) {},
     );
   }
 
@@ -300,7 +305,7 @@ class FuelFormView extends StatelessWidget {
     
     return TextFormField(
       decoration: const InputDecoration(
-        labelText: 'Valor Total',
+        labelText: FuelConstants.totalPriceLabel,
         prefixText: 'R\$ ',
         prefixIcon: Icon(Icons.attach_money),
         border: OutlineInputBorder(),
@@ -320,12 +325,13 @@ class FuelFormView extends StatelessWidget {
     final vehicle = provider.formModel.vehicle;
     return ValidatedFormField(
       controller: provider.odometerController,
-      label: 'Odômetro',
-      hint: '0,0',
+      label: FuelConstants.odometerLabel,
+      hint: FuelConstants.odometerPlaceholder,
       prefixIcon: Icons.speed,
       required: true,
-      validationType: ValidationType.decimal, // Usar validação decimal por enquanto
+      validationType: ValidationType.odometer, // Usar validação de odômetro específica
       currentOdometer: vehicle?.currentOdometer,
+      initialOdometer: provider.lastOdometerReading,
       minValue: 0.0,
       maxValue: 9999999.0,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -333,25 +339,21 @@ class FuelFormView extends StatelessWidget {
       decoration: const InputDecoration(
         suffixText: 'km',
       ),
-      onValidationChanged: (result) {
-        // Pode adicionar callback se necessário
-      },
+      onValidationChanged: (result) {},
     );
   }
 
   Widget _buildGasStationField(BuildContext context, FuelFormProvider provider) {
     return ValidatedFormField(
       controller: provider.gasStationController,
-      label: 'Nome do Posto (opcional)',
-      hint: 'Ex: Shell, Petrobras, Ipiranga...',
+      label: FuelConstants.gasStationLabel,
+      hint: FuelConstants.gasStationHint,
       prefixIcon: Icons.local_gas_station_outlined,
       required: false,
       validationType: ValidationType.length,
       minLength: 2,
       maxLengthValidation: 100,
-      onValidationChanged: (result) {
-        // Pode adicionar callback se necessário
-      },
+      onValidationChanged: (result) {},
     );
   }
 
@@ -359,8 +361,8 @@ class FuelFormView extends StatelessWidget {
     return TextFormField(
       controller: provider.gasStationBrandController,
       decoration: const InputDecoration(
-        labelText: 'Bandeira/Rede (opcional)',
-        hintText: 'Ex: BR, Shell Select...',
+        labelText: FuelConstants.gasStationBrandLabel,
+        hintText: FuelConstants.gasStationBrandHint,
         prefixIcon: Icon(Icons.business),
         border: OutlineInputBorder(),
       ),
@@ -371,8 +373,8 @@ class FuelFormView extends StatelessWidget {
   Widget _buildNotesField(BuildContext context, FuelFormProvider provider) {
     return ValidatedFormField(
       controller: provider.notesController,
-      label: 'Observações (opcional)',
-      hint: 'Adicione comentários sobre este abastecimento...',
+      label: FuelConstants.notesLabel,
+      hint: FuelConstants.notesHint,
       prefixIcon: Icons.note_add,
       required: false,
       validationType: ValidationType.length,
@@ -380,9 +382,7 @@ class FuelFormView extends StatelessWidget {
       maxLines: 3,
       maxLength: FuelConstants.maxNotesLength,
       showCharacterCount: true,
-      onValidationChanged: (result) {
-        // Pode adicionar callback se necessário
-      },
+      onValidationChanged: (result) {},
     );
   }
 

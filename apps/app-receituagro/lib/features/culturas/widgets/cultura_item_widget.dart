@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/cultura_hive.dart';
 
+enum CulturaItemMode { list, grid }
+
 class CulturaItemWidget extends StatelessWidget {
   final CulturaHive cultura;
   final bool isDark;
   final VoidCallback onTap;
+  final CulturaItemMode mode;
 
   const CulturaItemWidget({
     super.key,
     required this.cultura,
     required this.isDark,
     required this.onTap,
+    this.mode = CulturaItemMode.list,
   });
 
   @override
   Widget build(BuildContext context) {
+    return mode == CulturaItemMode.grid 
+        ? _buildGridItem(context)
+        : _buildListItem(context);
+  }
+
+  Widget _buildListItem(BuildContext context) {
     final theme = Theme.of(context);
     final color = theme.colorScheme.primary;
     
@@ -61,6 +71,58 @@ class CulturaItemWidget extends StatelessWidget {
               Icon(
                 Icons.chevron_right,
                 color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridItem(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.primary;
+    
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.all(4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: isDark ? const Color(0xFF222228) : Colors.white,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.agriculture,
+                  size: 24,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Text(
+                  cultura.cultura,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

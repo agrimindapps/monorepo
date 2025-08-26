@@ -7,6 +7,7 @@ import '../../core/models/cultura_hive.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas/lista_pragas_por_cultura_page.dart';
+import 'models/cultura_view_mode.dart';
 import 'widgets/cultura_item_widget.dart';
 import 'widgets/cultura_search_field.dart';
 import 'widgets/empty_state_widget.dart';
@@ -27,6 +28,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
   bool _isLoading = true;
   bool _isSearching = false;
   bool _isAscending = true;
+  CulturaViewMode _viewMode = CulturaViewMode.list;
   Timer? _debounceTimer;
   String? _errorMessage;
 
@@ -132,6 +134,12 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
   }
 
+  void _toggleViewMode(CulturaViewMode mode) {
+    setState(() {
+      _viewMode = mode;
+    });
+  }
+
   void _onCulturaTap(CulturaHive cultura) {
     Navigator.push(
       context,
@@ -189,6 +197,8 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
               CulturaSearchField(
                 controller: _searchController,
                 isDark: isDark,
+                viewMode: _viewMode,
+                onViewModeChanged: _toggleViewMode,
                 isSearching: _isSearching,
                 onClear: _clearSearch,
                 onSubmitted: () => _performSearch(_searchController.text),
@@ -233,18 +243,60 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
             : 'Verifique se os dados foram carregados',
       );
     } else {
-      return ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: _filteredCulturas.length,
-        itemBuilder: (context, index) {
-          final cultura = _filteredCulturas[index];
-          return CulturaItemWidget(
-            cultura: cultura,
-            isDark: isDark,
-            onTap: () => _onCulturaTap(cultura),
-          );
-        },
-      );
+      return _viewMode.isGrid
+          ? _buildGridView(isDark)
+          : _buildListView(isDark);
     }
+  }
+
+  Widget _buildListView(bool isDark) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: _filteredCulturas.length,
+      itemBuilder: (context, index) {
+        final cultura = _filteredCulturas[index];
+        return CulturaItemWidget(
+          cultura: cultura,
+          isDark: isDark,
+          mode: CulturaItemMode.list,
+          onTap: () => _onCulturaTap(cultura),
+        );
+      },
+    );
+  }
+
+  Widget _buildGridView(bool isDark) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
+        
+        return GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.85,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: _filteredCulturas.length,
+          itemBuilder: (context, index) {
+            final cultura = _filteredCulturas[index];
+            return CulturaItemWidget(
+              cultura: cultura,
+              isDark: isDark,
+              mode: CulturaItemMode.grid,
+              onTap: () => _onCulturaTap(cultura),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  int _calculateCrossAxisCount(double screenWidth) {
+    if (screenWidth < 600) return 2;
+    if (screenWidth < 900) return 3;
+    if (screenWidth < 1100) return 4;
+    return 5;
   }
 }

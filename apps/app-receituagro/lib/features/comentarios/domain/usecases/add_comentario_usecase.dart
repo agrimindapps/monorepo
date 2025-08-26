@@ -21,8 +21,8 @@ import '../repositories/i_comentarios_repository.dart';
 /// 
 /// ### Context Validation Rules:
 /// - **Tool Identifier**: ferramenta field cannot be empty (required for categorization)
-/// - **Context ID**: pkIdentificador cannot be empty (required for linking to agricultural content)
-/// - **Duplicate Prevention**: Prevents duplicate titles and highly similar content in same context
+/// - **Context ID**: pkIdentificador is optional (empty for general comments, specific ID for content-linked comments)
+/// - **Duplicate Prevention**: Prevents duplicate titles and highly similar content in same context (when context is specified)
 /// 
 /// ### User Limit Rules:
 /// - **Total Comments**: Maximum 500 comments per user (absolute limit)
@@ -37,11 +37,18 @@ import '../repositories/i_comentarios_repository.dart';
 /// 
 /// ## Agricultural Domain Context:
 /// 
-/// Comments in ReceitaAgro are user annotations on agricultural content:
+/// Comments in ReceitaAgro can be either context-specific or general user notes:
+/// 
+/// ### Context-Specific Comments (pkIdentificador provided):
 /// - **Pragas** (Pests): User observations about pest behavior, treatments, results
 /// - **Doenças** (Diseases): User experiences with disease management, symptoms
 /// - **Defensivos** (Defensive Products): User feedback on product effectiveness, application notes
 /// - **Diagnósticos** (Diagnostics): User clarifications, additional context, field observations
+/// 
+/// ### General Comments (pkIdentificador empty):
+/// - **Personal Notes**: General agricultural observations and reminders
+/// - **Planning Notes**: Seasonal planning, weather observations, field conditions
+/// - **Learning Notes**: Agricultural insights, technique notes, experience sharing
 /// 
 /// ## Error Handling:
 /// 
@@ -53,15 +60,28 @@ import '../repositories/i_comentarios_repository.dart';
 /// ## Usage Example:
 /// ```dart
 /// final useCase = AddComentarioUseCase(repository);
-/// final comment = ComentarioEntity(
+/// 
+/// // Context-specific comment (linked to agricultural content)
+/// final specificComment = ComentarioEntity(
 ///   id: generateId(),
 ///   titulo: 'Resultado do tratamento X',
 ///   conteudo: 'Aplicação realizada conforme recomendação...',
 ///   ferramenta: 'defensivos',
-///   pkIdentificador: 'def_12345',
+///   pkIdentificador: 'def_12345', // Links to specific defensive product
 ///   // ... other fields
 /// );
-/// await useCase.call(comment); // Validates and saves
+/// await useCase.call(specificComment);
+/// 
+/// // General comment (user personal note)
+/// final generalComment = ComentarioEntity(
+///   id: generateId(),
+///   titulo: 'Observação pessoal',
+///   conteudo: 'Lembrar de verificar as condições climáticas...',
+///   ferramenta: 'Comentários',
+///   pkIdentificador: '', // Empty for general comments
+///   // ... other fields
+/// );
+/// await useCase.call(generalComment);
 /// ```
 class AddComentarioUseCase {
   final IComentariosRepository _repository;
@@ -132,10 +152,9 @@ class AddComentarioUseCase {
       throw InvalidComentarioException('Ferramenta/contexto é obrigatório');
     }
 
-    // Business rule: Context validation
-    if (comentario.pkIdentificador.trim().isEmpty) {
-      throw InvalidComentarioException('Identificador do contexto é obrigatório');
-    }
+    // Business rule: Context validation (optional for general comments)
+    // pkIdentificador can be empty for general comments not linked to specific content
+    // When empty, the comment becomes a general user note
 
     // Business rule: No profanity or inappropriate content
     if (_containsInappropriateContent(comentario)) {
@@ -143,6 +162,7 @@ class AddComentarioUseCase {
     }
 
     // Business rule: No duplicate content in same context (async)
+    // Only check for duplicates if comment has specific context
     if (comentario.pkIdentificador.isNotEmpty && await _isDuplicateContent(comentario)) {
       throw DuplicateComentarioException('Já existe um comentário similar neste contexto');
     }

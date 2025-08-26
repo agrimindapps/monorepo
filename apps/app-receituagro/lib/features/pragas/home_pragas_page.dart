@@ -41,33 +41,65 @@ class _HomePragasPageState extends State<HomePragasPage> {
   }
 
   /// Inicializa pragas aguardando dados estarem carregados
-  Future<void> _initializePragasWithDelay() async {
+  /// Implementa timeout com máximo de 10 tentativas para evitar loops infinitos
+  Future<void> _initializePragasWithDelay([int attempts = 0]) async {
+    const int maxAttempts = 10;
+    const Duration delayBetweenAttempts = Duration(milliseconds: 500);
+    
     try {
       final appDataManager = GetIt.instance<IAppDataManager>();
       final pragasProvider = GetIt.instance<PragasProvider>();
       
       // Aguarda dados estarem prontos
       final isDataReady = await appDataManager.isDataReady();
-      print('📊 HomePragasPage: Dados prontos = $isDataReady');
+      print('📊 HomePragasPage: Dados prontos = $isDataReady (tentativa ${attempts + 1}/$maxAttempts)');
       
       if (isDataReady && mounted) {
         await pragasProvider.initialize();
-        print('✅ HomePragasPage: PragasProvider inicializado');
-      } else if (mounted) {
-        // Se dados não estão prontos, tenta novamente após delay
-        print('⏳ HomePragasPage: Aguardando dados ficarem prontos...');
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _initializePragasWithDelay();
-          }
-        });
+        print('✅ HomePragasPage: PragasProvider inicializado com sucesso');
+        return;
+      }
+      
+      // Verifica se atingiu o limite de tentativas
+      if (attempts >= maxAttempts - 1) {
+        print('⚠️ HomePragasPage: Timeout atingido após $maxAttempts tentativas');
+        if (mounted) {
+          // Fallback: inicializa mesmo sem dados prontos
+          final pragasProvider = GetIt.instance<PragasProvider>();
+          await pragasProvider.initialize();
+          print('🔄 HomePragasPage: PragasProvider inicializado via fallback');
+        }
+        return;
+      }
+      
+      // Se dados não estão prontos e ainda há tentativas, aguarda e tenta novamente
+      if (mounted) {
+        print('⏳ HomePragasPage: Aguardando dados ficarem prontos... (tentativa ${attempts + 2}/$maxAttempts)');
+        await Future<void>.delayed(delayBetweenAttempts);
+        if (mounted) {
+          await _initializePragasWithDelay(attempts + 1);
+        }
       }
     } catch (e) {
-      print('❌ HomePragasPage: Erro na inicialização das pragas: $e');
-      if (mounted) {
-        // Tenta inicializar mesmo assim
-        final pragasProvider = GetIt.instance<PragasProvider>();
-        pragasProvider.initialize();
+      print('❌ HomePragasPage: Erro na inicialização das pragas (tentativa ${attempts + 1}): $e');
+      
+      // Se ainda há tentativas e o widget está montado, tenta novamente
+      if (attempts < maxAttempts - 1 && mounted) {
+        print('🔄 HomePragasPage: Tentando novamente após erro...');
+        await Future<void>.delayed(delayBetweenAttempts);
+        if (mounted) {
+          await _initializePragasWithDelay(attempts + 1);
+        }
+      } else if (mounted) {
+        // Último recurso: inicializa diretamente
+        print('🚨 HomePragasPage: Inicializando diretamente após esgotar tentativas');
+        try {
+          final pragasProvider = GetIt.instance<PragasProvider>();
+          await pragasProvider.initialize();
+          print('✅ HomePragasPage: PragasProvider inicializado via último recurso');
+        } catch (finalError) {
+          print('💥 HomePragasPage: Falha definitiva na inicialização: $finalError');
+        }
       }
     }
   }

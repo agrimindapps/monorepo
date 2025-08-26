@@ -42,7 +42,7 @@ class ComentariosRealRepository implements IComentariosRepository {
     await _hiveRepository.cleanupOldComments();
   }
 
-  Map<String, int> getUserCommentStats() {
-    return _hiveRepository.getUserCommentStats();
+  Future<Map<String, int>> getUserCommentStats() async {
+    return await _hiveRepository.getUserCommentStats();
   }
 }

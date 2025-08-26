@@ -6,7 +6,7 @@
 /// ## Business Rules Overview:
 /// 
 /// ### Validation Rules:
-/// - Content must have minimum 3 characters when trimmed
+/// - Content must have minimum 5 characters when trimmed (ComentariosDesignTokens.minCommentLength)
 /// - Title cannot be empty when trimmed  
 /// - Tool/ferramenta identifier cannot be empty
 /// - All required fields must be present for creation
@@ -32,6 +32,10 @@
 /// - idReg: Registry identifier for agricultural content
 /// - pkIdentificador: Primary key linking to specific pest/disease/defensive
 /// - Comments provide user annotations for agricultural decision-making
+library;
+
+import '../../constants/comentarios_design_tokens.dart';
+
 class ComentarioEntity {
   /// Unique identifier for the comment
   final String id;
@@ -42,7 +46,7 @@ class ComentarioEntity {
   /// Title/heading of the comment (business rule: cannot be empty)
   final String titulo;
   
-  /// Main content of the comment (business rule: minimum 3 characters)
+  /// Main content of the comment (business rule: minimum 5 characters per ComentariosDesignTokens.minCommentLength)
   final String conteudo;
   
   /// Agricultural tool/method identifier (business rule: cannot be empty)
@@ -103,7 +107,7 @@ class ComentarioEntity {
   /// Validates if a comment meets all requirements for saving to storage.
   /// 
   /// **Requirements:**
-  /// - Content must have at least 3 characters when trimmed (meaningful input)
+  /// - Content must have at least 5 characters when trimmed (ComentariosDesignTokens.minCommentLength)
   /// - Title must not be empty when trimmed (required for identification)
   /// - Tool identifier must not be empty (required for categorization)
   /// 
@@ -111,7 +115,7 @@ class ComentarioEntity {
   /// 
   /// **Returns:** `true` if all validation rules pass, `false` otherwise
   bool get isValid {
-    return conteudo.trim().length >= 3 &&
+    return conteudo.trim().length >= ComentariosDesignTokens.minCommentLength &&
            titulo.trim().isNotEmpty &&
            ferramenta.trim().isNotEmpty;
   }

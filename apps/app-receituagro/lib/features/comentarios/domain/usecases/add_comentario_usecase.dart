@@ -1,3 +1,4 @@
+import '../../constants/comentarios_design_tokens.dart';
 import '../entities/comentario_entity.dart';
 import '../repositories/i_comentarios_repository.dart';
 
@@ -9,7 +10,7 @@ import '../repositories/i_comentarios_repository.dart';
 /// ## Business Rules Implemented:
 /// 
 /// ### Content Validation Rules:
-/// - **Minimum Content**: Content must have at least 3 characters after trimming
+/// - **Minimum Content**: Content must have at least 5 characters after trimming (ComentariosDesignTokens.minCommentLength)
 /// - **Maximum Content**: Content cannot exceed 2000 characters  
 /// - **Quality Control**: Rejects low-quality content (spam, test messages, repetitive text)
 /// - **Profanity Filter**: Basic inappropriate content detection
@@ -120,8 +121,8 @@ class AddComentarioUseCase {
 
     // Business rule: Content length limits (improved)
     final contentLength = comentario.conteudo.trim().length;
-    if (contentLength < 3) {
-      throw InvalidComentarioException('Conteúdo deve ter pelo menos 3 caracteres');
+    if (contentLength < ComentariosDesignTokens.minCommentLength) {
+      throw InvalidComentarioException('Conteúdo deve ter pelo menos ${ComentariosDesignTokens.minCommentLength} caracteres');
     }
 
     if (contentLength > 2000) {

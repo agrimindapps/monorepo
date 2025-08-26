@@ -63,7 +63,7 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
 
   @override
   Future<Map<String, int>> getUserCommentStats() async {
-    return _hiveRepository.getUserCommentStats();
+    return await _hiveRepository.getUserCommentStats();
   }
 
   @override

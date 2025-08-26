@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import '../../features/comentarios/models/comentario_model.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
 import '../models/comentario_hive.dart';
+import '../services/device_identity_service.dart';
 import 'base_hive_repository.dart';
 
 class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive> 
@@ -25,7 +26,7 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   @override
   Future<List<ComentarioModel>> getAllComentarios() async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final hiveitems = getAll();
       
       // Filtra por usuário atual e ordena por data (mais recente primeiro)
@@ -47,7 +48,7 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   @override
   Future<void> addComentario(ComentarioModel comentario) async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final hiveComentario = ComentarioHive.fromComentarioModel(comentario, userId);
       
       // Gera ID único se não existir
@@ -67,7 +68,7 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   @override
   Future<void> updateComentario(ComentarioModel comentario) async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final existing = getById(comentario.idReg);
       
       if (existing == null) {
@@ -93,7 +94,7 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   @override
   Future<void> deleteComentario(String id) async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final existing = getById(id);
       
       if (existing == null) {
@@ -118,7 +119,7 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   /// Busca comentários por pkIdentificador (contexto específico)
   Future<List<ComentarioModel>> getComentariosByContext(String pkIdentificador) async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final hiveitems = getAll();
       
       final contextComments = hiveitems
@@ -142,7 +143,7 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   /// Busca comentários por ferramenta
   Future<List<ComentarioModel>> getComentariosByTool(String ferramenta) async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final hiveitems = getAll();
       
       final toolComments = hiveitems
@@ -185,9 +186,9 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   }
 
   /// Obtém estatísticas dos comentários do usuário
-  Map<String, int> getUserCommentStats() {
+  Future<Map<String, int>> getUserCommentStats() async {
     try {
-      final userId = _getCurrentUserId();
+      final userId = await _getCurrentUserId();
       final hiveitems = getAll();
       
       final userComments = hiveitems
@@ -216,11 +217,13 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   }
 
   /// Obtém ID do usuário atual
-  String _getCurrentUserId() {
+  /// Para usuários autenticados, usa Firebase UID
+  /// Para usuários não autenticados, usa UUID único do dispositivo
+  Future<String> _getCurrentUserId() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // Como não há sistema de login, usa usuário padrão
-      return 'default_user';
+      // Gera UUID único por dispositivo para usuários não autenticados
+      return await DeviceIdentityService.instance.getDeviceUuid();
     }
     return user.uid;
   }

@@ -46,6 +46,7 @@ import '../repositories/pragas_core_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
+import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
 import '../services/navigation_service.dart';
 import '../services/premium_service_real.dart';
@@ -108,6 +109,11 @@ Future<void> init() async {
   // Navigation Service - Serviço de navegação global
   sl.registerLazySingleton<INavigationService>(
     () => NavigationService(),
+  );
+  
+  // Device Identity Service - Gerenciador de UUID único por dispositivo
+  sl.registerLazySingleton<DeviceIdentityService>(
+    () => DeviceIdentityService.instance,
   );
   
   // Hive Repositories - Repositórios de dados reais

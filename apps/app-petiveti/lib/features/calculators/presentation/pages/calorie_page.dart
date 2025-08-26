@@ -44,6 +44,10 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
 
   @override
   void dispose() {
+    // Para animação em andamento para evitar memory leak
+    if (_fadeController.isAnimating) {
+      _fadeController.stop();
+    }
     _pageController.dispose();
     _fadeController.dispose();
     super.dispose();
@@ -322,6 +326,9 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   }
 
   void _animateTransition() {
+    // Verificar se o widget ainda está montado e controller não foi disposed
+    if (!mounted || _fadeController.isDisposed) return;
+    
     _fadeController.reset();
     _fadeController.forward();
   }

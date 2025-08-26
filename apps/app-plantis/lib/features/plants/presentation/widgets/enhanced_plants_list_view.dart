@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/plant.dart';
-import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import 'empty_plants_widget.dart';
 import 'enhanced_plant_card.dart';
 import 'enhanced_plants_app_bar.dart';
-import 'plant_form_modal.dart';
 import 'plants_error_widget.dart';
 import 'plants_loading_widget.dart';
 
@@ -115,29 +114,11 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   }
 
   void _showAddPlantModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => ChangeNotifierProvider(
-            create: (_) => di.sl<PlantFormProvider>(),
-            child: const PlantFormModal(),
-          ),
-    );
+    context.push('/plants/add');
   }
 
   void _showEditPlantModal(Plant plant) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => ChangeNotifierProvider(
-            create: (_) => di.sl<PlantFormProvider>(),
-            child: PlantFormModal(plantId: plant.id),
-          ),
-    );
+    context.push('/plants/edit/${plant.id}');
   }
 
   void _showRemoveConfirmation(Plant plant) {
@@ -190,14 +171,19 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
         body: SafeArea(
           child: Column(
             children: [
-              // Enhanced App Bar
-              Consumer<PlantsProvider>(
-                builder: (context, plantsProvider, child) {
+              // Enhanced App Bar - Optimized with Selector
+              Selector<PlantsProvider, Map<String, dynamic>>(
+                selector: (context, provider) => {
+                  'plantsCount': provider.plantsCount,
+                  'searchQuery': provider.searchQuery,
+                  'viewMode': provider.viewMode,
+                },
+                builder: (context, appBarData, child) {
                   return EnhancedPlantsAppBar(
-                    plantsCount: plantsProvider.plantsCount,
-                    searchQuery: plantsProvider.searchQuery,
+                    plantsCount: appBarData['plantsCount'] as int,
+                    searchQuery: appBarData['searchQuery'] as String,
                     viewMode:
-                        plantsProvider.viewMode == ViewMode.grid
+                        (appBarData['viewMode'] as ViewMode) == ViewMode.grid
                             ? AppBarViewMode.grid
                             : AppBarViewMode.list,
                     searchDelegate: this,
@@ -207,36 +193,44 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                 },
               ),
 
-              // Content Area
+              // Content Area - Optimized with Selector
               Expanded(
-                child: Consumer<PlantsProvider>(
-                  builder: (context, plantsProvider, child) {
+                child: Selector<PlantsProvider, Map<String, dynamic>>(
+                  selector: (context, provider) => {
+                    'isLoading': provider.isLoading,
+                    'error': provider.error,
+                    'plants': provider.plants,
+                    'searchResults': provider.searchResults,
+                    'searchQuery': provider.searchQuery,
+                    'viewMode': provider.viewMode,
+                  },
+                  builder: (context, contentData, child) {
                     // Loading state
-                    if (plantsProvider.isLoading &&
-                        plantsProvider.plants.isEmpty) {
+                    if ((contentData['isLoading'] as bool) &&
+                        (contentData['plants'] as List<Plant>).isEmpty) {
                       return const PlantsLoadingWidget();
                     }
 
                     // Error state
-                    if (plantsProvider.error != null &&
-                        plantsProvider.plants.isEmpty) {
+                    if (contentData['error'] != null &&
+                        (contentData['plants'] as List<Plant>).isEmpty) {
                       return PlantsErrorWidget(
-                        error: plantsProvider.error!,
+                        error: contentData['error'] as String,
                         onRetry: _loadInitialData,
                       );
                     }
 
                     // Determine which plants to show
                     final plantsToShow =
-                        plantsProvider.searchQuery.isNotEmpty
-                            ? plantsProvider.searchResults
-                            : plantsProvider.plants;
+                        (contentData['searchQuery'] as String).isNotEmpty
+                            ? (contentData['searchResults'] as List<Plant>)
+                            : (contentData['plants'] as List<Plant>);
 
                     // Empty state
                     if (plantsToShow.isEmpty) {
                       return EmptyPlantsWidget(
-                        isSearching: plantsProvider.searchQuery.isNotEmpty,
-                        searchQuery: plantsProvider.searchQuery,
+                        isSearching: (contentData['searchQuery'] as String).isNotEmpty,
+                        searchQuery: contentData['searchQuery'] as String,
                         onClearSearch: onClearSearch,
                         onAddPlant: _showAddPlantModal,
                       );
@@ -247,7 +241,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                       onRefresh: _onRefresh,
                       child: _EnhancedPlantsContent(
                         plants: plantsToShow,
-                        viewMode: plantsProvider.viewMode,
+                        viewMode: contentData['viewMode'] as ViewMode,
                         scrollController: _scrollController,
                         actions: this,
                         taskProvider: this,

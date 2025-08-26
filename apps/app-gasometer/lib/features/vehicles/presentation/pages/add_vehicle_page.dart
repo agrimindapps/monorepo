@@ -149,6 +149,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           minLength: 2,
           maxLengthValidation: 50,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+          validateOnChange: false,
           onValidationChanged: (result) => _validationResults['marca'] = result,
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -161,6 +162,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           minLength: 2,
           maxLengthValidation: 50,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
+          validateOnChange: false,
           onValidationChanged: (result) => _validationResults['modelo'] = result,
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -180,6 +182,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 minLength: 3,
                 maxLengthValidation: 30,
                 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+                validateOnChange: false,
                 onValidationChanged: (result) => _validationResults['cor'] = result,
               ),
             ),
@@ -219,6 +222,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           decoration: const InputDecoration(
             suffixText: 'km',
           ),
+          validateOnChange: false,
           onValidationChanged: (result) => _validationResults['odometro'] = result,
           onChanged: (value) {
             setState(() {});
@@ -237,6 +241,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
             LengthLimitingTextInputFormatter(7),
           ],
+          validateOnChange: false,
           onValidationChanged: (result) => _validationResults['placa'] = result,
           onChanged: (value) {
             setState(() {});
@@ -256,6 +261,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             LengthLimitingTextInputFormatter(17),
             UpperCaseTextFormatter(),
           ],
+          validateOnChange: false,
           onValidationChanged: (result) => _validationResults['chassi'] = result,
           onChanged: (value) {
             setState(() {});
@@ -275,6 +281,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(11),
           ],
+          validateOnChange: false,
           onValidationChanged: (result) => _validationResults['renavam'] = result,
           onChanged: (value) {
             setState(() {});
@@ -546,79 +553,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    String? hint,
-    TextInputType? keyboardType,
-    TextCapitalization? textCapitalization,
-    int? maxLength,
-    String? suffixText,
-    String? Function(String?)? validator,
-    bool showCounter = false,
-    TextAlign? textAlign,
-    List<TextInputFormatter>? inputFormatters,
-    Function(String)? onChanged,
-  }) {
-    return Column(
-      children: [
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization ?? TextCapitalization.none,
-          maxLength: showCounter ? null : maxLength,
-          textAlign: textAlign ?? TextAlign.start,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hint,
-            suffixText: suffixText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
-            ),
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            counterText: '',
-          ),
-        ),
-        if (showCounter && maxLength != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                '${controller.text.length}/$maxLength',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
   Widget _buildYearDropdown() {
     final currentYear = DateTime.now().year;
     final years = List.generate(currentYear - 1900 + 1, (index) => currentYear - index);
@@ -724,126 +658,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
 
-
-  // Formatadores de entrada
-  List<TextInputFormatter> _getPlacaFormatters() {
-    return [
-      FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
-      LengthLimitingTextInputFormatter(7),
-    ];
-  }
-
-  List<TextInputFormatter> _getChassiFormatters() {
-    return [
-      FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
-      LengthLimitingTextInputFormatter(17),
-    ];
-  }
-
-  List<TextInputFormatter> _getRenavamFormatters() {
-    return [
-      FilteringTextInputFormatter.digitsOnly,
-      LengthLimitingTextInputFormatter(11),
-    ];
-  }
-
-  List<TextInputFormatter> _getOdometroFormatters() {
-    return [
-      FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-      TextInputFormatter.withFunction((oldValue, newValue) {
-        var text = newValue.text.replaceAll('.', ',');
-        if (text.contains(',')) {
-          final parts = text.split(',');
-          if (parts.length == 2 && parts[1].length > 2) {
-            text = '${parts[0]},${parts[1].substring(0, 2)}';
-          }
-        }
-        return TextEditingValue(
-          text: text,
-          selection: TextSelection.collapsed(offset: text.length),
-        );
-      }),
-    ];
-  }
-
-  // Validadores
-  String? _validatePlaca(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Campo obrigatório';
-    }
-
-    final cleanValue = _sanitizeInput(value.replaceAll(RegExp(r'[^A-Z0-9]'), ''));
-    
-    // Placa Mercosul: ABC1D23
-    final mercosulRegex = RegExp(r'^[A-Z]{3}[0-9][A-Z][0-9]{2}$');
-    // Placa antiga: ABC1234
-    final antigaRegex = RegExp(r'^[A-Z]{3}[0-9]{4}$');
-    
-    if (!mercosulRegex.hasMatch(cleanValue) && !antigaRegex.hasMatch(cleanValue)) {
-      return 'Formato inválido. Use ABC1234 ou ABC1D23';
-    }
-    
-    return null;
-  }
-
-  String? _validateChassi(String? value) {
-    if (value == null || value.isEmpty) {
-      return null; // Campo opcional
-    }
-
-    final cleanValue = _sanitizeInput(value.replaceAll(RegExp(r'[^A-HJ-NPR-Z0-9]'), ''));
-    
-    if (cleanValue.length != 17) {
-      return 'Chassi deve ter 17 caracteres';
-    }
-    
-    // Chassi não pode conter I, O, Q
-    if (RegExp(r'[IOQ]').hasMatch(cleanValue)) {
-      return 'Chassi inválido';
-    }
-    
-    return null;
-  }
-
-  String? _validateRenavam(String? value) {
-    if (value == null || value.isEmpty) {
-      return null; // Campo opcional
-    }
-
-    final cleanValue = _sanitizeInput(value.trim());
-    
-    // Validação de comprimento
-    if (cleanValue.length != 11) {
-      return 'RENAVAM deve ter 11 dígitos';
-    }
-    
-    // Validação se contém apenas números
-    if (!RegExp(r'^\d+$').hasMatch(cleanValue)) {
-      return 'RENAVAM deve conter apenas números';
-    }
-    
-    return null;
-  }
-
-  String? _validateOdometro(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Campo obrigatório';
-    }
-
-    final cleanValue = value.replaceAll(',', '.');
-    final number = double.tryParse(cleanValue);
-    
-    if (number == null || number < 0) {
-      return 'Valor inválido';
-    }
-    
-    if (number > 999999.0) {
-      return 'Odômetro deve estar entre 0 e 999.999 km';
-    }
-    
-    return null;
-  }
-
   // Sanitização de entrada para prevenir XSS
   String _sanitizeInput(String input) {
     return input
@@ -852,33 +666,15 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         .replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  // Validação melhorada para campos de texto
-  String? _validateTextInput(String? value, String fieldName, {int maxLength = 50, bool required = true}) {
-    if (value == null || value.isEmpty) {
-      return required ? 'Campo obrigatório' : null;
-    }
-
-    final trimmedValue = value.trim();
-    if (required && trimmedValue.isEmpty) {
-      return 'Campo obrigatório';
-    }
-
-    if (trimmedValue.length > maxLength) {
-      return '$fieldName deve ter no máximo $maxLength caracteres';
-    }
-
-    // Validação de caracteres especiais maliciosos (proteção XSS/SQL injection)
-    if (RegExp(r'[<>"\\&%$#@!*()[\]{}]').hasMatch(trimmedValue)) {
-      return '$fieldName contém caracteres não permitidos';
-    }
-
-    return null;
-  }
-
   Future<void> _submitForm() async {
-    // Valida todos os campos primeiro
-    final hasErrors = _validationResults.values.any((result) => !result.isValid);
-    if (hasErrors || !_formKey.currentState!.validate()) {
+    // Validar todos os campos manualmente antes de submeter
+    setState(() {
+      // Limpa resultados anteriores
+      _validationResults.clear();
+    });
+    
+    // Valida o form usando o GlobalKey
+    if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Por favor, corrija os erros no formulário'),

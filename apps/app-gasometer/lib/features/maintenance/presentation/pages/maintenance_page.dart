@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../shared/widgets/vehicle_selector.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -131,14 +131,17 @@ class _MaintenancePageState extends State<MaintenancePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        VehicleSelector(
-          selectedVehicleId: _selectedVehicleId,
-          onVehicleChanged: (vehicleId) {
-            setState(() {
-              _selectedVehicleId = vehicleId;
-            });
+        Consumer<VehiclesProvider>(
+          builder: (context, vehiclesProvider, child) {
+            return EnhancedVehicleSelector(
+              selectedVehicleId: _selectedVehicleId,
+              onVehicleChanged: (String? vehicleId) {
+                setState(() {
+                  _selectedVehicleId = vehicleId;
+                });
+              },
+            );
           },
-          showEmptyOption: true,
         ),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         if (_filteredRecords.isEmpty)
@@ -582,7 +585,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
     
     // Se resultado for true, recarregar veículos
     if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
+      await context.read<VehiclesProvider>().initialize();
     }
   }
 

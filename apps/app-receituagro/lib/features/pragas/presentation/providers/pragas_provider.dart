@@ -60,11 +60,27 @@ class PragasProvider extends ChangeNotifier {
 
   /// Inicialização
   Future<void> initialize() async {
-    await Future.wait([
-      loadRecentPragas(),
-      loadSuggestedPragas(),
-      loadStats(),
-    ]);
+    print('🚀 PragasProvider: Iniciando inicialização...');
+    try {
+      _setLoading(true);
+      _clearError();
+
+      await Future.wait([
+        loadRecentPragas(),
+        loadSuggestedPragas(),
+        loadStats(),
+      ]);
+      
+      print('✅ PragasProvider: Inicialização concluída');
+      print('📊 PragasProvider: Stats = ${_stats?.toString()}');
+      print('📊 PragasProvider: Recentes = ${_recentPragas.length}');
+      print('📊 PragasProvider: Sugeridas = ${_suggestedPragas.length}');
+    } catch (e) {
+      print('❌ PragasProvider: Erro na inicialização: $e');
+      _setError('Erro ao inicializar dados das pragas: $e');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Carrega todas as pragas
@@ -144,7 +160,9 @@ class PragasProvider extends ChangeNotifier {
   /// Carrega estatísticas
   Future<void> loadStats() async {
     await _executeUseCase(() async {
+      print('📊 PragasProvider: Carregando estatísticas...');
       _stats = await _getPragasStatsUseCase.execute();
+      print('📊 PragasProvider: Estatísticas carregadas - ${_stats?.toString()}');
     });
   }
 

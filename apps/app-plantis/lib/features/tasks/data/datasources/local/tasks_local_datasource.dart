@@ -147,7 +147,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       result.fold(
         (failure) =>
             throw Exception('Erro ao salvar tarefas: ${failure.message}'),
-        (_) => {},
+        (_) => <String, dynamic>{},
       );
     } catch (e) {
       throw Exception('Erro ao cachear tarefas: $e');
@@ -190,7 +190,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       result.fold(
         (failure) =>
             throw Exception('Erro ao limpar cache: ${failure.message}'),
-        (_) => {},
+        (_) => <String, dynamic>{},
       );
     } catch (e) {
       throw Exception('Erro ao limpar cache de tarefas: $e');
@@ -209,7 +209,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     result.fold(
       (failure) =>
           throw Exception('Erro ao salvar tarefas: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 }

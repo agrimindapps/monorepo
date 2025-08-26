@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/services/image_service.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../domain/entities/plant.dart';
+import '../optimized_image_widget.dart';
 
 /// Widget responsável por exibir e gerenciar as imagens da planta
 class PlantImageSection extends StatelessWidget {
@@ -114,11 +115,13 @@ class PlantImageSection extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: ImageService().buildImagePreview(
-                  plant.primaryImageUrl,
+                child: OptimizedImageWidget(
+                  imageUrl: plant.primaryImageUrl,
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(16),
+                  enablePreloading: true,
                 ),
               ),
             ),
@@ -162,11 +165,14 @@ class PlantImageSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: ImageService().buildImagePreview(
-                          plant.imageUrls[index],
+                        child: OptimizedImageWidget(
+                          imageUrl: plant.imageUrls[index],
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,
+                          borderRadius: BorderRadius.circular(12),
+                          cacheKey: index,
+                          enablePreloading: true,
                         ),
                       ),
                     ),
@@ -216,9 +222,11 @@ class PlantImageSection extends StatelessWidget {
                       child: InteractiveViewer(
                         minScale: 0.5,
                         maxScale: 3.0,
-                        child: ImageService().buildImagePreview(
-                          imageUrls[index],
+                        child: OptimizedImageWidget(
+                          imageUrl: imageUrls[index],
                           fit: BoxFit.contain,
+                          cacheKey: index,
+                          enablePreloading: false, // Disable for fullscreen view
                         ),
                       ),
                     );
@@ -308,9 +316,12 @@ class PlantImageSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: ImageService().buildImagePreview(
-                          plant.imageUrls[index],
+                        child: OptimizedImageWidget(
+                          imageUrl: plant.imageUrls[index],
                           fit: BoxFit.cover,
+                          borderRadius: BorderRadius.circular(12),
+                          cacheKey: index,
+                          enablePreloading: false, // Gallery view doesn't need preloading
                         ),
                       ),
                     ),

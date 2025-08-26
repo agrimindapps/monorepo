@@ -204,6 +204,15 @@ class LoadingErrorState {
     required this.hasPlants,
   });
 
+  /// Returns true if this represents an actual error state that should show error UI
+  bool get shouldShowError => error != null && !hasPlants && !isLoading;
+  
+  /// Returns true if this represents an empty state (no error, no plants, not loading)
+  bool get shouldShowEmpty => error == null && !hasPlants && !isLoading;
+  
+  /// Returns true if this represents a loading state (loading with no plants)
+  bool get shouldShowLoading => isLoading && !hasPlants;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

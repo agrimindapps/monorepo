@@ -54,10 +54,9 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
   @override
   List<T> getAll() {
     try {
-      // Força abertura do box se não estiver aberto
+      // Verifica se box está aberto
       if (!Hive.isBoxOpen(_boxName)) {
-        print('⚠️ Box $_boxName não estava aberto, abrindo...');
-        // Não podemos usar await aqui, então retorna vazio se não estiver aberto
+        print('⚠️ Box $_boxName não estava aberto - retornando lista vazia');
         return [];
       }
       
@@ -66,6 +65,18 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
       return box.values.toList();
     } catch (e) {
       print('❌ Erro em getAll(): $e');
+      return [];
+    }
+  }
+
+  /// Versão assíncrona de getAll que aguarda o box estar aberto
+  Future<List<T>> getAllAsync() async {
+    try {
+      final box = await _getBox();
+      print('📦 Box $_boxName carregado assincronamente com ${box.length} itens');
+      return box.values.toList();
+    } catch (e) {
+      print('❌ Erro em getAllAsync(): $e');
       return [];
     }
   }
@@ -83,6 +94,12 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
   @override
   List<T> findBy(bool Function(T item) predicate) {
     return getAll().where(predicate).toList();
+  }
+
+  /// Versão assíncrona de findBy que aguarda o box estar aberto
+  Future<List<T>> findByAsync(bool Function(T item) predicate) async {
+    final items = await getAllAsync();
+    return items.where(predicate).toList();
   }
 
   @override

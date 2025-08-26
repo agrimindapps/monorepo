@@ -19,6 +19,7 @@ class PlantModel extends Plant {
     super.version,
     super.userId,
     super.moduleName,
+    super.isFavorited = false,
   });
 
   factory PlantModel.fromEntity(Plant plant) {
@@ -36,6 +37,7 @@ class PlantModel extends Plant {
       updatedAt: plant.updatedAt,
       isDeleted: plant.isDeleted,
       isDirty: plant.isDirty,
+      isFavorited: plant.isFavorited,
     );
   }
 
@@ -71,6 +73,7 @@ class PlantModel extends Plant {
               : null,
       isDeleted: json['isDeleted'] as bool? ?? false,
       isDirty: json['isDirty'] as bool? ?? false,
+      isFavorited: json['isFavorited'] as bool? ?? false,
     );
   }
 
@@ -90,6 +93,7 @@ class PlantModel extends Plant {
       'updatedAt': updatedAt?.toIso8601String(),
       'isDeleted': isDeleted,
       'isDirty': isDirty,
+      'isFavorited': isFavorited,
     };
   }
 
@@ -112,6 +116,7 @@ class PlantModel extends Plant {
     int? version,
     String? userId,
     String? moduleName,
+    bool? isFavorited,
   }) {
     return PlantModel(
       id: id ?? this.id,
@@ -131,6 +136,7 @@ class PlantModel extends Plant {
       version: version ?? this.version,
       userId: userId ?? this.userId,
       moduleName: moduleName ?? this.moduleName,
+      isFavorited: isFavorited ?? this.isFavorited,
     );
   }
 }
@@ -148,6 +154,10 @@ class PlantConfigModel extends PlantConfig {
     super.soilType,
     super.idealTemperature,
     super.idealHumidity,
+    super.enableWateringCare,
+    super.lastWateringDate,
+    super.enableFertilizerCare,
+    super.lastFertilizerDate,
   });
 
   factory PlantConfigModel.fromEntity(PlantConfig config) {
@@ -163,6 +173,10 @@ class PlantConfigModel extends PlantConfig {
       soilType: config.soilType,
       idealTemperature: config.idealTemperature,
       idealHumidity: config.idealHumidity,
+      enableWateringCare: config.enableWateringCare,
+      lastWateringDate: config.lastWateringDate,
+      enableFertilizerCare: config.enableFertilizerCare,
+      lastFertilizerDate: config.lastFertilizerDate,
     );
   }
 
@@ -179,6 +193,14 @@ class PlantConfigModel extends PlantConfig {
       soilType: json['soilType'] as String?,
       idealTemperature: (json['idealTemperature'] as num?)?.toDouble(),
       idealHumidity: (json['idealHumidity'] as num?)?.toDouble(),
+      enableWateringCare: json['enableWateringCare'] as bool?,
+      lastWateringDate: json['lastWateringDate'] != null 
+          ? DateTime.parse(json['lastWateringDate'] as String)
+          : null,
+      enableFertilizerCare: json['enableFertilizerCare'] as bool?,
+      lastFertilizerDate: json['lastFertilizerDate'] != null 
+          ? DateTime.parse(json['lastFertilizerDate'] as String)
+          : null,
     );
   }
 
@@ -195,6 +217,10 @@ class PlantConfigModel extends PlantConfig {
       'soilType': soilType,
       'idealTemperature': idealTemperature,
       'idealHumidity': idealHumidity,
+      'enableWateringCare': enableWateringCare,
+      'lastWateringDate': lastWateringDate?.toIso8601String(),
+      'enableFertilizerCare': enableFertilizerCare,
+      'lastFertilizerDate': lastFertilizerDate?.toIso8601String(),
     };
   }
 
@@ -211,6 +237,10 @@ class PlantConfigModel extends PlantConfig {
     String? soilType,
     double? idealTemperature,
     double? idealHumidity,
+    bool? enableWateringCare,
+    DateTime? lastWateringDate,
+    bool? enableFertilizerCare,
+    DateTime? lastFertilizerDate,
   }) {
     return PlantConfigModel(
       wateringIntervalDays: wateringIntervalDays ?? this.wateringIntervalDays,
@@ -228,6 +258,10 @@ class PlantConfigModel extends PlantConfig {
       soilType: soilType ?? this.soilType,
       idealTemperature: idealTemperature ?? this.idealTemperature,
       idealHumidity: idealHumidity ?? this.idealHumidity,
+      enableWateringCare: enableWateringCare ?? this.enableWateringCare,
+      lastWateringDate: lastWateringDate ?? this.lastWateringDate,
+      enableFertilizerCare: enableFertilizerCare ?? this.enableFertilizerCare,
+      lastFertilizerDate: lastFertilizerDate ?? this.lastFertilizerDate,
     );
   }
 }

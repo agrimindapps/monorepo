@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../core/localization/app_strings.dart';
+import '../../core/constants/tasks_constants.dart';
 import '../providers/tasks_provider.dart';
 
 class TasksDashboard extends StatelessWidget {
@@ -9,56 +12,64 @@ class TasksDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer<TasksProvider>(
-      builder: (context, provider, child) {
+    // Optimized with Selector - only rebuilds when task statistics change
+    return Selector<TasksProvider, Map<String, int>>(
+      selector: (context, provider) => {
+        'totalTasks': provider.totalTasks,
+        'pendingTasks': provider.pendingTasks,
+        'todayTasks': provider.todayTasks,
+        'overdueTasks': provider.overdueTasks,
+        'completedTasks': provider.completedTasks,
+      },
+      builder: (context, taskStats, child) {
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(TasksConstants.dashboardPadding),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             boxShadow: [
               BoxShadow(
                 color: theme.shadowColor.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                blurRadius: TasksConstants.dashboardShadowBlurRadius,
+                offset: const Offset(0, TasksConstants.dashboardShadowOffset),
               ),
             ],
           ),
           child: Column(
             children: [
-              // Estatísticas principais
+              // Main statistics
               Row(
                 children: [
                   Expanded(
                     child: _StatCard(
-                      title: 'Total',
-                      value: provider.totalTasks,
+                      title: AppStrings.totalLabel,
+                      value: taskStats['totalTasks']!,
                       icon: Icons.list_alt,
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: TasksConstants.statCardRowSpacing),
                   Expanded(
                     child: _StatCard(
-                      title: 'Pendentes',
-                      value: provider.pendingTasks,
+                      title: AppStrings.pendingLabel,
+                      value: taskStats['pendingTasks']!,
                       icon: Icons.schedule,
                       color: Colors.orange,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: TasksConstants.statCardRowSpacing),
                   Expanded(
                     child: _StatCard(
-                      title: 'Hoje',
-                      value: provider.todayTasks,
+                      title: AppStrings.todayLabel,
+                      value: taskStats['todayTasks']!,
                       icon: Icons.today,
                       color: Colors.blue,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: TasksConstants.statCardRowSpacing),
                   Expanded(
                     child: _StatCard(
-                      title: 'Atrasadas',
-                      value: provider.overdueTasks,
+                      title: AppStrings.overdueLabel,
+                      value: taskStats['overdueTasks']!,
                       icon: Icons.warning,
                       color: Colors.red,
                     ),
@@ -66,12 +77,12 @@ class TasksDashboard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: TasksConstants.dashboardVerticalSpacing),
 
               // Barra de progresso
               _ProgressBar(
-                completed: provider.completedTasks,
-                total: provider.totalTasks,
+                completed: taskStats['completedTasks']!,
+                total: taskStats['totalTasks']!,
                 theme: theme,
               ),
             ],
@@ -100,7 +111,7 @@ class _StatCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(TasksConstants.statCardPadding),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
@@ -108,8 +119,8 @@ class _StatCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 4),
+          Icon(icon, color: color, size: TasksConstants.statCardIconSize),
+          const SizedBox(height: TasksConstants.statCardSmallSpacing),
           Text(
             value.toString(),
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -153,7 +164,7 @@ class _ProgressBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Progresso Geral',
+              AppStrings.overallProgress,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -166,15 +177,15 @@ class _ProgressBar extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: TasksConstants.progressSectionSpacing),
         LinearProgressIndicator(
           value: progress,
           backgroundColor: theme.colorScheme.surfaceContainerHighest,
           valueColor: AlwaysStoppedAnimation<Color>(
             _getProgressColor(percentage, theme),
           ),
-          minHeight: 8,
-          borderRadius: BorderRadius.circular(4),
+          minHeight: TasksConstants.progressBarHeight,
+          borderRadius: BorderRadius.circular(TasksConstants.progressBarBorderRadius),
         ),
       ],
     );

@@ -113,7 +113,6 @@ class PlantisNotificationService {
   }
 
   /// Mostra notificação de tarefa atrasada
-  /// TODO: Implementar quando definir regras de negócio para detecção de atraso
   Future<void> showOverdueTaskNotification({
     required String taskName,
     required String plantName,
@@ -140,7 +139,6 @@ class PlantisNotificationService {
   }
 
   /// Mostra notificação de nova planta adicionada
-  /// TODO: Implementar quando necessário
   Future<void> showNewPlantNotification({
     required String plantName,
     required String plantType,
@@ -164,7 +162,6 @@ class PlantisNotificationService {
   }
 
   /// Agenda lembrete diário de cuidados
-  /// TODO: Implementar quando definir horário e regras de recorrência
   Future<void> scheduleDailyCareReminder({
     required String message,
     required Duration interval,
@@ -189,7 +186,6 @@ class PlantisNotificationService {
   }
 
   /// Mostra notificação de dica de jardinagem
-  /// TODO: Implementar quando tiver conteúdo de dicas
   Future<void> showGardeningTipNotification({
     required String tip,
     String? category,

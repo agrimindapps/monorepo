@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
-import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import '../selectors/plants_selectors.dart';
 import '../widgets/empty_plants_widget.dart';
-import '../widgets/plant_form_modal.dart';
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_error_widget.dart';
 import '../widgets/plants_fab.dart';
@@ -90,16 +89,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
   }
 
   void _showAddPlantModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => ChangeNotifierProvider(
-            create: (_) => di.sl<PlantFormProvider>(),
-            child: const PlantFormModal(),
-          ),
-    );
+    context.push('/plants/add');
   }
 
   @override
@@ -173,20 +163,21 @@ class _PlantsListPageState extends State<PlantsListPage> {
             previous.hasPlants != next.hasPlants;
       },
       builder: (context, loadingErrorState, child) {
-        // Estado de carregamento
-        if (loadingErrorState.isLoading && !loadingErrorState.hasPlants) {
+        // Estado de carregamento inicial (primeira carga)
+        if (loadingErrorState.shouldShowLoading) {
           return const PlantsLoadingWidget();
         }
 
-        // Estado de erro
-        if (loadingErrorState.error != null && !loadingErrorState.hasPlants) {
+        // Estado de erro - apenas quando há um erro real e nenhuma planta carregada
+        // Diferencia erro real de estado vazio (lista vazia após load bem-sucedido)
+        if (loadingErrorState.shouldShowError) {
           return PlantsErrorWidget(
             error: loadingErrorState.error!,
             onRetry: _loadInitialData,
           );
         }
 
-        // Content with plants
+        // Content with plants or empty state (successful load)
         return _buildPlantsContent();
       },
     );

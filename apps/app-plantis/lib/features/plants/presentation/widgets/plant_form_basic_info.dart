@@ -59,21 +59,19 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    return Consumer<PlantFormProvider>(
-      builder: (context, provider, child) {
+    // Optimized with Selector - only rebuilds when image-related data changes
+    return Selector<PlantFormProvider, bool>(
+      selector: (context, provider) => provider.hasImages,
+      builder: (context, hasImages, child) {
+        final provider = context.read<PlantFormProvider>();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Área para uma única imagem
-            if (provider.hasImages)
+            if (hasImages)
               _buildSingleImage(context, provider)
             else
               _buildEmptyImageArea(context, provider),
-
-            const SizedBox(height: 16),
-
-            // Botões de ação
-            _buildImageActionButtons(context, provider),
           ],
         );
       },
@@ -91,37 +89,56 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
-        Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: ImageService().buildImagePreview(
-                provider.imageUrls.first,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
+        GestureDetector(
+          onTap: () => _showImageOptions(context, provider),
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: ImageService().buildImagePreview(
+                  provider.imageUrls.first,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: () => _showRemoveImageDialog(context, provider, 0),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
+              // Overlay para indicar que é clicável
+              Positioned.fill(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error,
-                    shape: BoxShape.circle,
+                    color: Colors.black.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(
-                    Icons.close,
-                    color: Theme.of(context).colorScheme.onError,
-                    size: 20,
+                  child: const Center(
+                    child: Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                      size: 32,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () => _showRemoveImageDialog(context, provider, 0),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onError,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -133,89 +150,172 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   ) {
     final theme = Theme.of(context);
 
-    return Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.5),
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.add_a_photo,
-            size: 48,
-            color: theme.colorScheme.onSurfaceVariant,
+    return GestureDetector(
+      onTap: () => _showImageOptions(context, provider),
+      child: Container(
+        width: double.infinity,
+        height: 200,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.5),
+            width: 2,
+            style: BorderStyle.solid,
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Adicionar foto da planta',
-            style: theme.textTheme.bodyLarge?.copyWith(
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_a_photo,
+              size: 48,
               color: theme.colorScheme.onSurfaceVariant,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Opcional - Uma única foto',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            const SizedBox(height: 16),
+            Text(
+              'Toque para adicionar foto',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Câmera ou Galeria',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildImageActionButtons(
-    BuildContext context,
-    PlantFormProvider provider,
-  ) {
-    final hasNoImage = !provider.hasImages;
 
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed:
-                hasNoImage && !provider.isUploadingImages
-                    ? () => provider.addImageFromCamera()
-                    : null,
-            icon:
-                provider.isUploadingImages
-                    ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Icon(Icons.camera_alt),
-            label: const Text('Câmera'),
+  void _showImageOptions(BuildContext context, PlantFormProvider provider) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                'Adicionar Foto',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildImageOptionButton(
+                      context: context,
+                      provider: provider,
+                      icon: Icons.camera_alt,
+                      label: 'Câmera',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        provider.addImageFromCamera();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildImageOptionButton(
+                      context: context,
+                      provider: provider,
+                      icon: Icons.photo_library,
+                      label: 'Galeria',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        provider.addImageFromGallery();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImageOptionButton({
+    required BuildContext context,
+    required PlantFormProvider provider,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final isDisabled = provider.hasImages || provider.isUploadingImages;
+
+    return GestureDetector(
+      onTap: isDisabled ? null : onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isDisabled 
+              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+              : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDisabled 
+                ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                : theme.colorScheme.primary.withValues(alpha: 0.3),
+            width: 1,
           ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed:
-                hasNoImage && !provider.isUploadingImages
-                    ? () => provider.addImageFromGallery()
-                    : null,
-            icon:
-                provider.isUploadingImages
-                    ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Icon(Icons.photo_library),
-            label: const Text('Galeria'),
-          ),
+        child: Column(
+          children: [
+            if (provider.isUploadingImages)
+              const SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              )
+            else
+              Icon(
+                icon,
+                size: 32,
+                color: isDisabled 
+                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                    : theme.colorScheme.primary,
+              ),
+            const SizedBox(height: 12),
+            Text(
+              provider.isUploadingImages ? 'Enviando...' : label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isDisabled 
+                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                    : theme.colorScheme.primary,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -224,7 +324,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     PlantFormProvider provider,
     int index,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

@@ -124,24 +124,26 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     return PlantaConfigModel.create(
       plantaId: plant.id,
       userId: plant.userId,
-      aguaAtiva:
-          config.wateringIntervalDays != null &&
-          config.wateringIntervalDays! > 0,
+      // Fix watering - use enable flag when available, otherwise check interval
+      aguaAtiva: config.enableWateringCare ?? 
+          (config.wateringIntervalDays != null && config.wateringIntervalDays! > 0),
       intervaloRegaDias: config.wateringIntervalDays ?? 3,
-      aduboAtivo:
-          config.fertilizingIntervalDays != null &&
-          config.fertilizingIntervalDays! > 0,
+      // Fix fertilizer - use enable flag when available, otherwise check interval
+      aduboAtivo: config.enableFertilizerCare ?? 
+          (config.fertilizingIntervalDays != null && config.fertilizingIntervalDays! > 0),
       intervaloAdubacaoDias: config.fertilizingIntervalDays ?? 14,
-      podaAtiva:
-          config.pruningIntervalDays != null && config.pruningIntervalDays! > 0,
-      intervaloPodaDias: config.pruningIntervalDays ?? 30,
-      banhoSolAtivo: true,
-      intervaloBanhoSolDias: 1,
-      inspecaoPragasAtiva: true,
-      intervaloInspecaoPragasDias: 7,
-      // Replantio pode ser definido com base no tipo de planta ou configuração
-      replantarAtivo: true,
-      intervaloReplantarDias: 180, // 6 meses por padrão
+      // Fix pruning - only active if interval is set (respects enable logic)
+      podaAtiva: config.pruningIntervalDays != null && config.pruningIntervalDays! > 0,
+      intervaloPodaDias: config.pruningIntervalDays ?? 90,
+      // Fix sunlight - only active if interval is set (not hardcoded true)
+      banhoSolAtivo: config.sunlightCheckIntervalDays != null && config.sunlightCheckIntervalDays! > 0,
+      intervaloBanhoSolDias: config.sunlightCheckIntervalDays ?? 7,
+      // Fix pest inspection - only active if interval is set (not hardcoded true)
+      inspecaoPragasAtiva: config.pestInspectionIntervalDays != null && config.pestInspectionIntervalDays! > 0,
+      intervaloInspecaoPragasDias: config.pestInspectionIntervalDays ?? 14,
+      // Fix replanting - only active if interval is set (not hardcoded true)
+      replantarAtivo: config.replantingIntervalDays != null && config.replantingIntervalDays! > 0,
+      intervaloReplantarDias: config.replantingIntervalDays ?? 365,
     );
   }
 }

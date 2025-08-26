@@ -71,10 +71,15 @@ class PlantsProvider extends ChangeNotifier {
 
     final result = await _getPlantsUseCase.call(const NoParams());
 
-    result.fold((failure) => _setError(_getErrorMessage(failure)), (plants) {
-      _plants = _sortPlants(plants);
-      _applyFilters();
-    });
+    result.fold(
+      (failure) => _setError(_getErrorMessage(failure)), 
+      (plants) {
+        // Successful load - ensure error is cleared and plants are updated
+        _clearError();
+        _plants = _sortPlants(plants);
+        _applyFilters();
+      }
+    );
 
     if (shouldShowLoading) {
       _setLoading(false);
@@ -306,15 +311,67 @@ class PlantsProvider extends ChangeNotifier {
     final threshold = now.add(const Duration(days: 2));
 
     return _plants.where((plant) {
-      if (plant.config?.wateringIntervalDays == null) return false;
+      final config = plant.config;
+      if (config == null) return false;
 
-      final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
-      final nextWatering = lastWatering.add(
-        Duration(days: plant.config!.wateringIntervalDays!),
-      );
+      // Check if watering care is enabled and has valid interval
+      if (config.enableWateringCare == true && config.wateringIntervalDays != null) {
+        final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
+        final nextWatering = lastWatering.add(
+          Duration(days: config.wateringIntervalDays!),
+        );
 
-      return nextWatering.isBefore(threshold) ||
-          nextWatering.isAtSameMomentAs(threshold);
+        return nextWatering.isBefore(threshold) ||
+            nextWatering.isAtSameMomentAs(threshold);
+      }
+
+      // Fallback to old logic for backward compatibility
+      if (config.wateringIntervalDays != null) {
+        final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
+        final nextWatering = lastWatering.add(
+          Duration(days: config.wateringIntervalDays!),
+        );
+
+        return nextWatering.isBefore(threshold) ||
+            nextWatering.isAtSameMomentAs(threshold);
+      }
+
+      return false;
+    }).toList();
+  }
+
+  // Get plants that need fertilizer soon (next 2 days)
+  List<Plant> getPlantsNeedingFertilizer() {
+    final now = DateTime.now();
+    final threshold = now.add(const Duration(days: 2));
+
+    return _plants.where((plant) {
+      final config = plant.config;
+      if (config == null) return false;
+
+      // Check if fertilizer care is enabled and has valid interval
+      if (config.enableFertilizerCare == true && config.fertilizingIntervalDays != null) {
+        final lastFertilizer = config.lastFertilizerDate ?? plant.createdAt ?? now;
+        final nextFertilizer = lastFertilizer.add(
+          Duration(days: config.fertilizingIntervalDays!),
+        );
+
+        return nextFertilizer.isBefore(threshold) ||
+            nextFertilizer.isAtSameMomentAs(threshold);
+      }
+
+      // Fallback to old logic for backward compatibility
+      if (config.fertilizingIntervalDays != null) {
+        final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
+        final nextFertilizer = lastFertilizer.add(
+          Duration(days: config.fertilizingIntervalDays!),
+        );
+
+        return nextFertilizer.isBefore(threshold) ||
+            nextFertilizer.isAtSameMomentAs(threshold);
+      }
+
+      return false;
     }).toList();
   }
 
@@ -323,28 +380,108 @@ class PlantsProvider extends ChangeNotifier {
     final now = DateTime.now();
 
     return _plants.where((plant) {
-      if (plant.config?.wateringIntervalDays == null) {
+      final config = plant.config;
+      if (config == null) {
         return status == CareStatus.unknown;
       }
 
-      final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
-      final nextWatering = lastWatering.add(
-        Duration(days: plant.config!.wateringIntervalDays!),
-      );
-
-      final daysDifference = nextWatering.difference(now).inDays;
-
       switch (status) {
         case CareStatus.needsWater:
-          return daysDifference <= 0;
+          return _checkWaterStatus(plant, now, 0);
         case CareStatus.soonWater:
-          return daysDifference > 0 && daysDifference <= 2;
+          return _checkWaterStatus(plant, now, 2);
+        case CareStatus.needsFertilizer:
+          return _checkFertilizerStatus(plant, now, 0);
+        case CareStatus.soonFertilizer:
+          return _checkFertilizerStatus(plant, now, 2);
         case CareStatus.good:
-          return daysDifference > 2;
+          return _isPlantInGoodCondition(plant, now);
         case CareStatus.unknown:
-          return false;
+          return config.wateringIntervalDays == null && 
+                 config.fertilizingIntervalDays == null;
       }
     }).toList();
+  }
+
+  // Helper method to check water status
+  bool _checkWaterStatus(Plant plant, DateTime now, int dayThreshold) {
+    final config = plant.config;
+    if (config == null) return false;
+
+    // Use new care system if enabled
+    if (config.enableWateringCare == true && config.wateringIntervalDays != null) {
+      final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
+      final nextWatering = lastWatering.add(
+        Duration(days: config.wateringIntervalDays!),
+      );
+      final daysDifference = nextWatering.difference(now).inDays;
+      
+      return dayThreshold == 0 
+          ? daysDifference <= 0
+          : daysDifference > 0 && daysDifference <= dayThreshold;
+    }
+
+    // Fallback to old system
+    if (config.wateringIntervalDays != null) {
+      final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
+      final nextWatering = lastWatering.add(
+        Duration(days: config.wateringIntervalDays!),
+      );
+      final daysDifference = nextWatering.difference(now).inDays;
+      
+      return dayThreshold == 0 
+          ? daysDifference <= 0
+          : daysDifference > 0 && daysDifference <= dayThreshold;
+    }
+
+    return false;
+  }
+
+  // Helper method to check fertilizer status
+  bool _checkFertilizerStatus(Plant plant, DateTime now, int dayThreshold) {
+    final config = plant.config;
+    if (config == null) return false;
+
+    // Use new care system if enabled
+    if (config.enableFertilizerCare == true && config.fertilizingIntervalDays != null) {
+      final lastFertilizer = config.lastFertilizerDate ?? plant.createdAt ?? now;
+      final nextFertilizer = lastFertilizer.add(
+        Duration(days: config.fertilizingIntervalDays!),
+      );
+      final daysDifference = nextFertilizer.difference(now).inDays;
+      
+      return dayThreshold == 0 
+          ? daysDifference <= 0
+          : daysDifference > 0 && daysDifference <= dayThreshold;
+    }
+
+    // Fallback to old system
+    if (config.fertilizingIntervalDays != null) {
+      final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
+      final nextFertilizer = lastFertilizer.add(
+        Duration(days: config.fertilizingIntervalDays!),
+      );
+      final daysDifference = nextFertilizer.difference(now).inDays;
+      
+      return dayThreshold == 0 
+          ? daysDifference <= 0
+          : daysDifference > 0 && daysDifference <= dayThreshold;
+    }
+
+    return false;
+  }
+
+  // Helper method to check if plant is in good condition
+  bool _isPlantInGoodCondition(Plant plant, DateTime now) {
+    final waterGood = !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
+    final fertilizerGood = !_checkFertilizerStatus(plant, now, 0) && !_checkFertilizerStatus(plant, now, 2);
+    
+    final config = plant.config;
+    final hasWaterCare = config?.enableWateringCare == true || config?.wateringIntervalDays != null;
+    final hasFertilizerCare = config?.enableFertilizerCare == true || config?.fertilizingIntervalDays != null;
+    
+    // Plant is good if it doesn't need water or fertilizer within 2 days
+    return (hasWaterCare ? waterGood : true) && (hasFertilizerCare ? fertilizerGood : true);
   }
 
   // Private methods
@@ -440,4 +577,11 @@ enum ViewMode { grid, list, groupedBySpaces }
 
 enum SortBy { newest, oldest, name, species }
 
-enum CareStatus { needsWater, soonWater, good, unknown }
+enum CareStatus { 
+  needsWater, 
+  soonWater, 
+  needsFertilizer,
+  soonFertilizer,
+  good, 
+  unknown 
+}

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -90,6 +91,7 @@ import '../error/error_handler.dart';
 // Error handling imports
 import '../error/error_logger.dart';
 import '../services/analytics_service.dart';
+import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
 import '../services/local_data_service.dart';
 import '../services/platform_service.dart';
@@ -112,12 +114,21 @@ Future<void> initializeDependencies() async {
   // SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+  
+  // FlutterSecureStorage
+  const secureStorageConfig = AndroidOptions(
+    encryptedSharedPreferences: true,
+  );
+  sl.registerLazySingleton<FlutterSecureStorage>(
+    () => const FlutterSecureStorage(aOptions: secureStorageConfig),
+  );
 
   // ===== Services =====
   
   // Core Services
   sl.registerLazySingleton<LocalDataService>(() => LocalDataService());
   sl.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
+  sl.registerLazySingleton<AuthRateLimiter>(() => AuthRateLimiter(sl()));
   sl.registerLazySingleton<GasOMeterNotificationService>(() => GasOMeterNotificationService());
   sl.registerLazySingleton<PlatformService>(() => const PlatformService());
 
@@ -155,7 +166,7 @@ Future<void> initializeDependencies() async {
 
   // Auth Data Sources
   sl.registerLazySingleton<AuthLocalDataSource>(
-    () => AuthLocalDataSourceImpl(sl()),
+    () => AuthLocalDataSourceImpl(sl(), sl()),
   );
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(sl(), sl()),
@@ -332,6 +343,7 @@ Future<void> initializeDependencies() async {
       sendPasswordReset: sl(),
       analytics: sl(),
       platformService: sl(),
+      rateLimiter: sl(),
     ),
   );
 
@@ -416,6 +428,11 @@ abstract class RegisterModule {
   
   @singleton
   core.ISubscriptionRepository get subscriptionRepository => core.RevenueCatService();
+  
+  @singleton
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 }
 
 // Extension para facilitar o acesso

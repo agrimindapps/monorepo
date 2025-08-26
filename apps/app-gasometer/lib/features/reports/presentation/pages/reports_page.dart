@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../shared/widgets/vehicle_selector.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 
 class ReportsPage extends StatefulWidget {
@@ -42,9 +42,9 @@ class _ReportsPageState extends State<ReportsPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      VehicleSelector(
+                      EnhancedVehicleSelector(
                         selectedVehicleId: _selectedVehicleId,
-                        onVehicleChanged: (vehicleId) {
+                        onVehicleChanged: (String? vehicleId) {
                           setState(() {
                             _selectedVehicleId = vehicleId;
                           });

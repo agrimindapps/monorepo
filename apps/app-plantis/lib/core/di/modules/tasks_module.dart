@@ -26,6 +26,7 @@ class TasksModule {
         getTasksUseCase: sl(),
         addTaskUseCase: sl(),
         completeTaskUseCase: sl(),
+        authProvider: sl(),
       ),
     );
 

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../../../core/di/injection_container.dart' as di;
-import '../providers/plant_form_provider.dart';
-import 'plant_form_modal.dart';
+import 'package:go_router/go_router.dart';
 
 class PlantsFab extends StatelessWidget {
   final VoidCallback onScrollToTop;
@@ -16,16 +12,7 @@ class PlantsFab extends StatelessWidget {
   });
 
   void _onAddPlant(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => ChangeNotifierProvider(
-            create: (_) => di.sl<PlantFormProvider>(),
-            child: const PlantFormModal(),
-          ),
-    );
+    context.push('/plants/add');
   }
 
   @override

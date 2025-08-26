@@ -19,6 +19,21 @@ class GasometerFirebaseService {
     required String userId,
     required Map<String, dynamic> fuelData,
   }) async {
+    // Validação de entrada
+    if (userId.trim().isEmpty) {
+      throw ArgumentError('userId não pode estar vazio');
+    }
+    if (fuelData.isEmpty) {
+      throw ArgumentError('fuelData não pode estar vazio');
+    }
+    // Validar campos obrigatórios
+    final requiredFields = ['fuelType', 'liters', 'totalCost'];
+    for (final field in requiredFields) {
+      if (!fuelData.containsKey(field) || fuelData[field] == null) {
+        throw ArgumentError('Campo obrigatório ausente: $field');
+      }
+    }
+    
     try {
       final docRef = FirebaseFirestore.instance
           .collection('fuel_records')
@@ -42,9 +57,9 @@ class GasometerFirebaseService {
       );
 
       await _analytics.log('Fuel data saved successfully');
-      print('✅ Dados de abastecimento salvos no Firebase');
+      await _analytics.log('Dados de abastecimento salvos no Firebase');
     } catch (e, stackTrace) {
-      print('❌ Erro ao salvar dados de abastecimento: $e');
+      await _analytics.log('Erro ao salvar dados de abastecimento');
       await _analytics.recordError(
         e,
         stackTrace,
@@ -58,6 +73,21 @@ class GasometerFirebaseService {
     required String userId,
     required Map<String, dynamic> maintenanceData,
   }) async {
+    // Validação de entrada
+    if (userId.trim().isEmpty) {
+      throw ArgumentError('userId não pode estar vazio');
+    }
+    if (maintenanceData.isEmpty) {
+      throw ArgumentError('maintenanceData não pode estar vazio');
+    }
+    // Validar campos obrigatórios
+    final requiredFields = ['type', 'cost'];
+    for (final field in requiredFields) {
+      if (!maintenanceData.containsKey(field) || maintenanceData[field] == null) {
+        throw ArgumentError('Campo obrigatório ausente: $field');
+      }
+    }
+    
     try {
       final docRef = FirebaseFirestore.instance
           .collection('maintenance_records')
@@ -80,9 +110,9 @@ class GasometerFirebaseService {
       );
 
       await _analytics.log('Maintenance data saved successfully');
-      print('✅ Dados de manutenção salvos no Firebase');
+      await _analytics.log('Dados de manutenção salvos no Firebase');
     } catch (e, stackTrace) {
-      print('❌ Erro ao salvar dados de manutenção: $e');
+      await _analytics.log('Erro ao salvar dados de manutenção');
       await _analytics.recordError(
         e,
         stackTrace,
@@ -117,9 +147,9 @@ class GasometerFirebaseService {
       );
 
       await _analytics.log('Expense data saved successfully');
-      print('✅ Dados de despesa salvos no Firebase');
+      await _analytics.log('Dados de despesa salvos no Firebase');
     } catch (e, stackTrace) {
-      print('❌ Erro ao salvar dados de despesa: $e');
+      await _analytics.log('Erro ao salvar dados de despesa');
       await _analytics.recordError(
         e,
         stackTrace,
@@ -153,9 +183,9 @@ class GasometerFirebaseService {
       );
 
       await _analytics.log('Vehicle data saved successfully');
-      print('✅ Dados de veículo salvos no Firebase');
+      await _analytics.log('Dados de veículo salvos no Firebase');
     } catch (e, stackTrace) {
-      print('❌ Erro ao salvar dados de veículo: $e');
+      await _analytics.log('Erro ao salvar dados de veículo');
       await _analytics.recordError(
         e,
         stackTrace,
@@ -209,7 +239,7 @@ class GasometerFirebaseService {
 
       return stats;
     } catch (e, stackTrace) {
-      print('❌ Erro ao obter estatísticas do usuário: $e');
+      await _analytics.log('Erro ao obter estatísticas do usuário');
       await _analytics.recordError(
         e,
         stackTrace,

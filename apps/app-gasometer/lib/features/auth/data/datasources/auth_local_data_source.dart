@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
 
@@ -18,13 +19,17 @@ abstract class AuthLocalDataSource {
 @LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences _sharedPreferences;
+  final FlutterSecureStorage _secureStorage;
   
   static const String _cachedUserKey = 'cached_user';
   static const String _firstLaunchKey = 'first_launch';
   static const String _cachedEmailKey = 'cached_email';
   static const String _cachedPasswordKey = 'cached_password_hash';
 
-  AuthLocalDataSourceImpl(this._sharedPreferences);
+  AuthLocalDataSourceImpl(
+    this._sharedPreferences,
+    this._secureStorage,
+  );
 
   @override
   Future<UserModel?> getCachedUser() async {
@@ -83,8 +88,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<Map<String, String>> getCachedCredentials() async {
     try {
-      final email = _sharedPreferences.getString(_cachedEmailKey);
-      final passwordHash = _sharedPreferences.getString(_cachedPasswordKey);
+      final email = await _secureStorage.read(key: _cachedEmailKey);
+      final passwordHash = await _secureStorage.read(key: _cachedPasswordKey);
       
       return {
         if (email != null) 'email': email,
@@ -99,8 +104,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<void> cacheCredentials(String email, String hashedPassword) async {
     try {
       await Future.wait([
-        _sharedPreferences.setString(_cachedEmailKey, email),
-        _sharedPreferences.setString(_cachedPasswordKey, hashedPassword),
+        _secureStorage.write(key: _cachedEmailKey, value: email),
+        _secureStorage.write(key: _cachedPasswordKey, value: hashedPassword),
       ]);
     } catch (e) {
       throw CacheException('Failed to cache credentials: $e');
@@ -111,8 +116,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<void> clearCachedCredentials() async {
     try {
       await Future.wait([
-        _sharedPreferences.remove(_cachedEmailKey),
-        _sharedPreferences.remove(_cachedPasswordKey),
+        _secureStorage.delete(key: _cachedEmailKey),
+        _secureStorage.delete(key: _cachedPasswordKey),
       ]);
     } catch (e) {
       throw CacheException('Failed to clear cached credentials: $e');

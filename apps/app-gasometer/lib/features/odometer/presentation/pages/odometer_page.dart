@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../shared/widgets/vehicle_selector.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../domain/entities/odometer_entity.dart';
 import 'add_odometer_page.dart';
 
@@ -148,14 +148,13 @@ class _OdometerPageState extends State<OdometerPage> {
           constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
           child: Column(
             children: [
-              VehicleSelector(
+              EnhancedVehicleSelector(
                 selectedVehicleId: _selectedVehicleId,
-                onVehicleChanged: (vehicleId) {
+                onVehicleChanged: (String? vehicleId) {
                   setState(() {
                     _selectedVehicleId = vehicleId;
                   });
                 },
-                showEmptyOption: false,
               ),
               if (_selectedVehicleId != null) ...[
                 SizedBox(height: GasometerDesignTokens.spacingLg),

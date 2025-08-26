@@ -12,9 +12,9 @@ import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../../features/plants/presentation/providers/plant_form_provider.dart';
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';
-import '../../../features/plants/presentation/providers/plants_list_provider.dart';
 import '../../../features/plants/presentation/providers/plants_provider.dart';
 
+// ignore: avoid_classes_with_only_static_members
 class PlantsDIModule {
   static void init(GetIt sl) {
     // Data sources
@@ -58,12 +58,12 @@ class PlantsDIModule {
       ),
     );
 
-    sl.registerFactory(() => PlantsListProvider(plantsRepository: sl()));
 
     sl.registerFactory(
       () => PlantDetailsProvider(
         getPlantByIdUseCase: sl(),
         deletePlantUseCase: sl(),
+        updatePlantUseCase: sl(),
       ),
     );
 

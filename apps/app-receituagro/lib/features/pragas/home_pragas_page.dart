@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/services/app_data_manager.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
 import '../culturas/lista_culturas_page.dart';
@@ -31,10 +32,40 @@ class _HomePragasPageState extends State<HomePragasPage> {
     super.initState();
     _loadCulturaData();
     
-    // Inicializa pragas usando Provider após o build
+    // Inicializa pragas usando Provider após aguardar dados estarem carregados
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PragasProvider>().initialize();
+      _initializePragasWithDelay();
     });
+  }
+
+  /// Inicializa pragas aguardando dados estarem carregados
+  Future<void> _initializePragasWithDelay() async {
+    try {
+      final appDataManager = GetIt.instance<IAppDataManager>();
+      
+      // Aguarda dados estarem prontos
+      final isDataReady = await appDataManager.isDataReady();
+      print('📊 HomePragasPage: Dados prontos = $isDataReady');
+      
+      if (isDataReady && mounted) {
+        await context.read<PragasProvider>().initialize();
+        print('✅ HomePragasPage: PragasProvider inicializado');
+      } else if (mounted) {
+        // Se dados não estão prontos, tenta novamente após delay
+        print('⏳ HomePragasPage: Aguardando dados ficarem prontos...');
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _initializePragasWithDelay();
+          }
+        });
+      }
+    } catch (e) {
+      print('❌ HomePragasPage: Erro na inicialização das pragas: $e');
+      if (mounted) {
+        // Tenta inicializar mesmo assim
+        context.read<PragasProvider>().initialize();
+      }
+    }
   }
 
   @override
@@ -132,20 +163,64 @@ class _HomePragasPageState extends State<HomePragasPage> {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final availableWidth = constraints.maxWidth;
-            final screenWidth = MediaQuery.of(context).size.width;
-            final isSmallDevice = screenWidth < 360;
-            final useVerticalLayout = isSmallDevice || availableWidth < 320;
+        child: provider.errorMessage != null 
+            ? _buildErrorState(context, provider)
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  final availableWidth = constraints.maxWidth;
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final isSmallDevice = screenWidth < 360;
+                  final useVerticalLayout = isSmallDevice || availableWidth < 320;
 
-            if (useVerticalLayout) {
-              return _buildVerticalMenuLayout(availableWidth, provider);
-            } else {
-              return _buildGridMenuLayout(availableWidth, context, provider);
-            }
-          },
-        ),
+                  if (useVerticalLayout) {
+                    return _buildVerticalMenuLayout(availableWidth, provider);
+                  } else {
+                    return _buildGridMenuLayout(availableWidth, context, provider);
+                  }
+                },
+              ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, PragasProvider provider) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 48,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Erro ao carregar dados',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Toque para tentar novamente',
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              provider.initialize();
+            },
+            child: const Text('Tentar Novamente'),
+          ),
+        ],
       ),
     );
   }

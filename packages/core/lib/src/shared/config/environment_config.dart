@@ -34,11 +34,17 @@ class EnvironmentConfig {
   static String get revenueCatApiKey {
     switch (environment) {
       case Environment.development:
-        return const String.fromEnvironment('REVENUE_CAT_DEV_KEY', defaultValue: 'rc_dev_default');
+        const key = String.fromEnvironment('REVENUE_CAT_DEV_KEY');
+        if (key.isEmpty) throw Exception('REVENUE_CAT_DEV_KEY not configured');
+        return key;
       case Environment.staging:
-        return const String.fromEnvironment('REVENUE_CAT_STAGING_KEY', defaultValue: 'rc_staging_default');
+        const key = String.fromEnvironment('REVENUE_CAT_STAGING_KEY');
+        if (key.isEmpty) throw Exception('REVENUE_CAT_STAGING_KEY not configured');
+        return key;
       case Environment.production:
-        return const String.fromEnvironment('REVENUE_CAT_PROD_KEY', defaultValue: 'rc_prod_default');
+        const key = String.fromEnvironment('REVENUE_CAT_PROD_KEY');
+        if (key.isEmpty) throw Exception('REVENUE_CAT_PROD_KEY not configured');
+        return key;
     }
   }
 
@@ -113,11 +119,15 @@ class EnvironmentConfig {
 
   // API Keys
   static String get weatherApiKey {
-    return const String.fromEnvironment('WEATHER_API_KEY', defaultValue: '');
+    const key = String.fromEnvironment('WEATHER_API_KEY');
+    if (key.isEmpty) throw Exception('WEATHER_API_KEY not configured');
+    return key;
   }
 
   static String get googleMapsApiKey {
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
+    const key = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+    if (key.isEmpty) throw Exception('GOOGLE_MAPS_API_KEY not configured');
+    return key;
   }
 
   // Debug Configuration

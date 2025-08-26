@@ -499,9 +499,7 @@ class _LoginPageState extends State<LoginPage>
                                           ),
                                           const Spacer(),
                                           TextButton(
-                                            onPressed: () {
-                                              // TODO: Implement forgot password
-                                            },
+                                            onPressed: null, // Disabled for now
                                             style: TextButton.styleFrom(
                                               padding:
                                                   const EdgeInsets.symmetric(

@@ -1,273 +1,321 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
+import '../../../../../core/localization/app_strings.dart';
 
-/// Controller responsável pela lógica de negócio da tela de detalhes da planta
+/// Controller responsible for business logic of the plant details screen
+/// 
+/// This controller follows the separation of concerns principle by not using
+/// BuildContext directly. Instead, it uses callback functions to trigger UI actions.
+/// This approach makes the controller more testable and decouples it from the UI.
+/// 
+/// The controller handles:
+/// - Plant data loading and refreshing
+/// - Navigation actions (back, edit, images, schedule)
+/// - Plant operations (delete, share, duplicate)
+/// - Error handling and success/failure messaging
+/// 
+/// Example usage:
+/// ```dart
+/// final controller = PlantDetailsController(
+///   provider: plantDetailsProvider,
+///   onBack: () => Navigator.of(context).pop(),
+///   onShowSnackBar: (message, type) => showSnackBar(message),
+/// );
+/// controller.loadPlant('plant-id-123');
+/// ```
 class PlantDetailsController {
-  final BuildContext context;
   final PlantDetailsProvider provider;
+  
+  // Callbacks para ações que precisam de context
+  final VoidCallback? onBack;
+  final Function(String)? onNavigateToEdit;
+  final Function(String)? onNavigateToImages;
+  final Function(String)? onNavigateToSchedule;
+  final Function(String, String)? onShowSnackBar;
+  final Function(String, String, {Color? backgroundColor})? onShowSnackBarWithColor;
+  final Function(Widget)? onShowDialog;
+  final Function(Widget)? onShowBottomSheet;
 
-  PlantDetailsController({required this.context, required this.provider});
+  PlantDetailsController({
+    required this.provider,
+    this.onBack,
+    this.onNavigateToEdit,
+    this.onNavigateToImages,
+    this.onNavigateToSchedule,
+    this.onShowSnackBar,
+    this.onShowSnackBarWithColor,
+    this.onShowDialog,
+    this.onShowBottomSheet,
+  });
 
-  /// Carrega a planta por ID
+  /// Loads a plant by its unique identifier
+  /// 
+  /// This method triggers the provider to fetch plant data from the repository.
+  /// The UI will automatically update when the data loading state changes.
+  /// 
+  /// Parameters:
+  /// - [plantId]: The unique identifier of the plant to load
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.loadPlant('plant-123');
+  /// ```
   void loadPlant(String plantId) {
     provider.loadPlant(plantId);
   }
 
-  /// Recarrega a planta atual
+  /// Refreshes the current plant data
+  /// 
+  /// This method forces a reload of the plant data, useful for recovering
+  /// from error states or ensuring the latest data is displayed.
+  /// 
+  /// Parameters:
+  /// - [plantId]: The unique identifier of the plant to refresh
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.refresh('plant-123');
+  /// ```
   void refresh(String plantId) {
     provider.loadPlant(plantId);
   }
 
-  /// Navega de volta
+  /// Navigates back to the previous screen
+  /// 
+  /// This method triggers the back navigation callback, typically closing
+  /// the plant details screen and returning to the plants list.
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.goBack();
+  /// ```
   void goBack() {
-    context.pop();
+    onBack?.call();
   }
 
-  /// Mostra opções de edição da planta
-  void showEditOptions(Plant plant) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder:
-          (context) => Container(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Editar ${plant.displayName}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 24),
-                ListTile(
-                  leading: const Icon(Icons.edit_outlined),
-                  title: const Text('Editar informações'),
-                  subtitle: const Text('Nome, espécie, notas e configurações'),
-                  onTap: () {
-                    context.pop();
-                    context.push('/plants/edit/${plant.id}');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.add_photo_alternate_outlined),
-                  title: const Text('Gerenciar fotos'),
-                  subtitle: const Text(
-                    'Adicionar, remover ou reorganizar fotos',
-                  ),
-                  onTap: () {
-                    context.pop();
-                    context.push('/plants/${plant.id}/images');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.schedule_outlined),
-                  title: const Text('Editar cronograma'),
-                  subtitle: const Text('Alterar intervalos de cuidados'),
-                  onTap: () {
-                    context.pop();
-                    context.push('/plants/${plant.id}/schedule');
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-    );
+  /// Navigates to the plant editing screen
+  /// 
+  /// This method triggers navigation to the plant form page in edit mode,
+  /// allowing users to modify the plant's information.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity containing the current plant data
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.editPlant(selectedPlant);
+  /// ```
+  void editPlant(Plant plant) {
+    onNavigateToEdit?.call(plant.id);
   }
 
-  /// Mostra mais opções da planta
-  void showMoreOptions(Plant plant) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder:
-          (context) => Container(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Opções',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 24),
-                ListTile(
-                  leading: const Icon(Icons.share_outlined),
-                  title: const Text('Compartilhar'),
-                  subtitle: const Text('Compartilhar informações da planta'),
-                  onTap: () {
-                    context.pop();
-                    _sharePlant(plant);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.content_copy_outlined),
-                  title: const Text('Duplicar'),
-                  subtitle: const Text('Criar uma cópia desta planta'),
-                  onTap: () {
-                    context.pop();
-                    _duplicatePlant(plant);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.delete_outline,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  title: Text(
-                    'Excluir',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                  subtitle: const Text('Remover permanentemente esta planta'),
-                  onTap: () {
-                    context.pop();
-                    confirmDelete(plant);
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-    );
+  /// Navigates to the plant image management screen
+  /// 
+  /// This method opens the photo gallery where users can view, add,
+  /// edit, and delete plant images.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity for which to manage images
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.managePhotos(selectedPlant);
+  /// ```
+  void managePhotos(Plant plant) {
+    onNavigateToImages?.call(plant.id);
   }
 
-  /// Confirma a exclusão da planta
-  void confirmDelete(Plant plant) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Excluir planta'),
-            content: Text(
-              'Tem certeza que deseja excluir "${plant.displayName}"? Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => context.pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.pop();
-                  deletePlant(plant.id);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
-    );
+  /// Navigates to the plant care schedule editing screen
+  /// 
+  /// This method opens the schedule management interface where users
+  /// can configure watering, fertilizing, and other care reminders.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity for which to edit the schedule
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.editSchedule(selectedPlant);
+  /// ```
+  void editSchedule(Plant plant) {
+    onNavigateToSchedule?.call(plant.id);
   }
 
-  /// Exclui a planta
+  /// Displays plant editing options in a bottom sheet
+  /// 
+  /// This method shows a modal bottom sheet with various plant editing
+  /// options like edit details, manage photos, etc.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity for which to show edit options
+  /// - [bottomSheetBuilder]: A function that builds the bottom sheet widget
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.showEditOptions(plant, (p) => EditOptionsSheet(plant: p));
+  /// ```
+  void showEditOptions(Plant plant, Widget Function(Plant) bottomSheetBuilder) {
+    onShowBottomSheet?.call(bottomSheetBuilder(plant));
+  }
+
+  /// Displays additional plant options in a bottom sheet
+  /// 
+  /// This method shows a modal bottom sheet with extended plant actions
+  /// like share, duplicate, delete, etc.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity for which to show more options
+  /// - [bottomSheetBuilder]: A function that builds the bottom sheet widget
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.showMoreOptions(plant, (p) => MoreOptionsSheet(plant: p));
+  /// ```
+  void showMoreOptions(Plant plant, Widget Function(Plant) bottomSheetBuilder) {
+    onShowBottomSheet?.call(bottomSheetBuilder(plant));
+  }
+
+  /// Shows a confirmation dialog before deleting a plant
+  /// 
+  /// This method displays a confirmation dialog to ensure the user
+  /// really wants to delete the plant, as this action is irreversible.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity to be potentially deleted
+  /// - [dialogBuilder]: A function that builds the confirmation dialog
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.confirmDelete(plant, (p) => DeleteConfirmDialog(plant: p));
+  /// ```
+  void confirmDelete(Plant plant, Widget Function(Plant) dialogBuilder) {
+    onShowDialog?.call(dialogBuilder(plant));
+  }
+
+  /// Deletes a plant permanently from the system
+  /// 
+  /// This method performs the actual plant deletion operation.
+  /// It loads the plant data, attempts to delete it through the provider,
+  /// and provides feedback through callbacks.
+  /// 
+  /// The deletion process:
+  /// 1. Loads the plant data to ensure it exists
+  /// 2. Calls the provider's delete method
+  /// 3. Shows success message and navigates back on success
+  /// 4. Shows error message on failure
+  /// 
+  /// Parameters:
+  /// - [plantId]: The unique identifier of the plant to delete
+  /// 
+  /// Returns:
+  /// - A [Future] that completes when the deletion operation finishes
+  /// 
+  /// Example:
+  /// ```dart
+  /// await controller.deletePlant('plant-123');
+  /// ```
   Future<void> deletePlant(String plantId) async {
     try {
       provider.loadPlant(plantId);  // Carrega a planta no provider
       final success = await provider.deletePlant();  // Deleta a planta atual no provider
 
-      if (context.mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Planta excluída com sucesso'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          context.pop();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(provider.errorMessage ?? 'Erro ao excluir planta'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao excluir planta: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+      if (success) {
+        onShowSnackBarWithColor?.call(
+          AppStrings.plantDeletedSuccessfully,
+          '',
+          backgroundColor: Colors.green,
+        );
+        onBack?.call();
+      } else {
+        onShowSnackBar?.call(
+          provider.errorMessage ?? AppStrings.errorDeletingPlant,
+          'error',
         );
       }
+    } catch (e) {
+      onShowSnackBar?.call(
+        '${AppStrings.errorDeletingPlant}: $e',
+        'error',
+      );
     }
   }
 
-  /// Compartilha as informações da planta
-  void _sharePlant(Plant plant) {
+  /// Shares plant information with other applications
+  /// 
+  /// This method allows users to share plant details through various
+  /// channels like social media, messaging apps, or email.
+  /// 
+  /// Currently shows a development message as the feature is being implemented.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity whose information should be shared
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.sharePlant(selectedPlant);
+  /// ```
+  void sharePlant(Plant plant) {
     // TODO: Implementar compartilhamento
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade de compartilhamento em desenvolvimento'),
-      ),
+    onShowSnackBar?.call(
+      AppStrings.sharingFeatureInDevelopment,
+      'info',
     );
   }
 
-  /// Duplica a planta
-  void _duplicatePlant(Plant plant) {
+  /// Creates a duplicate copy of an existing plant
+  /// 
+  /// This method creates a new plant entry with the same characteristics
+  /// as the original plant, useful for users who want to track multiple
+  /// plants of the same species or similar care requirements.
+  /// 
+  /// Currently shows a development message as the feature is being implemented.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity to be duplicated
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.duplicatePlant(selectedPlant);
+  /// ```
+  void duplicatePlant(Plant plant) {
     // TODO: Implementar duplicação
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade de duplicação em desenvolvimento'),
-      ),
+    onShowSnackBar?.call(
+      AppStrings.duplicateFeatureInDevelopment,
+      'info',
     );
   }
 
-  /// Mostra mensagem de erro
+  /// Displays an error message to the user
+  /// 
+  /// This method shows error messages through the snackbar callback.
+  /// Used for displaying validation errors, network issues, or other failures.
+  /// 
+  /// Parameters:
+  /// - [message]: The error message to display to the user
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.showError('Failed to load plant data');
+  /// ```
   void showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ),
-    );
+    onShowSnackBar?.call(message, 'error');
   }
 
-  /// Mostra mensagem de sucesso
+  /// Displays a success message to the user
+  /// 
+  /// This method shows success messages through the snackbar callback
+  /// with a green background to indicate successful operations.
+  /// 
+  /// Parameters:
+  /// - [message]: The success message to display to the user
+  /// 
+  /// Example:
+  /// ```dart
+  /// controller.showSuccess('Plant updated successfully!');
+  /// ```
   void showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
+    onShowSnackBarWithColor?.call(message, '', backgroundColor: Colors.green);
   }
 }

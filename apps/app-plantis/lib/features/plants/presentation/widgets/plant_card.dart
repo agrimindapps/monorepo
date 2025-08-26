@@ -17,20 +17,14 @@ class PlantCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border:
-            isDark
-                ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
-                : Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                ),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
-            color:
-                isDark
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.08),
+            color: theme.colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.08),
             blurRadius: isDark ? 8 : 12,
             offset: const Offset(0, 4),
             spreadRadius: isDark ? 0 : 2,
@@ -113,7 +107,7 @@ class PlantCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Badge de cuidados pendentes
-                Center(child: _buildPendingTasksBadge()),
+                Center(child: _buildPendingTasksBadge(context)),
               ],
             ),
           ),
@@ -134,7 +128,8 @@ class PlantCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPendingTasksBadge() {
+  Widget _buildPendingTasksBadge(BuildContext context) {
+    final theme = Theme.of(context);
     final pendingTasks = _getPendingTasksCount();
 
     if (pendingTasks == 0) {
@@ -144,22 +139,22 @@ class PlantCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF9500).withValues(alpha: 0.15),
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+          color: theme.colorScheme.error.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.schedule, color: Color(0xFFFF9500), size: 14),
+          Icon(Icons.schedule, color: theme.colorScheme.error, size: 14),
           const SizedBox(width: 6),
           Text(
             '$pendingTasks pendentes',
-            style: const TextStyle(
-              color: Color(0xFFFF9500),
+            style: TextStyle(
+              color: theme.colorScheme.error,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -233,8 +228,7 @@ class PlantCard extends StatelessWidget {
       context: context,
       builder:
           (context) => AlertDialog(
-            backgroundColor:
-                isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
+            backgroundColor: theme.colorScheme.surface,
             title: Text(
               'Excluir planta',
               style: TextStyle(color: theme.colorScheme.onSurface),
@@ -256,7 +250,7 @@ class PlantCard extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // TODO: Implement delete functionality
+                  // Delete functionality not implemented
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Função de exclusão será implementada'),
@@ -274,7 +268,7 @@ class PlantCard extends StatelessWidget {
   }
 
   int _getPendingTasksCount() {
-    // TODO: Integrate with actual tasks system
+    // Tasks integration pending
     // For now, return a mock value based on plant name for demonstration
     switch (plant.displayName.toLowerCase()) {
       case 'teste':

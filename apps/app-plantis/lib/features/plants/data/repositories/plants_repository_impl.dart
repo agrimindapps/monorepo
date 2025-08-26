@@ -23,9 +23,14 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
   Future<String?> get _currentUserId async {
     try {
-      final user = await authService.currentUser.first;
+      // Wait for user with timeout to handle initialization delays
+      final user = await authService.currentUser
+          .timeout(const Duration(seconds: 5))
+          .first;
       return user?.id;
     } catch (e) {
+      // Log error for debugging
+      print('Error getting current user ID: $e');
       return null;
     }
   }
@@ -35,7 +40,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return const Left(ServerFailure('Usuário não autenticado'));
+        // For anonymous users still initializing, return empty list instead of error
+        // This prevents showing error page during auth initialization
+        return const Right([]);
       }
 
       // ALWAYS return local data first for instant UI response
@@ -236,7 +243,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return const Left(ServerFailure('Usuário não autenticado'));
+        // For anonymous users still initializing, return empty search results
+        return const Right([]);
       }
 
       if (await networkInfo.isConnected) {

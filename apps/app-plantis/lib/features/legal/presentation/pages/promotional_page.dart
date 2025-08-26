@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
 class PromotionalPage extends StatefulWidget {
@@ -665,6 +667,36 @@ class _PromotionalPageState extends State<PromotionalPage>
           ],
         ),
 
+        const SizedBox(height: 16),
+
+        // Login Button
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: () => context.go(AppRouter.login),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: PlantisColors.primary, width: 2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(
+              Icons.login,
+              color: PlantisColors.primary,
+              size: 20,
+            ),
+            label: const Text(
+              'Já tenho conta - Fazer Login',
+              style: TextStyle(
+                color: PlantisColors.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+
         const SizedBox(height: 20),
 
         // Terms and conditions
@@ -682,7 +714,7 @@ class _PromotionalPageState extends State<PromotionalPage>
   }
 
   void _handleSubscription(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(

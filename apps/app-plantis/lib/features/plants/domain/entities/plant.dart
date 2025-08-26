@@ -10,6 +10,7 @@ class Plant extends BaseSyncEntity {
   final DateTime? plantingDate;
   final String? notes;
   final PlantConfig? config;
+  final bool isFavorited;
 
   const Plant({
     required super.id,
@@ -21,6 +22,7 @@ class Plant extends BaseSyncEntity {
     this.plantingDate,
     this.notes,
     this.config,
+    this.isFavorited = false,
     super.createdAt,
     super.updatedAt,
     super.lastSyncAt,
@@ -59,6 +61,7 @@ class Plant extends BaseSyncEntity {
       imageUrls: (plantaModel.imagePaths as List<dynamic>?)?.cast<String>() ?? [],
       plantingDate: plantaModel.dataCadastro as DateTime?,
       notes: plantaModel.observacoes as String?,
+      isFavorited: (plantaModel.isFavorited as bool?) ?? false,
       createdAt: plantaModel.createdAt as DateTime?,
       updatedAt: plantaModel.updatedAt as DateTime?,
       lastSyncAt: plantaModel.lastSyncAt as DateTime?,
@@ -81,6 +84,7 @@ class Plant extends BaseSyncEntity {
       'image_urls': imageUrls,
       'planting_date': plantingDate?.toIso8601String(),
       'notes': notes,
+      'is_favorited': isFavorited,
       'config':
           config != null
               ? {
@@ -97,6 +101,10 @@ class Plant extends BaseSyncEntity {
                 'soil_type': config!.soilType,
                 'ideal_temperature': config!.idealTemperature,
                 'ideal_humidity': config!.idealHumidity,
+                'enable_watering_care': config!.enableWateringCare,
+                'last_watering_date': config!.lastWateringDate?.toIso8601String(),
+                'enable_fertilizer_care': config!.enableFertilizerCare,
+                'last_fertilizer_date': config!.lastFertilizerDate?.toIso8601String(),
               }
               : null,
     };
@@ -143,6 +151,7 @@ class Plant extends BaseSyncEntity {
     DateTime? plantingDate,
     String? notes,
     PlantConfig? config,
+    bool? isFavorited,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? lastSyncAt,
@@ -162,6 +171,7 @@ class Plant extends BaseSyncEntity {
       plantingDate: plantingDate ?? this.plantingDate,
       notes: notes ?? this.notes,
       config: config ?? this.config,
+      isFavorited: isFavorited ?? this.isFavorited,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
@@ -184,6 +194,7 @@ class Plant extends BaseSyncEntity {
     plantingDate,
     notes,
     config,
+    isFavorited,
   ];
 }
 
@@ -199,6 +210,13 @@ class PlantConfig extends Equatable {
   final String? soilType;
   final double? idealTemperature;
   final double? idealHumidity;
+  
+  // New care fields for Water and Fertilizer
+  final bool? enableWateringCare;
+  final DateTime? lastWateringDate;
+  
+  final bool? enableFertilizerCare;
+  final DateTime? lastFertilizerDate;
 
   const PlantConfig({
     this.wateringIntervalDays,
@@ -212,6 +230,10 @@ class PlantConfig extends Equatable {
     this.soilType,
     this.idealTemperature,
     this.idealHumidity,
+    this.enableWateringCare,
+    this.lastWateringDate,
+    this.enableFertilizerCare,
+    this.lastFertilizerDate,
   });
 
   bool get hasWateringSchedule =>
@@ -227,6 +249,10 @@ class PlantConfig extends Equatable {
   bool get hasReplantingSchedule =>
       replantingIntervalDays != null && replantingIntervalDays! > 0;
 
+  // New care schedule getters
+  bool get hasWateringCareEnabled => enableWateringCare == true;
+  bool get hasFertilizerCareEnabled => enableFertilizerCare == true;
+
   PlantConfig copyWith({
     int? wateringIntervalDays,
     int? fertilizingIntervalDays,
@@ -239,6 +265,10 @@ class PlantConfig extends Equatable {
     String? soilType,
     double? idealTemperature,
     double? idealHumidity,
+    bool? enableWateringCare,
+    DateTime? lastWateringDate,
+    bool? enableFertilizerCare,
+    DateTime? lastFertilizerDate,
   }) {
     return PlantConfig(
       wateringIntervalDays: wateringIntervalDays ?? this.wateringIntervalDays,
@@ -256,6 +286,10 @@ class PlantConfig extends Equatable {
       soilType: soilType ?? this.soilType,
       idealTemperature: idealTemperature ?? this.idealTemperature,
       idealHumidity: idealHumidity ?? this.idealHumidity,
+      enableWateringCare: enableWateringCare ?? this.enableWateringCare,
+      lastWateringDate: lastWateringDate ?? this.lastWateringDate,
+      enableFertilizerCare: enableFertilizerCare ?? this.enableFertilizerCare,
+      lastFertilizerDate: lastFertilizerDate ?? this.lastFertilizerDate,
     );
   }
 
@@ -272,5 +306,9 @@ class PlantConfig extends Equatable {
     soilType,
     idealTemperature,
     idealHumidity,
+    enableWateringCare,
+    lastWateringDate,
+    enableFertilizerCare,
+    lastFertilizerDate,
   ];
 }

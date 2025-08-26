@@ -187,7 +187,7 @@ class AnalyticsService {
 
   Future<void> setUserId(String userId) async {
     if (!_isAnalyticsEnabled) {
-      debugPrint('👤 [DEV] User ID: $userId');
+      debugPrint('👤 [DEV] User ID configurado');
       return;
     }
 
@@ -197,7 +197,7 @@ class AnalyticsService {
 
   Future<void> setUserProperties(Map<String, String> properties) async {
     if (!_isAnalyticsEnabled) {
-      debugPrint('👤 [DEV] User properties: $properties');
+      debugPrint('👤 [DEV] User properties configuradas');
       return;
     }
 

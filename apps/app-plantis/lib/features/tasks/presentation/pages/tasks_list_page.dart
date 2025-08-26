@@ -3,9 +3,14 @@ import 'package:provider/provider.dart';
 
 import '../../domain/entities/task.dart' as task_entity;
 import '../providers/tasks_provider.dart';
+import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
+import '../widgets/task_completion_dialog.dart';
+import '../widgets/task_creation_dialog.dart';
 import '../widgets/tasks_app_bar.dart';
+import '../widgets/tasks_error_boundary.dart';
 import '../widgets/tasks_error_widget.dart';
+import '../widgets/tasks_fab.dart';
 import '../widgets/tasks_loading_widget.dart';
 
 class TaskDateGroup {
@@ -36,10 +41,10 @@ class _TasksListPageState extends State<TasksListPage> {
   void initState() {
     super.initState();
 
-    // Carregar tarefas ao inicializar com delay para garantir que auth está pronto
+    // Load tasks on initialization with delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TasksProvider>().loadTasks();
-      // Definir filtro padrão como "Para hoje"
+      // Set default filter to "Today"
       context.read<TasksProvider>().setFilter(TasksFilterType.today);
     });
   }
@@ -49,25 +54,43 @@ class _TasksListPageState extends State<TasksListPage> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
-      appBar: const TasksAppBar(),
-      body: Consumer<TasksProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const TasksLoadingWidget();
-          }
+    return TasksErrorBoundary(
+      onRetry: () {
+        final provider = context.read<TasksProvider>();
+        provider.clearError();
+        provider.loadTasks();
+      },
+      child: Scaffold(
+        backgroundColor:
+            isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+        appBar: const TasksAppBar(),
+        body: Consumer<TasksProvider>(
+          builder: (context, provider, child) {
+            if (provider.isLoading && provider.allTasks.isEmpty) {
+              return const TasksLoadingWidget();
+            }
 
-          if (provider.hasError) {
-            return TasksErrorWidget(
-              message: provider.errorMessage!,
-              onRetry: () => provider.loadTasks(),
+            if (provider.hasError) {
+              return TasksErrorWidget(
+                message: provider.errorMessage!,
+                onRetry: () => provider.loadTasks(),
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh: provider.refresh,
+              child: Stack(
+                children: [
+                  _buildTasksList(provider),
+                  // Operation feedback overlay
+                  if (provider.hasActiveOperations || provider.currentOperationMessage != null)
+                    _buildOperationOverlay(provider),
+                ],
+              ),
             );
-          }
-
-          return _buildTasksList(provider);
-        },
+          },
+        ),
+        floatingActionButton: const TasksFab(),
       ),
     );
   }
@@ -158,69 +181,135 @@ class _TasksListPageState extends State<TasksListPage> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color:
-            isDark
-                ? const Color(0xFF1C1C1E)
-                : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Ícone da tarefa
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.secondary,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(_getTaskIcon(task.type), color: Colors.black, size: 20),
+    return Consumer<TasksProvider>(
+      builder: (context, provider, child) {
+        final isLoading = provider.isTaskOperationLoading(task.id);
+        
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color:
+                isDark
+                    ? const Color(0xFF1C1C1E)
+                    : theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+            border: isLoading 
+                ? Border.all(color: theme.colorScheme.primary, width: 1.5)
+                : null,
           ),
-          const SizedBox(width: 16),
-          // Informações da tarefa
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+          child: Row(
+            children: [
+              // Ícone da tarefa ou loading
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: isLoading 
+                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                      : theme.colorScheme.secondary,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  task.plantName,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Botão de check
-          GestureDetector(
-            onTap: () => context.read<TasksProvider>().completeTask(task.id),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondary,
-                shape: BoxShape.circle,
+                child: isLoading 
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    : Icon(_getTaskIcon(task.type), color: Colors.black, size: 20),
               ),
-              child: const Icon(Icons.check, color: Colors.black, size: 20),
-            ),
+              const SizedBox(width: 16),
+              // Task information
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: isLoading ? 0.6 : 1.0,
+                        ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      task.plantName,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (isLoading) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Processando...',
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // Check button
+              GestureDetector(
+                onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isLoading 
+                        ? theme.colorScheme.secondary.withValues(alpha: 0.3)
+                        : theme.colorScheme.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check, 
+                    color: isLoading ? Colors.grey : Colors.black, 
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  Future<void> _showTaskCompletionDialog(BuildContext context, task_entity.Task task) async {
+    final result = await TaskCompletionDialog.show(
+      context: context,
+      task: task,
+    );
+
+    if (result != null && context.mounted) {
+      // Use the completion date and notes from the dialog
+      final success = await context.read<TasksProvider>().completeTask(
+        task.id, 
+        notes: result.notes,
+      );
+      
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Tarefa "${task.title}" marcada como concluída!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   IconData _getTaskIcon(task_entity.TaskType type) {
@@ -284,11 +373,96 @@ class _TasksListPageState extends State<TasksListPage> {
     }
   }
 
-  void _showAddTaskDialog(BuildContext context) {
-    // TODO: Implementar dialog/página de criação de tarefa
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Formulário de criação de tarefa em desenvolvimento'),
+  Future<void> _showAddTaskDialog(BuildContext context) async {
+    final result = await TaskCreationDialog.show(context: context);
+    
+    if (result != null && context.mounted) {
+      // Create task entity from the form data
+      final task = task_entity.Task(
+        id: '', // Will be generated by the repository
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        title: result.title,
+        description: result.description,
+        plantId: result.plantId,
+        plantName: result.plantName,
+        type: result.type,
+        priority: result.priority,
+        dueDate: result.dueDate,
+      );
+
+      // Add the task using the provider
+      final success = await context.read<TasksProvider>().addTask(task);
+      
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Tarefa "${result.title}" criada com sucesso!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao criar tarefa. Tente novamente.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildOperationOverlay(TasksProvider provider) {
+    final theme = Theme.of(context);
+    
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                provider.currentOperationMessage ?? 'Processando...',
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

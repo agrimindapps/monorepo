@@ -42,4 +42,23 @@ class PragasHiveRepository extends BaseHiveRepository<PragasHive> {
   List<PragasHive> findByFamilia(String familia) {
     return findBy((item) => item.familia?.toLowerCase() == familia.toLowerCase());
   }
+
+  /// Métodos assíncronos para aguardar box estar aberto
+  Future<List<PragasHive>> findByTipoAsync(String tipoPraga) async {
+    return await findByAsync((item) => item.tipoPraga.toLowerCase() == tipoPraga.toLowerCase());
+  }
+
+  Future<List<PragasHive>> findByFamiliaAsync(String familia) async {
+    return await findByAsync((item) => item.familia?.toLowerCase() == familia.toLowerCase());
+  }
+
+  Future<PragasHive?> findByNomeComumAsync(String nomeComum) async {
+    final results = await findByAsync((item) => item.nomeComum.toLowerCase() == nomeComum.toLowerCase());
+    return results.isNotEmpty ? results.first : null;
+  }
+
+  Future<PragasHive?> findByNomeCientificoAsync(String nomeCientifico) async {
+    final results = await findByAsync((item) => item.nomeCientifico.toLowerCase() == nomeCientifico.toLowerCase());
+    return results.isNotEmpty ? results.first : null;
+  }
 }

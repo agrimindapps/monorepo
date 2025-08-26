@@ -333,7 +333,7 @@ class PlantListTile extends StatelessWidget {
                 title: const Text('Editar planta'),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Navegar para edição
+                  // Edit functionality not implemented
                 },
               ),
               ListTile(
@@ -341,7 +341,7 @@ class PlantListTile extends StatelessWidget {
                 title: const Text('Registrar rega'),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Registrar rega
+                  // Water logging not implemented
                 },
               ),
               ListTile(
@@ -352,7 +352,7 @@ class PlantListTile extends StatelessWidget {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Confirmar exclusão
+                  // Delete functionality not implemented
                 },
               ),
               const SizedBox(height: 20),

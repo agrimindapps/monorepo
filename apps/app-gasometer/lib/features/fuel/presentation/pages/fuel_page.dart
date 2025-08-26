@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../shared/widgets/vehicle_selector.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../domain/entities/fuel_record_entity.dart';
@@ -34,8 +34,8 @@ class _FuelPageState extends State<FuelPage> {
     final fuelProvider = context.read<FuelProvider>();
     final vehiclesProvider = context.read<VehiclesProvider>();
     
-    // Load vehicles first, then fuel records
-    vehiclesProvider.loadVehicles().then((_) {
+    // Initialize vehicles first, then fuel records
+    vehiclesProvider.initialize().then((_) {
       if (_selectedVehicleId?.isNotEmpty == true) {
         fuelProvider.loadFuelRecordsByVehicle(_selectedVehicleId!);
       } else {
@@ -156,9 +156,9 @@ class _FuelPageState extends State<FuelPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        VehicleSelector(
+        EnhancedVehicleSelector(
           selectedVehicleId: _selectedVehicleId,
-          onVehicleChanged: (vehicleId) {
+          onVehicleChanged: (String? vehicleId) {
             setState(() {
               _selectedVehicleId = vehicleId;
               _selectedFilter = vehicleId ?? 'all';
@@ -171,7 +171,6 @@ class _FuelPageState extends State<FuelPage> {
               fuelProvider.loadAllFuelRecords();
             }
           },
-          showEmptyOption: true,
         ),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         
@@ -556,7 +555,7 @@ class _FuelPageState extends State<FuelPage> {
     
     // Se resultado for true, recarregar veículos
     if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
+      await context.read<VehiclesProvider>().initialize();
     }
   }
 

@@ -31,6 +31,7 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
         plantingDate: params.plantingDate,
         notes: params.notes?.trim(),
         config: params.config,
+        isFavorited: params.isFavorited,
         updatedAt: DateTime.now(),
         isDirty: true,
       );
@@ -82,6 +83,7 @@ class UpdatePlantParams {
   final DateTime? plantingDate;
   final String? notes;
   final PlantConfig? config;
+  final bool? isFavorited;
 
   const UpdatePlantParams({
     required this.id,
@@ -93,5 +95,6 @@ class UpdatePlantParams {
     this.plantingDate,
     this.notes,
     this.config,
+    this.isFavorited,
   });
 }

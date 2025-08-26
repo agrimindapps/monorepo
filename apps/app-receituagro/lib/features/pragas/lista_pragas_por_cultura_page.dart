@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/design/design_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/models/pragas_hive.dart';
 import '../../core/repositories/pragas_hive_repository.dart';
@@ -255,20 +256,18 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
 
   Widget _buildBody() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTabBar(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _buildSearchField(),
-          ),
+          SizedBox(height: ReceitaAgroSpacing.sm),
+          _buildSearchField(),
+          SizedBox(height: ReceitaAgroSpacing.sm),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _buildScrollableContent(),
-            ),
+            child: _buildScrollableContent(),
           ),
         ],
       ),
@@ -307,12 +306,13 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
 
   Widget _buildTabView() {
     return Card(
-      elevation: 4,
+      elevation: ReceitaAgroElevation.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        side: BorderSide.none,
       ),
       color: _state.isDark ? const Color(0xFF1E1E22) : Colors.white,
-      margin: const EdgeInsets.only(top: 4),
+      margin: EdgeInsets.zero,
       child: _buildTabViewContent(),
     );
   }
@@ -357,12 +357,12 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
           height: totalHeight,
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               childAspectRatio: 0.85,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisSpacing: ReceitaAgroSpacing.sm,
+              mainAxisSpacing: ReceitaAgroSpacing.sm,
             ),
             itemCount: pragas.length,
             itemBuilder: (context, index) {
@@ -383,14 +383,17 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   Widget _buildListView(List<PragaCulturaItemModel> pragas) {
     return Column(
       children: [
-        const SizedBox(height: 8),
-        ...pragas.map((praga) => PragaCulturaItemWidget(
-          praga: praga,
-          viewMode: _state.viewMode,
-          isDark: _state.isDark,
-          onTap: () => _handleItemTap(praga),
+        SizedBox(height: ReceitaAgroSpacing.sm),
+        ...pragas.map((praga) => Padding(
+          padding: EdgeInsets.only(bottom: ReceitaAgroSpacing.xs),
+          child: PragaCulturaItemWidget(
+            praga: praga,
+            viewMode: _state.viewMode,
+            isDark: _state.isDark,
+            onTap: () => _handleItemTap(praga),
+          ),
         )),
-        const SizedBox(height: 8),
+        SizedBox(height: ReceitaAgroSpacing.sm),
       ],
     );
   }

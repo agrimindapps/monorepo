@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../core/design/design_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../core/models/fitossanitario_hive.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/widgets/content_section_widget.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'lista_defensivos_agrupados_page.dart';
@@ -102,13 +104,13 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 20),
+                        SizedBox(height: ReceitaAgroSpacing.sm),
                         _buildStatsGrid(context),
-                        const SizedBox(height: 24),
+                        SizedBox(height: ReceitaAgroSpacing.lg),
                         _buildRecentAccessSection(context),
-                        const SizedBox(height: 24),
+                        SizedBox(height: ReceitaAgroSpacing.lg),
                         _buildNewItemsSection(context),
-                        const SizedBox(height: 80), // Espaço para bottom navigation
+                        SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),
                       ],
                     ),
                   ),
@@ -138,27 +140,35 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
   }
 
   Widget _buildStatsGrid(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide.none,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final availableWidth = constraints.maxWidth;
-            final screenWidth = MediaQuery.of(context).size.width;
-            final isSmallDevice = screenWidth < 360;
-            final useVerticalLayout = isSmallDevice || availableWidth < 320;
+      child: Card(
+        elevation: ReceitaAgroElevation.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+          side: BorderSide.none,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: ReceitaAgroSpacing.sm, 
+            vertical: ReceitaAgroSpacing.sm,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth;
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isSmallDevice = screenWidth < ReceitaAgroBreakpoints.smallDevice;
+              final useVerticalLayout = isSmallDevice || availableWidth < ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
-            if (useVerticalLayout) {
-              return _buildVerticalMenuLayout(availableWidth, context);
-            } else {
-              return _buildGridMenuLayout(availableWidth, context);
-            }
-          },
+              if (useVerticalLayout) {
+                return _buildVerticalMenuLayout(availableWidth, context);
+              } else {
+                return _buildGridMenuLayout(availableWidth, context);
+              }
+            },
+          ),
         ),
       ),
     );
@@ -181,7 +191,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
           color: standardColor,
           context: context,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: _isLoading ? '...' : '$_totalFabricantes',
           title: 'Fabricantes',
@@ -191,7 +201,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
           color: standardColor,
           context: context,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: _isLoading ? '...' : '$_totalModoAcao',
           title: 'Modo de Ação',
@@ -201,7 +211,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
           color: standardColor,
           context: context,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: _isLoading ? '...' : '$_totalIngredienteAtivo',
           title: 'Ingrediente Ativo',
@@ -211,7 +221,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
           color: standardColor,
           context: context,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: _isLoading ? '...' : '$_totalClasseAgronomica',
           title: 'Classe Agronômica',
@@ -227,7 +237,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
 
   Widget _buildGridMenuLayout(double availableWidth, BuildContext context) {
     final theme = Theme.of(context);
-    final isMediumDevice = MediaQuery.of(context).size.width < 600;
+    final isMediumDevice = MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
     final buttonWidth = isMediumDevice ? (availableWidth - 32) / 2 : (availableWidth - 40) / 2;
     final standardColor = theme.colorScheme.primary;
 
@@ -245,7 +255,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
               color: standardColor,
               context: context,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             _buildCategoryButton(
               count: _isLoading ? '...' : '$_totalFabricantes',
               title: 'Fabricantes',
@@ -257,7 +267,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -270,7 +280,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
               color: standardColor,
               context: context,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             _buildCategoryButton(
               count: _isLoading ? '...' : '$_totalIngredienteAtivo',
               title: 'Ingrediente Ativo',
@@ -282,7 +292,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: _isLoading ? '...' : '$_totalClasseAgronomica',
           title: 'Classe Agronômica',
@@ -309,12 +319,12 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
     final buttonColor = color ?? theme.colorScheme.primary;
     return SizedBox(
       width: width,
-      height: 90,
+      height: ReceitaAgroDimensions.buttonHeight,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
           child: Ink(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -325,7 +335,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
               boxShadow: [
                 BoxShadow(
                   color: buttonColor.withValues(alpha: 0.3),
@@ -346,7 +356,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -358,7 +368,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
                             color: theme.colorScheme.onPrimary,
                             size: 22,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 2),
@@ -377,7 +387,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         title,
                         textAlign: TextAlign.center,
@@ -415,227 +425,71 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
   }
 
   Widget _buildRecentAccessSection(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Últimos Acessados',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.history,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+    return ContentSectionWidget(
+      title: 'Últimos Acessados',
+      actionIcon: Icons.history,
+      onActionPressed: () {},
+      isLoading: _isLoading,
+      emptyMessage: 'Nenhum defensivo acessado recentemente',
+      child: _recentDefensivos.isEmpty
+          ? const SizedBox.shrink()
+          : ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _recentDefensivos.length,
+              separatorBuilder: (context, index) => SizedBox(height: ReceitaAgroSpacing.xs),
+              itemBuilder: (context, index) {
+                final defensivo = _recentDefensivos[index];
+                return ContentListItemWidget(
+                  title: defensivo.displayName,
+                  subtitle: defensivo.displayIngredient,
+                  category: defensivo.displayClass,
+                  icon: FontAwesomeIcons.leaf,
+                  iconColor: const Color(0xFF4CAF50),
+                  onTap: () => _navigateToDefensivoDetails(
+                    context, 
+                    defensivo.displayName, 
+                    defensivo.displayFabricante,
+                  ),
+                );
+              },
             ),
-            color: theme.cardColor,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _recentDefensivos.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nenhum defensivo acessado recentemente',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _recentDefensivos.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final defensivo = _recentDefensivos[index];
-                            return _buildListItem(
-                              context,
-                              defensivo.displayName,
-                              defensivo.displayIngredient,
-                              defensivo.displayClass,
-                              FontAwesomeIcons.leaf,
-                              fabricante: defensivo.displayFabricante,
-                            );
-                          },
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
   Widget _buildNewItemsSection(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Novos Defensivos',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.settings,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+    return ContentSectionWidget(
+      title: 'Novos Defensivos',
+      actionIcon: Icons.settings,
+      onActionPressed: () {},
+      isLoading: _isLoading,
+      emptyMessage: 'Nenhum novo defensivo disponível',
+      child: _newDefensivos.isEmpty
+          ? const SizedBox.shrink()
+          : ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _newDefensivos.length,
+              separatorBuilder: (context, index) => SizedBox(height: ReceitaAgroSpacing.xs),
+              itemBuilder: (context, index) {
+                final defensivo = _newDefensivos[index];
+                return ContentListItemWidget(
+                  title: defensivo.displayName,
+                  subtitle: defensivo.displayIngredient,
+                  category: defensivo.displayClass,
+                  icon: FontAwesomeIcons.seedling,
+                  iconColor: const Color(0xFF4CAF50),
+                  onTap: () => _navigateToDefensivoDetails(
+                    context, 
+                    defensivo.displayName, 
+                    defensivo.displayFabricante,
+                  ),
+                );
+              },
             ),
-            color: theme.cardColor,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _newDefensivos.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nenhum novo defensivo disponível',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _newDefensivos.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final defensivo = _newDefensivos[index];
-                            return _buildListItem(
-                              context,
-                              defensivo.displayName,
-                              defensivo.displayIngredient,
-                              defensivo.displayClass,
-                              FontAwesomeIcons.seedling,
-                              fabricante: defensivo.displayFabricante,
-                            );
-                          },
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
-  Widget _buildListItem(BuildContext context, String title, String subtitle, String category, IconData icon, {String fabricante = 'Fabricante'}) {
-    final theme = Theme.of(context);
-    
-    return InkWell(
-      onTap: () => _navigateToDefensivoDetails(context, title, fabricante),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: FaIcon(
-              icon,
-              color: const Color(0xFF4CAF50),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ],
-          ),
-        ),
-    );
-  }
 
   void _navigateToDefensivoDetails(BuildContext context, String defensivoName, String fabricante) {
     Navigator.push(

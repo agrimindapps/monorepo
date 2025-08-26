@@ -110,32 +110,7 @@ class PragaCardWidget extends StatelessWidget {
         child: SizedBox(
           width: customWidth ?? 180,
           height: customHeight ?? 240,
-          child: Column(
-            children: [
-              // Imagem principal
-              Expanded(
-                flex: 3,
-                child: _buildGridImageSection(),
-              ),
-              
-              // Conteúdo
-              Expanded(
-                flex: 2,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildGridContentSection(),
-                      const Spacer(),
-                      if (showFavoriteButton)
-                        _buildGridActionSection(),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: _buildGridImageSection(),
         ),
       ),
     );
@@ -265,41 +240,6 @@ class PragaCardWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         
-        const SizedBox(height: 8),
-        
-        // Chip de tipo
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: _getTypeColor().withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _getTypeColor().withValues(alpha: 0.5),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (showTypeIcon) ...[
-                FaIcon(
-                  _getTypeIcon(),
-                  size: 12,
-                  color: _getTypeColor(),
-                ),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                _getTypeText(),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: _getTypeColor(),
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -348,10 +288,7 @@ class PragaCardWidget extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
+        borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
             OptimizedPragaImageWidget(
@@ -363,13 +300,70 @@ class PragaCardWidget extends StatelessWidget {
               errorWidget: _buildIconFallback(double.infinity),
             ),
             
-            // Overlay para favorito
-            if (showFavoriteButton)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: _buildFloatingFavoriteButton(),
+            // Overlay com gradiente para legibilidade do texto
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.7),
+                    ],
+                    stops: const [0.0, 0.6, 1.0],
+                  ),
+                ),
               ),
+            ),
+            
+            // Nomes da praga na parte inferior
+            Positioned(
+              bottom: 8,
+              left: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Nome comum
+                    Text(
+                      praga.nomeFormatado,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    
+                    // Nome científico
+                    if (praga.nomeCientifico.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        praga.nomeCientifico,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

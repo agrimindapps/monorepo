@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../core/design/design_tokens.dart';
+
 class PragaCulturaTabBarWidget extends StatefulWidget {
   final TabController tabController;
   final Function(int) onTabTap;
@@ -57,14 +59,15 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
 
   Widget _buildTabBar() {
     return Card(
-      elevation: 2,
+      elevation: ReceitaAgroElevation.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        side: BorderSide.none,
       ),
       color: widget.isDark ? const Color(0xFF222228) : Colors.white,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
           border: Border.all(
             color: widget.isDark 
                 ? Colors.grey.shade800 
@@ -77,7 +80,7 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
           onTap: widget.onTabTap,
           indicatorSize: TabBarIndicatorSize.tab,
           indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.sm),
             color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
             border: Border.all(
               color: const Color(0xFF2E7D32).withValues(alpha: 0.3),
@@ -128,7 +131,10 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
     return Tab(
       height: 60,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: ReceitaAgroSpacing.sm, 
+          vertical: ReceitaAgroSpacing.sm,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
@@ -142,10 +148,10 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
                       ? Colors.grey.shade400 
                       : Colors.grey.shade600),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: ReceitaAgroSpacing.xs + 2),
             Text(
               label,
-              style: TextStyle(
+              style: ReceitaAgroTypography.itemCategory.copyWith(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected 

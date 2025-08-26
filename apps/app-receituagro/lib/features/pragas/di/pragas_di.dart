@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
 
-import '../../../core/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_repository_impl.dart';
 import '../domain/repositories/i_pragas_repository.dart';
 import '../domain/usecases/get_pragas_usecase.dart';
@@ -18,9 +17,7 @@ class PragasDI {
     );
     
     sl.registerLazySingleton<IPragasHistoryRepository>(
-      () => PragasHistoryRepositoryImpl(
-        hiveRepository: sl<PragasHiveRepository>(),
-      ),
+      () => PragasHistoryRepositoryImpl(),
     );
     
     sl.registerLazySingleton<IPragasFormatter>(

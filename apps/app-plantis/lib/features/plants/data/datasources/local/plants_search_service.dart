@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-import 'package:sqflite/sqflite.dart';
-
 import '../../../domain/entities/plant.dart';
 
-/// Optimized search service for plants with FTS5, caching and indexing
+/// Simplified search service for plants using in-memory search only
+/// Consistent with monorepo architecture using only Hive for persistence
 class PlantsSearchService {
   static PlantsSearchService? _instance;
   static PlantsSearchService get instance =>
@@ -13,7 +11,7 @@ class PlantsSearchService {
 
   PlantsSearchService._();
 
-  Database? _database;
+  // In-memory cache and indexes
   final Map<String, List<Plant>> _searchCache = {};
   final Map<String, Set<String>> _wordIndex = {};
   final Map<String, Plant> _plantsIndex = {};
@@ -21,114 +19,41 @@ class PlantsSearchService {
   Timer? _cacheCleanupTimer;
   Timer? _debounceTimer;
 
-  static const String _tableName = 'plants_fts';
   static const int _cacheExpirationMinutes = 10;
 
   // Track cache timestamps for cleanup
   final Map<String, DateTime> _cacheTimestamps = {};
 
-  /// Initialize the FTS database and cleanup timer
+  /// Initialize the search service and cleanup timer
   Future<void> initialize() async {
-    if (_database != null) return;
-
-    final databasesPath = await getDatabasesPath();
-    final dbPath = path.join(databasesPath, 'plants_search.db');
-
-    _database = await openDatabase(
-      dbPath,
-      version: 1,
-      onCreate: _createDatabase,
-    );
-
     // Start periodic cache cleanup
     _startCacheCleanup();
   }
 
-  Future<void> _createDatabase(Database db, int version) async {
-    // Create FTS5 virtual table for full-text search
-    await db.execute('''
-      CREATE VIRTUAL TABLE $_tableName USING fts5(
-        id UNINDEXED,
-        name,
-        species,
-        notes,
-        content='',
-        tokenize='porter unicode61 remove_diacritics 1'
-      );
-    ''');
-
-    // Create triggers to maintain FTS table
-    await db.execute('''
-      CREATE TRIGGER plants_fts_insert AFTER INSERT ON plants BEGIN
-        INSERT INTO $_tableName(id, name, species, notes)
-        VALUES (new.id, new.name, new.species, new.notes);
-      END;
-    ''');
-  }
-
   /// Update search index with new plant data
   Future<void> updateSearchIndex(List<Plant> plants) async {
-    await initialize();
-    if (_database == null) return;
-
-    final batch = _database!.batch();
-
-    // Clear existing data
-    batch.delete(_tableName);
-
-    // Rebuild index and memory structures
+    // Rebuild memory structures
     _plantsIndex.clear();
     _wordIndex.clear();
 
     for (final plant in plants) {
-      // Add to FTS table
-      batch.insert(_tableName, {
-        'id': plant.id,
-        'name': plant.name,
-        'species': plant.species ?? '',
-        'notes': plant.notes ?? '',
-      });
-
       // Build memory index
       _plantsIndex[plant.id] = plant;
       _buildWordIndex(plant);
     }
-
-    await batch.commit(noResult: true);
   }
 
   /// Update search index with new plant data (modern entity)
   Future<void> updateSearchIndexFromPlants(List<Plant> plants) async {
-    await initialize();
-    if (_database == null) return;
-
-    final batch = _database!.batch();
-
-    // Clear existing data
-    batch.delete('plant_search');
-
-    // Index each plant
-    for (final plant in plants) {
-      batch.insert('plant_search', {
-        'id': plant.id,
-        'name': plant.name,
-        'species': plant.species ?? '',
-        'notes': plant.notes ?? '',
-      });
-
-      // Build memory index
-      _plantsIndex[plant.id] = plant;
-      _buildWordIndex(plant);
-    }
-
-    await batch.commit(noResult: true);
+    // Same as updateSearchIndex - keeping both methods for compatibility
+    await updateSearchIndex(plants);
   }
 
   void _buildWordIndex(Plant plant) {
     final words = <String>{};
 
     // Extract words from searchable fields
-    words.addAll(_extractWords(plant.name ?? ''));
+    words.addAll(_extractWords(plant.name));
     if (plant.species != null) words.addAll(_extractWords(plant.species!));
     if (plant.notes != null) words.addAll(_extractWords(plant.notes!));
 
@@ -147,7 +72,7 @@ class PlantsSearchService {
         .toList();
   }
 
-  /// Optimized search with multiple strategies
+  /// Optimized in-memory search
   Future<List<Plant>> searchPlants(String query) async {
     if (query.trim().isEmpty) return [];
 
@@ -159,16 +84,13 @@ class PlantsSearchService {
 
     List<Plant> results;
 
-    // Choose search strategy based on query characteristics
-    if (normalizedQuery.length <= 3) {
-      // Short queries: use memory index for speed
-      results = await _searchMemoryIndex(normalizedQuery);
-    } else if (normalizedQuery.contains(' ')) {
-      // Multi-word queries: use FTS5 for advanced matching
-      results = await _searchFTS(normalizedQuery);
+    // Use memory-based search for all queries
+    if (normalizedQuery.contains(' ')) {
+      // Multi-word queries: search for all words
+      results = await _searchMultiWord(normalizedQuery);
     } else {
-      // Single word queries: hybrid approach
-      results = await _searchHybrid(normalizedQuery);
+      // Single word queries: use word index
+      results = await _searchSingleWord(normalizedQuery);
     }
 
     // Limit results for performance
@@ -182,13 +104,53 @@ class PlantsSearchService {
     return results;
   }
 
-  /// Fast memory-based search for short queries
-  Future<List<Plant>> _searchMemoryIndex(String query) async {
+  /// Search for plants containing all words in the query
+  Future<List<Plant>> _searchMultiWord(String query) async {
+    final queryWords = query
+        .split(' ')
+        .where((word) => word.isNotEmpty && word.length > 2)
+        .toList();
+
+    if (queryWords.isEmpty) return [];
+
+    // Find plants that match all query words
+    Set<String>? matchingIds;
+
+    for (final queryWord in queryWords) {
+      final currentMatches = <String>{};
+
+      // Find words in index that contain the query word
+      for (final entry in _wordIndex.entries) {
+        if (entry.key.contains(queryWord)) {
+          currentMatches.addAll(entry.value);
+        }
+      }
+
+      // Intersect with previous results (AND operation)
+      if (matchingIds == null) {
+        matchingIds = currentMatches;
+      } else {
+        matchingIds = matchingIds.intersection(currentMatches);
+      }
+
+      // If no matches found for this word, no results possible
+      if (matchingIds.isEmpty) break;
+    }
+
+    return (matchingIds ?? <String>{})
+        .map((id) => _plantsIndex[id])
+        .where((plant) => plant != null)
+        .cast<Plant>()
+        .toList();
+  }
+
+  /// Search for plants with single word query
+  Future<List<Plant>> _searchSingleWord(String query) async {
     final matchingIds = <String>{};
 
-    // Find words that start with query
+    // Find words that contain the query (partial matching)
     for (final entry in _wordIndex.entries) {
-      if (entry.key.startsWith(query)) {
+      if (entry.key.contains(query)) {
         matchingIds.addAll(entry.value);
       }
     }
@@ -198,64 +160,6 @@ class PlantsSearchService {
         .where((plant) => plant != null)
         .cast<Plant>()
         .toList();
-  }
-
-  /// Full-text search using SQLite FTS5
-  Future<List<Plant>> _searchFTS(String query) async {
-    await initialize();
-    if (_database == null) return [];
-
-    try {
-      // Use FTS5 match operator for phrase and proximity searches
-      final ftsQuery = query
-          .split(' ')
-          .where((word) => word.isNotEmpty)
-          .map((word) => '"$word"*')
-          .join(' OR ');
-
-      final results = await _database!.query(
-        _tableName,
-        where: '$_tableName MATCH ?',
-        whereArgs: [ftsQuery],
-        orderBy: 'rank',
-        limit: 50,
-      );
-
-      return results
-          .map((row) => _plantsIndex[row['id'] as String])
-          .where((plant) => plant != null)
-          .cast<Plant>()
-          .toList();
-    } catch (e) {
-      // Fallback to memory search if FTS fails
-      return _searchMemoryIndex(query);
-    }
-  }
-
-  /// Hybrid search combining memory and FTS
-  Future<List<Plant>> _searchHybrid(String query) async {
-    // Start with fast memory search
-    final memoryResults = await _searchMemoryIndex(query);
-
-    if (memoryResults.length >= 20) {
-      return memoryResults;
-    }
-
-    // Enhance with FTS search for better results
-    final ftsResults = await _searchFTS(query);
-
-    // Merge results, prioritizing memory results
-    final mergedResults = <String, Plant>{};
-
-    for (final plant in memoryResults) {
-      mergedResults[plant.id] = plant;
-    }
-
-    for (final plant in ftsResults) {
-      mergedResults[plant.id] = plant;
-    }
-
-    return mergedResults.values.toList();
   }
 
   List<Plant>? _getCachedResult(String query) {
@@ -358,8 +262,6 @@ class PlantsSearchService {
   void dispose() {
     _cacheCleanupTimer?.cancel();
     _debounceTimer?.cancel();
-    _database?.close();
-    _database = null;
     clearCache();
   }
 

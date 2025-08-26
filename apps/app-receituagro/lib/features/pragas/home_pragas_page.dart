@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/design/design_tokens.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
 import '../../core/services/app_data_manager.dart';
+import '../../core/widgets/content_section_widget.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
 import '../culturas/lista_culturas_page.dart';
@@ -42,13 +44,14 @@ class _HomePragasPageState extends State<HomePragasPage> {
   Future<void> _initializePragasWithDelay() async {
     try {
       final appDataManager = GetIt.instance<IAppDataManager>();
+      final pragasProvider = GetIt.instance<PragasProvider>();
       
       // Aguarda dados estarem prontos
       final isDataReady = await appDataManager.isDataReady();
       print('📊 HomePragasPage: Dados prontos = $isDataReady');
       
       if (isDataReady && mounted) {
-        await context.read<PragasProvider>().initialize();
+        await pragasProvider.initialize();
         print('✅ HomePragasPage: PragasProvider inicializado');
       } else if (mounted) {
         // Se dados não estão prontos, tenta novamente após delay
@@ -63,7 +66,8 @@ class _HomePragasPageState extends State<HomePragasPage> {
       print('❌ HomePragasPage: Erro na inicialização das pragas: $e');
       if (mounted) {
         // Tenta inicializar mesmo assim
-        context.read<PragasProvider>().initialize();
+        final pragasProvider = GetIt.instance<PragasProvider>();
+        pragasProvider.initialize();
       }
     }
   }
@@ -114,13 +118,13 @@ class _HomePragasPageState extends State<HomePragasPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 20),
+                              SizedBox(height: ReceitaAgroSpacing.sm),
                               _buildStatsGrid(context, provider),
-                              const SizedBox(height: 24),
+                              SizedBox(height: ReceitaAgroSpacing.lg),
                               _buildSuggestionsSection(context, provider),
-                              const SizedBox(height: 24),
+                              SizedBox(height: ReceitaAgroSpacing.lg),
                               _buildRecentAccessSection(context, provider),
-                              const SizedBox(height: 80), // Espaço para bottom navigation
+                              SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),
                             ],
                           ),
                         ),
@@ -155,22 +159,29 @@ class _HomePragasPageState extends State<HomePragasPage> {
   }
 
   Widget _buildStatsGrid(BuildContext context, PragasProvider provider) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide.none,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+      child: Card(
+        elevation: ReceitaAgroElevation.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+          side: BorderSide.none,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: ReceitaAgroSpacing.sm, 
+            vertical: ReceitaAgroSpacing.sm,
+          ),
         child: provider.errorMessage != null 
             ? _buildErrorState(context, provider)
             : LayoutBuilder(
                 builder: (context, constraints) {
                   final availableWidth = constraints.maxWidth;
                   final screenWidth = MediaQuery.of(context).size.width;
-                  final isSmallDevice = screenWidth < 360;
-                  final useVerticalLayout = isSmallDevice || availableWidth < 320;
+                  final isSmallDevice = screenWidth < ReceitaAgroBreakpoints.smallDevice;
+                  final useVerticalLayout = isSmallDevice || availableWidth < ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
                   if (useVerticalLayout) {
                     return _buildVerticalMenuLayout(availableWidth, provider);
@@ -179,6 +190,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                   }
                 },
               ),
+        ),
       ),
     );
   }
@@ -187,7 +199,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -205,7 +217,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
               color: theme.colorScheme.error,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             'Toque para tentar novamente',
             style: TextStyle(
@@ -241,7 +253,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
           icon: Icons.bug_report,
           color: standardColor,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
           title: 'Doenças',
@@ -250,7 +262,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
           icon: Icons.coronavirus,
           color: standardColor,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
           title: 'Plantas',
@@ -259,7 +271,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
           icon: Icons.eco,
           color: standardColor,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildCategoryButton(
           count: '$_totalCulturas',
           title: 'Culturas',
@@ -274,8 +286,8 @@ class _HomePragasPageState extends State<HomePragasPage> {
 
   Widget _buildGridMenuLayout(double availableWidth, BuildContext context, PragasProvider provider) {
     final theme = Theme.of(context);
-    final isMediumDevice = MediaQuery.of(context).size.width < 600;
-    final buttonWidth = isMediumDevice ? (availableWidth - 32) / 3 : (availableWidth - 40) / 3;
+    final isMediumDevice = MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
+    final buttonWidth = isMediumDevice ? (availableWidth - 32) / 2 : (availableWidth - 40) / 2;
     final standardColor = theme.colorScheme.primary;
 
     return Column(
@@ -291,7 +303,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
               icon: Icons.bug_report,
               color: standardColor,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             _buildCategoryButton(
               count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
               title: 'Doenças',
@@ -300,7 +312,12 @@ class _HomePragasPageState extends State<HomePragasPage> {
               icon: Icons.coronavirus,
               color: standardColor,
             ),
-            const SizedBox(width: 8),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             _buildCategoryButton(
               count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
               title: 'Plantas',
@@ -309,16 +326,16 @@ class _HomePragasPageState extends State<HomePragasPage> {
               icon: Icons.eco,
               color: standardColor,
             ),
+            const SizedBox(width: 6),
+            _buildCategoryButton(
+              count: '$_totalCulturas',
+              title: 'Culturas',
+              width: buttonWidth,
+              onTap: () => _navigateToCategory(context, 'culturas'),
+              icon: Icons.agriculture,
+              color: standardColor,
+            ),
           ],
-        ),
-        const SizedBox(height: 8),
-        _buildCategoryButton(
-          count: '$_totalCulturas',
-          title: 'Culturas',
-          width: isMediumDevice ? availableWidth - 16 : availableWidth * 0.75,
-          onTap: () => _navigateToCategory(context, 'culturas'),
-          icon: Icons.agriculture,
-          color: standardColor,
         ),
       ],
     );
@@ -336,12 +353,12 @@ class _HomePragasPageState extends State<HomePragasPage> {
     final buttonColor = color ?? theme.colorScheme.primary;
     return SizedBox(
       width: width,
-      height: 90,
+      height: ReceitaAgroDimensions.buttonHeight,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
           child: Ink(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -352,7 +369,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
               boxShadow: [
                 BoxShadow(
                   color: buttonColor.withValues(alpha: 0.3),
@@ -373,7 +390,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -385,7 +402,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                             color: theme.colorScheme.onPrimary,
                             size: 22,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 2),
@@ -404,7 +421,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         title,
                         textAlign: TextAlign.center,
@@ -448,7 +465,9 @@ class _HomePragasPageState extends State<HomePragasPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: ReceitaAgroSpacing.horizontalPadding,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -505,7 +524,9 @@ class _HomePragasPageState extends State<HomePragasPage> {
 
   Widget _buildCarouselItem(Map<String, dynamic> suggestion) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 5),
+      margin: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.xs + 1,
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Stack(
@@ -582,7 +603,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -621,7 +642,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             _buildTypeTag(suggestion),
           ],
         ),
@@ -656,7 +677,10 @@ class _HomePragasPageState extends State<HomePragasPage> {
     }
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.sm,
+        vertical: ReceitaAgroSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
@@ -729,7 +753,9 @@ class _HomePragasPageState extends State<HomePragasPage> {
           child: Container(
             width: 8.0,
             height: 8.0,
-            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+            margin: const EdgeInsets.symmetric(
+              horizontal: ReceitaAgroSpacing.xs,
+            ),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: _currentCarouselIndex == entry.key
@@ -747,7 +773,9 @@ class _HomePragasPageState extends State<HomePragasPage> {
     
     return Container(
       height: 280,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
@@ -816,179 +844,69 @@ class _HomePragasPageState extends State<HomePragasPage> {
   }
 
   Widget _buildRecentAccessSection(BuildContext context, PragasProvider provider) {
-    final theme = Theme.of(context);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Últimos Acessados',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.history,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        provider.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : provider.recentPragas.isEmpty
-                ? const Center(
-                    child: Text(
-                      'Nenhuma praga acessada recentemente',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  )
-                : Column(
-                    children: provider.recentPragas.map((praga) {
-                      String emoji = '🐛';
-                      String type = 'Inseto';
-                      
-                      switch (praga.tipoPraga) {
-                        case '1':
-                          emoji = '🐛';
-                          type = 'Inseto';
-                          break;
-                        case '2':
-                          emoji = '🦠';
-                          type = 'Doença';
-                          break;
-                        case '3':
-                          emoji = '🌿';
-                          type = 'Planta';
-                          break;
-                      }
-                      
-                      return _buildPragaItem(
-                        context,
-                        praga.nomeComum,
-                        praga.nomeCientifico,
-                        type,
-                        _getColorForType(type, context),
-                        emoji,
-                      );
-                    }).toList(),
-                  ),
-      ],
+    return ContentSectionWidget(
+      title: 'Últimos Acessados',
+      actionIcon: Icons.history,
+      onActionPressed: () {},
+      isLoading: provider.isLoading,
+      emptyMessage: 'Nenhuma praga acessada recentemente',
+      child: provider.recentPragas.isEmpty
+          ? const SizedBox.shrink()
+          : ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: provider.recentPragas.length,
+              separatorBuilder: (context, index) => SizedBox(height: ReceitaAgroSpacing.xs),
+              itemBuilder: (context, index) {
+                final praga = provider.recentPragas[index];
+                String emoji = '🐛';
+                String type = 'Inseto';
+                
+                switch (praga.tipoPraga) {
+                  case '1':
+                    emoji = '🐛';
+                    type = 'Inseto';
+                    break;
+                  case '2':
+                    emoji = '🦠';
+                    type = 'Doença';
+                    break;
+                  case '3':
+                    emoji = '🌿';
+                    type = 'Planta';
+                    break;
+                }
+                
+                return ContentListItemWidget(
+                  title: praga.nomeComum,
+                  subtitle: praga.nomeCientifico,
+                  category: type,
+                  leading: _buildPragaItemLeading(praga.nomeCientifico, _getColorForType(type, context), emoji),
+                  onTap: () => _navigateToPragaDetails(context, praga.nomeComum, praga.nomeCientifico),
+                );
+              },
+            ),
     );
   }
 
-  Widget _buildPragaItem(BuildContext context, String name, String scientificName, String category, Color categoryColor, String emoji) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: InkWell(
-        onTap: () => _navigateToPragaDetails(context, name, scientificName),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(alpha: 0.1),
-                spreadRadius: 1,
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Foto/Imagem circular
-              PragaImageWidget(
-                nomeCientifico: scientificName,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-                borderRadius: BorderRadius.circular(24),
-                errorWidget: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: categoryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      emoji,
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Conteúdo principal
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Nome da praga
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Nome científico
-                    Text(
-                      scientificName,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Tag da categoria
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            category,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Seta à direita
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ],
+  Widget _buildPragaItemLeading(String nomeCientifico, Color categoryColor, String emoji) {
+    return PragaImageWidget(
+      nomeCientifico: nomeCientifico,
+      width: ReceitaAgroDimensions.itemImageSize,
+      height: ReceitaAgroDimensions.itemImageSize,
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(ReceitaAgroDimensions.itemImageSize / 2),
+      errorWidget: Container(
+        width: ReceitaAgroDimensions.itemImageSize,
+        height: ReceitaAgroDimensions.itemImageSize,
+        decoration: BoxDecoration(
+          color: categoryColor.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            emoji,
+            style: const TextStyle(fontSize: 24),
           ),
         ),
       ),

@@ -14,13 +14,14 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   final PremiumHiveRepository _hiveRepository;
   final ISubscriptionRepository _subscriptionRepository;
   final INavigationService _navigationService;
-  
+
   PremiumStatus _cachedStatus = const PremiumStatus(isActive: false);
   bool _isCheckingStatus = false;
-  
+
   // Stream controller para premiumStatusStream
-  final StreamController<bool> _statusStreamController = StreamController<bool>.broadcast();
-  
+  final StreamController<bool> _statusStreamController =
+      StreamController<bool>.broadcast();
+
   PremiumServiceReal({
     required PremiumHiveRepository hiveRepository,
     required ISubscriptionRepository subscriptionRepository,
@@ -36,7 +37,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
     final hiveStatus = _hiveRepository.getCurrentUserPremiumStatus();
     if (hiveStatus != null) {
       _cachedStatus = _convertHiveToStatus(hiveStatus);
-      
+
       // Se precisa sincronizar online, faz em background
       if (hiveStatus.shouldSyncOnline) {
         _syncOnlineInBackground();
@@ -70,7 +71,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   Future<void> checkPremiumStatus() async {
     if (_isCheckingStatus) return;
-    
+
     _isCheckingStatus = true;
     try {
       await _syncWithRevenueCat();
@@ -94,24 +95,25 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   Future<void> _syncWithRevenueCat() async {
     try {
       // Verifica se tem assinatura ativa
-      final hasActiveResult = await _subscriptionRepository.hasActiveSubscription();
-      
+      final hasActiveResult =
+          await _subscriptionRepository.hasActiveSubscription();
+
       bool hasActive = false;
       SubscriptionEntity? subscription;
-      
-      hasActiveResult.fold(
-        (failure) {
-          debugPrint('Error checking subscription: ${failure.message}');
-          return; // Mantém cache atual se falhar
-        },
-        (active) => hasActive = active,
-      );
+
+      hasActiveResult.fold((failure) {
+        debugPrint('Error checking subscription: ${failure.message}');
+        return; // Mantém cache atual se falhar
+      }, (active) => hasActive = active);
 
       // Se tem assinatura ativa, obtém detalhes
       if (hasActive) {
-        final subscriptionResult = await _subscriptionRepository.getCurrentSubscription();
+        final subscriptionResult =
+            await _subscriptionRepository.getCurrentSubscription();
         subscriptionResult.fold(
-          (failure) => debugPrint('Error getting subscription details: ${failure.message}'),
+          (failure) => debugPrint(
+            'Error getting subscription details: ${failure.message}',
+          ),
           (sub) => subscription = sub,
         );
       }
@@ -119,22 +121,31 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       // Atualiza cache Hive
       final currentStatus = _hiveRepository.getCurrentUserPremiumStatus();
       final userId = currentStatus?.userId ?? 'anonymous';
-      
+
       final hiveStatus = PremiumStatusHive(
         userId: userId,
         isActive: hasActive,
         isTestSubscription: false,
         // Mapeamento das propriedades do SubscriptionEntity
-        expiryDateTimestamp: subscription != null 
-            ? DateTime.now().add(const Duration(days: 30)).millisecondsSinceEpoch // Default 30 days for active subscription
-            : null,
-        planType: hasActive ? 'monthly' : null, // Default plan type for active subscriptions
+        expiryDateTimestamp:
+            subscription != null
+                ? DateTime.now()
+                    .add(const Duration(days: 30))
+                    .millisecondsSinceEpoch // Default 30 days for active subscription
+                : null,
+        planType:
+            hasActive
+                ? 'monthly'
+                : null, // Default plan type for active subscriptions
         subscriptionId: subscription?.toString(),
-        productId: hasActive ? 'receituagro_premium_monthly' : null, // Default product ID
+        productId:
+            hasActive
+                ? 'receituagro_premium_monthly'
+                : null, // Default product ID
         createdAt: DateTime.now().millisecondsSinceEpoch,
         updatedAt: DateTime.now().millisecondsSinceEpoch,
       );
-      
+
       hiveStatus.markAsSynced();
       await _hiveRepository.saveCurrentUserPremiumStatus(hiveStatus);
 
@@ -143,7 +154,6 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       _notifyStatusChange();
 
       debugPrint('Premium status synced successfully: isPremium=$isPremium');
-      
     } catch (e) {
       debugPrint('Error syncing premium status: $e');
       // Em caso de erro, marca para tentar novamente
@@ -168,17 +178,16 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
         planType: 'test_monthly',
         duration: const Duration(days: 30),
       );
-      
+
       // Atualiza status em memória
       _cachedStatus = const PremiumStatus(
         isActive: true,
         isTestSubscription: true,
         planType: 'test_monthly',
       );
-      
+
       _notifyStatusChange();
       debugPrint('Test subscription generated successfully');
-      
     } catch (e) {
       debugPrint('Error generating test subscription: $e');
       throw Exception('Falha ao gerar assinatura teste: $e');
@@ -189,13 +198,12 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   Future<void> removeTestSubscription() async {
     try {
       await _hiveRepository.removeTestPremium();
-      
+
       // Atualiza status em memória
       _cachedStatus = const PremiumStatus(isActive: false);
-      
+
       _notifyStatusChange();
       debugPrint('Test subscription removed successfully');
-      
     } catch (e) {
       debugPrint('Error removing test subscription: $e');
       throw Exception('Falha ao remover assinatura teste: $e');
@@ -209,7 +217,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       await _navigationService.navigateToPremium();
     } catch (e) {
       debugPrint('Error navigating to premium page: $e');
-      
+
       // Fallback: show snackbar message
       _navigationService.showSnackBar(
         'Erro ao abrir página premium. Tente novamente.',
@@ -245,14 +253,10 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   bool canUseFeature(String featureName) {
     if (isPremium) return true;
-    
+
     // Features gratuitas específicas
-    const freeFeatures = {
-      'basic_search',
-      'view_details',
-      'basic_favorites',
-    };
-    
+    const freeFeatures = {'basic_search', 'view_details', 'basic_favorites'};
+
     return freeFeatures.contains(featureName);
   }
 
@@ -262,18 +266,26 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
     if (isPremium) {
       // Limites premium
       switch (featureName) {
-        case 'comments': return 100;
-        case 'favorites': return 500;
-        case 'searches_per_day': return 1000;
-        default: return -1; // Ilimitado
+        case 'comments':
+          return 100;
+        case 'favorites':
+          return 500;
+        case 'searches_per_day':
+          return 1000;
+        default:
+          return -1; // Ilimitado
       }
     } else {
       // Limites gratuitos
       switch (featureName) {
-        case 'comments': return 5;
-        case 'favorites': return 20;
-        case 'searches_per_day': return 10;
-        default: return 0;
+        case 'comments':
+          return 5;
+        case 'favorites':
+          return 20;
+        case 'searches_per_day':
+          return 10;
+        default:
+          return 0;
       }
     }
   }
@@ -296,7 +308,8 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   Future<String?> getSubscriptionType() async {
     try {
-      final subscriptionResult = await _subscriptionRepository.getCurrentSubscription();
+      final subscriptionResult =
+          await _subscriptionRepository.getCurrentSubscription();
       return subscriptionResult.fold(
         (failure) => null,
         (subscription) => _cachedStatus.planType,
@@ -327,7 +340,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   Future<int> getRemainingDays() async {
     final expiryDate = await getSubscriptionExpiry();
     if (expiryDate == null) return -1; // Ilimitado ou erro
-    
+
     final now = DateTime.now();
     return expiryDate.isAfter(now) ? expiryDate.difference(now).inDays : 0;
   }
@@ -340,14 +353,10 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   Future<bool> hasFeatureAccess(String featureId) async {
     if (await isPremiumUser()) return true;
-    
+
     // Features gratuitas específicas
-    const freeFeatures = {
-      'basic_search',
-      'view_details',
-      'basic_favorites',
-    };
-    
+    const freeFeatures = {'basic_search', 'view_details', 'basic_favorites'};
+
     return freeFeatures.contains(featureId);
   }
 
@@ -355,7 +364,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   Future<List<String>> getPremiumFeatures() async {
     return [
       'unlimited_comments',
-      'unlimited_favorites', 
+      'unlimited_favorites',
       'advanced_search',
       'offline_mode',
       'priority_support',
@@ -382,7 +391,8 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   }
 
   @override
-  String? get upgradeUrl => 'https://apps.apple.com/app/receituagro/id6738924932'; // App Store URL real
+  String? get upgradeUrl =>
+      'https://apps.apple.com/app/receituagro/id6738924932'; // App Store URL real
 
   @override
   Stream<bool> get premiumStatusStream => _statusStreamController.stream;

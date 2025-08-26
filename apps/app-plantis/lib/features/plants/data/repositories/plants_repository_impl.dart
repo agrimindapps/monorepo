@@ -22,17 +22,45 @@ class PlantsRepositoryImpl implements PlantsRepository {
   });
 
   Future<String?> get _currentUserId async {
-    try {
-      // Wait for user with timeout to handle initialization delays
-      final user = await authService.currentUser
-          .timeout(const Duration(seconds: 5))
-          .first;
-      return user?.id;
-    } catch (e) {
-      // Log error for debugging
-      print('Error getting current user ID: $e');
-      return null;
+    return await _getCurrentUserIdWithRetry();
+  }
+
+  /// Get current user ID with retry logic to handle auth race conditions
+  Future<String?> _getCurrentUserIdWithRetry({int maxRetries = 3}) async {
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Wait for user with increasing timeout per attempt
+        final timeoutDuration = Duration(seconds: 2 * attempt);
+        final user = await authService.currentUser
+            .timeout(timeoutDuration)
+            .first;
+        
+        if (user != null && user.id != null && user.id!.isNotEmpty) {
+          return user.id;
+        }
+        
+        // If user is null or has empty ID, wait and retry (except on last attempt)
+        if (attempt < maxRetries) {
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
+          continue;
+        }
+        
+        return null;
+      } catch (e) {
+        // Log error for debugging with attempt number
+        print('Auth attempt $attempt/$maxRetries failed: $e');
+        
+        // If it's the last attempt, return null
+        if (attempt >= maxRetries) {
+          return null;
+        }
+        
+        // Wait before retrying, with exponential backoff
+        await Future.delayed(Duration(milliseconds: 500 * attempt));
+      }
     }
+    
+    return null;
   }
 
   @override

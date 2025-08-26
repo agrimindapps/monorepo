@@ -71,14 +71,27 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final plants = <Plant>[];
 
       for (final key in hiveBox.keys) {
-        final plantJson = hiveBox.get(key);
-        if (plantJson != null) {
-          final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-          final plantaModel = PlantaModel.fromJson(plantData);
-          final plant = Plant.fromPlantaModel(plantaModel);
-          if (!plant.isDeleted) {
-            plants.add(plant);
+        try {
+          final plantJson = hiveBox.get(key);
+          if (plantJson != null) {
+            final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
+            final plantaModel = PlantaModel.fromJson(plantData);
+            final plant = Plant.fromPlantaModel(plantaModel);
+            if (!plant.isDeleted) {
+              plants.add(plant);
+            }
           }
+        } catch (e) {
+          // Log corrupted data and remove from Hive
+          print('Found corrupted plant data for key $key: $e');
+          try {
+            await hiveBox.delete(key);
+            print('Removed corrupted plant data for key: $key');
+          } catch (deleteError) {
+            print('Failed to remove corrupted data for key $key: $deleteError');
+          }
+          // Continue processing other plants
+          continue;
         }
       }
 
@@ -114,11 +127,23 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         return null;
       }
 
-      final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-      final plantaModel = PlantaModel.fromJson(plantData);
-      final plant = Plant.fromPlantaModel(plantaModel);
+      try {
+        final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
+        final plantaModel = PlantaModel.fromJson(plantData);
+        final plant = Plant.fromPlantaModel(plantaModel);
 
-      return plant.isDeleted ? null : plant;
+        return plant.isDeleted ? null : plant;
+      } catch (corruptionError) {
+        // Handle corrupted individual plant data
+        print('Found corrupted plant data for ID $id: $corruptionError');
+        try {
+          await hiveBox.delete(id);
+          print('Removed corrupted plant data for ID: $id');
+        } catch (deleteError) {
+          print('Failed to remove corrupted data for ID $id: $deleteError');
+        }
+        return null;
+      }
     } catch (e) {
       throw CacheFailure(
         'Erro ao buscar planta do cache local: ${e.toString()}',
@@ -196,16 +221,13 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   @override
   Future<List<Plant>> searchPlants(String query) async {
     try {
-      // Use optimized search service and convert result
-      final plantaModels = await _searchService.searchWithDebounce(
+      // Use optimized search service - now returns Plant entities directly
+      final results = await _searchService.searchWithDebounce(
         query,
         const Duration(milliseconds: 300),
       );
 
-      // Convert PlantaModel to Plant
-      return plantaModels
-          .map((plantaModel) => Plant.fromPlantaModel(plantaModel))
-          .toList();
+      return results;
     } catch (e) {
       // Fallback to basic search if search service fails
       try {

@@ -550,25 +550,59 @@ class PlantsProvider extends ChangeNotifier {
   }
 
   String _getErrorMessage(Failure failure) {
+    // Log detailed error for debugging
+    if (kDebugMode) {
+      print('PlantsProvider Error Details:');
+      print('- Type: ${failure.runtimeType}');
+      print('- Message: ${failure.message}');
+      print('- Stack trace: ${StackTrace.current}');
+    }
+
     switch (failure.runtimeType) {
       case ValidationFailure _:
-        return failure.message;
+        return failure.message.isNotEmpty 
+            ? failure.message 
+            : 'Dados inválidos fornecidos';
       case CacheFailure _:
-        return failure.message;
+        // More specific cache error messages
+        if (failure.message.contains('PlantaModelAdapter') ||
+            failure.message.contains('TypeAdapter')) {
+          return 'Erro ao acessar dados locais. O app será reiniciado para corrigir o problema.';
+        }
+        if (failure.message.contains('HiveError') ||
+            failure.message.contains('corrupted')) {
+          return 'Dados locais corrompidos. Sincronizando com servidor...';
+        }
+        return failure.message.isNotEmpty 
+            ? 'Cache: ${failure.message}' 
+            : 'Erro ao acessar dados locais';
       case NetworkFailure _:
-        return 'Sem conexão com a internet';
+        return 'Sem conexão com a internet. Verifique sua conectividade.';
       case ServerFailure _:
         // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
-          return 'Erro de autenticação. Tente fazer login novamente.';
+          return 'Sessão expirada. Tente fazer login novamente.';
         }
-        return failure.message;
+        if (failure.message.contains('403') || failure.message.contains('Forbidden')) {
+          return 'Acesso negado. Verifique suas permissões.';
+        }
+        if (failure.message.contains('500') || failure.message.contains('Internal')) {
+          return 'Erro no servidor. Tente novamente em alguns instantes.';
+        }
+        return failure.message.isNotEmpty 
+            ? 'Servidor: ${failure.message}' 
+            : 'Erro no servidor';
       case NotFoundFailure _:
-        return failure.message;
+        return failure.message.isNotEmpty 
+            ? failure.message 
+            : 'Dados não encontrados';
       default:
-        return 'Erro inesperado';
+        final errorContext = kDebugMode 
+            ? ' (${failure.runtimeType}: ${failure.message})' 
+            : '';
+        return 'Ops! Algo deu errado$errorContext';
     }
   }
 }

@@ -71,53 +71,311 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Row(
-        children: [
-          Icon(
-            Icons.check_circle_outline,
-            color: theme.colorScheme.primary,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          const Text('Marcar como Concluída'),
-        ],
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      contentPadding: const EdgeInsets.all(24),
       content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.85,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Informações da tarefa
-              _buildTaskInfo(),
+              // Header com ícone e título da tarefa
+              _buildHeader(theme),
+              
+              const SizedBox(height: 24),
 
-              const SizedBox(height: 20),
+              // Data de vencimento atual
+              _buildInfoCard(
+                theme,
+                Icons.calendar_today,
+                'Data de vencimento',
+                _formatDateDescription(widget.task.dueDate),
+                theme.colorScheme.primary,
+              ),
 
-              // Data da conclusão
-              _buildCompletionDateField(),
+              const SizedBox(height: 12),
 
-              const SizedBox(height: 16),
+              // Próximo vencimento
+              _buildInfoCard(
+                theme,
+                Icons.schedule,
+                'Próximo vencimento',
+                _getNextDueDescription(),
+                Colors.green,
+              ),
 
-              // Campo de observações
-              _buildNotesField(),
+              const SizedBox(height: 12),
 
-              if (widget.nextTaskDate != null) ...[
-                const SizedBox(height: 20),
-                _buildNextTaskPreview(),
-              ],
+              // Intervalo
+              _buildInfoCard(
+                theme,
+                Icons.repeat,
+                'Intervalo',
+                _getIntervalDescription(),
+                Colors.orange,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Data de conclusão (editável)
+              _buildCompletionSection(theme),
+
+              const SizedBox(height: 32),
+
+              // Botões
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: _handleCancel,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: theme.colorScheme.outline),
+                        ),
+                      ),
+                      child: const Text('Voltar'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _handleConfirm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Concluir'),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
-      actions: [
-        TextButton(onPressed: _handleCancel, child: const Text('Cancelar')),
-        ElevatedButton(
-          onPressed: _handleConfirm,
-          child: const Text('Confirmar'),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Row(
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            _getTaskTypeIcon(),
+            size: 24,
+            color: theme.colorScheme.secondary,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.task.title,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              Text(
+                widget.task.plantName,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  Widget _buildInfoCard(ThemeData theme, IconData icon, String title, String description, Color iconColor) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompletionSection(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.calendar_today, color: Colors.green, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Data de conclusão',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _selectCompletionDate,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    _formatDate(_completionDate),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.calendar_month,
+                    color: Colors.green.shade700,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateDescription(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final targetDate = DateTime(date.year, date.month, date.day);
+    final difference = targetDate.difference(today).inDays;
+
+    if (difference == 0) {
+      return 'Hoje';
+    } else if (difference == 1) {
+      return 'Em 1 dia';
+    } else if (difference > 1) {
+      return 'Em $difference dias';
+    } else if (difference == -1) {
+      return 'Era ontem';
+    } else {
+      return 'Era há ${-difference} dias';
+    }
+  }
+
+  String _getNextDueDescription() {
+    // Simula um intervalo baseado no tipo de tarefa
+    final interval = _getTaskInterval();
+    final nextDate = _completionDate.add(Duration(days: interval));
+    return _formatDateDescription(nextDate);
+  }
+
+  String _getIntervalDescription() {
+    final interval = _getTaskInterval();
+    if (interval == 1) {
+      return '1 dia';
+    } else if (interval < 7) {
+      return '$interval dias';
+    } else if (interval == 7) {
+      return '1 semana';
+    } else if (interval < 30) {
+      final weeks = (interval / 7).round();
+      return '$weeks ${weeks == 1 ? 'semana' : 'semanas'}';
+    } else {
+      final months = (interval / 30).round();
+      return '$months ${months == 1 ? 'mês' : 'meses'}';
+    }
+  }
+
+  int _getTaskInterval() {
+    // Define intervalos padrão baseados no tipo de tarefa
+    switch (widget.task.type) {
+      case TaskType.watering:
+        return 3; // 3 dias
+      case TaskType.fertilizing:
+        return 30; // 1 mês
+      case TaskType.pruning:
+        return 60; // 2 meses
+      case TaskType.repotting:
+        return 365; // 1 ano
+      case TaskType.pestInspection:
+        return 14; // 2 semanas
+      default:
+        return 7; // 1 semana
+    }
   }
 
   Widget _buildTaskInfo() {

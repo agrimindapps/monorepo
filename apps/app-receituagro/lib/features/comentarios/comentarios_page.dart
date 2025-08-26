@@ -855,12 +855,6 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
       try {
         await widget.onSave!(contentToSave);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Comentário salvo com sucesso!'),
-              backgroundColor: Color(0xFF4CAF50),
-            ),
-          );
           Navigator.of(context).pop();
         }
       } catch (e) {
@@ -876,12 +870,6 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
     } else {
       // Fallback para demonstração
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Comentário salvo: "$content"'),
-            backgroundColor: const Color(0xFF4CAF50),
-          ),
-        );
         Navigator.of(context).pop();
       }
     }

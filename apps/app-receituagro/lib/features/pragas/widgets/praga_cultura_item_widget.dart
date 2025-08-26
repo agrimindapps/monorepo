@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../core/design/design_tokens.dart';
 import '../../../core/widgets/praga_image_widget.dart';
 import '../models/praga_cultura_item_model.dart';
 import '../models/praga_view_mode.dart';
@@ -28,25 +29,26 @@ class PragaCulturaItemWidget extends StatelessWidget {
 
   Widget _buildListItem(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      elevation: 2,
+      margin: EdgeInsets.zero,
+      elevation: ReceitaAgroElevation.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        side: BorderSide.none,
       ),
       color: isDark ? const Color(0xFF2A2A2E) : Colors.white,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
           child: Row(
             children: [
-              _buildIcon(48),
-              const SizedBox(width: 16),
+              _buildIcon(ReceitaAgroDimensions.itemImageSize),
+              SizedBox(width: ReceitaAgroSpacing.lg),
               Expanded(
                 child: _buildListContent(),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: ReceitaAgroSpacing.md),
               _buildTrailingIcon(),
             ],
           ),
@@ -57,17 +59,18 @@ class PragaCulturaItemWidget extends StatelessWidget {
 
   Widget _buildGridItem(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(4),
-      elevation: 2,
+      margin: EdgeInsets.zero,
+      elevation: ReceitaAgroElevation.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        side: BorderSide.none,
       ),
       color: isDark ? const Color(0xFF2A2A2E) : Colors.white,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
         onTap: onTap,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
           child: Stack(
             children: [
               // Imagem da praga ocupando todo o card
@@ -98,7 +101,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.md),
           border: Border.all(
             color: color.withValues(alpha: 0.3),
             width: 1.5,
@@ -129,20 +132,17 @@ class PragaCulturaItemWidget extends StatelessWidget {
       children: [
         Text(
           praga.displayName,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+          style: ReceitaAgroTypography.itemTitle.copyWith(
             color: isDark ? Colors.white : Colors.black87,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         if (praga.displaySecondaryName.isNotEmpty) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: ReceitaAgroSpacing.xs),
           Text(
             praga.displaySecondaryName,
-            style: TextStyle(
-              fontSize: 14,
+            style: ReceitaAgroTypography.itemSubtitle.copyWith(
               color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
               fontStyle: FontStyle.italic,
             ),
@@ -150,103 +150,24 @@ class PragaCulturaItemWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            _buildTypeChip(),
-            if (praga.categoria?.isNotEmpty == true) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildCategoryChip(),
-              ),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGridContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          praga.displayName,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if (praga.displaySecondaryName.isNotEmpty) ...[
-          const SizedBox(height: 4),
+        if (praga.categoria?.isNotEmpty == true) ...[
+          SizedBox(height: ReceitaAgroSpacing.sm),
           Text(
-            praga.displaySecondaryName,
-            style: TextStyle(
-              fontSize: 12,
+            praga.categoria!,
+            style: ReceitaAgroTypography.itemCategory.copyWith(
               color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
             ),
-            textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
-        const SizedBox(height: 8),
-        _buildTypeChip(),
       ],
     );
   }
 
-  Widget _buildTypeChip() {
-    final color = _getTypeColor();
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        praga.displayType,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: color,
-        ),
-      ),
-    );
-  }
 
-  Widget _buildCategoryChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark 
-            ? Colors.grey.shade700.withValues(alpha: 0.5)
-            : Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        praga.categoria!,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
+
 
   Widget _buildTrailingIcon() {
     return Icon(
@@ -333,20 +254,18 @@ class PragaCulturaItemWidget extends StatelessWidget {
 
   Widget _buildOverlayContent() {
     return Positioned(
-      bottom: 8,
-      left: 8,
-      right: 8,
+      bottom: ReceitaAgroSpacing.sm,
+      left: ReceitaAgroSpacing.sm,
+      right: ReceitaAgroSpacing.sm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             praga.displayName,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+            style: ReceitaAgroTypography.itemTitle.copyWith(
               color: Colors.white,
-              shadows: [
+              shadows: const [
                 Shadow(
                   blurRadius: 2.0,
                   color: Colors.black,
@@ -358,11 +277,10 @@ class PragaCulturaItemWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           if (praga.displaySecondaryName.isNotEmpty) ...[
-            const SizedBox(height: 2),
+            SizedBox(height: ReceitaAgroSpacing.xs / 2),
             Text(
               praga.displaySecondaryName,
-              style: TextStyle(
-                fontSize: 12,
+              style: ReceitaAgroTypography.itemCategory.copyWith(
                 color: Colors.white.withValues(alpha: 0.9),
                 fontStyle: FontStyle.italic,
                 shadows: const [

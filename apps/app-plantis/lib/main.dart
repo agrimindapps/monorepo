@@ -12,7 +12,7 @@ import 'app.dart';
 // Import Hive adapters - these include the generated adapters from .g.dart files
 import 'core/data/models/comentario_model.dart';
 import 'core/data/models/espaco_model.dart';
-// import 'core/data/models/planta_model.dart'; // DEPRECATED: Migrado para PlantModel em inglês
+import 'core/data/models/legacy/planta_model.dart'; // REATIVADO: Para compatibilidade com dados legacy
 // import 'core/data/models/tarefa_model.dart'; // DEPRECATED: Migrado para TaskModel em inglês
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
@@ -64,7 +64,7 @@ void main() async {
   // Register Hive adapters
   Hive.registerAdapter(ComentarioModelAdapter()); // TypeId: 0
   Hive.registerAdapter(EspacoModelAdapter()); // TypeId: 1
-  // Hive.registerAdapter(PlantaModelAdapter()); // TypeId: 2 - DEPRECATED: Migrado para PlantModel
+  Hive.registerAdapter(PlantaModelAdapter()); // TypeId: 2 - REATIVADO para compatibilidade com dados legacy
   // Hive.registerAdapter(TarefaModelAdapter()); // TypeId: 3 - DEPRECATED: Migrado para TaskModel
   Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
 

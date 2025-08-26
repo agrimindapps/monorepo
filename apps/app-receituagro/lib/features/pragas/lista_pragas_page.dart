@@ -17,10 +17,7 @@ import 'widgets/pragas_loading_skeleton_widget.dart';
 class ListaPragasPage extends StatefulWidget {
   final String? pragaType;
 
-  const ListaPragasPage({
-    super.key,
-    this.pragaType,
-  });
+  const ListaPragasPage({super.key, this.pragaType});
 
   @override
   State<ListaPragasPage> createState() => _ListaPragasPageState();
@@ -29,7 +26,7 @@ class ListaPragasPage extends StatefulWidget {
 class _ListaPragasPageState extends State<ListaPragasPage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounceTimer;
-  
+
   bool _isAscending = true;
   PragaViewMode _viewMode = PragaViewMode.grid;
   String _searchText = '';
@@ -40,10 +37,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     super.initState();
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
-    
-    // Carrega pragas usando o Provider após o build
+
+    // Carrega pragas usando GetIt diretamente para evitar erro de Provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PragasProvider>().loadPragasByTipo(_currentPragaType);
+      GetIt.instance<PragasProvider>().loadPragasByTipo(_currentPragaType);
     });
   }
 
@@ -57,12 +54,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
   // Método migrado para PragasProvider
 
-
   void _onSearchChanged() {
     _searchDebounceTimer?.cancel();
-    
+
     final searchText = _searchController.text;
-    
+
     setState(() {
       _searchText = searchText;
     });
@@ -73,12 +69,12 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   void _performDebouncedSearch(String searchText) {
+    final provider = GetIt.instance<PragasProvider>();
     if (searchText.trim().isEmpty) {
-      context.read<PragasProvider>().loadPragasByTipo(_currentPragaType);
+      provider.loadPragasByTipo(_currentPragaType);
     } else {
-      context.read<PragasProvider>().searchPragas(searchText.trim());
+      provider.searchPragas(searchText.trim());
     }
-    
   }
 
   // Métodos de filtragem migrados para PragasProvider
@@ -86,13 +82,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   void _clearSearch() {
     _searchDebounceTimer?.cancel();
     _searchController.clear();
-    
+
     setState(() {
       _searchText = '';
     });
-    
+
     // Recarrega pragas do tipo atual
-    context.read<PragasProvider>().loadPragasByTipo(_currentPragaType);
+    GetIt.instance<PragasProvider>().loadPragasByTipo(_currentPragaType);
   }
 
   void _toggleViewMode(PragaViewMode mode) {
@@ -105,13 +101,14 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     setState(() {
       _isAscending = !_isAscending;
     });
-    
+
     // TODO: Implementar ordenação no PragasProvider
     // Por enquanto recarrega os dados
+    final provider = GetIt.instance<PragasProvider>();
     if (_searchText.isEmpty) {
-      context.read<PragasProvider>().loadPragasByTipo(_currentPragaType);
+      provider.loadPragasByTipo(_currentPragaType);
     } else {
-      context.read<PragasProvider>().searchPragas(_searchText);
+      provider.searchPragas(_searchText);
     }
   }
 
@@ -119,10 +116,14 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => DetalhePragaPage(
-          pragaName: praga.nomeComum,
-          pragaScientificName: praga.nomeCientifico.isNotEmpty ? praga.nomeCientifico : 'Nome científico não disponível',
-        ),
+        builder:
+            (context) => DetalhePragaPage(
+              pragaName: praga.nomeComum,
+              pragaScientificName:
+                  praga.nomeCientifico.isNotEmpty
+                      ? praga.nomeCientifico
+                      : 'Nome científico não disponível',
+            ),
       ),
     );
   }
@@ -130,7 +131,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return ChangeNotifierProvider.value(
       value: GetIt.instance<PragasProvider>(),
       child: Scaffold(
@@ -166,9 +167,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       title: _getHeaderTitle(),
       subtitle: _getHeaderSubtitle(provider),
       leftIcon: _getHeaderIcon(),
-      rightIcon: _isAscending 
-          ? Icons.arrow_upward_outlined 
-          : Icons.arrow_downward_outlined,
+      rightIcon:
+          _isAscending
+              ? Icons.arrow_upward_outlined
+              : Icons.arrow_downward_outlined,
       isDark: isDark,
       showBackButton: true,
       showActions: true,
@@ -181,9 +183,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     return Column(
       children: [
         _buildSearchField(isDark),
-        Expanded(
-          child: _buildContent(isDark, provider),
-        ),
+        Expanded(child: _buildContent(isDark, provider)),
       ],
     );
   }
@@ -211,12 +211,9 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
   Widget _buildPragasList(bool isDark, PragasProvider provider) {
     if (provider.isLoading) {
-      return PragasLoadingSkeletonWidget(
-        viewMode: _viewMode,
-        isDark: isDark,
-      );
+      return PragasLoadingSkeletonWidget(viewMode: _viewMode, isDark: isDark);
     }
-    
+
     if (provider.errorMessage != null) {
       return Center(
         child: Padding(
@@ -295,14 +292,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: isDark ? const Color(0xFF1E1E22) : Colors.white,
       margin: const EdgeInsets.only(top: 4),
-      child: _viewMode.isGrid
-          ? _buildGridView(isDark, provider)
-          : _buildListView(isDark, provider),
+      child:
+          _viewMode.isGrid
+              ? _buildGridView(isDark, provider)
+              : _buildListView(isDark, provider),
     );
   }
 
@@ -310,7 +306,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
-        
+
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -378,15 +374,15 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
   String _getHeaderSubtitle(PragasProvider provider) {
     final total = provider.pragas.length;
-    
+
     if (provider.isLoading && total == 0) {
       return 'Carregando registros...';
     }
-    
+
     if (provider.errorMessage != null) {
       return 'Erro no carregamento';
     }
-    
+
     return '$total registros disponíveis';
   }
 

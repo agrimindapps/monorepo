@@ -51,26 +51,204 @@ class Plant extends BaseSyncEntity {
   }
 
   /// Convert from legacy PlantaModel to modern Plant entity
+  /// Includes robust validation to handle corrupted or null data
   factory Plant.fromPlantaModel(dynamic plantaModel) {
-    return Plant(
-      id: plantaModel.id as String,
-      name: (plantaModel.nome as String?) ?? '',
-      species: plantaModel.especie as String?,
-      spaceId: plantaModel.espacoId as String?,
-      imageBase64: plantaModel.fotoBase64 as String?,
-      imageUrls: (plantaModel.imagePaths as List<dynamic>?)?.cast<String>() ?? [],
-      plantingDate: plantaModel.dataCadastro as DateTime?,
-      notes: plantaModel.observacoes as String?,
-      isFavorited: (plantaModel.isFavorited as bool?) ?? false,
-      createdAt: plantaModel.createdAt as DateTime?,
-      updatedAt: plantaModel.updatedAt as DateTime?,
-      lastSyncAt: plantaModel.lastSyncAt as DateTime?,
-      isDirty: (plantaModel.isDirty as bool?) ?? false,
-      isDeleted: (plantaModel.isDeleted as bool?) ?? false,
-      version: (plantaModel.version as int?) ?? 1,
-      userId: plantaModel.userId as String?,
-      moduleName: plantaModel.moduleName as String?,
-    );
+    try {
+      // Validate essential fields
+      if (plantaModel == null) {
+        throw ArgumentError('PlantaModel cannot be null');
+      }
+
+      final id = plantaModel.id;
+      if (id == null || id.toString().trim().isEmpty) {
+        throw ArgumentError('PlantaModel must have a valid ID');
+      }
+
+      // Safe conversion with null checks and validation
+      String safeName = '';
+      try {
+        final nome = plantaModel.nome;
+        safeName = (nome is String && nome.trim().isNotEmpty) ? nome : '';
+      } catch (e) {
+        // Keep default empty name if conversion fails
+      }
+
+      String? safeSpecies;
+      try {
+        final especie = plantaModel.especie;
+        safeSpecies = (especie is String && especie.trim().isNotEmpty) ? especie : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      String? safeSpaceId;
+      try {
+        final espacoId = plantaModel.espacoId;
+        safeSpaceId = (espacoId is String && espacoId.trim().isNotEmpty) ? espacoId : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      String? safeImageBase64;
+      try {
+        final fotoBase64 = plantaModel.fotoBase64;
+        safeImageBase64 = (fotoBase64 is String && fotoBase64.trim().isNotEmpty) ? fotoBase64 : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      List<String> safeImageUrls = [];
+      try {
+        final imagePaths = plantaModel.imagePaths;
+        if (imagePaths is List) {
+          safeImageUrls = imagePaths
+              .where((path) => path != null && path.toString().trim().isNotEmpty)
+              .map((path) => path.toString())
+              .toList();
+        }
+      } catch (e) {
+        // Keep empty list if conversion fails
+      }
+
+      DateTime? safePlantingDate;
+      try {
+        final dataCadastro = plantaModel.dataCadastro;
+        safePlantingDate = (dataCadastro is DateTime) ? dataCadastro : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      String? safeNotes;
+      try {
+        final observacoes = plantaModel.observacoes;
+        safeNotes = (observacoes is String && observacoes.trim().isNotEmpty) ? observacoes : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      bool safeIsFavorited = false;
+      try {
+        final isFavorited = plantaModel.isFavorited;
+        safeIsFavorited = (isFavorited is bool) ? isFavorited : false;
+      } catch (e) {
+        // Keep default false if conversion fails
+      }
+
+      DateTime? safeCreatedAt;
+      try {
+        final createdAt = plantaModel.createdAt;
+        safeCreatedAt = (createdAt is DateTime) ? createdAt : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      DateTime? safeUpdatedAt;
+      try {
+        final updatedAt = plantaModel.updatedAt;
+        safeUpdatedAt = (updatedAt is DateTime) ? updatedAt : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      DateTime? safeLastSyncAt;
+      try {
+        final lastSyncAt = plantaModel.lastSyncAt;
+        safeLastSyncAt = (lastSyncAt is DateTime) ? lastSyncAt : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      bool safeIsDirty = false;
+      try {
+        final isDirty = plantaModel.isDirty;
+        safeIsDirty = (isDirty is bool) ? isDirty : false;
+      } catch (e) {
+        // Keep default false if conversion fails
+      }
+
+      bool safeIsDeleted = false;
+      try {
+        final isDeleted = plantaModel.isDeleted;
+        safeIsDeleted = (isDeleted is bool) ? isDeleted : false;
+      } catch (e) {
+        // Keep default false if conversion fails
+      }
+
+      int safeVersion = 1;
+      try {
+        final version = plantaModel.version;
+        safeVersion = (version is int && version > 0) ? version : 1;
+      } catch (e) {
+        // Keep default 1 if conversion fails
+      }
+
+      String? safeUserId;
+      try {
+        final userId = plantaModel.userId;
+        safeUserId = (userId is String && userId.trim().isNotEmpty) ? userId : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      String? safeModuleName;
+      try {
+        final moduleName = plantaModel.moduleName;
+        safeModuleName = (moduleName is String && moduleName.trim().isNotEmpty) ? moduleName : null;
+      } catch (e) {
+        // Keep null if conversion fails
+      }
+
+      return Plant(
+        id: id.toString(),
+        name: safeName,
+        species: safeSpecies,
+        spaceId: safeSpaceId,
+        imageBase64: safeImageBase64,
+        imageUrls: safeImageUrls,
+        plantingDate: safePlantingDate,
+        notes: safeNotes,
+        isFavorited: safeIsFavorited,
+        createdAt: safeCreatedAt,
+        updatedAt: safeUpdatedAt,
+        lastSyncAt: safeLastSyncAt,
+        isDirty: safeIsDirty,
+        isDeleted: safeIsDeleted,
+        version: safeVersion,
+        userId: safeUserId,
+        moduleName: safeModuleName,
+      );
+    } catch (e) {
+      // If conversion completely fails, log error and return a basic plant with minimal data
+      print('Error converting PlantaModel to Plant: $e');
+      
+      // Try to extract at least the ID for basic functionality
+      String fallbackId;
+      try {
+        fallbackId = plantaModel?.id?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
+      } catch (_) {
+        fallbackId = DateTime.now().millisecondsSinceEpoch.toString();
+      }
+
+      return Plant(
+        id: fallbackId,
+        name: 'Planta com dados corrompidos',
+        species: null,
+        spaceId: null,
+        imageBase64: null,
+        imageUrls: const [],
+        plantingDate: null,
+        notes: 'Dados originais corrompidos - convertido com valores padrão',
+        isFavorited: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        lastSyncAt: null,
+        isDirty: true,
+        isDeleted: false,
+        version: 1,
+        userId: null,
+        moduleName: 'plantis',
+      );
+    }
   }
 
   @override

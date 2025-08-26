@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/design/design_tokens.dart';
 import '../models/praga_view_mode.dart';
 
 class PragaCulturaSearchFieldWidget extends StatefulWidget {
@@ -77,19 +79,20 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
 
   Widget _buildSearchCard() {
     return Card(
-      elevation: 2,
+      elevation: ReceitaAgroElevation.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.lg),
+        side: BorderSide.none,
       ),
       color: widget.isDark ? const Color(0xFF222228) : Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
         child: Row(
           children: [
             Expanded(
               child: _buildSearchField(),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: ReceitaAgroSpacing.md),
             _buildViewToggleButtons(),
           ],
         ),
@@ -99,12 +102,12 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
 
   Widget _buildSearchField() {
     return Container(
-      height: 48,
+      height: ReceitaAgroDimensions.touchTargetSize + 4,
       decoration: BoxDecoration(
         color: widget.isDark 
             ? Colors.grey.shade900.withValues(alpha: 0.3)
             : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.md),
         border: Border.all(
           color: widget.isDark 
               ? Colors.grey.shade700 
@@ -148,8 +151,8 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
               : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+            horizontal: ReceitaAgroSpacing.lg,
+            vertical: ReceitaAgroSpacing.md,
           ),
         ),
       ),
@@ -158,12 +161,12 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
 
   Widget _buildViewToggleButtons() {
     return Container(
-      height: 48,
+      height: ReceitaAgroDimensions.touchTargetSize + 4,
       decoration: BoxDecoration(
         color: widget.isDark 
             ? Colors.grey.shade900.withValues(alpha: 0.3)
             : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.md),
         border: Border.all(
           color: widget.isDark 
               ? Colors.grey.shade700 

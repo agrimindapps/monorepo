@@ -52,7 +52,6 @@ class _AddFuelPageState extends State<AddFuelPage> {
         userId: authProvider.userId,
       );
       
-      // Se está editando um registro, carregá-lo
       if (widget.editFuelRecordId != null) {
         await _loadFuelRecordForEdit();
       }
@@ -66,11 +65,20 @@ class _AddFuelPageState extends State<AddFuelPage> {
   }
 
   Future<void> _loadFuelRecordForEdit() async {
-    // TODO: Implementar carregamento do registro para edição
-    // final record = _fuelProvider.getFuelRecordById(widget.editFuelRecordId!);
-    // if (record != null) {
-    //   _formProvider.loadFromFuelRecord(record);
-    // }
+    try {
+      // Primeiro garantir que os dados foram carregados
+      await _fuelProvider.loadAllFuelRecords();
+      
+      final record = _fuelProvider.getFuelRecordById(widget.editFuelRecordId!);
+      
+      if (record != null) {
+        await _formProvider.loadFromFuelRecord(record);
+      } else {
+        throw Exception('Registro de abastecimento não encontrado');
+      }
+    } catch (e) {
+      _showErrorDialog('Erro ao carregar registro para edição: $e');
+    }
   }
 
   @override
@@ -111,16 +119,24 @@ class _AddFuelPageState extends State<AddFuelPage> {
           ),
           actions: [
             Consumer<FuelFormProvider>(builder: (context, formProvider, _) {
-              return TextButton(
-                onPressed: formProvider.formModel.canSubmit 
-                    ? () => _submitForm()
-                    : null,
-                child: Text(
-                  widget.editFuelRecordId != null ? 'Salvar' : 'Adicionar',
-                  style: TextStyle(
-                    color: formProvider.formModel.canSubmit
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).disabledColor,
+              return Semantics(
+                label: widget.editFuelRecordId != null 
+                  ? 'Salvar alterações do abastecimento'
+                  : 'Adicionar novo abastecimento',
+                hint: formProvider.formModel.canSubmit
+                  ? 'Botão habilitado, toque para salvar'
+                  : 'Botão desabilitado, preencha todos os campos obrigatórios',
+                child: TextButton(
+                  onPressed: formProvider.formModel.canSubmit 
+                      ? () => _submitForm()
+                      : null,
+                  child: Text(
+                    widget.editFuelRecordId != null ? 'Salvar' : 'Adicionar',
+                    style: TextStyle(
+                      color: formProvider.formModel.canSubmit
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).disabledColor,
+                    ),
                   ),
                 ),
               );
@@ -182,7 +198,7 @@ class _AddFuelPageState extends State<AddFuelPage> {
   void _showErrorDialog(String message) {
     if (!mounted) return;
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Erro'),

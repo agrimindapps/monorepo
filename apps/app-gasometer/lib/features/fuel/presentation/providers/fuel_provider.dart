@@ -57,8 +57,10 @@ class FuelProvider extends ChangeNotifier {
         _getTotalSpent = getTotalSpent,
         _getRecentFuelRecords = getRecentFuelRecords;
 
-  // Getters
-  List<FuelRecordEntity> get fuelRecords => _filteredFuelRecords.isEmpty ? _fuelRecords : _filteredFuelRecords;
+  List<FuelRecordEntity> get fuelRecords {
+    // Se há busca ativa, retornar os filtrados; senão, retornar todos
+    return _searchQuery.isNotEmpty ? _filteredFuelRecords : _fuelRecords;
+  }
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get currentVehicleFilter => _currentVehicleFilter;
@@ -70,8 +72,21 @@ class FuelProvider extends ChangeNotifier {
   bool get hasError => _errorMessage != null;
   bool get hasRecords => fuelRecords.isNotEmpty;
   int get recordsCount => fuelRecords.length;
+  
+  bool get hasActiveVehicleFilter => _currentVehicleFilter.isNotEmpty;
+  bool get hasActiveSearch => _searchQuery.isNotEmpty;
+  bool get hasActiveFilters => hasActiveVehicleFilter || hasActiveSearch;
+  String get activeFiltersDescription {
+    if (hasActiveSearch && hasActiveVehicleFilter) {
+      return 'Busca: "$_searchQuery" no veículo selecionado';
+    } else if (hasActiveSearch) {
+      return 'Busca: "$_searchQuery"';
+    } else if (hasActiveVehicleFilter) {
+      return 'Veículo selecionado';
+    }
+    return '';
+  }
 
-  // Load all fuel records
   Future<void> loadAllFuelRecords() async {
     _setLoading(true);
     _clearError();
@@ -90,7 +105,6 @@ class FuelProvider extends ChangeNotifier {
     _setLoading(false);
   }
 
-  // Load fuel records by vehicle
   Future<void> loadFuelRecordsByVehicle(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
@@ -114,7 +128,6 @@ class FuelProvider extends ChangeNotifier {
     _setLoading(false);
   }
 
-  // Add new fuel record
   Future<bool> addFuelRecord(FuelRecordEntity fuelRecord) async {
     _setLoading(true);
     _clearError();
@@ -139,7 +152,6 @@ class FuelProvider extends ChangeNotifier {
     );
   }
 
-  // Update fuel record
   Future<bool> updateFuelRecord(FuelRecordEntity fuelRecord) async {
     _setLoading(true);
     _clearError();
@@ -167,7 +179,6 @@ class FuelProvider extends ChangeNotifier {
     );
   }
 
-  // Delete fuel record
   Future<bool> deleteFuelRecord(String id) async {
     if (id.isEmpty) return false;
 
@@ -194,55 +205,27 @@ class FuelProvider extends ChangeNotifier {
     );
   }
 
-  // Search fuel records
-  Future<void> searchFuelRecords(String query) async {
+  void searchFuelRecords(String query) {
     _searchQuery = query.trim();
-
-    if (_searchQuery.isEmpty) {
-      _filteredFuelRecords.clear();
-      notifyListeners();
-      return;
+    _applyCurrentFilters();
+    
+    if (_searchQuery.isNotEmpty && _searchQuery.length >= 2) {
+      debugPrint('🔍 Encontrados ${_filteredFuelRecords.length} registros para "$_searchQuery"');
     }
-
-    if (_searchQuery.length < 2) {
-      _filteredFuelRecords.clear();
-      notifyListeners();
-      return;
-    }
-
-    _setLoading(true);
-    _clearError();
-
-    final result = await _searchFuelRecords(
-      SearchFuelRecordsParams(query: _searchQuery),
-    );
-
-    result.fold(
-      (failure) => _handleError(failure),
-      (records) {
-        _filteredFuelRecords = records;
-        debugPrint('🔍 Encontrados ${records.length} registros para "$_searchQuery"');
-      },
-    );
-
-    _setLoading(false);
   }
 
-  // Clear search
   void clearSearch() {
     _searchQuery = '';
     _filteredFuelRecords.clear();
     notifyListeners();
   }
 
-  // Load analytics for vehicle
   Future<void> loadAnalytics(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
     _setLoading(true);
     _clearError();
 
-    // Load average consumption
     final consumptionResult = await _getAverageConsumption(
       GetAverageConsumptionParams(vehicleId: vehicleId),
     );
@@ -252,7 +235,6 @@ class FuelProvider extends ChangeNotifier {
       (consumption) => _averageConsumption = consumption,
     );
 
-    // Load total spent (last 30 days)
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
     final totalSpentResult = await _getTotalSpent(
       GetTotalSpentParams(
@@ -266,7 +248,6 @@ class FuelProvider extends ChangeNotifier {
       (total) => _totalSpent = total,
     );
 
-    // Load recent records
     final recentResult = await _getRecentFuelRecords(
       GetRecentFuelRecordsParams(vehicleId: vehicleId, limit: 5),
     );
@@ -280,7 +261,6 @@ class FuelProvider extends ChangeNotifier {
     debugPrint('🚗 Analytics carregados para veículo $vehicleId');
   }
 
-  // Get fuel record by ID
   FuelRecordEntity? getFuelRecordById(String id) {
     try {
       return _fuelRecords.firstWhere((record) => record.id == id);
@@ -289,7 +269,6 @@ class FuelProvider extends ChangeNotifier {
     }
   }
 
-  // Clear all data
   void clearAllData() {
     _fuelRecords.clear();
     _filteredFuelRecords.clear();
@@ -302,44 +281,38 @@ class FuelProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Clear error
   void clearError() {
     _clearError();
   }
 
-  // Filter by vehicle
   void filterByVehicle(String vehicleId) {
     if (_currentVehicleFilter != vehicleId) {
       loadFuelRecordsByVehicle(vehicleId);
     }
   }
 
-  // Clear vehicle filter
-  void clearVehicleFilter() {
+  
+  void clearAllFilters() {
     _currentVehicleFilter = '';
+    clearSearch();
     loadAllFuelRecords();
   }
 
-  // Get records for specific date range
-  List<FuelRecordEntity> getRecordsInDateRange(DateTime startDate, DateTime endDate) {
-    return fuelRecords.where((record) {
-      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
-    }).toList();
-  }
 
-  // Get total spent in date range
   double getTotalSpentInDateRange(DateTime startDate, DateTime endDate) {
-    final recordsInRange = getRecordsInDateRange(startDate, endDate);
-    return recordsInRange.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
+    final recordsInRange = fuelRecords.where((record) {
+      return record.data.isAfter(startDate) && record.data.isBefore(endDate);
+    }).toList();
+    return recordsInRange.map((r) => r.valorTotal).fold(0.0, (a, b) => a + b);
   }
 
-  // Get total liters in date range
   double getTotalLitersInDateRange(DateTime startDate, DateTime endDate) {
-    final recordsInRange = getRecordsInDateRange(startDate, endDate);
-    return recordsInRange.map((r) => r.liters).fold(0.0, (a, b) => a + b);
+    final recordsInRange = fuelRecords.where((record) {
+      return record.data.isAfter(startDate) && record.data.isBefore(endDate);
+    }).toList();
+    return recordsInRange.map((r) => r.litros).fold(0.0, (a, b) => a + b);
   }
 
-  // Private methods
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
       _isLoading = loading;
@@ -377,13 +350,20 @@ class FuelProvider extends ChangeNotifier {
   }
 
   void _applyCurrentFilters() {
-    // If there's a search query, keep the search results
-    if (_searchQuery.isNotEmpty && _filteredFuelRecords.isNotEmpty) {
-      return;
+    // Se não há busca ativa, limpar os filtros e usar todos os registros
+    if (_searchQuery.isEmpty) {
+      _filteredFuelRecords.clear();
+    } else {
+      // Aplicar busca nos registros carregados
+      _filteredFuelRecords = _fuelRecords.where((record) {
+        final searchLower = _searchQuery.toLowerCase();
+        return record.nomePosto?.toLowerCase().contains(searchLower) == true ||
+               record.marcaPosto?.toLowerCase().contains(searchLower) == true ||
+               record.observacoes?.toLowerCase().contains(searchLower) == true ||
+               record.tipoCombustivel.displayName.toLowerCase().contains(searchLower);
+      }).toList();
     }
-
-    // Otherwise clear filtered results to show all records
-    _filteredFuelRecords.clear();
+    
     notifyListeners();
   }
 }

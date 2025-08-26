@@ -19,7 +19,6 @@ class FuelPage extends StatefulWidget {
 }
 
 class _FuelPageState extends State<FuelPage> {
-  String _selectedFilter = 'all';
   String? _selectedVehicleId;
 
   @override
@@ -34,7 +33,6 @@ class _FuelPageState extends State<FuelPage> {
     final fuelProvider = context.read<FuelProvider>();
     final vehiclesProvider = context.read<VehiclesProvider>();
     
-    // Initialize vehicles first, then fuel records
     vehiclesProvider.initialize().then((_) {
       if (_selectedVehicleId?.isNotEmpty == true) {
         fuelProvider.loadFuelRecordsByVehicle(_selectedVehicleId!);
@@ -45,24 +43,11 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   List<FuelRecordEntity> get _filteredRecords {
-    final fuelProvider = context.read<FuelProvider>();
-    var filtered = fuelProvider.fuelRecords;
-
-    // Aplicar filtro por veículo
-    if (_selectedFilter != 'all') {
-      filtered = filtered.where((r) => r.vehicleId == _selectedFilter).toList();
-    }
-
-    // Aplicar busca - já está sendo filtrado pelo provider
-    // O provider já gerencia a busca através do searchFuelRecords()
-
-    return filtered;
+    return context.read<FuelProvider>().fuelRecords;
   }
 
   String _getVehicleName(String vehicleId) {
-    final vehiclesProvider = context.read<VehiclesProvider>();
-    // Busca na lista carregada localmente em vez de fazer chamada async
-    final vehicle = vehiclesProvider.vehicles.where((v) => v.id == vehicleId).firstOrNull;
+    final vehicle = context.read<VehiclesProvider>().vehicles.where((v) => v.id == vehicleId).firstOrNull;
     return vehicle?.displayName ?? 'Veículo desconhecido';
   }
 
@@ -110,16 +95,19 @@ class _FuelPageState extends State<FuelPage> {
         ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.local_gas_station,
-                color: Colors.white,
-                size: 28,
+            Semantics(
+              label: 'Ícone de abastecimentos',
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.local_gas_station,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -161,10 +149,12 @@ class _FuelPageState extends State<FuelPage> {
           onVehicleChanged: (String? vehicleId) {
             setState(() {
               _selectedVehicleId = vehicleId;
-              _selectedFilter = vehicleId ?? 'all';
             });
             
-            // Load records for selected vehicle
+            if (fuelProvider.searchQuery.isNotEmpty) {
+              fuelProvider.clearSearch();
+            }
+            
             if (vehicleId?.isNotEmpty == true) {
               fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
             } else {
@@ -172,18 +162,40 @@ class _FuelPageState extends State<FuelPage> {
             }
           },
         ),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
+        
+        // Campo de busca
+        TextField(
+          decoration: InputDecoration(
+            hintText: 'Buscar por posto, marca ou observação...',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: fuelProvider.searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () => fuelProvider.clearSearch(),
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surface,
+          ),
+          onChanged: (value) => fuelProvider.searchFuelRecords(value),
+        ),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         
-        // Show loading state
+        if (fuelProvider.hasActiveFilters) ...[
+          _buildFilterStatus(fuelProvider),
+          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        ],
+        
         if (fuelProvider.isLoading)
           _buildLoadingState()
-        // Show error state  
         else if (fuelProvider.hasError)
           _buildErrorState(fuelProvider.errorMessage!, () => _loadData())
-        // Show empty state
         else if (_filteredRecords.isEmpty)
           _buildEmptyState()
-        // Show content
         else ...[
           _buildStatistics(_filteredRecords),
           SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
@@ -196,17 +208,17 @@ class _FuelPageState extends State<FuelPage> {
   Widget _buildStatistics(List<FuelRecordEntity> records) {
     final totalLiters = records.fold<double>(
       0,
-      (sum, record) => sum + record.liters,
+      (sum, record) => sum + record.litros,
     );
     final totalCost = records.fold<double>(
       0,
-      (sum, record) => sum + record.totalPrice,
+      (sum, record) => sum + record.valorTotal,
     );
     final avgPrice = records.isEmpty
         ? 0.0
         : records.fold<double>(
               0,
-              (sum, record) => sum + record.pricePerLiter,
+              (sum, record) => sum + record.precoPorLitro,
             ) /
             records.length;
 
@@ -313,12 +325,12 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   Widget _buildRecordCard(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {
-    final date = record.date;
+    final date = record.data;
     final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    final vehicleName = _getVehicleName(record.vehicleId);
+    final vehicleName = _getVehicleName(record.veiculoId);
 
     return Semantics(
-      label: 'Abastecimento $vehicleName, ${record.liters.toStringAsFixed(1)} litros, R\$ ${record.totalPrice.toStringAsFixed(2)}',
+      label: 'Abastecimento $vehicleName, ${record.litros.toStringAsFixed(1)} litros, R\$ ${record.valorTotal.toStringAsFixed(2)}',
       hint: 'Toque para ver detalhes, mantenha pressionado para opções',
       child: GestureDetector(
         onLongPress: () => _showRecordMenu(record),
@@ -326,165 +338,194 @@ class _FuelPageState extends State<FuelPage> {
           margin: EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
           onTap: () => _showRecordDetails(record, vehiclesProvider),
           child: Column(
-        children: [
-          Row(
             children: [
-              Container(
-                padding: GasometerDesignTokens.paddingAll(
-                  GasometerDesignTokens.spacingMd - 2,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(
-                    alpha: GasometerDesignTokens.opacityOverlay,
-                  ),
-                  borderRadius: GasometerDesignTokens.borderRadius(
-                    GasometerDesignTokens.radiusMd + 2,
-                  ),
-                ),
-                child: Icon(
-                  Icons.local_gas_station,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: GasometerDesignTokens.iconSizeListItem,
-                ),
-              ),
-              SizedBox(width: GasometerDesignTokens.spacingLg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          vehicleName,
-                          style: TextStyle(
-                            fontSize: GasometerDesignTokens.fontSizeLg,
-                            fontWeight: GasometerDesignTokens.fontWeightBold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          formattedDate,
-                          style: TextStyle(
-                            fontSize: GasometerDesignTokens.fontSizeMd,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(
-                              alpha: GasometerDesignTokens.opacitySecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: GasometerDesignTokens.spacingXs),
-                    Text(
-                      record.gasStationName ?? 'Posto não informado',
-                      style: TextStyle(
-                        fontSize: GasometerDesignTokens.fontSizeMd,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(
-                          alpha: GasometerDesignTokens.opacitySecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildRecordHeader(context, vehicleName, formattedDate, record),
+              _buildRecordDivider(context),
+              _buildRecordStats(context, record),
             ],
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
-          Divider(
-            height: 1,
-            color: Theme.of(context).colorScheme.outline.withValues(
-              alpha: GasometerDesignTokens.opacityDivider,
-            ),
-          ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildInfoItem(
-                Icons.water_drop_outlined,
-                '${record.liters.toStringAsFixed(1)} L',
-                'Litros',
-              ),
-              _buildInfoItem(
-                Icons.speed,
-                '${record.odometer.toStringAsFixed(0)} km',
-                'Odômetro',
-              ),
-              _buildInfoItem(
-                Icons.attach_money,
-                'R\$ ${record.totalPrice.toStringAsFixed(2)}',
-                'Total',
-              ),
-              if (record.fullTank)
-                Container(
-                  padding: GasometerDesignTokens.paddingOnly(
-                    left: GasometerDesignTokens.spacingSm,
-                    right: GasometerDesignTokens.spacingSm,
-                    top: GasometerDesignTokens.spacingXs,
-                    bottom: GasometerDesignTokens.spacingXs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(
-                      alpha: GasometerDesignTokens.opacityOverlay,
-                    ),
-                    borderRadius: GasometerDesignTokens.borderRadius(
-                      GasometerDesignTokens.radiusSm,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: GasometerDesignTokens.fontSizeMd,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      SizedBox(width: GasometerDesignTokens.spacingXs),
-                      Text(
-                        'Tanque cheio',
-                        style: TextStyle(
-                          fontSize: GasometerDesignTokens.fontSizeSm,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: GasometerDesignTokens.fontWeightMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ],
+        ),
       ),
-    ),
-    ),
+    );
+  }
+
+  Widget _buildRecordHeader(BuildContext context, String vehicleName, String formattedDate, FuelRecordEntity record) {
+    return Row(
+      children: [
+        _buildRecordIcon(context),
+        SizedBox(width: GasometerDesignTokens.spacingLg),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    vehicleName,
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeLg,
+                      fontWeight: GasometerDesignTokens.fontWeightBold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    formattedDate,
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeMd,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(
+                        alpha: GasometerDesignTokens.opacitySecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: GasometerDesignTokens.spacingXs),
+              Text(
+                record.nomePosto ?? 'Posto não informado',
+                style: TextStyle(
+                  fontSize: GasometerDesignTokens.fontSizeMd,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(
+                    alpha: GasometerDesignTokens.opacitySecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecordIcon(BuildContext context) {
+    return Container(
+      padding: GasometerDesignTokens.paddingAll(
+        GasometerDesignTokens.spacingMd - 2,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withValues(
+          alpha: GasometerDesignTokens.opacityOverlay,
+        ),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusMd + 2,
+        ),
+      ),
+      child: Icon(
+        Icons.local_gas_station,
+        color: Theme.of(context).colorScheme.primary,
+        size: GasometerDesignTokens.iconSizeListItem,
+      ),
+    );
+  }
+
+  Widget _buildRecordDivider(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: GasometerDesignTokens.spacingMd),
+        Divider(
+          height: 1,
+          color: Theme.of(context).colorScheme.outline.withValues(
+            alpha: GasometerDesignTokens.opacityDivider,
+          ),
+        ),
+        SizedBox(height: GasometerDesignTokens.spacingMd),
+      ],
+    );
+  }
+
+  Widget _buildRecordStats(BuildContext context, FuelRecordEntity record) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildInfoItem(
+          Icons.water_drop_outlined,
+          '${record.litros.toStringAsFixed(1)} L',
+          'Litros',
+        ),
+        _buildInfoItem(
+          Icons.speed,
+          '${record.odometro.toStringAsFixed(0)} km',
+          'Odômetro',
+        ),
+        _buildInfoItem(
+          Icons.attach_money,
+          'R\$ ${record.valorTotal.toStringAsFixed(2)}',
+          'Total',
+        ),
+        if (record.tanqueCheio) _buildFullTankBadge(context),
+      ],
+    );
+  }
+
+  Widget _buildFullTankBadge(BuildContext context) {
+    return Semantics(
+      label: 'Abastecimento com tanque cheio',
+      child: Container(
+        padding: GasometerDesignTokens.paddingOnly(
+          left: GasometerDesignTokens.spacingSm,
+          right: GasometerDesignTokens.spacingSm,
+          top: GasometerDesignTokens.spacingXs,
+          bottom: GasometerDesignTokens.spacingXs,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(
+            alpha: GasometerDesignTokens.opacityOverlay,
+          ),
+          borderRadius: GasometerDesignTokens.borderRadius(
+            GasometerDesignTokens.radiusSm,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle,
+              size: GasometerDesignTokens.fontSizeMd,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            SizedBox(width: GasometerDesignTokens.spacingXs),
+            Text(
+              'Tanque cheio',
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeSm,
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: GasometerDesignTokens.fontWeightMedium,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildInfoItem(IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
+    return Semantics(
+      label: '$label: $value',
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            size: 18,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -553,16 +594,15 @@ class _FuelPageState extends State<FuelPage> {
       builder: (context) => const AddVehiclePage(),
     );
     
-    // Se resultado for true, recarregar veículos
     if (result == true && context.mounted) {
       await context.read<VehiclesProvider>().initialize();
     }
   }
 
   void _showRecordDetails(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {
-    final vehicleName = _getVehicleName(record.vehicleId);
+    final vehicleName = _getVehicleName(record.veiculoId);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -576,15 +616,15 @@ class _FuelPageState extends State<FuelPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('Posto', record.gasStationName ?? 'Não informado'),
-            _buildDetailRow('Combustível', record.fuelType.displayName),
-            _buildDetailRow('Litros', record.formattedLiters),
-            _buildDetailRow('Preço/L', record.formattedPricePerLiter),
-            _buildDetailRow('Total', record.formattedTotalPrice),
-            _buildDetailRow('Odômetro', record.formattedOdometer),
-            _buildDetailRow('Tanque cheio', record.fullTank ? 'Sim' : 'Não'),
-            if (record.hasNotes)
-              _buildDetailRow('Observações', record.notes!),
+            _buildDetailRow('Posto', record.nomePosto ?? 'Não informado'),
+            _buildDetailRow('Combustível', record.tipoCombustivel.displayName),
+            _buildDetailRow('Litros', record.litrosFormatados),
+            _buildDetailRow('Preço/L', record.precoPorLitroFormatado),
+            _buildDetailRow('Total', record.valorTotalFormatado),
+            _buildDetailRow('Odômetro', record.odometroFormatado),
+            _buildDetailRow('Tanque cheio', record.tanqueCheio ? 'Sim' : 'Não'),
+            if (record.temObservacoes)
+              _buildDetailRow('Observações', record.observacoes!),
           ],
         ),
         actions: [
@@ -598,7 +638,7 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _showRecordMenu(FuelRecordEntity record) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
         child: Wrap(
@@ -610,7 +650,7 @@ class _FuelPageState extends State<FuelPage> {
                 Navigator.pop(context);
                 context.go('/fuel/add', extra: {
                   'editFuelRecordId': record.id,
-                  'vehicleId': record.vehicleId,
+                  'vehicleId': record.veiculoId,
                 });
               },
             ),
@@ -629,7 +669,7 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _confirmDeleteRecord(FuelRecordEntity record) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar exclusão'),
@@ -647,21 +687,18 @@ class _FuelPageState extends State<FuelPage> {
               final success = await fuelProvider.deleteFuelRecord(record.id);
               
               if (mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Registro excluído com sucesso!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(fuelProvider.errorMessage ?? 'Erro ao excluir registro'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final message = success 
+                  ? 'Registro excluído com sucesso!'
+                  : fuelProvider.errorMessage ?? 'Erro ao excluir registro';
+                final backgroundColor = success ? Colors.green : Colors.red;
+                
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: backgroundColor,
+                  ),
+                );
               }
             },
             style: ElevatedButton.styleFrom(
@@ -721,6 +758,54 @@ class _FuelPageState extends State<FuelPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFilterStatus(FuelProvider fuelProvider) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.filter_alt,
+            color: Theme.of(context).colorScheme.primary,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              fuelProvider.activeFiltersDescription,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          if (fuelProvider.hasActiveFilters)
+            TextButton(
+              onPressed: () => fuelProvider.clearAllFilters(),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(60, 30),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              child: Text(
+                'Limpar',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

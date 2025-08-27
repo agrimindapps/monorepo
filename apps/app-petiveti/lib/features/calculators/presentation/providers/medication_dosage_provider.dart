@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/repositories/medication_database.dart';
+import '../../data/repositories/versioned_medication_database.dart';
 import '../../domain/entities/medication_data.dart';
 import '../../domain/entities/medication_dosage_input.dart';
 import '../../domain/entities/medication_dosage_output.dart';
@@ -257,10 +258,28 @@ class MedicationDosageProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 300)); // Simular processamento
+      await Future<void>.delayed(const Duration(milliseconds: 300)); // Simular processamento
       
       final result = _strategy.calculate(_input);
       _output = result;
+      
+      // Registrar cálculo no sistema de auditoria médica
+      VersionedMedicationDatabase.instance.logDosageCalculation(
+        medicationId: _input.medicationId,
+        calculatedDose: result.dosagePerKg,
+        species: _input.species,
+        additionalData: {
+          'weight': _input.weight,
+          'ageGroup': _input.ageGroup.name,
+          'frequency': _input.frequency.name,
+          'specialConditions': _input.specialConditions.map((c) => c.name).toList(),
+          'isEmergency': _input.isEmergency,
+          'totalDailyDose': result.totalDailyDose,
+          'dosePerAdministration': result.dosePerAdministration,
+          'alertsCount': result.alerts.length,
+          'criticalAlerts': result.alerts.where((a) => a.level == AlertLevel.danger).length,
+        },
+      );
       
       // Adicionar ao histórico
       _addToHistory(result);

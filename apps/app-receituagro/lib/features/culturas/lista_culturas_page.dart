@@ -1,15 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/models/cultura_hive.dart';
+import '../../core/repositories/cultura_core_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas/lista_pragas_por_cultura_page.dart';
-import 'domain/entities/cultura_entity.dart';
 import 'models/cultura_view_mode.dart';
-import 'presentation/providers/culturas_provider.dart';
 import 'widgets/cultura_item_widget.dart';
 import 'widgets/cultura_search_field.dart';
 import 'widgets/empty_state_widget.dart';
@@ -24,22 +22,21 @@ class ListaCulturasPage extends StatefulWidget {
 
 class _ListaCulturasPageState extends State<ListaCulturasPage> {
   final TextEditingController _searchController = TextEditingController();
-  // ARCHITECTURAL FIX: Removed direct repository access, using Provider pattern
-  // Fix para conflito arquitetural - substituído acesso direto por Provider
+  final CulturaCoreRepository _repository = sl<CulturaCoreRepository>();
+  
+  List<CulturaHive> _culturas = [];
+  List<CulturaHive> _filteredCulturas = [];
+  bool _isLoading = false;
   bool _isAscending = true;
   CulturaViewMode _viewMode = CulturaViewMode.list;
   Timer? _debounceTimer;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    
-    // ARCHITECTURAL FIX: Initialize provider using Clean Architecture pattern
-    // Inicialização seguindo padrão Provider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CulturasProvider>().loadActiveCulturas();
-    });
+    _loadCulturas();
   }
 
   @override
@@ -49,8 +46,26 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     super.dispose();
   }
 
-  // ARCHITECTURAL FIX: Removed direct repository method
-  // Método removido - dados agora vêm via Provider
+  Future<void> _loadCulturas() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    try {
+      final culturas = await _repository.getActiveCulturas();
+      setState(() {
+        _culturas = culturas;
+        _filteredCulturas = culturas;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao carregar culturas: $e';
+        _isLoading = false;
+      });
+    }
+  }
 
   void _onSearchChanged() {
     _debounceTimer?.cancel();
@@ -58,39 +73,44 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     final searchText = _searchController.text;
     
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      // ARCHITECTURAL FIX: Using Provider pattern for search
-      // Usando Provider para busca ao invés de manipulação local
-      final provider = context.read<CulturasProvider>();
-      if (searchText.trim().isEmpty) {
-        provider.loadActiveCulturas();
-      } else {
-        provider.searchByPattern(searchText.trim());
-      }
+      _performSearch(searchText.trim());
     });
   }
 
-  // ARCHITECTURAL FIX: Removed performSearch method
-  // Método removido - busca agora via Provider
+  void _performSearch(String searchText) {
+    setState(() {
+      if (searchText.isEmpty) {
+        _filteredCulturas = _culturas;
+      } else {
+        _filteredCulturas = _culturas.where((cultura) {
+          return cultura.cultura.toLowerCase().contains(searchText.toLowerCase());
+        }).toList();
+      }
+      _sortCulturas();
+    });
+  }
 
   void _clearSearch() {
     _searchController.clear();
-    // ARCHITECTURAL FIX: Using Provider to clear search
-    // Usando Provider para limpar busca
-    context.read<CulturasProvider>().loadActiveCulturas();
+    setState(() {
+      _filteredCulturas = _culturas;
+      _sortCulturas();
+    });
   }
 
   void _toggleSort() {
     setState(() {
       _isAscending = !_isAscending;
+      _sortCulturas();
     });
-    // ARCHITECTURAL FIX: Sorting handled by provider
-    // TODO: Implement sorting in CulturasProvider
-    // Por enquanto recarrega os dados
-    if (_searchController.text.isEmpty) {
-      context.read<CulturasProvider>().loadActiveCulturas();
-    } else {
-      context.read<CulturasProvider>().searchByPattern(_searchController.text);
-    }
+  }
+
+  void _sortCulturas() {
+    _filteredCulturas.sort((a, b) {
+      return _isAscending 
+          ? a.cultura.compareTo(b.cultura)
+          : b.cultura.compareTo(a.cultura);
+    });
   }
 
   void _toggleViewMode(CulturaViewMode mode) {
@@ -99,111 +119,92 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
   }
 
-  void _onCulturaTap(CulturaEntity cultura) {
+  void _onCulturaTap(CulturaHive cultura) {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
         builder: (context) => ListaPragasPorCulturaPage(
-          culturaId: cultura.id,
-          culturaNome: cultura.nome,
+          culturaId: cultura.idReg,
+          culturaNome: cultura.cultura,
         ),
       ),
     );
   }
 
-  String _getHeaderSubtitle(CulturasProvider provider) {
-    final total = provider.culturas.length;
-
-    if (provider.isLoading && total == 0) {
+  String _getHeaderSubtitle() {
+    if (_isLoading) {
       return 'Carregando culturas...';
     }
     
-    if (provider.hasError) {
+    if (_errorMessage != null) {
       return 'Erro no carregamento';
     }
 
-    return '$total culturas disponíveis';
+    return '${_filteredCulturas.length} culturas disponíveis';
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // ARCHITECTURAL FIX: Using Provider pattern with ChangeNotifierProvider
-    // Implementação seguindo padrão Provider estabelecido
-    return ChangeNotifierProvider.value(
-      value: sl<CulturasProvider>(),
-      child: Scaffold(
-        body: SafeArea(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Column(
-              children: [
-                Consumer<CulturasProvider>(
-                  builder: (context, provider, child) {
-                    return ModernHeaderWidget(
-                      title: 'Culturas',
-                      subtitle: _getHeaderSubtitle(provider),
-                      leftIcon: Icons.agriculture_outlined,
-                      rightIcon: _isAscending
-                          ? Icons.arrow_upward_outlined
-                          : Icons.arrow_downward_outlined,
-                      isDark: isDark,
-                      showBackButton: true,
-                      showActions: true,
-                      onBackPressed: () => Navigator.of(context).pop(),
-                      onRightIconPressed: _toggleSort,
-                    );
-                  },
-                ),
-                CulturaSearchField(
-                  controller: _searchController,
-                  isDark: isDark,
-                  viewMode: _viewMode,
-                  onViewModeChanged: _toggleViewMode,
-                  isSearching: false, // Controlled by provider now
-                  onClear: _clearSearch,
-                  onSubmitted: () {
-                    final provider = context.read<CulturasProvider>();
-                    provider.searchByPattern(_searchController.text);
-                  },
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                    child: Card(
-                      elevation: 2,
-                      color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Consumer<CulturasProvider>(
-                        builder: (context, provider, child) {
-                          return _buildContent(isDark, provider);
-                        },
-                      ),
+    return Scaffold(
+      body: SafeArea(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Column(
+            children: [
+              ModernHeaderWidget(
+                title: 'Culturas',
+                subtitle: _getHeaderSubtitle(),
+                leftIcon: Icons.agriculture_outlined,
+                rightIcon: _isAscending
+                    ? Icons.arrow_upward_outlined
+                    : Icons.arrow_downward_outlined,
+                isDark: isDark,
+                showBackButton: true,
+                showActions: true,
+                onBackPressed: () => Navigator.of(context).pop(),
+                onRightIconPressed: _toggleSort,
+              ),
+              CulturaSearchField(
+                controller: _searchController,
+                isDark: isDark,
+                viewMode: _viewMode,
+                onViewModeChanged: _toggleViewMode,
+                isSearching: _isLoading,
+                onClear: _clearSearch,
+                onSubmitted: () => _performSearch(_searchController.text),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: Card(
+                    elevation: 2,
+                    color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: _buildContent(isDark),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent(bool isDark, CulturasProvider provider) {
-    // ARCHITECTURAL FIX: Using provider state instead of local state
-    if (provider.isLoading) {
+  Widget _buildContent(bool isDark) {
+    if (_isLoading) {
       return LoadingSkeletonWidget(isDark: isDark);
-    } else if (provider.hasError) {
+    } else if (_errorMessage != null) {
       return EmptyStateWidget(
         isDark: isDark,
         message: 'Erro ao carregar culturas',
-        subtitle: provider.errorMessage,
+        subtitle: _errorMessage,
       );
-    } else if (provider.culturas.isEmpty) {
+    } else if (_filteredCulturas.isEmpty) {
       return EmptyStateWidget(
         isDark: isDark,
         message: _searchController.text.isNotEmpty
@@ -215,21 +216,19 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
       );
     } else {
       return _viewMode.isGrid
-          ? _buildGridView(isDark, provider)
-          : _buildListView(isDark, provider);
+          ? _buildGridView(isDark)
+          : _buildListView(isDark);
     }
   }
 
-  Widget _buildListView(bool isDark, CulturasProvider provider) {
+  Widget _buildListView(bool isDark) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: provider.culturas.length,
+      itemCount: _filteredCulturas.length,
       itemBuilder: (context, index) {
-        final cultura = provider.culturas[index];
-        // ARCHITECTURAL FIX: Need to convert CulturaEntity to CulturaHive for widget compatibility
-        // TODO: Update CulturaItemWidget to work with CulturaEntity or create adapter
+        final cultura = _filteredCulturas[index];
         return CulturaItemWidget(
-          cultura: _convertEntityToHive(cultura),
+          cultura: cultura,
           isDark: isDark,
           mode: CulturaItemMode.list,
           onTap: () => _onCulturaTap(cultura),
@@ -238,7 +237,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     );
   }
 
-  Widget _buildGridView(bool isDark, CulturasProvider provider) {
+  Widget _buildGridView(bool isDark) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
@@ -251,11 +250,11 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: provider.culturas.length,
+          itemCount: _filteredCulturas.length,
           itemBuilder: (context, index) {
-            final cultura = provider.culturas[index];
+            final cultura = _filteredCulturas[index];
             return CulturaItemWidget(
-              cultura: _convertEntityToHive(cultura),
+              cultura: cultura,
               isDark: isDark,
               mode: CulturaItemMode.grid,
               onTap: () => _onCulturaTap(cultura),
@@ -273,15 +272,4 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     return 5;
   }
 
-  // ARCHITECTURAL FIX: Temporary adapter method
-  // Método adaptador temporário para compatibilidade com widgets existentes
-  CulturaHive _convertEntityToHive(CulturaEntity entity) {
-    return CulturaHive(
-      objectId: entity.id,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      updatedAt: DateTime.now().millisecondsSinceEpoch,
-      idReg: entity.id,
-      cultura: entity.nome,
-    );
-  }
 }

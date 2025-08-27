@@ -6,10 +6,7 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
 import 'domain/entities/favorito_entity.dart';
 import 'favoritos_di.dart';
-import 'models/favorito_defensivo_model.dart';
-import 'models/favorito_diagnostico_model.dart';
-import 'models/favorito_praga_model.dart';
-import 'presentation/providers/favoritos_provider.dart';
+import 'presentation/providers/favoritos_provider_simplified.dart';
 
 /// Favoritos Page refatorada para usar Clean Architecture com Provider
 class FavoritosPage extends StatefulWidget {
@@ -44,15 +41,10 @@ class _FavoritosPageState extends State<FavoritosPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     
-    return ChangeNotifierProvider(
-      // ARCHITECTURAL FIX: Provider initialization with auto-loading
-      // Fix para race condition - provider agora inicializa automaticamente
-      create: (_) {
-        final provider = FavoritosDI.get<FavoritosProvider>();
-        // Inicializa o provider imediatamente após criação
-        provider.initialize();
-        return provider;
-      },
+    return ChangeNotifierProvider.value(
+      // ARCHITECTURAL FIX: Use Provider.value to avoid race conditions
+      // Provider já está instanciado e inicializado pelo DI simplificado
+      value: FavoritosDI.get<FavoritosProviderSimplified>()..initialize(),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
@@ -62,7 +54,7 @@ class _FavoritosPageState extends State<FavoritosPage>
               const SizedBox(height: 20),
               _buildTabBar(),
               Expanded(
-                child: Consumer<FavoritosProvider>(
+                child: Consumer<FavoritosProviderSimplified>(
                   builder: (context, provider, child) {
                     return TabBarView(
                       controller: _tabController,
@@ -83,7 +75,7 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return Consumer<FavoritosProvider>(
+    return Consumer<FavoritosProviderSimplified>(
       builder: (context, provider, child) {
         return ModernHeaderWidget(
           title: 'Favoritos',
@@ -140,7 +132,7 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  Widget _buildDefensivosTab(FavoritosProvider provider, bool isDark) {
+  Widget _buildDefensivosTab(FavoritosProviderSimplified provider, bool isDark) {
     return _buildTabContent(
       provider: provider,
       viewState: provider.getViewStateForType(TipoFavorito.defensivo),
@@ -152,7 +144,7 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  Widget _buildPragasTab(FavoritosProvider provider, bool isDark) {
+  Widget _buildPragasTab(FavoritosProviderSimplified provider, bool isDark) {
     return _buildTabContent(
       provider: provider,
       viewState: provider.getViewStateForType(TipoFavorito.praga),
@@ -164,7 +156,7 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  Widget _buildDiagnosticosTab(FavoritosProvider provider, bool isDark) {
+  Widget _buildDiagnosticosTab(FavoritosProviderSimplified provider, bool isDark) {
     return _buildTabContent(
       provider: provider,
       viewState: provider.getViewStateForType(TipoFavorito.diagnostico),
@@ -177,7 +169,7 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   Widget _buildTabContent<T extends FavoritoEntity>({
-    required FavoritosProvider provider,
+    required FavoritosProviderSimplified provider,
     required FavoritosViewState viewState,
     required String emptyMessage,
     required int count,
@@ -269,23 +261,11 @@ class _FavoritosPageState extends State<FavoritosPage>
     }
   }
 
-  Widget _buildFavoritoDefensivoItem(FavoritoDefensivoEntity defensivo, FavoritosProvider provider) {
+  Widget _buildFavoritoDefensivoItem(FavoritoDefensivoEntity defensivo, FavoritosProviderSimplified provider) {
     final theme = Theme.of(context);
     
-    // Converte para modelo para compatibilidade com navegação existente
-    final model = FavoritoDefensivoModel(
-      id: 0,
-      idReg: defensivo.id,
-      line1: defensivo.nomeComum,
-      line2: defensivo.ingredienteAtivo ?? '',
-      nomeComum: defensivo.nomeComum,
-      ingredienteAtivo: defensivo.ingredienteAtivo,
-      fabricante: defensivo.fabricante,
-      dataCriacao: DateTime.now(),
-    );
-    
     return GestureDetector(
-      onTap: () => _navigateToDefensivoDetails(model),
+      onTap: () => _navigateToDefensivoDetails(defensivo),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
@@ -330,10 +310,10 @@ class _FavoritosPageState extends State<FavoritosPage>
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (defensivo.ingredienteAtivo?.isNotEmpty == true) ...[
+                  if (defensivo.ingredienteAtivo.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      defensivo.ingredienteAtivo ?? '',
+                      defensivo.ingredienteAtivo,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -374,21 +354,11 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  Widget _buildFavoritoPragaItem(FavoritoPragaEntity praga, FavoritosProvider provider) {
+  Widget _buildFavoritoPragaItem(FavoritoPragaEntity praga, FavoritosProviderSimplified provider) {
     final theme = Theme.of(context);
     
-    // Converte para modelo para compatibilidade com navegação existente
-    final model = FavoritoPragaModel(
-      id: 0,
-      idReg: praga.id,
-      nomeComum: praga.nomeComum,
-      nomeCientifico: praga.nomeCientifico,
-      tipoPraga: praga.tipoPraga,
-      dataCriacao: DateTime.now(),
-    );
-    
     return GestureDetector(
-      onTap: () => _navigateToPragaDetails(model),
+      onTap: () => _navigateToPragaDetails(praga),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
@@ -479,20 +449,11 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  Widget _buildFavoritoDiagnosticoItem(FavoritoDiagnosticoEntity diagnostico, FavoritosProvider provider) {
+  Widget _buildFavoritoDiagnosticoItem(FavoritoDiagnosticoEntity diagnostico, FavoritosProviderSimplified provider) {
     final theme = Theme.of(context);
     
-    // Converte para modelo para compatibilidade com navegação existente
-    final model = FavoritoDiagnosticoModel(
-      id: 0,
-      idReg: diagnostico.id,
-      nome: '${diagnostico.nomeDefensivo} → ${diagnostico.nomePraga}',
-      cultura: diagnostico.cultura,
-      dataCriacao: DateTime.now(),
-    );
-    
     return GestureDetector(
-      onTap: () => _navigateToDiagnosticoDetails(model),
+      onTap: () => _navigateToDiagnosticoDetails(diagnostico),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
@@ -581,8 +542,8 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  // Métodos de navegação (podem ser movidos para um service futuramente)
-  void _navigateToDefensivoDetails(FavoritoDefensivoModel defensivo) {
+  // Métodos de navegação usando apenas entidades
+  void _navigateToDefensivoDetails(FavoritoDefensivoEntity defensivo) {
     Navigator.pushNamed(
       context, 
       '/detalhe-defensivo',
@@ -593,7 +554,7 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  void _navigateToPragaDetails(FavoritoPragaModel praga) {
+  void _navigateToPragaDetails(FavoritoPragaEntity praga) {
     Navigator.pushNamed(
       context,
       '/detalhe-praga',
@@ -604,14 +565,14 @@ class _FavoritosPageState extends State<FavoritosPage>
     );
   }
 
-  void _navigateToDiagnosticoDetails(FavoritoDiagnosticoModel diagnostico) {
+  void _navigateToDiagnosticoDetails(FavoritoDiagnosticoEntity diagnostico) {
     Navigator.pushNamed(
       context,
       '/detalhe-diagnostico',
       arguments: {
-        'diagnosticoId': diagnostico.idReg,
+        'diagnosticoId': diagnostico.id,
         'nomeDefensivo': diagnostico.displayName,
-        'nomePraga': diagnostico.displayName,
+        'nomePraga': diagnostico.nomePraga,
         'cultura': diagnostico.displayCultura,
       },
     );

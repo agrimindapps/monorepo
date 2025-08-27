@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/entities/medication_dosage_output.dart';
+import '../../domain/services/dosage_validation_service.dart';
 import '../providers/medication_dosage_provider.dart';
+import '../widgets/critical_dose_confirmation_dialog.dart';
 import '../widgets/medication_dosage_input_form.dart';
 import '../widgets/medication_dosage_result_card.dart';
 import '../widgets/medication_selector_widget.dart';
@@ -117,10 +119,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
           if (!provider.hasValidInput) return const SizedBox.shrink();
           
           return FloatingActionButton.extended(
-            onPressed: provider.isCalculating ? null : () {
-              provider.calculateDosage();
-              _tabController.animateTo(1); // Ir para tab de resultado
-            },
+            onPressed: provider.isCalculating ? null : () => _handleCalculateWithSafetyCheck(provider),
             backgroundColor: Colors.red.shade600,
             icon: provider.isCalculating 
                 ? const SizedBox(
@@ -475,6 +474,70 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
         ],
       ),
     );
+  }
+
+  /// Implementa confirmação dupla para doses críticas
+  Future<void> _handleCalculateWithSafetyCheck(MedicationDosageProvider provider) async {
+    // Pre-validação para identificar riscos
+    final preValidation = DosageValidationService.preValidate(provider.input);
+    
+    if (preValidation.requiresDoubleConfirmation) {
+      final confirmed = await _showCriticalDoseConfirmation(preValidation.warnings);
+      if (!confirmed) return;
+    }
+    
+    // Proceder com cálculo
+    await provider.calculateDosage();
+    
+    // Validação pós-cálculo
+    if (provider.output != null && provider.selectedMedication != null) {
+      final postValidation = DosageValidationService.validateCalculation(
+        provider.input,
+        provider.output!,
+        provider.selectedMedication!,
+      );
+      
+      // Se ainda há questões críticas após o cálculo
+      if (postValidation.isCritical && !postValidation.isValid) {
+        final confirmed = await _showCriticalDoseConfirmation(
+          postValidation.criticalErrors + postValidation.warnings,
+          medicationName: provider.output!.medicationName,
+          calculatedDose: provider.output!.dosagePerKg,
+          unit: provider.output!.unit,
+          recommendedAction: postValidation.recommendedAction,
+        );
+        
+        if (!confirmed) {
+          // Se não confirmou, limpar resultado
+          provider.clearAll();
+          return;
+        }
+      }
+    }
+    
+    // Ir para tab de resultado
+    _tabController.animateTo(1);
+  }
+
+  /// Mostra dialog de confirmação crítica
+  Future<bool> _showCriticalDoseConfirmation(
+    List<String> warnings, {
+    String? medicationName,
+    double? calculatedDose,
+    String? unit,
+    String? recommendedAction,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => CriticalDoseConfirmationDialog(
+        warnings: warnings,
+        medicationName: medicationName ?? 'Medicamento',
+        calculatedDose: calculatedDose ?? 0.0,
+        unit: unit ?? 'mg/kg',
+        recommendedAction: recommendedAction,
+      ),
+    ).then((value) => value ?? false);
   }
 
   void _showPrescriptionExport(BuildContext context, MedicationDosageProvider provider) {

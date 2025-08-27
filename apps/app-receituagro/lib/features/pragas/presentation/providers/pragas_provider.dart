@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/services/access_history_service.dart';
+import '../../../../core/services/random_selection_service.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/usecases/get_pragas_usecase.dart';
 
@@ -15,6 +17,9 @@ class PragasProvider extends ChangeNotifier {
   final GetRecentPragasUseCase _getRecentPragasUseCase;
   final GetSuggestedPragasUseCase _getSuggestedPragasUseCase;
   final GetPragasStatsUseCase _getPragasStatsUseCase;
+  
+  // Serviços de histórico
+  final AccessHistoryService _historyService = AccessHistoryService();
 
   // Estados
   List<PragaEntity> _pragas = [];
@@ -60,7 +65,6 @@ class PragasProvider extends ChangeNotifier {
 
   /// Inicialização
   Future<void> initialize() async {
-    print('🚀 PragasProvider: Iniciando inicialização...');
     try {
       _setLoading(true);
       _clearError();
@@ -71,12 +75,7 @@ class PragasProvider extends ChangeNotifier {
         loadStats(),
       ]);
       
-      print('✅ PragasProvider: Inicialização concluída');
-      print('📊 PragasProvider: Stats = ${_stats?.toString()}');
-      print('📊 PragasProvider: Recentes = ${_recentPragas.length}');
-      print('📊 PragasProvider: Sugeridas = ${_suggestedPragas.length}');
     } catch (e) {
-      print('❌ PragasProvider: Erro na inicialização: $e');
       _setError('Erro ao inicializar dados das pragas: $e');
     } finally {
       _setLoading(false);
@@ -146,23 +145,90 @@ class PragasProvider extends ChangeNotifier {
   /// Carrega pragas recentes
   Future<void> loadRecentPragas() async {
     await _executeUseCase(() async {
-      _recentPragas = await _getRecentPragasUseCase.execute();
+      // Tenta carregar do histórico primeiro
+      final historyItems = await _historyService.getPragasHistory();
+      
+      if (historyItems.isNotEmpty) {
+        // Converte histórico para PragaEntity
+        final historicPragas = <PragaEntity>[];
+        
+        // Para fazer a conversão, precisamos carregar todas as pragas uma vez
+        final allPragasResult = await _getPragasUseCase.execute();
+        allPragasResult.fold(
+          (failure) => throw Exception(failure.message),
+          (allPragas) {
+            for (final historyItem in historyItems.take(3)) {
+              final praga = allPragas.firstWhere(
+                (p) => p.idReg == historyItem.id || p.nomeComum == historyItem.name,
+                orElse: () => const PragaEntity(
+                  idReg: '',
+                  nomeComum: '',
+                  nomeCientifico: '',
+                  tipoPraga: '1',
+                ),
+              );
+              
+              if (praga.idReg.isNotEmpty) {
+                historicPragas.add(praga);
+              }
+            }
+            
+            // Combina histórico com seleção aleatória se necessário
+            _recentPragas = RandomSelectionService.combineHistoryWithRandom(
+              historicPragas,
+              allPragas,
+              3,
+              RandomSelectionService.selectRandomPragas,
+            );
+          },
+        );
+      } else {
+        // Fallback para use case original se não há histórico
+        _recentPragas = await _getRecentPragasUseCase.execute();
+      }
     });
   }
 
   /// Carrega pragas sugeridas
   Future<void> loadSuggestedPragas({int limit = 5}) async {
     await _executeUseCase(() async {
-      _suggestedPragas = await _getSuggestedPragasUseCase.execute(limit: limit);
+      // Tenta usar o use case original, mas com fallback para seleção aleatória
+      try {
+        _suggestedPragas = await _getSuggestedPragasUseCase.execute(limit: limit);
+        
+        // Se não retornou sugestões, usa seleção aleatória inteligente
+        if (_suggestedPragas.isEmpty) {
+          final allPragasResult = await _getPragasUseCase.execute();
+          allPragasResult.fold(
+            (failure) => throw Exception(failure.message),
+            (allPragas) {
+              _suggestedPragas = RandomSelectionService.selectSuggestedPragas(
+                allPragas,
+                count: limit,
+              );
+            },
+          );
+        }
+      } catch (e) {
+        // Em caso de erro, usa seleção aleatória como fallback
+        final allPragasResult = await _getPragasUseCase.execute();
+        allPragasResult.fold(
+          (failure) => throw Exception(failure.message),
+          (allPragas) {
+            _suggestedPragas = RandomSelectionService.selectSuggestedPragas(
+              allPragas,
+              count: limit,
+            );
+          },
+        );
+      }
     });
   }
 
   /// Carrega estatísticas
   Future<void> loadStats() async {
     await _executeUseCase(() async {
-      print('📊 PragasProvider: Carregando estatísticas...');
       _stats = await _getPragasStatsUseCase.execute();
-      print('📊 PragasProvider: Estatísticas carregadas - ${_stats?.toString()}');
     });
   }
 
@@ -182,6 +248,16 @@ class PragasProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Registra acesso a uma praga
+  Future<void> recordPragaAccess(PragaEntity praga) async {
+    await _historyService.recordPragaAccess(
+      id: praga.idReg,
+      nomeComum: praga.nomeComum,
+      nomeCientifico: praga.nomeCientifico,
+      tipoPraga: praga.tipoPraga,
+    );
   }
 
   /// Método helper para executar use cases com tratamento de erro

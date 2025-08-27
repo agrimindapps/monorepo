@@ -1,4 +1,5 @@
 import '../entities/user_settings_entity.dart';
+import '../exceptions/settings_exceptions.dart';
 import '../repositories/i_user_settings_repository.dart';
 
 /// Use case for retrieving user settings with business logic applied.
@@ -149,14 +150,6 @@ enum SettingsContext {
   default_,
 }
 
-/// Exception thrown when user ID is invalid
-class InvalidUserIdException implements Exception {
-  final String message;
-  InvalidUserIdException(this.message);
-
-  @override
-  String toString() => 'InvalidUserIdException: $message';
-}
 
 /// Exception thrown when settings are invalid
 class InvalidSettingsException implements Exception {

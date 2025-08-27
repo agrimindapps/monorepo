@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
-import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
@@ -20,7 +20,6 @@ import '../../features/settings/presentation/providers/backup_settings_provider.
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
-import '../../presentation/pages/account_settings_page.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/main_scaffold.dart';
@@ -38,14 +37,13 @@ class AppRouter {
   static const String plantEdit = '/plants/edit/:id';
   static const String tasks = '/tasks';
   static const String premium = '/premium';
-  static const String profile = '/profile';
   static const String settings = '/settings';
+  static const String accountProfile = '/account-profile';
   static const String termsOfService = '/terms-of-service';
   static const String privacyPolicy = '/privacy-policy';
   static const String promotional = '/promotional';
   static const String notificationsSettings = '/notifications-settings';
   static const String backupSettings = '/backup-settings';
-  static const String account = '/account';
 
   /// Helper method to navigate to plant details
   static String plantDetailsPath(String plantId) => '/plants/$plantId';
@@ -72,11 +70,10 @@ class AppRouter {
           plantEdit,
           tasks,
           premium,
-          profile,
           settings,
           notificationsSettings,
           backupSettings,
-          account,
+          accountProfile,
           home,
         ];
 
@@ -204,18 +201,18 @@ class AppRouter {
               builder: (context, state) => const PremiumPage(),
             ),
 
-            // Profile Route
-            GoRoute(
-              path: profile,
-              name: 'profile',
-              builder: (context, state) => const ProfilePage(),
-            ),
-
             // Settings Route
             GoRoute(
               path: settings,
               name: 'settings',
               builder: (context, state) => const SettingsPage(),
+            ),
+
+            // Account Profile Route
+            GoRoute(
+              path: accountProfile,
+              name: 'account-profile',
+              builder: (context, state) => const AccountProfilePage(),
             ),
 
             // Legal Routes
@@ -255,13 +252,6 @@ class AppRouter {
                   child: const BackupSettingsPage(),
                 );
               },
-            ),
-
-            // Account Route
-            GoRoute(
-              path: account,
-              name: 'account',
-              builder: (context, state) => const AccountSettingsPage(),
             ),
           ],
         ),
@@ -308,5 +298,4 @@ class ErrorPage extends StatelessWidget {
   }
 }
 
-// ProfilePage is implemented in features/auth/presentation/pages/
 // SettingsPage is implemented in presentation/pages/settings_page.dart

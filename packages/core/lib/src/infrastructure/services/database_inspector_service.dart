@@ -72,7 +72,21 @@ class DatabaseInspectorService {
   /// Carrega dados de uma Hive Box específica
   Future<List<DatabaseRecord>> loadHiveBoxData(String boxKey) async {
     try {
-      final box = Hive.box(boxKey);
+      // Verificar se a box está aberta, se não tenta abrir
+      late Box box;
+      if (Hive.isBoxOpen(boxKey)) {
+        box = Hive.box(boxKey);
+      } else {
+        try {
+          box = await Hive.openBox(boxKey);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error opening Hive box $boxKey: $e');
+          }
+          throw Exception('Box not found and could not be opened: $boxKey');
+        }
+      }
+      
       final records = <DatabaseRecord>[];
 
       for (final key in box.keys) {
@@ -293,6 +307,17 @@ class DatabaseInspectorService {
   /// Obtém estatísticas de uma box
   Map<String, dynamic> getBoxStats(String boxKey) {
     try {
+      // Verificar se a box está aberta
+      if (!Hive.isBoxOpen(boxKey)) {
+        return {
+          'boxKey': boxKey,
+          'displayName': getBoxDisplayName(boxKey),
+          'totalRecords': 0,
+          'isOpen': false,
+          'error': 'Box is not open',
+        };
+      }
+      
       final box = Hive.box(boxKey);
       final keys = box.keys.toList();
       
@@ -321,8 +346,10 @@ class DatabaseInspectorService {
     
     for (final boxKey in hiveBoxes) {
       try {
-        final box = Hive.box(boxKey);
-        totalRecords += box.keys.length;
+        if (Hive.isBoxOpen(boxKey)) {
+          final box = Hive.box(boxKey);
+          totalRecords += box.keys.length;
+        }
       } catch (e) {
         // Ignorar boxes que não podem ser abertas
       }

@@ -79,68 +79,52 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   }
 
   Widget _buildSingleImage(BuildContext context, PlantFormProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Foto da Planta',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () => _showImageOptions(context, provider),
-          child: Stack(
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: ImageService().buildImagePreview(
-                  provider.imageUrls.first,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
+              Text(
+                'Foto da Planta',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              // Overlay para indicar que é clicável
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 32,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: () => _showRemoveImageDialog(context, provider, 0),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      color: Theme.of(context).colorScheme.onError,
-                      size: 20,
-                    ),
+              InkWell(
+                onTap: () => _showRemoveImageDialog(context, provider, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.close,
+                    color: theme.colorScheme.error,
+                    size: 20,
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: ImageService().buildImagePreview(
+              provider.imageUrls.first,
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -150,44 +134,65 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   ) {
     final theme = Theme.of(context);
 
-    return GestureDetector(
-      onTap: () => _showImageOptions(context, provider),
-      child: Container(
-        width: double.infinity,
-        height: 200,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.5),
-            width: 2,
-            style: BorderStyle.solid,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: InkWell(
+        onTap: () => _showImageOptions(context, provider),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_a_photo,
-              size: 48,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Toque para adicionar foto',
-              style: theme.textTheme.bodyLarge?.copyWith(
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.add_photo_alternate,
+                  color: theme.colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Adicionar foto',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Selecione uma foto da sua planta',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
                 color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+                size: 20,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Câmera ou Galeria',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -497,7 +502,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
             ),
             filled: true,
-            fillColor: theme.colorScheme.surface,
+            fillColor: Colors.white,
             contentPadding: const EdgeInsets.all(16),
             errorText: errorText,
           ),
@@ -563,7 +568,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 color: theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
               borderRadius: BorderRadius.circular(12),
-              color: theme.colorScheme.surface,
+              color: Colors.white,
             ),
             child: Row(
               children: [

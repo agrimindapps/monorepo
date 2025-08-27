@@ -68,3 +68,22 @@ class AuthException implements Exception {
   @override
   String toString() => 'AuthException: $message';
 }
+
+class VeterinaryInputException implements Exception {
+  final String message;
+  final String? fieldName;
+  final double? providedValue;
+  final double? minValue;
+  final double? maxValue;
+  
+  const VeterinaryInputException({
+    required this.message,
+    this.fieldName,
+    this.providedValue,
+    this.minValue,
+    this.maxValue,
+  });
+  
+  @override
+  String toString() => 'VeterinaryInputException: $message';
+}

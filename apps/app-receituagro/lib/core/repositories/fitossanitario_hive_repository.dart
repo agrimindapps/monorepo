@@ -18,10 +18,8 @@ class FitossanitarioHiveRepository extends BaseHiveRepository<FitossanitarioHive
 
   /// Busca defensivo por nome comum
   FitossanitarioHive? findByNomeComum(String nomeComum) {
-    return findBy((item) => item.nomeComum.toLowerCase() == nomeComum.toLowerCase())
-        .isNotEmpty 
-        ? findBy((item) => item.nomeComum.toLowerCase() == nomeComum.toLowerCase()).first 
-        : null;
+    final results = findBy((item) => item.nomeComum.toLowerCase() == nomeComum.toLowerCase());
+    return results.isNotEmpty ? results.first : null;
   }
 
   /// Lista defensivos por classe agronômica

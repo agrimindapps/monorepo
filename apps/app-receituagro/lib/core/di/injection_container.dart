@@ -4,17 +4,7 @@ import 'package:get_it/get_it.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
-import '../../features/culturas/data/repositories/culturas_repository_impl.dart';
-// Culturas Clean Architecture
-import '../../features/culturas/domain/repositories/i_culturas_repository.dart';
-import '../../features/culturas/domain/usecases/get_culturas_usecase.dart';
-import '../../features/culturas/presentation/providers/culturas_provider.dart';
-import '../../features/defensivos/data/repositories/defensivos_repository_impl.dart';
-// Defensivos Clean Architecture
-import '../../features/defensivos/domain/repositories/i_defensivos_repository.dart';
-import '../../features/defensivos/domain/usecases/get_defensivos_usecase.dart';
-import '../../features/defensivos/domain/usecases/search_defensivos_usecase.dart';
-import '../../features/defensivos/presentation/providers/defensivos_provider.dart';
+// Culturas dependencies removed - using direct CulturaCoreRepository access
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 // Diagnósticos Clean Architecture
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
@@ -287,85 +277,6 @@ Future<void> init() async {
     ),
   );
 
-  // ===== DEFENSIVE CLEAN ARCHITECTURE =====
-  
-  // Repository Implementation para Defensivos
-  sl.registerLazySingleton<IDefensivosRepository>(
-    () => DefensivosRepositoryImpl(sl<FitossanitarioCoreRepository>()),
-  );
-
-  // Use Cases para Defensivos
-  sl.registerLazySingleton<GetDefensivosUseCase>(
-    () => GetDefensivosUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetActiveDefensivosUseCase>(
-    () => GetActiveDefensivosUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetElegibleDefensivosUseCase>(
-    () => GetElegibleDefensivosUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDefensivoByIdUseCase>(
-    () => GetDefensivoByIdUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDefensivosByNomeUseCase>(
-    () => SearchDefensivosByNomeUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDefensivosByIngredienteUseCase>(
-    () => SearchDefensivosByIngredienteUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDefensivosByFabricanteUseCase>(
-    () => SearchDefensivosByFabricanteUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDefensivosByClasseUseCase>(
-    () => SearchDefensivosByClasseUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDefensivosAdvancedUseCase>(
-    () => SearchDefensivosAdvancedUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDefensivosStatsUseCase>(
-    () => GetDefensivosStatsUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDefensivosFiltersUseCase>(
-    () => GetDefensivosFiltersUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetRelatedDefensivosUseCase>(
-    () => GetRelatedDefensivosUseCase(sl<IDefensivosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetPopularDefensivosUseCase>(
-    () => GetPopularDefensivosUseCase(sl<IDefensivosRepository>()),
-  );
-
-  // Provider para Defensivos
-  sl.registerLazySingleton<DefensivosProvider>(
-    () => DefensivosProvider(
-      getDefensivosUseCase: sl<GetDefensivosUseCase>(),
-      getActiveDefensivosUseCase: sl<GetActiveDefensivosUseCase>(),
-      getElegibleDefensivosUseCase: sl<GetElegibleDefensivosUseCase>(),
-      getDefensivoByIdUseCase: sl<GetDefensivoByIdUseCase>(),
-      searchByNomeUseCase: sl<SearchDefensivosByNomeUseCase>(),
-      searchByIngredienteUseCase: sl<SearchDefensivosByIngredienteUseCase>(),
-      searchByFabricanteUseCase: sl<SearchDefensivosByFabricanteUseCase>(),
-      searchByClasseUseCase: sl<SearchDefensivosByClasseUseCase>(),
-      searchAdvancedUseCase: sl<SearchDefensivosAdvancedUseCase>(),
-      getStatsUseCase: sl<GetDefensivosStatsUseCase>(),
-      getFiltersUseCase: sl<GetDefensivosFiltersUseCase>(),
-      getRelatedUseCase: sl<GetRelatedDefensivosUseCase>(),
-      getPopularUseCase: sl<GetPopularDefensivosUseCase>(),
-    ),
-  );
-
   // ===== USE CASES =====
   
   // Use Cases para Favoritos de Defensivos
@@ -389,109 +300,10 @@ Future<void> init() async {
     ),
   );
 
-  // REMOVIDO: Registro duplicado de IDefensivosRepository
-  // Já foi registrado acima na linha 252
 
-  // Use Cases para Busca de Defensivos
-  sl.registerLazySingleton<SearchDefensivosUseCase>(
-    () => SearchDefensivosUseCase(
-      sl<IDefensivosRepository>(),
-    ),
-  );
-
-  // ===== CULTURAS CLEAN ARCHITECTURE =====
-  
-  // Repository Implementation para Culturas
-  sl.registerLazySingleton<ICulturasRepository>(
-    () => CulturasRepositoryImpl(sl<CulturaCoreRepository>()),
-  );
-
-  // Use Cases para Culturas
-  sl.registerLazySingleton<GetCulturasUseCase>(
-    () => GetCulturasUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetActiveCulturasUseCase>(
-    () => GetActiveCulturasUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetCulturaByIdUseCase>(
-    () => GetCulturaByIdUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetCulturaByNomeUseCase>(
-    () => GetCulturaByNomeUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchCulturasByNomeUseCase>(
-    () => SearchCulturasByNomeUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchCulturasByFamiliaUseCase>(
-    () => SearchCulturasByFamiliaUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchCulturasByTipoUseCase>(
-    () => SearchCulturasByTipoUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchCulturasWithFiltersUseCase>(
-    () => SearchCulturasWithFiltersUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetCulturaStatsUseCase>(
-    () => GetCulturaStatsUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetPopularCulturasUseCase>(
-    () => GetPopularCulturasUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetRelatedCulturasUseCase>(
-    () => GetRelatedCulturasUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<CheckCulturaExistsUseCase>(
-    () => CheckCulturaExistsUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<CheckCulturaExistsByNomeUseCase>(
-    () => CheckCulturaExistsByNomeUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<GetCulturaFiltersDataUseCase>(
-    () => GetCulturaFiltersDataUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<ValidateCulturaDataUseCase>(
-    () => ValidateCulturaDataUseCase(sl<ICulturasRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchCulturasByPatternUseCase>(
-    () => SearchCulturasByPatternUseCase(sl<ICulturasRepository>()),
-  );
-
-  // Provider para Culturas
-  sl.registerLazySingleton<CulturasProvider>(
-    () => CulturasProvider(
-      getCulturasUseCase: sl<GetCulturasUseCase>(),
-      getActiveCulturasUseCase: sl<GetActiveCulturasUseCase>(),
-      getCulturaByIdUseCase: sl<GetCulturaByIdUseCase>(),
-      getCulturaByNomeUseCase: sl<GetCulturaByNomeUseCase>(),
-      searchCulturasByNomeUseCase: sl<SearchCulturasByNomeUseCase>(),
-      searchCulturasByFamiliaUseCase: sl<SearchCulturasByFamiliaUseCase>(),
-      searchCulturasByTipoUseCase: sl<SearchCulturasByTipoUseCase>(),
-      searchCulturasWithFiltersUseCase: sl<SearchCulturasWithFiltersUseCase>(),
-      getCulturaStatsUseCase: sl<GetCulturaStatsUseCase>(),
-      getPopularCulturasUseCase: sl<GetPopularCulturasUseCase>(),
-      getRelatedCulturasUseCase: sl<GetRelatedCulturasUseCase>(),
-      checkCulturaExistsUseCase: sl<CheckCulturaExistsUseCase>(),
-      checkCulturaExistsByNomeUseCase: sl<CheckCulturaExistsByNomeUseCase>(),
-      getCulturaFiltersDataUseCase: sl<GetCulturaFiltersDataUseCase>(),
-      validateCulturaDataUseCase: sl<ValidateCulturaDataUseCase>(),
-      searchCulturasByPatternUseCase: sl<SearchCulturasByPatternUseCase>(),
-    ),
-  );
+  // ===== CULTURAS SIMPLIFIED =====
+  // Clean Architecture removed - using direct CulturaCoreRepository access
+  // ListaCulturasPage now uses sl<CulturaCoreRepository>() directly
 
   // ===== DIAGNÓSTICOS CLEAN ARCHITECTURE =====
   

@@ -14,6 +14,7 @@ class ContentSectionWidget extends StatelessWidget {
   final bool isLoading;
   final Widget? emptyState;
   final String? emptyMessage;
+  final bool isEmpty;
 
   const ContentSectionWidget({
     super.key,
@@ -25,6 +26,7 @@ class ContentSectionWidget extends StatelessWidget {
     this.isLoading = false,
     this.emptyState,
     this.emptyMessage,
+    this.isEmpty = false,
   });
 
   @override
@@ -36,7 +38,7 @@ class ContentSectionWidget extends StatelessWidget {
       children: [
         // Header da seção
         _buildSectionHeader(theme),
-        SizedBox(height: ReceitaAgroSpacing.sm),
+        const SizedBox(height: ReceitaAgroSpacing.sm),
         
         // Conteúdo da seção
         if (showCard)
@@ -53,20 +55,43 @@ class ContentSectionWidget extends StatelessWidget {
         horizontal: ReceitaAgroSpacing.horizontalPadding,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: ReceitaAgroTypography.sectionTitle.copyWith(
+          // Linha verde vertical como no mockup
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
               color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
+          const SizedBox(width: 12),
+          
+          // Título da seção
+          Expanded(
+            child: Text(
+              title,
+              style: ReceitaAgroTypography.sectionTitle.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          
+          // Ícone de ação
           if (actionIcon != null)
             IconButton(
               onPressed: onActionPressed,
               icon: Icon(
                 actionIcon,
                 color: theme.colorScheme.primary,
+                size: 20,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
               ),
             ),
         ],
@@ -76,19 +101,15 @@ class ContentSectionWidget extends StatelessWidget {
 
   Widget _buildCardContent(ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: ReceitaAgroSpacing.horizontalPadding,
-      ),
+      padding: const EdgeInsets.all(8.0), // Padding externo de 8px
       child: Card(
         elevation: ReceitaAgroElevation.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
         ),
         color: theme.cardColor,
-        child: Padding(
-          padding: const EdgeInsets.all(ReceitaAgroSpacing.md),
-          child: _buildContent(),
-        ),
+        clipBehavior: Clip.antiAlias, // Para que os dividers fiquem dentro do card
+        child: _buildContent(),
       ),
     );
   }
@@ -111,7 +132,8 @@ class ContentSectionWidget extends StatelessWidget {
       return emptyState!;
     }
 
-    if (emptyMessage != null) {
+    // Se está vazio e tem mensagem, mostra a mensagem
+    if (isEmpty && emptyMessage != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
@@ -157,18 +179,13 @@ class ContentListItemWidget extends StatelessWidget {
     
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(ReceitaAgroSpacing.md),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.md),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
             // Leading widget ou ícone padrão
             leading ?? _buildDefaultIcon(theme),
-            SizedBox(width: ReceitaAgroSpacing.md),
+            const SizedBox(width: 16),
             
             // Conteúdo principal
             Expanded(
@@ -177,31 +194,36 @@ class ContentListItemWidget extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: ReceitaAgroTypography.itemTitle.copyWith(
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: ReceitaAgroSpacing.xs),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: ReceitaAgroTypography.itemSubtitle.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (category != null) ...[
-                    SizedBox(height: ReceitaAgroSpacing.xs),
+                    const SizedBox(height: 6),
                     _buildCategoryTag(theme),
                   ],
                 ],
               ),
             ),
             
-            // Trailing widget ou seta padrão
-            trailing ?? Icon(
+            // Seta de navegação
+            Icon(
               Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               size: 20,
             ),
           ],
@@ -211,38 +233,38 @@ class ContentListItemWidget extends StatelessWidget {
   }
 
   Widget _buildDefaultIcon(ThemeData theme) {
-    if (icon == null) return const SizedBox.shrink();
-    
     return Container(
-      padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
-        color: (iconColor ?? const Color(0xFF4CAF50)).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.sm + 2),
+        color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+        shape: BoxShape.circle,
       ),
       child: Icon(
-        icon,
-        color: iconColor ?? const Color(0xFF4CAF50),
-        size: 20,
+        icon ?? Icons.eco,
+        color: const Color(0xFF4CAF50),
+        size: 24,
       ),
     );
   }
 
   Widget _buildCategoryTag(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: ReceitaAgroSpacing.sm,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.sm),
-      ),
-      child: Text(
-        category!,
-        style: ReceitaAgroTypography.itemCategory.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
+    return Row(
+      children: [
+        Icon(
+          Icons.label_outline,
+          size: 12,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
-      ),
+        const SizedBox(width: 4),
+        Text(
+          category!,
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -36,31 +36,25 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   }
 
   void _initializeInspector() {
-    // Registrar boxes customizadas do app-plantis
+    // Registrar boxes customizadas do app-plantis (usando nomes reais das boxes)
     _inspector.registerCustomBoxes([
       const CustomBoxType(
-        key: 'plants_box',
+        key: 'plants',
         displayName: 'Plantas',
         module: 'plants',
         description: 'Dados das plantas cadastradas',
       ),
       const CustomBoxType(
-        key: 'care_tasks_box',
+        key: 'tasks',
         displayName: 'Tarefas de Cuidados',
-        module: 'care',
+        module: 'tasks',
         description: 'Lembretes e tarefas de cuidados',
       ),
       const CustomBoxType(
-        key: 'notifications_box',
-        displayName: 'Notificações',
-        module: 'notifications',
-        description: 'Configurações e histórico de notificações',
-      ),
-      const CustomBoxType(
-        key: 'user_preferences_box',
-        displayName: 'Preferências do Usuário',
-        module: 'settings',
-        description: 'Configurações e preferências do app',
+        key: 'spaces',
+        displayName: 'Espaços',
+        module: 'spaces',
+        description: 'Espaços onde as plantas estão localizadas',
       ),
     ]);
   }

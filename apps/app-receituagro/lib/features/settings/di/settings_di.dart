@@ -4,6 +4,7 @@ import '../data/repositories/user_settings_repository_impl.dart';
 import '../domain/repositories/i_user_settings_repository.dart';
 import '../domain/usecases/get_user_settings_usecase.dart';
 import '../domain/usecases/update_user_settings_usecase.dart';
+import '../presentation/providers/settings_provider.dart';
 import '../presentation/providers/user_settings_provider.dart';
 
 /// Dependency Injection setup for Settings module following Clean Architecture.
@@ -24,9 +25,17 @@ class SettingsDI {
       () => UpdateUserSettingsUseCase(getIt<IUserSettingsRepository>()),
     );
 
-    // Provider layer
+    // Provider layer - Legacy UserSettingsProvider
     getIt.registerFactory<UserSettingsProvider>(
       () => UserSettingsProvider(
+        getUserSettingsUseCase: getIt<GetUserSettingsUseCase>(),
+        updateUserSettingsUseCase: getIt<UpdateUserSettingsUseCase>(),
+      ),
+    );
+
+    // Unified Settings Provider for the refactored SettingsPage
+    getIt.registerLazySingleton<SettingsProvider>(
+      () => SettingsProvider(
         getUserSettingsUseCase: getIt<GetUserSettingsUseCase>(),
         updateUserSettingsUseCase: getIt<UpdateUserSettingsUseCase>(),
       ),
@@ -44,6 +53,10 @@ class SettingsDI {
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
+    if (getIt.isRegistered<SettingsProvider>()) {
+      getIt.unregister<SettingsProvider>();
+    }
+
     if (getIt.isRegistered<UserSettingsProvider>()) {
       getIt.unregister<UserSettingsProvider>();
     }

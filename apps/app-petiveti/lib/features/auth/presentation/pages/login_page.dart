@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -91,7 +92,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     if (value == null || value.isEmpty) {
                       return 'Email é obrigatório';
                     }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    // Regex mais robusta para validação de email
+                    final emailRegex = RegExp(
+                      r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$'
+                    );
+                    if (!emailRegex.hasMatch(value)) {
                       return 'Email inválido';
                     }
                     return null;
@@ -188,34 +193,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 const SizedBox(height: 32),
                 
-                // Demo Login Info
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Demo Login',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[700],
+                // Demo Login Info - Only in Debug Mode
+                if (kDebugMode) 
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Demo Login (Development Only)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[700],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Email: test@example.com\nSenha: 123456',
-                        style: TextStyle(
-                          color: Colors.blue[600],
-                          fontSize: 12,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Email: test@example.com\nSenha: 123456',
+                          style: TextStyle(
+                            color: Colors.blue[600],
+                            fontSize: 12,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),

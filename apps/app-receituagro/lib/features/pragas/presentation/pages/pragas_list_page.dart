@@ -3,10 +3,6 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/pragas_provider.dart';
-// TODO: Criar widgets de UI quando necessário
-// import '../widgets/praga_list_item.dart';
-// import '../widgets/pragas_search_field.dart';
-// import '../widgets/pragas_filter_chips.dart';
 
 /// Página de listagem de pragas (Presentation Layer)
 /// Princípio: Single Responsibility - Apenas exibe lista de pragas

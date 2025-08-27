@@ -66,8 +66,6 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   final TextEditingController _commentController = TextEditingController();
   bool _isLoadingComments = false;
   final ComentariosService _comentariosService = sl<ComentariosService>();
-  bool _hasReachedMaxComments = false;
-  final int _maxComentarios = 5; // default valor
   
   // Dados para defensivo relacionado
   Map<String, dynamic>? _defensivoData;
@@ -929,7 +927,6 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
 
       setState(() {
         _comentarios.insert(0, newComment);
-        _hasReachedMaxComments = !_comentariosService.canAddComentario(_comentarios.length);
         _commentController.clear();
       });
 
@@ -955,7 +952,6 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
 
       setState(() {
         _comentarios.removeWhere((comment) => comment.id == commentId);
-        _hasReachedMaxComments = !_comentariosService.canAddComentario(_comentarios.length);
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1025,7 +1021,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
   void _showDiagnosticDialog(String nome, String ingredienteAtivo, String dosagem) {
     final theme = Theme.of(context);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
@@ -1139,7 +1135,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                           Navigator.of(context).pop();
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (context) => DetalheDefensivoPage(
                                 defensivoName: nome,
                                 fabricante: _defensivoData?['fabricante'] as String? ?? 'Fabricante Desconhecido',
@@ -1163,7 +1159,7 @@ class _DetalhePragaPageState extends State<DetalhePragaPage>
                           Navigator.of(context).pop();
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (context) => DetalheDiagnosticoPage(
                                 diagnosticoId: '1',
                                 nomeDefensivo: nome,

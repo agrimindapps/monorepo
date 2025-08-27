@@ -19,6 +19,7 @@ import 'core/services/revenuecat_service.dart' as local_rc;
 import 'core/services/startup_optimization_service.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'features/navigation/main_navigation_page.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -167,6 +168,7 @@ class ReceitaAgroApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => PreferencesProvider()..initialize(),
         ),
+        ChangeNotifierProvider(create: (_) => di.sl<SettingsProvider>()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

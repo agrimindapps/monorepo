@@ -19,5 +19,4 @@ export 'widgets/defensivo_favorito_list_item.dart';
 export 'widgets/diagnostico_favorito_list_item.dart';
 // Widgets
 export 'widgets/empty_state_widget.dart';
-export 'widgets/favoritos_search_field_widget.dart';
 export 'widgets/praga_favorito_list_item.dart';

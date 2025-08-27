@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/body_condition_input.dart';
 import '../../domain/entities/body_condition_output.dart';
 import '../../domain/entities/calculation_result.dart';
@@ -90,6 +91,41 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
   }
 
   void updateCurrentWeight(double weight) {
+    // Validação rigorosa de peso veterinário
+    if (weight <= 0.0 || weight > 150.0) {
+      throw VeterinaryInputException(
+        message: 'Peso deve estar entre 0.1kg e 150kg',
+        fieldName: 'currentWeight',
+        providedValue: weight,
+        minValue: 0.1,
+        maxValue: 150.0,
+      );
+    }
+    
+    // Validações específicas por espécie (se disponível)
+    final species = state.input.species;
+    if (species == AnimalSpecies.cat) {
+      if (weight < 1.0 || weight > 12.0) {
+        throw VeterinaryInputException(
+          message: 'Peso para gatos deve estar entre 1kg e 12kg',
+          fieldName: 'currentWeight',
+          providedValue: weight,
+          minValue: 1.0,
+          maxValue: 12.0,
+        );
+      }
+    } else if (species == AnimalSpecies.dog) {
+      if (weight < 1.0 || weight > 90.0) {
+        throw VeterinaryInputException(
+          message: 'Peso para cães deve estar entre 1kg e 90kg',
+          fieldName: 'currentWeight',
+          providedValue: weight,
+          minValue: 1.0,
+          maxValue: 90.0,
+        );
+      }
+    }
+    
     final newInput = state.input.copyWith(currentWeight: weight);
     updateInput(newInput);
   }
@@ -169,6 +205,12 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
         status: BodyConditionCalculatorStatus.success,
         output: result,
         history: newHistory,
+      );
+    } on VeterinaryInputException catch (e) {
+      state = state.copyWith(
+        status: BodyConditionCalculatorStatus.error,
+        error: e.message,
+        validationErrors: [e.message],
       );
     } on InvalidInputException catch (e) {
       state = state.copyWith(

@@ -18,10 +18,8 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       // Usa método assíncrono para aguardar box estar aberto
       final hivePragas = await _hiveRepository.getAllAsync();
-      print('🔍 PragasRepositoryImpl.getAll() carregou ${hivePragas.length} pragas');
       return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.getAll(): $e');
       throw PragasRepositoryException('Erro ao carregar todas as pragas: $e');
     }
   }
@@ -45,10 +43,8 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       // Usa método assíncrono para aguardar box estar aberto
       final hivePragas = await _hiveRepository.findByTipoAsync(tipo);
-      print('🔍 PragasRepositoryImpl.getByTipo($tipo) carregou ${hivePragas.length} pragas');
       return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.getByTipo(): $e');
       throw PragasRepositoryException('Erro ao buscar pragas por tipo: $e');
     }
   }
@@ -71,10 +67,8 @@ class PragasRepositoryImpl implements IPragasRepository {
               )
               .toList();
 
-      print('🔍 PragasRepositoryImpl.searchByName("$searchTerm") encontrou ${filteredPragas.length} pragas');
       return filteredPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.searchByName(): $e');
       throw PragasRepositoryException('Erro ao buscar pragas por nome: $e');
     }
   }
@@ -86,10 +80,8 @@ class PragasRepositoryImpl implements IPragasRepository {
 
       // Usa método assíncrono para aguardar box estar aberto
       final hivePragas = await _hiveRepository.findByFamiliaAsync(familia);
-      print('🔍 PragasRepositoryImpl.getByFamilia("$familia") carregou ${hivePragas.length} pragas');
       return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.getByFamilia(): $e');
       throw PragasRepositoryException('Erro ao buscar pragas por família: $e');
     }
   }
@@ -102,10 +94,8 @@ class PragasRepositoryImpl implements IPragasRepository {
       // Por enquanto retorna todas as pragas usando método assíncrono
       // TODO: Implementar busca por cultura usando DiagnosticoHiveRepository
       final allPragas = await _hiveRepository.getAllAsync();
-      print('🔍 PragasRepositoryImpl.getByCultura("$culturaId") carregou ${allPragas.length} pragas');
       return allPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.getByCultura(): $e');
       throw PragasRepositoryException('Erro ao buscar pragas por cultura: $e');
     }
   }
@@ -115,10 +105,8 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       // Usa método assíncrono para aguardar box estar aberto
       final pragasByTipo = await _hiveRepository.findByTipoAsync(tipo);
-      print('🔍 PragasRepositoryImpl.getCountByTipo("$tipo") contou ${pragasByTipo.length} pragas');
       return pragasByTipo.length;
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.getCountByTipo(): $e');
       throw PragasRepositoryException('Erro ao contar pragas por tipo: $e');
     }
   }
@@ -128,10 +116,8 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       // Usa método assíncrono para aguardar box estar aberto
       final allPragas = await _hiveRepository.getAllAsync();
-      print('🔍 PragasRepositoryImpl.getTotalCount() contou ${allPragas.length} pragas');
       return allPragas.length;
     } catch (e) {
-      print('❌ Erro em PragasRepositoryImpl.getTotalCount(): $e');
       throw PragasRepositoryException('Erro ao contar total de pragas: $e');
     }
   }
@@ -159,12 +145,10 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
 
       // Pega algumas pragas como mock de recentes
       final recentHivePragas = allPragas.take(_maxRecentItems).toList();
-      print('🔍 PragasHistoryRepositoryImpl.getRecentlyAccessed() retornou ${recentHivePragas.length} pragas recentes');
       return recentHivePragas
           .map((hive) => PragaEntity.fromHive(hive))
           .toList();
     } catch (e) {
-      print('❌ Erro em PragasHistoryRepositoryImpl.getRecentlyAccessed(): $e');
       throw PragasRepositoryException('Erro ao carregar pragas recentes: $e');
     }
   }
@@ -193,12 +177,10 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
       final shuffledPragas = List<PragasHive>.from(allPragas)..shuffle();
       final suggestedHivePragas =
           shuffledPragas.take(limit.clamp(1, _maxSuggestedItems)).toList();
-      print('🔍 PragasHistoryRepositoryImpl.getSuggested($limit) retornou ${suggestedHivePragas.length} pragas sugeridas');
       return suggestedHivePragas
           .map((hive) => PragaEntity.fromHive(hive))
           .toList();
     } catch (e) {
-      print('❌ Erro em PragasHistoryRepositoryImpl.getSuggested(): $e');
       throw PragasRepositoryException('Erro ao buscar pragas sugeridas: $e');
     }
   }

@@ -7,6 +7,7 @@ import '../../core/di/injection_container.dart' as di;
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/test_data_generator_service.dart';
 import '../../core/theme/plantis_colors.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../features/development/presentation/pages/data_inspector_page.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
@@ -17,37 +18,237 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDevelopmentMode = _isDevelopmentMode();
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: theme.colorScheme.surface,
-        title: Text(
-          'Configurações',
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        automaticallyImplyLeading: false, // Remove back button since it's a main tab
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Subtítulo
-            Text(
-              'Personalize sua experiência',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 24),
+        child: Consumer<auth_providers.AuthProvider>(
+          builder: (context, authProvider, _) {
+            final user = authProvider.currentUser;
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header com título e boas-vindas
+                const SizedBox(height: 8),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Minha Conta',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        user != null && user.displayName.isNotEmpty
+                            ? 'Bem-vindo, ${user.displayName}'
+                            : 'Bem-vindo, Usuário Anônimo',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+
+                // User Profile Card
+                InkWell(
+                  onTap: () => context.push('/account-profile'),
+                  borderRadius: BorderRadius.circular(16.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainer,
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Row(
+                    children: [
+                      // Avatar
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: PlantisColors.primary,
+                        child: user?.hasProfilePhoto == true
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(30),
+                                child: Image.network(
+                                  user!.photoUrl!,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Text(
+                                      user.initials,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            : Text(
+                                user?.initials ?? 'UA',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                      const SizedBox(width: 16),
+
+                      // User Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.displayName ?? 'Usuário Anônimo',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user?.email ?? 'usuario@anonimo.com',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _getMemberSince(user?.createdAt),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Arrow to profile
+                      Icon(
+                        Icons.arrow_forward_ios, 
+                        color: theme.colorScheme.onSurfaceVariant,
+                        size: 16,
+                      ),
+                    ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+
+                // Premium Plan Card
+                Container(
+                  padding: const EdgeInsets.all(20.0),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Plan Header
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_outline,
+                            color: PlantisColors.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Plano Gratuito',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Desbloqueie recursos premium',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Premium Resources
+                      Text(
+                        'Recursos Premium:',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _buildPremiumFeature(theme, 'Plantas ilimitadas'),
+                      _buildPremiumFeature(theme, 'Backup automático na nuvem'),
+                      _buildPremiumFeature(theme, 'Relatórios avançados de cuidados'),
+                      _buildPremiumFeature(theme, 'Lembretes personalizados'),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'E mais 3 recursos...',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Premium Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => context.push('/premium'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: PlantisColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.star),
+                          label: const Text(
+                            'Assinar Premium',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
 
             // App Settings Section
             SettingsSection(
@@ -72,6 +273,7 @@ class SettingsPage extends StatelessWidget {
                       iconColor: themeProvider.isDarkMode
                           ? PlantisColors.sun
                           : PlantisColors.primaryDark,
+                      isLast: true,
                       trailing: Switch(
                         value: themeProvider.isDarkMode,
                         onChanged: (value) {
@@ -82,6 +284,19 @@ class SettingsPage extends StatelessWidget {
                           }
                         },
                         activeColor: PlantisColors.primary,
+                        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+                        thumbColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return PlantisColors.primary;
+                          }
+                          return theme.colorScheme.onSurface.withValues(alpha: 0.6);
+                        }),
+                        trackColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return PlantisColors.primary.withValues(alpha: 0.5);
+                          }
+                          return theme.colorScheme.onSurface.withValues(alpha: 0.2);
+                        }),
                       ),
                       onTap: () {
                         if (themeProvider.isDarkMode) {
@@ -93,16 +308,6 @@ class SettingsPage extends StatelessWidget {
                     );
                   },
                 ),
-                SettingsItem(
-                  icon: Icons.language,
-                  title: 'Idioma',
-                  subtitle: 'Português (Brasil)',
-                  iconColor: PlantisColors.secondary,
-                  isLast: true,
-                  onTap: () {
-                    _showLanguageDialog(context);
-                  },
-                ),
               ],
             ),
 
@@ -111,20 +316,11 @@ class SettingsPage extends StatelessWidget {
               title: 'Conta',
               children: [
                 SettingsItem(
-                  icon: Icons.person,
-                  title: 'Minha Conta',
-                  subtitle: 'Perfil, assinatura e dados pessoais',
-                  iconColor: PlantisColors.accent,
-                  isFirst: true,
-                  onTap: () {
-                    context.push('/account');
-                  },
-                ),
-                SettingsItem(
                   icon: Icons.cloud_upload,
                   title: 'Backup na Nuvem',
                   subtitle: 'Proteja seus dados com backup automático',
                   iconColor: PlantisColors.primary,
+                  isFirst: true,
                   onTap: () {
                     context.push('/backup-settings');
                   },
@@ -178,9 +374,8 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
 
-            // Development Section (only in debug mode)
-            if (isDevelopmentMode)
-              SettingsSection(
+            // Development Section
+            SettingsSection(
                 title: 'Desenvolvimento',
                 children: [
                   SettingsItem(
@@ -220,6 +415,7 @@ class SettingsPage extends StatelessWidget {
                 ],
               ),
 
+
             // App Info Section
             SettingsSection(
               title: 'Sobre o App',
@@ -238,12 +434,38 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 40),
-          ],
+                const SizedBox(height: 40),
+              ],
+            );
+          },
         ),
       ),
     );
   }
+
+  Widget _buildPremiumFeature(ThemeData theme, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 18,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   String _getThemeSubtitle(ThemeProvider themeProvider) {
     if (themeProvider.isDarkMode) {
@@ -255,59 +477,23 @@ class SettingsPage extends StatelessWidget {
     }
   }
 
-  bool _isDevelopmentMode() {
-    bool isDevelopment = false;
-    assert(() {
-      isDevelopment = true;
-      return true;
-    }());
-    return isDevelopment;
+  String _getMemberSince(DateTime? createdAt) {
+    if (createdAt == null) return 'Membro desde 10 dias';
+
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inDays < 30) {
+      return 'Membro desde ${difference.inDays} dias';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return 'Membro desde $months ${months == 1 ? 'mês' : 'meses'}';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return 'Membro desde $years ${years == 1 ? 'ano' : 'anos'}';
+    }
   }
 
-  void _showLanguageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Idioma',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<String>(
-              title: const Text('Português (Brasil)'),
-              value: 'pt_BR',
-              groupValue: 'pt_BR',
-              onChanged: (value) {
-                Navigator.of(context).pop();
-              },
-              activeColor: PlantisColors.primary,
-            ),
-            RadioListTile<String>(
-              title: const Text('English'),
-              value: 'en_US',
-              groupValue: 'pt_BR',
-              onChanged: (value) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Em breve disponível em outros idiomas'),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showAboutDialog(BuildContext context) {
     showDialog(

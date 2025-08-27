@@ -22,7 +22,6 @@ class RemoteAssetService {
   // Configurações
   static const String _configAssetPath = 'assets/remote_assets_config.json';
   static const Duration _cacheExpiration = Duration(hours: 24);
-  static const int _maxConcurrentDownloads = 3;
   static const int _downloadTimeoutSeconds = 30;
 
   // State
@@ -343,8 +342,6 @@ class RemoteAssetService {
 
   /// Obtém estatísticas do serviço
   Map<String, dynamic> getStats() {
-    final cacheDir = _cacheDirectory != null ? Directory(_cacheDirectory!) : null;
-    
     return {
       'downloads': _downloadCount,
       'cacheHits': _cacheHits,

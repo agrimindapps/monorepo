@@ -42,6 +42,11 @@ class FavoritoDefensivoEntity extends FavoritoEntity {
           nomeDisplay: nomeComum,
         );
 
+  /// Propriedades para compatibilidade com navegação existente
+  String get displayName => nomeComum;
+  String get line1 => nomeComum;
+  String get line2 => ingredienteAtivo;
+
   @override
   String toString() {
     return 'FavoritoDefensivoEntity{id: $id, nomeComum: $nomeComum, ingredienteAtivo: $ingredienteAtivo}';
@@ -65,10 +70,14 @@ class FavoritoPragaEntity extends FavoritoEntity {
           nomeDisplay: nomeComum,
         );
 
-  /// Getters de conveniência
+  /// Getters de conveniência para navegação
   bool get isInseto => tipoPraga == '1';
   bool get isDoenca => tipoPraga == '2';
   bool get isPlanta => tipoPraga == '3';
+  
+  /// Propriedades para compatibilidade com navegação existente
+  @override
+  String get tipo => tipoPraga;
 
   @override
   String toString() {
@@ -94,6 +103,11 @@ class FavoritoDiagnosticoEntity extends FavoritoEntity {
           tipo: TipoFavorito.diagnostico,
           nomeDisplay: '$nomePraga - $nomeDefensivo',
         );
+
+  /// Propriedades para compatibilidade com navegação existente
+  String get nome => '$nomeDefensivo → $nomePraga';
+  String get displayName => nomeDefensivo;
+  String get displayCultura => cultura;
 
   @override
   String toString() {

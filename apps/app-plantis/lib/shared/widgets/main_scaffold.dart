@@ -16,7 +16,7 @@ class _MainScaffoldState extends State<MainScaffold> {
 
     if (location.startsWith('/tasks')) return 0;
     if (location.startsWith('/plants')) return 1;
-    if (location.startsWith('/profile')) return 2;
+    if (location.startsWith('/settings')) return 2;
 
     return 0;
   }
@@ -30,7 +30,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         context.go('/plants');
         break;
       case 2:
-        context.go('/profile');
+        context.go('/settings');
         break;
     }
   }
@@ -56,7 +56,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           NavigationDestination(
             selectedIcon: Icon(Icons.person),
             icon: Icon(Icons.person_outline),
-            label: 'Perfil',
+            label: 'Conta',
           ),
         ],
       ),

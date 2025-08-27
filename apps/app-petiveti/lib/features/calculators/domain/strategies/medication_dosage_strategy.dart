@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../entities/medication_data.dart';
 import '../entities/medication_dosage_input.dart';
 import '../entities/medication_dosage_output.dart';
@@ -94,58 +96,118 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
     return dosageRange.minDose + (dosageRange.maxDose - dosageRange.minDose) * 0.3;
   }
 
-  /// Aplica ajustes de dosagem baseados em condições especiais
+  /// Aplica ajustes de dosagem baseados em condições especiais com proteção contra subdosagem perigosa
   double _applyDosageAdjustments(double baseDosage, MedicationDosageInput input, MedicationData medicationData) {
-    double adjustedDosage = baseDosage;
+    double cumulativeReduction = 1.0;
+    const double minimumDosageFactor = 0.4; // Nunca reduzir mais que 60%
+    const double severityWeightFactor = 0.7; // Fator de peso para condições severas múltiplas
+    
+    // Aplicar ajustes com peso baseado em severidade e número de condições
+    final Map<SpecialCondition, double> conditionFactors = {};
     
     for (final condition in input.specialConditions) {
-      switch (condition) {
-        case SpecialCondition.renalDisease:
-          // Reduzir dosagem em 25-50% para doença renal
-          adjustedDosage *= 0.6;
-          break;
-        case SpecialCondition.hepaticDisease:
-          // Reduzir dosagem em 30-50% para doença hepática
-          adjustedDosage *= 0.5;
-          break;
-        case SpecialCondition.geriatric:
-          // Reduzir dosagem em 15-25% para geriátricos
-          adjustedDosage *= 0.8;
-          break;
-        case SpecialCondition.heartDisease:
-          // Ajuste específico dependendo do medicamento
-          if (medicationData.category.toLowerCase().contains('diurético')) {
-            adjustedDosage *= 1.1; // Pode precisar de dose ligeiramente maior
-          } else {
-            adjustedDosage *= 0.9; // Geral: dose um pouco menor
-          }
-          break;
-        case SpecialCondition.pregnant:
-          // Ajuste baseado na categoria de gravidez
-          if (!medicationData.isSafeForPregnancy()) {
-            adjustedDosage *= 0.7; // Dose mais conservadora
-          }
-          break;
-        case SpecialCondition.diabetes:
-          // Ajuste para diabéticos (depende do medicamento)
-          if (medicationData.category.toLowerCase().contains('corticoide')) {
-            adjustedDosage *= 0.8; // Corticoides podem piorar diabetes
-          }
-          break;
-        default:
-          // Outras condições: redução conservadora de 10%
-          adjustedDosage *= 0.9;
-      }
+      double conditionFactor = _getConditionAdjustmentFactor(condition, medicationData);
+      conditionFactors[condition] = conditionFactor;
     }
     
-    // Ajuste adicional por idade
+    // Se múltiplas condições, aplicar fator de redução ponderado ao invés de multiplicativo
+    if (conditionFactors.length > 1) {
+      // Para múltiplas condições, usar média ponderada ao invés de produto
+      double weightedSum = 0.0;
+      double totalWeight = 0.0;
+      
+      for (final entry in conditionFactors.entries) {
+        final weight = _getConditionSeverityWeight(entry.key);
+        weightedSum += entry.value * weight;
+        totalWeight += weight;
+      }
+      
+      // Aplicar fator de suavização para múltiplas condições
+      final avgFactor = weightedSum / totalWeight;
+      cumulativeReduction = severityWeightFactor + (avgFactor * (1.0 - severityWeightFactor));
+    } else if (conditionFactors.isNotEmpty) {
+      // Uma única condição: aplicar fator direto
+      cumulativeReduction = conditionFactors.values.first;
+    }
+    
+    // Ajuste adicional por idade (aplicado separadamente para não ser cumulativo)
+    double ageAdjustment = 1.0;
     if (input.ageGroup == AgeGroup.puppy) {
-      adjustedDosage *= 0.8; // Filhotes geralmente precisam de doses menores por kg
+      ageAdjustment = 0.8; // Filhotes geralmente precisam de doses menores por kg
     } else if (input.ageGroup == AgeGroup.senior) {
-      adjustedDosage *= 0.85; // Idosos: metabolismo mais lento
+      ageAdjustment = 0.85; // Idosos: metabolismo mais lento
+    }
+    
+    // Garantir que não reduzimos além do mínimo terapêutico
+    cumulativeReduction = math.max(cumulativeReduction, minimumDosageFactor);
+    
+    // Aplicar ajustes finais
+    double adjustedDosage = baseDosage * cumulativeReduction * ageAdjustment;
+    
+    // Verificação final: garantir que ainda está dentro da faixa terapêutica mínima
+    final dosageRange = medicationData.getDosageRange(input.species, input.ageGroup);
+    if (dosageRange != null) {
+      final absoluteMinimum = dosageRange.minDose * 0.6; // 60% da dose mínima como limite absoluto
+      adjustedDosage = math.max(adjustedDosage, absoluteMinimum);
     }
     
     return adjustedDosage;
+  }
+  
+  /// Obtém fator de ajuste específico para cada condição
+  double _getConditionAdjustmentFactor(SpecialCondition condition, MedicationData medicationData) {
+    switch (condition) {
+      case SpecialCondition.renalDisease:
+        // Ajuste baseado na metabolização renal do medicamento
+        return _isRenallyMetabolized(medicationData) ? 0.6 : 0.8;
+      case SpecialCondition.hepaticDisease:
+        // Ajuste baseado na metabolização hepática
+        return _isHepaticallyMetabolized(medicationData) ? 0.5 : 0.75;
+      case SpecialCondition.geriatric:
+        // Redução conservadora para geriátricos
+        return 0.8;
+      case SpecialCondition.heartDisease:
+        // Ajuste específico dependendo do medicamento
+        if (medicationData.category.toLowerCase().contains('diurético')) {
+          return 1.0; // Manter dose para diuréticos em cardiopatas
+        } else {
+          return 0.9; // Redução leve para outros medicamentos
+        }
+      case SpecialCondition.pregnant:
+        // Ajuste baseado na categoria de gravidez
+        if (!medicationData.isSafeForPregnancy()) {
+          return 0.7; // Dose mais conservadora
+        }
+        return 0.9; // Redução leve se seguro na gravidez
+      case SpecialCondition.diabetes:
+        // Ajuste para diabéticos (depende do medicamento)
+        if (medicationData.category.toLowerCase().contains('corticoide')) {
+          return 0.7; // Redução maior para corticoides em diabéticos
+        }
+        return 0.9; // Redução leve para outros
+      case SpecialCondition.lactating:
+        return 0.85; // Redução moderada durante lactação
+      default:
+        // Outras condições: redução conservadora
+        return 0.9;
+    }
+  }
+  
+  /// Obtém peso de severidade para cada condição (usado no cálculo de média ponderada)
+  double _getConditionSeverityWeight(SpecialCondition condition) {
+    switch (condition) {
+      case SpecialCondition.renalDisease:
+      case SpecialCondition.hepaticDisease:
+        return 3.0; // Condições críticas têm peso maior
+      case SpecialCondition.heartDisease:
+      case SpecialCondition.diabetes:
+        return 2.5; // Condições sérias
+      case SpecialCondition.geriatric:
+      case SpecialCondition.pregnant:
+        return 2.0; // Condições importantes
+      default:
+        return 1.0; // Peso padrão
+    }
   }
 
   /// Realiza cálculos de dosagem
@@ -418,6 +480,37 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
       return (dosageRange.toxicDose! - calculatedDosage) / dosageRange.toxicDose! * 100;
     }
     return (dosageRange.maxDose - calculatedDosage) / dosageRange.maxDose * 100;
+  }
+
+  /// Verifica se medicamento é predominantemente metabolizado pelos rins
+  bool _isRenallyMetabolized(MedicationData medication) {
+    // Lista de medicamentos que são predominantemente eliminados pelos rins
+    const renalMetabolizedMedications = [
+      'furosemide',
+      'enrofloxacin', 
+      'amoxicillin',
+      'gabapentin',
+    ];
+    
+    return renalMetabolizedMedications.contains(medication.id) ||
+           medication.category.toLowerCase().contains('diurético') ||
+           medication.category.toLowerCase().contains('quinolona');
+  }
+
+  /// Verifica se medicamento é predominantemente metabolizado pelo fígado
+  bool _isHepaticallyMetabolized(MedicationData medication) {
+    // Lista de medicamentos que são predominantemente metabolizados pelo fígado
+    const hepaticallyMetabolizedMedications = [
+      'meloxicam',
+      'tramadol',
+      'prednisolone',
+      'metronidazole',
+    ];
+    
+    return hepaticallyMetabolizedMedications.contains(medication.id) ||
+           medication.category.toLowerCase().contains('anti-inflamatório') ||
+           medication.category.toLowerCase().contains('corticoide') ||
+           medication.category.toLowerCase().contains('analgésico');
   }
 
   @override

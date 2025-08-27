@@ -46,10 +46,10 @@ class _PlantFormPageState extends State<PlantFormPage> {
     final isEditing = widget.plantId != null;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: const Color(0xFFF5F5F5), // Cor de fundo mais clara conforme mockup
       appBar: AppBar(
         title: Text(isEditing ? 'Editar Planta' : 'Nova Planta'),
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: const Color(0xFFF5F5F5), // Mesmo fundo que o Scaffold
         elevation: 0,
         leading: IconButton(
           onPressed: () => _handleBackPressed(context),
@@ -174,41 +174,61 @@ class _PlantFormPageState extends State<PlantFormPage> {
                       _buildSectionTitle('Configurações de Cuidado'),
                       const PlantFormCareConfig(),
 
-                      const SizedBox(
-                        height: 100,
-                      ), // Espaço para o botão flutuante
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
               ),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: Consumer<PlantFormProvider>(
-        builder: (context, provider, child) {
-          return FloatingActionButton.extended(
-            onPressed:
-                provider.isValid && !provider.isSaving
-                    ? () => _savePlant(context)
-                    : null,
-            backgroundColor:
-                provider.isValid
-                    ? theme.colorScheme.primary
-                    : theme.disabledColor,
-            foregroundColor: Colors.white,
-            icon:
-                provider.isSaving
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+              // Área de botões com fundo branco
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
+                  ),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _handleBackPressed(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        ),
+                        child: const Text('Cancelar'),
                       ),
-                    )
-                    : const Icon(Icons.check),
-            label: Text(provider.isSaving ? 'Salvando...' : 'Salvar'),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: provider.isValid && !provider.isSaving
+                            ? () => _savePlant(context)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          disabledBackgroundColor: Colors.grey.shade300,
+                        ),
+                        child: provider.isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Salvar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),

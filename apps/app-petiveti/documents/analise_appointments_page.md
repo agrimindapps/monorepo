@@ -16,58 +16,21 @@
 ### **Quick Stats**
 | Métrica | Valor | Status |
 |---------|--------|--------|
-| Issues Totais | 8 | 🟡 |
-| Críticos | 2 | 🟡 |
+| Issues Totais | 6 | 🟢 |
+| Críticos | 0 | ✅ |
 | Importantes | 4 | 🟡 |
 | Menores | 2 | 🟢 |
 | Lines of Code | 249 | Info |
 
 ## 🔴 ISSUES CRÍTICOS (Immediate Action)
 
-### 1. [ARCHITECTURE] - Dependência circular entre providers
-**Impact**: 🔥 Alto | **Effort**: ⚡ 2-3 horas | **Risk**: 🚨 Alto
+### ✅ 1. [RESOLVIDO] - Dependência circular entre providers
+**Status**: ✅ **CORRIGIDO**
+**Implementação**: Criado `selectedAnimalIdProvider` independente removendo dependência circular com módulo animals.
 
-**Description**: A página depende de `selectedAnimalProvider` de outro módulo, criando acoplamento forte e dependência circular entre features appointments e animals. Isso viola o princípio de independência de módulos.
-
-**Implementation Prompt**:
-```dart
-// Solução: Criar um provider compartilhado ou usar eventos de domínio
-// Option 1: Provider compartilhado no core
-final selectedPetProvider = StateProvider<String?>((ref) => null);
-
-// Option 2: Passar animalId como parâmetro da rota
-// Na página: constructor que recebe animalId
-class AppointmentsPage extends ConsumerStatefulWidget {
-  final String? animalId;
-  const AppointmentsPage({super.key, this.animalId});
-}
-```
-
-**Validation**: Verificar que appointments não importa diretamente de animals module
-
-### 2. [STATE] - Inconsistência entre providers observados
-**Impact**: 🔥 Alto | **Effort**: ⚡ 1 hora | **Risk**: 🚨 Médio
-
-**Description**: Na linha 114, o método `_buildContent` recebe `List<dynamic>` mas o cast para `Appointment` na linha 197 pode falhar. Há inconsistência entre o provider `appointmentsListProvider` e o state.
-
-**Implementation Prompt**:
-```dart
-// Corrigir tipo no método _buildContent
-Widget _buildContent(
-  BuildContext context,
-  AppointmentState state,
-  List<Appointment> appointments, // <- Tipo específico
-  String? animalId,
-) {
-  // Remover cast desnecessário na linha 197
-  return AppointmentCard(
-    appointment: appointment, // <- Sem cast
-    // ...
-  );
-}
-```
-
-**Validation**: Compilação sem warnings de casting
+### ✅ 2. [RESOLVIDO] - Inconsistência entre providers observados
+**Status**: ✅ **CORRIGIDO**
+**Implementação**: Tipo `_buildContent` corrigido para `List<Appointment>` e removido cast desnecessário.
 
 ## 🟡 ISSUES IMPORTANTES (Next Sprint)
 

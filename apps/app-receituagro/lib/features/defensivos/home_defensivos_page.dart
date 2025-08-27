@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/design/design_tokens.dart';
 import '../../core/di/injection_container.dart';
@@ -12,125 +12,42 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'lista_defensivos_agrupados_page.dart';
 import 'lista_defensivos_page.dart';
+import 'presentation/providers/home_defensivos_provider.dart';
 
-/// Model for statistics data computed in background
-class DefensivosStatistics {
-  final int totalDefensivos;
-  final int totalFabricantes;
-  final int totalModoAcao;
-  final int totalIngredienteAtivo;
-  final int totalClasseAgronomica;
-  final List<FitossanitarioHive> recentDefensivos;
-  final List<FitossanitarioHive> newDefensivos;
 
-  const DefensivosStatistics({
-    required this.totalDefensivos,
-    required this.totalFabricantes,
-    required this.totalModoAcao,
-    required this.totalIngredienteAtivo,
-    required this.totalClasseAgronomica,
-    required this.recentDefensivos,
-    required this.newDefensivos,
-  });
-}
-
-/// Static function for compute() - calculates statistics in background isolate
-/// Performance optimization: Prevents UI thread blocking during heavy statistical calculations
-DefensivosStatistics _calculateDefensivosStatistics(List<FitossanitarioHive> defensivos) {
-  // Calculate real statistics - moved to background thread to prevent UI blocking
-  final totalDefensivos = defensivos.length;
-  final totalFabricantes = defensivos.map((d) => d.displayFabricante).toSet().length;
-  final totalModoAcao = defensivos.map((d) => d.displayModoAcao).where((m) => m.isNotEmpty).toSet().length;
-  final totalIngredienteAtivo = defensivos.map((d) => d.displayIngredient).where((i) => i.isNotEmpty).toSet().length;
-  final totalClasseAgronomica = defensivos.map((d) => d.displayClass).where((c) => c.isNotEmpty).toSet().length;
-  
-  // Process recent and new defensivos
-  final recentDefensivos = defensivos.take(3).toList();
-  final newDefensivos = defensivos.take(4).toList();
-
-  return DefensivosStatistics(
-    totalDefensivos: totalDefensivos,
-    totalFabricantes: totalFabricantes,
-    totalModoAcao: totalModoAcao,
-    totalIngredienteAtivo: totalIngredienteAtivo,
-    totalClasseAgronomica: totalClasseAgronomica,
-    recentDefensivos: recentDefensivos,
-    newDefensivos: newDefensivos,
-  );
-}
-
-class HomeDefensivosPage extends StatefulWidget {
+/// Página Home de Defensivos refatorada seguindo Clean Architecture
+/// 
+/// Performance optimizations implemented:
+/// - Uses Provider pattern instead of direct repository access
+/// - Heavy calculations moved to background isolate via compute()
+/// - Consolidated state management with single notifyListeners()
+/// - Proper separation of concerns between UI and business logic
+class HomeDefensivosPage extends StatelessWidget {
   const HomeDefensivosPage({super.key});
 
   @override
-  State<HomeDefensivosPage> createState() => _HomeDefensivosPageState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<HomeDefensivosProvider>(
+      create: (_) => HomeDefensivosProvider(
+        repository: sl<FitossanitarioHiveRepository>(),
+      )..loadData(),
+      child: const _HomeDefensivosView(),
+    );
+  }
 }
 
-class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
-  final FitossanitarioHiveRepository _repository = sl<FitossanitarioHiveRepository>();
-  bool _isLoading = true;
-  
-  // Contadores reais
-  int _totalDefensivos = 0;
-  int _totalFabricantes = 0;
-  int _totalModoAcao = 0;
-  int _totalIngredienteAtivo = 0;
-  int _totalClasseAgronomica = 0;
-  
-  // Listas para dados reais
-  List<FitossanitarioHive> _recentDefensivos = [];
-  List<FitossanitarioHive> _newDefensivos = [];
+class _HomeDefensivosView extends StatefulWidget {
+  const _HomeDefensivosView();
 
+  @override
+  State<_HomeDefensivosView> createState() => _HomeDefensivosViewState();
+}
+
+class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
   @override
   void initState() {
     super.initState();
-    _loadRealData();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> _loadRealData() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      
-      // Carrega dados do repositório na main thread (necessário para Hive)
-      final defensivos = _repository.getActiveDefensivos();
-      
-      // Performance optimization: Move heavy statistical calculations to background thread
-      final statistics = await compute(_calculateDefensivosStatistics, defensivos);
-      
-      if (mounted) {
-        // Apply calculated statistics
-        _totalDefensivos = statistics.totalDefensivos;
-        _totalFabricantes = statistics.totalFabricantes;
-        _totalModoAcao = statistics.totalModoAcao;
-        _totalIngredienteAtivo = statistics.totalIngredienteAtivo;
-        _totalClasseAgronomica = statistics.totalClasseAgronomica;
-        _recentDefensivos = statistics.recentDefensivos;
-        _newDefensivos = statistics.newDefensivos;
-        
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          // Em caso de erro, manter valores padrão
-          _totalDefensivos = 0;
-          _totalFabricantes = 0;
-          _totalModoAcao = 0;
-          _totalIngredienteAtivo = 0;
-          _totalClasseAgronomica = 0;
-        });
-      }
-    }
+    // No manual data loading needed - Provider handles initialization
   }
 
   @override
@@ -143,25 +60,39 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildModernHeader(context, isDark),
+            Consumer<HomeDefensivosProvider>(
+              builder: (context, provider, _) => _buildModernHeader(context, isDark, provider),
+            ),
             Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: ReceitaAgroSpacing.sm),
-                        _buildStatsGrid(context),
-                        SizedBox(height: ReceitaAgroSpacing.lg),
-                        _buildRecentAccessSection(context),
-                        SizedBox(height: ReceitaAgroSpacing.lg),
-                        _buildNewItemsSection(context),
-                        SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),
+              child: Consumer<HomeDefensivosProvider>(
+                builder: (context, provider, _) {
+                  // Handle error state
+                  if (provider.errorMessage != null) {
+                    return _buildErrorState(context, provider);
+                  }
+                  
+                  return RefreshIndicator(
+                    onRefresh: () => provider.refreshData(),
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: ReceitaAgroSpacing.sm),
+                              _buildStatsGrid(context, provider),
+                              const SizedBox(height: 24),
+                              _buildRecentAccessSection(context, provider),
+                              const SizedBox(height: 32),
+                              _buildNewItemsSection(context, provider),
+                              const SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -170,23 +101,53 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
     );
   }
 
-  Widget _buildModernHeader(BuildContext context, bool isDark) {
-    String subtitle = 'Carregando defensivos...';
-    if (!_isLoading) {
-      subtitle = '$_totalDefensivos Registros Disponíveis';
-    }
-    
+  Widget _buildModernHeader(BuildContext context, bool isDark, HomeDefensivosProvider provider) {
     return ModernHeaderWidget(
       title: 'Defensivos',
-      subtitle: subtitle,
+      subtitle: provider.headerSubtitle,
       leftIcon: Icons.shield_outlined,
       showBackButton: false,
       showActions: false,
       isDark: isDark,
     );
   }
+  
+  Widget _buildErrorState(BuildContext context, HomeDefensivosProvider provider) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: theme.colorScheme.error,
+            ),
+            const SizedBox(height: ReceitaAgroSpacing.md),
+            Text(
+              provider.errorMessage ?? 'Erro desconhecido',
+              style: ReceitaAgroTypography.sectionTitle.copyWith(
+                color: theme.colorScheme.error,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: ReceitaAgroSpacing.lg),
+            ElevatedButton(
+              onPressed: () {
+                provider.clearError();
+                provider.loadData();
+              },
+              child: const Text('Tentar Novamente'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-  Widget _buildStatsGrid(BuildContext context) {
+  Widget _buildStatsGrid(BuildContext context, HomeDefensivosProvider provider) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: ReceitaAgroSpacing.horizontalPadding,
@@ -210,9 +171,9 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
               final useVerticalLayout = isSmallDevice || availableWidth < ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
               if (useVerticalLayout) {
-                return _buildVerticalMenuLayout(availableWidth, context);
+                return _buildVerticalMenuLayout(availableWidth, context, provider);
               } else {
-                return _buildGridMenuLayout(availableWidth, context);
+                return _buildGridMenuLayout(availableWidth, context, provider);
               }
             },
           ),
@@ -221,7 +182,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
     );
   }
 
-  Widget _buildVerticalMenuLayout(double availableWidth, BuildContext context) {
+  Widget _buildVerticalMenuLayout(double availableWidth, BuildContext context, HomeDefensivosProvider provider) {
     final theme = Theme.of(context);
     final buttonWidth = availableWidth - 16;
     final standardColor = theme.colorScheme.primary;
@@ -230,7 +191,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalDefensivos',
+          count: provider.getFormattedCount(provider.totalDefensivos),
           title: 'Defensivos',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'defensivos'),
@@ -240,7 +201,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
         ),
         const SizedBox(height: 6),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalFabricantes',
+          count: provider.getFormattedCount(provider.totalFabricantes),
           title: 'Fabricantes',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'fabricantes'),
@@ -250,7 +211,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
         ),
         const SizedBox(height: 6),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalModoAcao',
+          count: provider.getFormattedCount(provider.totalModoAcao),
           title: 'Modo de Ação',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'modoAcao'),
@@ -260,7 +221,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
         ),
         const SizedBox(height: 6),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalIngredienteAtivo',
+          count: provider.getFormattedCount(provider.totalIngredienteAtivo),
           title: 'Ingrediente Ativo',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'ingredienteAtivo'),
@@ -270,7 +231,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
         ),
         const SizedBox(height: 6),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalClasseAgronomica',
+          count: provider.getFormattedCount(provider.totalClasseAgronomica),
           title: 'Classe Agronômica',
           width: buttonWidth,
           onTap: () => _navigateToCategory(context, 'classeAgronomica'),
@@ -282,7 +243,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
     );
   }
 
-  Widget _buildGridMenuLayout(double availableWidth, BuildContext context) {
+  Widget _buildGridMenuLayout(double availableWidth, BuildContext context, HomeDefensivosProvider provider) {
     final theme = Theme.of(context);
     final isMediumDevice = MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
     final buttonWidth = isMediumDevice ? (availableWidth - 32) / 2 : (availableWidth - 40) / 2;
@@ -294,7 +255,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalDefensivos',
+              count: provider.getFormattedCount(provider.totalDefensivos),
               title: 'Defensivos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'defensivos'),
@@ -304,7 +265,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
             ),
             const SizedBox(width: 6),
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalFabricantes',
+              count: provider.getFormattedCount(provider.totalFabricantes),
               title: 'Fabricantes',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'fabricantes'),
@@ -319,7 +280,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalModoAcao',
+              count: provider.getFormattedCount(provider.totalModoAcao),
               title: 'Modo de Ação',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'modoAcao'),
@@ -329,7 +290,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
             ),
             const SizedBox(width: 6),
             _buildCategoryButton(
-              count: _isLoading ? '...' : '$_totalIngredienteAtivo',
+              count: provider.getFormattedCount(provider.totalIngredienteAtivo),
               title: 'Ingrediente Ativo',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'ingredienteAtivo'),
@@ -341,7 +302,7 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
         ),
         const SizedBox(height: 6),
         _buildCategoryButton(
-          count: _isLoading ? '...' : '$_totalClasseAgronomica',
+          count: provider.getFormattedCount(provider.totalClasseAgronomica),
           title: 'Classe Agronômica',
           width: isMediumDevice ? availableWidth - 16 : availableWidth * 0.75,
           onTap: () => _navigateToCategory(context, 'classeAgronomica'),
@@ -471,77 +432,97 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
     );
   }
 
-  Widget _buildRecentAccessSection(BuildContext context) {
+  Widget _buildRecentAccessSection(BuildContext context, HomeDefensivosProvider provider) {
     return ContentSectionWidget(
       title: 'Últimos Acessados',
       actionIcon: Icons.history,
       onActionPressed: () {},
-      isLoading: _isLoading,
+      isLoading: provider.isLoading,
       emptyMessage: 'Nenhum defensivo acessado recentemente',
-      child: _recentDefensivos.isEmpty
-          ? const SizedBox.shrink()
-          : ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _recentDefensivos.length,
-              separatorBuilder: (context, index) => SizedBox(height: ReceitaAgroSpacing.xs),
-              itemBuilder: (context, index) {
-                final defensivo = _recentDefensivos[index];
-                return ContentListItemWidget(
-                  title: defensivo.displayName,
-                  subtitle: defensivo.displayIngredient,
-                  category: defensivo.displayClass,
-                  icon: FontAwesomeIcons.leaf,
-                  iconColor: const Color(0xFF4CAF50),
-                  onTap: () => _navigateToDefensivoDetails(
-                    context, 
-                    defensivo.displayName, 
-                    defensivo.displayFabricante,
-                  ),
-                );
-              },
+      isEmpty: provider.recentDefensivos.isEmpty,
+      showCard: true,
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: provider.recentDefensivos.length,
+        separatorBuilder: (context, index) => Divider(
+          height: 1,
+          thickness: 0.5,
+          indent: 80, // Alinhado com o texto (ícone + espaço)
+          endIndent: 16,
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+        itemBuilder: (context, index) {
+          final defensivo = provider.recentDefensivos[index];
+          return ContentListItemWidget(
+            title: defensivo.displayName,
+            subtitle: defensivo.displayIngredient,
+            category: defensivo.displayClass,
+            icon: FontAwesomeIcons.leaf,
+            iconColor: const Color(0xFF4CAF50),
+            onTap: () => _navigateToDefensivoDetails(
+              context, 
+              defensivo.displayName, 
+              defensivo.displayFabricante,
+              defensivo,
             ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildNewItemsSection(BuildContext context) {
+  Widget _buildNewItemsSection(BuildContext context, HomeDefensivosProvider provider) {
     return ContentSectionWidget(
       title: 'Novos Defensivos',
       actionIcon: Icons.settings,
       onActionPressed: () {},
-      isLoading: _isLoading,
+      isLoading: provider.isLoading,
       emptyMessage: 'Nenhum novo defensivo disponível',
-      child: _newDefensivos.isEmpty
-          ? const SizedBox.shrink()
-          : ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _newDefensivos.length,
-              separatorBuilder: (context, index) => SizedBox(height: ReceitaAgroSpacing.xs),
-              itemBuilder: (context, index) {
-                final defensivo = _newDefensivos[index];
-                return ContentListItemWidget(
-                  title: defensivo.displayName,
-                  subtitle: defensivo.displayIngredient,
-                  category: defensivo.displayClass,
-                  icon: FontAwesomeIcons.seedling,
-                  iconColor: const Color(0xFF4CAF50),
-                  onTap: () => _navigateToDefensivoDetails(
-                    context, 
-                    defensivo.displayName, 
-                    defensivo.displayFabricante,
-                  ),
-                );
-              },
+      isEmpty: provider.newDefensivos.isEmpty,
+      showCard: true,
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: provider.newDefensivos.length,
+        separatorBuilder: (context, index) => Divider(
+          height: 1,
+          thickness: 0.5,
+          indent: 80, // Alinhado com o texto (ícone + espaço)
+          endIndent: 16,
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+        itemBuilder: (context, index) {
+          final defensivo = provider.newDefensivos[index];
+          return ContentListItemWidget(
+            title: defensivo.displayName,
+            subtitle: defensivo.displayIngredient,
+            category: defensivo.displayClass,
+            icon: FontAwesomeIcons.seedling,
+            iconColor: const Color(0xFF4CAF50),
+            onTap: () => _navigateToDefensivoDetails(
+              context, 
+              defensivo.displayName, 
+              defensivo.displayFabricante,
+              defensivo,
             ),
+          );
+        },
+      ),
     );
   }
 
 
-  void _navigateToDefensivoDetails(BuildContext context, String defensivoName, String fabricante) {
-    Navigator.push(
+  void _navigateToDefensivoDetails(BuildContext context, String defensivoName, String fabricante, [FitossanitarioHive? defensivo]) {
+    // Registra o acesso se o defensivo foi fornecido (em background)
+    if (defensivo != null) {
+      final provider = context.read<HomeDefensivosProvider>();
+      provider.recordDefensivoAccess(defensivo);
+    }
+    
+    Navigator.push<void>(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => DetalheDefensivoPage(
           defensivoName: defensivoName,
           fabricante: fabricante,
@@ -552,16 +533,16 @@ class _HomeDefensivosPageState extends State<HomeDefensivosPage> {
 
   void _navigateToCategory(BuildContext context, String category) {
     if (category == 'defensivos') {
-      Navigator.push(
+      Navigator.push<void>(
         context,
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => const ListaDefensivosPage(),
         ),
       );
     } else {
-      Navigator.push(
+      Navigator.push<void>(
         context,
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (context) => ListaDefensivosAgrupadosPage(
             tipoAgrupamento: category,
           ),

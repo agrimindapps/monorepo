@@ -1,4 +1,5 @@
 import '../entities/user_settings_entity.dart';
+import '../exceptions/settings_exceptions.dart';
 import '../repositories/i_user_settings_repository.dart';
 
 /// Use case for updating user settings with business validation.
@@ -247,14 +248,6 @@ class UnsupportedLanguageException implements Exception {
   String toString() => 'UnsupportedLanguageException: $message';
 }
 
-/// Exception thrown when user ID is invalid
-class InvalidUserIdException implements Exception {
-  final String message;
-  InvalidUserIdException(this.message);
-
-  @override
-  String toString() => 'InvalidUserIdException: $message';
-}
 
 /// Exception thrown when settings are invalid
 class InvalidSettingsException implements Exception {

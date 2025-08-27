@@ -27,6 +27,7 @@ import '../sync/sync_operations.dart';
 // Sync dependencies
 import '../sync/sync_queue.dart';
 import '../utils/navigation_service.dart';
+// import '../../features/account/di/account_di.dart'; // Removido - account simplificado
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
@@ -42,6 +43,7 @@ Future<void> init() async {
 
   // Features
   _initAuth();
+  _initAccount();
   _initPlants();
   _initTasks();
   _initSpaces();
@@ -133,6 +135,10 @@ void _initAuth() {
       subscriptionRepository: sl<ISubscriptionRepository>(),
     ),
   );
+}
+
+void _initAccount() {
+  // Account simplificado - sem DI necessário
 }
 
 void _initPlants() {

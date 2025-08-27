@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -66,8 +65,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   List<ComentarioModel> _comentarios = [];
   bool _isLoadingComments = false;
   final TextEditingController _commentController = TextEditingController();
-  bool _hasReachedMaxComments = false;
-  final int _maxComentarios = 5; // default valor
   
   // Estado dos diagnósticos
   String _searchQuery = '';
@@ -1105,111 +1102,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  Widget _buildTecnologiaSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF4CAF50),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.psychology,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Tecnologia',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.volume_up,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    // Funcionalidade de áudio
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO - MAPA INSTRUÇÕES DE USO:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _getTecnologiaContent(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'NÚMERO, ÉPOCA E INTERVALO DE APLICAÇÃO:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _getAplicacaoContent(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildDiagnosticoTab() {
     final filteredDiagnosticos = _getFilteredDiagnosticos();
@@ -1816,7 +1708,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       if (mounted) {
         setState(() {
           _comentarios.removeWhere((comment) => comment.id == commentId);
-          _hasReachedMaxComments = !_comentariosService.canAddComentario(_comentarios.length);
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1837,62 +1728,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     }
   }
 
-  Widget _buildLimitReachedWidget() {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                color: theme.colorScheme.onSurface,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Limite de comentários atingido',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Você já adicionou ${_comentarios.length} de $_maxComentarios comentários disponíveis.',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Para adicionar mais comentários, assine o plano premium.',
-            style: TextStyle(
-              fontSize: 12,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyCommentsState() {
     final theme = Theme.of(context);
@@ -1963,151 +1798,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  Widget _buildComentarioCard(ComentarioModel comentario, int index) {
-    final theme = Theme.of(context);
-    
-    return Dismissible(
-      key: Key(comentario.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: 24,
-        ),
-      ),
-      confirmDismiss: (direction) async {
-        return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Confirmar exclusão'),
-            content: const Text('Tem certeza que deseja excluir este comentário?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
-        );
-      },
-      onDismissed: (direction) {
-        _deleteComentario(index);
-      },
-      child: GestureDetector(
-        onTap: () => _showEditCommentDialog(comentario, index),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(alpha: 0.1),
-                spreadRadius: 1,
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Cabeçalho com origem e data
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Defensivos',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        Text(
-                          widget.defensivoName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _formatDate(comentario.createdAt),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Conteúdo do comentário
-              Text(
-                comentario.conteudo,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: theme.colorScheme.onSurface,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Indicador de ação
-              Row(
-                children: [
-                  const Spacer(),
-                  Text(
-                    'Toque para editar',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  Icon(
-                    Icons.edit,
-                    size: 12,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   String _getTecnologiaContent() {
     return 'MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO - MAPA\n\nINSTRUÇÕES DE USO:\n\n${widget.defensivoName} é um herbicida à base do ingrediente ativo Indaziflam, indicado para o controle pré-emergente das plantas daninhas nas culturas da cana-de-açúcar (cana planta e cana soca), café e citros.\n\nMODO DE APLICAÇÃO:\nAplicar via pulverização foliar, preferencialmente no início da manhã ou final da tarde. Utilizar equipamentos de proteção individual adequados.\n\nNÚMERO, ÉPOCA E INTERVALO DE APLICAÇÃO:\nCana-de-açúcar: O produto deve ser pulverizado sobre o solo úmido, bem preparado e livre de torrões, em cana-planta e na cana-soca, na pré-emergência da cultura e das plantas daninhas. Aplicar somente em solo médio e pesado.\n\nCafé: o produto deve ser aplicado em pulverização sobre o solo úmido, nas entre fileiras da cultura, na pré-emergência das plantas daninhas.';
@@ -2137,9 +1827,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     return 'COMPATIBILIDADE E MISTURAS:\n\nCOMPATIBILIDADE QUÍMICA:\nO ${widget.defensivoName} é compatível com:\n• Adjuvantes recomendados pelo fabricante\n• Fertilizantes foliares específicos\n• Outros herbicidas quando recomendado\n\nINCOMPATIBILIDADES:\n• Produtos alcalinos (pH > 8,0)\n• Fertilizantes com cálcio em alta concentração\n• Produtos à base de cobre\n• Óleos minerais ou vegetais\n\nTESTE DE COMPATIBILIDADE:\nAntes de fazer misturas:\n1. Preparar pequena quantidade da mistura\n2. Observar por 30 minutos\n3. Verificar formação de precipitados ou separação de fases\n4. Não utilizar em caso de incompatibilidade\n\nRECOMENDAÇÕES:\n• Sempre consultar engenheiro agrônomo\n• Realizar teste prévio em pequena área\n• Preparar mistura apenas para uso imediato\n• Agitar constantemente durante aplicação';
   }
 
-  String _getAplicacaoContent() {
-    return 'Cana-de-açúcar: O produto deve ser pulverizado sobre o solo úmido, bem preparado e livre de torrões, em cana-planta e na cana-soca, na pré-emergência da cultura e das plantas daninhas. Aplicar somente em solo médio e pesado.\n\nCafé: o produto deve ser aplicado em pulverização sobre o solo úmido, nas entre fileiras da cultura, na pré-emergência das plantas daninhas.';
-  }
 
   Widget? _buildFloatingActionButton(BuildContext context) {
     // Só mostra o FAB se estiver na aba de comentários (agora é a quarta aba, índice 3)
@@ -2205,7 +1892,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
             onPressed: () {
               final content = controller.text.trim();
               if (_validateComment(content)) {
-                _addComentario(content);
+                _commentController.text = content;
+                _addComment();
                 Navigator.of(context).pop();
               }
             },
@@ -2216,65 +1904,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  void _showEditCommentDialog(ComentarioModel comentario, int index) {
-    final TextEditingController controller = TextEditingController(text: comentario.conteudo);
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar Comentário'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Defensivos - ${widget.defensivoName}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'Edite seu comentário...',
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
-              maxLines: 4,
-              maxLength: 300,
-              autofocus: true,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Mínimo 5 caracteres, máximo 300 caracteres',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final content = controller.text.trim();
-              if (_validateComment(content)) {
-                _editComentario(index, content);
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
-    );
-  }
 
   bool _validateComment(String content) {
     if (content.length < 5) {
@@ -2298,69 +1927,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     }
     
     return true;
-  }
-
-  void _addComentario(String content) {
-    final novoComentario = ComentarioModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      idReg: 'REG_${DateTime.now().millisecondsSinceEpoch}',
-      titulo: 'Comentário',
-      conteudo: content,
-      ferramenta: 'Defensivos - ${widget.defensivoName}',
-      pkIdentificador: widget.defensivoName,
-      status: true,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    
-    setState(() {
-      _comentarios.add(novoComentario);
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Comentário adicionado com sucesso!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _editComentario(int index, String newContent) {
-    setState(() {
-      _comentarios[index] = _comentarios[index].copyWith(
-        conteudo: newContent,
-        updatedAt: DateTime.now(),
-      );
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Comentário editado com sucesso!'),
-        backgroundColor: Color(0xFF4CAF50),
-      ),
-    );
-  }
-
-  void _deleteComentario(int index) {
-    final comentario = _comentarios[index];
-    
-    setState(() {
-      _comentarios.removeAt(index);
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Comentário excluído'),
-        action: SnackBarAction(
-          label: 'Desfazer',
-          onPressed: () {
-            setState(() {
-              _comentarios.insert(index, comentario);
-            });
-          },
-        ),
-      ),
-    );
   }
 
   String _formatDate(DateTime date) {
@@ -2651,36 +2217,4 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     }
   }
 
-  void _showPremiumDialog() {
-    // Import the helper at the top of the file first
-    // For now, just check directly
-    final firebaseAuth = FirebaseAuth.instance;
-    final user = firebaseAuth.currentUser;
-    
-    // Don't show premium dialog for anonymous users
-    if (user != null && user.isAnonymous) {
-      return;
-    }
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Funcionalidade Premium'),
-        content: const Text(
-          'Este recurso está disponível apenas para usuários premium. '
-          'Assine agora para ter acesso completo ao app.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Assinar'),
-          ),
-        ],
-      ),
-    );
-  }
 }

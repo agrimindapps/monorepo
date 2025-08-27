@@ -10,6 +10,7 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/praga_image_widget.dart';
 import '../culturas/lista_culturas_page.dart';
 import 'detalhe_praga_page.dart';
+import 'domain/entities/praga_entity.dart';
 import 'lista_pragas_page.dart';
 import 'presentation/providers/pragas_provider.dart';
 
@@ -52,53 +53,43 @@ class _HomePragasPageState extends State<HomePragasPage> {
       
       // Aguarda dados estarem prontos
       final isDataReady = await appDataManager.isDataReady();
-      print('📊 HomePragasPage: Dados prontos = $isDataReady (tentativa ${attempts + 1}/$maxAttempts)');
       
       if (isDataReady && mounted) {
         await pragasProvider.initialize();
-        print('✅ HomePragasPage: PragasProvider inicializado com sucesso');
         return;
       }
       
       // Verifica se atingiu o limite de tentativas
       if (attempts >= maxAttempts - 1) {
-        print('⚠️ HomePragasPage: Timeout atingido após $maxAttempts tentativas');
         if (mounted) {
           // Fallback: inicializa mesmo sem dados prontos
           final pragasProvider = GetIt.instance<PragasProvider>();
           await pragasProvider.initialize();
-          print('🔄 HomePragasPage: PragasProvider inicializado via fallback');
         }
         return;
       }
       
       // Se dados não estão prontos e ainda há tentativas, aguarda e tenta novamente
       if (mounted) {
-        print('⏳ HomePragasPage: Aguardando dados ficarem prontos... (tentativa ${attempts + 2}/$maxAttempts)');
         await Future<void>.delayed(delayBetweenAttempts);
         if (mounted) {
           await _initializePragasWithDelay(attempts + 1);
         }
       }
     } catch (e) {
-      print('❌ HomePragasPage: Erro na inicialização das pragas (tentativa ${attempts + 1}): $e');
       
       // Se ainda há tentativas e o widget está montado, tenta novamente
       if (attempts < maxAttempts - 1 && mounted) {
-        print('🔄 HomePragasPage: Tentando novamente após erro...');
         await Future<void>.delayed(delayBetweenAttempts);
         if (mounted) {
           await _initializePragasWithDelay(attempts + 1);
         }
       } else if (mounted) {
         // Último recurso: inicializa diretamente
-        print('🚨 HomePragasPage: Inicializando diretamente após esgotar tentativas');
         try {
           final pragasProvider = GetIt.instance<PragasProvider>();
           await pragasProvider.initialize();
-          print('✅ HomePragasPage: PragasProvider inicializado via último recurso');
         } catch (finalError) {
-          print('💥 HomePragasPage: Falha definitiva na inicialização: $finalError');
         }
       }
     }
@@ -271,61 +262,16 @@ class _HomePragasPageState extends State<HomePragasPage> {
 
   Widget _buildVerticalMenuLayout(double availableWidth, PragasProvider provider) {
     final theme = Theme.of(context);
-    final buttonWidth = availableWidth - 16;
+    final buttonWidth = (availableWidth - 32) / 3; // Três botões por linha
+    final cultureButtonWidth = availableWidth - 16; // Botão cultura ocupa linha inteira
     final standardColor = theme.colorScheme.primary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildCategoryButton(
-          count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
-          title: 'Insetos',
-          width: buttonWidth,
-          onTap: () => _navigateToCategory(context, 'insetos'),
-          icon: Icons.bug_report,
-          color: standardColor,
-        ),
-        const SizedBox(height: 6),
-        _buildCategoryButton(
-          count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
-          title: 'Doenças',
-          width: buttonWidth,
-          onTap: () => _navigateToCategory(context, 'doencas'),
-          icon: Icons.coronavirus,
-          color: standardColor,
-        ),
-        const SizedBox(height: 6),
-        _buildCategoryButton(
-          count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
-          title: 'Plantas',
-          width: buttonWidth,
-          onTap: () => _navigateToCategory(context, 'plantas'),
-          icon: Icons.eco,
-          color: standardColor,
-        ),
-        const SizedBox(height: 6),
-        _buildCategoryButton(
-          count: '$_totalCulturas',
-          title: 'Culturas',
-          width: buttonWidth,
-          onTap: () => _navigateToCategory(context, 'culturas'),
-          icon: Icons.agriculture,
-          color: standardColor,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGridMenuLayout(double availableWidth, BuildContext context, PragasProvider provider) {
-    final theme = Theme.of(context);
-    final isMediumDevice = MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
-    final buttonWidth = isMediumDevice ? (availableWidth - 32) / 2 : (availableWidth - 40) / 2;
-    final standardColor = theme.colorScheme.primary;
-
-    return Column(
-      children: [
+        // Primeira row: Insetos, Doenças e Plantas
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildCategoryButton(
               count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
@@ -344,12 +290,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
               icon: Icons.coronavirus,
               color: standardColor,
             ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+            const SizedBox(width: 6),
             _buildCategoryButton(
               count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
               title: 'Plantas',
@@ -358,16 +299,73 @@ class _HomePragasPageState extends State<HomePragasPage> {
               icon: Icons.eco,
               color: standardColor,
             ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Segunda row: Culturas
+        _buildCategoryButton(
+          count: '$_totalCulturas',
+          title: 'Culturas',
+          width: cultureButtonWidth,
+          onTap: () => _navigateToCategory(context, 'culturas'),
+          icon: Icons.agriculture,
+          color: standardColor,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGridMenuLayout(double availableWidth, BuildContext context, PragasProvider provider) {
+    final theme = Theme.of(context);
+    final buttonWidth = (availableWidth - 32) / 3; // Três botões por linha
+    final cultureButtonWidth = (availableWidth - 16) / 2; // Botão cultura ocupa metade da largura
+    final standardColor = theme.colorScheme.primary;
+
+    return Column(
+      children: [
+        // Primeira row: Insetos, Doenças e Plantas
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildCategoryButton(
+              count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
+              title: 'Insetos',
+              width: buttonWidth,
+              onTap: () => _navigateToCategory(context, 'insetos'),
+              icon: Icons.bug_report,
+              color: standardColor,
+            ),
             const SizedBox(width: 6),
             _buildCategoryButton(
-              count: '$_totalCulturas',
-              title: 'Culturas',
+              count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
+              title: 'Doenças',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'culturas'),
-              icon: Icons.agriculture,
+              onTap: () => _navigateToCategory(context, 'doencas'),
+              icon: Icons.coronavirus,
+              color: standardColor,
+            ),
+            const SizedBox(width: 6),
+            _buildCategoryButton(
+              count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
+              title: 'Plantas',
+              width: buttonWidth,
+              onTap: () => _navigateToCategory(context, 'plantas'),
+              icon: Icons.eco,
               color: standardColor,
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        // Segunda row: Culturas centralizado
+        Center(
+          child: _buildCategoryButton(
+            count: '$_totalCulturas',
+            title: 'Culturas',
+            width: cultureButtonWidth,
+            onTap: () => _navigateToCategory(context, 'culturas'),
+            icon: Icons.agriculture,
+            color: standardColor,
+          ),
         ),
       ],
     );
@@ -888,7 +886,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: provider.recentPragas.length,
-              separatorBuilder: (context, index) => SizedBox(height: ReceitaAgroSpacing.xs),
+              separatorBuilder: (context, index) => const SizedBox(height: ReceitaAgroSpacing.xs),
               itemBuilder: (context, index) {
                 final praga = provider.recentPragas[index];
                 String emoji = '🐛';
@@ -914,7 +912,7 @@ class _HomePragasPageState extends State<HomePragasPage> {
                   subtitle: praga.nomeCientifico,
                   category: type,
                   leading: _buildPragaItemLeading(praga.nomeCientifico, _getColorForType(type, context), emoji),
-                  onTap: () => _navigateToPragaDetails(context, praga.nomeComum, praga.nomeCientifico),
+                  onTap: () => _navigateToPragaDetails(context, praga.nomeComum, praga.nomeCientifico, praga),
                 );
               },
             ),
@@ -945,7 +943,13 @@ class _HomePragasPageState extends State<HomePragasPage> {
     );
   }
 
-  void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName) {
+  void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName, [PragaEntity? praga]) {
+    // Registra o acesso se a praga foi fornecida (em background)
+    if (praga != null) {
+      final provider = context.read<PragasProvider>();
+      provider.recordPragaAccess(praga);
+    }
+    
     Navigator.push(
       context,
       MaterialPageRoute<void>(

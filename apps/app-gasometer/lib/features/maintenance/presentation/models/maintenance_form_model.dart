@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/maintenance_entity.dart';
 
@@ -369,8 +370,25 @@ class MaintenanceFormModel extends Equatable {
   }
 
   /// Converte para MaintenanceEntity para persistência
+  /// Aplica sanitização em todos os campos de texto para segurança
   MaintenanceEntity toMaintenanceEntity() {
     final now = DateTime.now();
+    
+    // Sanitizar todos os campos de texto antes da persistência
+    final sanitizedTitle = InputSanitizer.sanitize(title);
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(description);
+    final sanitizedWorkshopName = workshopName.trim().isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeName(workshopName);
+    final sanitizedWorkshopPhone = workshopPhone.trim().isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeNumeric(workshopPhone);
+    final sanitizedWorkshopAddress = workshopAddress.trim().isEmpty 
+        ? null 
+        : InputSanitizer.sanitize(workshopAddress);
+    final sanitizedNotes = notes.trim().isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeDescription(notes);
     
     return MaintenanceEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
@@ -378,20 +396,20 @@ class MaintenanceFormModel extends Equatable {
       vehicleId: vehicleId,
       type: type,
       status: status,
-      title: title.trim(),
-      description: description.trim(),
+      title: sanitizedTitle,
+      description: sanitizedDescription,
       cost: cost,
       serviceDate: serviceDate,
       odometer: odometer,
-      workshopName: workshopName.trim().isEmpty ? null : workshopName.trim(),
-      workshopPhone: workshopPhone.trim().isEmpty ? null : workshopPhone.trim(),
-      workshopAddress: workshopAddress.trim().isEmpty ? null : workshopAddress.trim(),
+      workshopName: sanitizedWorkshopName,
+      workshopPhone: sanitizedWorkshopPhone,
+      workshopAddress: sanitizedWorkshopAddress,
       nextServiceDate: nextServiceDate,
       nextServiceOdometer: nextServiceOdometer,
       photosPaths: photosPaths,
       invoicesPaths: invoicesPaths,
       parts: parts,
-      notes: notes.trim().isEmpty ? null : notes.trim(),
+      notes: sanitizedNotes,
       createdAt: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
       updatedAt: now,
       metadata: const {},

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/presentation/theme/app_theme.dart';
 
 /// Widget para seleção/visualização de imagem do comprovante
@@ -104,36 +105,11 @@ class ReceiptImagePicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            // Imagem
+            // Imagem otimizada
             SizedBox(
               width: double.infinity,
               height: double.infinity,
-              child: Image.file(
-                File(imagePath!),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return ColoredBox(
-                    color: AppTheme.colors.errorContainer,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 32,
-                          color: AppTheme.colors.onErrorContainer,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Erro ao carregar imagem',
-                          style: AppTheme.textStyles.bodySmall?.copyWith(
-                            color: AppTheme.colors.onErrorContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              child: _buildOptimizedReceiptImage(File(imagePath!)),
             ),
             
             // Overlay com ações
@@ -275,9 +251,10 @@ class ReceiptImagePicker extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
+                  child: _buildOptimizedReceiptImage(
                     File(imagePath!),
                     fit: BoxFit.contain,
+                    isFullScreen: true,
                   ),
                 ),
               ),
@@ -299,6 +276,100 @@ class ReceiptImagePicker extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Método otimizado para carregamento de imagens de comprovante
+  /// com cache de memória e shimmer loading
+  Widget _buildOptimizedReceiptImage(
+    File imageFile, {
+    BoxFit fit = BoxFit.cover,
+    bool isFullScreen = false,
+  }) {
+    final context = this.context;
+    final screenSize = MediaQuery.of(context).size;
+    // Definir cache dimensions baseado no uso
+    final cacheHeight = isFullScreen 
+        ? (screenSize.height * 0.8).toInt() 
+        : 200;
+    final cacheWidth = isFullScreen 
+        ? (screenSize.width * 0.9).toInt() 
+        : (screenSize.width).toInt();
+
+    return Image.file(
+      imageFile,
+      fit: fit,
+      // Otimizações de memória para reduzir uso de RAM
+      cacheHeight: cacheHeight,
+      cacheWidth: cacheWidth,
+      // Frame builder para adicionar shimmer loading effect
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded || frame != null) {
+          return child;
+        }
+        
+        // Shimmer loading enquanto a imagem carrega
+        return _buildReceiptShimmerPlaceholder(isFullScreen);
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return ColoredBox(
+          color: AppTheme.colors.errorContainer,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 32,
+                color: AppTheme.colors.onErrorContainer,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Erro ao carregar imagem',
+                style: AppTheme.textStyles.bodySmall?.copyWith(
+                  color: AppTheme.colors.onErrorContainer,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Toque para tentar novamente',
+                style: AppTheme.textStyles.labelSmall?.copyWith(
+                  color: AppTheme.colors.onErrorContainer.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Widget de shimmer placeholder para loading de comprovantes
+  Widget _buildReceiptShimmerPlaceholder(bool isFullScreen) {
+    return Shimmer.fromColors(
+      baseColor: AppTheme.colors.surfaceVariant.withOpacity(0.3),
+      highlightColor: AppTheme.colors.surface,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: AppTheme.colors.surfaceVariant.withOpacity(0.3),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.receipt_outlined,
+              size: isFullScreen ? 64 : 48,
+              color: AppTheme.colors.onSurfaceVariant.withOpacity(0.3),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Carregando comprovante...',
+              style: AppTheme.textStyles.bodyMedium?.copyWith(
+                color: AppTheme.colors.onSurfaceVariant.withOpacity(0.5),
               ),
             ),
           ],

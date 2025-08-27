@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/performance/performance_service.dart';
 import '../../domain/entities/medication.dart';
 import '../../domain/repositories/medication_repository.dart';
 import '../../domain/usecases/add_medication.dart';
@@ -46,8 +47,8 @@ class MedicationsState {
   }
 }
 
-// State notifier
-class MedicationsNotifier extends StateNotifier<MedicationsState> {
+// State notifier with performance monitoring
+class MedicationsNotifier extends StateNotifier<MedicationsState> with PerformanceMonitoring {
   final GetMedications _getMedications;
   final GetMedicationsByAnimalId _getMedicationsByAnimalId;
   final GetActiveMedications _getActiveMedications;
@@ -80,39 +81,43 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> {
         super(const MedicationsState());
 
   Future<void> loadMedications() async {
-    state = state.copyWith(isLoading: true, error: null);
+    return trackAsync('loadMedications', () async {
+      state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getMedications(const NoParams());
+      final result = await _getMedications(const NoParams());
 
-    result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (medications) => state = state.copyWith(
-        medications: medications,
-        isLoading: false,
-        error: null,
-      ),
-    );
+      result.fold(
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        ),
+        (medications) => state = state.copyWith(
+          medications: medications,
+          isLoading: false,
+          error: null,
+        ),
+      );
+    });
   }
 
   Future<void> loadMedicationsByAnimalId(String animalId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    return trackAsync('loadMedicationsByAnimalId', () async {
+      state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getMedicationsByAnimalId(animalId);
+      final result = await _getMedicationsByAnimalId(animalId);
 
-    result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (medications) => state = state.copyWith(
-        medications: medications,
-        isLoading: false,
-        error: null,
-      ),
-    );
+      result.fold(
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        ),
+        (medications) => state = state.copyWith(
+          medications: medications,
+          isLoading: false,
+          error: null,
+        ),
+      );
+    });
   }
 
   Future<void> loadActiveMedications() async {

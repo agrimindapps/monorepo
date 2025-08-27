@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/error/app_error.dart';
 import '../../../../core/providers/base_provider.dart';
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -14,12 +16,18 @@ import '../../domain/services/expense_validation_service.dart';
 import '../models/expense_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de despesas
+/// 
+/// ARCHITECTURAL NOTE: This provider now uses dependency injection pattern
+/// instead of direct provider coupling to avoid circular dependencies.
+/// VehiclesProvider is accessed via BuildContext when needed.
 class ExpenseFormProvider extends BaseProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
   final ExpenseValidationService _validator = const ExpenseValidationService();
-  final VehiclesProvider _vehiclesProvider;
   final ImagePicker _imagePicker = ImagePicker();
+  
+  // Store context for accessing providers when needed
+  BuildContext? _context;
 
   // Controllers para campos de texto
   final TextEditingController descriptionController = TextEditingController();
@@ -38,7 +46,7 @@ class ExpenseFormProvider extends BaseProvider {
   bool _isInitialized = false;
   final bool _isUpdating = false;
 
-  ExpenseFormProvider(this._vehiclesProvider, {String? initialVehicleId, String? userId}) 
+  ExpenseFormProvider({String? initialVehicleId, String? userId}) 
       : _formModel = ExpenseFormModel.initial(initialVehicleId ?? '', userId ?? '') {
     _initializeControllers();
   }
@@ -47,6 +55,23 @@ class ExpenseFormProvider extends BaseProvider {
   GlobalKey<FormState> get formKey => _formKey;
   ExpenseFormModel get formModel => _formModel;
   bool get isInitialized => _isInitialized;
+
+  /// Sets the BuildContext for dependency injection access.
+  /// This should be called when the provider is used in a widget.
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  /// Safely access VehiclesProvider through dependency injection
+  VehiclesProvider? get _vehiclesProvider {
+    if (_context == null) return null;
+    try {
+      return _context!.read<VehiclesProvider>();
+    } catch (e) {
+      debugPrint('Warning: VehiclesProvider not available in context: $e');
+      return null;
+    }
+  }
   bool get isUpdating => _isUpdating;
 
   void _initializeControllers() {
@@ -140,8 +165,14 @@ class ExpenseFormProvider extends BaseProvider {
 
   /// Carrega dados do veículo selecionado
   Future<void> _loadVehicleData(String vehicleId) async {
+    // Safely access VehiclesProvider through dependency injection
+    final vehiclesProvider = _vehiclesProvider;
+    if (vehiclesProvider == null) {
+      throw Exception('VehiclesProvider não disponível. Certifique-se de chamar setContext() primeiro.');
+    }
+
     final vehicle = await executeDataOperation(
-      () => _vehiclesProvider.getVehicleById(vehicleId),
+      () => vehiclesProvider.getVehicleById(vehicleId),
       operationName: '_loadVehicleData',
       parameters: {'vehicleId': vehicleId},
       showLoading: false,
@@ -185,7 +216,8 @@ class ExpenseFormProvider extends BaseProvider {
         // Verificar se o provider ainda está ativo
         if (_descriptionDebounceTimer == null) return;
         
-        final sanitized = _formatter.sanitizeInput(descriptionController.text);
+        // Aplicar sanitização específica para descrições
+        final sanitized = InputSanitizer.sanitizeDescription(descriptionController.text);
         _updateDescription(sanitized);
         
         // Sugerir categoria baseada na descrição
@@ -228,12 +260,14 @@ class ExpenseFormProvider extends BaseProvider {
   }
 
   void _onLocationChanged() {
-    final sanitized = _formatter.sanitizeInput(locationController.text);
+    // Aplicar sanitização específica para localizações
+    final sanitized = InputSanitizer.sanitize(locationController.text);
     _updateLocation(sanitized);
   }
 
   void _onNotesChanged() {
-    final sanitized = _formatter.sanitizeInput(notesController.text);
+    // Aplicar sanitização específica para observações
+    final sanitized = InputSanitizer.sanitizeDescription(notesController.text);
     _updateNotes(sanitized);
   }
 

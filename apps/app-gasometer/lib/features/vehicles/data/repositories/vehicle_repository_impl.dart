@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -77,11 +78,15 @@ class VehicleRepositoryImpl implements VehicleRepository {
         }
       }).catchError((Object error) {
         // Sync falhou, mas não afeta a funcionalidade local
-        print('Background sync failed: $error');
+        if (kDebugMode) {
+          print('Background sync failed: $error');
+        }
       }));
     } catch (e) {
       // Ignorar erros de sync em background
-      print('Background sync error: $e');
+      if (kDebugMode) {
+        print('Background sync error: $e');
+      }
     }
   }
 
@@ -119,10 +124,14 @@ class VehicleRepositoryImpl implements VehicleRepository {
           await localDataSource.saveVehicle(remoteVehicle);
         }
       }).catchError((Object error) {
-        print('Background vehicle sync failed: $error');
+        if (kDebugMode) {
+          print('Background vehicle sync failed: $error');
+        }
       }));
     } catch (e) {
-      print('Background vehicle sync error: $e');
+      if (kDebugMode) {
+        print('Background vehicle sync error: $e');
+      }
     }
   }
 

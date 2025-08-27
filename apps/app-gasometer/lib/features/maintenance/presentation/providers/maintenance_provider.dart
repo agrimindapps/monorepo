@@ -13,6 +13,41 @@ import '../../domain/usecases/get_maintenance_records_by_vehicle.dart';
 import '../../domain/usecases/get_upcoming_maintenance_records.dart';
 import '../../domain/usecases/update_maintenance_record.dart';
 
+// Statistics models for caching
+class MaintenanceStatistics {
+  final double totalCost;
+  final int preventiveCount;
+  final int correctiveCount;
+  final int inspectionCount;
+  final int emergencyCount;
+  final int totalRecords;
+  final List<MaintenanceEntity> recentRecords;
+  final DateTime lastUpdated;
+
+  const MaintenanceStatistics({
+    required this.totalCost,
+    required this.preventiveCount,
+    required this.correctiveCount,
+    required this.inspectionCount,
+    required this.emergencyCount,
+    required this.totalRecords,
+    required this.recentRecords,
+    required this.lastUpdated,
+  });
+
+  bool get needsRecalculation {
+    final now = DateTime.now();
+    const maxCacheTime = Duration(minutes: 5);
+    return now.difference(lastUpdated) > maxCacheTime;
+  }
+
+  String get formattedTotalCost => 'R\$ ${totalCost.toStringAsFixed(2)}';
+
+  String get maintenanceCountSummary {
+    return '$preventiveCount preventivas, $correctiveCount corretivas, $inspectionCount revisões, $emergencyCount emergenciais';
+  }
+}
+
 @injectable
 class MaintenanceProvider extends ChangeNotifier {
   final GetAllMaintenanceRecords _getAllMaintenanceRecords;
@@ -43,6 +78,10 @@ class MaintenanceProvider extends ChangeNotifier {
   bool _isLoadingAnalytics = false;
   String? _errorMessage;
   String? _selectedVehicleId;
+  
+  // Cached statistics
+  MaintenanceStatistics? _cachedStatistics;
+  bool _statisticsNeedRecalculation = true;
 
   // Getters
   List<MaintenanceEntity> get maintenanceRecords => _maintenanceRecords;
@@ -61,24 +100,33 @@ class MaintenanceProvider extends ChangeNotifier {
     return _maintenanceRecords.where((record) => record.vehicleId == _selectedVehicleId).toList();
   }
 
-  // Statistics getters
-  double get totalMaintenanceCost {
-    return filteredRecords.fold(0.0, (sum, record) => sum + record.cost);
-  }
-
-  Map<MaintenanceType, int> get maintenanceCountByType {
-    final counts = <MaintenanceType, int>{};
-    for (final record in filteredRecords) {
-      counts[record.type] = (counts[record.type] ?? 0) + 1;
+  // Cached statistics getter
+  MaintenanceStatistics get statistics {
+    final records = filteredRecords;
+    if (_cachedStatistics == null ||
+        _statisticsNeedRecalculation ||
+        _cachedStatistics!.needsRecalculation ||
+        _cachedStatistics!.totalRecords != records.length) {
+      _cachedStatistics = _calculateStatistics(records);
+      _statisticsNeedRecalculation = false;
     }
-    return counts;
+    return _cachedStatistics!;
   }
-
-  List<MaintenanceEntity> get recentMaintenanceRecords {
-    final sorted = List<MaintenanceEntity>.from(filteredRecords);
-    sorted.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
-    return sorted.take(5).toList();
+  
+  // Legacy getters for backward compatibility (now use cached statistics)
+  double get totalMaintenanceCost => statistics.totalCost;
+  
+  Map<MaintenanceType, int> get maintenanceCountByType {
+    final stats = statistics;
+    return {
+      MaintenanceType.preventive: stats.preventiveCount,
+      MaintenanceType.corrective: stats.correctiveCount,
+      MaintenanceType.inspection: stats.inspectionCount,
+      MaintenanceType.emergency: stats.emergencyCount,
+    };
   }
+  
+  List<MaintenanceEntity> get recentMaintenanceRecords => statistics.recentRecords;
 
   List<MaintenanceEntity> get overdueMaintenance {
     final now = DateTime.now();
@@ -100,6 +148,7 @@ class MaintenanceProvider extends ChangeNotifier {
   void selectVehicle(String? vehicleId) {
     if (_selectedVehicleId != vehicleId) {
       _selectedVehicleId = vehicleId;
+      _invalidateStatistics();
       notifyListeners();
       if (vehicleId != null) {
         loadMaintenanceRecordsByVehicle(vehicleId);
@@ -119,6 +168,7 @@ class MaintenanceProvider extends ChangeNotifier {
       (failure) => _setError(failure.message),
       (records) {
         _maintenanceRecords = records;
+        _invalidateStatistics();
         _setLoading(false);
       },
     );
@@ -136,6 +186,7 @@ class MaintenanceProvider extends ChangeNotifier {
       (failure) => _setError(failure.message),
       (records) {
         _maintenanceRecords = records;
+        _invalidateStatistics();
         _setLoading(false);
       },
     );
@@ -192,6 +243,7 @@ class MaintenanceProvider extends ChangeNotifier {
       (addedRecord) {
         _maintenanceRecords.add(addedRecord);
         _sortRecords();
+        _invalidateStatistics();
         notifyListeners();
         return true;
       },
@@ -214,6 +266,7 @@ class MaintenanceProvider extends ChangeNotifier {
         final index = _maintenanceRecords.indexWhere((r) => r.id == updatedRecord.id);
         if (index != -1) {
           _maintenanceRecords[index] = updatedRecord;
+          _invalidateStatistics();
           notifyListeners();
         }
         return true;
@@ -235,6 +288,7 @@ class MaintenanceProvider extends ChangeNotifier {
       },
       (_) {
         _maintenanceRecords.removeWhere((record) => record.id == id);
+        _invalidateStatistics();
         notifyListeners();
         return true;
       },
@@ -267,17 +321,9 @@ class MaintenanceProvider extends ChangeNotifier {
     }).toList();
   }
 
-  // Formatted getters for UI
-  String get formattedTotalCost => 'R\$ ${totalMaintenanceCost.toStringAsFixed(2)}';
-
-  String get maintenanceCountSummary {
-    final preventive = maintenanceCountByType[MaintenanceType.preventive] ?? 0;
-    final corrective = maintenanceCountByType[MaintenanceType.corrective] ?? 0;
-    final inspection = maintenanceCountByType[MaintenanceType.inspection] ?? 0;
-    final emergency = maintenanceCountByType[MaintenanceType.emergency] ?? 0;
-    
-    return '$preventive preventivas, $corrective corretivas, $inspection revisões, $emergency emergenciais';
-  }
+  // Formatted getters for UI (now use cached statistics)
+  String get formattedTotalCost => statistics.formattedTotalCost;
+  String get maintenanceCountSummary => statistics.maintenanceCountSummary;
 
   // Helper methods
   void _setLoading(bool loading) {
@@ -321,6 +367,67 @@ class MaintenanceProvider extends ChangeNotifier {
     _isLoadingUpcoming = false;
     _isLoadingAnalytics = false;
     _errorMessage = null;
+    _invalidateStatistics();
     notifyListeners();
+  }
+  
+  // Statistics calculation method
+  MaintenanceStatistics _calculateStatistics(List<MaintenanceEntity> records) {
+    if (records.isEmpty) {
+      return MaintenanceStatistics(
+        totalCost: 0.0,
+        preventiveCount: 0,
+        correctiveCount: 0,
+        inspectionCount: 0,
+        emergencyCount: 0,
+        totalRecords: 0,
+        recentRecords: [],
+        lastUpdated: DateTime.now(),
+      );
+    }
+    
+    final totalCost = records.fold<double>(0.0, (sum, record) => sum + record.cost);
+    
+    int preventiveCount = 0;
+    int correctiveCount = 0;
+    int inspectionCount = 0;
+    int emergencyCount = 0;
+    
+    for (final record in records) {
+      switch (record.type) {
+        case MaintenanceType.preventive:
+          preventiveCount++;
+          break;
+        case MaintenanceType.corrective:
+          correctiveCount++;
+          break;
+        case MaintenanceType.inspection:
+          inspectionCount++;
+          break;
+        case MaintenanceType.emergency:
+          emergencyCount++;
+          break;
+      }
+    }
+    
+    // Get recent records (sorted by date)
+    final sortedRecords = List<MaintenanceEntity>.from(records);
+    sortedRecords.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
+    final recentRecords = sortedRecords.take(5).toList();
+    
+    return MaintenanceStatistics(
+      totalCost: totalCost,
+      preventiveCount: preventiveCount,
+      correctiveCount: correctiveCount,
+      inspectionCount: inspectionCount,
+      emergencyCount: emergencyCount,
+      totalRecords: records.length,
+      recentRecords: recentRecords,
+      lastUpdated: DateTime.now(),
+    );
+  }
+  
+  void _invalidateStatistics() {
+    _statisticsNeedRecalculation = true;
   }
 }

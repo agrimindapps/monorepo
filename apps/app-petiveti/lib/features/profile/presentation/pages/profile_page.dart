@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/domain/entities/user.dart';
+import '../../../../shared/constants/profile_constants.dart';
+import '../widgets/profile_state_handlers.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -9,37 +13,64 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final user = authState.user;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Perfil'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Header do perfil
-            _buildProfileHeader(context, user),
-            const SizedBox(height: 32),
+      body: _buildBody(context, ref, authState),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, WidgetRef ref, AuthState authState) {
+    // Handle loading state
+    if (authState.status == AuthStatus.loading) {
+      return ProfileStateHandlers.buildLoadingState(context);
+    }
+
+    // Handle error state
+    if (authState.status == AuthStatus.error && authState.error != null) {
+      return ProfileStateHandlers.buildErrorState(
+        context: context,
+        error: authState.error,
+        onRetry: () => _retryLoadProfile(ref),
+      );
+    }
+
+    // Handle unauthenticated state
+    if (authState.status == AuthStatus.unauthenticated || authState.user == null) {
+      return ProfileStateHandlers.buildUnauthenticatedState(
+        context: context,
+        onSignIn: () => context.push('/login'),
+      );
+    }
+
+    // Handle authenticated state with user data
+    return SingleChildScrollView(
+      padding: ProfileConstants.pageContentPadding,
+      child: Column(
+        children: [
+          // Header do perfil
+          ProfileStateHandlers.buildProfileHeader(context, authState.user!),
+            const SizedBox(height: ProfileConstants.headerTopSpacing),
             
             // Seções do menu
             _buildMenuSection(
               context,
-              'Financeiro',
+              ProfileConstants.financialSectionTitle,
               [
                 _buildMenuItem(
                   context,
-                  'Controle de Despesas',
-                  Icons.receipt_long,
-                  () => context.push('/expenses'),
+                  ProfileConstants.expensesMenuTitle,
+                  ProfileIcons.expensesIcon,
+                  () => context.push(ProfileConstants.expensesRoute),
                 ),
                 _buildMenuItem(
                   context,
-                  'Assinaturas',
-                  Icons.star,
-                  () => context.push('/subscription'),
+                  ProfileConstants.subscriptionMenuTitle,
+                  ProfileIcons.subscriptionIcon,
+                  () => context.push(ProfileConstants.subscriptionRoute),
                 ),
               ],
             ),
@@ -48,7 +79,7 @@ class ProfilePage extends ConsumerWidget {
             
             _buildMenuSection(
               context,
-              'Configurações',
+              ProfileConstants.settingsSectionTitle,
               [
                 _buildMenuItem(
                   context,
@@ -81,7 +112,7 @@ class ProfilePage extends ConsumerWidget {
             
             _buildMenuSection(
               context,
-              'Suporte',
+              ProfileConstants.supportSectionTitle,
               [
                 _buildMenuItem(
                   context,
@@ -109,16 +140,20 @@ class ProfilePage extends ConsumerWidget {
             // Botão de logout
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _showLogoutDialog(context, ref),
-                icon: const Icon(Icons.logout, color: Colors.red),
-                label: const Text(
-                  'Sair da Conta',
-                  style: TextStyle(color: Colors.red),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Semantics(
+                label: 'Sair da conta do usuário',
+                hint: 'Faz logout e retorna para a tela de login',
+                child: OutlinedButton.icon(
+                  onPressed: () => _showLogoutDialog(context, ref),
+                  icon: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+                  label: Text(
+                    'Sair da Conta',
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Theme.of(context).colorScheme.error),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
               ),
             ),
@@ -126,11 +161,19 @@ class ProfilePage extends ConsumerWidget {
             const SizedBox(height: 16),
             
             // Versão do app
-            Text(
-              'Versão 1.0.0',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              ),
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final version = snapshot.hasData 
+                    ? 'Versão ${snapshot.data!.version}'
+                    : 'Versão 1.0.0';
+                return Text(
+                  version,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -138,7 +181,15 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, user) {
+  /// **Retry Profile Loading**
+  /// 
+  /// Attempts to reload the user profile data when an error occurs.
+  void _retryLoadProfile(WidgetRef ref) {
+    // Trigger a refresh by invalidating the provider
+    ref.invalidate(authProvider);
+  }
+
+  Widget _buildProfileHeader(BuildContext context, User? user) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -158,31 +209,37 @@ class ProfilePage extends ConsumerWidget {
             radius: 40,
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             child: user?.photoUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: Image.network(
-                      user!.photoUrl! as String,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.white,
-                        );
-                      },
+                ? Semantics(
+                    label: 'Foto do perfil do usuário ${user?.displayName ?? ""}'.trim(),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Image.network(
+                        user!.photoUrl!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.white,
+                          );
+                        },
+                      ),
                     ),
                   )
-                : const Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.white,
+                : const Semantics(
+                    label: 'Avatar padrão do usuário',
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.white,
+                    ),
                   ),
           ),
           const SizedBox(height: 12),
           Text(
-            (user?.displayName as String?) ?? 'Usuário',
+            user?.displayName ?? 'Usuário',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -191,7 +248,7 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            (user?.email as String?) ?? 'email@exemplo.com',
+            user?.email ?? 'email@exemplo.com',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 14,
@@ -246,100 +303,63 @@ class ProfilePage extends ConsumerWidget {
     IconData icon,
     VoidCallback onTap,
   ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
+    return Semantics(
+      hint: 'Navegar para $title',
+      button: true,
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  void _showComingSoonDialog(BuildContext context, String title) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: const Text('Funcionalidade em desenvolvimento'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showNotificationsSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Configurações de Notificação'),
-        content: const Text('Funcionalidade em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    _showComingSoonDialog(context, 'Configurações de Notificação');
   }
 
   void _showThemeSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Configurações de Tema'),
-        content: const Text('Funcionalidade em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    _showComingSoonDialog(context, 'Configurações de Tema');
   }
 
   void _showLanguageSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Configurações de Idioma'),
-        content: const Text('Funcionalidade em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    _showComingSoonDialog(context, 'Configurações de Idioma');
   }
 
   void _showBackupSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Backup e Sincronização'),
-        content: const Text('Funcionalidade em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    _showComingSoonDialog(context, 'Backup e Sincronização');
   }
 
   void _showHelp(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Central de Ajuda'),
-        content: const Text('Funcionalidade em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    _showComingSoonDialog(context, 'Central de Ajuda');
   }
 
   void _contactSupport(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Contatar Suporte'),
-        content: const Text('Email: suporte@petiveti.com\nTelefone: (11) 99999-9999'),
+        content: Semantics(
+          label: 'Informações de contato do suporte',
+          child: const Text('Email: suporte@petiveti.com\nTelefone: (11) 99999-9999'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -364,7 +384,7 @@ class ProfilePage extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Logout'),
@@ -380,7 +400,9 @@ class ProfilePage extends ConsumerWidget {
               ref.read(authProvider.notifier).signOut();
               context.go('/login');
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Sair'),
           ),
         ],

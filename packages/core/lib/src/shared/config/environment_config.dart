@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 enum Environment { development, staging, production }
 
 /// Configuração centralizada de ambiente para o monorepo
@@ -174,7 +176,7 @@ class EnvironmentConfig {
 
   /// Print current configuration for debugging
   static void printConfig() {
-    if (isDebugMode) {
+    if (kDebugMode && isDebugMode) {
       print('=== Environment Configuration ===');
       print('Environment: $environmentName');
       print('Firebase Project: $firebaseProjectId');

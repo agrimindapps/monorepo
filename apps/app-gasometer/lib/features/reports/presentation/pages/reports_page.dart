@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../models/stat_data.dart';
@@ -47,29 +50,42 @@ class _ReportsPageState extends State<ReportsPage> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      EnhancedVehicleSelector(
-                        selectedVehicleId: _selectedVehicleId,
-                        onVehicleChanged: (String? vehicleId) {
-                          setState(() {
-                            _selectedVehicleId = vehicleId;
-                          });
+                  child: Consumer<ReportsProvider>(
+                    builder: (context, reportsProvider, child) {
+                      return Column(
+                        children: [
+                          EnhancedVehicleSelector(
+                            selectedVehicleId: _selectedVehicleId,
+                            onVehicleChanged: (String? vehicleId) {
+                              setState(() {
+                                _selectedVehicleId = vehicleId;
+                              });
+                              
+                              // Load new reports data when vehicle changes
+                              if (vehicleId != null) {
+                                reportsProvider.loadAllReportsForVehicle(vehicleId);
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 24),
                           
-                          // Load new reports data when vehicle changes
-                          if (vehicleId != null) {
-                            final reportsProvider = Provider.of<ReportsProvider>(context, listen: false);
-                            reportsProvider.loadAllReportsForVehicle(vehicleId);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      _buildFuelSection(context),
-                      const SizedBox(height: 24),
-                      _buildConsumptionSection(context),
-                      const SizedBox(height: 24),
-                      _buildDistanceSection(context),
-                    ],
+                          if (reportsProvider.isLoading)
+                            StandardLoadingView.initial(
+                              message: 'Carregando estatísticas...',
+                              height: 400,
+                            )
+                          else if (reportsProvider.hasError)
+                            _buildErrorState(reportsProvider.errorMessage!, () => reportsProvider.loadAllReportsForVehicle(_selectedVehicleId!))
+                          else ...[
+                            _buildFuelSection(context),
+                            const SizedBox(height: 24),
+                            _buildConsumptionSection(context),
+                            const SizedBox(height: 24),
+                            _buildDistanceSection(context),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -87,7 +103,7 @@ class _ReportsPageState extends State<ReportsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E),
+          color: GasometerDesignTokens.colorHeaderBackground,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -98,28 +114,32 @@ class _ReportsPageState extends State<ReportsPage> {
                 color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.bar_chart,
-                color: Colors.white,
-                size: 28,
+              child: Semantics(
+                label: 'Seção de relatórios',
+                hint: 'Página principal para visualizar estatísticas e gráficos',
+                child: const Icon(
+                  Icons.bar_chart,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  SemanticText.heading(
                     'Estatísticas',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  Text(
+                  SemanticText.subtitle(
                     'Acompanhe o desempenho dos seus veículos',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.white70,
                     ),
@@ -146,7 +166,7 @@ class _ReportsPageState extends State<ReportsPage> {
           context,
           title: 'Abastecimento',
           icon: Icons.local_gas_station,
-          iconColor: const Color(0xFF4299E1),
+          iconColor: GasometerDesignTokens.colorAnalyticsBlue,
           stats: [
             StatData(
               label: 'Este Ano',
@@ -182,7 +202,7 @@ class _ReportsPageState extends State<ReportsPage> {
           context,
           title: 'Combustível',
           icon: Icons.local_gas_station,
-          iconColor: const Color(0xFF48BB78),
+          iconColor: GasometerDesignTokens.colorAnalyticsGreen,
           stats: [
             StatData(
               label: 'Este Ano',
@@ -214,7 +234,7 @@ class _ReportsPageState extends State<ReportsPage> {
           context,
           title: 'Distância',
           icon: Icons.speed,
-          iconColor: const Color(0xFF9F7AEA),
+          iconColor: GasometerDesignTokens.colorAnalyticsPurple,
           stats: [
             StatData(
               label: 'Este Ano',
@@ -245,21 +265,18 @@ class _ReportsPageState extends State<ReportsPage> {
     required Color iconColor,
     required List<StatData> stats,
   }) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
+    return SemanticCard(
+      semanticLabel: 'Seção de estatísticas: $title',
+      semanticHint: 'Contém dados estatísticos sobre $title do veículo selecionado',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Semantics(
+                label: 'Ícone da categoria $title',
+                hint: 'Indicador visual para estatísticas de $title',
+                child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: iconColor.withValues(alpha: 0.15),
@@ -271,37 +288,44 @@ class _ReportsPageState extends State<ReportsPage> {
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+              ),
+              const SizedBox(width: 12),
+              SemanticText.heading(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ...stats.map((stat) => _buildStatRow(context, stat)),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ...stats.map((stat) => _buildStatRow(context, stat)),
+        ],
       ),
     );
   }
 
   Widget _buildStatRow(BuildContext context, StatData stat) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        children: [
-          Row(
-            children: [
+    final semanticLabel = '${stat.label}: ${stat.value}. ${stat.comparison}: ${stat.comparisonValue}';
+    final growthDescription = stat.percentage != null 
+        ? ', ${stat.isPositive! ? 'crescimento' : 'decréscimo'} de ${stat.percentage}'
+        : '';
+    
+    return Semantics(
+      label: semanticLabel + growthDescription,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          children: [
+            Row(
+              children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    SemanticText.label(
                       stat.label,
                       style: TextStyle(
                         fontSize: 12,
@@ -311,7 +335,7 @@ class _ReportsPageState extends State<ReportsPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
+                        SemanticText(
                           stat.value,
                           style: TextStyle(
                             fontSize: 20,
@@ -321,37 +345,43 @@ class _ReportsPageState extends State<ReportsPage> {
                         ),
                         if (stat.percentage != null) ...[
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: stat.isPositive! 
-                                ? Colors.green.withValues(alpha: 0.1)
-                                : Colors.red.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  stat.isPositive! 
-                                    ? Icons.arrow_upward
-                                    : Icons.arrow_downward,
-                                  size: 12,
-                                  color: stat.isPositive! 
-                                    ? Colors.green
-                                    : Colors.red,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  stat.percentage!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                          SemanticStatusIndicator(
+                            status: stat.isPositive! ? 'Crescimento' : 'Decréscimo',
+                            description: '${stat.isPositive! ? 'Aumento' : 'Diminuição'} de ${stat.percentage}',
+                            isSuccess: stat.isPositive!,
+                            isError: !stat.isPositive!,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: stat.isPositive! 
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.red.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    stat.isPositive! 
+                                      ? Icons.arrow_upward
+                                      : Icons.arrow_downward,
+                                    size: 12,
                                     color: stat.isPositive! 
                                       ? Colors.green
                                       : Colors.red,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 2),
+                                  SemanticText(
+                                    stat.percentage!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: stat.isPositive! 
+                                        ? Colors.green
+                                        : Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -364,7 +394,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    SemanticText.label(
                       stat.comparison,
                       style: TextStyle(
                         fontSize: 12,
@@ -372,7 +402,7 @@ class _ReportsPageState extends State<ReportsPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    SemanticText(
                       stat.comparisonValue,
                       style: TextStyle(
                         fontSize: 20,
@@ -383,9 +413,10 @@ class _ReportsPageState extends State<ReportsPage> {
                   ],
                 ),
               ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -395,6 +426,54 @@ class _ReportsPageState extends State<ReportsPage> {
     final cleanPercentage = percentage.replaceAll('%', '').replaceAll('+', '');
     final growth = double.tryParse(cleanPercentage);
     return growth != null ? growth > 0 : null;
+  }
+
+  Widget _buildErrorState(String error, VoidCallback onRetry) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(48.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Semantics(
+              label: 'Erro de carregamento',
+              hint: 'Ícone indicando erro no carregamento das estatísticas',
+              child: Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SemanticText.heading(
+              'Erro ao carregar estatísticas',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SemanticText(
+              error,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            SemanticButton(
+              semanticLabel: 'Tentar carregar estatísticas novamente',
+              semanticHint: 'Tenta recarregar os dados das estatísticas após o erro',
+              type: ButtonType.elevated,
+              onPressed: onRetry,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
 }

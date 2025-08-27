@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../models/maintenance_model.dart';
@@ -334,7 +335,9 @@ class MaintenanceRepository {
       await _box.close();
     } catch (e) {
       // Log error mas não trava
-      print('Erro ao fechar box de manutenções: $e');
+      if (kDebugMode) {
+        print('Erro ao fechar box de manutenções: $e');
+      }
     }
   }
 }

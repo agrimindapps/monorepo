@@ -1,8 +1,127 @@
 import 'package:flutter/material.dart';
 
 /// Design Tokens para consistência visual no GasOMeter
+/// Centraliza cores, espaçamentos, tamanhos e outros valores de design
+/// para garantir consistência visual e facilitar manutenção
 class GasometerDesignTokens {
+  // ============================================================================
+  // COLOR DESIGN TOKENS
+  // ============================================================================
+  
+  // PRIMARY BRAND COLORS
+  static const Color colorPrimary = Color(0xFFFF5722);        // Deep Orange - Main brand color
+  static const Color colorPrimaryLight = Color(0xFFFF8A65);   // Light orange variant
+  static const Color colorPrimaryDark = Color(0xFFE64A19);    // Dark orange variant
+  
+  // SECONDARY COLORS
+  static const Color colorSecondary = Color(0xFF2196F3);      // Blue for secondary actions
+  static const Color colorSecondaryLight = Color(0xFF64B5F6); // Light blue variant
+  static const Color colorSecondaryDark = Color(0xFF1976D2);  // Dark blue variant
+  
+  // ACCENT COLORS
+  static const Color colorAccent = Color(0xFF4CAF50);         // Green for positive actions
+  static const Color colorAccentLight = Color(0xFF81C784);    // Light green variant
+  static const Color colorAccentDark = Color(0xFF388E3C);     // Dark green variant
+  
+  // HEADER/SURFACE COLORS
+  static const Color colorHeaderBackground = Color(0xFF2C2C2E); // Dark header background
+  static const Color colorSurface = Color(0xFFFFFFFF);          // Primary surface
+  static const Color colorSurfaceVariant = Color(0xFFF8F9FA);   // Alternative surface
+  static const Color colorBackground = Color(0xFFF5F5F5);       // Main background
+  
+  // PREMIUM COLORS
+  static const Color colorPremiumAccent = Color(0xFFFFA500);     // Orange premium accent
+  static const Color colorPremiumGold = Color(0xFFFFD700);       // Gold premium
+  static const Color colorPremiumBackground = Color(0xFFFFA500); // Premium background overlay
+  
+  // STATUS COLORS
+  static const Color colorSuccess = Color(0xFF4CAF50);          // Success states
+  static const Color colorWarning = Color(0xFFFF9800);          // Warning states
+  static const Color colorError = Color(0xFFF44336);            // Error states
+  static const Color colorInfo = Color(0xFF2196F3);             // Info states
+  
+  // NEUTRAL COLORS (GRAYSCALE)
+  static const Color colorNeutral50 = Color(0xFFFAFAFA);        // Lightest neutral
+  static const Color colorNeutral100 = Color(0xFFF5F5F5);       // Very light neutral
+  static const Color colorNeutral200 = Color(0xFFEEEEEE);       // Light neutral
+  static const Color colorNeutral300 = Color(0xFFE0E0E0);       // Medium light neutral
+  static const Color colorNeutral400 = Color(0xFFBDBDBD);       // Medium neutral
+  static const Color colorNeutral500 = Color(0xFF9E9E9E);       // Base neutral
+  static const Color colorNeutral600 = Color(0xFF757575);       // Medium dark neutral
+  static const Color colorNeutral700 = Color(0xFF616161);       // Dark neutral
+  static const Color colorNeutral800 = Color(0xFF424242);       // Very dark neutral
+  static const Color colorNeutral900 = Color(0xFF212121);       // Darkest neutral
+  
+  // TEXT COLORS
+  static const Color colorTextPrimary = Color(0xFF1C1B1F);      // Primary text
+  static const Color colorTextSecondary = Color(0xFF757575);     // Secondary text
+  static const Color colorTextOnPrimary = Color(0xFFFFFFFF);    // Text on primary background
+  static const Color colorTextOnSurface = Color(0xFF1C1B1F);    // Text on surface
+  
+  // FUEL-SPECIFIC COLORS
+  static const Color colorFuelGasoline = Color(0xFFFF5722);     // Gasoline orange
+  static const Color colorFuelEthanol = Color(0xFF4CAF50);      // Ethanol green
+  static const Color colorFuelDiesel = Color(0xFF795548);       // Diesel brown
+  static const Color colorFuelGas = Color(0xFF9C27B0);          // Gas purple
+  
+  // REPORT/ANALYTICS COLORS
+  static const Color colorAnalyticsBlue = Color(0xFF4299E1);    // Analytics blue
+  static const Color colorAnalyticsGreen = Color(0xFF48BB78);   // Analytics green
+  static const Color colorAnalyticsPurple = Color(0xFF9F7AEA);  // Analytics purple
+  
+  // FAQ/CONTENT COLORS
+  static const Color colorContentBackground = Color(0xFFF8F9FA); // Content background
+  
+  // ============================================================================
+  // COLOR HELPER METHODS
+  // ============================================================================
+  
+  /// Returns fuel-specific color based on fuel type
+  static Color getFuelTypeColor(String fuelType) {
+    switch (fuelType.toLowerCase()) {
+      case 'gasoline':
+      case 'gasolina':
+        return colorFuelGasoline;
+      case 'ethanol':
+      case 'etanol':
+        return colorFuelEthanol;
+      case 'diesel':
+        return colorFuelDiesel;
+      case 'gas':
+      case 'gnv':
+        return colorFuelGas;
+      default:
+        return colorPrimary;
+    }
+  }
+  
+  /// Returns appropriate text color for given background
+  static Color getTextColorForBackground(Color backgroundColor) {
+    // Simple luminance calculation to determine if background is light or dark
+    final luminance = backgroundColor.computeLuminance();
+    return luminance > 0.5 ? colorTextPrimary : colorTextOnPrimary;
+  }
+  
+  /// Returns premium background color with specified opacity
+  static Color getPremiumBackgroundWithOpacity(double opacity) {
+    return colorPremiumBackground.withValues(alpha: opacity);
+  }
+  
+  /// Returns surface color based on elevation level
+  static Color getSurfaceColorByElevation(int elevation) {
+    switch (elevation) {
+      case 0:
+        return colorSurface;
+      case 1:
+        return colorSurfaceVariant;
+      default:
+        return colorNeutral50;
+    }
+  }
+  
+  // ============================================================================
   // SPACING TOKENS
+  // ============================================================================
   static const double spacingXs = 4.0;
   static const double spacingSm = 8.0;
   static const double spacingMd = 12.0;

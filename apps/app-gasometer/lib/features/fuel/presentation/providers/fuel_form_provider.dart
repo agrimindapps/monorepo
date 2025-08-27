@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/fuel_constants.dart';
@@ -11,11 +13,17 @@ import '../../domain/services/fuel_validator_service.dart';
 import '../models/fuel_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de abastecimento
+/// 
+/// ARCHITECTURAL NOTE: This provider now uses dependency injection pattern
+/// instead of direct provider coupling to avoid circular dependencies.
+/// VehiclesProvider is accessed via BuildContext when needed.
 class FuelFormProvider extends ChangeNotifier {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FuelFormatterService _formatter = FuelFormatterService();
   final FuelValidatorService _validator = FuelValidatorService();
-  final VehiclesProvider _vehiclesProvider;
+  
+  // Store context for accessing providers when needed
+  BuildContext? _context;
   
   // For odometer validation
   double? _lastOdometerReading;
@@ -38,7 +46,7 @@ class FuelFormProvider extends ChangeNotifier {
   bool _isInitialized = false;
   bool _isCalculating = false;
 
-  FuelFormProvider(this._vehiclesProvider, {String? initialVehicleId, String? userId}) 
+  FuelFormProvider({String? initialVehicleId, String? userId}) 
       : _formModel = FuelFormModel.initial(initialVehicleId ?? '', userId ?? '') {
     _initializeControllers();
   }
@@ -49,6 +57,23 @@ class FuelFormProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   bool get isCalculating => _isCalculating;
   double? get lastOdometerReading => _lastOdometerReading;
+
+  /// Sets the BuildContext for dependency injection access.
+  /// This should be called when the provider is used in a widget.
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  /// Safely access VehiclesProvider through dependency injection
+  VehiclesProvider? get _vehiclesProvider {
+    if (_context == null) return null;
+    try {
+      return _context!.read<VehiclesProvider>();
+    } catch (e) {
+      debugPrint('Warning: VehiclesProvider not available in context: $e');
+      return null;
+    }
+  }
 
   void _initializeControllers() {
     // Adicionar listeners para reagir a mudanças nos campos
@@ -123,7 +148,13 @@ class FuelFormProvider extends ChangeNotifier {
       _formModel = _formModel.copyWith(isLoading: true);
       notifyListeners();
 
-      final vehicle = await _vehiclesProvider.getVehicleById(vehicleId);
+      // Safely access VehiclesProvider through dependency injection
+      final vehiclesProvider = _vehiclesProvider;
+      if (vehiclesProvider == null) {
+        throw Exception('VehiclesProvider não disponível. Certifique-se de chamar setContext() primeiro.');
+      }
+
+      final vehicle = await vehiclesProvider.getVehicleById(vehicleId);
       
       if (vehicle != null) {
         // Set the last odometer reading from the vehicle's current odometer
@@ -203,17 +234,20 @@ class FuelFormProvider extends ChangeNotifier {
   }
 
   void _onGasStationChanged() {
-    final sanitized = _formatter.sanitizeInput(gasStationController.text);
+    // Aplicar sanitização específica para nomes de postos
+    final sanitized = InputSanitizer.sanitizeName(gasStationController.text);
     _updateGasStationName(sanitized);
   }
 
   void _onGasStationBrandChanged() {
-    final sanitized = _formatter.sanitizeInput(gasStationBrandController.text);
+    // Aplicar sanitização específica para marcas de postos  
+    final sanitized = InputSanitizer.sanitizeName(gasStationBrandController.text);
     _updateGasStationBrand(sanitized);
   }
 
   void _onNotesChanged() {
-    final sanitized = _formatter.sanitizeInput(notesController.text);
+    // Aplicar sanitização específica para descrições/observações
+    final sanitized = InputSanitizer.sanitizeDescription(notesController.text);
     _updateNotes(sanitized);
   }
 

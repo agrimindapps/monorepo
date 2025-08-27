@@ -50,7 +50,7 @@ class CentralizedLoadingWidget extends StatelessWidget {
               ),
             ),
             if (showMessage) ...[
-              SizedBox(height: GasometerDesignTokens.spacingLg),
+              const SizedBox(height: GasometerDesignTokens.spacingLg),
               Text(
                 effectiveMessage,
                 style: TextStyle(

@@ -75,8 +75,8 @@ class _OdometerPageState extends State<OdometerPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Color(0xFF2C2C2E),
-          borderRadius: BorderRadius.circular(20),
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(GasometerDesignTokens.radiusXl),
         ),
         child: Row(
           children: [

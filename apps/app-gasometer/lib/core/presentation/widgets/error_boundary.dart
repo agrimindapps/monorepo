@@ -1,11 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
-/// Widget que captura e trata erros não esperados em formulários
+import '../../error/app_error.dart';
+import '../../error/error_reporter.dart';
+import '../theme/app_theme.dart';
+import 'retry_button.dart';
+
+/// Widget que captura e trata erros não esperados globalmente
 /// 
 /// Funciona como um "error boundary" similar ao React, capturando
 /// erros que ocorrem em widgets filhos e exibindo uma UI de fallback.
+/// Integra com ErrorReporter para logging automático.
 class ErrorBoundary extends StatefulWidget {
   final Widget child;
   final Widget Function(Object error, StackTrace? stackTrace)? errorBuilder;
@@ -13,6 +18,8 @@ class ErrorBoundary extends StatefulWidget {
   final String? title;
   final String? message;
   final bool showDebugInfo;
+  final String? context;
+  final ErrorReporter? errorReporter;
 
   const ErrorBoundary({
     super.key,
@@ -22,6 +29,8 @@ class ErrorBoundary extends StatefulWidget {
     this.title,
     this.message,
     this.showDebugInfo = kDebugMode,
+    this.context,
+    this.errorReporter,
   });
 
   @override
@@ -52,12 +61,48 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       // Chamar callback de erro se fornecido
       widget.onError?.call(details.exception, details.stack);
       
+      // Report error to external services
+      _reportError(details.exception, details.stack);
+      
       // Log do erro para debugging
       debugPrint('🚨 ErrorBoundary capturou erro: ${details.exception}');
       if (widget.showDebugInfo) {
         debugPrint('Stack trace: ${details.stack}');
       }
     }
+  }
+
+  /// Report error to external services
+  void _reportError(Object error, StackTrace? stackTrace) {
+    try {
+      final appError = _convertToAppError(error);
+      widget.errorReporter?.reportWidgetError(
+        appError,
+        widgetName: widget.runtimeType.toString(),
+        parentWidget: widget.context,
+      );
+    } catch (e) {
+      debugPrint('Failed to report error: $e');
+    }
+  }
+
+  /// Convert exception to AppError
+  AppError _convertToAppError(Object error) {
+    if (error is AppError) {
+      return error;
+    }
+
+    if (error is FlutterError) {
+      return UnexpectedError(
+        message: 'Widget error: ${error.message}',
+        technicalDetails: error.toString(),
+      );
+    }
+
+    return UnexpectedError(
+      message: 'Unexpected widget error: ${error.toString()}',
+      technicalDetails: error.toString(),
+    );
   }
 
   /// Reseta o estado de erro para tentar renderizar novamente
@@ -177,10 +222,9 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: _resetError,
-                icon: const Icon(Icons.refresh, size: 16),
-                label: const Text('Tentar Novamente'),
+              RetryButton.compact(
+                onRetry: _resetError,
+                customLabel: 'Tentar Novamente',
               ),
             ],
           ),
@@ -229,6 +273,8 @@ extension ErrorBoundaryExtension on Widget {
     String? title,
     String? message,
     bool showDebugInfo = kDebugMode,
+    String? context,
+    ErrorReporter? errorReporter,
   }) {
     return ErrorBoundary(
       errorBuilder: errorBuilder,
@@ -236,6 +282,36 @@ extension ErrorBoundaryExtension on Widget {
       title: title,
       message: message,
       showDebugInfo: showDebugInfo,
+      context: context,
+      errorReporter: errorReporter,
+      child: this,
+    );
+  }
+
+  /// Envolve widget com error boundary para páginas principais
+  Widget withPageErrorBoundary({
+    String? pageName,
+    ErrorReporter? errorReporter,
+  }) {
+    return ErrorBoundary(
+      title: 'Erro na página${pageName != null ? ' $pageName' : ''}',
+      message: 'Algo deu errado nesta página. Você pode tentar recarregar ou voltar para a tela anterior.',
+      context: 'page_error',
+      errorReporter: errorReporter,
+      child: this,
+    );
+  }
+
+  /// Envolve widget com error boundary para providers
+  Widget withProviderErrorBoundary({
+    String? providerName,
+    ErrorReporter? errorReporter,
+  }) {
+    return ErrorBoundary(
+      title: 'Erro no carregamento de dados${providerName != null ? ' - $providerName' : ''}',
+      message: 'Houve um problema ao carregar os dados. Tente novamente.',
+      context: 'provider_error',
+      errorReporter: errorReporter,
       child: this,
     );
   }
@@ -329,15 +405,14 @@ class FormErrorBoundary extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
+                  child: RetryButton.form(
+                    onRetry: () {
                       // Recarregar a página
                       Navigator.of(context).pushReplacementNamed(
                         ModalRoute.of(context)?.settings.name ?? '/',
                       );
                     },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Recarregar'),
+                    customLabel: 'Recarregar',
                   ),
                 ),
               ],

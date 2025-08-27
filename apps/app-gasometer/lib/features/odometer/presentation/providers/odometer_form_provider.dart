@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/services/odometer_formatter.dart';
@@ -104,9 +105,10 @@ class OdometerFormProvider extends ChangeNotifier {
   }
 
   void setDescription(String value) {
-    final trimmedValue = value.trim();
-    if (_description != trimmedValue) {
-      _description = trimmedValue;
+    // Aplicar sanitização específica para descrições antes de armazenar
+    final sanitizedValue = InputSanitizer.sanitizeDescription(value);
+    if (_description != sanitizedValue) {
+      _description = sanitizedValue;
       notifyListeners();
     }
   }
@@ -261,11 +263,15 @@ class OdometerFormProvider extends ChangeNotifier {
   // ===========================================
 
   /// Creates OdometerEntity from current form data
+  /// Aplica sanitização final antes da persistência
   OdometerEntity toOdometerEntity({
     String? id,
     DateTime? createdAt,
   }) {
     final now = DateTime.now();
+    
+    // Aplicar sanitização final na descrição antes da persistência
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(_description);
     
     return OdometerEntity(
       id: id ?? now.millisecondsSinceEpoch.toString(),
@@ -273,7 +279,7 @@ class OdometerFormProvider extends ChangeNotifier {
       userId: _userId,
       value: _odometerValue,
       registrationDate: _registrationDate,
-      description: _description,
+      description: sanitizedDescription,
       type: _registrationType,
       createdAt: createdAt ?? now,
       updatedAt: now,

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/expense_entity.dart';
 
@@ -262,20 +263,30 @@ class ExpenseFormModel extends Equatable {
   }
 
   /// Converte para ExpenseEntity para persistência
+  /// Aplica sanitização em todos os campos de texto para segurança
   ExpenseEntity toExpenseEntity() {
     final now = DateTime.now();
+    
+    // Sanitizar todos os campos de texto antes da persistência
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(description);
+    final sanitizedLocation = location.trim().isEmpty 
+        ? null 
+        : InputSanitizer.sanitize(location);
+    final sanitizedNotes = notes.trim().isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeDescription(notes);
     
     return ExpenseEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
       userId: userId,
       vehicleId: vehicleId,
       type: expenseType,
-      description: description.trim(),
+      description: sanitizedDescription,
       amount: amount,
       date: date,
       odometer: odometer,
-      location: location.trim().isEmpty ? null : location.trim(),
-      notes: notes.trim().isEmpty ? null : notes.trim(),
+      location: sanitizedLocation,
+      notes: sanitizedNotes,
       receiptImagePath: receiptImagePath,
       createdAt: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
       updatedAt: now,

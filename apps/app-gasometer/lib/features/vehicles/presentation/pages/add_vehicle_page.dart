@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
@@ -11,12 +13,13 @@ import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
+import '../../domain/entities/vehicle_entity.dart';
+import '../providers/vehicle_form_provider.dart';
 import '../providers/vehicles_provider.dart';
 
 class AddVehiclePage extends StatefulWidget {
-  final Map<String, dynamic>? vehicle;
+  final VehicleEntity? vehicle;
 
   const AddVehiclePage({super.key, this.vehicle});
 
@@ -25,68 +28,39 @@ class AddVehiclePage extends StatefulWidget {
 }
 
 class _AddVehiclePageState extends State<AddVehiclePage> {
-  final _formKey = GlobalKey<FormState>();
-  final _marcaController = TextEditingController();
-  final _modeloController = TextEditingController();
-  final _anoController = TextEditingController();
-  final _corController = TextEditingController();
-  final _placaController = TextEditingController();
-  final _chassiController = TextEditingController();
-  final _renavamController = TextEditingController();
-  final _odometroController = TextEditingController();
-  
+  late VehicleFormProvider formProvider;
   final Map<String, ValidationResult> _validationResults = {};
-  
-  String _selectedCombustivel = 'Gasolina';
-  bool _isLoading = false;
-  File? _vehicleImage;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
     
+    // Inicializar o form provider
+    final authProvider = context.read<AuthProvider>();
+    formProvider = VehicleFormProvider(authProvider);
+    
     if (widget.vehicle != null) {
-      _populateFields();
+      formProvider.initializeForEdit(widget.vehicle!);
     }
     
     // Add listeners para atualizar contadores
-    _placaController.addListener(_updateUI);
-    _chassiController.addListener(_updateUI);
-    _renavamController.addListener(_updateUI);
+    formProvider.placaController.addListener(_updateUI);
+    formProvider.chassiController.addListener(_updateUI);
+    formProvider.renavamController.addListener(_updateUI);
   }
 
   void _updateUI() {
     setState(() {});
   }
 
-  void _populateFields() {
-    final vehicle = widget.vehicle!;
-    _marcaController.text = vehicle['marca'] as String? ?? '';
-    _modeloController.text = vehicle['modelo'] as String? ?? '';
-    _anoController.text = vehicle['ano']?.toString() ?? '';
-    _corController.text = vehicle['cor'] as String? ?? '';
-    _placaController.text = vehicle['placa'] as String? ?? '';
-    _chassiController.text = vehicle['chassi'] as String? ?? '';
-    _renavamController.text = vehicle['renavam'] as String? ?? '';
-    _odometroController.text = vehicle['odometroInicial']?.toString() ?? '';
-    _selectedCombustivel = vehicle['combustivel'] as String? ?? 'Gasolina';
-  }
-
   @override
   void dispose() {
-    _placaController.removeListener(_updateUI);
-    _chassiController.removeListener(_updateUI);
-    _renavamController.removeListener(_updateUI);
+    formProvider.placaController.removeListener(_updateUI);
+    formProvider.chassiController.removeListener(_updateUI);
+    formProvider.renavamController.removeListener(_updateUI);
     
-    _marcaController.dispose();
-    _modeloController.dispose();
-    _anoController.dispose();
-    _corController.dispose();
-    _placaController.dispose();
-    _chassiController.dispose();
-    _renavamController.dispose();
-    _odometroController.dispose();
+    formProvider.dispose();
     super.dispose();
   }
 
@@ -94,16 +68,21 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   Widget build(BuildContext context) {
     final isEditing = widget.vehicle != null;
     
-    return FormDialog(
-      title: 'Veículos',
-      subtitle: 'Gerencie seus veículos cadastrados',
-      headerIcon: Icons.directions_car,
-      isLoading: _isLoading,
-      confirmButtonText: isEditing ? 'Salvar' : 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
-      onConfirm: _submitForm,
-      content: Form(
-        key: _formKey,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: formProvider),
+      ],
+      child: Consumer<VehicleFormProvider>(builder: (context, formProvider, _) {
+        return FormDialog(
+          title: 'Veículos',
+          subtitle: 'Gerencie seus veículos cadastrados',
+          headerIcon: Icons.directions_car,
+          isLoading: formProvider.isLoading,
+          confirmButtonText: isEditing ? 'Salvar' : 'Salvar',
+          onCancel: () => Navigator.of(context).pop(),
+          onConfirm: _submitForm,
+          content: Form(
+            key: formProvider.formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,6 +98,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           ],
         ),
       ),
+        );
+      }),
     );
   }
 
@@ -142,7 +123,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       icon: Icons.directions_car,
       children: [
         ValidatedFormField(
-          controller: _marcaController,
+          controller: formProvider.marcaController,
           label: 'Marca',
           hint: 'Ex: Ford, Volkswagen, etc.',
           required: true,
@@ -155,7 +136,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
-          controller: _modeloController,
+          controller: formProvider.modeloController,
           label: 'Modelo',
           hint: 'Ex: Gol, Fiesta, etc.',
           required: true,
@@ -175,7 +156,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             SizedBox(width: GasometerDesignTokens.spacingMd),
             Expanded(
               child: ValidatedFormField(
-                controller: _corController,
+                controller: formProvider.corController,
                 label: 'Cor',
                 hint: 'Ex: Branco, Preto, etc.',
                 required: true,
@@ -209,7 +190,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       icon: Icons.description,
       children: [
         ValidatedFormField(
-          controller: _odometroController,
+          controller: formProvider.odometroController,
           label: 'Odômetro Atual',
           hint: '0,00',
           required: true,
@@ -231,7 +212,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
-          controller: _placaController,
+          controller: formProvider.placaController,
           label: 'Placa',
           hint: 'Ex: ABC1234 ou ABC1D23',
           required: true,
@@ -250,7 +231,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
-          controller: _chassiController,
+          controller: formProvider.chassiController,
           label: 'Chassi (opcional)',
           hint: 'Ex: 9BWZZZ377VT004251',
           required: false,
@@ -270,7 +251,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         ValidatedFormField(
-          controller: _renavamController,
+          controller: formProvider.renavamController,
           label: 'Renavam (opcional)',
           hint: 'Ex: 12345678901',
           required: false,
@@ -303,7 +284,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
   Widget _buildPhotoUploadSection() {
-    final hasPhoto = _vehicleImage != null && _vehicleImage!.existsSync();
+    final hasPhoto = formProvider.vehicleImage != null && formProvider.vehicleImage!.existsSync();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,13 +327,11 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(GasometerDesignTokens.radiusLg),
                       ),
-                      child: Image.file(
-                        _vehicleImage!,
+                      child: _buildOptimizedImage(
+                        formProvider.vehicleImage!,
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => 
-                          _buildErrorWidget(),
                       ),
                     ),
                     Positioned(
@@ -362,7 +341,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                         backgroundColor: Theme.of(context).colorScheme.error,
                         radius: GasometerDesignTokens.spacingLg,
                         child: IconButton(
-                          onPressed: _removePhoto,
+                          onPressed: () => formProvider.removeVehicleImage(),
                           icon: Icon(
                             Icons.close,
                             color: Theme.of(context).colorScheme.onError,
@@ -459,19 +438,75 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     );
   }
 
-  void _removePhoto() {
-    try {
-      if (_vehicleImage != null && _vehicleImage!.existsSync()) {
-        _vehicleImage!.deleteSync();
-      }
-    } catch (e) {
-      // Ignora erros de limpeza
-    }
-
-    setState(() {
-      _vehicleImage = null;
-    });
+  /// Método otimizado para carregamento de imagens com cache e shimmer loading
+  Widget _buildOptimizedImage(
+    File imageFile, {
+    required double height,
+    required double width,
+    required BoxFit fit,
+  }) {
+    // Para imagens locais (File), usar Image.file otimizado com memory cache
+    return Image.file(
+      imageFile,
+      height: height,
+      width: width,
+      fit: fit,
+      // Otimizações de memória
+      cacheHeight: height.toInt(),
+      cacheWidth: width.toInt(),
+      // Frame builder para adicionar shimmer loading effect
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded || frame != null) {
+          return child;
+        }
+        
+        // Shimmer loading enquanto a imagem carrega
+        return _buildShimmerPlaceholder(height, width);
+      },
+      errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+    );
   }
+
+  /// Widget de shimmer placeholder para loading states
+  Widget _buildShimmerPlaceholder(double height, double width) {
+    return Shimmer.fromColors(
+      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      highlightColor: Theme.of(context).colorScheme.surface,
+      child: Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(GasometerDesignTokens.radiusLg),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.directions_car,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(
+                alpha: 0.3,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Carregando...',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _showImageSourceDialog() {
     showDialog<void>(
@@ -537,9 +572,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       );
 
       if (image != null) {
-        setState(() {
-          _vehicleImage = File(image.path);
-        });
+        formProvider.updateVehicleImage(File(image.path));
       }
     } catch (e) {
       if (mounted) {
@@ -559,7 +592,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     final years = List.generate(currentYear - 1900 + 1, (index) => currentYear - index);
     
     return DropdownButtonFormField<int>(
-      value: _anoController.text.isNotEmpty ? int.tryParse(_anoController.text) : null,
+      value: formProvider.anoController.text.isNotEmpty ? int.tryParse(formProvider.anoController.text) : null,
       decoration: InputDecoration(
         labelText: 'Ano',
         border: OutlineInputBorder(
@@ -586,9 +619,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         );
       }).toList(),
       onChanged: (value) {
-        setState(() {
-          _anoController.text = value?.toString() ?? '';
-        });
+        formProvider.anoController.text = value?.toString() ?? '';
+        formProvider.markAsChanged();
       },
     );
   }
@@ -643,9 +675,9 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           spacing: 8,
           runSpacing: 8,
           children: combustiveis.map((combustivel) {
-            final isSelected = _selectedCombustivel == combustivel['name'];
+            final isSelected = formProvider.selectedCombustivel == combustivel['name'];
             return GestureDetector(
-              onTap: () => setState(() => _selectedCombustivel = combustivel['name'] as String),
+              onTap: () => formProvider.updateSelectedCombustivel(combustivel['name'] as String),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
@@ -683,64 +715,26 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   }
 
 
-  // Sanitização robusta de entrada para prevenir XSS e injeções
-  String _sanitizeInput(String input) {
-    return input
-        .trim()
-        .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
-        .replaceAll(RegExp(r'[&<>"\'`]'), '') // Remove dangerous chars (otimizado)
-        .replaceAll(RegExp(r'\s+'), ' '); // Normalize whitespace
-  }
 
   Future<void> _submitForm() async {
-    // Validar todos os campos manualmente antes de submeter
-    setState(() {
-      // Limpa resultados anteriores
-      _validationResults.clear();
-    });
-    
-    // Valida o form usando o GlobalKey
-    if (!_formKey.currentState!.validate()) {
+    // Validar usando o FormProvider
+    if (!formProvider.validateForm()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Por favor, corrija os erros no formulário'),
+          content: Text(formProvider.lastError ?? 'Por favor, corrija os erros no formulário'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
+    formProvider.setLoading(true);
 
     try {
-      final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+      final vehiclesProvider = context.read<VehiclesProvider>();
       
-      // Usar FuelTypeMapper centralizado para conversão
-      final fuelType = FuelTypeMapper.fromString(_selectedCombustivel);
-      final odometroValue = double.tryParse(_odometroController.text.replaceAll(',', '.')) ?? 0.0;
-      
-      // Criar entidade do veículo
-      final vehicleEntity = VehicleEntity(
-        id: widget.vehicle?['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: context.read<AuthProvider>().userId,
-        name: '${_sanitizeInput(_marcaController.text)} ${_sanitizeInput(_modeloController.text)}',
-        brand: _sanitizeInput(_marcaController.text),
-        model: _sanitizeInput(_modeloController.text),
-        year: int.tryParse(_anoController.text) ?? DateTime.now().year,
-        color: _sanitizeInput(_corController.text),
-        licensePlate: _sanitizeInput(_placaController.text),
-        type: VehicleType.car, // Padrão para carro
-        supportedFuels: [fuelType],
-        currentOdometer: odometroValue,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        metadata: {
-          'chassi': _sanitizeInput(_chassiController.text),
-          'renavam': _sanitizeInput(_renavamController.text),
-          'foto': _vehicleImage?.path,
-          'odometroInicial': odometroValue,
-        },
-      );
+      // Criar entidade do veículo usando o FormProvider
+      final vehicleEntity = formProvider.createVehicleEntity();
       
       // Salvar via provider
       bool success;
@@ -764,26 +758,16 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         } else {
           // Se falhou, mostrar o erro do provider se disponível
           final errorMessage = vehiclesProvider.errorMessage ?? 'Erro desconhecido ao salvar veículo';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erro ao salvar veículo: $errorMessage'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
+          formProvider.setError('Erro ao salvar veículo: $errorMessage');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar veículo: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        formProvider.setError('Erro ao salvar veículo: $e');
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        formProvider.setLoading(false);
       }
     }
   }

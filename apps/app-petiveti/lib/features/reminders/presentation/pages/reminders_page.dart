@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_provider.dart';
+import '../../../../shared/constants/reminders_constants.dart';
 
 class RemindersPage extends ConsumerStatefulWidget {
   final String userId;
@@ -19,14 +20,24 @@ class RemindersPage extends ConsumerStatefulWidget {
 class _RemindersPageState extends ConsumerState<RemindersPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  bool _isProcessing = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(remindersProvider.notifier).loadReminders(widget.userId);
-    });
+    _tabController = TabController(length: RemindersConstants.tabCount, vsync: this);
+    // Use Future.microtask for better performance
+    Future.microtask(() => _loadReminders());
+    
+    // Listen for errors and show them consistently
+    ref.listenManual<RemindersState>(
+      remindersProvider,
+      (RemindersState? previous, RemindersState next) {
+        if (next.error != null && previous?.error != next.error) {
+          _showError(next.error!);
+        }
+      },
+    );
   }
 
   @override
@@ -41,193 +52,263 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lembretes'),
+        title: const Text(RemindersConstants.pageTitle),
+        actions: [
+          Semantics(
+            label: RemindersConstants.refreshLabel,
+            hint: RemindersConstants.refreshHint,
+            child: IconButton(
+              icon: const Icon(RemindersIcons.refreshIcon),
+              onPressed: _loadReminders,
+            ),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(
-              text: 'Hoje (${state.todayReminders.length})',
-              icon: const Icon(Icons.today),
+            Semantics(
+              label: RemindersSemantics.tabLabel(RemindersConstants.todayTabText, state.todayReminders.length),
+              child: Tab(
+                text: '${RemindersConstants.todayTabText} (${state.todayReminders.length})',
+                icon: const Icon(RemindersIcons.todayIcon),
+              ),
             ),
-            Tab(
-              text: 'Atrasados (${state.overdueReminders.length})',
-              icon: const Icon(Icons.warning),
+            Semantics(
+              label: RemindersSemantics.tabLabel(RemindersConstants.overdueTabText, state.overdueReminders.length),
+              child: Tab(
+                text: '${RemindersConstants.overdueTabText} (${state.overdueReminders.length})',
+                icon: const Icon(RemindersIcons.warningIcon),
+              ),
             ),
-            Tab(
-              text: 'Todos (${state.reminders.length})',
-              icon: const Icon(Icons.list),
+            Semantics(
+              label: RemindersSemantics.tabLabel(RemindersConstants.allTabText, state.reminders.length),
+              child: Tab(
+                text: '${RemindersConstants.allTabText} (${state.reminders.length})',
+                icon: const Icon(RemindersIcons.listIcon),
+              ),
             ),
           ],
         ),
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Erro: ${state.error}',
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(remindersProvider.notifier)
-                            .loadReminders(widget.userId),
-                        child: const Text('Tentar Novamente'),
-                      ),
-                    ],
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildRemindersList(state.todayReminders, 'Nenhum lembrete para hoje'),
-                    _buildRemindersList(state.overdueReminders, 'Nenhum lembrete atrasado'),
-                    _buildRemindersList(state.reminders, 'Nenhum lembrete cadastrado'),
-                  ],
+          ? Semantics(
+              label: RemindersConstants.loadingLabel,
+              child: const Center(child: CircularProgressIndicator()),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildRemindersList(
+                  state.todayReminders, 
+                  RemindersConstants.emptyTodayMessage,
+                  RemindersConstants.todayListLabel,
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddReminderDialog(context),
-        child: const Icon(Icons.add),
+                _buildRemindersList(
+                  state.overdueReminders, 
+                  RemindersConstants.emptyOverdueMessage,
+                  RemindersConstants.overdueListLabel,
+                ),
+                _buildRemindersList(
+                  state.reminders, 
+                  RemindersConstants.emptyAllMessage,
+                  RemindersConstants.allListLabel,
+                ),
+              ],
+            ),
+      floatingActionButton: Semantics(
+        label: RemindersConstants.addReminderLabel,
+        hint: RemindersConstants.addReminderHint,
+        child: FloatingActionButton(
+          onPressed: () => _showAddReminderDialog(context),
+          child: const Icon(RemindersIcons.addIcon),
+        ),
       ),
     );
   }
 
-  Widget _buildRemindersList(List<Reminder> reminders, String emptyMessage) {
+  Widget _buildRemindersList(List<Reminder> reminders, String emptyMessage, String listLabel) {
     if (reminders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.schedule, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              emptyMessage,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
+      return Semantics(
+        label: emptyMessage,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                RemindersIcons.emptyScheduleIcon, 
+                size: RemindersConstants.emptyIconSize, 
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                emptyMessage,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: reminders.length,
-      itemBuilder: (context, index) {
-        final reminder = reminders[index];
-        return _buildReminderCard(reminder);
-      },
+    return Semantics(
+      label: listLabel,
+      child: RefreshIndicator(
+        onRefresh: () async => _loadReminders(),
+        child: ListView.builder(
+          padding: RemindersConstants.listPadding,
+          itemCount: reminders.length,
+          itemExtent: RemindersConstants.itemExtent,
+          cacheExtent: RemindersConstants.cacheExtent,
+          itemBuilder: (context, index) {
+            final reminder = reminders[index];
+            return _buildReminderCard(reminder);
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildReminderCard(Reminder reminder) {
     final isOverdue = reminder.isOverdue;
     final isDueToday = reminder.isDueToday;
+    final statusText = reminder.status == ReminderStatus.completed 
+        ? RemindersConstants.completedStatus 
+        : isOverdue 
+            ? RemindersConstants.overdueStatus 
+            : isDueToday 
+                ? RemindersConstants.todayStatus 
+                : RemindersConstants.scheduledStatus;
+    
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      color: isOverdue
-          ? Colors.red[50]
-          : isDueToday
-              ? Colors.orange[50]
-              : null,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isOverdue
-              ? Colors.red
-              : isDueToday
-                  ? Colors.orange
-                  : _getTypeColor(reminder.type),
-          child: Icon(
-            _getTypeIcon(reminder.type),
-            color: Colors.white,
-          ),
-        ),
-        title: Text(
-          reminder.title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            decoration: reminder.status == ReminderStatus.completed
-                ? TextDecoration.lineThrough
+    return Semantics(
+      label: RemindersSemantics.reminderCardLabel(
+        reminder.title, statusText, _formatDateTime(reminder.scheduledDate)),
+      hint: RemindersSemantics.cardHint,
+      child: Card(
+        key: ValueKey(reminder.id), // Key for optimized rebuilds
+        margin: RemindersConstants.cardMargin,
+        color: isOverdue
+            ? colorScheme.errorContainer
+            : isDueToday
+                ? colorScheme.tertiaryContainer
                 : null,
+        child: ListTile(
+          leading: Semantics(
+            label: RemindersSemantics.reminderTypeLabel(reminder.type.name),
+            child: CircleAvatar(
+              backgroundColor: isOverdue
+                  ? colorScheme.error
+                  : isDueToday
+                      ? colorScheme.tertiary
+                      : _getTypeColor(reminder.type),
+              child: Icon(
+                _getTypeIcon(reminder.type),
+                color: RemindersColors.completedIconColor,
+                semanticLabel: reminder.type.name,
+              ),
+            ),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (reminder.description.isNotEmpty) ...[
-              Text(reminder.description),
-              const SizedBox(height: 4),
+          title: Text(
+            reminder.title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              decoration: reminder.status == ReminderStatus.completed
+                  ? TextDecoration.lineThrough
+                  : null,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (reminder.description.isNotEmpty) ...[
+                Text(reminder.description),
+                const SizedBox(height: 4),
+              ],
+              Row(
+                children: [
+                  Icon(
+                    Icons.schedule, 
+                    size: 14, 
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _formatDateTime(reminder.scheduledDate),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isOverdue 
+                        ? colorScheme.error 
+                        : colorScheme.onSurfaceVariant,
+                      fontWeight: isOverdue ? FontWeight.bold : null,
+                    ),
+                  ),
+                ],
+              ),
+              if (reminder.isRecurring) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.repeat, 
+                      size: 14, 
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Repete a cada ${reminder.recurringDays} dias',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-            Row(
-              children: [
-                Icon(Icons.schedule, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  _formatDateTime(reminder.scheduledDate),
-                  style: TextStyle(
-                    color: isOverdue ? Colors.red : Colors.grey[600],
-                    fontWeight: isOverdue ? FontWeight.bold : null,
+          ),
+          trailing: Semantics(
+            label: 'Opções do lembrete',
+            hint: 'Toque para ver ações disponíveis',
+            child: PopupMenuButton<String>(
+              onSelected: (value) => _handleMenuAction(value, reminder),
+              itemBuilder: (context) => [
+                if (reminder.status == ReminderStatus.active) ...[
+                  const PopupMenuItem(
+                    value: 'complete',
+                    child: ListTile(
+                      leading: Icon(Icons.check),
+                      title: Text('Marcar como Concluído'),
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'snooze',
+                    child: ListTile(
+                      leading: Icon(Icons.snooze),
+                      title: Text('Adiar'),
+                    ),
+                  ),
+                ],
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: ListTile(
+                    leading: Icon(Icons.edit),
+                    title: Text('Editar'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: ListTile(
+                    leading: Icon(Icons.delete, color: colorScheme.error),
+                    title: Text(
+                      'Excluir', 
+                      style: TextStyle(color: colorScheme.error),
+                    ),
                   ),
                 ),
               ],
             ),
-            if (reminder.isRecurring) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(Icons.repeat, size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Repete a cada ${reminder.recurringDays} dias',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuAction(value, reminder),
-          itemBuilder: (context) => [
-            if (reminder.status == ReminderStatus.active) ...[
-              const PopupMenuItem(
-                value: 'complete',
-                child: ListTile(
-                  leading: Icon(Icons.check),
-                  title: Text('Marcar como Concluído'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'snooze',
-                child: ListTile(
-                  leading: Icon(Icons.snooze),
-                  title: Text('Adiar'),
-                ),
-              ),
-            ],
-            const PopupMenuItem(
-              value: 'edit',
-              child: ListTile(
-                leading: Icon(Icons.edit),
-                title: Text('Editar'),
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
-                title: Text('Excluir', style: TextStyle(color: Colors.red)),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -236,30 +317,30 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   Color _getTypeColor(ReminderType type) {
     switch (type) {
       case ReminderType.vaccine:
-        return Colors.green;
+        return RemindersColors.vaccineColor;
       case ReminderType.medication:
-        return Colors.blue;
+        return RemindersColors.medicationColor;
       case ReminderType.appointment:
-        return Colors.purple;
+        return RemindersColors.appointmentColor;
       case ReminderType.weight:
-        return Colors.teal;
+        return RemindersColors.weightColor;
       case ReminderType.general:
-        return Colors.grey;
+        return RemindersColors.generalColor;
     }
   }
 
   IconData _getTypeIcon(ReminderType type) {
     switch (type) {
       case ReminderType.vaccine:
-        return Icons.vaccines;
+        return RemindersIcons.vaccineIcon;
       case ReminderType.medication:
-        return Icons.medication;
+        return RemindersIcons.medicationIcon;
       case ReminderType.appointment:
-        return Icons.event;
+        return RemindersIcons.appointmentIcon;
       case ReminderType.weight:
-        return Icons.scale;
+        return RemindersIcons.weightIcon;
       case ReminderType.general:
-        return Icons.notifications;
+        return RemindersIcons.generalIcon;
     }
   }
 
@@ -278,20 +359,91 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
     }
   }
 
-  void _handleMenuAction(String action, Reminder reminder) {
-    switch (action) {
-      case 'complete':
-        ref.read(remindersProvider.notifier).completeReminder(reminder.id, widget.userId);
-        break;
-      case 'snooze':
-        _showSnoozeDialog(reminder);
-        break;
-      case 'edit':
-        _showEditReminderDialog(reminder);
-        break;
-      case 'delete':
-        _showDeleteConfirmation(reminder);
-        break;
+  void _handleMenuAction(String action, Reminder reminder) async {
+    if (_isProcessing) return;
+    
+    try {
+      switch (action) {
+        case 'complete':
+          setState(() => _isProcessing = true);
+          final success = await ref
+              .read(remindersProvider.notifier)
+              .completeReminder(reminder.id, widget.userId);
+          _showResultSnackBar(success, 'lembrete marcado como concluído');
+          break;
+        case 'snooze':
+          _showSnoozeDialog(reminder);
+          break;
+        case 'edit':
+          _showEditReminderDialog(reminder);
+          break;
+        case 'delete':
+          _showDeleteConfirmation(reminder);
+          break;
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    }
+  }
+
+  void _loadReminders() {
+    ref.read(remindersProvider.notifier).loadReminders(widget.userId);
+  }
+  
+  void _showError(String message) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Erro: $message'),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        action: SnackBarAction(
+          label: 'Tentar Novamente',
+          onPressed: _loadReminders,
+        ),
+      ),
+    );
+  }
+  
+  void _showResultSnackBar(bool success, String action) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success 
+            ? '${action[0].toUpperCase()}${action.substring(1)} com sucesso'
+            : 'Erro ao ${action.split(' ').join(' ')}',
+        ),
+        backgroundColor: success 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).colorScheme.error,
+        action: success ? null : SnackBarAction(
+          label: 'Tentar Novamente',
+          onPressed: _loadReminders,
+        ),
+      ),
+    );
+  }
+  
+  void _snoozeReminder(Reminder reminder, Duration duration) async {
+    Navigator.of(context).pop();
+    setState(() => _isProcessing = true);
+    
+    try {
+      final snoozeUntil = DateTime.now().add(duration);
+      final success = await ref.read(remindersProvider.notifier).snoozeReminder(
+        reminder.id,
+        snoozeUntil,
+        widget.userId,
+      );
+      _showResultSnackBar(success, 'lembrete adiado');
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
@@ -310,46 +462,22 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   }
 
   void _showSnoozeDialog(Reminder reminder) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Adiar Lembrete'),
         content: const Text('Por quanto tempo deseja adiar este lembrete?'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              final snoozeUntil = DateTime.now().add(const Duration(hours: 1));
-              ref.read(remindersProvider.notifier).snoozeReminder(
-                reminder.id,
-                snoozeUntil,
-                widget.userId,
-              );
-            },
+            onPressed: () => _snoozeReminder(reminder, RemindersConstants.snooze1Hour),
             child: const Text('1 hora'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              final snoozeUntil = DateTime.now().add(const Duration(hours: 4));
-              ref.read(remindersProvider.notifier).snoozeReminder(
-                reminder.id,
-                snoozeUntil,
-                widget.userId,
-              );
-            },
+            onPressed: () => _snoozeReminder(reminder, RemindersConstants.snooze4Hours),
             child: const Text('4 horas'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              final snoozeUntil = DateTime.now().add(const Duration(days: 1));
-              ref.read(remindersProvider.notifier).snoozeReminder(
-                reminder.id,
-                snoozeUntil,
-                widget.userId,
-              );
-            },
+            onPressed: () => _snoozeReminder(reminder, RemindersConstants.snooze1Day),
             child: const Text('1 dia'),
           ),
           TextButton(
@@ -362,7 +490,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   }
 
   void _showDeleteConfirmation(Reminder reminder) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),
@@ -373,14 +501,24 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              ref.read(remindersProvider.notifier).deleteReminder(
-                reminder.id,
-                widget.userId,
-              );
+              setState(() => _isProcessing = true);
+              
+              try {
+                final success = await ref
+                    .read(remindersProvider.notifier)
+                    .deleteReminder(reminder.id, widget.userId);
+                _showResultSnackBar(success, 'lembrete excluído');
+              } finally {
+                if (mounted) {
+                  setState(() => _isProcessing = false);
+                }
+              }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Excluir'),
           ),
         ],

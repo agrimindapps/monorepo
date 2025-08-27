@@ -3,11 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/body_condition_provider.dart';
+import '../widgets/bcs_guide_sheet.dart';
 import '../widgets/body_condition_history_panel.dart';
 import '../widgets/body_condition_input_form.dart';
+import '../widgets/body_condition_menu_handler.dart';
 import '../widgets/body_condition_result_card.dart';
+import '../widgets/body_condition_state_indicator.dart';
+import '../widgets/body_condition_tab_controller.dart';
+import '../../../../shared/constants/body_condition_constants.dart';
 
-/// Página principal da Calculadora de Condição Corporal
+/// Refactored Body Condition Calculator page following Clean Architecture
+/// 
+/// Responsibilities:
+/// - Page layout and structure
+/// - Coordinate between specialized handlers
+/// - Manage widget lifecycle
+/// - Separate concerns properly
 class BodyConditionPage extends ConsumerStatefulWidget {
   const BodyConditionPage({super.key});
 
@@ -15,19 +26,43 @@ class BodyConditionPage extends ConsumerStatefulWidget {
   ConsumerState<BodyConditionPage> createState() => _BodyConditionPageState();
 }
 
-class _BodyConditionPageState extends ConsumerState<BodyConditionPage> 
+class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
   
+  // Specialized handlers for different concerns
+  late TabController _tabController;
+  late BodyConditionTabController _tabHandler;
+  late BodyConditionMenuHandler _menuHandler;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _initializeComponents();
+  }
+
+  void _initializeComponents() {
+    // Initialize tab controller
+    _tabController = TabController(length: BodyConditionConstants.tabCount, vsync: this);
+    
+    // Initialize tab handler
+    _tabHandler = BodyConditionTabController(
+      tabController: _tabController,
+      ref: ref,
+    );
+    
+    // Initialize menu handler
+    _menuHandler = BodyConditionMenuHandler(
+      context: context,
+      ref: ref,
+      tabController: _tabHandler,
+    );
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _tabHandler.dispose();
+    _menuHandler.dispose();
     super.dispose();
   }
 
@@ -36,77 +71,15 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     final state = ref.watch(bodyConditionProvider);
     
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Condição Corporal (BCS)'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            onPressed: () => _showBcsGuide(context),
-            tooltip: 'Guia BCS',
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) => _handleMenuAction(value),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'reset',
-                child: ListTile(
-                  leading: Icon(Icons.refresh),
-                  title: Text('Resetar'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'history',
-                child: ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('Histórico'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: ListTile(
-                  leading: Icon(Icons.share),
-                  title: Text('Exportar'),
-                  dense: true,
-                ),
-              ),
-            ],
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.input), text: 'Entrada'),
-            Tab(icon: Icon(Icons.analytics), text: 'Resultado'),
-            Tab(icon: Icon(Icons.history), text: 'Histórico'),
-          ],
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          // Indicador de progresso/status
-          _buildStatusIndicator(state),
-          
-          // Conteúdo das abas
+          const BodyConditionStateIndicator(),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Aba de entrada
-                _buildInputTab(),
-                
-                // Aba de resultado
-                _buildResultTab(),
-                
-                // Aba de histórico
-                _buildHistoryTab(),
-              ],
+            child: _tabHandler.getTabBarView(
+              inputTab: _buildInputTab(),
+              resultTab: _buildResultTab(),
+              historyTab: _buildHistoryTab(),
             ),
           ),
         ],
@@ -115,136 +88,64 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     );
   }
 
-  Widget _buildStatusIndicator(BodyConditionState state) {
-    if (state.isLoading) {
-      return Container(
-        padding: const EdgeInsets.all(8.0),
-        color: Colors.blue.withValues(alpha: 0.1),
-        child: const Row(
-          children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            SizedBox(width: 12),
-            Text('Calculando...'),
-          ],
+  /// Build the app bar
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text(BodyConditionConstants.appBarTitle),
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(BodyConditionIcons.backIcon),
+        onPressed: () => context.pop(),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(BodyConditionIcons.helpIcon),
+          onPressed: _showBcsGuide,
+          tooltip: BodyConditionConstants.helpTooltip,
         ),
-      );
-    }
-
-    if (state.hasError) {
-      return Container(
-        padding: const EdgeInsets.all(8.0),
-        color: Colors.red.withValues(alpha: 0.1),
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 16),
-            const SizedBox(width: 8),
-            Expanded(child: Text(state.error!, style: const TextStyle(color: Colors.red))),
-            TextButton(
-              onPressed: () => ref.read(bodyConditionProvider.notifier).clearError(),
-              child: const Text('Fechar'),
-            ),
-          ],
+        PopupMenuButton<String>(
+          onSelected: _menuHandler.handleMenuAction,
+          itemBuilder: (context) => _menuHandler.getMenuItems(),
         ),
-      );
-    }
-
-    if (state.hasValidationErrors) {
-      return Container(
-        padding: const EdgeInsets.all(8.0),
-        color: Colors.orange.withValues(alpha: 0.1),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.warning_outlined, color: Colors.orange, size: 16),
-                SizedBox(width: 8),
-                Text('Dados incompletos:', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 4),
-            ...state.validationErrors.map((error) => Padding(
-              padding: const EdgeInsets.only(left: 24.0),
-              child: Text('• $error', style: const TextStyle(color: Colors.orange)),
-            )),
-          ],
-        ),
-      );
-    }
-
-    return const SizedBox.shrink();
+      ],
+      bottom: _tabHandler.getTabBar(),
+    );
   }
 
+  /// Build the input tab
   Widget _buildInputTab() {
     return const SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
+      padding: BodyConditionConstants.tabPadding,
       child: BodyConditionInputForm(),
     );
   }
 
+  /// Build the result tab
   Widget _buildResultTab() {
     return Consumer(
       builder: (context, ref, child) {
         final output = ref.watch(bodyConditionOutputProvider);
         
         if (output == null) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.analytics_outlined, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'Nenhum resultado ainda',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Preencha os dados na aba "Entrada" e toque em "Calcular"',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          );
+          return _buildEmptyResultState();
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: BodyConditionConstants.tabPadding,
           child: BodyConditionResultCard(result: output),
         );
       },
     );
   }
 
+  /// Build the history tab
   Widget _buildHistoryTab() {
     return Consumer(
       builder: (context, ref, child) {
         final history = ref.watch(bodyConditionHistoryProvider);
         
         if (history.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.history, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'Nenhum histórico ainda',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Os resultados dos cálculos aparecerão aqui',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          );
+          return _buildEmptyHistoryState();
         }
 
         return BodyConditionHistoryPanel(history: history);
@@ -252,346 +153,101 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     );
   }
 
-  Widget? _buildFloatingActionButton(BodyConditionState state) {
-    // Mostrar FAB apenas na aba de entrada
-    if (_tabController.index != 0) return null;
+  /// Build empty result state
+  Widget _buildEmptyResultState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            BodyConditionIcons.emptyResultIcon, 
+            size: BodyConditionConstants.emptyStateIconSize, 
+            color: BodyConditionConstants.emptyStateIconColor
+          ),
+          SizedBox(height: BodyConditionConstants.emptyStateIconSpacing),
+          Text(
+            BodyConditionConstants.emptyResultTitle,
+            style: TextStyle(
+              fontSize: BodyConditionConstants.emptyStateTitleFontSize, 
+              fontWeight: BodyConditionConstants.emptyStateTitleWeight
+            ),
+          ),
+          SizedBox(height: BodyConditionConstants.emptyStateTitleSpacing),
+          Text(
+            BodyConditionConstants.emptyResultDescription,
+            textAlign: BodyConditionTextAlign.centerAlign,
+            style: TextStyle(color: BodyConditionConstants.emptyStateDescriptionColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build empty history state
+  Widget _buildEmptyHistoryState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            BodyConditionIcons.emptyHistoryIcon, 
+            size: BodyConditionConstants.emptyStateIconSize, 
+            color: BodyConditionConstants.emptyStateIconColor
+          ),
+          SizedBox(height: BodyConditionConstants.emptyStateIconSpacing),
+          Text(
+            BodyConditionConstants.emptyHistoryTitle,
+            style: TextStyle(
+              fontSize: BodyConditionConstants.emptyStateTitleFontSize, 
+              fontWeight: BodyConditionConstants.emptyStateTitleWeight
+            ),
+          ),
+          SizedBox(height: BodyConditionConstants.emptyStateTitleSpacing),
+          Text(
+            BodyConditionConstants.emptyHistoryDescription,
+            style: TextStyle(color: BodyConditionConstants.emptyStateDescriptionColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build floating action button
+  Widget? _buildFloatingActionButton(dynamic state) {
+    // Show FAB only on input tab
+    if (!_tabHandler.isInputTab) return null;
 
     return FloatingActionButton.extended(
       onPressed: state.canCalculate
           ? () {
               ref.read(bodyConditionProvider.notifier).calculate();
-              // Mover para aba de resultado após calcular
-              _tabController.animateTo(1);
+              _tabHandler.calculateAndNavigateToResult();
             }
           : null,
-      backgroundColor: state.canCalculate ? null : Colors.grey,
+      backgroundColor: state.canCalculate ? null : BodyConditionColors.fabDisabled,
       icon: state.isLoading
           ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              width: BodyConditionConstants.fabLoadingIndicatorSize,
+              height: BodyConditionConstants.fabLoadingIndicatorSize,
+              child: CircularProgressIndicator(
+                strokeWidth: BodyConditionConstants.fabLoadingStrokeWidth,
+                color: BodyConditionConstants.fabLoadingColor,
+              ),
             )
-          : const Icon(Icons.calculate),
-      label: Text(state.isLoading ? 'Calculando...' : 'Calcular BCS'),
+          : const Icon(BodyConditionIcons.calculateIcon),
+      label: Text(state.isLoading 
+          ? BodyConditionConstants.calculatingButtonText 
+          : BodyConditionConstants.calculateButtonText),
     );
   }
 
-  void _handleMenuAction(String action) {
-    switch (action) {
-      case 'reset':
-        _showResetConfirmation();
-        break;
-      case 'history':
-        _tabController.animateTo(2);
-        break;
-      case 'export':
-        _exportResult();
-        break;
-    }
-  }
-
-  void _showResetConfirmation() {
-    showDialog(
+  /// Show BCS guide sheet
+  void _showBcsGuide() {
+    showModalBottomSheet<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resetar Calculadora'),
-        content: const Text('Isso limpará todos os dados inseridos e resultados. Continuar?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(bodyConditionProvider.notifier).reset();
-              Navigator.pop(context);
-              _tabController.animateTo(0);
-            },
-            child: const Text('Resetar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _exportResult() {
-    final output = ref.read(bodyConditionOutputProvider);
-    if (output == null) {
-      _showErrorSnackBar('Nenhum resultado para exportar');
-      return;
-    }
-    
-    // Validar dados antes da exportação
-    if (!_validateExportData(output)) {
-      _showErrorSnackBar('Dados insuficientes para exportação segura');
-      return;
-    }
-    
-    _showExportDialog(output);
-  }
-  
-  bool _validateExportData(BodyConditionOutput output) {
-    // Validações críticas de dados veterinários antes da exportação
-    if (output.bcsScore < 1.0 || output.bcsScore > 9.0) {
-      return false; // Score BCS inválido
-    }
-    
-    final input = ref.read(bodyConditionInputProvider);
-    if (input.currentWeight <= 0.0 || input.currentWeight > 150.0) {
-      return false; // Peso inválido
-    }
-    
-    // Verificar se dados essenciais estão presentes
-    if (output.results.isEmpty) {
-      return false; // Sem resultados calculados
-    }
-    
-    return true;
-  }
-  
-  void _showExportDialog(BodyConditionOutput output) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exportar Resultado BCS'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Score BCS: ${output.bcsScore.toStringAsFixed(1)}'),
-            Text('Classificação: ${_getClassificationText(output.classification)}'),
-            const SizedBox(height: 8),
-            const Text('Os dados serão exportados de forma segura e anônima.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _performSecureExport(output);
-            },
-            child: const Text('Exportar'),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _performSecureExport(BodyConditionOutput output) {
-    // Implementação segura da exportação
-    // Em uma implementação real, aqui haveria:
-    // - Sanitização dos dados
-    // - Remoção de informações sensíveis
-    // - Geração de PDF ou outro formato
-    // - Compartilhamento seguro
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Resultado exportado com segurança!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-  
-  String _getClassificationText(BcsClassification classification) {
-    return classification.displayName;
-  }
-  
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  void _showBcsGuide(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      isScrollControlled: BodyConditionLayout.isScrollControlled,
+      backgroundColor: BodyConditionColors.modalBackground,
       builder: (context) => const BcsGuideSheet(),
-    );
-  }
-}
-
-/// Sheet com guia de interpretação BCS
-class BcsGuideSheet extends StatelessWidget {
-  const BcsGuideSheet({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              color: Colors.blue,
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.help, color: Colors.white),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Guia de Condição Corporal (BCS)',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildGuideSection(
-                    'O que é BCS?',
-                    'Body Condition Score (BCS) é um sistema de avaliação nutricional que analisa a condição corporal do animal através de palpação e observação visual, utilizando uma escala de 1 a 9.',
-                    Icons.info,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildGuideSection(
-                    'Como palpar as costelas?',
-                    '1. Coloque as mãos nas laterais do tórax\n2. Pressione suavemente com as pontas dos dedos\n3. Avalie a facilidade para sentir as costelas\n4. Considere a cobertura de gordura',
-                    Icons.touch_app,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildGuideSection(
-                    'Avaliação da cintura',
-                    'Observe o animal de cima:\n• Deve haver uma "cintura" visível atrás das costelas\n• A cintura deve ser mais estreita que o tórax\n• Em animais obesos, a cintura desaparece',
-                    Icons.visibility,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildGuideSection(
-                    'Perfil abdominal',
-                    'Observe o animal de lado:\n• Abdome deve estar "retraído" (tucked up)\n• Em animais magros, a retração é muito evidente\n• Em obesos, o abdome fica pendular',
-                    Icons.straighten,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildBcsScale(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGuideSection(String title, String content, IconData icon) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.blue),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              content,
-              style: const TextStyle(height: 1.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBcsScale() {
-    const bcsData = [
-      {'score': '1-2', 'condition': 'Extremamente Magro', 'color': Colors.red},
-      {'score': '3', 'condition': 'Magro', 'color': Colors.orange},
-      {'score': '4', 'condition': 'Abaixo do Ideal', 'color': Colors.amber},
-      {'score': '5', 'condition': 'Ideal', 'color': Colors.green},
-      {'score': '6', 'condition': 'Acima do Ideal', 'color': Colors.amber},
-      {'score': '7', 'condition': 'Sobrepeso', 'color': Colors.orange},
-      {'score': '8-9', 'condition': 'Obeso', 'color': Colors.red},
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.scale, color: Colors.blue),
-                SizedBox(width: 12),
-                Text(
-                  'Escala BCS (1-9)',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...bcsData.map((data) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: (data['color'] as Color).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: data['color'] as Color),
-                    ),
-                    child: Center(
-                      child: Text(
-                        data['score'] as String,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: data['color'] as Color,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(data['condition'] as String),
-                ],
-              ),
-            )),
-          ],
-        ),
-      ),
     );
   }
 }

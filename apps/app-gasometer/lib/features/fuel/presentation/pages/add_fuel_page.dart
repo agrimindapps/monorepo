@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../providers/fuel_form_provider.dart';
 import '../providers/fuel_provider.dart';
 import '../widgets/fuel_form_view.dart';
 
-class AddFuelPage extends StatefulWidget {
+class AddFuelPage extends BaseFormPage<FuelFormProvider> {
   final String? vehicleId;
   final String? editFuelRecordId;
   
@@ -18,198 +18,100 @@ class AddFuelPage extends StatefulWidget {
   });
 
   @override
-  State<AddFuelPage> createState() => _AddFuelPageState();
+  BaseFormPageState<FuelFormProvider> createState() => _AddFuelPageState();
 }
 
-class _AddFuelPageState extends State<AddFuelPage> {
-  late FuelFormProvider _formProvider;
-  late FuelProvider _fuelProvider;
-  late VehiclesProvider _vehiclesProvider;
-  bool _isInitialized = false;
-
+class _AddFuelPageState extends BaseFormPageState<FuelFormProvider> {
+  AddFuelPage get _widget => widget as AddFuelPage;
+  
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeProviders();
-    });
-  }
-
-  void _initializeProviders() async {
-    _vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
-    _fuelProvider = Provider.of<FuelProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  bool get isEditMode => _widget.editFuelRecordId != null;
+  
+  @override
+  String get pageTitle => 'Abastecimento';
+  
+  @override
+  FuelFormProvider createFormProvider() {
+    final authProvider = context.read<AuthProvider>();
     
-    _formProvider = FuelFormProvider(
-      _vehiclesProvider,
-      initialVehicleId: widget.vehicleId,
+    return FuelFormProvider(
+      initialVehicleId: _widget.vehicleId,
       userId: authProvider.userId,
     );
+  }
+  
+  @override
+  Future<void> initializeFormProvider(FuelFormProvider provider) async {
+    final authProvider = context.read<AuthProvider>();
+    
+    // Set context for dependency injection access
+    provider.setContext(context);
 
-    try {
-      await _formProvider.initialize(
-        vehicleId: widget.vehicleId,
-        userId: authProvider.userId,
-      );
-      
-      if (widget.editFuelRecordId != null) {
-        await _loadFuelRecordForEdit();
-      }
-      
-      setState(() {
-        _isInitialized = true;
-      });
-    } catch (e) {
-      _showErrorDialog('Erro ao inicializar formulário: $e');
+    await provider.initialize(
+      vehicleId: _widget.vehicleId,
+      userId: authProvider.userId,
+    );
+    
+    if (_widget.editFuelRecordId != null) {
+      await _loadFuelRecordForEdit(provider);
     }
   }
 
-  Future<void> _loadFuelRecordForEdit() async {
+  Future<void> _loadFuelRecordForEdit(FuelFormProvider provider) async {
     try {
+      final fuelProvider = context.read<FuelProvider>();
       // Primeiro garantir que os dados foram carregados
-      await _fuelProvider.loadAllFuelRecords();
+      await fuelProvider.loadAllFuelRecords();
       
-      final record = _fuelProvider.getFuelRecordById(widget.editFuelRecordId!);
+      final record = fuelProvider.getFuelRecordById(_widget.editFuelRecordId!);
       
       if (record != null) {
-        await _formProvider.loadFromFuelRecord(record);
+        await provider.loadFromFuelRecord(record);
       } else {
         throw Exception('Registro de abastecimento não encontrado');
       }
     } catch (e) {
-      _showErrorDialog('Erro ao carregar registro para edição: $e');
+      throw Exception('Erro ao carregar registro para edição: $e');
     }
   }
 
-  @override
-  void dispose() {
-    if (_isInitialized) {
-      _formProvider.dispose();
-    }
-    super.dispose();
-  }
 
   @override
-  Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          title: Text(
-            widget.editFuelRecordId != null 
-                ? 'Editar Abastecimento' 
-                : 'Novo Abastecimento',
-          ),
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return ChangeNotifierProvider.value(
-      value: _formProvider,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          title: Text(
-            widget.editFuelRecordId != null 
-                ? 'Editar Abastecimento' 
-                : 'Novo Abastecimento',
-          ),
-          actions: [
-            Consumer<FuelFormProvider>(builder: (context, formProvider, _) {
-              return Semantics(
-                label: widget.editFuelRecordId != null 
-                  ? 'Salvar alterações do abastecimento'
-                  : 'Adicionar novo abastecimento',
-                hint: formProvider.formModel.canSubmit
-                  ? 'Botão habilitado, toque para salvar'
-                  : 'Botão desabilitado, preencha todos os campos obrigatórios',
-                child: TextButton(
-                  onPressed: formProvider.formModel.canSubmit 
-                      ? () => _submitForm()
-                      : null,
-                  child: Text(
-                    widget.editFuelRecordId != null ? 'Salvar' : 'Adicionar',
-                    style: TextStyle(
-                      color: formProvider.formModel.canSubmit
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).disabledColor,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
-        body: Consumer<FuelFormProvider>(builder: (context, formProvider, _) {
-          if (formProvider.formModel.lastError != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showErrorDialog(formProvider.formModel.lastError!);
-            });
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formProvider.formKey,
-              child: FuelFormView(
-                formProvider: formProvider,
-                onSubmit: _submitForm,
-              ),
-            ),
-          );
-        }),
-      ),
+  Widget buildFormContent(BuildContext context, FuelFormProvider provider) {
+    return FuelFormView(
+      formProvider: provider,
+      onSubmit: () => onSubmitForm(context, provider),
     );
   }
 
-  Future<void> _submitForm() async {
-    if (!_formProvider.validateForm()) {
-      _showErrorDialog('Por favor, corrija os erros no formulário');
-      return;
+  @override
+  Future<bool> onSubmitForm(BuildContext context, FuelFormProvider provider) async {
+    if (!provider.validateForm()) {
+      return false;
     }
 
     try {
-      final fuelRecord = _formProvider.formModel.toFuelRecord();
+      final fuelProvider = context.read<FuelProvider>();
+      final fuelRecord = provider.formModel.toFuelRecord();
       
       bool success;
-      if (widget.editFuelRecordId != null) {
-        success = await _fuelProvider.updateFuelRecord(fuelRecord);
+      if (_widget.editFuelRecordId != null) {
+        success = await fuelProvider.updateFuelRecord(fuelRecord);
       } else {
-        success = await _fuelProvider.addFuelRecord(fuelRecord);
+        success = await fuelProvider.addFuelRecord(fuelRecord);
       }
 
-      if (success) {
-        if (mounted) {
-          Navigator.of(context).pop(true);
-        }
-      } else {
-        _showErrorDialog(
-          _fuelProvider.errorMessage ?? 'Erro ao salvar abastecimento'
+      if (!success) {
+        onFormSubmitFailure(
+          fuelProvider.errorMessage ?? 'Erro ao salvar abastecimento'
         );
       }
+      
+      return success;
     } catch (e) {
-      _showErrorDialog('Erro inesperado: $e');
+      onFormSubmitFailure('Erro inesperado: $e');
+      return false;
     }
   }
 
-  void _showErrorDialog(String message) {
-    if (!mounted) return;
-    
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erro'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 }

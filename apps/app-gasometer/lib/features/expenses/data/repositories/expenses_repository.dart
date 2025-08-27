@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 import '../../../../core/cache/cache_manager.dart';
@@ -56,7 +57,9 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
       }
     } catch (e) {
       // Warmup não deve travar a inicialização
-      print('Cache warmup failed (non-critical): $e');
+      if (kDebugMode) {
+        print('Cache warmup failed (non-critical): $e');
+      }
     }
   }
 
@@ -596,7 +599,9 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
       await _box.close();
     } catch (e) {
       // Log error mas não trava
-      print('Erro ao fechar box de despesas: $e');
+      if (kDebugMode) {
+        print('Erro ao fechar box de despesas: $e');
+      }
     }
   }
 }

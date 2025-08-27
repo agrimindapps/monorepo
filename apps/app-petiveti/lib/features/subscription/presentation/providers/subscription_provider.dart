@@ -9,12 +9,26 @@ class SubscriptionState {
   final List<SubscriptionPlan> availablePlans;
   final UserSubscription? currentSubscription;
   final bool isLoading;
+  final bool isLoadingPlans;
+  final bool isLoadingCurrentSubscription;
+  final bool isProcessingPurchase;
+  final bool isRestoringPurchases;
+  final bool isCancelling;
+  final bool isResuming;
+  final String? purchasingPlanId;
   final String? error;
 
   const SubscriptionState({
     this.availablePlans = const [],
     this.currentSubscription,
     this.isLoading = false,
+    this.isLoadingPlans = false,
+    this.isLoadingCurrentSubscription = false,
+    this.isProcessingPurchase = false,
+    this.isRestoringPurchases = false,
+    this.isCancelling = false,
+    this.isResuming = false,
+    this.purchasingPlanId,
     this.error,
   });
 
@@ -22,12 +36,26 @@ class SubscriptionState {
     List<SubscriptionPlan>? availablePlans,
     UserSubscription? currentSubscription,
     bool? isLoading,
+    bool? isLoadingPlans,
+    bool? isLoadingCurrentSubscription,
+    bool? isProcessingPurchase,
+    bool? isRestoringPurchases,
+    bool? isCancelling,
+    bool? isResuming,
+    String? purchasingPlanId,
     String? error,
   }) {
     return SubscriptionState(
       availablePlans: availablePlans ?? this.availablePlans,
       currentSubscription: currentSubscription ?? this.currentSubscription,
       isLoading: isLoading ?? this.isLoading,
+      isLoadingPlans: isLoadingPlans ?? this.isLoadingPlans,
+      isLoadingCurrentSubscription: isLoadingCurrentSubscription ?? this.isLoadingCurrentSubscription,
+      isProcessingPurchase: isProcessingPurchase ?? this.isProcessingPurchase,
+      isRestoringPurchases: isRestoringPurchases ?? this.isRestoringPurchases,
+      isCancelling: isCancelling ?? this.isCancelling,
+      isResuming: isResuming ?? this.isResuming,
+      purchasingPlanId: purchasingPlanId,
       error: error,
     );
   }
@@ -49,6 +77,30 @@ class SubscriptionState {
   
   SubscriptionPlan? get yearlyPlan => 
       availablePlans.where((p) => p.type == PlanType.yearly).firstOrNull;
+
+  // Granular loading state getters
+  bool get hasAnyLoading => 
+      isLoading || 
+      isLoadingPlans || 
+      isLoadingCurrentSubscription || 
+      isProcessingPurchase || 
+      isRestoringPurchases || 
+      isCancelling || 
+      isResuming;
+
+  bool isPurchasing(String planId) => 
+      isProcessingPurchase && purchasingPlanId == planId;
+
+  String get loadingMessage {
+    if (isLoadingPlans) return 'Carregando planos...';
+    if (isLoadingCurrentSubscription) return 'Verificando assinatura...';
+    if (isProcessingPurchase) return 'Processando compra...';
+    if (isRestoringPurchases) return 'Restaurando compras...';
+    if (isCancelling) return 'Cancelando assinatura...';
+    if (isResuming) return 'Retomando assinatura...';
+    if (isLoading) return 'Carregando...';
+    return '';
+  }
   
   SubscriptionPlan? get lifetimePlan => 
       availablePlans.where((p) => p.type == PlanType.lifetime).firstOrNull;
@@ -76,33 +128,45 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   ) : super(const SubscriptionState());
 
   Future<void> loadAvailablePlans() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoadingPlans: true, error: null);
 
     final result = await _getAvailablePlans(const NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(
-        isLoading: false,
+        isLoadingPlans: false,
         error: failure.message,
       ),
       (plans) => state = state.copyWith(
         availablePlans: plans,
-        isLoading: false,
+        isLoadingPlans: false,
       ),
     );
   }
 
   Future<void> loadCurrentSubscription(String userId) async {
+    state = state.copyWith(isLoadingCurrentSubscription: true, error: null);
+
     final result = await _getCurrentSubscription(userId);
 
     result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (subscription) => state = state.copyWith(currentSubscription: subscription),
+      (failure) => state = state.copyWith(
+        isLoadingCurrentSubscription: false,
+        error: failure.message,
+      ),
+      (subscription) => state = state.copyWith(
+        currentSubscription: subscription,
+        isLoadingCurrentSubscription: false,
+      ),
     );
   }
 
   Future<bool> subscribeToPlan(String userId, String planId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(
+      isProcessingPurchase: true, 
+      purchasingPlanId: planId,
+      error: null,
+    );
 
     final params = SubscribeToPlanParams(userId: userId, planId: planId);
     final result = await _subscribeToPlan(params);
@@ -110,7 +174,8 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     return result.fold(
       (failure) {
         state = state.copyWith(
-          isLoading: false,
+          isProcessingPurchase: false,
+          purchasingPlanId: null,
           error: failure.message,
         );
         return false;
@@ -118,7 +183,8 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       (subscription) {
         state = state.copyWith(
           currentSubscription: subscription,
-          isLoading: false,
+          isProcessingPurchase: false,
+          purchasingPlanId: null,
         );
         return true;
       },
@@ -126,21 +192,21 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 
   Future<bool> cancelSubscription(String userId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isCancelling: true, error: null);
 
     final result = await _cancelSubscription(userId);
 
     return result.fold(
       (failure) {
         state = state.copyWith(
-          isLoading: false,
+          isCancelling: false,
           error: failure.message,
         );
         return false;
       },
       (_) {
         loadCurrentSubscription(userId);
-        state = state.copyWith(isLoading: false);
+        state = state.copyWith(isCancelling: false);
         return true;
       },
     );
@@ -168,21 +234,21 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 
   Future<bool> resumeSubscription(String userId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isResuming: true, error: null);
 
     final result = await _resumeSubscription(userId);
 
     return result.fold(
       (failure) {
         state = state.copyWith(
-          isLoading: false,
+          isResuming: false,
           error: failure.message,
         );
         return false;
       },
       (_) {
         loadCurrentSubscription(userId);
-        state = state.copyWith(isLoading: false);
+        state = state.copyWith(isResuming: false);
         return true;
       },
     );
@@ -213,21 +279,21 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 
   Future<bool> restorePurchases(String userId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isRestoringPurchases: true, error: null);
 
     final result = await _restorePurchases(userId);
 
     return result.fold(
       (failure) {
         state = state.copyWith(
-          isLoading: false,
+          isRestoringPurchases: false,
           error: failure.message,
         );
         return false;
       },
       (_) {
         loadCurrentSubscription(userId);
-        state = state.copyWith(isLoading: false);
+        state = state.copyWith(isRestoringPurchases: false);
         return true;
       },
     );

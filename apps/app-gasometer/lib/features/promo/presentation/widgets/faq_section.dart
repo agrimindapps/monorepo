@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/design_tokens.dart';
+
 class FaqSection extends StatefulWidget {
   const FaqSection({super.key});
 
@@ -52,7 +54,7 @@ class _FaqSectionState extends State<FaqSection> with TickerProviderStateMixin {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFFF8F9FA),
+        color: GasometerDesignTokens.colorContentBackground,
       ),
       padding: EdgeInsets.symmetric(
         vertical: 80,

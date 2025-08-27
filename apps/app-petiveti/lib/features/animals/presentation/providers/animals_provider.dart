@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart';
 import '../../domain/entities/animal.dart';
+import '../../domain/entities/animal_enums.dart';
 import '../../domain/repositories/animal_repository.dart';
 import '../../domain/usecases/add_animal.dart';
 import '../../domain/usecases/delete_animal.dart';
@@ -10,29 +11,78 @@ import '../../domain/usecases/get_animal_by_id.dart';
 import '../../domain/usecases/get_animals.dart';
 import '../../domain/usecases/update_animal.dart';
 
+// Filter classes
+class AnimalsFilter {
+  final String searchQuery;
+  final AnimalSpecies? speciesFilter;
+  final AnimalGender? genderFilter;
+  final AnimalSize? sizeFilter;
+  final bool onlyActive;
+
+  const AnimalsFilter({
+    this.searchQuery = '',
+    this.speciesFilter,
+    this.genderFilter,
+    this.sizeFilter,
+    this.onlyActive = true,
+  });
+
+  AnimalsFilter copyWith({
+    String? searchQuery,
+    AnimalSpecies? speciesFilter,
+    AnimalGender? genderFilter,
+    AnimalSize? sizeFilter,
+    bool? onlyActive,
+  }) {
+    return AnimalsFilter(
+      searchQuery: searchQuery ?? this.searchQuery,
+      speciesFilter: speciesFilter,
+      genderFilter: genderFilter,
+      sizeFilter: sizeFilter,
+      onlyActive: onlyActive ?? this.onlyActive,
+    );
+  }
+
+  bool get hasActiveFilters =>
+      searchQuery.isNotEmpty ||
+      speciesFilter != null ||
+      genderFilter != null ||
+      sizeFilter != null;
+}
+
 // State classes
 class AnimalsState {
   final List<Animal> animals;
+  final List<Animal> filteredAnimals;
+  final AnimalsFilter filter;
   final bool isLoading;
   final String? error;
 
   const AnimalsState({
     this.animals = const [],
+    this.filteredAnimals = const [],
+    this.filter = const AnimalsFilter(),
     this.isLoading = false,
     this.error,
   });
 
   AnimalsState copyWith({
     List<Animal>? animals,
+    List<Animal>? filteredAnimals,
+    AnimalsFilter? filter,
     bool? isLoading,
     String? error,
   }) {
     return AnimalsState(
       animals: animals ?? this.animals,
+      filteredAnimals: filteredAnimals ?? this.filteredAnimals,
+      filter: filter ?? this.filter,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
   }
+
+  List<Animal> get displayedAnimals => filter.hasActiveFilters ? filteredAnimals : animals;
 }
 
 // State notifier
@@ -66,12 +116,98 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
         isLoading: false,
         error: failure.message,
       ),
-      (animals) => state = state.copyWith(
-        animals: animals,
-        isLoading: false,
-        error: null,
-      ),
+      (animals) {
+        state = state.copyWith(
+          animals: animals,
+          isLoading: false,
+          error: null,
+        );
+        // Apply current filter to new data
+        _applyFilter();
+      },
     );
+  }
+
+  void updateSearchQuery(String query) {
+    final newFilter = state.filter.copyWith(searchQuery: query);
+    state = state.copyWith(filter: newFilter);
+    _applyFilter();
+  }
+
+  void updateSpeciesFilter(AnimalSpecies? species) {
+    final newFilter = state.filter.copyWith(speciesFilter: species);
+    state = state.copyWith(filter: newFilter);
+    _applyFilter();
+  }
+
+  void updateGenderFilter(AnimalGender? gender) {
+    final newFilter = state.filter.copyWith(genderFilter: gender);
+    state = state.copyWith(filter: newFilter);
+    _applyFilter();
+  }
+
+  void updateSizeFilter(AnimalSize? size) {
+    final newFilter = state.filter.copyWith(sizeFilter: size);
+    state = state.copyWith(filter: newFilter);
+    _applyFilter();
+  }
+
+  void clearFilters() {
+    state = state.copyWith(
+      filter: const AnimalsFilter(),
+      filteredAnimals: [],
+    );
+  }
+
+  void _applyFilter() {
+    final filter = state.filter;
+    
+    if (!filter.hasActiveFilters) {
+      state = state.copyWith(filteredAnimals: []);
+      return;
+    }
+
+    List<Animal> filtered = state.animals;
+
+    // Apply active status filter
+    if (filter.onlyActive) {
+      filtered = filtered.where((animal) => animal.isActive).toList();
+    }
+
+    // Apply search query filter
+    if (filter.searchQuery.isNotEmpty) {
+      final query = filter.searchQuery.toLowerCase();
+      filtered = filtered.where((animal) {
+        return animal.name.toLowerCase().contains(query) ||
+            animal.breed?.toLowerCase().contains(query) == true ||
+            animal.color?.toLowerCase().contains(query) == true ||
+            animal.species.displayName.toLowerCase().contains(query) ||
+            animal.microchipNumber?.toLowerCase().contains(query) == true;
+      }).toList();
+    }
+
+    // Apply species filter
+    if (filter.speciesFilter != null) {
+      filtered = filtered
+          .where((animal) => animal.species == filter.speciesFilter)
+          .toList();
+    }
+
+    // Apply gender filter
+    if (filter.genderFilter != null) {
+      filtered = filtered
+          .where((animal) => animal.gender == filter.genderFilter)
+          .toList();
+    }
+
+    // Apply size filter
+    if (filter.sizeFilter != null) {
+      filtered = filtered
+          .where((animal) => animal.size == filter.sizeFilter)
+          .toList();
+    }
+
+    state = state.copyWith(filteredAnimals: filtered);
   }
 
   Future<void> addAnimal(Animal animal) async {
@@ -86,6 +222,8 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
           animals: updatedAnimals,
           error: null,
         );
+        // Reapply filter to include new animal if it matches
+        _applyFilter();
       },
     );
   }
@@ -105,6 +243,8 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
           animals: updatedAnimals,
           error: null,
         );
+        // Reapply filter to update filtered list
+        _applyFilter();
       },
     );
   }
@@ -121,6 +261,8 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
           animals: updatedAnimals,
           error: null,
         );
+        // Reapply filter to update filtered list
+        _applyFilter();
       },
     );
   }

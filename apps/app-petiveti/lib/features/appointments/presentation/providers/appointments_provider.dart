@@ -200,6 +200,15 @@ class AppointmentsNotifier extends StateNotifier<AppointmentState> {
   void clearSelectedAppointment() {
     state = state.copyWith(clearSelected: true);
   }
+  
+  void clearAppointments() {
+    state = state.copyWith(
+      appointments: [],
+      upcomingAppointments: [],
+      clearError: true,
+      clearSelected: true,
+    );
+  }
 }
 
 // Provider instance

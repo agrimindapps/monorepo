@@ -103,7 +103,9 @@ class AuthProvider extends ChangeNotifier {
           } else {
             // If no user and should use anonymous mode, initialize anonymously
             if (await shouldUseAnonymousMode()) {
-              debugPrint('🔐 Iniciando modo anônimo automaticamente');
+              if (kDebugMode) {
+                debugPrint('🔐 Iniciando modo anônimo automaticamente');
+              }
               await signInAnonymously();
               return;
             }
@@ -151,6 +153,7 @@ class AuthProvider extends ChangeNotifier {
       }
       
       // For registered users, set up analytics and check premium
+      // Note: Only setting user ID for analytics, not logging sensitive info
       await _analytics.setUserId(user.id);
       await _analytics.setUserProperties({
         'user_type': user.isAnonymous ? 'anonymous' : 'authenticated',
@@ -306,13 +309,17 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    debugPrint('🔐 Iniciando login anônimo...');
+    if (kDebugMode) {
+      debugPrint('🔐 Iniciando login anônimo...');
+    }
     
     final result = await _signInAnonymously();
     
     result.fold(
       (failure) {
-        debugPrint('🔐 Erro no login anônimo: ${failure.message}');
+        if (kDebugMode) {
+          debugPrint('🔐 Erro no login anônimo: ${failure.message}');
+        }
         _errorMessage = _mapFailureToMessage(failure);
         _isLoading = false;
         notifyListeners();
@@ -364,7 +371,9 @@ class AuthProvider extends ChangeNotifier {
           _isPremium = false;
           _isLoading = false;
           
-          debugPrint('🔐 Logout realizado com sucesso');
+          if (kDebugMode) {
+            debugPrint('🔐 Logout realizado com sucesso');
+          }
           notifyListeners();
         },
       );
@@ -421,7 +430,9 @@ class AuthProvider extends ChangeNotifier {
   
   Future<void> _saveAnonymousPreference() async {
     // Anonymous preference is now handled by the auth data source
-    debugPrint('🔐 Preferência de modo anônimo salva');
+    if (kDebugMode) {
+      debugPrint('🔐 Preferência de modo anônimo salva');
+    }
   }
   
   Future<bool> shouldUseAnonymousMode() async {
@@ -429,7 +440,9 @@ class AuthProvider extends ChangeNotifier {
       // Use platform service to determine if anonymous mode should be used by default
       return _platformService.shouldUseAnonymousByDefault;
     } catch (e) {
-      debugPrint('Erro ao verificar modo anônimo');
+      if (kDebugMode) {
+        debugPrint('Erro ao verificar modo anônimo: $e');
+      }
       return _platformService.shouldUseAnonymousByDefault;
     }
   }

@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/maintenance_constants.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -11,12 +13,18 @@ import '../../domain/services/maintenance_validator_service.dart';
 import '../models/maintenance_form_model.dart';
 
 /// Provider reativo para gerenciar o estado do formulário de manutenção
+/// 
+/// ARCHITECTURAL NOTE: This provider now uses dependency injection pattern
+/// instead of direct provider coupling to avoid circular dependencies.
+/// VehiclesProvider is accessed via BuildContext when needed.
 class MaintenanceFormProvider extends ChangeNotifier {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final MaintenanceFormatterService _formatter = MaintenanceFormatterService();
   final MaintenanceValidatorService _validator = MaintenanceValidatorService();
-  final VehiclesProvider _vehiclesProvider;
   final ImagePicker _imagePicker = ImagePicker();
+  
+  // Store context for accessing providers when needed
+  BuildContext? _context;
 
   // Controllers para campos de texto
   final TextEditingController titleController = TextEditingController();
@@ -40,7 +48,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   bool _isInitialized = false;
   final bool _isUpdating = false;
 
-  MaintenanceFormProvider(this._vehiclesProvider, {String? initialVehicleId, String? userId}) 
+  MaintenanceFormProvider({String? initialVehicleId, String? userId}) 
       : _formModel = MaintenanceFormModel.initial(initialVehicleId ?? '', userId ?? '') {
     _initializeControllers();
   }
@@ -50,6 +58,23 @@ class MaintenanceFormProvider extends ChangeNotifier {
   MaintenanceFormModel get formModel => _formModel;
   bool get isInitialized => _isInitialized;
   bool get isUpdating => _isUpdating;
+
+  /// Sets the BuildContext for dependency injection access.
+  /// This should be called when the provider is used in a widget.
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  /// Safely access VehiclesProvider through dependency injection
+  VehiclesProvider? get _vehiclesProvider {
+    if (_context == null) return null;
+    try {
+      return _context!.read<VehiclesProvider>();
+    } catch (e) {
+      debugPrint('Warning: VehiclesProvider not available in context: $e');
+      return null;
+    }
+  }
 
   void _initializeControllers() {
     // Adicionar listeners para reagir a mudanças nos campos
@@ -142,7 +167,13 @@ class MaintenanceFormProvider extends ChangeNotifier {
       _formModel = _formModel.copyWith(isLoading: true);
       notifyListeners();
 
-      final vehicle = await _vehiclesProvider.getVehicleById(vehicleId);
+      // Safely access VehiclesProvider through dependency injection
+      final vehiclesProvider = _vehiclesProvider;
+      if (vehiclesProvider == null) {
+        throw Exception('VehiclesProvider não disponível. Certifique-se de chamar setContext() primeiro.');
+      }
+
+      final vehicle = await vehiclesProvider.getVehicleById(vehicleId);
       
       if (vehicle != null) {
         _formModel = _formModel.copyWith(
@@ -192,7 +223,8 @@ class MaintenanceFormProvider extends ChangeNotifier {
     _titleDebounceTimer = Timer(
       const Duration(milliseconds: MaintenanceConstants.titleDebounceMs),
       () {
-        final sanitized = _formatter.sanitizeInput(titleController.text);
+        // Aplicar sanitização específica para títulos
+        final sanitized = InputSanitizer.sanitize(titleController.text);
         _updateTitle(sanitized);
         
         // Sugerir tipo baseado no título se ainda não foi definido
@@ -211,7 +243,8 @@ class MaintenanceFormProvider extends ChangeNotifier {
     _descriptionDebounceTimer = Timer(
       const Duration(milliseconds: MaintenanceConstants.descriptionDebounceMs),
       () {
-        final sanitized = _formatter.sanitizeInput(descriptionController.text);
+        // Aplicar sanitização específica para descrições
+        final sanitized = InputSanitizer.sanitizeDescription(descriptionController.text);
         _updateDescription(sanitized);
       },
     );
@@ -240,7 +273,8 @@ class MaintenanceFormProvider extends ChangeNotifier {
   }
 
   void _onWorkshopNameChanged() {
-    final sanitized = _formatter.sanitizeInput(workshopNameController.text);
+    // Aplicar sanitização específica para nomes de oficinas
+    final sanitized = InputSanitizer.sanitizeName(workshopNameController.text);
     _updateWorkshopName(sanitized);
   }
 
@@ -257,7 +291,8 @@ class MaintenanceFormProvider extends ChangeNotifier {
   }
 
   void _onWorkshopAddressChanged() {
-    final sanitized = _formatter.sanitizeInput(workshopAddressController.text);
+    // Aplicar sanitização específica para endereços
+    final sanitized = InputSanitizer.sanitize(workshopAddressController.text);
     _updateWorkshopAddress(sanitized);
   }
 
@@ -267,7 +302,8 @@ class MaintenanceFormProvider extends ChangeNotifier {
   }
 
   void _onNotesChanged() {
-    final sanitized = _formatter.sanitizeInput(notesController.text);
+    // Aplicar sanitização específica para observações
+    final sanitized = InputSanitizer.sanitizeDescription(notesController.text);
     _updateNotes(sanitized);
   }
 

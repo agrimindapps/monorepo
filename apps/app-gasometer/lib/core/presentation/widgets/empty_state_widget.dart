@@ -276,6 +276,11 @@ class EmptyStateWidget extends StatelessWidget {
         child: Image.asset(
           illustrationAsset!,
           fit: BoxFit.contain,
+          // Otimizações de memória para assets
+          cacheHeight: (style.illustrationSize ?? 120.0).toInt(),
+          cacheWidth: (style.illustrationSize ?? 120.0).toInt(),
+          // Evitar carregamento desnecessário
+          excludeFromSemantics: true,
         ),
       );
     }

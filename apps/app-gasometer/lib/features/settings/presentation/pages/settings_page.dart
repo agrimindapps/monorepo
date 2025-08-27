@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
+import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -46,7 +46,7 @@ class SettingsPage extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E),
+          color: GasometerDesignTokens.colorHeaderBackground,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -57,28 +57,32 @@ class SettingsPage extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.settings,
-                color: Colors.white,
-                size: 28,
+              child: Semantics(
+                label: 'Seção de configurações',
+                hint: 'Página principal para gerenciar preferências',
+                child: const Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  SemanticText.heading(
                     'Configurações',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  Text(
+                  SemanticText.subtitle(
                     'Gerencie suas preferências',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.white70,
                     ),
@@ -93,16 +97,22 @@ class SettingsPage extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: IconButton(
-                    onPressed: () => _showThemeDialog(context, themeProvider),
-                    icon: Icon(
-                      themeProvider.themeMode == ThemeMode.dark
-                        ? Icons.brightness_2
-                        : themeProvider.themeMode == ThemeMode.light
-                          ? Icons.brightness_high
-                          : Icons.brightness_auto,
-                      color: Colors.white,
-                      size: 24,
+                  child: Semantics(
+                    label: 'Alterar tema',
+                    hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                    button: true,
+                    onTap: () => _showThemeDialog(context, themeProvider),
+                    child: IconButton(
+                      onPressed: () => _showThemeDialog(context, themeProvider),
+                      icon: Icon(
+                        themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.brightness_2
+                          : themeProvider.themeMode == ThemeMode.light
+                            ? Icons.brightness_high
+                            : Icons.brightness_auto,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                   ),
                 );
@@ -222,7 +232,7 @@ class SettingsPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: const BoxDecoration(
-                      color: Color(0xFFFFA500),
+                      color: GasometerDesignTokens.colorPremiumAccent,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -281,12 +291,12 @@ class SettingsPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFA500).withValues(alpha: 0.1),
+            color: GasometerDesignTokens.getPremiumBackgroundWithOpacity(0.1),
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusSm),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFFFFA500),
+            color: GasometerDesignTokens.colorPremiumAccent,
             size: GasometerDesignTokens.iconSizeXs,
           ),
         ),
@@ -353,11 +363,18 @@ class SettingsPage extends StatelessWidget {
           icon: Icons.notification_important,
           title: 'Lembretes de Manutenção',
           subtitle: 'Receba notificações para manutenções pendentes',
-          trailing: Switch(
-            value: true, // TODO: Connect to actual setting
-            onChanged: (value) {
+          trailing: Semantics(
+            label: 'Lembretes de manutenção ativados',
+            hint: 'Interruptor para ativar ou desativar notificações de manutenções pendentes',
+            onTap: () {
               // TODO: Implement notification toggle
             },
+            child: Switch(
+              value: true, // TODO: Connect to actual setting
+              onChanged: (value) {
+                // TODO: Implement notification toggle
+              },
+            ),
           ),
         ),
         _buildSettingsItem(
@@ -365,11 +382,18 @@ class SettingsPage extends StatelessWidget {
           icon: Icons.local_gas_station,
           title: 'Alertas de Combustível',
           subtitle: 'Notificações sobre consumo e economia',
-          trailing: Switch(
-            value: false, // TODO: Connect to actual setting
-            onChanged: (value) {
+          trailing: Semantics(
+            label: 'Alertas de combustível desativados',
+            hint: 'Interruptor para ativar ou desativar notificações sobre consumo e economia de combustível',
+            onTap: () {
               // TODO: Implement fuel alerts toggle
             },
+            child: Switch(
+              value: false, // TODO: Connect to actual setting
+              onChanged: (value) {
+                // TODO: Implement fuel alerts toggle
+              },
+            ),
           ),
         ),
       ],
@@ -583,7 +607,7 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
+                SemanticText.heading(
                   title,
                   style: TextStyle(
                     fontSize: 18,
@@ -629,7 +653,7 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  SemanticText.heading(
                     title,
                     style: TextStyle(
                       fontSize: 16,
@@ -638,7 +662,7 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  SemanticText.subtitle(
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
@@ -1024,19 +1048,12 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
             foregroundColor: Colors.white,
           ),
           child: _isGenerating
-              ? const Row(
+              ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text('Gerando...'),
+                    StandardLoadingView.inline(color: Colors.white),
+                    const SizedBox(width: 8),
+                    const Text('Gerando...'),
                   ],
                 )
               : const Text('Gerar Dados'),
@@ -1218,9 +1235,9 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
             const SizedBox(height: 20),
             
             if (_isLoading) ...[
-              const CentralizedLoadingWidget(
+              StandardLoadingView.initial(
                 message: 'Carregando estatísticas...',
-                showMessage: true,
+                height: 200,
               ),
             ] else if (_currentStats != null) ...[
               // Current Stats
@@ -1370,19 +1387,12 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
             foregroundColor: Colors.white,
           ),
           child: _isClearing
-              ? const Row(
+              ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text('Limpando...'),
+                    StandardLoadingView.inline(color: Colors.white),
+                    const SizedBox(width: 8),
+                    const Text('Limpando...'),
                   ],
                 )
               : Text(_selectedClearType == 'all' ? 'Limpar Tudo' : 'Limpar Selecionados'),

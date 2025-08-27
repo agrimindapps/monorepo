@@ -53,6 +53,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final UpdateProfile _updateProfile;
   final DeleteAccount _deleteAccount;
 
+  // Rate limiting properties
+  DateTime? _lastLoginAttempt;
+  DateTime? _lastRegisterAttempt;
+  int _loginAttempts = 0;
+  int _registerAttempts = 0;
+  static const int _maxAttempts = 5;
+  static const Duration _cooldownPeriod = Duration(minutes: 2);
+
   AuthNotifier(
     this._signInWithEmail,
     this._signUpWithEmail,
@@ -83,7 +91,52 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  // Rate limiting helper methods
+  bool _canAttemptLogin() {
+    if (_lastLoginAttempt == null) return true;
+    
+    final timeSinceLastAttempt = DateTime.now().difference(_lastLoginAttempt!);
+    if (timeSinceLastAttempt > _cooldownPeriod) {
+      _loginAttempts = 0;
+      return true;
+    }
+    
+    return _loginAttempts < _maxAttempts;
+  }
+
+  bool _canAttemptRegister() {
+    if (_lastRegisterAttempt == null) return true;
+    
+    final timeSinceLastAttempt = DateTime.now().difference(_lastRegisterAttempt!);
+    if (timeSinceLastAttempt > _cooldownPeriod) {
+      _registerAttempts = 0;
+      return true;
+    }
+    
+    return _registerAttempts < _maxAttempts;
+  }
+
+  String _getRateLimitMessage(int attempts) {
+    final remainingTime = _cooldownPeriod.inMinutes - 
+      DateTime.now().difference(_lastLoginAttempt ?? _lastRegisterAttempt!).inMinutes;
+    
+    return 'Muitas tentativas. Aguarde ${remainingTime > 0 ? remainingTime : 1} minuto(s) antes de tentar novamente.';
+  }
+
   Future<bool> signInWithEmail(String email, String password) async {
+    // Check rate limiting
+    if (!_canAttemptLogin()) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        error: _getRateLimitMessage(_loginAttempts),
+      );
+      return false;
+    }
+
+    // Record attempt
+    _lastLoginAttempt = DateTime.now();
+    _loginAttempts++;
+
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
     final params = SignInWithEmailParams(email: email, password: password);
@@ -98,6 +151,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       },
       (user) {
+        // Reset attempts on successful login
+        _loginAttempts = 0;
+        _lastLoginAttempt = null;
+        
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
@@ -108,6 +165,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> signUpWithEmail(String email, String password, String? name) async {
+    // Check rate limiting
+    if (!_canAttemptRegister()) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        error: _getRateLimitMessage(_registerAttempts),
+      );
+      return false;
+    }
+
+    // Record attempt
+    _lastRegisterAttempt = DateTime.now();
+    _registerAttempts++;
+
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
     final params = SignUpWithEmailParams(email: email, password: password, name: name);
@@ -122,6 +192,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       },
       (user) {
+        // Reset attempts on successful registration
+        _registerAttempts = 0;
+        _lastRegisterAttempt = null;
+        
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user: user,

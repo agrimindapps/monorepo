@@ -30,6 +30,7 @@ class CalorieState {
     this.validationErrors = const [],
     this.history = const [],
     this.currentStep = 0,
+    this.isTransitionLoading = false,
   });
 
   final CalorieCalculatorStatus status;
@@ -39,6 +40,7 @@ class CalorieState {
   final List<String> validationErrors;
   final List<CalorieOutput> history;
   final int currentStep; // Para navegação step-by-step no formulário
+  final bool isTransitionLoading; // Para loading states durante transições
 
   /// Getters de conveniência
   bool get isLoading => status == CalorieCalculatorStatus.loading;
@@ -71,6 +73,7 @@ class CalorieState {
     List<String>? validationErrors,
     List<CalorieOutput>? history,
     int? currentStep,
+    bool? isTransitionLoading,
   }) {
     return CalorieState(
       status: status ?? this.status,
@@ -80,6 +83,7 @@ class CalorieState {
       validationErrors: validationErrors ?? this.validationErrors,
       history: history ?? this.history,
       currentStep: currentStep ?? this.currentStep,
+      isTransitionLoading: isTransitionLoading ?? this.isTransitionLoading,
     );
   }
 }
@@ -187,6 +191,11 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
 
   void resetSteps() {
     state = state.copyWith(currentStep: 0);
+  }
+
+  /// Set transition loading state for better UX during step changes
+  void setTransitionLoading(bool isLoading) {
+    state = state.copyWith(isTransitionLoading: isLoading);
   }
 
   /// Valida step atual antes de avançar
@@ -443,8 +452,24 @@ final calorieCurrentStepProvider = Provider<int>((ref) {
 });
 
 /// Provider indicando se pode avançar para próximo step
+/// Optimized to watch state instead of calling method repeatedly
 final calorieCanProceedProvider = Provider<bool>((ref) {
-  return ref.read(calorieProvider.notifier).canProceedToNextStep();
+  final state = ref.watch(calorieProvider);
+  
+  switch (state.currentStep) {
+    case 0: // Informações básicas
+      return state.input.weight > 0 && state.input.age >= 0;
+    case 1: // Estado fisiológico
+      return (!state.input.isLactating || state.input.numberOfOffspring != null);
+    case 2: // Atividade e condição corporal
+      return true; // BodyConditionScore is non-nullable enum
+    case 3: // Condições especiais
+      return true; // Sempre pode prosseguir (campos opcionais)
+    case 4: // Revisão
+      return state.canCalculate;
+    default:
+      return false;
+  }
 });
 
 /// Provider de sugestões baseadas na entrada atual

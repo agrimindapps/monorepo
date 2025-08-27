@@ -1,0 +1,228 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+
+import '../../../../core/services/input_sanitizer.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../domain/entities/fuel_type_mapper.dart';
+import '../../domain/entities/vehicle_entity.dart';
+
+/// Provider para gerenciar o estado do formulário de veículos
+class VehicleFormProvider extends ChangeNotifier {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final AuthProvider _authProvider;
+  
+  // Controllers para campos de texto
+  final TextEditingController marcaController = TextEditingController();
+  final TextEditingController modeloController = TextEditingController();
+  final TextEditingController anoController = TextEditingController();
+  final TextEditingController corController = TextEditingController();
+  final TextEditingController placaController = TextEditingController();
+  final TextEditingController chassiController = TextEditingController();
+  final TextEditingController renavamController = TextEditingController();
+  final TextEditingController odometroController = TextEditingController();
+
+  // Estado do formulário
+  String _selectedCombustivel = 'Gasolina';
+  bool _isLoading = false;
+  File? _vehicleImage;
+  String? _lastError;
+  bool _hasChanges = false;
+  VehicleEntity? _editingVehicle;
+
+  VehicleFormProvider(this._authProvider);
+
+  // Getters
+  GlobalKey<FormState> get formKey => _formKey;
+  String get selectedCombustivel => _selectedCombustivel;
+  bool get isLoading => _isLoading;
+  File? get vehicleImage => _vehicleImage;
+  String? get lastError => _lastError;
+  bool get hasChanges => _hasChanges;
+  VehicleEntity? get editingVehicle => _editingVehicle;
+  
+  bool get canSubmit {
+    return !_isLoading &&
+           marcaController.text.isNotEmpty &&
+           modeloController.text.isNotEmpty &&
+           anoController.text.isNotEmpty &&
+           corController.text.isNotEmpty &&
+           placaController.text.isNotEmpty &&
+           odometroController.text.isNotEmpty;
+  }
+
+  @override
+  void dispose() {
+    marcaController.dispose();
+    modeloController.dispose();
+    anoController.dispose();
+    corController.dispose();
+    placaController.dispose();
+    chassiController.dispose();
+    renavamController.dispose();
+    odometroController.dispose();
+    super.dispose();
+  }
+
+  /// Inicializa o formulário para edição
+  void initializeForEdit(VehicleEntity vehicle) {
+    _editingVehicle = vehicle;
+    
+    marcaController.text = vehicle.brand;
+    modeloController.text = vehicle.model;
+    anoController.text = vehicle.year.toString();
+    corController.text = vehicle.color;
+    placaController.text = vehicle.licensePlate;
+    chassiController.text = vehicle.metadata['chassi'] as String? ?? '';
+    renavamController.text = vehicle.metadata['renavam'] as String? ?? '';
+    odometroController.text = vehicle.currentOdometer.toString();
+    
+    _selectedCombustivel = vehicle.supportedFuels.isNotEmpty 
+        ? FuelTypeMapper.toString(vehicle.supportedFuels.first)
+        : 'Gasolina';
+    
+    final imagePath = vehicle.metadata['foto'] as String?;
+    if (imagePath != null && imagePath.isNotEmpty) {
+      _vehicleImage = File(imagePath);
+    }
+    
+    notifyListeners();
+  }
+
+  /// Limpa o formulário
+  void clearForm() {
+    marcaController.clear();
+    modeloController.clear();
+    anoController.clear();
+    corController.clear();
+    placaController.clear();
+    chassiController.clear();
+    renavamController.clear();
+    odometroController.clear();
+    
+    _selectedCombustivel = 'Gasolina';
+    _vehicleImage = null;
+    _lastError = null;
+    _hasChanges = false;
+    _editingVehicle = null;
+    
+    notifyListeners();
+  }
+
+  /// Atualiza combustível selecionado
+  void updateSelectedCombustivel(String combustivel) {
+    if (_selectedCombustivel != combustivel) {
+      _selectedCombustivel = combustivel;
+      _hasChanges = true;
+      notifyListeners();
+    }
+  }
+
+  /// Atualiza imagem do veículo
+  void updateVehicleImage(File? image) {
+    if (_vehicleImage != image) {
+      _vehicleImage = image;
+      _hasChanges = true;
+      notifyListeners();
+    }
+  }
+
+  /// Remove imagem do veículo
+  void removeVehicleImage() {
+    try {
+      if (_vehicleImage != null && _vehicleImage!.existsSync()) {
+        _vehicleImage!.deleteSync();
+      }
+    } catch (e) {
+      // Ignora erros de limpeza
+    }
+
+    _vehicleImage = null;
+    _hasChanges = true;
+    notifyListeners();
+  }
+
+  /// Marca campo como alterado
+  void markAsChanged() {
+    if (!_hasChanges) {
+      _hasChanges = true;
+      notifyListeners();
+    }
+  }
+
+  /// Define estado de loading
+  void setLoading(bool loading) {
+    if (_isLoading != loading) {
+      _isLoading = loading;
+      notifyListeners();
+    }
+  }
+
+  /// Define erro
+  void setError(String? error) {
+    if (_lastError != error) {
+      _lastError = error;
+      notifyListeners();
+    }
+  }
+
+  /// Valida formulário
+  bool validateForm() {
+    setError(null);
+    
+    if (!_formKey.currentState!.validate()) {
+      setError('Por favor, corrija os erros no formulário');
+      return false;
+    }
+    
+    if (!canSubmit) {
+      setError('Por favor, preencha todos os campos obrigatórios');
+      return false;
+    }
+    
+    return true;
+  }
+
+  /// Sanitização robusta de entrada para prevenir XSS e injeções
+  /// Agora usando InputSanitizer centralizado
+  String _sanitizeInput(String input) {
+    return InputSanitizer.sanitize(input);
+  }
+
+  /// Cria entidade do veículo a partir dos dados do formulário
+  /// Aplica sanitização específica para cada tipo de campo
+  VehicleEntity createVehicleEntity() {
+    final fuelType = FuelTypeMapper.fromString(_selectedCombustivel);
+    final odometroValue = double.tryParse(odometroController.text.replaceAll(',', '.')) ?? 0.0;
+    
+    // Aplicar sanitização específica para cada campo
+    final sanitizedMarca = InputSanitizer.sanitizeName(marcaController.text);
+    final sanitizedModelo = InputSanitizer.sanitizeName(modeloController.text);
+    final sanitizedCor = InputSanitizer.sanitizeName(corController.text);
+    final sanitizedPlaca = InputSanitizer.sanitize(placaController.text).toUpperCase();
+    final sanitizedChassi = InputSanitizer.sanitize(chassiController.text);
+    final sanitizedRenavam = InputSanitizer.sanitizeNumeric(renavamController.text);
+    
+    return VehicleEntity(
+      id: _editingVehicle?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      userId: _authProvider.userId,
+      name: '$sanitizedMarca $sanitizedModelo',
+      brand: sanitizedMarca,
+      model: sanitizedModelo,
+      year: int.tryParse(anoController.text) ?? DateTime.now().year,
+      color: sanitizedCor,
+      licensePlate: sanitizedPlaca,
+      type: VehicleType.car, // Padrão para carro
+      supportedFuels: [fuelType],
+      currentOdometer: odometroValue,
+      createdAt: _editingVehicle?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
+      metadata: {
+        'chassi': sanitizedChassi,
+        'renavam': sanitizedRenavam,
+        'foto': _vehicleImage?.path,
+        'odometroInicial': odometroValue,
+      },
+    );
+  }
+}

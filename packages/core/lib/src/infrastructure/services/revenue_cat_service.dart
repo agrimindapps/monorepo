@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -44,7 +45,9 @@ class RevenueCatService implements ISubscriptionRepository {
 
       _isInitialized = true;
     } catch (e) {
-      print('Erro ao inicializar RevenueCat: $e');
+      if (kDebugMode) {
+        print('Erro ao inicializar RevenueCat: $e');
+      }
     }
   }
 

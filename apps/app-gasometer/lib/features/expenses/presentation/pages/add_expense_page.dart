@@ -94,10 +94,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
       // Step 3: Criando provider do formulário
       _updateProgress('Configurando formulário...', 0.5);
       final formProvider = ExpenseFormProvider(
-        vehiclesProvider,
         initialVehicleId: widget.vehicleId,
         userId: widget.userId,
       );
+
+      // Set context for dependency injection access
+      formProvider.setContext(context);
 
       if (!mounted) {
         formProvider.dispose();

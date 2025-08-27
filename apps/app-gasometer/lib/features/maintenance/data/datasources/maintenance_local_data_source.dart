@@ -3,8 +3,8 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/local_data_service.dart';
 import '../../domain/entities/maintenance_entity.dart';
-import '../models/maintenance_model.dart';
 import '../mappers/maintenance_mapper.dart';
+import '../models/maintenance_model.dart';
 
 abstract class MaintenanceLocalDataSource {
   Future<List<MaintenanceEntity>> getAllMaintenanceRecords();

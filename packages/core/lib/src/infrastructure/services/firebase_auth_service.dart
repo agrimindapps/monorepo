@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/user_entity.dart' as core_entities;
 import '../../domain/repositories/i_auth_repository.dart';
@@ -112,22 +113,34 @@ class FirebaseAuthService implements IAuthRepository {
   @override
   Future<Either<Failure, core_entities.UserEntity>> signInAnonymously() async {
     try {
-      print('🔄 Firebase: Tentando signInAnonymously...');
+      if (kDebugMode) {
+        print('🔄 Firebase: Tentando signInAnonymously...');
+      }
       final credential = await _firebaseAuth.signInAnonymously();
-      print('🔄 Firebase: Credential recebido: ${credential.user?.uid}');
+      if (kDebugMode) {
+        print('🔄 Firebase: Credential recebido: ${credential.user?.uid}');
+      }
 
       if (credential.user == null) {
-        print('❌ Firebase: credential.user é null');
+        if (kDebugMode) {
+          print('❌ Firebase: credential.user é null');
+        }
         return const Left(AuthFailure('Falha no login anônimo'));
       }
 
-      print('✅ Firebase: Login anônimo bem-sucedido');
+      if (kDebugMode) {
+        print('✅ Firebase: Login anônimo bem-sucedido');
+      }
       return Right(_mapFirebaseUserToEntity(credential.user!));
     } on FirebaseAuthException catch (e) {
-      print('❌ Firebase: FirebaseAuthException - code: ${e.code}, message: ${e.message}');
+      if (kDebugMode) {
+        print('❌ Firebase: FirebaseAuthException - code: ${e.code}, message: ${e.message}');
+      }
       return Left(AuthFailure(_mapFirebaseAuthError(e)));
     } catch (e) {
-      print('❌ Firebase: Erro geral - $e');
+      if (kDebugMode) {
+        print('❌ Firebase: Erro geral - $e');
+      }
       return Left(AuthFailure('Erro inesperado: $e'));
     }
   }

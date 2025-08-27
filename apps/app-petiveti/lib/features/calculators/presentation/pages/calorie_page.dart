@@ -2,19 +2,170 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../domain/entities/calorie_output.dart';
 import '../providers/calorie_provider.dart';
 import '../widgets/calorie_activity_condition_step.dart';
+import '../widgets/calorie_animation_manager.dart';
 import '../widgets/calorie_basic_info_step.dart';
+import '../widgets/calorie_dialog_manager.dart';
+import '../widgets/calorie_menu_handler.dart';
+import '../widgets/calorie_navigation_handler.dart';
 import '../widgets/calorie_physiological_step.dart';
-import '../widgets/calorie_quick_presets.dart';
 import '../widgets/calorie_result_card.dart';
 import '../widgets/calorie_review_step.dart';
 import '../widgets/calorie_special_conditions_step.dart';
 import '../widgets/calorie_step_indicator.dart';
+import '../../../../shared/constants/calorie_constants.dart';
 
-/// Página principal da Calculadora de Necessidades Calóricas
-/// Implementa formulário step-by-step para melhor UX
+/// **Refactored Calorie Calculator Page - Clean Architecture Implementation**
+/// 
+/// A comprehensive calorie calculation interface built with Clean Architecture
+/// principles and optimized for performance and maintainability.
+/// 
+/// ## Responsibilities:
+/// - **Page Layout**: Main structure and responsive design coordination
+/// - **Handler Coordination**: Manages specialized handlers for different concerns
+/// - **Widget Lifecycle**: Proper initialization and disposal of resources
+/// - **Separation of Concerns**: Each handler manages a specific aspect
+/// 
+/// ## Architecture Components:
+/// - **CalorieAnimationManager**: Handles all animation logic and transitions
+/// - **CalorieNavigationHandler**: Manages step navigation and validation
+/// - **CalorieDialogManager**: Handles all dialog interactions and sharing
+/// - **CalorieMenuHandler**: Manages menu actions and presets
+/// - **PageController**: Controls the multi-step form navigation
+/// 
+/// ## Unit Testing Strategy & Documentation:
+/// 
+/// ### **1. Widget Testing Approach:**
+/// ```dart
+/// testWidgets('CaloriePage navigation flow', (tester) async {
+///   await tester.pumpWidget(createTestWidget(CaloriePage()));
+///   
+///   // Test initial state
+///   expect(find.byType(CalorieBasicInfoStep), findsOneWidget);
+///   
+///   // Test navigation to next step
+///   await tester.tap(find.text('Avançar'));
+///   await tester.pumpAndSettle();
+///   expect(find.byType(CaloriePhysiologicalStep), findsOneWidget);
+/// });
+/// ```
+/// 
+/// ### **2. Provider/State Testing:**
+/// ```dart
+/// test('calorie calculation provider state management', () {
+///   final container = ProviderContainer();
+///   addTearDown(container.dispose);
+///   
+///   // Test initial state
+///   expect(container.read(calorieProvider).currentStep, equals(0));
+///   
+///   // Test input validation
+///   container.read(calorieProvider.notifier).updateInput(testInput);
+///   expect(container.read(calorieCanProceedProvider), isTrue);
+/// });
+/// ```
+/// 
+/// ### **3. Handler Integration Testing:**
+/// ```dart
+/// group('CalorieNavigationHandler tests', () {
+///   late CalorieNavigationHandler handler;
+///   late PageController pageController;
+///   late ProviderContainer container;
+///   
+///   setUp(() {
+///     pageController = PageController();
+///     container = ProviderContainer();
+///     handler = CalorieNavigationHandler(
+///       pageController: pageController,
+///       ref: container,
+///       onTransition: (_) {},
+///     );
+///   });
+///   
+///   test('should advance to next step when valid', () async {
+///     // Setup valid input state
+///     await handler.goToNextStep(false);
+///     expect(pageController.page, equals(1.0));
+///   });
+/// });
+/// ```
+/// 
+/// ### **4. Animation Testing:**
+/// ```dart
+/// testWidgets('animation manager lifecycle', (tester) async {
+///   final animationManager = CalorieAnimationManager();
+///   animationManager.initialize(tester);
+///   
+///   // Test animation initialization
+///   expect(animationManager.fadeAnimation, isNotNull);
+///   
+///   // Test transition animations
+///   animationManager.animateTransition(() {});
+///   await tester.pump();
+///   
+///   // Test cleanup
+///   animationManager.dispose();
+/// });
+/// ```
+/// 
+/// ### **5. Dialog Testing:**
+/// ```dart
+/// testWidgets('dialog manager interactions', (tester) async {
+///   final dialogManager = CalorieDialogManager(
+///     context: tester.element(find.byType(MaterialApp)),
+///     ref: container,
+///   );
+///   
+///   // Test preset loading dialog
+///   dialogManager.loadPresetsDialog();
+///   await tester.pumpAndSettle();
+///   expect(find.byType(Dialog), findsOneWidget);
+/// });
+/// ```
+/// 
+/// ### **6. Integration Testing Checklist:**
+/// - [ ] **Complete User Flow**: From basic info to final calculation
+/// - [ ] **Error State Handling**: Network failures, validation errors
+/// - [ ] **Loading States**: All transition loading indicators
+/// - [ ] **Accessibility**: Semantic labels and screen reader support
+/// - [ ] **Responsive Design**: Different screen sizes and orientations
+/// - [ ] **Performance**: Animation smoothness, memory usage
+/// - [ ] **Data Persistence**: History saving and favorite management
+/// 
+/// ### **7. Mock Strategies:**
+/// ```dart
+/// class MockCalorieProvider extends StateNotifier<CalorieState> 
+///     implements CalorieNotifier {
+///   MockCalorieProvider() : super(const CalorieState.initial());
+///   
+///   @override
+///   Future<void> calculate() async {
+///     state = state.copyWith(isLoading: true);
+///     // Mock calculation delay
+///     await Future.delayed(Duration(milliseconds: 100));
+///     state = state.copyWith(
+///       isLoading: false,
+///       output: MockCalorieOutput(),
+///     );
+///   }
+/// }
+/// ```
+/// 
+/// ### **8. Performance Testing:**
+/// - **Navigation Performance**: Measure step transition times
+/// - **Memory Management**: Monitor for handler disposal leaks
+/// - **Animation Performance**: Frame rate during transitions
+/// - **Provider Efficiency**: State update frequency and optimization
+/// 
+/// ### **9. Edge Case Testing:**
+/// - **Rapid Navigation**: Fast tapping between steps
+/// - **Form Validation**: Invalid input combinations
+/// - **Network Conditions**: Offline/online state changes
+/// - **Lifecycle Events**: App backgrounding during calculations
+/// 
+/// This comprehensive testing approach ensures reliability, performance,
+/// and maintainability of the calorie calculation feature.
 class CaloriePage extends ConsumerStatefulWidget {
   const CaloriePage({super.key});
 
@@ -24,132 +175,176 @@ class CaloriePage extends ConsumerStatefulWidget {
 
 class _CaloriePageState extends ConsumerState<CaloriePage> 
     with TickerProviderStateMixin {
+  
+  // Specialized handlers for different concerns
   late PageController _pageController;
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
+  late CalorieAnimationManager _animationManager;
+  late CalorieNavigationHandler _navigationHandler;
+  late CalorieDialogManager _dialogManager;
+  late CalorieMenuHandler _menuHandler;
 
   @override
   void initState() {
     super.initState();
+    _initializeComponents();
+  }
+
+  void _initializeComponents() {
+    // Initialize page controller
     _pageController = PageController();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
+    
+    // Initialize animation manager
+    _animationManager = CalorieAnimationManager();
+    _animationManager.initialize(this);
+    
+    // Initialize navigation handler
+    _navigationHandler = CalorieNavigationHandler(
+      pageController: _pageController,
+      ref: ref,
+      onTransition: _animationManager.animateTransition,
     );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    
+    // Initialize dialog manager
+    _dialogManager = CalorieDialogManager(
+      context: context,
+      ref: ref,
     );
-    _fadeController.forward();
+    
+    // Initialize menu handler
+    _menuHandler = CalorieMenuHandler(
+      dialogManager: _dialogManager,
+      ref: ref,
+      onPresetLoaded: () => _navigationHandler.goToPage(CalorieConstants.reviewStepIndex),
+      onReset: () => _navigationHandler.resetToFirstStep(),
+      onHistoryItemSelected: () {
+        // Navigate to results or review step after loading history
+      },
+    );
   }
 
   @override
   void dispose() {
-    // Para animação em andamento para evitar memory leak
-    if (_fadeController.isAnimating) {
-      _fadeController.stop();
-    }
     _pageController.dispose();
-    _fadeController.dispose();
+    _animationManager.dispose();
+    _navigationHandler.dispose();
+    _menuHandler.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(calorieProvider);
-    final currentStep = state.currentStep;
     
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Necessidades Calóricas'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            onPressed: () => _showCalorieGuide(context),
-            tooltip: 'Guia de Cálculo',
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) => _handleMenuAction(value),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'presets',
-                child: ListTile(
-                  leading: Icon(Icons.speed),
-                  title: Text('Presets Rápidos'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'reset',
-                child: ListTile(
-                  leading: Icon(Icons.refresh),
-                  title: Text('Resetar'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'history',
-                child: ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('Histórico'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: ListTile(
-                  leading: Icon(Icons.share),
-                  title: Text('Exportar'),
-                  dense: true,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          // Indicador de progresso
           _buildProgressIndicator(state),
-          
-          // Conteúdo do step atual
-          Expanded(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: state.hasResult 
-                  ? _buildResultView(state)
-                  : _buildStepperView(state),
-            ),
-          ),
-          
-          // Barra de navegação
+          _buildMainContent(state),
           _buildNavigationBar(state),
         ],
       ),
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text(CalorieConstants.appBarTitle),
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => context.pop(),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.help_outline),
+          onPressed: () => _menuHandler.handleMenuAction('help'),
+          tooltip: CalorieConstants.helpTooltip,
+        ),
+        PopupMenuButton<String>(
+          onSelected: _menuHandler.handleMenuAction,
+          itemBuilder: (context) => _menuHandler.getMenuItems(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildProgressIndicator(CalorieState state) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
+    return AnimatedContainer(
+      duration: CalorieConstants.progressContainerAnimationDuration,
+      padding: CalorieConstants.progressIndicatorPadding,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: state.isTransitionLoading 
+            ? Theme.of(context).colorScheme.primaryContainer.withValues(
+                alpha: CalorieColors.primaryContainerOpacity)
+            : Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(
+              alpha: state.isTransitionLoading 
+                  ? CalorieColors.shadowOpacityLoading 
+                  : CalorieColors.shadowOpacity),
+            blurRadius: state.isTransitionLoading 
+                ? CalorieConstants.progressShadowBlurRadiusLoading 
+                : CalorieConstants.progressShadowBlurRadius,
+            offset: CalorieConstants.progressShadowOffset,
           ),
         ],
       ),
-      child: CalorieStepIndicator(
-        currentStep: state.currentStep,
-        totalSteps: state.totalSteps,
-        isComplete: state.hasResult,
+      child: Stack(
+        children: [
+          CalorieStepIndicator(
+            currentStep: state.currentStep,
+            totalSteps: state.totalSteps,
+            isComplete: state.hasResult,
+          ),
+          if (state.isTransitionLoading)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface.withValues(
+                      alpha: CalorieColors.surfaceOverlayOpacity),
+                  borderRadius: BorderRadius.circular(CalorieConstants.progressBorderRadius),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: CalorieConstants.loadingIndicatorSize,
+                        height: CalorieConstants.loadingIndicatorSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: CalorieConstants.loadingSpacing),
+                      Text(
+                        CalorieConstants.processingText,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: CalorieConstants.processingTextWeight,
+                          fontSize: CalorieConstants.processingTextSize,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent(CalorieState state) {
+    return Expanded(
+      child: FadeTransition(
+        opacity: _animationManager.fadeAnimation ?? 
+          const AlwaysStoppedAnimation(1.0),
+        child: state.hasResult 
+            ? _buildResultView(state)
+            : _buildStepperView(state),
       ),
     );
   }
@@ -157,44 +352,32 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   Widget _buildStepperView(CalorieState state) {
     return PageView(
       controller: _pageController,
-      onPageChanged: (index) {
-        ref.read(calorieProvider.notifier).goToStep(index);
-        _animateTransition();
-      },
+      onPageChanged: _navigationHandler.onPageChanged,
       children: [
-        // Step 0: Informações Básicas
         CalorieBasicInfoStep(
           input: state.input,
           validationErrors: state.validationErrors,
           onInputChanged: (input) => 
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
-        
-        // Step 1: Estado Fisiológico
         CaloriePhysiologicalStep(
           input: state.input,
           validationErrors: state.validationErrors,
           onInputChanged: (input) => 
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
-        
-        // Step 2: Atividade e Condição Corporal
         CalorieActivityConditionStep(
           input: state.input,
           validationErrors: state.validationErrors,
           onInputChanged: (input) => 
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
-        
-        // Step 3: Condições Especiais
         CalorieSpecialConditionsStep(
           input: state.input,
           validationErrors: state.validationErrors,
           onInputChanged: (input) => 
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
-        
-        // Step 4: Revisão e Cálculo
         CalorieReviewStep(
           input: state.input,
           isLoading: state.isLoading,
@@ -207,23 +390,18 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
 
   Widget _buildResultView(CalorieState state) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: CalorieConstants.mainContentPadding,
       child: Column(
         children: [
-          // Resultado principal
           CalorieResultCard(
             output: state.output!,
             onSaveAsFavorite: () => ref.read(calorieProvider.notifier).saveAsFavorite(),
             onRecalculate: () {
               ref.read(calorieProvider.notifier).clearResult();
-              ref.read(calorieProvider.notifier).resetSteps();
-              _goToPage(0);
+              _navigationHandler.resetToFirstStep();
             },
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Botões de ação
+          const SizedBox(height: CalorieConstants.actionButtonsSpacing),
           _buildActionButtons(state),
         ],
       ),
@@ -235,21 +413,20 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => _showShareDialog(state.output!),
+            onPressed: () => _dialogManager.shareResult(state.output!),
             icon: const Icon(Icons.share),
-            label: const Text('Compartilhar'),
+            label: const Text(CalorieConstants.shareButtonText),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: CalorieConstants.actionButtonsSpacing),
         Expanded(
           child: ElevatedButton.icon(
             onPressed: () {
               ref.read(calorieProvider.notifier).clearResult();
-              ref.read(calorieProvider.notifier).resetSteps();
-              _goToPage(0);
+              _navigationHandler.resetToFirstStep();
             },
             icon: const Icon(Icons.calculate),
-            label: const Text('Novo Cálculo'),
+            label: const Text(CalorieConstants.newCalculationButtonText),
           ),
         ),
       ],
@@ -260,334 +437,67 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
     if (state.hasResult) return const SizedBox.shrink();
     
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: CalorieConstants.navigationBarPadding,
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border(
-          top: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+          top: BorderSide(color: Colors.grey.withValues(
+              alpha: CalorieConstants.navigationBorderOpacity)),
         ),
       ),
       child: Row(
         children: [
-          // Botão Voltar
           if (!state.isFirstStep) ...[
             OutlinedButton.icon(
-              onPressed: () => _goToPreviousStep(),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Voltar'),
+              onPressed: state.isTransitionLoading ? null : _navigationHandler.goToPreviousStep,
+              icon: state.isTransitionLoading 
+                  ? const SizedBox(
+                      width: CalorieConstants.loadingIndicatorSize,
+                      height: CalorieConstants.loadingIndicatorSize,
+                      child: CircularProgressIndicator(
+                          strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth),
+                    )
+                  : const Icon(Icons.arrow_back),
+              label: const Text(CalorieConstants.backButtonText),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: CalorieConstants.navigationButtonSpacing),
           ],
-          
-          // Espaçador
           const Spacer(),
-          
-          // Botão Avançar/Calcular
           Consumer(
             builder: (context, ref, child) {
               final canProceed = ref.watch(calorieCanProceedProvider);
               final isLastStep = state.isLastStep;
+              final isTransitionLoading = state.isTransitionLoading;
               
-              return ElevatedButton.icon(
-                onPressed: canProceed ? () => _goToNextStep(isLastStep) : null,
-                icon: Icon(isLastStep ? Icons.calculate : Icons.arrow_forward),
-                label: Text(isLastStep ? 'Calcular' : 'Avançar'),
+              return AnimatedContainer(
+                duration: CalorieConstants.navigationButtonAnimationDuration,
+                child: ElevatedButton.icon(
+                  onPressed: (canProceed && !isTransitionLoading) ? 
+                    () => _navigationHandler.goToNextStep(isLastStep) : null,
+                  icon: isTransitionLoading
+                      ? const SizedBox(
+                          width: CalorieConstants.loadingIndicatorSize,
+                          height: CalorieConstants.loadingIndicatorSize,
+                          child: CircularProgressIndicator(
+                            strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(isLastStep ? Icons.calculate : Icons.arrow_forward),
+                  label: AnimatedSwitcher(
+                    duration: CalorieConstants.animatedSwitcherDuration,
+                    child: Text(
+                      isTransitionLoading
+                          ? (isLastStep ? CalorieConstants.calculatingText : CalorieConstants.loadingText)
+                          : (isLastStep ? CalorieConstants.calculateButtonText : CalorieConstants.advanceButtonText),
+                      key: ValueKey(isTransitionLoading 
+                          ? CalorieConstants.loadingAnimationKey 
+                          : CalorieConstants.normalAnimationKey),
+                    ),
+                  ),
+                ),
               );
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _goToNextStep(bool isLastStep) {
-    if (isLastStep) {
-      // Executar cálculo
-      ref.read(calorieProvider.notifier).calculate();
-    } else {
-      // Avançar para próximo step
-      ref.read(calorieProvider.notifier).nextStep();
-      _goToPage(ref.read(calorieProvider).currentStep);
-    }
-  }
-
-  void _goToPreviousStep() {
-    ref.read(calorieProvider.notifier).previousStep();
-    _goToPage(ref.read(calorieProvider).currentStep);
-  }
-
-  void _goToPage(int page) {
-    _pageController.animateToPage(
-      page,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _animateTransition();
-  }
-
-  void _animateTransition() {
-    // Verificar se o widget ainda está montado e controller não foi disposed
-    if (!mounted || _fadeController.isDisposed) return;
-    
-    _fadeController.reset();
-    _fadeController.forward();
-  }
-
-  void _handleMenuAction(String value) {
-    switch (value) {
-      case 'presets':
-        _showPresetsDialog();
-        break;
-      case 'reset':
-        _showResetDialog();
-        break;
-      case 'history':
-        _showHistoryDialog();
-        break;
-      case 'export':
-        _showExportDialog();
-        break;
-    }
-  }
-
-  void _showPresetsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Presets Rápidos'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: CalorieQuickPresets(
-            onPresetSelected: (preset) {
-              ref.read(calorieProvider.notifier).loadPreset(preset);
-              Navigator.of(context).pop();
-              _goToPage(4); // Ir direto para revisão
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showResetDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resetar Calculadora'),
-        content: const Text(
-          'Isso irá limpar todos os dados inseridos. Deseja continuar?'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(calorieProvider.notifier).reset();
-              Navigator.of(context).pop();
-              _goToPage(0);
-            },
-            child: const Text('Resetar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showHistoryDialog() {
-    final history = ref.read(calorieHistoryProvider);
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Histórico de Cálculos'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 400,
-          child: history.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('Nenhum cálculo realizado ainda'),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: history.length,
-                  itemBuilder: (context, index) {
-                    final result = history[index];
-                    return ListTile(
-                      title: Text('${result.dailyEnergyRequirement.round()} kcal/dia'),
-                      subtitle: Text(
-                        '${result.input.species.displayName} • ${result.input.weight}kg • '
-                        '${result.calculatedAt?.day}/${result.calculatedAt?.month}',
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.restore),
-                        onPressed: () {
-                          ref.read(calorieProvider.notifier).loadFromHistory(index);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    );
-                  },
-                ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showExportDialog() {
-    final output = ref.read(calorieOutputProvider);
-    if (output == null) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exportar Resultado'),
-        content: const Text(
-          'Escolha como deseja exportar o resultado do cálculo:'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              // TODO: Implementar export para PDF
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Export PDF em desenvolvimento')),
-              );
-            },
-            child: const Text('PDF'),
-          ),
-          ElevatedButton(
-            onPressed: () => _shareResult(output),
-            child: const Text('Compartilhar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showShareDialog(CalorieOutput output) {
-    _shareResult(output);
-  }
-
-  void _shareResult(CalorieOutput output) {
-    final text = '''
-🐾 Cálculo de Necessidades Calóricas
-
-Animal: ${output.input.species.displayName}
-Peso: ${output.input.weight}kg
-Idade: ${output.input.age} meses
-
-📊 Resultados:
-• RER: ${output.restingEnergyRequirement.round()} kcal/dia
-• DER: ${output.dailyEnergyRequirement.round()} kcal/dia
-• Proteína: ${output.proteinRequirement.round()}g/dia
-• Água: ${output.waterRequirement.round()}ml/dia
-
-🍽️ Alimentação:
-• ${output.feedingRecommendations.mealsPerDay}x refeições/dia
-• ${output.feedingRecommendations.gramsPerMeal.round()}g por refeição
-
-Calculado em: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}
-via PetiVeti App
-''';
-
-    // TODO: Implementar share nativo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Texto copiado para área de transferência'),
-        action: SnackBarAction(
-          label: 'Ver',
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Resultado para Compartilhar'),
-                content: SingleChildScrollView(
-                  child: Text(text),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Fechar'),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  void _showCalorieGuide(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Guia de Cálculo Calórico'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Fórmulas Utilizadas:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• RER = 70 × peso^0.75 (>2kg)'),
-              Text('• RER = 30 × peso + 70 (≤2kg)'),
-              Text('• DER = RER × fatores multiplicadores'),
-              SizedBox(height: 16),
-              Text(
-                'Fatores Multiplicadores:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• Adulto normal: 1.6x'),
-              Text('• Castrado: 1.4x'),
-              Text('• Gestação: 1.8-2.6x'),
-              Text('• Lactação: 2.0x + 0.25x/filhote'),
-              Text('• Crescimento: 2.0-3.0x'),
-              Text('• Idoso: 1.2x'),
-              SizedBox(height: 16),
-              Text(
-                'Importante:',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
-              ),
-              SizedBox(height: 8),
-              Text('• Valores são estimativas'),
-              Text('• Monitorar peso regularmente'),
-              Text('• Consultar veterinário para casos especiais'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendi'),
           ),
         ],
       ),

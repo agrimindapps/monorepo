@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/error/app_error.dart';
+import '../../../../core/error/error_handler.dart';
+import '../../../../core/error/error_reporter.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/usecases/add_fuel_record.dart';
@@ -12,6 +15,31 @@ import '../../domain/usecases/get_fuel_analytics.dart';
 import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../domain/usecases/search_fuel_records.dart';
 import '../../domain/usecases/update_fuel_record.dart';
+
+// Statistics models for caching
+class FuelStatistics {
+  final double totalLiters;
+  final double totalCost;
+  final double averagePrice;
+  final double averageConsumption;
+  final int totalRecords;
+  final DateTime lastUpdated;
+
+  const FuelStatistics({
+    required this.totalLiters,
+    required this.totalCost,
+    required this.averagePrice,
+    required this.averageConsumption,
+    required this.totalRecords,
+    required this.lastUpdated,
+  });
+
+  bool get needsRecalculation {
+    final now = DateTime.now();
+    const maxCacheTime = Duration(minutes: 5);
+    return now.difference(lastUpdated) > maxCacheTime;
+  }
+}
 
 @injectable
 class FuelProvider extends ChangeNotifier {
@@ -24,6 +52,8 @@ class FuelProvider extends ChangeNotifier {
   final GetAverageConsumption _getAverageConsumption;
   final GetTotalSpent _getTotalSpent;
   final GetRecentFuelRecords _getRecentFuelRecords;
+  final ErrorHandler _errorHandler;
+  final ErrorReporter _errorReporter;
 
   List<FuelRecordEntity> _fuelRecords = [];
   List<FuelRecordEntity> _filteredFuelRecords = [];
@@ -36,6 +66,10 @@ class FuelProvider extends ChangeNotifier {
   double _averageConsumption = 0.0;
   double _totalSpent = 0.0;
   List<FuelRecordEntity> _recentRecords = [];
+  
+  // Cached statistics
+  FuelStatistics? _cachedStatistics;
+  bool _statisticsNeedRecalculation = true;
 
   FuelProvider({
     required GetAllFuelRecords getAllFuelRecords,
@@ -47,6 +81,8 @@ class FuelProvider extends ChangeNotifier {
     required GetAverageConsumption getAverageConsumption,
     required GetTotalSpent getTotalSpent,
     required GetRecentFuelRecords getRecentFuelRecords,
+    required ErrorHandler errorHandler,
+    required ErrorReporter errorReporter,
   })  : _getAllFuelRecords = getAllFuelRecords,
         _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
         _addFuelRecord = addFuelRecord,
@@ -55,7 +91,9 @@ class FuelProvider extends ChangeNotifier {
         _searchFuelRecords = searchFuelRecords,
         _getAverageConsumption = getAverageConsumption,
         _getTotalSpent = getTotalSpent,
-        _getRecentFuelRecords = getRecentFuelRecords;
+        _getRecentFuelRecords = getRecentFuelRecords,
+        _errorHandler = errorHandler,
+        _errorReporter = errorReporter;
 
   List<FuelRecordEntity> get fuelRecords {
     // Se há busca ativa, retornar os filtrados; senão, retornar todos
@@ -68,6 +106,19 @@ class FuelProvider extends ChangeNotifier {
   double get averageConsumption => _averageConsumption;
   double get totalSpent => _totalSpent;
   List<FuelRecordEntity> get recentRecords => _recentRecords;
+  
+  // Cached statistics getter
+  FuelStatistics get statistics {
+    final records = fuelRecords;
+    if (_cachedStatistics == null || 
+        _statisticsNeedRecalculation || 
+        _cachedStatistics!.needsRecalculation ||
+        _cachedStatistics!.totalRecords != records.length) {
+      _cachedStatistics = _calculateStatistics(records);
+      _statisticsNeedRecalculation = false;
+    }
+    return _cachedStatistics!;
+  }
 
   bool get hasError => _errorMessage != null;
   bool get hasRecords => fuelRecords.isNotEmpty;
@@ -91,13 +142,24 @@ class FuelProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final result = await _getAllFuelRecords();
+    final result = await _errorHandler.handleProviderOperation(
+      () async {
+        final result = await _getAllFuelRecords();
+        return result.fold(
+          (failure) => throw _convertFailureToError(failure),
+          (records) => records,
+        );
+      },
+      providerName: 'FuelProvider',
+      methodName: 'loadAllFuelRecords',
+    );
 
     result.fold(
-      (failure) => _handleError(failure),
+      (error) => _handleError(error),
       (records) {
         _fuelRecords = records;
         _applyCurrentFilters();
+        _invalidateStatistics();
         debugPrint('🚗 Carregados ${records.length} registros de combustível');
       },
     );
@@ -121,6 +183,7 @@ class FuelProvider extends ChangeNotifier {
       (records) {
         _fuelRecords = records;
         _applyCurrentFilters();
+        _invalidateStatistics();
         debugPrint('🚗 Carregados ${records.length} registros para veículo $vehicleId');
       },
     );
@@ -145,6 +208,7 @@ class FuelProvider extends ChangeNotifier {
       (addedRecord) {
         _fuelRecords.insert(0, addedRecord); // Add to beginning (most recent)
         _applyCurrentFilters();
+        _invalidateStatistics();
         _setLoading(false);
         debugPrint('🚗 Registro de combustível adicionado: ${addedRecord.id}');
         return true;
@@ -171,6 +235,7 @@ class FuelProvider extends ChangeNotifier {
         if (index != -1) {
           _fuelRecords[index] = updatedRecord;
           _applyCurrentFilters();
+          _invalidateStatistics();
         }
         _setLoading(false);
         debugPrint('🚗 Registro de combustível atualizado: ${updatedRecord.id}');
@@ -198,6 +263,7 @@ class FuelProvider extends ChangeNotifier {
       (_) {
         _fuelRecords.removeWhere((record) => record.id == id);
         _applyCurrentFilters();
+        _invalidateStatistics();
         _setLoading(false);
         debugPrint('🚗 Registro de combustível removido: $id');
         return true;
@@ -277,6 +343,7 @@ class FuelProvider extends ChangeNotifier {
     _averageConsumption = 0.0;
     _totalSpent = 0.0;
     _recentRecords.clear();
+    _invalidateStatistics();
     _clearError();
     notifyListeners();
   }
@@ -327,10 +394,49 @@ class FuelProvider extends ChangeNotifier {
     }
   }
 
-  void _handleError(Failure failure) {
-    _errorMessage = _mapFailureToMessage(failure);
+  void _handleError(dynamic error) {
+    if (error is Failure) {
+      _errorMessage = _mapFailureToMessage(error);
+    } else if (error is AppError) {
+      _errorMessage = error.userMessage;
+      _errorReporter.reportProviderError(
+        error,
+        providerName: 'FuelProvider',
+        method: 'handleError',
+        state: {
+          'records_count': _fuelRecords.length,
+          'is_loading': _isLoading,
+          'search_query': _searchQuery,
+        },
+      );
+    } else {
+      _errorMessage = 'Erro inesperado: ${error.toString()}';
+    }
+    
     debugPrint('🚗 Erro no FuelProvider: $_errorMessage');
     notifyListeners();
+  }
+
+  AppError _convertFailureToError(Failure failure) {
+    if (failure is NetworkFailure) {
+      return NetworkError(
+        message: 'Erro de conexão ao carregar dados de combustível',
+        statusCode: failure.statusCode,
+      );
+    } else if (failure is ServerFailure) {
+      return ServerError(
+        message: 'Erro do servidor ao processar dados de combustível',
+        statusCode: failure.statusCode,
+      );
+    } else if (failure is ValidationFailure) {
+      return ValidationError(
+        message: failure.message,
+      );
+    } else {
+      return UnexpectedError(
+        message: 'Erro inesperado no carregamento de combustível: ${failure.message}',
+      );
+    }
   }
 
   String _mapFailureToMessage(Failure failure) {
@@ -365,5 +471,43 @@ class FuelProvider extends ChangeNotifier {
     }
     
     notifyListeners();
+  }
+  
+  // Statistics calculation method
+  FuelStatistics _calculateStatistics(List<FuelRecordEntity> records) {
+    if (records.isEmpty) {
+      return FuelStatistics(
+        totalLiters: 0.0,
+        totalCost: 0.0,
+        averagePrice: 0.0,
+        averageConsumption: 0.0,
+        totalRecords: 0,
+        lastUpdated: DateTime.now(),
+      );
+    }
+    
+    final totalLiters = records.fold<double>(0, (sum, record) => sum + record.litros);
+    final totalCost = records.fold<double>(0, (sum, record) => sum + record.valorTotal);
+    final averagePrice = records.fold<double>(0, (sum, record) => sum + record.precoPorLitro) / records.length;
+    
+    // Calculate consumption only for records with odometer data
+    double averageConsumption = 0.0;
+    final recordsWithConsumption = records.where((r) => r.consumo != null && r.consumo! > 0).toList();
+    if (recordsWithConsumption.isNotEmpty) {
+      averageConsumption = recordsWithConsumption.fold<double>(0, (sum, record) => sum + record.consumo!) / recordsWithConsumption.length;
+    }
+    
+    return FuelStatistics(
+      totalLiters: totalLiters,
+      totalCost: totalCost,
+      averagePrice: averagePrice,
+      averageConsumption: averageConsumption,
+      totalRecords: records.length,
+      lastUpdated: DateTime.now(),
+    );
+  }
+  
+  void _invalidateStatistics() {
+    _statisticsNeedRecalculation = true;
   }
 }

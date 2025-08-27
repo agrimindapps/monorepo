@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
+import '../../../../shared/constants/splash_constants.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -26,44 +27,51 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   void _setupAnimations() {
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: SplashConstants.animationDuration,
       vsync: this,
     );
 
     _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: SplashConstants.fadeBeginValue,
+      end: SplashConstants.fadeEndValue,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+      curve: SplashConstants.fadeInterval,
     ));
 
     _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
+      begin: SplashConstants.scaleBeginValue,
+      end: SplashConstants.scaleEndValue,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.2, 0.8, curve: Curves.elasticOut),
+      curve: SplashConstants.scaleInterval,
     ));
 
     _animationController.forward();
   }
 
   void _checkAuthState() {
+    // Get auth state immediately, then delay navigation
+    final authState = ref.read(authProvider);
+    
     // Delay mínimo para mostrar o splash
-    Future.delayed(const Duration(milliseconds: 2000), () {
-      final authState = ref.read(authProvider);
+    Future.delayed(SplashConstants.splashMinimumDuration, () {
+      if (!mounted) return; // Check if widget is still mounted
       
       if (authState.isAuthenticated) {
-        context.go('/');
+        context.go(SplashConstants.homeRoute);
       } else {
-        context.go('/login');
+        context.go(SplashConstants.loginRoute);
       }
     });
   }
 
   @override
   void dispose() {
+    // Dispose animation controller safely
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    }
     _animationController.dispose();
     super.dispose();
   }
@@ -71,7 +79,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
+      backgroundColor: SplashColors.backgroundColor,
       body: Center(
         child: AnimatedBuilder(
           animation: _animationController,
@@ -85,52 +93,52 @@ class _SplashPageState extends ConsumerState<SplashPage>
                   children: [
                     // Logo
                     Container(
-                      padding: const EdgeInsets.all(32),
+                      padding: SplashConstants.logoContainerPadding,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: SplashColors.logoContainerColor,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withValues(alpha: 0.2),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+                            color: SplashColors.shadowColor,
+                            blurRadius: SplashConstants.logoShadowBlurRadius,
+                            offset: SplashConstants.logoShadowOffset,
                           ),
                         ],
                       ),
                       child: const Icon(
                         Icons.pets,
-                        size: 80,
-                        color: Colors.blue,
+                        size: SplashConstants.logoIconSize,
+                        color: SplashColors.logoIconColor,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: SplashConstants.logoToTitleSpacing),
                     
                     // App Name
                     Text(
-                      'PetiVeti',
+                      SplashConstants.appName,
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[700],
+                            color: SplashColors.titleColor,
                           ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: SplashConstants.titleToTaglineSpacing),
                     
                     // Tagline
                     Text(
-                      'Cuidando do seu melhor amigo',
+                      SplashConstants.appTagline,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.blue[600],
+                            color: SplashColors.taglineColor,
                           ),
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: SplashConstants.taglineToIndicatorSpacing),
                     
                     // Loading indicator
                     SizedBox(
-                      width: 32,
-                      height: 32,
+                      width: SplashConstants.progressIndicatorSize,
+                      height: SplashConstants.progressIndicatorSize,
                       child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[400]!),
+                        strokeWidth: SplashConstants.progressIndicatorStrokeWidth,
+                        valueColor: AlwaysStoppedAnimation<Color>(SplashColors.progressIndicatorColor),
                       ),
                     ),
                   ],

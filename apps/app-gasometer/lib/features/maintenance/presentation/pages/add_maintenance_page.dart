@@ -4,91 +4,68 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
+import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/maintenance_entity.dart';
+import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
 
-class AddMaintenancePage extends StatefulWidget {
+class AddMaintenancePage extends BaseFormPage<MaintenanceFormProvider> {
   const AddMaintenancePage({super.key});
 
   @override
-  State<AddMaintenancePage> createState() => _AddMaintenancePageState();
+  BaseFormPageState<MaintenanceFormProvider> createState() => _AddMaintenancePageState();
 }
 
-class _AddMaintenancePageState extends State<AddMaintenancePage> {
-  final _formKey = GlobalKey<FormState>();
-  final _typeController = TextEditingController();
-  final _workshopController = TextEditingController();
-  final _costController = TextEditingController();
-  final _odometerController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  
+class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider> {
   final Map<String, ValidationResult> _validationResults = {};
   
-  String _selectedVehicle = '';
-  String _selectedCategory = 'preventiva';
-  DateTime _selectedDate = DateTime.now();
-  DateTime? _nextServiceDate;
-
   @override
-  void dispose() {
-    _typeController.dispose();
-    _workshopController.dispose();
-    _costController.dispose();
-    _odometerController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
+  String get pageTitle => 'Manutenção';
+  
+  @override
+  MaintenanceFormProvider createFormProvider() {
+    final authProvider = context.read<AuthProvider>();
+    return MaintenanceFormProvider(
+      userId: authProvider.userId,
+    );
+  }
+  
+  @override
+  Future<void> initializeFormProvider(MaintenanceFormProvider provider) async {
+    final authProvider = context.read<AuthProvider>();
+    
+    // Set context for dependency injection access
+    provider.setContext(context);
+
+    await provider.initialize(
+      userId: authProvider.userId,
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        title: Text(
-          'Nova Manutenção',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Padding(
-              padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    FormSpacing.section(),
-                    _buildVehicleSelection(),
-                    _buildBasicInfo(),
-                    _buildCostAndOdometer(),
-                    _buildDescription(),
-                    _buildNextServiceDate(),
-                    FormSpacing.section(),
-                    _buildActionButtons(),
-                  ],
-                ),
-              ),
-            ),
+  Widget buildFormContent(BuildContext context, MaintenanceFormProvider provider) {
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              FormSpacing.section(),
+              _buildVehicleSelection(),
+              _buildBasicInfo(),
+              _buildCostAndOdometer(),
+              _buildDescription(),
+              _buildNextServiceDate(),
+              FormSpacing.section(),
+              _buildActionButtons(),
+            ],
           ),
         ),
       ),
@@ -159,7 +136,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
           border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         child: DropdownButton<String>(
-          value: _selectedVehicle.isEmpty ? null : _selectedVehicle,
+          value: formProvider.formModel.vehicleId.isEmpty ? null : formProvider.formModel.vehicleId,
           hint: Text(
             'Selecione o veículo',
             style: TextStyle(
@@ -173,7 +150,10 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           items: _buildVehicleDropdownItems(),
-          onChanged: (value) => setState(() => _selectedVehicle = value!),
+          onChanged: (value) {
+            // TODO: Implementar updateVehicle no FormProvider
+            // formProvider.updateVehicle(value!);
+          },
         ),
       ),
     );
@@ -186,7 +166,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       content: Column(
         children: [
           ValidatedFormField(
-            controller: _typeController,
+            controller: formProvider.titleController,
             label: 'Tipo de Manutenção',
             hint: 'Ex: Troca de óleo, Revisão completa...',
             required: true,
@@ -198,7 +178,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
           ),
           FormSpacing.large(),
           ValidatedFormField(
-            controller: _workshopController,
+            controller: formProvider.workshopNameController,
             label: 'Oficina/Local',
             hint: 'Nome da oficina ou local da manutenção',
             required: true,
@@ -219,7 +199,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                   border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: DropdownButton<String>(
-                  value: _selectedCategory,
+                  value: formProvider.formModel.type == MaintenanceType.preventive ? 'preventiva' : 'corretiva',
                   isExpanded: true,
                   underline: const SizedBox(),
                   icon: Icon(
@@ -227,10 +207,12 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'preventiva', child: Text('Preventiva')),
-                    DropdownMenuItem(value: 'corretiva', child: Text('Corretiva')),
+                    DropdownMenuItem(value: 'preventiva', child: const Text('Preventiva')),
+                    DropdownMenuItem(value: 'corretiva', child: const Text('Corretiva')),
                   ],
-                  onChanged: (value) => setState(() => _selectedCategory = value!),
+                  onChanged: (value) => formProvider.updateType(
+                    value == 'preventiva' ? MaintenanceType.preventive : MaintenanceType.corrective
+                  ),
                 ),
               ),
               InkWell(
@@ -256,7 +238,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                       ),
                       SizedBox(width: GasometerDesignTokens.spacingSm),
                       Text(
-                        '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
+                        '${formProvider.formModel.serviceDate.day.toString().padLeft(2, '0')}/${formProvider.formModel.serviceDate.month.toString().padLeft(2, '0')}/${formProvider.formModel.serviceDate.year}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -279,7 +261,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       content: FormFieldRow.standard(
         children: [
           ValidatedFormField(
-            controller: _costController,
+            controller: formProvider.costController,
             label: 'Custo',
             hint: '0,00',
             required: true,
@@ -293,7 +275,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             onValidationChanged: (result) => _validationResults['cost'] = result,
           ),
           ValidatedFormField(
-            controller: _odometerController,
+            controller: formProvider.odometerController,
             label: 'Odômetro',
             hint: '0,0',
             required: true,
@@ -317,7 +299,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       title: 'Descrição',
       icon: Icons.description_outlined,
       content: ValidatedFormField(
-        controller: _descriptionController,
+        controller: formProvider.descriptionController,
         label: 'Detalhes da manutenção',
         hint: 'Descreva os serviços realizados, peças trocadas, etc.',
         required: true,
@@ -386,11 +368,11 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                     ),
                     SizedBox(width: GasometerDesignTokens.spacingSm),
                     Text(
-                      _nextServiceDate != null
-                          ? '${_nextServiceDate!.day.toString().padLeft(2, '0')}/${_nextServiceDate!.month.toString().padLeft(2, '0')}/${_nextServiceDate!.year}'
+                      formProvider.formModel.nextServiceDate != null
+                          ? '${formProvider.formModel.nextServiceDate!.day.toString().padLeft(2, '0')}/${formProvider.formModel.nextServiceDate!.month.toString().padLeft(2, '0')}/${formProvider.formModel.nextServiceDate!.year}'
                           : 'Definir data da próxima manutenção',
                       style: TextStyle(
-                        color: _nextServiceDate != null
+                        color: formProvider.formModel.nextServiceDate != null
                             ? Theme.of(context).colorScheme.onSurface
                             : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
@@ -399,11 +381,11 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                 ),
               ),
             ),
-            if (_nextServiceDate != null)
+            if (formProvider.formModel.nextServiceDate != null)
               Padding(
                 padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
                 child: TextButton(
-                  onPressed: () => setState(() => _nextServiceDate = null),
+                  onPressed: () => formProvider.updateNextServiceDate(null),
                   child: Text(
                     'Remover data',
                     style: TextStyle(
@@ -438,7 +420,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
         ),
       ),
       primaryButton: ElevatedButton(
-        onPressed: _saveMaintenance,
+        onPressed: () => onSubmitForm(context, formProvider),
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -459,109 +441,37 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-    if (date != null) {
-      setState(() => _selectedDate = date);
-    }
+    await formProvider.pickServiceDate(context);
   }
 
   Future<void> _selectNextServiceDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().add(const Duration(days: 90)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
-    if (date != null) {
-      setState(() => _nextServiceDate = date);
-    }
+    await formProvider.pickNextServiceDate(context);
   }
 
-  void _saveMaintenance() {
-    // Valida todos os campos primeiro
-    final hasErrors = _validationResults.values.any((result) => !result.isValid);
-    if (hasErrors || !(_formKey.currentState?.validate() ?? false)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Por favor, corrija os erros no formulário'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-      return;
-    }
-    
-    if (_selectedVehicle.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Selecione um veículo'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-      return;
+  @override
+  Future<bool> onSubmitForm(BuildContext context, MaintenanceFormProvider provider) async {
+    if (!provider.validateForm()) {
+      return false;
     }
 
     try {
-      // Criar entidade de manutenção com dados do formulário
-      final maintenanceEntity = MaintenanceEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // ID temporário
-        userId: 'current_user', // TODO: Obter do sistema de autenticação
-        vehicleId: _selectedVehicle, 
-        type: MaintenanceType.preventive, // TODO: Mapear do _typeController
-        status: MaintenanceStatus.completed,
-        title: _typeController.text.trim(),
-        description: _descriptionController.text.trim(),
-        cost: double.tryParse(_costController.text.replaceAll(',', '.')) ?? 0.0,
-        serviceDate: _selectedDate,
-        odometer: double.tryParse(_odometerController.text.replaceAll(',', '.')) ?? 0.0,
-        workshopName: _workshopController.text.isNotEmpty ? _workshopController.text.trim() : null,
-        workshopPhone: null, // TODO: Adicionar campo se necessário
-        workshopAddress: null, // TODO: Adicionar campo se necessário
-        nextServiceDate: null, // TODO: Implementar lógica de próximo serviço
-        nextServiceOdometer: null,
-        photosPaths: const [],
-        invoicesPaths: const [],
-        parts: const {},
-        notes: null,
-      );
-
-      // Usar o provider para salvar
-      final maintenanceProvider = Provider.of<MaintenanceProvider>(context, listen: false);
+      final maintenanceProvider = context.read<MaintenanceProvider>();
+      
+      // Criar entidade usando o FormProvider
+      final maintenanceEntity = provider.formModel.toMaintenanceEntity();
+      
       final success = await maintenanceProvider.addMaintenanceRecord(maintenanceEntity);
 
       if (success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Manutenção salva com sucesso!'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
-          context.pop();
-        }
+        showSuccessSnackbar('Manutenção salva com sucesso!');
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erro ao salvar: ${maintenanceProvider.errorMessage ?? "Erro desconhecido"}'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+        onFormSubmitFailure('Erro ao salvar: ${maintenanceProvider.errorMessage ?? "Erro desconhecido"}');
       }
+      
+      return success;
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar manutenção: ${e.toString()}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+      onFormSubmitFailure('Erro ao salvar manutenção: ${e.toString()}');
+      return false;
     }
   }
 

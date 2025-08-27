@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/maintenance_entity.dart';
 import '../models/maintenance_model.dart';
 
@@ -236,7 +238,9 @@ abstract class MaintenanceMapper {
       return modelToEntity(model);
     } catch (e) {
       // Log error in production
-      print('Error converting model to entity: $e');
+      if (kDebugMode) {
+        print('Error converting model to entity: $e');
+      }
       return null;
     }
   }
@@ -250,7 +254,9 @@ abstract class MaintenanceMapper {
       return entityToModel(entity);
     } catch (e) {
       // Log error in production
-      print('Error converting entity to model: $e');
+      if (kDebugMode) {
+        print('Error converting entity to model: $e');
+      }
       return null;
     }
   }

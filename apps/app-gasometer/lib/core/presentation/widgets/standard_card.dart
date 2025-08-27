@@ -212,42 +212,46 @@ class CardInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: GasometerDesignTokens.spacingXs,
-      ),
-      child: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(
-              icon,
-              size: GasometerDesignTokens.iconSizeXs,
-              color: iconColor ?? 
-                Theme.of(context).colorScheme.onSurface.withValues(
+    return Semantics(
+      label: '$label: $value',
+      readOnly: true,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: GasometerDesignTokens.spacingXs,
+        ),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: GasometerDesignTokens.iconSizeXs,
+                color: iconColor ?? 
+                  Theme.of(context).colorScheme.onSurface.withValues(
+                    alpha: GasometerDesignTokens.opacitySecondary,
+                  ),
+              ),
+              SizedBox(width: GasometerDesignTokens.spacingXs + 2),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(
                   alpha: GasometerDesignTokens.opacitySecondary,
                 ),
-            ),
-            SizedBox(width: GasometerDesignTokens.spacingXs + 2),
-          ],
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(
-                alpha: GasometerDesignTokens.opacitySecondary,
+                fontSize: GasometerDesignTokens.fontSizeMd,
               ),
-              fontSize: GasometerDesignTokens.fontSizeMd,
             ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: GasometerDesignTokens.fontWeightMedium,
-              fontSize: GasometerDesignTokens.fontSizeMd,
-              color: Theme.of(context).colorScheme.onSurface,
+            const Spacer(),
+            Text(
+              value,
+              style: TextStyle(
+                fontWeight: GasometerDesignTokens.fontWeightMedium,
+                fontSize: GasometerDesignTokens.fontSizeMd,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

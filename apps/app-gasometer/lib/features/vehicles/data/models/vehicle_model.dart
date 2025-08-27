@@ -3,8 +3,8 @@ import 'package:core/core.dart';
 import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
-import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
+import '../../domain/entities/vehicle_entity.dart';
 
 part 'vehicle_model.g.dart';
 

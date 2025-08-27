@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/injection_container.dart';
+import 'core/presentation/widgets/global_error_boundary.dart';
 import 'core/router/app_router.dart';
+import 'core/sync/presentation/providers/sync_status_provider.dart';
 import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/fuel/presentation/providers/fuel_provider.dart';
@@ -17,62 +19,105 @@ class GasOMeterApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // Auth Provider - deve ser o primeiro
+    return GlobalErrorBoundary(
+      child: MultiProvider(
+        providers: [
+        // LEVEL 1: Base providers (no dependencies)
+        // Auth Provider - deve ser o primeiro (base dependency)
         ChangeNotifierProvider(
           create: (_) => sl<local.AuthProvider>(),
+          lazy: false, // Critical for app initialization
         ),
         
-        // Premium Provider
-        ChangeNotifierProvider(
-          create: (_) => sl<PremiumProvider>(),
-        ),
-        
-        // Vehicles Provider
-        ChangeNotifierProvider(
-          create: (_) => sl<VehiclesProvider>(),
-        ),
-        
-        // Fuel Provider
-        ChangeNotifierProvider(
-          create: (_) => sl<FuelProvider>(),
-        ),
-        
-        // Maintenance Provider
-        ChangeNotifierProvider(
-          create: (_) => sl<MaintenanceProvider>(),
-        ),
-        
-        // Reports Provider
-        ChangeNotifierProvider(
-          create: (_) => sl<ReportsProvider>(),
-        ),
-        
-        // Theme Provider
+        // Theme Provider - independent
         ChangeNotifierProvider(
           create: (_) => ThemeProvider()..initialize(),
         ),
         
-        // TODO: Adicionar outros providers quando criados
-        // - AnalyticsProvider
-      ],
-      builder: (context, child) {
-        final router = AppRouter.router(context);
+        // Sync Status Provider - independent
+        ChangeNotifierProvider(
+          create: (_) => sl<SyncStatusProvider>(),
+        ),
         
-        return Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
-            return MaterialApp.router(
-              title: 'GasOMeter - Controle de Veículos',
-              theme: GasometerTheme.lightTheme,
-              darkTheme: GasometerTheme.darkTheme,
-              themeMode: themeProvider.themeMode,
-              routerConfig: router,
-              debugShowCheckedModeBanner: false,
-            );
+        // Premium Provider - independent 
+        ChangeNotifierProvider(
+          create: (_) => sl<PremiumProvider>(),
+        ),
+        
+        // LEVEL 2: Domain providers (depend on Auth)
+        // Vehicles Provider - depends on Auth for user context
+        ProxyProvider<local.AuthProvider, VehiclesProvider>(
+          update: (context, auth, previous) {
+            // Dispose previous instance if exists to prevent memory leaks
+            previous?.dispose();
+            
+            // Create new instance with proper dependencies
+            final vehiclesProvider = sl<VehiclesProvider>();
+            
+            // Initialize with current user context if authenticated
+            if (auth.isAuthenticated) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                vehiclesProvider.initialize();
+              });
+            }
+            
+            return vehiclesProvider;
           },
-        );
-      },
+          lazy: true,
+        ),
+        
+        // LEVEL 3: Feature providers (depend on domain providers)
+        // Fuel Provider - depends on Vehicles for vehicle context
+        ProxyProvider2<local.AuthProvider, VehiclesProvider, FuelProvider>(
+          update: (context, auth, vehicles, previous) {
+            // Dispose previous instance to prevent memory leaks
+            previous?.dispose();
+            
+            return sl<FuelProvider>();
+          },
+          lazy: true,
+        ),
+        
+        // Maintenance Provider - depends on Vehicles for vehicle context
+        ProxyProvider2<local.AuthProvider, VehiclesProvider, MaintenanceProvider>(
+          update: (context, auth, vehicles, previous) {
+            // Dispose previous instance to prevent memory leaks
+            previous?.dispose();
+            
+            return sl<MaintenanceProvider>();
+          },
+          lazy: true,
+        ),
+        
+        // LEVEL 4: Analytics providers (depend on multiple feature providers)
+        // Reports Provider - depends on multiple providers for comprehensive reporting
+        ProxyProvider4<local.AuthProvider, VehiclesProvider, FuelProvider, MaintenanceProvider, ReportsProvider>(
+          update: (context, auth, vehicles, fuel, maintenance, previous) {
+            // Dispose previous instance to prevent memory leaks
+            previous?.dispose();
+            
+            return sl<ReportsProvider>();
+          },
+          lazy: true,
+        ),
+      ],
+        builder: (context, child) {
+          final router = AppRouter.router(context);
+          
+          return Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return MaterialApp.router(
+                title: 'GasOMeter - Controle de Veículos',
+                theme: GasometerTheme.lightTheme,
+                darkTheme: GasometerTheme.darkTheme,
+                themeMode: themeProvider.themeMode,
+                routerConfig: router,
+                debugShowCheckedModeBanner: false,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

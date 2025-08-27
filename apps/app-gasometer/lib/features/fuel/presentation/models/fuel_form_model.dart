@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 
@@ -215,8 +216,22 @@ class FuelFormModel extends Equatable {
   }
 
   /// Converte para FuelRecordEntity para persistência
+  /// Aplica sanitização em todos os campos de texto para segurança
   FuelRecordEntity toFuelRecord() {
     final now = DateTime.now();
+    
+    // Sanitizar campos de texto antes da persistência
+    final sanitizedGasStationName = gasStationName.isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeName(gasStationName);
+        
+    final sanitizedGasStationBrand = gasStationBrand.isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeName(gasStationBrand);
+        
+    final sanitizedNotes = notes.isEmpty 
+        ? null 
+        : InputSanitizer.sanitizeDescription(notes);
     
     return FuelRecordEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
@@ -228,10 +243,10 @@ class FuelFormModel extends Equatable {
       valorTotal: totalPrice,
       odometro: odometer,
       data: date,
-      nomePosto: gasStationName.isEmpty ? null : gasStationName,
-      marcaPosto: gasStationBrand.isEmpty ? null : gasStationBrand,
+      nomePosto: sanitizedGasStationName,
+      marcaPosto: sanitizedGasStationBrand,
       tanqueCheio: fullTank,
-      observacoes: notes.isEmpty ? null : notes,
+      observacoes: sanitizedNotes,
       criadoEm: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
       atualizadoEm: now,
     );

@@ -1,13 +1,64 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/services/gasometer_notification_service.dart';
+import '../providers/auth_provider.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // VERIFICAÇÃO CRÍTICA DE SEGURANÇA: Bloquear acesso não autorizado
+        if (!authProvider.isAuthenticated) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('⚙️ Configurações'),
+              centerTitle: true,
+              elevation: 2,
+            ),
+            body: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.security,
+                    size: 64,
+                    color: Colors.red,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Acesso Restrito',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Acesso negado. Faça login para continuar.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        
+        return _buildAuthenticatedContent(context, authProvider);
+      },
+    );
+  }
+
+  Widget _buildAuthenticatedContent(BuildContext context, AuthProvider authProvider) {
     final theme = Theme.of(context);
     
     return Scaffold(
@@ -311,7 +362,7 @@ class ProfilePage extends StatelessWidget {
   Future<void> _showNotificationSettings(BuildContext context) async {
     final theme = Theme.of(context);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -565,7 +616,7 @@ class ProfilePage extends StatelessWidget {
   void _showAboutDialog(BuildContext context) {
     final theme = Theme.of(context);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,

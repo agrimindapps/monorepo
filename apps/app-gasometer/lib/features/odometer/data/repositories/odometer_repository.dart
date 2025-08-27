@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 import '../../../../core/cache/cache_manager.dart';
@@ -359,7 +360,9 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
       await _box.close();
     } catch (e) {
       // Log error but don't crash
-      print('Erro ao fechar box de odômetro: $e');
+      if (kDebugMode) {
+        print('Erro ao fechar box de odômetro: $e');
+      }
     }
   }
 }

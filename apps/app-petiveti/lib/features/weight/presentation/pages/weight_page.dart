@@ -6,6 +6,9 @@ import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
 import '../widgets/add_weight_form.dart';
 import '../widgets/weight_card.dart';
+import '../widgets/weight_chart_visualization.dart';
+import '../widgets/weight_goal_management.dart';
+import '../widgets/body_condition_correlation.dart';
 
 class WeightPage extends ConsumerStatefulWidget {
   const WeightPage({super.key});
@@ -98,30 +101,55 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               ],
             ),
           
-          // Sort menu
-          PopupMenuButton<WeightSortOrder>(
-            icon: const Icon(Icons.sort),
-            onSelected: (order) {
-              ref.read(weightsProvider.notifier).setSortOrder(order);
+          // Advanced features menu
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (action) {
+              switch (action) {
+                case 'sort':
+                  _showSortMenu(context, weightsState);
+                  break;
+                case 'charts':
+                  _navigateToCharts(context);
+                  break;
+                case 'goals':
+                  _navigateToGoals(context);
+                  break;
+                case 'correlation':
+                  _navigateToCorrelation(context);
+                  break;
+              }
             },
-            itemBuilder: (context) => WeightSortOrder.values
-                .map((order) => PopupMenuItem(
-                      value: order,
-                      child: Row(
-                        children: [
-                          Icon(
-                            order == weightsState.sortOrder 
-                                ? Icons.radio_button_checked 
-                                : Icons.radio_button_unchecked,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(order.displayName)),
-                          Icon(order.icon, size: 16),
-                        ],
-                      ),
-                    ))
-                .toList(),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'sort',
+                child: ListTile(
+                  leading: Icon(Icons.sort),
+                  title: Text('Ordenar'),
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'charts',
+                child: ListTile(
+                  leading: Icon(Icons.show_chart),
+                  title: Text('Gráficos Avançados'),
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'goals',
+                child: ListTile(
+                  leading: Icon(Icons.track_changes),
+                  title: Text('Metas de Peso'),
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'correlation',
+                child: ListTile(
+                  leading: Icon(Icons.fitness_center),
+                  title: Text('Correlação BCS'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -549,5 +577,89 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       case WeightTrend.stable:
         return Icons.trending_flat;
     }
+  }
+
+  void _showSortMenu(BuildContext context, WeightsState weightsState) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ordenar por'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: WeightSortOrder.values
+              .map((order) => RadioListTile<WeightSortOrder>(
+                    title: Text(order.displayName),
+                    value: order,
+                    groupValue: weightsState.sortOrder,
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref.read(weightsProvider.notifier).setSortOrder(value);
+                      }
+                      Navigator.pop(context);
+                    },
+                  ))
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToCharts(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Gráficos de Peso'),
+          ),
+          body: WeightChartVisualization(
+            animalId: _selectedAnimalId,
+            showInteractiveMode: true,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToGoals(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => WeightGoalManagement(
+          animalId: _selectedAnimalId,
+          onGoalsUpdated: () {
+            // Refresh weights
+            if (_selectedAnimalId != null) {
+              ref.read(weightsProvider.notifier).loadWeightsByAnimal(_selectedAnimalId!);
+            } else {
+              ref.read(weightsProvider.notifier).loadWeights();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  void _navigateToCorrelation(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Correlação Peso vs BCS'),
+          ),
+          body: BodyConditionCorrelation(
+            animalId: _selectedAnimalId,
+            showInteractiveMode: true,
+          ),
+        ),
+      ),
+    );
   }
 }

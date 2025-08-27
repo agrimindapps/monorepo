@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/providers/base_provider.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/usecases/add_maintenance_record.dart';
@@ -49,7 +50,7 @@ class MaintenanceStatistics {
 }
 
 @injectable
-class MaintenanceProvider extends ChangeNotifier {
+class MaintenanceProvider extends BaseProvider {
   final GetAllMaintenanceRecords _getAllMaintenanceRecords;
   final GetMaintenanceRecordsByVehicle _getMaintenanceRecordsByVehicle;
   final AddMaintenanceRecord _addMaintenanceRecord;

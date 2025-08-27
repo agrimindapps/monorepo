@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/appointments_provider.dart';
@@ -49,6 +50,9 @@ class AppointmentsAutoReloadManager extends ConsumerStatefulWidget {
 class _AppointmentsAutoReloadManagerState 
     extends ConsumerState<AppointmentsAutoReloadManager> {
   String? _lastAnimalId;
+  Timer? _debounceTimer;
+  bool _isReloading = false;
+  final Map<String, DateTime> _lastLoadTimes = {};
 
   @override
   void initState() {
@@ -58,9 +62,15 @@ class _AppointmentsAutoReloadManagerState
     // Perform initial load if animal is selected
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.selectedAnimalId != null) {
-        _performReload(widget.selectedAnimalId!, isInitial: true);
+        _performReloadWithDebounce(widget.selectedAnimalId!, isInitial: true);
       }
     });
+  }
+  
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -84,16 +94,47 @@ class _AppointmentsAutoReloadManagerState
   void _handleAnimalChange(String? previousAnimalId, String? newAnimalId) {
     // If we had a previous animal and now have a different one, reload
     if (previousAnimalId != null && newAnimalId != null && previousAnimalId != newAnimalId) {
-      _performReload(newAnimalId);
+      _performReloadWithDebounce(newAnimalId);
     }
     // If we now have an animal selected for the first time
     else if (previousAnimalId == null && newAnimalId != null) {
-      _performReload(newAnimalId, isInitial: true);
+      _performReloadWithDebounce(newAnimalId, isInitial: true);
     }
     // If animal was deselected, clear the appointments
     else if (previousAnimalId != null && newAnimalId == null) {
       _clearAppointments();
     }
+  }
+
+  /// **Perform Reload with Debouncing**
+  /// 
+  /// Adds debouncing to prevent excessive API calls when animal selection
+  /// changes rapidly or during quick navigation.
+  /// 
+  /// @param animalId Animal ID to load appointments for
+  /// @param isInitial Whether this is the initial load
+  void _performReloadWithDebounce(String animalId, {bool isInitial = false}) {
+    // Cancel existing timer
+    _debounceTimer?.cancel();
+    
+    // For initial loads, don't debounce
+    if (isInitial) {
+      _performReload(animalId, isInitial: true);
+      return;
+    }
+    
+    // Check if we recently loaded for this animal (cache check)
+    final lastLoadTime = _lastLoadTimes[animalId];
+    final now = DateTime.now();
+    if (lastLoadTime != null && now.difference(lastLoadTime).inSeconds < 30) {
+      // Skip reload if we loaded recently (within 30 seconds)
+      return;
+    }
+    
+    // Set debounce timer
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _performReload(animalId);
+    });
   }
 
   /// **Perform Appointments Reload**
@@ -104,12 +145,20 @@ class _AppointmentsAutoReloadManagerState
   /// @param animalId Animal ID to load appointments for
   /// @param isInitial Whether this is the initial load
   Future<void> _performReload(String animalId, {bool isInitial = false}) async {
+    // Prevent concurrent reloads
+    if (_isReloading) return;
+    
     try {
+      _isReloading = true;
+      
       // Notify reload start
       widget.onReloadStart?.call();
       
       // Load appointments using the provider
       await ref.read(appointmentsProvider.notifier).loadAppointments(animalId);
+      
+      // Update cache timestamp
+      _lastLoadTimes[animalId] = DateTime.now();
       
       // Check if the operation was successful
       final state = ref.read(appointmentsProvider);
@@ -121,6 +170,8 @@ class _AppointmentsAutoReloadManagerState
     } catch (error) {
       // Handle any unexpected errors
       widget.onReloadError?.call(error.toString());
+    } finally {
+      _isReloading = false;
     }
   }
 
@@ -136,9 +187,13 @@ class _AppointmentsAutoReloadManagerState
   /// 
   /// Public method to manually trigger a reload of appointments.
   /// Useful for refresh buttons or pull-to-refresh gestures.
+  /// Manual reloads bypass cache to ensure fresh data.
   Future<void> manualReload() async {
-    if (widget.selectedAnimalId != null) {
-      await _performReload(widget.selectedAnimalId!);
+    final animalId = widget.selectedAnimalId;
+    if (animalId != null) {
+      // Clear cache entry for manual reloads
+      _lastLoadTimes.remove(animalId);
+      await _performReload(animalId);
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/constants/ui_constants.dart';
 import '../../features/vehicles/domain/entities/vehicle_entity.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 
@@ -135,27 +136,27 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
 
   Widget _buildLoadingState(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: AppSpacing.xlarge),
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).colorScheme.outline),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         color: Theme.of(context).colorScheme.surface,
       ),
       child: Row(
         children: [
           SizedBox(
-            width: 16,
-            height: 16,
+            width: AppSizes.iconXS,
+            height: AppSizes.iconXS,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.medium),
           Text(
             'Carregando veículos...',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
             ),
           ),
         ],
@@ -165,10 +166,10 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
 
   Widget _buildEmptyState(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: AppSpacing.xlarge),
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).colorScheme.outline),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         color: Theme.of(context).colorScheme.surface,
       ),
       child: Row(
@@ -176,14 +177,14 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
           Icon(
             Icons.directions_car_outlined,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-            size: 20,
+            size: AppSizes.iconS,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.medium),
           Expanded(
             child: Text(
               'Nenhum veículo cadastrado',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
               ),
             ),
           ),
@@ -203,13 +204,13 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).colorScheme.outline),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         color: Theme.of(context).colorScheme.surface,
       ),
       child: DropdownButtonFormField<String>(
         value: _currentSelectedVehicleId,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: AppSpacing.large),
           border: InputBorder.none,
           hintText: widget.hintText,
           hintStyle: TextStyle(
@@ -219,7 +220,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
             Icons.directions_car,
             color: selectedVehicle != null 
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.subtle),
           ),
         ),
         items: vehiclesProvider.vehicles.map<DropdownMenuItem<String>>((VehicleEntity vehicle) {
@@ -235,16 +236,16 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
                       Text(
                         '${vehicle.brand} ${vehicle.model}',
                         style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontWeight: AppFontWeights.medium,
+                          fontSize: AppFontSizes.medium,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.spacingXS),
                       Text(
                         'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontSize: AppFontSizes.small,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
                         ),
                       ),
                     ],
@@ -259,36 +260,16 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
         icon: Icon(
           Icons.arrow_drop_down,
           color: widget.enabled 
-              ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
-              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              ? Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.prominent)
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.disabled),
         ),
         style: TextStyle(
           color: Theme.of(context).colorScheme.onSurface,
-          fontSize: 16,
+          fontSize: AppFontSizes.medium,
         ),
         dropdownColor: Theme.of(context).colorScheme.surface,
       ),
     );
   }
 
-  /// Método para limpar a seleção persistida
-  static Future<void> clearSelectedVehicle() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_selectedVehicleKey);
-    } catch (e) {
-      debugPrint('Erro ao limpar veículo selecionado: $e');
-    }
-  }
-
-  /// Método para obter o veículo selecionado salvo
-  static Future<String?> getSavedSelectedVehicle() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_selectedVehicleKey);
-    } catch (e) {
-      debugPrint('Erro ao obter veículo selecionado: $e');
-      return null;
-    }
-  }
 }

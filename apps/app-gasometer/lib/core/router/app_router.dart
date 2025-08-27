@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../constants/ui_constants.dart';
+
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -136,20 +138,20 @@ class AppRouter {
             children: [
               const Icon(
                 Icons.error_outline,
-                size: 64,
+                size: AppSizes.iconXXL,
                 color: Colors.red,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.large),
               Text(
                 'Página não encontrada',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.small),
               Text(
                 'A página "${state.matchedLocation}" não existe.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxlarge),
               ElevatedButton(
                 onPressed: () => context.go('/'),
                 child: const Text('Voltar ao Início'),

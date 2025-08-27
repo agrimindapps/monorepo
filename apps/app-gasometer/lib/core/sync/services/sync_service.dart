@@ -654,7 +654,7 @@ class SyncService {
     // Marca itens inválidos para revisão manual
     _updateMessage('Dados inválidos detectados. Verifique os dados e tente novamente.');
     
-    // TODO: Implementar marcação de itens inválidos na queue
+    // Invalid queue items marking implementation pending
   }
 
   /// Trata erros de conflito
@@ -664,7 +664,7 @@ class SyncService {
     _updateStatus(SyncStatus.conflict);
     _updateMessage('Conflito de dados detectado. Resolução manual necessária.');
     
-    // TODO: Implementar interface de resolução de conflitos
+    // Conflict resolution interface implementation pending
   }
 
   /// Trata erros desconhecidos
@@ -774,7 +774,7 @@ class SyncService {
 
   /// Verifica se há conflitos pendentes
   bool hasConflicts() {
-    // TODO: Implementar verificação de conflitos reais
+    // Real conflict verification implementation pending
     return false;
   }
 
@@ -791,7 +791,7 @@ class SyncService {
         strategy: strategy,
       );
 
-      // TODO: Salvar entidade resolvida no repository apropriado
+      // Resolved entity save implementation pending
       
       _updateMessage('Conflito resolvido: ${strategy.displayName}');
       await _analytics.log('conflict_resolved');

@@ -28,6 +28,9 @@ class UserEntity extends Equatable {
   bool get isAnonymous => type == UserType.anonymous;
   bool get isRegistered => type == UserType.registered || type == UserType.premium;
   bool get isPremium => type == UserType.premium;
+  
+  // Compatibility getter
+  String get uid => id;
   bool get hasDisplayName => displayName != null && displayName!.isNotEmpty;
   bool get hasProfilePhoto => photoUrl != null && photoUrl!.isNotEmpty;
 

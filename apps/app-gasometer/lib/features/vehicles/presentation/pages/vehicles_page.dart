@@ -507,23 +507,9 @@ class _VehicleCardActions extends StatelessWidget {
   }
   
   void _editVehicle(BuildContext context, VehicleEntity vehicle) async {
-    // Converter VehicleEntity para Map para compatibilidade com AddVehiclePage
-    final vehicleMap = {
-      'id': vehicle.id,
-      'marca': vehicle.brand,
-      'modelo': vehicle.model,
-      'ano': vehicle.year,
-      'cor': vehicle.color,
-      'placa': vehicle.licensePlate,
-      'chassi': vehicle.metadata['chassi'] ?? '',
-      'renavam': vehicle.metadata['renavam'] ?? '',
-      'odometroInicial': vehicle.currentOdometer,
-      'combustivel': vehicle.supportedFuels.isNotEmpty ? vehicle.supportedFuels.first.displayName : 'Gasolina',
-    };
-    
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AddVehiclePage(vehicle: vehicleMap),
+      builder: (context) => AddVehiclePage(vehicle: vehicle),
     );
     
     // Se resultado for true, atualizar lista

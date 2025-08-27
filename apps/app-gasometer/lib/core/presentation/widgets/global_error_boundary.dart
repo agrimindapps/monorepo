@@ -83,11 +83,11 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
     // Handle isolate errors
     Isolate.current.addErrorListener(
       RawReceivePort((pair) async {
-        final List<dynamic> errorAndStacktrace = pair;
+        final List<dynamic> errorAndStacktrace = pair as List<dynamic>;
         final error = errorAndStacktrace.first;
-        final stackTrace = StackTrace.tryParse(errorAndStacktrace.last.toString());
+        final stackTrace = StackTrace.fromString(errorAndStacktrace.last.toString());
         
-        await _handleIsolateError(error, stackTrace);
+        await _handleIsolateError(error as Object, stackTrace);
       }).sendPort,
     );
   }
@@ -109,7 +109,7 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
     await _reportError(appError, details.stack, 'flutter_framework');
 
     // Only show global error for critical errors
-    if (appError.severity.index >= ErrorSeverity.high.index) {
+    if (appError.severity.index >= ErrorSeverity.critical.index) {
       _showGlobalError(details.exception, details.stack);
     } else {
       // For less critical errors, just log them
@@ -145,7 +145,6 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
       return UnexpectedError(
         message: 'Flutter framework error: ${error.message}',
         technicalDetails: error.toString(),
-        severity: ErrorSeverity.high,
       );
     }
 
@@ -153,14 +152,12 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
       return UnexpectedError(
         message: 'System error: ${error.toString()}',
         technicalDetails: error.toString(),
-        severity: ErrorSeverity.critical,
       );
     }
 
     return UnexpectedError(
       message: 'Unexpected error: ${error.toString()}',
       technicalDetails: error.toString(),
-      severity: ErrorSeverity.medium,
     );
   }
 
@@ -277,7 +274,7 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
             const SizedBox(height: 16),
             
             Text(
-              appError.userMessage,
+              appError.displayMessage,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.grey[600],

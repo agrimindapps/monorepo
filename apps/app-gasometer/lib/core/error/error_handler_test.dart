@@ -36,7 +36,7 @@ class ErrorHandlerTestSuite {
     // Test timeout error
     final timeoutResult = await _errorHandler.execute(
       () async {
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
         throw TimeoutException('Operation timed out');
       },
       operationName: 'test_timeout',
@@ -287,7 +287,7 @@ class TestProvider extends BaseProvider {
   Future<void> testSuccessfulOperation() async {
     await executeOperation(
       () async {
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
         // Simulate success
       },
       operationName: 'testSuccessfulOperation',
@@ -297,7 +297,7 @@ class TestProvider extends BaseProvider {
   Future<void> testFailedOperation() async {
     await executeOperation(
       () async {
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
         throw const BusinessLogicError(
           message: 'Test business logic error',
           userFriendlyMessage: 'Operação de teste falhou',

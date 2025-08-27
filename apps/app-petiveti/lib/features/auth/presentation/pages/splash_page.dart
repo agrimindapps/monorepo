@@ -79,9 +79,11 @@ class _SplashPageState extends ConsumerState<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SplashColors.backgroundColor,
-      body: Center(
-        child: AnimatedBuilder(
+      backgroundColor: SplashColors.getBackgroundColor(context),
+      body: Semantics(
+        label: 'Tela de inicialização do PetiVeti',
+        child: Center(
+          child: AnimatedBuilder(
           animation: _animationController,
           builder: (context, child) {
             return FadeTransition(
@@ -91,54 +93,70 @@ class _SplashPageState extends ConsumerState<SplashPage>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo
-                    Container(
-                      padding: SplashConstants.logoContainerPadding,
-                      decoration: BoxDecoration(
-                        color: SplashColors.logoContainerColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: SplashColors.shadowColor,
-                            blurRadius: SplashConstants.logoShadowBlurRadius,
-                            offset: SplashConstants.logoShadowOffset,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.pets,
-                        size: SplashConstants.logoIconSize,
-                        color: SplashColors.logoIconColor,
+                    // Logo with accessibility
+                    Semantics(
+                      label: 'Logo do PetiVeti',
+                      image: true,
+                      child: Container(
+                        padding: SplashConstants.logoContainerPadding,
+                        decoration: BoxDecoration(
+                          color: SplashColors.getLogoContainerColor(context),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: SplashColors.getShadowColor(context),
+                              blurRadius: SplashConstants.logoShadowBlurRadius,
+                              offset: SplashConstants.logoShadowOffset,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.pets,
+                          size: SplashConstants.logoIconSize,
+                          color: SplashColors.getLogoIconColor(context),
+                        ),
                       ),
                     ),
                     const SizedBox(height: SplashConstants.logoToTitleSpacing),
                     
-                    // App Name
-                    Text(
-                      SplashConstants.appName,
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: SplashColors.titleColor,
-                          ),
+                    // App Name with accessibility
+                    Semantics(
+                      label: 'Nome do aplicativo: ${SplashConstants.appName}',
+                      header: true,
+                      child: Text(
+                        SplashConstants.appName,
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: SplashColors.getTitleColor(context),
+                            ),
+                      ),
                     ),
                     const SizedBox(height: SplashConstants.titleToTaglineSpacing),
                     
-                    // Tagline
-                    Text(
-                      SplashConstants.appTagline,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: SplashColors.taglineColor,
-                          ),
+                    // Tagline with accessibility
+                    Semantics(
+                      label: 'Slogan do aplicativo: ${SplashConstants.appTagline}',
+                      child: Text(
+                        SplashConstants.appTagline,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: SplashColors.getTaglineColor(context),
+                            ),
+                      ),
                     ),
                     const SizedBox(height: SplashConstants.taglineToIndicatorSpacing),
                     
-                    // Loading indicator
-                    SizedBox(
-                      width: SplashConstants.progressIndicatorSize,
-                      height: SplashConstants.progressIndicatorSize,
-                      child: CircularProgressIndicator(
-                        strokeWidth: SplashConstants.progressIndicatorStrokeWidth,
-                        valueColor: AlwaysStoppedAnimation<Color>(SplashColors.progressIndicatorColor),
+                    // Loading indicator with accessibility
+                    Semantics(
+                      label: 'Carregando aplicativo',
+                      hint: 'Aguarde enquanto o PetiVeti está sendo inicializado',
+                      liveRegion: true,
+                      child: SizedBox(
+                        width: SplashConstants.progressIndicatorSize,
+                        height: SplashConstants.progressIndicatorSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: SplashConstants.progressIndicatorStrokeWidth,
+                          valueColor: AlwaysStoppedAnimation<Color>(SplashColors.getProgressIndicatorColor(context)),
+                        ),
                       ),
                     ),
                   ],
@@ -146,6 +164,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
               ),
             );
           },
+          ),
         ),
       ),
     );

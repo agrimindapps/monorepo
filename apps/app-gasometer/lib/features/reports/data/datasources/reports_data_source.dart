@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
 import '../../domain/entities/report_comparison_entity.dart';
 import '../../domain/entities/report_summary_entity.dart';
@@ -49,6 +50,14 @@ class ReportsDataSourceImpl implements ReportsDataSource {
 
           // Calculate distance metrics
           final totalDistanceTraveled = _calculateTotalDistance(filteredRecords);
+
+          // Calculate odometer readings from fuel records
+          double firstOdometerReading = 0.0;
+          double lastOdometerReading = 0.0;
+          if (filteredRecords.isNotEmpty) {
+            firstOdometerReading = filteredRecords.first.odometro;
+            lastOdometerReading = filteredRecords.last.odometro;
+          }
 
           // Calculate average consumption
           double averageConsumption = 0.0;
@@ -268,8 +277,8 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   ///   'average_cost_per_fill': 83.38,
   ///   'cost_breakdown': {
   ///     'fuel_cost': 1250.75,
-  ///     'maintenance_cost': 0.0,  // TODO: Future integration
-  ///     'other_expenses': 0.0     // TODO: Future integration
+  ///     'maintenance_cost': 0.0,  // Maintenance integration pending
+  ///     'other_expenses': 0.0     // Expenses integration pending
   ///   },
   ///   'price_trends': [
   ///     {'month': '2024-01', 'average_price': 5.12, 'min_price': 4.98, 'max_price': 5.25}
@@ -333,8 +342,8 @@ class ReportsDataSourceImpl implements ReportsDataSource {
             'average_cost_per_fill': averageCostPerFill,
             'cost_breakdown': {
               'fuel_cost': totalCost,
-              'maintenance_cost': 0.0, // TODO: Implement when maintenance is ready
-              'other_expenses': 0.0,   // TODO: Implement when expenses is ready
+              'maintenance_cost': 0.0, // Maintenance integration pending
+              'other_expenses': 0.0,   // Expenses integration pending
             },
             'price_trends': priceTrends,
             'records_analyzed': filteredRecords.length,
@@ -582,7 +591,7 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   /// Retorna a distância total percorrida validando que:
   /// - Diferenças são positivas (não há reset de hodômetro)
   /// - Diferenças são razoáveis (< 10.000 km entre registros)
-  double _calculateTotalDistance(List<dynamic> records) {
+  double _calculateTotalDistance(List<FuelRecordEntity> records) {
     if (records.length < 2) return 0.0;
     
     // Ordenar por data para garantir sequência correta

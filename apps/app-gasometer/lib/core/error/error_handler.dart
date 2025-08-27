@@ -202,7 +202,7 @@ class ErrorHandler {
         }
 
         // Wait before retrying
-        await Future.delayed(policy.getDelay(attempt));
+        await Future<void>.delayed(policy.getDelay(attempt));
       }
     }
 
@@ -220,7 +220,7 @@ class ErrorHandler {
     return execute(
       () => Future.any([
         operation(),
-        Future.delayed(timeout).then((_) => 
+        Future<void>.delayed(timeout).then((_) => 
           throw TimeoutException('Operation timed out after ${timeout.inSeconds}s')),
       ]),
       policy: policy,
@@ -237,8 +237,8 @@ class ErrorHandler {
   }) {
     return source
         .map<Result<T>>((data) => Result.success(data))
-        .handleError((error, stackTrace) {
-          final appError = _convertToAppError(error, stackTrace as StackTrace?);
+        .handleError((Object error, StackTrace stackTrace) {
+          final appError = _convertToAppError(error, stackTrace);
           
           _logger.logError(
             appError,

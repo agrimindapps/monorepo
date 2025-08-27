@@ -78,7 +78,7 @@ class VehicleFormProvider extends ChangeNotifier {
     odometroController.text = vehicle.currentOdometer.toString();
     
     _selectedCombustivel = vehicle.supportedFuels.isNotEmpty 
-        ? FuelTypeMapper.toString(vehicle.supportedFuels.first)
+        ? FuelTypeMapper.toStringFormat(vehicle.supportedFuels.first)
         : 'Gasolina';
     
     final imagePath = vehicle.metadata['foto'] as String?;
@@ -183,11 +183,6 @@ class VehicleFormProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Sanitização robusta de entrada para prevenir XSS e injeções
-  /// Agora usando InputSanitizer centralizado
-  String _sanitizeInput(String input) {
-    return InputSanitizer.sanitize(input);
-  }
 
   /// Cria entidade do veículo a partir dos dados do formulário
   /// Aplica sanitização específica para cada tipo de campo

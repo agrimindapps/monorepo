@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/constants/animals_constants.dart';
 import '../widgets/animals_app_bar.dart';
 import '../widgets/animals_body.dart';
 import '../widgets/animals_error_handler.dart';
@@ -58,10 +59,15 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _listController.addAnimal,
-        tooltip: 'Adicionar Pet',
-        child: const Icon(Icons.pets),
+      floatingActionButton: Semantics(
+        label: 'Adicionar novo pet',
+        hint: 'Toque para abrir o formulário de cadastro de pets',
+        button: true,
+        child: FloatingActionButton(
+          onPressed: _listController.addAnimal,
+          tooltip: AnimalsConstants.addPetTooltip,
+          child: const Icon(Icons.pets),
+        ),
       ),
     );
   }

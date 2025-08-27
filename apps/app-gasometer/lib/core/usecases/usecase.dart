@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import '../constants/ui_constants.dart';
 import '../error/failures.dart';
 
 /// Base class for all use cases
@@ -82,7 +83,7 @@ class PurchasePremiumParams extends UseCaseParams {
 class GenerateLocalLicenseParams extends UseCaseParams {
   final int days;
   
-  const GenerateLocalLicenseParams({this.days = 30});
+  const GenerateLocalLicenseParams({this.days = AppDefaults.defaultLicenseDays});
   
   @override
   List<Object> get props => [days];

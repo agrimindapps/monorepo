@@ -259,4 +259,32 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, String>> exportReportToPDF(ReportSummaryEntity report) async {
+    try {
+      // Basic PDF content structure - would need proper PDF library for actual PDF generation
+      final pdfContent = StringBuffer();
+      pdfContent.writeln('=== RELATÓRIO PDF DO VEÍCULO ${report.vehicleId} ===');
+      pdfContent.writeln('');
+      pdfContent.writeln('Período: ${report.periodDisplayName}');
+      pdfContent.writeln('Data de Início: ${report.startDate.toLocal().toString().split(' ')[0]}');
+      pdfContent.writeln('Data de Fim: ${report.endDate.toLocal().toString().split(' ')[0]}');
+      pdfContent.writeln('');
+      pdfContent.writeln('=== MÉTRICAS PRINCIPAIS ===');
+      pdfContent.writeln('Total Gasto com Combustível: ${report.formattedTotalFuelSpent}');
+      pdfContent.writeln('Total de Litros: ${report.formattedTotalFuelLiters}');
+      pdfContent.writeln('Preço Médio por Litro: ${report.formattedAverageFuelPrice}');
+      pdfContent.writeln('Distância Total: ${report.formattedTotalDistance}');
+      pdfContent.writeln('Consumo Médio: ${report.formattedAverageConsumption}');
+      pdfContent.writeln('Custo por Km: ${report.formattedCostPerKm}');
+      pdfContent.writeln('Número de Registros: ${report.fuelRecordsCount}');
+      pdfContent.writeln('');
+      pdfContent.writeln('=== FIM DO RELATÓRIO ===');
+
+      return Right(pdfContent.toString());
+    } catch (e) {
+      return Left(UnexpectedFailure('Erro ao exportar para PDF: ${e.toString()}'));
+    }
+  }
+
 }

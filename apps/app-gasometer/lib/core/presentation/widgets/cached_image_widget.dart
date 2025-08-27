@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../constants/ui_constants.dart';
+
 /// Widget reutilizável para carregamento otimizado de imagens
 /// com cache, shimmer loading e error handling
 class CachedImageWidget extends StatelessWidget {
@@ -204,7 +206,7 @@ class CachedImageWidget extends StatelessWidget {
     // Calcular cache dimensions baseado no contexto
     final cacheHeight = isFullScreen 
         ? (screenSize.height * 0.8).toInt() 
-        : height?.toInt() ?? 200;
+        : height?.toInt() ?? AppSizes.imagePreviewHeight.toInt();
     final cacheWidth = isFullScreen 
         ? (screenSize.width * 0.9).toInt() 
         : width?.toInt() ?? screenSize.width.toInt();
@@ -260,11 +262,11 @@ class CachedImageWidget extends StatelessWidget {
           children: [
             Icon(
               placeholderIcon ?? Icons.image_outlined,
-              size: isFullScreen ? 64 : 32,
+              size: isFullScreen ? AppSizes.iconXXL : AppSizes.iconL,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
             ),
             if (!isFullScreen) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.small),
               Text(
                 'Carregando...',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -294,10 +296,10 @@ class CachedImageWidget extends StatelessWidget {
         children: [
           Icon(
             Icons.error_outline,
-            size: isFullScreen ? 48 : 32,
+            size: isFullScreen ? AppSizes.iconXL : AppSizes.iconL,
             color: theme.colorScheme.error,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.small),
           Text(
             'Erro ao carregar',
             style: theme.textTheme.bodySmall?.copyWith(

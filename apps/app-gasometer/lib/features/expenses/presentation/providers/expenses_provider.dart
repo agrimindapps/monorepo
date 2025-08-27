@@ -8,6 +8,7 @@ import '../../../../core/providers/base_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
+import '../../core/constants/expense_constants.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_statistics_service.dart';
 import '../../domain/services/expense_validation_service.dart';

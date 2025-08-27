@@ -94,7 +94,7 @@ class ErrorReporter {
       additionalData: {
         'endpoint': endpoint,
         'method': method,
-        'status_code': (error as NetworkError?)?.statusCode,
+        'status_code': error is ServerError ? (error as ServerError).statusCode : null,
         'request_data': requestData,
       },
     );
@@ -220,14 +220,14 @@ class ErrorReporter {
   ) async {
     try {
       await _analyticsService.logEvent(
-        name: 'app_error',
-        parameters: {
+        'app_error',
+        {
           'error_type': error.runtimeType.toString(),
-          'error_message': error.userMessage,
+          'error_message': error.displayMessage,
           'error_severity': error.severity.name,
           'is_recoverable': error.isRecoverable,
           'context': context ?? 'unknown',
-          ...?additionalData,
+          if (additionalData != null) ...additionalData.map((key, value) => MapEntry(key, value as Object)),
         },
       );
     } catch (e) {

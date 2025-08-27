@@ -74,8 +74,13 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
     final filteredAnimals = ref.watch(filteredAnimalsProvider);
     
     if (animalsState.isLoading && animalsState.animals.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Semantics(
+        label: 'Carregando lista de pets',
+        hint: 'Aguarde enquanto carregamos seus pets',
+        liveRegion: true,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
     
@@ -88,12 +93,15 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
       return _buildEmptyFilteredState(animalsState);
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        ref.read(animalsUIStateProvider.notifier).resetPagination();
-        await ref.read(animalsProvider.notifier).loadAnimals();
-      },
-      child: ListView.builder(
+    return Semantics(
+      label: 'Lista de pets',
+      hint: 'Arraste para baixo para atualizar a lista',
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.read(animalsUIStateProvider.notifier).resetPagination();
+          await ref.read(animalsProvider.notifier).loadAnimals();
+        },
+        child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
         // Performance optimization: provide itemExtent for better performance
@@ -114,6 +122,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
             onDelete: () => widget.onDeleteAnimal(animal),
           );
         },
+        ),
       ),
     );
   }
@@ -126,13 +135,18 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
   }
 
   Widget _buildLoadingIndicator() {
-    return const Padding(
-      padding: EdgeInsets.all(16),
-      child: Center(
-        child: SizedBox(
-          height: 20,
-          width: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
+    return Semantics(
+      label: 'Carregando mais pets',
+      hint: 'Aguarde enquanto carregamos mais pets',
+      liveRegion: true,
+      child: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
       ),
     );
@@ -145,10 +159,13 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
+            Semantics(
+              label: 'Ícone de busca vazia',
+              child: Icon(
+                Icons.search_off,
+                size: 64,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -166,12 +183,17 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            OutlinedButton.icon(
-              onPressed: () {
-                ref.read(animalsProvider.notifier).clearFilters();
-              },
-              icon: const Icon(Icons.clear_all),
-              label: const Text('Limpar Filtros'),
+            Semantics(
+              label: 'Limpar todos os filtros',
+              hint: 'Toque para remover todos os filtros e mostrar todos os pets',
+              button: true,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ref.read(animalsProvider.notifier).clearFilters();
+                },
+                icon: const Icon(Icons.clear_all),
+                label: const Text('Limpar Filtros'),
+              ),
             ),
           ],
         ),

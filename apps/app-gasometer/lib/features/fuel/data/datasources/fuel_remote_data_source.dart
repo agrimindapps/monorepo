@@ -96,7 +96,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   Future<FuelRecordEntity> updateFuelRecord(String userId, FuelRecordEntity fuelRecord) async {
     try {
       final updatedRecord = fuelRecord.copyWith(
-        updatedAt: DateTime.now(),
+        atualizadoEm: DateTime.now(),
       );
 
       final model = _mapToModel(updatedRecord, userId);
@@ -185,28 +185,25 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   FuelRecordEntity _mapToEntity(FuelSupplyModel model) {
     return FuelRecordEntity(
       id: model.id,
-      userId: model.userId ?? '',
-      vehicleId: model.veiculoId,
-      fuelType: _mapIntToFuelType(model.tipoCombustivel),
-      liters: model.litros,
-      pricePerLiter: model.precoPorLitro,
-      totalPrice: model.valorTotal,
-      odometer: model.odometro,
-      date: DateTime.fromMillisecondsSinceEpoch(model.data),
-      gasStationName: model.posto,
-      gasStationBrand: null, // Not available in current model
-      fullTank: model.tanqueCheio ?? true,
-      notes: model.observacao,
-      createdAt: model.createdAt ?? DateTime.now(),
-      updatedAt: model.updatedAt ?? DateTime.now(),
-      photos: const [],
+      idUsuario: model.userId ?? '',
+      veiculoId: model.veiculoId,
+      tipoCombustivel: _mapIntToFuelType(model.tipoCombustivel),
+      litros: model.litros,
+      precoPorLitro: model.precoPorLitro,
+      valorTotal: model.valorTotal,
+      odometro: model.odometro,
+      data: DateTime.fromMillisecondsSinceEpoch(model.data),
+      nomePosto: model.posto,
+      marcaPosto: null, // Not available in current model
+      tanqueCheio: model.tanqueCheio ?? true,
+      observacoes: model.observacao,
+      criadoEm: model.createdAt ?? DateTime.now(),
+      atualizadoEm: model.updatedAt ?? DateTime.now(),
       latitude: null,
       longitude: null,
-      address: null,
-      previousOdometer: null,
-      distanceTraveled: null,
-      consumption: null,
-      metadata: const {},
+      odometroAnterior: null,
+      distanciaPercorrida: null,
+      consumo: null,
     );
   }
 

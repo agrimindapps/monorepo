@@ -35,6 +35,12 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
   }
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(

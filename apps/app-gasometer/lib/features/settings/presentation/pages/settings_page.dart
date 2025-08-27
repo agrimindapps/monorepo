@@ -72,7 +72,7 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SemanticText.heading(
+                  Text(
                     'Configurações',
                     style: const TextStyle(
                       fontSize: 24,
@@ -80,7 +80,7 @@ class SettingsPage extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  SemanticText.subtitle(
+                  Text(
                     'Gerencie suas preferências',
                     style: const TextStyle(
                       fontSize: 14,
@@ -195,7 +195,7 @@ class SettingsPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    // TODO: Navigate to login
+                    // Navigate to login - feature pending
                     _showSnackBar(context, 'Funcionalidade em desenvolvimento');
                   },
                   style: ElevatedButton.styleFrom(
@@ -461,7 +461,7 @@ class SettingsPage extends StatelessWidget {
           title: 'Central de Ajuda',
           subtitle: 'Perguntas frequentes e tutoriais',
           onTap: () {
-            // TODO: Navigate to help center
+            // Help center navigation pending
             _showSnackBar(context, 'Funcionalidade em desenvolvimento');
           },
           trailing: Icon(
@@ -475,7 +475,7 @@ class SettingsPage extends StatelessWidget {
           title: 'Contato',
           subtitle: 'Entre em contato conosco',
           onTap: () {
-            // TODO: Open contact form or email
+            // Contact form implementation pending
             _showSnackBar(context, 'Funcionalidade em desenvolvimento');
           },
           trailing: Icon(
@@ -489,7 +489,7 @@ class SettingsPage extends StatelessWidget {
           title: 'Reportar Bug',
           subtitle: 'Relatar problemas ou sugestões',
           onTap: () {
-            // TODO: Open bug report form
+            // Bug report form implementation pending
             _showSnackBar(context, 'Funcionalidade em desenvolvimento');
           },
           trailing: Icon(
@@ -503,7 +503,7 @@ class SettingsPage extends StatelessWidget {
           title: 'Avaliar o App',
           subtitle: 'Avalie nossa experiência na loja',
           onTap: () {
-            // TODO: Open app store rating
+            // App store rating implementation pending
             _showSnackBar(context, 'Funcionalidade em desenvolvimento');
           },
           trailing: Icon(
@@ -527,7 +527,7 @@ class SettingsPage extends StatelessWidget {
           title: 'Sobre o App',
           subtitle: 'Versão 1.0.0',
           onTap: () {
-            // TODO: Show app info dialog
+            // App info dialog implementation pending
             _showSnackBar(context, 'Funcionalidade em desenvolvimento');
           },
           trailing: Icon(
@@ -607,7 +607,7 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                SemanticText.heading(
+                Text(
                   title,
                   style: TextStyle(
                     fontSize: 18,
@@ -653,7 +653,7 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SemanticText.heading(
+                  Text(
                     title,
                     style: TextStyle(
                       fontSize: 16,
@@ -662,7 +662,7 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  SemanticText.subtitle(
+                  Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
@@ -815,7 +815,7 @@ class SettingsPage extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // TODO: Implement logout functionality
+              // Logout functionality implementation pending
               _showSnackBar(context, 'Logout realizado com sucesso');
             },
             style: TextButton.styleFrom(

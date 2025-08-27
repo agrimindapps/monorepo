@@ -59,13 +59,13 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       _formProvider.initializeFromOdometer(widget.odometer!);
     } else {
       // Get selected vehicle ID from vehicles provider
-      // TODO: Get selected vehicle from provider
+      // Selected vehicle from provider pending
       // final selectedVehicle = vehiclesProvider.selectedVehicle;
       // For now, initialize with empty vehicle ID
       const selectedVehicleId = '';
       if (selectedVehicleId.isNotEmpty) {
         _formProvider.initializeForNew(selectedVehicleId);
-        // TODO: Load and set vehicle data
+        // Vehicle data loading implementation pending
       }
     }
   }

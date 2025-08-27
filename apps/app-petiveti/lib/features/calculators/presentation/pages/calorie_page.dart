@@ -14,6 +14,8 @@ import '../widgets/calorie_result_card.dart';
 import '../widgets/calorie_review_step.dart';
 import '../widgets/calorie_special_conditions_step.dart';
 import '../widgets/calorie_step_indicator.dart';
+import '../widgets/calorie_progress_indicator.dart';
+import '../widgets/calorie_navigation_bar.dart';
 import '../../../../shared/constants/calorie_constants.dart';
 
 /// **Refactored Calorie Calculator Page - Clean Architecture Implementation**
@@ -239,9 +241,12 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
       appBar: _buildAppBar(),
       body: Column(
         children: [
-          _buildProgressIndicator(state),
+          CalorieProgressIndicator(state: state),
           _buildMainContent(state),
-          _buildNavigationBar(state),
+          CalorieNavigationBar(
+            state: state,
+            navigationHandler: _navigationHandler,
+          ),
         ],
       ),
     );
@@ -269,73 +274,6 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
     );
   }
 
-  Widget _buildProgressIndicator(CalorieState state) {
-    return AnimatedContainer(
-      duration: CalorieConstants.progressContainerAnimationDuration,
-      padding: CalorieConstants.progressIndicatorPadding,
-      decoration: BoxDecoration(
-        color: state.isTransitionLoading 
-            ? Theme.of(context).colorScheme.primaryContainer.withValues(
-                alpha: CalorieColors.primaryContainerOpacity)
-            : Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: state.isTransitionLoading 
-                  ? CalorieColors.shadowOpacityLoading 
-                  : CalorieColors.shadowOpacity),
-            blurRadius: state.isTransitionLoading 
-                ? CalorieConstants.progressShadowBlurRadiusLoading 
-                : CalorieConstants.progressShadowBlurRadius,
-            offset: CalorieConstants.progressShadowOffset,
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          CalorieStepIndicator(
-            currentStep: state.currentStep,
-            totalSteps: state.totalSteps,
-            isComplete: state.hasResult,
-          ),
-          if (state.isTransitionLoading)
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface.withValues(
-                      alpha: CalorieColors.surfaceOverlayOpacity),
-                  borderRadius: BorderRadius.circular(CalorieConstants.progressBorderRadius),
-                ),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: CalorieConstants.loadingIndicatorSize,
-                        height: CalorieConstants.loadingIndicatorSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: CalorieConstants.loadingSpacing),
-                      Text(
-                        CalorieConstants.processingText,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: CalorieConstants.processingTextWeight,
-                          fontSize: CalorieConstants.processingTextSize,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildMainContent(CalorieState state) {
     return Expanded(
@@ -433,74 +371,4 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
     );
   }
 
-  Widget _buildNavigationBar(CalorieState state) {
-    if (state.hasResult) return const SizedBox.shrink();
-    
-    return Container(
-      padding: CalorieConstants.navigationBarPadding,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: Border(
-          top: BorderSide(color: Colors.grey.withValues(
-              alpha: CalorieConstants.navigationBorderOpacity)),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (!state.isFirstStep) ...[
-            OutlinedButton.icon(
-              onPressed: state.isTransitionLoading ? null : _navigationHandler.goToPreviousStep,
-              icon: state.isTransitionLoading 
-                  ? const SizedBox(
-                      width: CalorieConstants.loadingIndicatorSize,
-                      height: CalorieConstants.loadingIndicatorSize,
-                      child: CircularProgressIndicator(
-                          strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth),
-                    )
-                  : const Icon(Icons.arrow_back),
-              label: const Text(CalorieConstants.backButtonText),
-            ),
-            const SizedBox(width: CalorieConstants.navigationButtonSpacing),
-          ],
-          const Spacer(),
-          Consumer(
-            builder: (context, ref, child) {
-              final canProceed = ref.watch(calorieCanProceedProvider);
-              final isLastStep = state.isLastStep;
-              final isTransitionLoading = state.isTransitionLoading;
-              
-              return AnimatedContainer(
-                duration: CalorieConstants.navigationButtonAnimationDuration,
-                child: ElevatedButton.icon(
-                  onPressed: (canProceed && !isTransitionLoading) ? 
-                    () => _navigationHandler.goToNextStep(isLastStep) : null,
-                  icon: isTransitionLoading
-                      ? const SizedBox(
-                          width: CalorieConstants.loadingIndicatorSize,
-                          height: CalorieConstants.loadingIndicatorSize,
-                          child: CircularProgressIndicator(
-                            strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Icon(isLastStep ? Icons.calculate : Icons.arrow_forward),
-                  label: AnimatedSwitcher(
-                    duration: CalorieConstants.animatedSwitcherDuration,
-                    child: Text(
-                      isTransitionLoading
-                          ? (isLastStep ? CalorieConstants.calculatingText : CalorieConstants.loadingText)
-                          : (isLastStep ? CalorieConstants.calculateButtonText : CalorieConstants.advanceButtonText),
-                      key: ValueKey(isTransitionLoading 
-                          ? CalorieConstants.loadingAnimationKey 
-                          : CalorieConstants.normalAnimationKey),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -32,6 +32,12 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
   }
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(

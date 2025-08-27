@@ -165,8 +165,8 @@ class _ErrorTestingWidgetState extends State<ErrorTestingWidget> {
   }
 
   void _simulateNetworkError() {
-    final error = NetworkError(
-      message: 'Simulated network error for testing',
+    final error = ServerError(
+      message: 'Simulated server error for testing',
       statusCode: 500,
     );
     

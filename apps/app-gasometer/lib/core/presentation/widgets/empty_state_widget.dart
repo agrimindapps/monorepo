@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/ui_constants.dart';
+
 /// Reusable empty state widget with illustrations and actions
 /// Provides consistent empty state handling across the app
 class EmptyStateWidget extends StatelessWidget {
@@ -185,16 +187,16 @@ class EmptyStateWidget extends StatelessWidget {
 
   Widget _buildCompactEmpty(ThemeData theme) {
     return Container(
-      padding: style.padding ?? const EdgeInsets.all(16.0),
+      padding: style.padding ?? const EdgeInsets.all(AppSpacing.large),
       child: Row(
         children: [
           if (icon != null) ...[
             Icon(
               icon,
-              size: style.iconSize ?? 32.0,
+              size: style.iconSize ?? AppSizes.iconL,
               color: style.iconColor ?? theme.colorScheme.onSurface.withOpacity(0.5),
             ),
-            const SizedBox(width: 16.0),
+            const SizedBox(width: AppSpacing.large),
           ],
           Expanded(
             child: Column(
@@ -206,7 +208,7 @@ class EmptyStateWidget extends StatelessWidget {
                   style: style.titleStyle ??
                       theme.textTheme.titleMedium?.copyWith(
                         color: style.titleColor ?? theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: AppFontWeights.semiBold,
                       ),
                 ),
                 if (message != null)
@@ -233,13 +235,13 @@ class EmptyStateWidget extends StatelessWidget {
   Widget _buildFullEmpty(ThemeData theme) {
     return Center(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
-        padding: style.padding ?? const EdgeInsets.all(32.0),
+        constraints: const BoxConstraints(maxWidth: AppSizes.maxContentWidth),
+        padding: style.padding ?? const EdgeInsets.all(AppSpacing.xxxlarge),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildIllustration(theme),
-            const SizedBox(height: 24.0),
+            const SizedBox(height: AppSpacing.xxlarge),
             Text(
               title,
               style: style.titleStyle ??
@@ -250,7 +252,7 @@ class EmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (message != null) ...[
-              const SizedBox(height: 12.0),
+              const SizedBox(height: AppSpacing.medium),
               Text(
                 message!,
                 style: style.messageStyle ??
@@ -260,7 +262,7 @@ class EmptyStateWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: 32.0),
+            const SizedBox(height: AppSpacing.xxxlarge),
             _buildActionButtons(theme),
           ],
         ),
@@ -271,14 +273,14 @@ class EmptyStateWidget extends StatelessWidget {
   Widget _buildIllustration(ThemeData theme) {
     if (illustrationAsset != null) {
       return SizedBox(
-        width: style.illustrationSize ?? 120.0,
-        height: style.illustrationSize ?? 120.0,
+        width: style.illustrationSize ?? AppSizes.imageThumbSize,
+        height: style.illustrationSize ?? AppSizes.imageThumbSize,
         child: Image.asset(
           illustrationAsset!,
           fit: BoxFit.contain,
           // Otimizações de memória para assets
-          cacheHeight: (style.illustrationSize ?? 120.0).toInt(),
-          cacheWidth: (style.illustrationSize ?? 120.0).toInt(),
+          cacheHeight: (style.illustrationSize ?? AppSizes.imageThumbSize).toInt(),
+          cacheWidth: (style.illustrationSize ?? AppSizes.imageThumbSize).toInt(),
           // Evitar carregamento desnecessário
           excludeFromSemantics: true,
         ),
@@ -287,15 +289,15 @@ class EmptyStateWidget extends StatelessWidget {
 
     if (icon != null) {
       return Container(
-        width: style.illustrationSize ?? 120.0,
-        height: style.illustrationSize ?? 120.0,
+        width: style.illustrationSize ?? AppSizes.imageThumbSize,
+        height: style.illustrationSize ?? AppSizes.imageThumbSize,
         decoration: BoxDecoration(
           color: (style.iconColor ?? theme.colorScheme.primary).withOpacity(0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
-          size: style.iconSize ?? 64.0,
+          size: style.iconSize ?? AppSizes.iconXXL,
           color: style.iconColor ?? theme.colorScheme.primary.withOpacity(0.7),
         ),
       );
@@ -316,7 +318,7 @@ class EmptyStateWidget extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: style.actionButtonColor ?? theme.colorScheme.primary,
             foregroundColor: style.actionButtonTextColor ?? theme.colorScheme.onPrimary,
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxlarge, vertical: AppSpacing.medium),
           ),
         ),
       );
@@ -328,7 +330,7 @@ class EmptyStateWidget extends StatelessWidget {
           onPressed: onSecondaryAction,
           style: TextButton.styleFrom(
             foregroundColor: style.secondaryButtonColor ?? theme.colorScheme.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxlarge, vertical: AppSpacing.medium),
           ),
           child: Text(secondaryButtonText ?? 'Learn More'),
         ),
@@ -346,7 +348,7 @@ class EmptyStateWidget extends StatelessWidget {
     return Column(
       children: [
         buttons.first,
-        const SizedBox(height: 12.0),
+        const SizedBox(height: AppSpacing.medium),
         buttons.last,
       ],
     );

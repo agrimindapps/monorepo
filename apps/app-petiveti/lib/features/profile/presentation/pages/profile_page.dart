@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../../shared/constants/profile_constants.dart';
+import '../../../../shared/widgets/dialogs/app_dialogs.dart';
 import '../widgets/profile_state_handlers.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -47,9 +48,12 @@ class ProfilePage extends ConsumerWidget {
     }
 
     // Handle authenticated state with user data
-    return SingleChildScrollView(
-      padding: ProfileConstants.pageContentPadding,
-      child: Column(
+    return Semantics(
+      label: 'Página de perfil do usuário',
+      hint: 'Visualize e gerencie suas informações de perfil e configurações',
+      child: SingleChildScrollView(
+        padding: ProfileConstants.pageContentPadding,
+        child: Column(
         children: [
           // Header do perfil
           ProfileStateHandlers.buildProfileHeader(context, authState.user!),
@@ -160,20 +164,23 @@ class ProfilePage extends ConsumerWidget {
             
             const SizedBox(height: 16),
             
-            // Versão do app
-            FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (context, snapshot) {
-                final version = snapshot.hasData 
-                    ? 'Versão ${snapshot.data!.version}'
-                    : 'Versão 1.0.0';
-                return Text(
-                  version,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                  ),
-                );
-              },
+            // Versão do app com acessibilidade
+            Semantics(
+              label: 'Informações da versão do aplicativo',
+              child: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final version = snapshot.hasData 
+                      ? 'Versão ${snapshot.data!.version}'
+                      : 'Versão 1.0.0';
+                  return Text(
+                    version,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -207,7 +214,7 @@ class ProfilePage extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            backgroundColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
             child: user?.photoUrl != null
                 ? Semantics(
                     label: 'Foto do perfil do usuário ${user?.displayName ?? ""}'.trim(),
@@ -219,29 +226,29 @@ class ProfilePage extends ConsumerWidget {
                         height: 80,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
+                          return Icon(
                             Icons.person,
                             size: 40,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           );
                         },
                       ),
                     ),
                   )
-                : const Semantics(
+                : Semantics(
                     label: 'Avatar padrão do usuário',
                     child: Icon(
                       Icons.person,
                       size: 40,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
           ),
           const SizedBox(height: 12),
           Text(
             user?.displayName ?? 'Usuário',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -250,7 +257,7 @@ class ProfilePage extends ConsumerWidget {
           Text(
             user?.email ?? 'email@exemplo.com',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
               fontSize: 14,
             ),
           ),
@@ -259,13 +266,13 @@ class ProfilePage extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.amber,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
+              child: Text(
                 'PREMIUM',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -283,15 +290,22 @@ class ProfilePage extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+          child: Semantics(
+            label: 'Cabeçalho da seção $title',
+            header: true,
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
-        Card(
-          child: Column(children: items),
+        Semantics(
+          label: 'Lista de opções da seção $title',
+          child: Card(
+            child: Column(children: items),
+          ),
         ),
       ],
     );
@@ -304,31 +318,26 @@ class ProfilePage extends ConsumerWidget {
     VoidCallback onTap,
   ) {
     return Semantics(
-      hint: 'Navegar para $title',
+      label: 'Menu $title',
+      hint: 'Toque para acessar $title',
       button: true,
       child: ListTile(
-        leading: Icon(icon),
+        leading: Semantics(
+          label: 'Ícone de $title',
+          child: Icon(icon),
+        ),
         title: Text(title),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: Semantics(
+          label: 'Indicador de navegação',
+          child: const Icon(Icons.chevron_right),
+        ),
         onTap: onTap,
       ),
     );
   }
 
   void _showComingSoonDialog(BuildContext context, String title) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: const Text('Funcionalidade em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    AppDialogs.showComingSoon(context, title);
   }
 
   void _showNotificationsSettings(BuildContext context) {
@@ -352,61 +361,31 @@ class ProfilePage extends ConsumerWidget {
   }
 
   void _contactSupport(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Contatar Suporte'),
-        content: Semantics(
-          label: 'Informações de contato do suporte',
-          child: const Text('Email: suporte@petiveti.com\nTelefone: (11) 99999-9999'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+    AppDialogs.showContactSupport(
+      context,
+      supportEmail: 'suporte@petiveti.com',
+      supportPhone: '(11) 99999-9999',
+      showSocialMedia: true,
     );
   }
 
   void _showAbout(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: 'PetiVeti',
-      applicationVersion: '1.0.0',
-      applicationIcon: const Icon(Icons.pets, size: 64),
-      children: const [
-        Text('App completo para cuidados veterinários'),
-        Text('Desenvolvido com Flutter'),
-      ],
+    AppDialogs.showAboutApp(
+      context,
+      appName: 'PetiVeti',
+      appIcon: const Icon(Icons.pets, size: 32, color: Colors.blue),
+      customDescription: 'App completo para cuidados veterinários com calculadoras especializadas, controle de medicamentos, agendamento de consultas e muito mais.',
+      showTechnicalInfo: true,
     );
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Logout'),
-        content: const Text('Deseja realmente sair da sua conta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ref.read(authProvider.notifier).signOut();
-              context.go('/login');
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
+    AppDialogs.showLogoutConfirmation(
+      context,
+      onConfirm: () {
+        ref.read(authProvider.notifier).signOut();
+        context.go('/login');
+      },
     );
   }
 }

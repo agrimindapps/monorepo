@@ -21,4 +21,5 @@ abstract class ReportsRepository {
   
   // Export reports
   Future<Either<Failure, String>> exportReportToCSV(ReportSummaryEntity report);
+  Future<Either<Failure, String>> exportReportToPDF(ReportSummaryEntity report);
 }

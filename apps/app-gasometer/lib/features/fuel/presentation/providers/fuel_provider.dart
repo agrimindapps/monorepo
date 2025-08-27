@@ -398,7 +398,7 @@ class FuelProvider extends ChangeNotifier {
     if (error is Failure) {
       _errorMessage = _mapFailureToMessage(error);
     } else if (error is AppError) {
-      _errorMessage = error.userMessage;
+      _errorMessage = error.displayMessage;
       _errorReporter.reportProviderError(
         error,
         providerName: 'FuelProvider',
@@ -421,12 +421,11 @@ class FuelProvider extends ChangeNotifier {
     if (failure is NetworkFailure) {
       return NetworkError(
         message: 'Erro de conexão ao carregar dados de combustível',
-        statusCode: failure.statusCode,
       );
     } else if (failure is ServerFailure) {
       return ServerError(
         message: 'Erro do servidor ao processar dados de combustível',
-        statusCode: failure.statusCode,
+        statusCode: 500,
       );
     } else if (failure is ValidationFailure) {
       return ValidationError(

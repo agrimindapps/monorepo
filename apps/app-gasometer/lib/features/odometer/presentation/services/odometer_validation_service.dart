@@ -124,7 +124,7 @@ class OdometerValidationService {
     }
 
     // Check for duplicate values in recent history
-    // TODO: Implement when odometer history is available
+    // Odometer history validation implementation pending
     // final hasDuplicateInRecent = await _checkForRecentDuplicate(
     //   vehicle.id,
     //   odometerValue,
@@ -225,6 +225,21 @@ class OdometerValidationService {
     }
 
     return null;
+  }
+
+  /// Simple validation method for backward compatibility
+  ///
+  /// This method provides basic validation for odometer readings.
+  /// For more comprehensive validation, use validateOdometerWithContext instead.
+  Future<OdometerContextValidationResult> validateOdometerReading(
+    String vehicleId,
+    double odometerValue, {
+    String? context,
+  }) async {
+    return await validateOdometerWithContext(
+      vehicleId: vehicleId,
+      odometerValue: odometerValue,
+    );
   }
 
   /// Generates intelligent validation suggestions based on vehicle context

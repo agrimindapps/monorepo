@@ -78,6 +78,11 @@ class OdometerProvider extends ChangeNotifier {
     }
   }
 
+  /// Alias for loadOdometers for backward compatibility
+  Future<void> loadOdometerReadings() async {
+    await loadOdometers();
+  }
+
   /// Loads odometers for a specific vehicle
   Future<void> loadOdometersByVehicle(String vehicleId) async {
     _setLoading(true);

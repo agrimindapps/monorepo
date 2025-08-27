@@ -198,7 +198,6 @@ class ExpenseConstants {
   static const double reportAmountMillions = 1000000.0;
   
   // Configurações de paginação
-  static const int defaultPageSize = 20;
   static const int maxPageSize = 100;
   static const int minPageSize = 5;
   

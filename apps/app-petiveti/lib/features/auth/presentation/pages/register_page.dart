@@ -6,6 +6,7 @@ import '../widgets/register_page_coordinator.dart';
 import '../widgets/register_page_header.dart';
 import '../widgets/register_form_fields.dart';
 import '../widgets/register_social_auth.dart';
+import '../widgets/register_action_buttons.dart';
 
 /// **User Registration Page - Secure Authentication Interface**
 /// 
@@ -147,14 +148,63 @@ class RegisterPage extends ConsumerStatefulWidget {
   ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
+/// **Register Page State Management**
+/// 
+/// Manages the complete registration form lifecycle including input validation,
+/// state persistence, authentication processing, and user navigation.
+/// 
+/// ## State Variables:
+/// - **_formKey**: Global form validation state controller
+/// - **_nameController**: Full name input field controller  
+/// - **_emailController**: Email address input field controller
+/// - **_passwordController**: Password input field controller
+/// - **_confirmPasswordController**: Password confirmation field controller
+/// - **_acceptedTerms**: Terms and conditions acceptance state
+/// 
+/// ## Form Validation Strategy:
+/// - Real-time validation with user-friendly error messages
+/// - Comprehensive input sanitization and format checking
+/// - Terms acceptance requirement before submission
+/// - Password strength validation and confirmation matching
+/// 
+/// ## Authentication Flow:
+/// - Form submission validation → Input sanitization → Authentication request
+/// - Loading state management during registration process
+/// - Success/error state handling with user feedback
+/// - Automatic navigation upon successful registration
+/// 
+/// ## Memory Management:
+/// - Proper controller disposal in dispose() method
+/// - State cleanup to prevent memory leaks
+/// - Efficient widget rebuilding strategy
 class _RegisterPageState extends ConsumerState<RegisterPage> {
+  /// Global key for form validation state management
   final _formKey = GlobalKey<FormState>();
+  
+  /// Text controller for user's full name input
   final _nameController = TextEditingController();
+  
+  /// Text controller for email address input with validation
   final _emailController = TextEditingController();
+  
+  /// Text controller for secure password input
   final _passwordController = TextEditingController();
+  
+  /// Text controller for password confirmation matching
   final _confirmPasswordController = TextEditingController();
+  
+  /// Whether user has explicitly accepted terms and conditions
   bool _acceptedTerms = false;
 
+  /// **Cleanup Resources**
+  /// 
+  /// Properly disposes of all text controllers and resources to prevent memory leaks.
+  /// Called automatically when the widget is removed from the widget tree.
+  /// 
+  /// ## Cleanup Actions:
+  /// - Disposes text input controllers
+  /// - Clears any pending validations
+  /// - Releases form state resources
   @override
   void dispose() {
     _nameController.dispose();
@@ -164,6 +214,28 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
+  /// **Build Registration Form Interface**
+  /// 
+  /// Constructs the complete registration user interface with responsive design,
+  /// form validation, and interactive elements.
+  /// 
+  /// ## UI Structure:
+  /// - **AppBar**: Navigation and branding
+  /// - **Form Container**: Scrollable form with input validation
+  /// - **Header Section**: App branding and registration messaging
+  /// - **Form Fields**: Name, email, password with validation
+  /// - **Action Buttons**: Registration and navigation controls
+  /// - **Social Auth**: Alternative authentication options
+  /// 
+  /// ## State Integration:
+  /// - Watches authentication provider for loading/error states
+  /// - Sets up authentication state listeners for navigation
+  /// - Manages form validation and submission states
+  /// 
+  /// ## Responsive Design:
+  /// - Adapts to different screen sizes and orientations
+  /// - Provides appropriate keyboard types and input actions
+  /// - Ensures accessibility with semantic labels
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -195,9 +267,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   onTermsChanged: (value) => setState(() => _acceptedTerms = value),
                 ),
                 const SizedBox(height: 24),
-                _buildRegisterButton(authState),
-                const SizedBox(height: 16),
-                _buildLoginLink(),
+                RegisterActionButtons(
+                  formKey: _formKey,
+                  nameController: _nameController,
+                  emailController: _emailController,
+                  passwordController: _passwordController,
+                  acceptedTerms: _acceptedTerms,
+                ),
                 const SizedBox(height: 32),
                 const RegisterSocialAuth(),
               ],
@@ -208,51 +284,4 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  /// **Register Button Widget**
-  /// 
-  /// Main registration button with loading state and validation.
-  Widget _buildRegisterButton(AuthState authState) {
-    return ElevatedButton(
-      onPressed: (authState.isLoading || !_acceptedTerms) 
-          ? null 
-          : () => _handleRegister(),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
-      child: authState.isLoading
-          ? const CircularProgressIndicator()
-          : const Text('Criar Conta'),
-    );
-  }
-
-  /// **Login Link Widget**
-  /// 
-  /// Link for existing users to navigate back to login page.
-  Widget _buildLoginLink() {
-    return TextButton(
-      onPressed: () => RegisterPageCoordinator.navigateToLogin(context),
-      child: const Text('Já tem uma conta? Faça login'),
-    );
-  }
-
-  /// **Handle Registration Form Submission**
-  /// 
-  /// Processes registration form using the coordinator.
-  Future<void> _handleRegister() async {
-    if (!RegisterPageCoordinator.validateRegistrationForm(
-      formKey: _formKey,
-      termsAccepted: _acceptedTerms,
-    )) {
-      return;
-    }
-
-    await RegisterPageCoordinator.handleRegistration(
-      ref: ref,
-      context: context,
-      name: _nameController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
-      termsAccepted: _acceptedTerms,
-    );
-  }
 }

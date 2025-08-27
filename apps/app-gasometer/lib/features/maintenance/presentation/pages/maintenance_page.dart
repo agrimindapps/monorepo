@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/widgets.dart';
+import '../../../../core/providers/base_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
@@ -164,7 +165,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                 message: 'Carregando manutenções...',
                 height: 400,
               )
-            else if (maintenanceProvider.hasError)
+            else if (maintenanceProvider.state == ProviderState.error)
               _buildErrorState(maintenanceProvider.errorMessage!, () => maintenanceProvider.loadAllMaintenanceRecords())
             else if (_filteredRecords.isEmpty)
               _buildEmptyState()
@@ -394,7 +395,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
     return EnhancedEmptyState.maintenances(
       onAddMaintenance: () => context.go('/maintenance/add'),
       onViewGuides: () {
-        // TODO: Implementar navegação para guias
+        // Navigation to guides implementation pending
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Guias de manutenção em breve!'),
@@ -697,7 +698,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Veículo: ${record.vehicleId}', // TODO: Buscar nome do veículo
+                    'Veículo: ${record.vehicleId}', // Vehicle name lookup pending
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),

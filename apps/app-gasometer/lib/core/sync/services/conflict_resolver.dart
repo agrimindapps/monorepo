@@ -6,6 +6,7 @@ import '../interfaces/i_conflict_resolver.dart';
 import '../models/conflict_data.dart';
 import '../strategies/conflict_resolution_strategy.dart';
 
+@injectable
 class ConflictResolver<T extends BaseSyncModel> implements IConflictResolver<T> {
   
   @override

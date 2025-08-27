@@ -1,3 +1,4 @@
+
 /// Interface for connectivity monitoring service
 /// Provides contract for network connectivity operations
 abstract class IConnectivityService {
@@ -50,7 +51,7 @@ enum ConnectionType {
 /// Connection quality data model
 class ConnectionQuality {
   final ConnectionType type;
-  final int? signalStrength; // 0-100
+  final int? signalStrength; // ${AppDefaults.minSignalStrength}-${AppDefaults.maxSignalStrength}
   final double? speed; // Mbps
   final int? latency; // milliseconds
   final bool isStable;

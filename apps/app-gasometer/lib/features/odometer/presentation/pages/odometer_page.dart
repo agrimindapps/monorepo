@@ -32,6 +32,15 @@ class _OdometerPageState extends State<OdometerPage> {
     'Ago 25',
   ];
 
+  // Get odometers from the provider instead of maintaining local state
+  List<OdometerEntity> get _odometers {
+    final provider = Provider.of<OdometerProvider>(context, listen: false);
+    if (_selectedVehicleId != null) {
+      return provider.getOdometersByVehicle(_selectedVehicleId!);
+    }
+    return provider.odometers;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,7 +52,7 @@ class _OdometerPageState extends State<OdometerPage> {
   void _loadOdometerData() {
     if (_selectedVehicleId != null && _selectedVehicleId!.isNotEmpty) {
       Provider.of<OdometerProvider>(context, listen: false)
-          .loadOdometerReadings(_selectedVehicleId!);
+          .loadOdometersByVehicle(_selectedVehicleId!);
     }
   }
 
@@ -58,7 +67,7 @@ class _OdometerPageState extends State<OdometerPage> {
               children: [
                 _buildHeader(),
                 _buildControls(),
-                Expanded(child: _buildContent(odometerProvider)),
+                Expanded(child: _buildContent()),
               ],
             );
           },
@@ -307,8 +316,8 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Widget _buildOdometerItem(Map<String, dynamic> odometer) {
-    final date = odometer['date'] as DateTime;
+  Widget _buildOdometerItem(OdometerEntity odometer) {
+    final date = odometer.registrationDate;
     final dayOfMonth = date.day.toString().padLeft(2, '0');
     final weekday = _getWeekdayName(date.weekday);
 
@@ -356,19 +365,13 @@ class _OdometerPageState extends State<OdometerPage> {
                 CardInfoRow(
                   icon: Icons.speed,
                   label: 'Odômetro',
-                  value: '${odometer['odometer'].toStringAsFixed(1)} km',
+                  value: '${odometer.value.toStringAsFixed(1)} km',
                   iconColor: Theme.of(context).colorScheme.primary,
                 ),
-                if ((odometer['difference'] as num? ?? 0) > 0)
-                  CardInfoRow(
-                    icon: Icons.trending_up,
-                    label: 'Diferença',
-                    value: '${odometer['difference'].toStringAsFixed(1)} km',
-                  ),
-                if ((odometer['description'] as String? ?? '').isNotEmpty) ...[
+                if (odometer.description.isNotEmpty) ...[
                   SizedBox(height: GasometerDesignTokens.spacingSm),
                   Text(
-                    odometer['description'] as String? ?? '',
+                    odometer.description,
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeSm,
                       color: Theme.of(context).colorScheme.onSurface.withValues(
@@ -436,12 +439,8 @@ class _OdometerPageState extends State<OdometerPage> {
     );
     
     if (result != null && mounted) {
-      setState(() {
-        _odometers.insert(0, {
-          'id': DateTime.now().millisecondsSinceEpoch,
-          ...result,
-        });
-      });
+      // Refresh data from provider instead of managing local state
+      _loadOdometerData();
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -458,28 +457,12 @@ class _OdometerPageState extends State<OdometerPage> {
     }
   }
 
-  void _editOdometer(Map<String, dynamic> odometer) async {
+  void _editOdometer(OdometerEntity odometer) async {
+    Map<String, dynamic>? result;
     try {
-      // Usar provider para converter e validar dados
-      final provider = Provider.of<OdometerProvider>(context, listen: false);
-      final odometerEntity = await provider.convertMapToEntity(odometer);
-      
-      if (odometerEntity == null) {
-        // Mostrar erro se conversão falhar
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Erro ao carregar dados do odômetro'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-        return;
-      }
-      
-      final result = await showDialog<Map<String, dynamic>>(
+      result = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (context) => AddOdometerPage(odometer: odometerEntity),
+        builder: (context) => AddOdometerPage(odometer: odometer),
       );
     } catch (e) {
       // Tratamento de erro adequado
@@ -496,15 +479,8 @@ class _OdometerPageState extends State<OdometerPage> {
     }
     
     if (result != null && mounted) {
-      setState(() {
-        final index = _odometers.indexWhere((o) => o['id'] == odometer['id']);
-        if (index >= 0) {
-          _odometers[index] = {
-            'id': odometer['id'],
-            ...result,
-          };
-        }
-      });
+      // Refresh data from provider instead of managing local state
+      _loadOdometerData();
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

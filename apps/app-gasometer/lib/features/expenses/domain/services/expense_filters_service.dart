@@ -1,4 +1,5 @@
 import '../entities/expense_entity.dart';
+import '../../core/constants/expense_constants.dart';
 
 /// Configuração de filtros para despesas
 class ExpenseFiltersConfig {

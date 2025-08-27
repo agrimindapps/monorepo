@@ -182,7 +182,7 @@ Future<void> initializeDependencies() async {
 
   // Reports Data Sources
   sl.registerLazySingleton<ReportsDataSource>(
-    () => ReportsDataSourceImpl(sl(), sl()),
+    () => ReportsDataSourceImpl(sl()),
   );
 
   // Maintenance Data Sources
@@ -294,6 +294,7 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<GetCostAnalysis>(() => GetCostAnalysis(sl()));
   sl.registerLazySingleton<GetUsagePatterns>(() => GetUsagePatterns(sl()));
   sl.registerLazySingleton<ExportReportToCSV>(() => ExportReportToCSV(sl()));
+  sl.registerLazySingleton<ExportReportToPDF>(() => ExportReportToPDF(sl()));
 
   // Maintenance Use Cases
   sl.registerLazySingleton<GetAllMaintenanceRecords>(() => GetAllMaintenanceRecords(sl()));
@@ -359,6 +360,8 @@ Future<void> initializeDependencies() async {
       getAverageConsumption: sl(),
       getTotalSpent: sl(),
       getRecentFuelRecords: sl(),
+      errorHandler: sl(),
+      errorReporter: sl(),
     ),
   );
 

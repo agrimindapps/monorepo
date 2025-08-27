@@ -1,4 +1,5 @@
 import '../../features/expenses/domain/entities/expense_entity.dart';
+import '../constants/ui_constants.dart';
 
 /// Interface for expenses repository operations
 /// Provides contract for different expense storage implementations
@@ -63,7 +64,7 @@ abstract class IExpensesRepository {
   /// Pagination support
   Future<PagedResult<ExpenseEntity>> getExpensesPaginated({
     int page = 0,
-    int pageSize = 20,
+    int pageSize = AppDefaults.defaultPageSize,
     String? vehicleId,
     ExpenseType? type,
     DateTime? startDate,

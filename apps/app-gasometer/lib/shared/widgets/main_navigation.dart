@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/constants/ui_constants.dart';
+
 class MainNavigation extends StatelessWidget {
   final Widget child;
   
@@ -15,7 +17,7 @@ class MainNavigation extends StatelessWidget {
         currentIndex: _getCurrentIndex(context),
         onTap: (index) => _onTap(context, index),
         selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),

@@ -230,7 +230,6 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
       semanticLabel: widget.semanticLabel ?? 'Tentar novamente',
       semanticHint: widget.semanticHint ?? 'Executa a operação novamente',
       onPressed: isDisabled ? null : _handleRetry,
-      type: _getButtonType(),
       style: _getButtonStyle(context, isDisabled),
       child: child,
     );
@@ -261,21 +260,6 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
     }
   }
 
-  ButtonType _getButtonType() {
-    switch (widget.type) {
-      case RetryButtonType.elevated:
-        return ButtonType.elevated;
-      case RetryButtonType.filled:
-        return ButtonType.filled;
-      case RetryButtonType.outlined:
-        return ButtonType.outlined;
-      case RetryButtonType.text:
-      case RetryButtonType.compact:
-        return ButtonType.text;
-      case RetryButtonType.iconOnly:
-        return ButtonType.icon;
-    }
-  }
 
   ButtonStyle? _getButtonStyle(BuildContext context, bool isDisabled) {
     final theme = Theme.of(context);

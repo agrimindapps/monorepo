@@ -47,22 +47,42 @@ class SplashConstants {
 }
 
 /// Color constants for the splash page
+/// For theme-aware colors, use these methods with Theme.of(context)
 class SplashColors {
   // Private constructor to prevent instantiation
   SplashColors._();
 
   // Background colors
+  static Color getBackgroundColor(BuildContext context) => 
+      Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1);
+      
+  static Color getLogoContainerColor(BuildContext context) => 
+      Theme.of(context).colorScheme.surface;
+      
+  static Color getLogoIconColor(BuildContext context) => 
+      Theme.of(context).colorScheme.primary;
+
+  // Text colors
+  static Color getTitleColor(BuildContext context) => 
+      Theme.of(context).colorScheme.primary;
+      
+  static Color getTaglineColor(BuildContext context) => 
+      Theme.of(context).colorScheme.onSurfaceVariant;
+
+  // Progress indicator color
+  static Color getProgressIndicatorColor(BuildContext context) => 
+      Theme.of(context).colorScheme.primary;
+
+  // Shadow color
+  static Color getShadowColor(BuildContext context) => 
+      Theme.of(context).colorScheme.primary.withValues(alpha: SplashConstants.logoShadowOpacity);
+      
+  // Fallback static colors for backwards compatibility
   static Color backgroundColor = Colors.blue[50]!;
   static const Color logoContainerColor = Colors.white;
   static const Color logoIconColor = Colors.blue;
-
-  // Text colors
   static Color titleColor = Colors.blue[700]!;
   static Color taglineColor = Colors.blue[600]!;
-
-  // Progress indicator color
   static Color progressIndicatorColor = Colors.blue[400]!;
-
-  // Shadow color
   static Color shadowColor = Colors.blue.withValues(alpha: SplashConstants.logoShadowOpacity);
 }

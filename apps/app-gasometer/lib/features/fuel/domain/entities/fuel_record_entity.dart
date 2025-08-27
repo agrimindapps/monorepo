@@ -70,6 +70,31 @@ class FuelRecordEntity extends Equatable {
     atualizadoEm,
   ];
   
+  // English getters for compatibility
+  String get userId => idUsuario;
+  String get vehicleId => veiculoId;
+  FuelType get fuelType => tipoCombustivel;
+  double get liters => litros;
+  double get pricePerLiter => precoPorLitro;
+  double get totalPrice => valorTotal;
+  double get odometer => odometro;
+  DateTime get date => data;
+  String? get gasStationName => nomePosto;
+  String? get gasStationBrand => marcaPosto;
+  bool get fullTank => tanqueCheio;
+  String? get notes => observacoes;
+  double? get previousOdometer => odometroAnterior;
+  double? get distanceTraveled => distanciaPercorrida;
+  double? get consumption => consumo;
+  DateTime get createdAt => criadoEm;
+  DateTime get updatedAt => atualizadoEm;
+  String? get address => null; // Not available in current entity
+  List<String>? get photos => null; // Not available in current entity
+  Map<String, dynamic>? get metadata => null; // Not available in current entity
+  
+  // Formatted getters
+  String get formattedPricePerLiter => 'R\$ ${precoPorLitro.toStringAsFixed(3)}';
+  
   FuelRecordEntity copyWith({
     String? id,
     String? idUsuario,

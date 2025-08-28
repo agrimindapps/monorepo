@@ -8,13 +8,7 @@ import '../../services/analytics_service.dart';
 import '../models/sync_queue_item.dart';
 import 'sync_queue.dart';
 
-enum NetworkStatus {
-  offline,
-  wifi,
-  mobile,
-  ethernet,
-  other
-}
+enum NetworkStatus { offline, wifi, mobile, ethernet, other }
 
 @singleton
 class SyncOperations {
@@ -25,27 +19,25 @@ class SyncOperations {
   late StreamSubscription<List<ConnectivityResult>> _networkSubscription;
   bool _isProcessingSync = false;
   Timer? _retryTimer;
-  
+
   NetworkStatus _currentNetworkStatus = NetworkStatus.offline;
   NetworkStatus get currentNetworkStatus => _currentNetworkStatus;
 
-  SyncOperations(
-    this._syncQueue, 
-    this._connectivity, 
-    this._analytics,
-  ) {
+  SyncOperations(this._syncQueue, this._connectivity, this._analytics) {
     _initializeNetworkListener();
   }
 
   void _initializeNetworkListener() {
     // Escuta mudanças de conectividade
-    _networkSubscription = _connectivity.onConnectivityChanged.listen((results) {
+    _networkSubscription = _connectivity.onConnectivityChanged.listen((
+      results,
+    ) {
       final newStatus = _mapConnectivityResult(results);
-      
+
       if (_currentNetworkStatus != newStatus) {
         _currentNetworkStatus = newStatus;
         debugPrint('📶 Conectividade mudou: ${newStatus.name}');
-        
+
         // Processa fila quando voltar online
         if (newStatus != NetworkStatus.offline) {
           _scheduleQueueProcessing();
@@ -61,7 +53,7 @@ class SyncOperations {
     final results = await _connectivity.checkConnectivity();
     _currentNetworkStatus = _mapConnectivityResult(results);
     debugPrint('📶 Conectividade inicial: ${_currentNetworkStatus.name}');
-    
+
     if (_currentNetworkStatus != NetworkStatus.offline) {
       _scheduleQueueProcessing();
     }
@@ -71,7 +63,7 @@ class SyncOperations {
     if (results.isEmpty || results.contains(ConnectivityResult.none)) {
       return NetworkStatus.offline;
     }
-    
+
     if (results.contains(ConnectivityResult.wifi)) {
       return NetworkStatus.wifi;
     } else if (results.contains(ConnectivityResult.mobile)) {
@@ -109,19 +101,19 @@ class SyncOperations {
 
     try {
       await _analytics.log('sync_queue_processing_started');
-      
+
       final pendingItems = _syncQueue.getPendingItems();
-      
+
       if (pendingItems.isEmpty) {
         debugPrint('✅ Fila de sync vazia');
         return;
       }
 
       debugPrint('📋 Processando ${pendingItems.length} items da fila');
-      
+
       // Prioriza items: Create > Update > Delete
       final prioritizedItems = _prioritizeItems(pendingItems);
-      
+
       int processedCount = 0;
       int failedCount = 0;
 
@@ -133,7 +125,7 @@ class SyncOperations {
         } catch (e) {
           failedCount++;
           debugPrint('❌ Erro ao processar item ${item.id}: $e');
-          
+
           // Incrementa retry ou remove se excedeu tentativas
           if (item.shouldRetry) {
             await _syncQueue.incrementRetryCount(item.id, e.toString());
@@ -150,8 +142,9 @@ class SyncOperations {
       // Log analytics
       await _analytics.log('sync_queue_processing_completed');
 
-      debugPrint('🎯 Sync concluído: $processedCount processados, $failedCount falharam');
-      
+      debugPrint(
+        '🎯 Sync concluído: $processedCount processados, $failedCount falharam',
+      );
     } catch (e) {
       debugPrint('💥 Erro no processamento da fila: $e');
       await _analytics.recordError(e, null);
@@ -164,9 +157,11 @@ class SyncOperations {
     // Ordena por prioridade calculada + timestamp
     items.sort((a, b) {
       // Primeiro por prioridade (maior primeiro)
-      final priorityComparison = b.calculatedPriority.compareTo(a.calculatedPriority);
+      final priorityComparison = b.calculatedPriority.compareTo(
+        a.calculatedPriority,
+      );
       if (priorityComparison != 0) return priorityComparison;
-      
+
       // Depois por timestamp (mais antigo primeiro)
       return a.timestamp.compareTo(b.timestamp);
     });
@@ -175,7 +170,9 @@ class SyncOperations {
   }
 
   Future<void> _processSyncItem(SyncQueueItem item) async {
-    debugPrint('⚙️ Processando: ${item.modelType}.${item.operation} (ID: ${item.id})');
+    debugPrint(
+      '⚙️ Processando: ${item.modelType}.${item.operation} (ID: ${item.id})',
+    );
 
     // Simula processamento por tipo de operação
     // TODO: Implementar integração real com repositories
@@ -195,39 +192,39 @@ class SyncOperations {
   Future<void> _performCreate(SyncQueueItem item) async {
     // TODO: Integrar com repository específico baseado no modelType
     debugPrint('➕ Criando ${item.modelType}...');
-    
+
     // Simula operação remota
     await Future.delayed(Duration(milliseconds: 500 + (item.retryCount * 200)));
-    
+
     // Marca como sincronizado
     await _syncQueue.markItemAsSynced(item.id);
-    
+
     await _analytics.log('sync_item_created');
   }
 
   Future<void> _performUpdate(SyncQueueItem item) async {
     // TODO: Integrar com repository específico baseado no modelType
     debugPrint('📝 Atualizando ${item.modelType}...');
-    
+
     // Simula operação remota
     await Future.delayed(Duration(milliseconds: 300 + (item.retryCount * 200)));
-    
+
     // Marca como sincronizado
     await _syncQueue.markItemAsSynced(item.id);
-    
+
     await _analytics.log('sync_item_updated');
   }
 
   Future<void> _performDelete(SyncQueueItem item) async {
     // TODO: Integrar com repository específico baseado no modelType
     debugPrint('🗑️ Deletando ${item.modelType}...');
-    
+
     // Simula operação remota
     await Future.delayed(Duration(milliseconds: 200 + (item.retryCount * 200)));
-    
+
     // Marca como sincronizado
     await _syncQueue.markItemAsSynced(item.id);
-    
+
     await _analytics.log('sync_item_deleted');
   }
 

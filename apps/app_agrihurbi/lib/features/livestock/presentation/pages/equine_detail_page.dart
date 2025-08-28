@@ -168,7 +168,7 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -252,8 +252,8 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
                   ),
                   decoration: BoxDecoration(
                     color: _equine!.isActive
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.1),
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: _equine!.isActive ? Colors.green : Colors.grey,

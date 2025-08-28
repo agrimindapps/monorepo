@@ -61,7 +61,7 @@ class BodyConditionStateIndicator extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              state.error ?? 'Erro desconhecido',
+              (state.error as String?) ?? 'Erro desconhecido',
               style: const TextStyle(color: Colors.red),
             ),
           ),
@@ -96,7 +96,7 @@ class BodyConditionStateIndicator extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 4),
-          ...state.validationErrors.map<Widget>((error) => Padding(
+          ...(state.validationErrors as List<String>? ?? <String>[]).map<Widget>((error) => Padding(
             padding: const EdgeInsets.only(left: 24.0),
             child: Text(
               '• $error',

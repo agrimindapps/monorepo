@@ -133,7 +133,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
             'GasOMeter',
             style: TextStyle(
               fontSize: 20,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white.withOpacity(0.9),
             ),
             textAlign: TextAlign.center,
           ),
@@ -142,7 +142,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
             'Última atualização: 01/01/2025',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white.withOpacity(0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -159,7 +159,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -783,7 +783,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
               children: [
                 Icon(
                   Icons.local_gas_station,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: Colors.white.withOpacity(0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -792,7 +792,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withOpacity(0.9),
                   ),
                 ),
               ],
@@ -802,7 +802,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
               '© ${DateTime.now().year} Agrimind Apps. Todos os direitos reservados.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.white.withOpacity(0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -815,7 +815,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
                   width: 1,
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: Colors.white.withOpacity(0.4),
                 ),
                 _footerLink('Termos de Uso', () => context.go('/terms')),
               ],
@@ -833,7 +833,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
         title,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.white.withValues(alpha: 0.7),
+          color: Colors.white.withOpacity(0.7),
         ),
       ),
     );

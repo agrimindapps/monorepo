@@ -265,7 +265,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   child: CircularProgressIndicator(
                     value: _progress,
                     strokeWidth: 6,
-                    backgroundColor: AppTheme.colors.outline.withValues(alpha: 0.2),
+                    backgroundColor: AppTheme.colors.outline.withOpacity(0.2),
                   ),
                 ),
                 Text(
@@ -286,7 +286,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: AppTheme.colors.surfaceVariant.withValues(alpha: 0.5),
+                color: AppTheme.colors.surfaceVariant.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -314,7 +314,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             // Linear progress bar
             LinearProgressIndicator(
               value: _progress,
-              backgroundColor: AppTheme.colors.outline.withValues(alpha: 0.2),
+              backgroundColor: AppTheme.colors.outline.withOpacity(0.2),
               minHeight: 6,
               borderRadius: BorderRadius.circular(3),
             ),
@@ -577,14 +577,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
 
     return Card(
-      color: AppTheme.colors.surfaceVariant.withValues(alpha: 0.3),
+      color: AppTheme.colors.surfaceVariant.withOpacity(0.3),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
             Icon(
               hintIcon,
-              color: AppTheme.colors.primary.withValues(alpha: 0.7),
+              color: AppTheme.colors.primary.withOpacity(0.7),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -609,7 +609,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
         color: AppTheme.colors.surface,
         border: Border(
           top: BorderSide(
-            color: AppTheme.colors.outline.withValues(alpha: 0.12),
+            color: AppTheme.colors.outline.withOpacity(0.12),
           ),
         ),
       ),

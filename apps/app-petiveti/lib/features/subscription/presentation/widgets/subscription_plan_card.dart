@@ -72,7 +72,7 @@ class SubscriptionPlanCard extends ConsumerWidget {
             bottomRight: Radius.circular(8),
           ),
         ),
-        child: const Text(
+        child: Text(
           'MAIS POPULAR',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimary,
@@ -214,7 +214,7 @@ class SubscriptionPlanCard extends ConsumerWidget {
           backgroundColor: plan.isPopular ? Theme.of(context).colorScheme.primary : null,
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
-        icon: _buildButtonIcon(isPurchasing, isCurrentPlan),
+        icon: _buildButtonIcon(context, isPurchasing, isCurrentPlan),
         label: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: Text(
@@ -229,9 +229,9 @@ class SubscriptionPlanCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildButtonIcon(bool isPurchasing, bool isCurrentPlan) {
+  Widget _buildButtonIcon(BuildContext context, bool isPurchasing, bool isCurrentPlan) {
     if (isPurchasing) {
-      return const SizedBox(
+      return SizedBox(
         width: 16,
         height: 16,
         child: CircularProgressIndicator(

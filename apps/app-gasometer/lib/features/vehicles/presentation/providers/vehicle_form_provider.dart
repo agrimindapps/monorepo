@@ -170,13 +170,41 @@ class VehicleFormProvider extends ChangeNotifier {
   bool validateForm() {
     setError(null);
     
-    if (!_formKey.currentState!.validate()) {
-      setError('Por favor, corrija os erros no formulário');
+    // Primeiro validar campos obrigatórios individualmente
+    List<String> missingFields = [];
+    
+    if (marcaController.text.trim().isEmpty) {
+      missingFields.add('Marca');
+    }
+    
+    if (modeloController.text.trim().isEmpty) {
+      missingFields.add('Modelo');
+    }
+    
+    if (anoController.text.trim().isEmpty) {
+      missingFields.add('Ano');
+    }
+    
+    if (corController.text.trim().isEmpty) {
+      missingFields.add('Cor');
+    }
+    
+    if (placaController.text.trim().isEmpty) {
+      missingFields.add('Placa');
+    }
+    
+    if (odometroController.text.trim().isEmpty) {
+      missingFields.add('Odômetro');
+    }
+    
+    if (missingFields.isNotEmpty) {
+      setError('Por favor, preencha os seguintes campos obrigatórios: ${missingFields.join(', ')}');
       return false;
     }
     
-    if (!canSubmit) {
-      setError('Por favor, preencha todos os campos obrigatórios');
+    // Agora validar usando o FormKey (validações específicas de formato, etc.)
+    if (!_formKey.currentState!.validate()) {
+      setError('Por favor, corrija os erros no formulário');
       return false;
     }
     

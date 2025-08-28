@@ -60,7 +60,7 @@ class AsyncState<T> extends BaseState<T> {
   }
 
   /// Factory constructors for common states
-  factory AsyncState.loading() => const AsyncState<T>(isLoading: true);
+  factory AsyncState.loading() => AsyncState<T>(isLoading: true);
   
   factory AsyncState.success(T data) => AsyncState<T>(
     data: data,
@@ -71,7 +71,7 @@ class AsyncState<T> extends BaseState<T> {
     errorMessage: message,
   );
 
-  factory AsyncState.initial() => const AsyncState<T>();
+  factory AsyncState.initial() => AsyncState<T>();
 }
 
 /// **Base Notifier Pattern**
@@ -178,7 +178,7 @@ class ListState<T> extends BaseState<List<T>> {
   }
 
   /// Factory constructors for common list states
-  factory ListState.loading() => const ListState<T>(isLoading: true);
+  factory ListState.loading() => ListState<T>(isLoading: true);
   
   factory ListState.success(List<T> items, {bool hasMore = false}) => ListState<T>(
     items: items,
@@ -190,7 +190,7 @@ class ListState<T> extends BaseState<List<T>> {
     errorMessage: message,
   );
 
-  factory ListState.initial() => const ListState<T>();
+  factory ListState.initial() => ListState<T>();
 }
 
 /// **Cache Management Utilities**
@@ -288,7 +288,7 @@ abstract class ProviderUtils {
 
   /// Debounce function for search queries
   static Future<void> debounce(Duration duration, Future<void> Function() action) async {
-    await Future.delayed(duration);
+    await Future<void>.delayed(duration);
     await action();
   }
 }

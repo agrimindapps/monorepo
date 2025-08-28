@@ -7,7 +7,7 @@ import '../theme/app_theme.dart';
 import 'retry_button.dart';
 
 /// Widget que captura e trata erros não esperados globalmente
-/// 
+///
 /// Funciona como um "error boundary" similar ao React, capturando
 /// erros que ocorrem em widgets filhos e exibindo uma UI de fallback.
 /// Integra com ErrorReporter para logging automático.
@@ -42,33 +42,58 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   StackTrace? _stackTrace;
   bool _hasError = false;
 
+  Function(FlutterErrorDetails)? _previousErrorHandler;
+
   @override
   void initState() {
     super.initState();
-    
-    // Configurar error handler para capturar erros
+
+    // Save previous error handler and chain with ours
+    _previousErrorHandler = FlutterError.onError;
     FlutterError.onError = _handleFlutterError;
   }
 
+  @override
+  void dispose() {
+    // Restore previous error handler
+    FlutterError.onError = _previousErrorHandler;
+    super.dispose();
+  }
+
   void _handleFlutterError(FlutterErrorDetails details) {
-    if (mounted) {
-      setState(() {
-        _error = details.exception;
-        _stackTrace = details.stack;
-        _hasError = true;
+    // Call previous error handler first
+    _previousErrorHandler?.call(details);
+
+    // Only handle if this widget is still mounted
+    if (!mounted) return;
+
+    try {
+      // Defer setState to avoid "setState during build" error
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _error = details.exception;
+            _stackTrace = details.stack;
+            _hasError = true;
+          });
+        }
       });
 
       // Chamar callback de erro se fornecido
       widget.onError?.call(details.exception, details.stack);
-      
+
       // Report error to external services
       _reportError(details.exception, details.stack);
-      
+
       // Log do erro para debugging
       debugPrint('🚨 ErrorBoundary capturou erro: ${details.exception}');
       if (widget.showDebugInfo) {
         debugPrint('Stack trace: ${details.stack}');
       }
+    } catch (e) {
+      // If setState fails, at least report the original error
+      debugPrint('🚨 ErrorBoundary setState failed: $e');
+      debugPrint('Original error was: ${details.exception}');
     }
   }
 
@@ -121,7 +146,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       if (widget.errorBuilder != null) {
         return widget.errorBuilder!(_error!, _stackTrace);
       }
-      
+
       // Usar UI de fallback padrão
       return _buildDefaultErrorUI();
     }
@@ -135,7 +160,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
             _stackTrace = stackTrace;
             _hasError = true;
           });
-          
+
           widget.onError?.call(error, stackTrace);
         }
       },
@@ -147,9 +172,9 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppTheme.colors.errorContainer.withValues(alpha: 0.1),
+        color: AppTheme.colors.errorContainer.withOpacity(0.1),
         border: Border.all(
-          color: AppTheme.colors.error.withValues(alpha: 0.3),
+          color: AppTheme.colors.error.withOpacity(0.3),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(8.0),
@@ -157,25 +182,24 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: AppTheme.colors.error,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  widget.title ?? 'Erro inesperado',
-                  style: AppTheme.textStyles.titleSmall?.copyWith(
-                    color: AppTheme.colors.error,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, color: AppTheme.colors.error, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.title ?? 'Erro inesperado',
+                    style: AppTheme.textStyles.titleSmall?.copyWith(
+                      color: AppTheme.colors.error,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          
+
           if (widget.message != null) ...[
             const SizedBox(height: 8),
             Align(
@@ -188,7 +212,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
               ),
             ),
           ],
-          
+
           // Informações de debug em desenvolvimento
           if (widget.showDebugInfo && _error != null) ...[
             const SizedBox(height: 12),
@@ -217,7 +241,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
               ],
             ),
           ],
-          
+
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -239,10 +263,7 @@ class _ErrorZone extends StatelessWidget {
   final Widget child;
   final void Function(Object error, StackTrace stackTrace) onError;
 
-  const _ErrorZone({
-    required this.child,
-    required this.onError,
-  });
+  const _ErrorZone({required this.child, required this.onError});
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +276,7 @@ class _ErrorZone extends StatelessWidget {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             onError(error, stackTrace);
           });
-          
+
           // Retornar widget vazio temporário
           return const SizedBox.shrink();
         }
@@ -295,7 +316,8 @@ extension ErrorBoundaryExtension on Widget {
   }) {
     return ErrorBoundary(
       title: 'Erro na página${pageName != null ? ' $pageName' : ''}',
-      message: 'Algo deu errado nesta página. Você pode tentar recarregar ou voltar para a tela anterior.',
+      message:
+          'Algo deu errado nesta página. Você pode tentar recarregar ou voltar para a tela anterior.',
       context: 'page_error',
       errorReporter: errorReporter,
       child: this,
@@ -308,7 +330,8 @@ extension ErrorBoundaryExtension on Widget {
     ErrorReporter? errorReporter,
   }) {
     return ErrorBoundary(
-      title: 'Erro no carregamento de dados${providerName != null ? ' - $providerName' : ''}',
+      title:
+          'Erro no carregamento de dados${providerName != null ? ' - $providerName' : ''}',
       message: 'Houve um problema ao carregar os dados. Tente novamente.',
       context: 'provider_error',
       errorReporter: errorReporter,
@@ -334,7 +357,8 @@ class FormErrorBoundary extends StatelessWidget {
   Widget build(BuildContext context) {
     return ErrorBoundary(
       title: 'Erro no formulário${formName != null ? ' $formName' : ''}',
-      message: 'Algo deu errado no formulário. Você pode tentar novamente ou voltar para a tela anterior.',
+      message:
+          'Algo deu errado no formulário. Você pode tentar novamente ou voltar para a tela anterior.',
       onError: onFormError,
       errorBuilder: (error, stackTrace) => _buildFormErrorUI(context, error),
       child: child,
@@ -350,10 +374,13 @@ class FormErrorBoundary extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.edit_note_outlined,
-              color: AppTheme.colors.onErrorContainer,
-              size: 48,
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Icon(
+                Icons.edit_note_outlined,
+                color: AppTheme.colors.onErrorContainer,
+                size: 48,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -372,7 +399,7 @@ class FormErrorBoundary extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             // Debug info em desenvolvimento
             if (kDebugMode) ...[
               const SizedBox(height: 16),
@@ -380,19 +407,16 @@ class FormErrorBoundary extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: Colors.black.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
                 child: Text(
                   error.toString(),
-                  style: const TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 10,
-                  ),
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 10),
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 16),
             Row(
               children: [

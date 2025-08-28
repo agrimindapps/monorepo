@@ -1,6 +1,7 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
+import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -84,15 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     hintText: 'Digite seu nome completo',
                     prefixIcon: Icon(Icons.person_outlined),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, digite seu nome';
-                    }
-                    if (value.trim().split(' ').length < 2) {
-                      return 'Por favor, digite seu nome completo';
-                    }
-                    return null;
-                  },
+                  validator: InputValidators.validateFullName,
                 ),
                 
                 const SizedBox(height: 16),
@@ -106,15 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     hintText: 'Digite seu e-mail',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, digite seu e-mail';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Digite um e-mail válido';
-                    }
-                    return null;
-                  },
+                  validator: InputValidators.validateEmail,
                 ),
                 
                 const SizedBox(height: 16),
@@ -128,14 +113,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     hintText: 'Digite seu telefone',
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty) {
-                      if (!RegExp(r'^[\+]?[1-9]?[0-9]{7,12}$').hasMatch(value.replaceAll(RegExp(r'[^\d\+]'), ''))) {
-                        return 'Digite um telefone válido';
-                      }
-                    }
-                    return null;
-                  },
+                  validator: InputValidators.validatePhone,
                 ),
                 
                 const SizedBox(height: 16),
@@ -161,15 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, digite sua senha';
-                    }
-                    if (value.length < 6) {
-                      return 'A senha deve ter pelo menos 6 caracteres';
-                    }
-                    return null;
-                  },
+                  validator: PasswordValidator.validatePassword,
                 ),
                 
                 const SizedBox(height: 16),
@@ -195,15 +165,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, confirme sua senha';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'As senhas não coincidem';
-                    }
-                    return null;
-                  },
+                  validator: (value) => PasswordValidator.validatePasswordConfirmation(
+                    _passwordController.text,
+                    value,
+                  ),
                 ),
                 
                 const SizedBox(height: 32),
@@ -314,16 +279,22 @@ class _RegisterPageState extends State<RegisterPage> {
             : _phoneController.text.trim(),
       );
 
+      if (!mounted) return; // ✅ Safety check
+
       result.fold(
         (failure) {
-          ErrorHandler.showErrorSnackbar(context, failure);
+          if (mounted) { // ✅ Double check before using context
+            ErrorHandler.showErrorSnackbar(context, failure);
+          }
         },
         (user) {
-          ErrorHandler.showSuccessSnackbar(
-            context, 
-            SuccessMessages.registerSuccess,
-          );
-          context.go('/home');
+          if (mounted) { // ✅ Double check before using context
+            ErrorHandler.showSuccessSnackbar(
+              context, 
+              SuccessMessages.registerSuccess,
+            );
+            context.go('/home');
+          }
         },
       );
     }

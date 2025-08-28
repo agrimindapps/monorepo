@@ -17,7 +17,7 @@ class MainNavigation extends StatelessWidget {
         currentIndex: _getCurrentIndex(context),
         onTap: (index) => _onTap(context, index),
         selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),

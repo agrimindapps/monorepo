@@ -263,14 +263,14 @@ class CachedImageWidget extends StatelessWidget {
             Icon(
               placeholderIcon ?? Icons.image_outlined,
               size: isFullScreen ? AppSizes.iconXXL : AppSizes.iconL,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
             ),
             if (!isFullScreen) ...[
               const SizedBox(height: AppSpacing.small),
               Text(
                 'Carregando...',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                 ),
               ),
             ],
@@ -290,7 +290,7 @@ class CachedImageWidget extends StatelessWidget {
     return Container(
       height: height,
       width: width,
-      color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+      color: theme.colorScheme.errorContainer.withOpacity(0.3),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

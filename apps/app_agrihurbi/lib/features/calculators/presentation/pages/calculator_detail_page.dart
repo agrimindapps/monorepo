@@ -38,7 +38,8 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
   }
 
   Future<void> _loadCalculatorData() async {
-    final provider = context.read<CalculatorProvider>();
+    if (!mounted) return; // ✅ Safety check
+    final provider = Provider.of<CalculatorProvider>(context, listen: false);
     await provider.loadCalculatorById(widget.calculatorId);
   }
 
@@ -216,7 +217,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(calculator.category).withOpacity(0.1),
+                    color: _getCategoryColor(calculator.category).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -397,6 +398,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   Future<void> _executeCalculation(CalculatorProvider provider) async {
     if (!_formKey.currentState!.validate()) {
+      if (!mounted) return; // ✅ Safety check
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Por favor, preencha todos os campos obrigatórios'),
@@ -408,6 +410,8 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
     final success = await provider.executeCurrentCalculation();
     
+    if (!mounted) return; // ✅ Safety check after async operation
+    
     if (success) {
       setState(() {
         _showResults = true;
@@ -415,26 +419,32 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
       
       // Scroll para os resultados
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
+        if (mounted) { // ✅ Safety check before using scroll controller
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cálculo executado com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) { // ✅ Safety check before using context
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cálculo executado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.errorMessage ?? 'Erro ao executar cálculo'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) { // ✅ Safety check before using context
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(provider.errorMessage ?? 'Erro ao executar cálculo'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -448,6 +458,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   void _loadTemplate(CalculatorProvider provider) {
     // TODO: Implementar carregamento de templates salvos
+    if (!mounted) return; // ✅ Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );
@@ -455,6 +466,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   void _toggleFavorite() {
     // TODO: Implementar sistema de favoritos
+    if (!mounted) return; // ✅ Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );
@@ -462,6 +474,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   void _shareResults(CalculationResult result) {
     // TODO: Implementar compartilhamento de resultados
+    if (!mounted) return; // ✅ Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );
@@ -469,6 +482,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   void _saveToHistory(CalculatorProvider provider, CalculationResult result) {
     // TODO: Implementar salvamento no histórico
+    if (!mounted) return; // ✅ Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );
@@ -487,6 +501,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   void _shareCalculator() {
     // TODO: Implementar compartilhamento da calculadora
+    if (!mounted) return; // ✅ Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );
@@ -494,6 +509,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
 
   void _saveTemplate() {
     // TODO: Implementar salvamento como template
+    if (!mounted) return; // ✅ Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );

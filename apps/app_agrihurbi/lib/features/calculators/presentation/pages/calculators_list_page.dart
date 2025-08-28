@@ -37,7 +37,8 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
     
     // Carrega dados iniciais
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<CalculatorProvider>();
+      if (!mounted) return; // ✅ Safety check
+      final provider = Provider.of<CalculatorProvider>(context, listen: false);
       provider.refreshAllData();
       
       // Aplica filtro de categoria se especificado
@@ -273,7 +274,10 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
       );
     }
 
-    return _buildCalculatorsList(favoriteCalculators, provider);
+    return RefreshIndicator(
+      onRefresh: () => provider.refreshAllData(),
+      child: _buildCalculatorsList(favoriteCalculators, provider),
+    );
   }
 
   Widget _buildHistoryTab(CalculatorProvider provider) {
@@ -317,110 +321,107 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
       );
     }
 
-    return ListView.builder(
+    return ListView.separated(
       controller: _scrollController,
       padding: const EdgeInsets.all(8.0),
       itemCount: history.length,
+      // Otimizações de performance:
+      addAutomaticKeepAlives: false,
+      addRepaintBoundaries: false,
+      cacheExtent: 400.0,
       itemBuilder: (context, index) {
         final historyItem = history[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              child: const Icon(Icons.calculate, color: Colors.white),
-            ),
-            title: Text(historyItem.calculatorName),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_formatHistoryResult(historyItem)),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDate(historyItem.createdAt),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-            trailing: PopupMenuButton<String>(
-              onSelected: (value) => _handleHistoryAction(value, historyItem, provider),
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'reapply',
-                  child: Row(
-                    children: [
-                      Icon(Icons.replay),
-                      SizedBox(width: 8),
-                      Text('Reaplicar'),
-                    ],
+        return RepaintBoundary(
+          child: Card(
+            key: ValueKey(historyItem.id),
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: const Icon(Icons.calculate, color: Colors.white),
+              ),
+              title: Text(historyItem.calculatorName),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_formatHistoryResult(historyItem)),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDate(historyItem.createdAt),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete),
-                      SizedBox(width: 8),
-                      Text('Remover'),
-                    ],
+                ],
+              ),
+              trailing: PopupMenuButton<String>(
+                onSelected: (value) => _handleHistoryAction(value, historyItem, provider),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'reapply',
+                    child: Row(
+                      children: [
+                        Icon(Icons.replay),
+                        SizedBox(width: 8),
+                        Text('Reaplicar'),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete),
+                        SizedBox(width: 8),
+                        Text('Remover'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () => _navigateToCalculatorWithHistory(historyItem, provider),
             ),
-            onTap: () => _navigateToCalculatorWithHistory(historyItem, provider),
           ),
         );
       },
+      separatorBuilder: (context, index) => const SizedBox(height: 4.0),
     );
   }
 
   Widget _buildCalculatorsList(List<CalculatorEntity> calculators, CalculatorProvider provider) {
-    // Agrupa calculadoras por categoria para melhor visualização
-    final Map<CalculatorCategory, List<CalculatorEntity>> calculatorsByCategory = {};
-    
-    for (final calculator in calculators) {
-      calculatorsByCategory.putIfAbsent(calculator.category, () => []).add(calculator);
+    if (calculators.isEmpty) {
+      return const SizedBox.shrink();
     }
 
-    return ListView.builder(
+    return _buildOptimizedVirtualizedList(calculators, provider);
+  }
+
+  /// Lista otimizada com virtualização adequada para performance
+  Widget _buildOptimizedVirtualizedList(List<CalculatorEntity> calculators, CalculatorProvider provider) {
+    return ListView.separated(
       controller: _scrollController,
       padding: const EdgeInsets.all(8.0),
-      itemCount: calculatorsByCategory.length,
-      itemBuilder: (context, categoryIndex) {
-        final category = calculatorsByCategory.keys.elementAt(categoryIndex);
-        final categoryCalculators = calculatorsByCategory[category]!;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cabeçalho da categoria
-            if (provider.selectedCategory == null) // Só mostra se não há filtro de categoria
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
-                  category.displayName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            
-            // Lista de calculadoras da categoria
-            ...categoryCalculators.map((calculator) {
-              return CalculatorCardWidget(
-                calculator: calculator,
-                isFavorite: provider.isCalculatorFavorite(calculator.id),
-                onTap: () => _navigateToCalculator(calculator.id),
-                onFavoriteToggle: () => provider.toggleFavorite(calculator.id),
-              );
-            }),
-            
-            // Espaçamento entre categorias
-            if (categoryIndex < calculatorsByCategory.length - 1)
-              const SizedBox(height: 16),
-          ],
+      itemCount: calculators.length,
+      // Otimizações de performance críticas:
+      addAutomaticKeepAlives: false,      // Reduce memory usage
+      addRepaintBoundaries: false,       // Reduce painting overhead
+      cacheExtent: 500.0,               // Cache 500px de conteúdo off-screen
+      itemBuilder: (context, index) {
+        final calculator = calculators[index];
+        
+        // RepaintBoundary isola repaints do widget individual
+        return RepaintBoundary(
+          child: CalculatorCardWidget(
+            calculator: calculator,
+            isFavorite: provider.isCalculatorFavorite(calculator.id),
+            onTap: () => _navigateToCalculator(calculator.id),
+            onFavoriteToggle: () => provider.toggleFavorite(calculator.id),
+            key: ValueKey(calculator.id), // Chave estável para otimização
+            showCategory: provider.selectedCategory == null,
+          ),
         );
+      },
+      separatorBuilder: (context, index) {
+        // Separator otimizado e leve
+        return const SizedBox(height: 8.0);
       },
     );
   }
@@ -456,7 +457,7 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
     CalculationHistory historyItem,
     CalculatorProvider provider,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remover do Histórico'),
@@ -473,11 +474,13 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
               Navigator.of(context).pop();
               provider.removeFromHistory(historyItem.id);
               
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Item removido do histórico'),
-                ),
-              );
+              if (mounted) { // ✅ Safety check before using context
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Item removido do histórico'),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,

@@ -60,14 +60,6 @@ class PlantCareSection extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Navegar para configuração
-            },
-            icon: const Icon(Icons.settings_outlined),
-            label: const Text('Configurar cuidados'),
-          ),
         ],
       ),
     );

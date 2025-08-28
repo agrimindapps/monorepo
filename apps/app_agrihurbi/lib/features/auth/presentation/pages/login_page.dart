@@ -1,6 +1,7 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
+import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -86,15 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                     hintText: 'Digite seu e-mail',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, digite seu e-mail';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Digite um e-mail válido';
-                    }
-                    return null;
-                  },
+                  validator: InputValidators.validateEmail,
                 ),
                 
                 const SizedBox(height: 16),
@@ -120,15 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, digite sua senha';
-                    }
-                    if (value.length < 6) {
-                      return 'A senha deve ter pelo menos 6 caracteres';
-                    }
-                    return null;
-                  },
+                  validator: PasswordValidator.validatePassword,
                 ),
                 
                 const SizedBox(height: 24),
@@ -235,16 +220,22 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
+      if (!mounted) return; // ✅ Safety check
+
       result.fold(
         (failure) {
-          ErrorHandler.showErrorSnackbar(context, failure);
+          if (mounted) { // ✅ Double check before using context
+            ErrorHandler.showErrorSnackbar(context, failure);
+          }
         },
         (user) {
-          ErrorHandler.showSuccessSnackbar(
-            context, 
-            SuccessMessages.loginSuccess,
-          );
-          context.go('/home');
+          if (mounted) { // ✅ Double check before using context
+            ErrorHandler.showSuccessSnackbar(
+              context, 
+              SuccessMessages.loginSuccess,
+            );
+            context.go('/home');
+          }
         },
       );
     }

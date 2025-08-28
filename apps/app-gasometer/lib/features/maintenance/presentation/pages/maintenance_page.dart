@@ -97,7 +97,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Semantics(
@@ -230,7 +230,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
               Container(
                 padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingSm),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
                 ),
                 child: Icon(
@@ -244,7 +244,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                 title,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
@@ -304,10 +304,10 @@ class _MaintenancePageState extends State<MaintenancePage> {
             child: Card(
               elevation: 0,
               margin: const EdgeInsets.only(bottom: 8),
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
               ),
               child: Padding(
                 padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
@@ -318,7 +318,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                       child: Container(
                         padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingSm),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                           borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
                         ),
                         child: Icon(
@@ -344,7 +344,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                             'Em $daysUntil dias',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                         ],
@@ -395,12 +395,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
     return EnhancedEmptyState.maintenances(
       onAddMaintenance: () => context.go('/maintenance/add'),
       onViewGuides: () {
-        // Navigation to guides implementation pending
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Guias de manutenção em breve!'),
-          ),
-        );
+        // Check if widget is still mounted before using context
+        if (mounted) {
+          // Navigation to guides implementation pending
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Guias de manutenção em breve!'),
+            ),
+          );
+        }
       },
     );
   }
@@ -420,6 +423,8 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   void _showSelectVehicleMessage() {
+    if (!mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Cadastre um veículo primeiro para registrar manutenções'),
@@ -432,7 +437,12 @@ class _MaintenancePageState extends State<MaintenancePage> {
         ),
         action: SnackBarAction(
           label: 'Cadastrar',
-          onPressed: () => _showAddVehicleDialog(context),
+          onPressed: () {
+            // Check if widget is still mounted before using context
+            if (mounted) {
+              _showAddVehicleDialog(context);
+            }
+          },
         ),
       ),
     );
@@ -489,14 +499,14 @@ class _MaintenancePageState extends State<MaintenancePage> {
               SizedBox(height: GasometerDesignTokens.spacingXs),
               Text(
                 record.description ?? 'Sem descrição',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
               ),
               if (record.nextServiceDate != null) ...[
                 SizedBox(height: GasometerDesignTokens.spacingMd),
                 Container(
                   padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
                   ),
                   child: Row(
@@ -545,7 +555,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
           Text(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               fontSize: 14,
             ),
           ),
@@ -595,7 +605,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
               error,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -657,7 +667,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
           padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd - 2),
           decoration: BoxDecoration(
             color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
-                .withValues(alpha: 0.1),
+                .withOpacity(0.1),
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
           ),
           child: Icon(
@@ -689,7 +699,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
                     formattedDate,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -701,14 +711,14 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
                     'Veículo: ${record.vehicleId}', // Vehicle name lookup pending
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                   SizedBox(width: GasometerDesignTokens.spacingSm),
                   Text(
                     '•',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                     ),
                   ),
                   SizedBox(width: GasometerDesignTokens.spacingSm),
@@ -716,7 +726,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
                     record.workshopName ?? 'Oficina não informada',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -748,7 +758,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
-                .withValues(alpha: 0.1),
+                .withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -772,7 +782,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
           Icon(
             icon,
             size: 18,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
           SizedBox(width: GasometerDesignTokens.spacingXs + 2),
           Column(
@@ -788,7 +798,7 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
               SemanticText.label(
                 label,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontSize: 12,
                 ),
               ),

@@ -5,6 +5,7 @@ import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../../domain/usecases/expense_usecases.dart';
+import '../../../../shared/models/date_range.dart';
 
 // State classes
 class ExpensesState {
@@ -251,7 +252,10 @@ final categoryExpensesProvider = FutureProvider.family<List<Expense>, (String, E
 // Stream provider for real-time updates
 final expensesStreamProvider = StreamProvider.family<List<Expense>, String>((ref, userId) {
   final repository = di.getIt.get<ExpenseRepository>();
-  return repository.watchExpenses(userId);
+  return repository.watchExpenses(userId).map((either) => either.fold(
+    (failure) => <Expense>[], // Return empty list on failure
+    (expenses) => expenses,   // Return expenses on success
+  ));
 });
 
 // Monthly expenses provider

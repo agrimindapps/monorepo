@@ -121,7 +121,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
             'GasOMeter',
             style: TextStyle(
               fontSize: 20,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white.withOpacity(0.9),
             ),
             textAlign: TextAlign.center,
           ),
@@ -130,7 +130,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
             'Última atualização: 01/01/2025',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white.withOpacity(0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -147,7 +147,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -662,7 +662,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
               children: [
                 Icon(
                   Icons.local_gas_station,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: Colors.white.withOpacity(0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -671,7 +671,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withOpacity(0.9),
                   ),
                 ),
               ],
@@ -681,7 +681,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
               '© ${DateTime.now().year} Agrimind Apps. Todos os direitos reservados.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.white.withOpacity(0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -694,7 +694,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
                   width: 1,
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: Colors.white.withOpacity(0.4),
                 ),
                 _footerLink('Termos de Uso', () {}),
               ],
@@ -712,7 +712,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
         title,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.white.withValues(alpha: 0.7),
+          color: Colors.white.withOpacity(0.7),
         ),
       ),
     );

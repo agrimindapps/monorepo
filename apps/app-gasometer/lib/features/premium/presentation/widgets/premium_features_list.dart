@@ -42,7 +42,7 @@ class PremiumFeaturesList extends StatelessWidget {
                       height: 40,
                       decoration: BoxDecoration(
                         color: hasAccess 
-                          ? AppColors.success.withValues(alpha: 0.1)
+                          ? AppColors.success.withOpacity(0.1)
                           : AppColors.grey200,
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -76,10 +76,10 @@ class PremiumFeaturesList extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.premiumGold.withValues(alpha: 0.1),
+                            color: AppColors.premiumGold.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: AppColors.premiumGold.withValues(alpha: 0.3),
+                              color: AppColors.premiumGold.withOpacity(0.3),
                             ),
                           ),
                           child: Text(

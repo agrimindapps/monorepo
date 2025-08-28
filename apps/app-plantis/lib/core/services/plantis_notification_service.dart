@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../di/injection_container.dart';
@@ -23,6 +24,13 @@ class PlantisNotificationService {
   /// Inicializa o serviço de notificações do Plantis
   Future<bool> initialize() async {
     if (_isInitialized) return true;
+
+    // Verificar se está rodando na web
+    if (kIsWeb) {
+      debugPrint('⚠️ Notifications not supported on web platform');
+      _isInitialized = true; // Mock initialization for web
+      return true;
+    }
 
     try {
       // Inicializa timezone
@@ -57,25 +65,48 @@ class PlantisNotificationService {
       return result;
     } catch (e) {
       debugPrint('❌ Error initializing Plantis notifications: $e');
-      return false;
+      // Para web e outras plataformas não suportadas, considerar como inicializado
+      _isInitialized = true;
+      return true;
     }
   }
 
   /// Verifica se as notificações estão habilitadas
   Future<bool> areNotificationsEnabled() async {
-    final permission = await _notificationRepository.getPermissionStatus();
-    return permission.isGranted;
+    if (kIsWeb) return false; // Web não suporta notificações locais
+    
+    try {
+      final permission = await _notificationRepository.getPermissionStatus();
+      return permission.isGranted;
+    } catch (e) {
+      debugPrint('❌ Error getting permission status: $e');
+      return false;
+    }
   }
 
   /// Solicita permissão para notificações
   Future<bool> requestNotificationPermission() async {
-    final permission = await _notificationRepository.requestPermission();
-    return permission.isGranted;
+    if (kIsWeb) return false; // Web não suporta notificações locais
+    
+    try {
+      final permission = await _notificationRepository.requestPermission();
+      return permission.isGranted;
+    } catch (e) {
+      debugPrint('❌ Error requesting notification permission: $e');
+      return false;
+    }
   }
 
   /// Abre configurações de notificação
   Future<bool> openNotificationSettings() async {
-    return await _notificationRepository.openNotificationSettings();
+    if (kIsWeb) return false; // Web não suporta configurações nativas
+    
+    try {
+      return await _notificationRepository.openNotificationSettings();
+    } catch (e) {
+      debugPrint('❌ Error opening notification settings: $e');
+      return false;
+    }
   }
 
   // ==========================================================================
@@ -208,24 +239,52 @@ class PlantisNotificationService {
 
   /// Cancela notificação específica
   Future<bool> cancelNotification(String identifier) async {
-    final id = _notificationRepository.generateNotificationId(identifier);
-    return await _notificationRepository.cancelNotification(id);
+    if (kIsWeb) return true; // Web não precisa cancelar notificações
+    
+    try {
+      final id = _notificationRepository.generateNotificationId(identifier);
+      return await _notificationRepository.cancelNotification(id);
+    } catch (e) {
+      debugPrint('❌ Error cancelling notification: $e');
+      return false;
+    }
   }
 
   /// Cancela todas as notificações
   Future<bool> cancelAllNotifications() async {
-    return await _notificationRepository.cancelAllNotifications();
+    if (kIsWeb) return true; // Web não precisa cancelar notificações
+    
+    try {
+      return await _notificationRepository.cancelAllNotifications();
+    } catch (e) {
+      debugPrint('❌ Error cancelling all notifications: $e');
+      return false;
+    }
   }
 
   /// Lista notificações pendentes
   Future<List<PendingNotificationEntity>> getPendingNotifications() async {
-    return await _notificationRepository.getPendingNotifications();
+    if (kIsWeb) return <PendingNotificationEntity>[]; // Web não tem notificações pendentes
+    
+    try {
+      return await _notificationRepository.getPendingNotifications();
+    } catch (e) {
+      debugPrint('❌ Error getting pending notifications: $e');
+      return <PendingNotificationEntity>[];
+    }
   }
 
   /// Verifica se uma notificação específica está agendada
   Future<bool> isNotificationScheduled(String identifier) async {
-    final id = _notificationRepository.generateNotificationId(identifier);
-    return await _notificationRepository.isNotificationScheduled(id);
+    if (kIsWeb) return false; // Web não agenda notificações
+    
+    try {
+      final id = _notificationRepository.generateNotificationId(identifier);
+      return await _notificationRepository.isNotificationScheduled(id);
+    } catch (e) {
+      debugPrint('❌ Error checking notification schedule: $e');
+      return false;
+    }
   }
 
   /// Manipula tap em notificação

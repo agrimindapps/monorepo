@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../features/auth/presentation/providers/auth_provider.dart' as local;
+import '../../../features/auth/presentation/providers/auth_provider.dart'
+    as local;
 import '../../di/injection_container.dart';
 import '../../error/app_error.dart';
 import '../../error/error_reporter.dart';
@@ -48,7 +49,7 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
       debugPrint('Failed to get ErrorReporter from service locator: $e');
       _errorReporter = null;
     }
-    
+
     // Set user context if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateUserContext();
@@ -57,6 +58,8 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
 
   void _updateUserContext() async {
     try {
+      if (!mounted) return;
+
       final authProvider = context.read<local.AuthProvider>();
       await _errorReporter?.setUserContext(
         userId: authProvider.currentUser?.uid,
@@ -80,32 +83,42 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
       return true;
     };
 
-    // Handle isolate errors
-    Isolate.current.addErrorListener(
-      RawReceivePort((pair) async {
-        final List<dynamic> errorAndStacktrace = pair as List<dynamic>;
-        final error = errorAndStacktrace.first;
-        final stackTrace = StackTrace.fromString(errorAndStacktrace.last.toString());
-        
-        await _handleIsolateError(error as Object, stackTrace);
-      }).sendPort,
-    );
+    // Handle isolate errors (not supported on web)
+    if (!kIsWeb) {
+      try {
+        Isolate.current.addErrorListener(
+          RawReceivePort((pair) async {
+            final List<dynamic> errorAndStacktrace = pair as List<dynamic>;
+            final error = errorAndStacktrace.first;
+            final stackTrace = StackTrace.fromString(
+              errorAndStacktrace.last.toString(),
+            );
+
+            await _handleIsolateError(error as Object, stackTrace);
+          }).sendPort,
+        );
+      } catch (e) {
+        debugPrint('Unable to set isolate error listener: $e');
+      }
+    }
   }
 
   Future<void> _handleFlutterError(FlutterErrorDetails details) async {
     // Don't show global error for overflow errors in debug mode
     if (kDebugMode && details.exception is FlutterError) {
       final flutterError = details.exception as FlutterError;
-      if (flutterError.diagnostics.any((node) => 
-          node.toString().contains('RenderFlex overflowed') ||
-          node.toString().contains('RenderBox was not laid out'))) {
+      if (flutterError.diagnostics.any(
+        (node) =>
+            node.toString().contains('RenderFlex overflowed') ||
+            node.toString().contains('RenderBox was not laid out'),
+      )) {
         FlutterError.presentError(details);
         return;
       }
     }
 
     final appError = _convertToAppError(details.exception);
-    
+
     await _reportError(appError, details.stack, 'flutter_framework');
 
     // Only show global error for critical errors
@@ -119,20 +132,20 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
 
   bool _handlePlatformError(Object error, StackTrace stack) {
     final appError = _convertToAppError(error);
-    
+
     _reportError(appError, stack, 'platform');
-    
+
     // Show global error for platform errors
     _showGlobalError(error, stack);
-    
+
     return true;
   }
 
   Future<void> _handleIsolateError(Object error, StackTrace? stack) async {
     final appError = _convertToAppError(error);
-    
+
     await _reportError(appError, stack, 'isolate');
-    
+
     _showGlobalError(error, stack);
   }
 
@@ -188,21 +201,37 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
   }
 
   void _showGlobalError(Object error, StackTrace? stackTrace) {
-    if (mounted) {
-      setState(() {
-        _lastError = error;
-        _lastStackTrace = stackTrace;
-        _hasGlobalError = true;
-      });
-    }
+    if (!mounted) return;
+
+    // Defer setState to avoid "setState during build" error
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        try {
+          setState(() {
+            _lastError = error;
+            _lastStackTrace = stackTrace;
+            _hasGlobalError = true;
+          });
+        } catch (e) {
+          debugPrint('🚨 GlobalErrorBoundary setState failed: $e');
+          debugPrint('Original error was: $error');
+        }
+      }
+    });
   }
 
   void _recoverFromError() {
-    setState(() {
-      _lastError = null;
-      _lastStackTrace = null;
-      _hasGlobalError = false;
-    });
+    if (!mounted) return;
+
+    try {
+      setState(() {
+        _lastError = null;
+        _lastStackTrace = null;
+        _hasGlobalError = false;
+      });
+    } catch (e) {
+      debugPrint('🚨 GlobalErrorBoundary recovery setState failed: $e');
+    }
   }
 
   @override
@@ -212,8 +241,9 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
         title: 'GasOMeter - Erro Global',
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
-        home: Scaffold(
-          body: _buildGlobalErrorScreen(),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(body: _buildGlobalErrorScreen()),
         ),
         debugShowCheckedModeBanner: false,
       );
@@ -230,7 +260,7 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
 
   Widget _buildGlobalErrorScreen() {
     final appError = _convertToAppError(_lastError!);
-    
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -244,45 +274,50 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
                 color: Colors.red.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red,
+                ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             const Text(
               'GasOMeter',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             Text(
               'Ops! Algo deu errado',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.red,
+              style: const TextStyle(
+                inherit: false,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
+                color: Colors.red,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             Text(
               appError.displayMessage,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              style: TextStyle(
+                inherit: false,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
                 color: Colors.grey[600],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Error details in debug mode
             if (kDebugMode && appError.technicalDetails != null) ...[
               ExpansionTile(
@@ -296,7 +331,8 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      appError.technicalDetails!,
+                      appError.technicalDetails ??
+                          'Nenhum detalhe técnico disponível',
                       style: const TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12,
@@ -307,7 +343,7 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
               ),
               const SizedBox(height: 32),
             ],
-            
+
             // Action buttons
             Column(
               children: [
@@ -317,16 +353,17 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
                     onRetry: _recoverFromError,
                     label: 'Tentar Novamente',
                     semanticLabel: 'Tentar recuperar da aplicação',
-                    semanticHint: 'Tenta voltar ao funcionamento normal da aplicação',
+                    semanticHint:
+                        'Tenta voltar ao funcionamento normal da aplicação',
                     type: RetryButtonType.filled,
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -346,47 +383,45 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Support message
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.blue.withOpacity(0.2),
-                ),
+                border: Border.all(color: Colors.blue.withOpacity(0.2)),
               ),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.blue[600],
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Este erro foi automaticamente reportado',
-                          style: TextStyle(
-                            color: Colors.blue[600],
-                            fontWeight: FontWeight.w500,
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue[600],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Este erro foi automaticamente reportado',
+                            style: TextStyle(
+                              color: Colors.blue[600],
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Nossa equipe foi notificada e está trabalhando para resolver o problema.',
-                    style: TextStyle(
-                      color: Colors.blue[600],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.blue[600], fontSize: 12),
                   ),
                 ],
               ),

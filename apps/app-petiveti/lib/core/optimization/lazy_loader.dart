@@ -127,8 +127,9 @@ class _LazyWidgetState<T> extends State<LazyWidget<T>> {
     _loadingFuture = LazyLoader().loadModule(widget.moduleKey, widget.loader);
     
     if (widget.preload) {
-      _loadingFuture.catchError((_) {
+      _loadingFuture.catchError((error) {
         // Preload sem bloquear UI - ignora erros
+        return widget.loader();
       }); 
     }
   }

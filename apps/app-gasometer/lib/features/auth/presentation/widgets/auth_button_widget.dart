@@ -50,7 +50,7 @@ class AuthButtonWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         elevation: 3,
-        shadowColor: primaryColor.withValues(alpha: 0.3),
+        shadowColor: primaryColor.withOpacity(0.3),
       ),
       child: isLoading
           ? SizedBox(

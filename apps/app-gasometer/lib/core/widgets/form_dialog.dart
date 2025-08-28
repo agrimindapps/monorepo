@@ -58,7 +58,7 @@ class FormDialog extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.inverseSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
@@ -70,7 +70,7 @@ class FormDialog extends StatelessWidget {
             children: [
               Icon(
                 headerIcon,
-                color: Theme.of(context).colorScheme.onInverseSurface,
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -78,7 +78,7 @@ class FormDialog extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onInverseSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -89,7 +89,7 @@ class FormDialog extends StatelessWidget {
                   onPressed: onCancel ?? () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close,
-                    color: Theme.of(context).colorScheme.onInverseSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                     size: 20,
                   ),
                   padding: EdgeInsets.zero,
@@ -103,7 +103,7 @@ class FormDialog extends StatelessWidget {
             child: Text(
               subtitle,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onInverseSurface.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 14,
               ),
             ),

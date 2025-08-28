@@ -113,7 +113,7 @@ class _FuelPageState extends State<FuelPage> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -293,9 +293,7 @@ class _FuelPageState extends State<FuelPage> {
                 title,
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: GasometerDesignTokens.opacitySecondary,
-                  ),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
@@ -359,9 +357,7 @@ class _FuelPageState extends State<FuelPage> {
           bottom: GasometerDesignTokens.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withValues(
-            alpha: GasometerDesignTokens.opacityOverlay,
-          ),
+          color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
           borderRadius: GasometerDesignTokens.borderRadius(
             GasometerDesignTokens.radiusSm,
           ),
@@ -643,7 +639,7 @@ class _FuelPageState extends State<FuelPage> {
               error,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -665,9 +661,9 @@ class _FuelPageState extends State<FuelPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -718,7 +714,7 @@ class _FuelPageState extends State<FuelPage> {
           Text(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               fontSize: 14,
             ),
           ),
@@ -799,9 +795,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
                     formattedDate,
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeMd,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(
-                        alpha: GasometerDesignTokens.opacitySecondary,
-                      ),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -811,9 +805,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
                 record.nomePosto ?? 'Posto não informado',
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: GasometerDesignTokens.opacitySecondary,
-                  ),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
@@ -829,9 +821,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
         GasometerDesignTokens.spacingMd - 2,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(
-          alpha: GasometerDesignTokens.opacityOverlay,
-        ),
+        color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
         borderRadius: GasometerDesignTokens.borderRadius(
           GasometerDesignTokens.radiusMd + 2,
         ),
@@ -850,9 +840,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
         SizedBox(height: GasometerDesignTokens.spacingMd),
         Divider(
           height: 1,
-          color: Theme.of(context).colorScheme.outline.withValues(
-            alpha: GasometerDesignTokens.opacityDivider,
-          ),
+          color: Theme.of(context).colorScheme.outline.withOpacity(GasometerDesignTokens.opacityDivider),
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
       ],
@@ -907,7 +895,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           SemanticText.label(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               fontSize: 12,
             ),
           ),
@@ -928,9 +916,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           bottom: GasometerDesignTokens.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withValues(
-            alpha: GasometerDesignTokens.opacityOverlay,
-          ),
+          color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
           borderRadius: GasometerDesignTokens.borderRadius(
             GasometerDesignTokens.radiusSm,
           ),

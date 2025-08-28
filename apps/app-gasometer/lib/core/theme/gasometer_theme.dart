@@ -3,23 +3,30 @@ import 'package:flutter/material.dart';
 
 import 'gasometer_colors.dart';
 
-/// Tema específico do GasOMeter usando BaseTheme
+/// Tema do GasOMeter otimizado e seguro
+/// 
+/// Esta versão evita configurações complexas de widget themes que podem
+/// causar conflitos de null values, focando nas customizações essenciais.
 class GasometerTheme {
-  /// Tema claro do GasOMeter
+  /// Tema claro simplificado
   static ThemeData get lightTheme => BaseTheme.buildLightTheme(
     primaryColor: GasometerColors.primary,
     secondaryColor: GasometerColors.secondary,
     fontFamily: 'Inter',
   ).copyWith(
-    // Customizações específicas do GasOMeter
-    appBarTheme: BaseTheme.buildLightTheme(
-      primaryColor: GasometerColors.primary,
-      secondaryColor: GasometerColors.secondary,
-    ).appBarTheme.copyWith(
+    // AppBar personalizado
+    appBarTheme: const AppBarTheme(
       backgroundColor: GasometerColors.primary,
       foregroundColor: Colors.white,
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
+      actionsIconTheme: IconThemeData(color: Colors.white),
+      elevation: 2,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter',
+      ),
     ),
     
     // FAB personalizado
@@ -34,25 +41,37 @@ class GasometerTheme {
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: GasometerColors.primary,
-      unselectedItemColor: GasometerColors.primaryDark,
+      unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
     
-    // Chip theme personalizado para combustíveis
-    chipTheme: ChipThemeData(
-      backgroundColor: GasometerColors.secondaryLight.withValues(alpha: 0.2),
-      selectedColor: GasometerColors.primary,
-      disabledColor: Colors.grey.shade300,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      labelStyle: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
+    // Card theme personalizado
+    cardTheme: CardThemeData(
+      elevation: 3,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide.none,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: Colors.white,
+      shadowColor: GasometerColors.primary.withOpacity(0.1),
+    ),
+    
+    // Elevated button personalizado
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: GasometerColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+        ),
       ),
     ),
     
@@ -79,49 +98,49 @@ class GasometerTheme {
       circularTrackColor: GasometerColors.primaryLight,
     ),
     
-    // Card theme personalizado para fuel cards
-    cardTheme: CardThemeData(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    // Chip theme personalizado para combustíveis
+    chipTheme: ChipThemeData(
+      backgroundColor: GasometerColors.secondaryLight.withOpacity(0.2),
+      selectedColor: GasometerColors.primary,
+      disabledColor: Colors.grey.shade300,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      labelStyle: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        fontFamily: 'Inter',
       ),
-      color: Colors.white,
-      shadowColor: GasometerColors.primary.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide.none,
+      ),
     ),
     
-    // Elevated button personalizado
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: GasometerColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+    // ListTile theme MUITO simples (apenas cores básicas)
+    listTileTheme: const ListTileThemeData(
+      iconColor: Color(0xFF1A1C1E),
+      textColor: Color(0xFF1A1C1E),
     ),
   );
   
-  /// Tema escuro do GasOMeter
+  /// Tema escuro simplificado
   static ThemeData get darkTheme => BaseTheme.buildDarkTheme(
     primaryColor: GasometerColors.primary,
     secondaryColor: GasometerColors.secondary,
     fontFamily: 'Inter',
   ).copyWith(
-    // Customizações específicas do GasOMeter para modo escuro
-    appBarTheme: BaseTheme.buildDarkTheme(
-      primaryColor: GasometerColors.primary,
-      secondaryColor: GasometerColors.secondary,
-    ).appBarTheme.copyWith(
+    // AppBar personalizado para modo escuro
+    appBarTheme: const AppBarTheme(
       backgroundColor: GasometerColors.primaryDark,
       foregroundColor: Colors.white,
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
+      actionsIconTheme: IconThemeData(color: Colors.white),
+      elevation: 2,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter',
+      ),
     ),
     
     // FAB para modo escuro
@@ -140,6 +159,34 @@ class GasometerTheme {
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
+    ),
+    
+    // Card theme para modo escuro
+    cardTheme: CardThemeData(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: const Color(0xFF2D2D2D),
+      shadowColor: Colors.black.withOpacity(0.3),
+    ),
+    
+    // Elevated button para modo escuro
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: GasometerColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+        ),
+      ),
     ),
     
     // Switch para modo escuro
@@ -165,38 +212,29 @@ class GasometerTheme {
       circularTrackColor: GasometerColors.primary,
     ),
     
-    // Card theme para modo escuro
-    cardTheme: CardThemeData(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    // Chip theme para modo escuro
+    chipTheme: ChipThemeData(
+      backgroundColor: GasometerColors.secondaryLight.withOpacity(0.2),
+      selectedColor: GasometerColors.primary,
+      disabledColor: Colors.grey.shade700,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      labelStyle: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        fontFamily: 'Inter',
       ),
-      color: const Color(0xFF2D2D2D),
-      shadowColor: Colors.black.withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide.none,
+      ),
     ),
     
-    // Elevated button para modo escuro
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: GasometerColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+    // ListTile theme MUITO simples para modo escuro
+    listTileTheme: const ListTileThemeData(
+      iconColor: Color(0xFFE2E3E3),
+      textColor: Color(0xFFE2E3E3),
     ),
   );
-  
-  /// Retorna as cores do tema baseado no modo
-  static GasometerColors colorsFor(BuildContext context) {
-    return GasometerColors();
-  }
   
   /// Verifica se está no modo escuro
   static bool isDarkMode(BuildContext context) {

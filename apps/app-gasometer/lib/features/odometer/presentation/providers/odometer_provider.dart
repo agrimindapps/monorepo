@@ -72,7 +72,7 @@ class OdometerProvider extends ChangeNotifier {
       
     } catch (e) {
       debugPrint('Error loading odometers: $e');
-      _setError(OdometerConstants.errorMessages['carregarOdometros']!);
+      _setError(OdometerConstants.errorMessages['carregarOdometros'] ?? 'Erro ao carregar registros');
     } finally {
       _setLoading(false);
     }
@@ -95,7 +95,7 @@ class OdometerProvider extends ChangeNotifier {
       
     } catch (e) {
       debugPrint('Error loading odometers for vehicle $vehicleId: $e');
-      _setError(OdometerConstants.errorMessages['carregarOdometros']!);
+      _setError(OdometerConstants.errorMessages['carregarOdometros'] ?? 'Erro ao carregar registros');
     } finally {
       _setLoading(false);
     }
@@ -118,13 +118,13 @@ class OdometerProvider extends ChangeNotifier {
       );
 
       if (!validationResult.isValid) {
-        _setError(validationResult.errorMessage!);
+        _setError(validationResult.errorMessage ?? 'Erro de validação');
         return false;
       }
 
       final savedOdometer = await _repository.saveOdometerReading(odometer);
       if (savedOdometer == null) {
-        _setError(OdometerConstants.errorMessages['salvarOdometro']!);
+        _setError(OdometerConstants.errorMessages['salvarOdometro'] ?? 'Erro ao salvar registro');
         return false;
       }
       
@@ -139,7 +139,7 @@ class OdometerProvider extends ChangeNotifier {
 
     } catch (e) {
       debugPrint('Error adding odometer: $e');
-      _setError(OdometerConstants.errorMessages['salvarOdometro']!);
+      _setError(OdometerConstants.errorMessages['salvarOdometro'] ?? 'Erro ao salvar registro');
       return false;
     } finally {
       _setLoading(false);
@@ -160,13 +160,13 @@ class OdometerProvider extends ChangeNotifier {
       );
 
       if (!validationResult.isValid) {
-        _setError(validationResult.errorMessage!);
+        _setError(validationResult.errorMessage ?? 'Erro de validação');
         return false;
       }
 
       final updatedOdometer = await _repository.updateOdometerReading(odometer);
       if (updatedOdometer == null) {
-        _setError(OdometerConstants.errorMessages['atualizarOdometro']!);
+        _setError(OdometerConstants.errorMessages['atualizarOdometro'] ?? 'Erro ao atualizar registro');
         return false;
       }
 
@@ -184,7 +184,7 @@ class OdometerProvider extends ChangeNotifier {
 
     } catch (e) {
       debugPrint('Error updating odometer: $e');
-      _setError(OdometerConstants.errorMessages['atualizarOdometro']!);
+      _setError(OdometerConstants.errorMessages['atualizarOdometro'] ?? 'Erro ao atualizar registro');
       return false;
     } finally {
       _setLoading(false);
@@ -199,7 +199,7 @@ class OdometerProvider extends ChangeNotifier {
     try {
       final success = await _repository.deleteOdometerReading(odometerId);
       if (!success) {
-        _setError(OdometerConstants.errorMessages['excluirOdometro']!);
+        _setError(OdometerConstants.errorMessages['excluirOdometro'] ?? 'Erro ao excluir registro');
         return false;
       }
 
@@ -215,7 +215,7 @@ class OdometerProvider extends ChangeNotifier {
 
     } catch (e) {
       debugPrint('Error deleting odometer: $e');
-      _setError(OdometerConstants.errorMessages['excluirOdometro']!);
+      _setError(OdometerConstants.errorMessages['excluirOdometro'] ?? 'Erro ao excluir registro');
       return false;
     } finally {
       _setLoading(false);

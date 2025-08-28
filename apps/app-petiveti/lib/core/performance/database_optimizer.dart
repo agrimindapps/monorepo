@@ -164,7 +164,7 @@ class DatabaseOptimizer {
   }
 
   /// Compactação otimizada de banco
-  Future<void> optimizedCompact(Box box) async {
+  Future<void> optimizedCompact(Box<dynamic> box) async {
     final stopwatch = Stopwatch()..start();
     
     try {
@@ -239,7 +239,7 @@ class DatabaseOptimizer {
     for (final metric in _metrics.values) {
       if (metric.executionCount > 1000 && metric.boxName != null) {
         try {
-          final box = await Hive.openBox(metric.boxName!);
+          final box = await Hive.openBox<dynamic>(metric.boxName!);
           if (box.length > 500) {
             await optimizedCompact(box);
           }
@@ -271,7 +271,7 @@ class DatabaseOptimizer {
       
       // Permite outras operações rodarem
       if (i + batchSize < values.length) {
-        await Future.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
       }
     }
     
@@ -377,7 +377,7 @@ class DatabaseOptimizer {
     
     // Recomendar cache para queries lentas
     final slowFrequentQueries = _slowQueries
-        .where((q) => _metrics[q.queryKey]?.executionCount ?? 0 > 5)
+        .where((q) => (_metrics[q.queryKey]?.executionCount ?? 0) > 5)
         .toList();
     
     if (slowFrequentQueries.isNotEmpty) {

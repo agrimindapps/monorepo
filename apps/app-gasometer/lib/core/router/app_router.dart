@@ -7,6 +7,7 @@ import '../constants/ui_constants.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/debug/test_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/maintenance/presentation/pages/add_maintenance_page.dart';
@@ -24,7 +25,15 @@ import 'guards/route_guard.dart';
 
 class AppRouter {
   static GoRouter router(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Safely get AuthProvider with null check during initialization
+    AuthProvider? authProvider;
+    try {
+      authProvider = Provider.of<AuthProvider>(context, listen: false);
+    } catch (e) {
+      // Provider not ready yet during initialization - will be set later
+      authProvider = null;
+    }
+    
     const platformService = PlatformService();
     final routeGuard = RouteGuard(authProvider, platformService);
     
@@ -32,6 +41,13 @@ class AppRouter {
       initialLocation: routeGuard.getInitialLocation(),
       redirect: (context, state) => routeGuard.handleRedirect(state.matchedLocation),
       routes: [
+        // Test Route (Temporary for debugging)
+        GoRoute(
+          path: '/test',
+          name: 'test',
+          builder: (context, state) => const TestPage(),
+        ),
+        
         // Promo Routes (Landing Page and Policies)
         GoRoute(
           path: '/promo',

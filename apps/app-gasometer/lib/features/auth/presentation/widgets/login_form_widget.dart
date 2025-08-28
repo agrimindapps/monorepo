@@ -231,7 +231,7 @@ class LoginFormWidget extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               foregroundColor: Theme.of(context).primaryColor,
               side: BorderSide(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                color: Theme.of(context).primaryColor.withOpacity(0.3),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

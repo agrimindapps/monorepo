@@ -276,7 +276,7 @@ class ExpenseFormView extends StatelessWidget {
     final model = provider.formModel;
     
     return Card(
-      color: AppTheme.colors.primaryLight.withValues(alpha: 0.3),
+      color: AppTheme.colors.primaryLight.withOpacity(0.3),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -337,8 +337,8 @@ class ExpenseFormView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: model.canSubmit 
-                        ? Colors.green.withValues(alpha: 0.2) 
-                        : Colors.orange.withValues(alpha: 0.2),
+                        ? Colors.green.withOpacity(0.2) 
+                        : Colors.orange.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -367,7 +367,7 @@ class ExpenseFormView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.2),
+                      color: Colors.blue.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -395,7 +395,7 @@ class ExpenseFormView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withValues(alpha: 0.2),
+                      color: Colors.purple.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(

@@ -155,7 +155,7 @@ class RegisterActionButtons extends ConsumerWidget {
   /// 
   /// Link for existing users to navigate back to login page.
   /// Provides alternative navigation path for users who already have accounts.
-  Widget _buildLoginLink(context) {
+  Widget _buildLoginLink(BuildContext context) {
     return Semantics(
       label: 'Navegar para página de login',
       hint: 'Para usuários que já possuem conta cadastrada',

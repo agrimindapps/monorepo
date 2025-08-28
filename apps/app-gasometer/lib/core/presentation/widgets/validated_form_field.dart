@@ -559,7 +559,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
               color: Theme.of(context).colorScheme.primary,
-              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
             ),
           ),
       ],

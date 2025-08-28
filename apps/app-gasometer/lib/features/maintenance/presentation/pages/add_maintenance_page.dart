@@ -76,10 +76,10 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
     return Container(
       padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXl),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -87,7 +87,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
           Container(
             padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
               borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
             ),
             child: Icon(
@@ -113,7 +113,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                   'Adicione informações sobre a manutenção realizada',
                   style: TextStyle(
                     fontSize: GasometerDesignTokens.fontSizeMd,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -140,14 +140,14 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
           hint: Text(
             'Selecione o veículo',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
           isExpanded: true,
           underline: const SizedBox(),
           icon: Icon(
             Icons.arrow_drop_down,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
           items: _buildVehicleDropdownItems(),
           onChanged: (value) {
@@ -204,7 +204,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                   underline: const SizedBox(),
                   icon: Icon(
                     Icons.arrow_drop_down,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
                   items: const [
                     DropdownMenuItem(value: 'preventiva', child: const Text('Preventiva')),
@@ -234,7 +234,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                       Icon(
                         Icons.calendar_today,
                         size: 18,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                       SizedBox(width: GasometerDesignTokens.spacingSm),
                       Text(
@@ -364,7 +364,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                     Icon(
                       Icons.calendar_today,
                       size: 18,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                     SizedBox(width: GasometerDesignTokens.spacingSm),
                     Text(
@@ -374,7 +374,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                       style: TextStyle(
                         color: formProvider.formModel.nextServiceDate != null
                             ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ],

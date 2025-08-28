@@ -36,8 +36,12 @@ class EnvironmentConfig {
   static String get revenueCatApiKey {
     switch (environment) {
       case Environment.development:
-        const key = String.fromEnvironment('REVENUE_CAT_DEV_KEY');
-        if (key.isEmpty) throw Exception('REVENUE_CAT_DEV_KEY not configured');
+        const key = String.fromEnvironment('REVENUE_CAT_DEV_KEY', defaultValue: 'rcat_dev_dummy_key');
+        if (key == 'rcat_dev_dummy_key') {
+          if (kDebugMode) {
+            print('⚠️ WARNING: Using dummy RevenueCat key for development/web');
+          }
+        }
         return key;
       case Environment.staging:
         const key = String.fromEnvironment('REVENUE_CAT_STAGING_KEY');
@@ -121,14 +125,22 @@ class EnvironmentConfig {
 
   // API Keys
   static String get weatherApiKey {
-    const key = String.fromEnvironment('WEATHER_API_KEY');
-    if (key.isEmpty) throw Exception('WEATHER_API_KEY not configured');
+    const key = String.fromEnvironment('WEATHER_API_KEY', defaultValue: 'weather_dummy_key');
+    if (key == 'weather_dummy_key') {
+      if (kDebugMode) {
+        print('⚠️ WARNING: Using dummy weather API key for development/web');
+      }
+    }
     return key;
   }
 
   static String get googleMapsApiKey {
-    const key = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
-    if (key.isEmpty) throw Exception('GOOGLE_MAPS_API_KEY not configured');
+    const key = String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: 'maps_dummy_key');
+    if (key == 'maps_dummy_key') {
+      if (kDebugMode) {
+        print('⚠️ WARNING: Using dummy Google Maps API key for development/web');
+      }
+    }
     return key;
   }
 

@@ -220,9 +220,9 @@ class LoginFormSection extends StatelessWidget {
 
     final email = value.trim();
     
-    // Comprehensive email validation regex
+    // Simple but effective email validation regex
     final emailRegex = RegExp(
-      r'^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     );
     
     if (!emailRegex.hasMatch(email)) {

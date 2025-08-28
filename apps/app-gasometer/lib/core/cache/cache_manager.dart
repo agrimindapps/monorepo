@@ -146,14 +146,20 @@ class MemoryCacheManager<K, V> implements CacheManager<K, V> {
 
 /// Base cached repository mixin
 mixin CachedRepository<T> {
-  late final CacheManager<String, T> _cache;
-  late final CacheManager<String, List<T>> _listCache;
+  CacheManager<String, T>? _cache;
+  CacheManager<String, List<T>>? _listCache;
+  bool _isInitialized = false;
   
   /// Initialize cache (call this in repository constructor)
   void initializeCache({
     int maxSize = 100,
     Duration defaultTtl = const Duration(minutes: 5),
   }) {
+    // Prevent double initialization
+    if (_isInitialized) {
+      return;
+    }
+    
     _cache = MemoryCacheManager<String, T>(
       maxSize: maxSize,
       defaultTtl: defaultTtl,
@@ -162,57 +168,59 @@ mixin CachedRepository<T> {
       maxSize: maxSize ~/ 2,
       defaultTtl: defaultTtl,
     );
+    _isInitialized = true;
   }
 
   /// Get cached entity
   T? getCachedEntity(String key) {
-    return _cache.get(key);
+    return _cache?.get(key);
   }
 
   /// Cache entity
   void cacheEntity(String key, T entity, {Duration? ttl}) {
-    _cache.put(key, entity, ttl: ttl);
+    _cache?.put(key, entity, ttl: ttl);
   }
 
   /// Get cached list
   List<T>? getCachedList(String key) {
-    return _listCache.get(key);
+    return _listCache?.get(key);
   }
 
   /// Cache list
   void cacheList(String key, List<T> list, {Duration? ttl}) {
-    _listCache.put(key, list, ttl: ttl);
+    _listCache?.put(key, list, ttl: ttl);
   }
 
   /// Invalidate specific cache entry
   void invalidateCache(String key) {
-    _cache.remove(key);
+    _cache?.remove(key);
   }
 
   /// Invalidate list cache entry
   void invalidateListCache(String key) {
-    _listCache.remove(key);
+    _listCache?.remove(key);
   }
 
   /// Clear all cache
   void clearAllCache() {
-    _cache.clear();
-    _listCache.clear();
+    _cache?.clear();
+    _listCache?.clear();
   }
 
   /// Get cache statistics
   Map<String, dynamic> getCacheStats() {
     final entityStats = _cache is MemoryCacheManager 
         ? (_cache as MemoryCacheManager).getStats() 
-        : {'type': 'unknown'};
+        : {'type': 'uninitialized'};
     
     final listStats = _listCache is MemoryCacheManager 
         ? (_listCache as MemoryCacheManager).getStats() 
-        : {'type': 'unknown'};
+        : {'type': 'uninitialized'};
 
     return {
       'entityCache': entityStats,
       'listCache': listStats,
+      'isInitialized': _isInitialized,
     };
   }
 

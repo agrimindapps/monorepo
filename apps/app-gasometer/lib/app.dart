@@ -10,6 +10,7 @@ import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/fuel/presentation/providers/fuel_provider.dart';
 import 'features/maintenance/presentation/providers/maintenance_provider.dart';
+import 'features/odometer/presentation/providers/odometer_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/reports/presentation/providers/reports_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
@@ -19,14 +20,13 @@ class GasOMeterApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return GlobalErrorBoundary(
-      child: MultiProvider(
-        providers: [
+    return MultiProvider(
+      providers: [
         // LEVEL 1: Base providers (no dependencies)
         // Auth Provider - deve ser o primeiro (base dependency)
         ChangeNotifierProvider(
           create: (_) => sl<local.AuthProvider>(),
-          lazy: false, // Critical for app initialization
+          lazy: true, // Changed to lazy to prevent startup deadlock
         ),
         
         // Theme Provider - independent
@@ -46,21 +46,11 @@ class GasOMeterApp extends StatelessWidget {
         
         // LEVEL 2: Domain providers (depend on Auth)
         // Vehicles Provider - depends on Auth for user context
-        ProxyProvider<local.AuthProvider, VehiclesProvider>(
-          update: (context, auth, previous) {
-            // Dispose previous instance if exists to prevent memory leaks
-            previous?.dispose();
-            
-            // Create new instance with proper dependencies
+        ChangeNotifierProvider(
+          create: (_) {
             final vehiclesProvider = sl<VehiclesProvider>();
-            
-            // Initialize with current user context if authenticated
-            if (auth.isAuthenticated) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                vehiclesProvider.initialize();
-              });
-            }
-            
+            // Initialize after the provider is fully created
+            Future.microtask(() => vehiclesProvider.initialize());
             return vehiclesProvider;
           },
           lazy: true,
@@ -68,56 +58,48 @@ class GasOMeterApp extends StatelessWidget {
         
         // LEVEL 3: Feature providers (depend on domain providers)
         // Fuel Provider - depends on Vehicles for vehicle context
-        ProxyProvider2<local.AuthProvider, VehiclesProvider, FuelProvider>(
-          update: (context, auth, vehicles, previous) {
-            // Dispose previous instance to prevent memory leaks
-            previous?.dispose();
-            
-            return sl<FuelProvider>();
-          },
+        ChangeNotifierProvider(
+          create: (_) => sl<FuelProvider>(),
           lazy: true,
         ),
         
         // Maintenance Provider - depends on Vehicles for vehicle context
-        ProxyProvider2<local.AuthProvider, VehiclesProvider, MaintenanceProvider>(
-          update: (context, auth, vehicles, previous) {
-            // Dispose previous instance to prevent memory leaks
-            previous?.dispose();
-            
-            return sl<MaintenanceProvider>();
-          },
+        ChangeNotifierProvider(
+          create: (_) => sl<MaintenanceProvider>(),
+          lazy: true,
+        ),
+        
+        // Odometer Provider - depends on Vehicles for vehicle context
+        ChangeNotifierProvider(
+          create: (_) => sl<OdometerProvider>(),
           lazy: true,
         ),
         
         // LEVEL 4: Analytics providers (depend on multiple feature providers)
         // Reports Provider - depends on multiple providers for comprehensive reporting
-        ProxyProvider4<local.AuthProvider, VehiclesProvider, FuelProvider, MaintenanceProvider, ReportsProvider>(
-          update: (context, auth, vehicles, fuel, maintenance, previous) {
-            // Dispose previous instance to prevent memory leaks
-            previous?.dispose();
-            
-            return sl<ReportsProvider>();
-          },
+        ChangeNotifierProvider(
+          create: (_) => sl<ReportsProvider>(),
           lazy: true,
         ),
       ],
         builder: (context, child) {
           final router = AppRouter.router(context);
           
-          return Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
-              return MaterialApp.router(
-                title: 'GasOMeter - Controle de Veículos',
-                theme: GasometerTheme.lightTheme,
-                darkTheme: GasometerTheme.darkTheme,
-                themeMode: themeProvider.themeMode,
-                routerConfig: router,
-                debugShowCheckedModeBanner: false,
-              );
-            },
+          return GlobalErrorBoundary(
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) {
+                return MaterialApp.router(
+                  title: 'GasOMeter - Controle de Veículos',
+                  theme: GasometerTheme.lightTheme,
+                  darkTheme: GasometerTheme.darkTheme,
+                  themeMode: themeProvider.themeMode,
+                  routerConfig: router,
+                  debugShowCheckedModeBanner: false,
+                );
+              },
+            ),
           );
         },
-      ),
-    );
+      );
   }
 }

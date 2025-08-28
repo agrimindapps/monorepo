@@ -57,12 +57,12 @@ class _BackgroundPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Color primaryColor = isDark
-        ? Colors.amber.withValues(alpha: 0.03)
-        : Colors.blue.shade700.withValues(alpha: 0.03);
+        ? Colors.amber.withOpacity(0.03)
+        : Colors.blue.shade700.withOpacity(0.03);
 
     final Color secondaryColor = isDark
-        ? Colors.amber.shade200.withValues(alpha: 0.02)
-        : Colors.blue.shade200.withValues(alpha: 0.03);
+        ? Colors.amber.shade200.withOpacity(0.02)
+        : Colors.blue.shade200.withOpacity(0.03);
 
     // Linhas diagonais
     final linePaint = Paint()
@@ -89,8 +89,8 @@ class _BackgroundPatternPainter extends CustomPainter {
     // Círculos maiores
     final accentPaint = Paint()
       ..color = isDark
-          ? Colors.white.withValues(alpha: 0.02)
-          : Colors.blue.shade700.withValues(alpha: 0.02)
+          ? Colors.white.withOpacity(0.02)
+          : Colors.blue.shade700.withOpacity(0.02)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 

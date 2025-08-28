@@ -245,7 +245,7 @@ class AuthRepositoryImpl implements AuthRepository {
         });
       }
       return Right<Failure, User?>(user);
-    }).handleError((error) {
+    }).handleError((Object error) {
       if (error is ServerException) {
         return Left<Failure, User?>(AuthFailure(message: error.message));
       }

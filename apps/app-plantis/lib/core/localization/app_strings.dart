@@ -53,7 +53,7 @@ class AppStrings {
   static const String overview = 'Visão Geral';
   static const String tasks = 'Tarefas';
   static const String care = 'Cuidados';
-  static const String notes = 'Observações';
+  static const String notes = 'Comentários';
   
   // More Options Sheet
   static const String options = 'Opções';

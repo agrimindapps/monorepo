@@ -7,6 +7,21 @@ enum PlanType {
   lifetime,
 }
 
+extension PlanTypeExtension on PlanType {
+  String get displayName {
+    switch (this) {
+      case PlanType.free:
+        return 'Gratuito';
+      case PlanType.monthly:
+        return 'Mensal';
+      case PlanType.yearly:
+        return 'Anual';
+      case PlanType.lifetime:
+        return 'Vitalício';
+    }
+  }
+}
+
 enum PlanStatus {
   active,
   expired,
@@ -14,6 +29,9 @@ enum PlanStatus {
   paused,
   pending,
 }
+
+// Alias for backward compatibility
+typedef SubscriptionStatus = PlanStatus;
 
 enum PlanDuration {
   weekly,

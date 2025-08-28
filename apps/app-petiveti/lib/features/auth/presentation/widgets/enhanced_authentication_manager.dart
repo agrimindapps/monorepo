@@ -626,7 +626,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
               Navigator.pop(context);
               _authenticateWithBiometrics();
             },
-            child: const Text('Usar $_biometricType'),
+            child: Text('Usar $_biometricType'),
           ),
         ],
       ),

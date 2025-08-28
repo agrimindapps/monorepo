@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/body_condition_input.dart';
 import '../providers/body_condition_provider.dart';
 
 /// Enhanced input feedback widget providing real-time validation and guidance
@@ -71,7 +72,7 @@ class BcsInputFeedback extends ConsumerWidget {
     );
   }
 
-  Widget _buildCompletionProgress(ThemeData theme, dynamic state) {
+  Widget _buildCompletionProgress(ThemeData theme, BodyConditionState state) {
     final totalFields = 5; // Weight, age, species, breed, gender
     final completedFields = _countCompletedFields(state);
     final progress = completedFields / totalFields;
@@ -121,39 +122,39 @@ class BcsInputFeedback extends ConsumerWidget {
     );
   }
 
-  Widget _buildInputValidation(ThemeData theme, dynamic state) {
+  Widget _buildInputValidation(ThemeData theme, BodyConditionState state) {
     final validationItems = [
       _ValidationItem(
         label: 'Peso corporal',
-        isValid: state.weight != null && state.weight > 0,
+        isValid: state.input.currentWeight > 0,
         isRequired: true,
         icon: Icons.monitor_weight,
         hint: 'Peso atual do animal em kg',
       ),
       _ValidationItem(
         label: 'Idade',
-        isValid: state.age != null && state.age > 0,
+        isValid: (state.input.animalAge ?? 0) > 0,
         isRequired: true,
         icon: Icons.calendar_today,
         hint: 'Idade em meses',
       ),
       _ValidationItem(
         label: 'Espécie',
-        isValid: state.species != null,
+        isValid: true, // species sempre tem um valor enum default
         isRequired: true,
         icon: Icons.pets,
         hint: 'Cão ou gato',
       ),
       _ValidationItem(
         label: 'Raça',
-        isValid: state.breed != null && state.breed.isNotEmpty,
+        isValid: (state.input.animalBreed?.isNotEmpty ?? false),
         isRequired: false,
         icon: Icons.category,
         hint: 'Opcional, mas melhora a precisão',
       ),
       _ValidationItem(
         label: 'Gênero',
-        isValid: state.gender != null,
+        isValid: true, // usando isNeutered que sempre tem valor bool
         isRequired: true,
         icon: Icons.pets,
         hint: 'Macho ou fêmea, castrado ou não',
@@ -323,14 +324,14 @@ class BcsInputFeedback extends ConsumerWidget {
     );
   }
 
-  int _countCompletedFields(dynamic state) {
+  int _countCompletedFields(BodyConditionState state) {
     int count = 0;
     
-    if (state.weight != null && state.weight > 0) count++;
-    if (state.age != null && state.age > 0) count++;
-    if (state.species != null) count++;
-    if (state.breed != null && state.breed.isNotEmpty) count++;
-    if (state.gender != null) count++;
+    if (state.input.currentWeight > 0) count++;
+    if ((state.input.animalAge ?? 0) > 0) count++;
+    count++; // species sempre presente
+    if (state.input.animalBreed?.isNotEmpty ?? false) count++;
+    count++; // usando isNeutered que sempre tem valor
     
     return count;
   }
@@ -498,42 +499,41 @@ class BcsEstimationPreview extends ConsumerWidget {
     );
   }
 
-  bool _hasEnoughDataForEstimate(dynamic state) {
-    return state.weight != null && 
-           state.weight > 0 && 
-           state.species != null;
+  bool _hasEnoughDataForEstimate(BodyConditionState state) {
+    return state.input.currentWeight > 0;
   }
 
-  double _calculatePreliminaryBcs(dynamic state) {
+  double _calculatePreliminaryBcs(BodyConditionState state) {
     // Simplified BCS estimation based on available data
     // This would be more sophisticated in a real implementation
     double baseBcs = 5.0; // Average BCS
     
     // Adjust based on weight for species
-    if (state.species == 'dog') {
-      if (state.weight < 5) baseBcs += 0.5; // Small dogs tend to be overweight
-      if (state.weight > 30) baseBcs -= 0.5; // Large dogs tend to be underweight
-    } else if (state.species == 'cat') {
-      if (state.weight < 3) baseBcs -= 1.0;
-      if (state.weight > 6) baseBcs += 1.0;
+    if (state.input.species == AnimalSpecies.dog) {
+      if (state.input.currentWeight < 5) baseBcs += 0.5; // Small dogs tend to be overweight
+      if (state.input.currentWeight > 30) baseBcs -= 0.5; // Large dogs tend to be underweight
+    } else if (state.input.species == AnimalSpecies.cat) {
+      if (state.input.currentWeight < 3) baseBcs -= 1.0;
+      if (state.input.currentWeight > 6) baseBcs += 1.0;
     }
     
     // Adjust based on age
-    if (state.age != null) {
-      if (state.age < 12) baseBcs -= 0.5; // Young animals
-      if (state.age > 84) baseBcs += 0.5; // Senior animals
+    final age = state.input.animalAge ?? 0;
+    if (age > 0) {
+      if (age < 12) baseBcs -= 0.5; // Young animals
+      if (age > 84) baseBcs += 0.5; // Senior animals
     }
     
     return baseBcs.clamp(1.0, 9.0);
   }
 
-  double _calculateConfidence(dynamic state) {
+  double _calculateConfidence(BodyConditionState state) {
     double confidence = 0.3; // Base confidence
     
-    if (state.weight != null && state.weight > 0) confidence += 0.3;
-    if (state.species != null) confidence += 0.2;
-    if (state.age != null) confidence += 0.1;
-    if (state.breed != null && state.breed.isNotEmpty) confidence += 0.1;
+    if (state.input.currentWeight > 0) confidence += 0.3;
+    confidence += 0.2; // species sempre presente
+    if ((state.input.animalAge ?? 0) > 0) confidence += 0.1;
+    if (state.input.animalBreed?.isNotEmpty ?? false) confidence += 0.1;
     
     return confidence.clamp(0.0, 1.0);
   }

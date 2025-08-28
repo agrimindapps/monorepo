@@ -87,7 +87,7 @@ class _OptimizedHeader extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -235,7 +235,7 @@ class _ErrorState extends StatelessWidget {
               errorMessage,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -345,9 +345,7 @@ class _VehicleCardHeader extends StatelessWidget {
             hint: 'Representação visual do veículo ${vehicle.brand} ${vehicle.model}',
             child: CircleAvatar(
               radius: GasometerDesignTokens.iconSizeAvatar / 2,
-              backgroundColor: Theme.of(context).colorScheme.primary.withValues(
-                alpha: GasometerDesignTokens.opacityOverlay,
-              ),
+              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
               child: Icon(
                 Icons.directions_car,
                 color: Theme.of(context).colorScheme.primary,
@@ -374,9 +372,7 @@ class _VehicleCardHeader extends StatelessWidget {
                   '${vehicle.year} • ${vehicle.color}',
                   style: TextStyle(
                     fontSize: GasometerDesignTokens.fontSizeMd,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                      alpha: GasometerDesignTokens.opacitySecondary,
-                    ),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

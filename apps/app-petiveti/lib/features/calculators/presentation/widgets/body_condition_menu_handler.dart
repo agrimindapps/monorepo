@@ -119,7 +119,8 @@ class BodyConditionMenuHandler {
   /// Validate export data before proceeding
   bool _validateExportData(dynamic output) {
     // Critical veterinary data validations before export
-    if (output.bcsScore < 1.0 || output.bcsScore > 9.0) {
+    final bcsScore = (output as dynamic)?.bcsScore as double? ?? 0.0;
+    if (bcsScore < 1.0 || bcsScore > 9.0) {
       return false; // Invalid BCS score
     }
     
@@ -129,7 +130,8 @@ class BodyConditionMenuHandler {
     }
     
     // Check if essential data is present
-    if (output.results.isEmpty) {
+    final results = (output as dynamic)?.results as List? ?? [];
+    if (results.isEmpty) {
       return false; // No calculated results
     }
     
@@ -188,7 +190,8 @@ class BodyConditionMenuHandler {
 
   /// Get classification text
   String _getClassificationText(dynamic classification) {
-    return classification.displayName ?? 'Não definido';
+    if (classification == null) return 'Não definido';
+    return (classification.displayName as String?) ?? 'Não definido';
   }
 
   /// Show error snackbar

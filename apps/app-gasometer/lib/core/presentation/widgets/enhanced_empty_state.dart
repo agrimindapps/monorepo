@@ -144,9 +144,7 @@ class EnhancedEmptyState extends StatelessWidget {
       child: Icon(
         icon,
         color: iconColor ??
-            Theme.of(context).colorScheme.onSurface.withValues(
-              alpha: GasometerDesignTokens.opacityHint,
-            ),
+            Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
         size: iconSize ?? GasometerDesignTokens.iconSizeXxxl + 16,
       ),
     );
@@ -173,9 +171,7 @@ class EnhancedEmptyState extends StatelessWidget {
         description,
         style: TextStyle(
           fontSize: GasometerDesignTokens.fontSizeMd,
-          color: Theme.of(context).colorScheme.onSurface.withValues(
-            alpha: GasometerDesignTokens.opacitySecondary,
-          ),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
         ),
         textAlign: TextAlign.center,
       ),

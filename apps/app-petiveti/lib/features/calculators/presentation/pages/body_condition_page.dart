@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/constants/body_condition_constants.dart';
 import '../providers/body_condition_provider.dart';
 import '../widgets/bcs_guide_sheet.dart';
 import '../widgets/body_condition_history_panel.dart';
@@ -9,8 +10,7 @@ import '../widgets/body_condition_input_form.dart';
 import '../widgets/body_condition_menu_handler.dart';
 import '../widgets/body_condition_result_card.dart';
 import '../widgets/body_condition_state_indicator.dart';
-import '../widgets/body_condition_tab_controller.dart';\nimport '../widgets/bcs_calculation_feedback.dart';\nimport '../widgets/bcs_input_feedback.dart';
-import '../../../../shared/constants/body_condition_constants.dart';
+import '../widgets/body_condition_tab_controller.dart';
 
 /// **Body Condition Score (BCS) Calculator Page - Professional Veterinary Assessment Interface**
 /// 
@@ -371,7 +371,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
   }
 
   /// Build floating action button
-  Widget? _buildFloatingActionButton(dynamic state) {
+  Widget? _buildFloatingActionButton(BodyConditionState state) {
     // Show FAB only on input tab
     if (!_tabHandler.isInputTab) return null;
 

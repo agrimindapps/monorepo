@@ -1,6 +1,78 @@
 import 'package:equatable/equatable.dart';
 import 'animal_enums.dart';
 
+// Backwards compatibility aliases for test files
+typedef PetEntity = Animal;
+typedef Pet = Animal;
+
+// Additional entities referenced in error messages
+class PetImageEntity extends Equatable {
+  final String id;
+  final String petId;
+  final String imageUrl;
+  final String? description;
+  final bool isProfile;
+  final DateTime createdAt;
+
+  const PetImageEntity({
+    required this.id,
+    required this.petId,
+    required this.imageUrl,
+    this.description,
+    this.isProfile = false,
+    required this.createdAt,
+  });
+
+  @override
+  List<Object?> get props => [id, petId, imageUrl, description, isProfile, createdAt];
+}
+
+class OwnerEntity extends Equatable {
+  final String id;
+  final String name;
+  final String email;
+  final String? phone;
+  final String? address;
+  final DateTime createdAt;
+
+  const OwnerEntity({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.phone,
+    this.address,
+    required this.createdAt,
+  });
+
+  @override
+  List<Object?> get props => [id, name, email, phone, address, createdAt];
+}
+
+class VetEntity extends Equatable {
+  final String id;
+  final String name;
+  final String clinic;
+  final String? phone;
+  final String? email;
+  final String? address;
+  final String? specialty;
+  final DateTime createdAt;
+
+  const VetEntity({
+    required this.id,
+    required this.name,
+    required this.clinic,
+    this.phone,
+    this.email,
+    this.address,
+    this.specialty,
+    required this.createdAt,
+  });
+
+  @override
+  List<Object?> get props => [id, name, clinic, phone, email, address, specialty, createdAt];
+}
+
 class Animal extends Equatable {
   final String id;
   final String userId;

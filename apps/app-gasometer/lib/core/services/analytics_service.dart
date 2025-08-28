@@ -51,18 +51,31 @@ class AnalyticsService {
   /// Log de evento customizado
   Future<void> logEvent(String eventName, Map<String, Object>? parameters) async {
     if (!_isAnalyticsEnabled) {
-      debugPrint('📊 [DEV] Event: $eventName ${parameters ?? ''}');
+      debugPrint('📊 [DEV] Event: $eventName ${parameters ?? '{}'}');
       return;
     }
 
     try {
+      // Filter out null values from parameters
+      Map<String, Object>? cleanParameters;
+      if (parameters != null) {
+        cleanParameters = Map.fromEntries(
+          parameters.entries.where((entry) => entry.value != null)
+        );
+        // If all values were null, set to null
+        if (cleanParameters.isEmpty) {
+          cleanParameters = null;
+        }
+      }
+
       await _analytics.logEvent(
         name: eventName,
-        parameters: parameters,
+        parameters: cleanParameters,
       );
       debugPrint('📊 Event logged: $eventName');
     } catch (e, stackTrace) {
-      await _crashlytics.recordError(e, stackTrace);
+      debugPrint('Failed to report to Analytics: $e');
+      // Don't recursively call crashlytics if analytics fails
     }
   }
 

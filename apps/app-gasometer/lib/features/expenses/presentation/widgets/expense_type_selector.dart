@@ -72,12 +72,12 @@ class ExpenseTypeSelector extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: isSelected 
-                  ? properties.colorValue.withValues(alpha: 0.2)
+                  ? properties.colorValue.withOpacity(0.2)
                   : AppTheme.colors.surface,
               border: Border.all(
                 color: isSelected 
                     ? properties.colorValue
-                    : AppTheme.colors.outline.withValues(alpha: 0.2),
+                    : AppTheme.colors.outline.withOpacity(0.2),
                 width: isSelected ? 2 : 1,
               ),
               borderRadius: BorderRadius.circular(12),
@@ -112,7 +112,7 @@ class ExpenseTypeSelector extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: Colors.purple.withValues(alpha: 0.2),
+                            color: Colors.purple.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -180,7 +180,7 @@ class ExpenseTypeDropdown extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withValues(alpha: 0.2),
+                    color: Colors.purple.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -214,7 +214,7 @@ class ExpenseTypeDetails extends StatelessWidget {
     final properties = type.properties;
     
     return Card(
-      color: properties.colorValue.withValues(alpha: 0.1),
+      color: properties.colorValue.withOpacity(0.1),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -239,7 +239,7 @@ class ExpenseTypeDetails extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withValues(alpha: 0.2),
+                      color: Colors.purple.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

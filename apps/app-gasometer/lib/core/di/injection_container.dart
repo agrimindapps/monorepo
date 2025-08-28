@@ -47,6 +47,9 @@ import '../../features/maintenance/domain/usecases/get_maintenance_records_by_ve
 import '../../features/maintenance/domain/usecases/get_upcoming_maintenance_records.dart';
 import '../../features/maintenance/domain/usecases/update_maintenance_record.dart';
 import '../../features/maintenance/presentation/providers/maintenance_provider.dart';
+// Odometer imports
+import '../../features/odometer/data/repositories/odometer_repository.dart';
+import '../../features/odometer/presentation/providers/odometer_provider.dart';
 // Premium imports
 import '../../features/premium/data/datasources/premium_local_data_source.dart';
 import '../../features/premium/data/datasources/premium_remote_data_source.dart';
@@ -90,6 +93,7 @@ import '../data/models/base_sync_model.dart';
 import '../error/error_handler.dart';
 // Error handling imports
 import '../error/error_logger.dart';
+import '../error/error_reporter.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
@@ -135,13 +139,15 @@ Future<void> initializeDependencies() async {
   // Error Handling Services
   sl.registerLazySingleton<ErrorLogger>(() => ErrorLogger());
   sl.registerLazySingleton<ErrorHandler>(() => ErrorHandler(sl()));
+  sl.registerLazySingleton<ErrorReporter>(() => ErrorReporter(sl()));
 
   // Core Package Services
   sl.registerLazySingleton<core.ISubscriptionRepository>(() => core.RevenueCatService());
 
   // Sync Services
   sl.registerLazySingleton<SyncQueue>(() => SyncQueue());
-  sl.registerLazySingleton<ConflictResolver<BaseSyncModel>>(() => ConflictResolver<BaseSyncModel>());
+  // Register the specific ConflictResolver<BaseSyncModel> that SyncService needs
+  sl.registerLazySingleton<ConflictResolver<BaseSyncModel>>(() => BaseSyncModelConflictResolver());
   sl.registerLazySingleton<SyncOperations>(() => SyncOperations(sl(), sl(), sl()));
   sl.registerLazySingleton<SyncService>(() => SyncService(sl(), sl(), sl(), sl(), sl()));
   
@@ -244,6 +250,13 @@ Future<void> initializeDependencies() async {
       connectivity: sl(),
     ),
   );
+
+  // Odometer Repository
+  sl.registerLazySingleton<OdometerRepository>(() {
+    final repository = OdometerRepository();
+    // Initialize will be called when needed, avoiding blocking registration
+    return repository;
+  });
 
   // Premium Repository
   sl.registerLazySingleton<PremiumRepository>(
@@ -390,6 +403,14 @@ Future<void> initializeDependencies() async {
       sl(),
       sl(),
       sl(),
+    ),
+  );
+
+  // Odometer Provider
+  sl.registerFactory<OdometerProvider>(
+    () => OdometerProvider(
+      sl<OdometerRepository>(),
+      sl<VehiclesProvider>(),
     ),
   );
 

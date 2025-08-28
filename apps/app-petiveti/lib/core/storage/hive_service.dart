@@ -84,11 +84,11 @@ class HiveService {
   }
 
   /// Obtém uma box simples (sem tipo), abrindo se necessário
-  Future<Box> getSimpleBox(String boxName) async {
+  Future<Box<dynamic>> getSimpleBox(String boxName) async {
     if (!Hive.isBoxOpen(boxName)) {
-      return await Hive.openBox(boxName);
+      return await Hive.openBox<dynamic>(boxName);
     }
-    return Hive.box(boxName);
+    return Hive.box<dynamic>(boxName);
   }
 
   /// Fecha uma box específica
@@ -126,7 +126,7 @@ class HiveService {
   Future<void> compactBox(String boxName) async {
     try {
       if (Hive.isBoxOpen(boxName)) {
-        await Hive.box(boxName).compact();
+        await Hive.box<dynamic>(boxName).compact();
       }
     } catch (e) {
       print('Erro ao compactar box $boxName: $e');

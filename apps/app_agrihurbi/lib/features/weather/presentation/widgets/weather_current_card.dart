@@ -127,7 +127,7 @@ class WeatherCurrentCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -200,7 +200,7 @@ class WeatherCurrentCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -233,7 +233,7 @@ class WeatherCurrentCard extends StatelessWidget {
         Icon(
           Icons.cloud_off,
           size: 64,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -316,7 +316,7 @@ class WeatherCurrentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
-        color: (isFavorable ? Colors.green : Colors.orange).withOpacity(0.3),
+        color: (isFavorable ? Colors.green : Colors.orange).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isFavorable ? Colors.green : Colors.orange,

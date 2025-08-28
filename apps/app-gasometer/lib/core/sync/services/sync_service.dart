@@ -169,7 +169,7 @@ class RetryConfig {
 class SyncService {
   final SyncQueue _syncQueue;
   final SyncOperations _syncOperations;
-  final ConflictResolver _conflictResolver;
+  final ConflictResolver<BaseSyncModel> _conflictResolver;
   final AnalyticsService _analytics;
   final AuthRepository _authRepository;
 

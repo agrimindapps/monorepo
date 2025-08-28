@@ -73,14 +73,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Gerar tarefas iniciais
-            },
-            icon: const Icon(Icons.add_task),
-            label: const Text('Gerar tarefas'),
-          ),
         ],
       ),
     );

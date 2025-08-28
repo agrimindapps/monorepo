@@ -24,6 +24,12 @@ enum PaymentMethod {
   other,
 }
 
+enum RecurrenceType {
+  weekly,
+  monthly,
+  yearly,
+}
+
 class Expense extends Equatable {
   final String id;
   final String animalId;
@@ -37,6 +43,13 @@ class Expense extends Equatable {
   final String? veterinaryClinic;
   final String? veterinarianName;
   final String? invoiceNumber;
+  final String? notes;
+  final String? veterinarian;
+  final String? receiptNumber;
+  final bool isPaid;
+  final bool isRecurring;
+  final RecurrenceType? recurrenceType;
+  final bool isDeleted;
   final List<String> attachments;
   final Map<String, dynamic>? metadata;
   final DateTime createdAt;
@@ -55,6 +68,13 @@ class Expense extends Equatable {
     this.veterinaryClinic,
     this.veterinarianName,
     this.invoiceNumber,
+    this.notes,
+    this.veterinarian,
+    this.receiptNumber,
+    this.isPaid = true,
+    this.isRecurring = false,
+    this.recurrenceType,
+    this.isDeleted = false,
     this.attachments = const [],
     this.metadata,
     required this.createdAt,
@@ -74,6 +94,13 @@ class Expense extends Equatable {
     String? veterinaryClinic,
     String? veterinarianName,
     String? invoiceNumber,
+    String? notes,
+    String? veterinarian,
+    String? receiptNumber,
+    bool? isPaid,
+    bool? isRecurring,
+    RecurrenceType? recurrenceType,
+    bool? isDeleted,
     List<String>? attachments,
     Map<String, dynamic>? metadata,
     DateTime? createdAt,
@@ -92,6 +119,13 @@ class Expense extends Equatable {
       veterinaryClinic: veterinaryClinic ?? this.veterinaryClinic,
       veterinarianName: veterinarianName ?? this.veterinarianName,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      notes: notes ?? this.notes,
+      veterinarian: veterinarian ?? this.veterinarian,
+      receiptNumber: receiptNumber ?? this.receiptNumber,
+      isPaid: isPaid ?? this.isPaid,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrenceType: recurrenceType ?? this.recurrenceType,
+      isDeleted: isDeleted ?? this.isDeleted,
       attachments: attachments ?? this.attachments,
       metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
@@ -125,6 +159,13 @@ class Expense extends Equatable {
         veterinaryClinic,
         veterinarianName,
         invoiceNumber,
+        notes,
+        veterinarian,
+        receiptNumber,
+        isPaid,
+        isRecurring,
+        recurrenceType,
+        isDeleted,
         attachments,
         metadata,
         createdAt,

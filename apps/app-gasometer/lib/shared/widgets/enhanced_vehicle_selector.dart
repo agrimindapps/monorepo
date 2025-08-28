@@ -156,7 +156,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
           Text(
             'Carregando veículos...',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
             ),
           ),
         ],
@@ -176,7 +176,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
         children: [
           Icon(
             Icons.directions_car_outlined,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             size: AppSizes.iconS,
           ),
           const SizedBox(width: AppSpacing.medium),
@@ -184,7 +184,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
             child: Text(
               'Nenhum veículo cadastrado',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
               ),
             ),
           ),
@@ -214,13 +214,13 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
           border: InputBorder.none,
           hintText: widget.hintText,
           hintStyle: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
           prefixIcon: Icon(
             Icons.directions_car,
             color: selectedVehicle != null 
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.subtle),
+                : Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.subtle),
           ),
         ),
         items: vehiclesProvider.vehicles.map<DropdownMenuItem<String>>((VehicleEntity vehicle) {
@@ -245,7 +245,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
                         'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
                         style: TextStyle(
                           fontSize: AppFontSizes.small,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
                         ),
                       ),
                     ],
@@ -260,8 +260,8 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
         icon: Icon(
           Icons.arrow_drop_down,
           color: widget.enabled 
-              ? Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.prominent)
-              : Theme.of(context).colorScheme.onSurface.withValues(alpha: AppOpacity.disabled),
+              ? Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.prominent)
+              : Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.disabled),
         ),
         style: TextStyle(
           color: Theme.of(context).colorScheme.onSurface,

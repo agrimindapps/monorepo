@@ -130,7 +130,7 @@ class HeaderSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             elevation: 4,
-            shadowColor: Colors.black.withValues(alpha: 0.3),
+            shadowColor: Colors.black.withOpacity(0.3),
           ),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
@@ -180,7 +180,7 @@ class HeaderSection extends StatelessWidget {
                     Text(
                       'EM BREVE NA',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: Colors.white.withOpacity(0.8),
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
                       ),
@@ -226,7 +226,7 @@ class HeaderSection extends StatelessWidget {
                     Text(
                       'EM BREVE NA',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: Colors.white.withOpacity(0.8),
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
                       ),
@@ -259,7 +259,7 @@ class HeaderSection extends StatelessWidget {
           height: 350,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.05),
+            color: Colors.white.withOpacity(0.05),
           ),
         ),
 
@@ -268,17 +268,17 @@ class HeaderSection extends StatelessWidget {
           width: 280,
           height: 520,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Colors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.black.withOpacity(0.2),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
             ],
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               width: 2,
             ),
           ),
@@ -333,7 +333,7 @@ class HeaderSection extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
@@ -346,7 +346,7 @@ class HeaderSection extends StatelessWidget {
                                 height: 70 + (index * 10),
                                 decoration: BoxDecoration(
                                   color:
-                                      Colors.amber[400]!.withValues(alpha: 0.7),
+                                      Colors.amber[400]!.withOpacity(0.7),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -360,7 +360,7 @@ class HeaderSection extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -426,7 +426,7 @@ class HeaderSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

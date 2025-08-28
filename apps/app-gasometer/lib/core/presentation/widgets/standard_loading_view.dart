@@ -111,9 +111,7 @@ class StandardLoadingView extends StatelessWidget {
               message,
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
-                color: Theme.of(context).colorScheme.onSurface.withValues(
-                  alpha: GasometerDesignTokens.opacitySecondary,
-                ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
               ),
             ),
           ],
@@ -136,7 +134,7 @@ class StandardLoadingView extends StatelessWidget {
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -155,7 +153,7 @@ class StandardLoadingView extends StatelessWidget {
                       CircularProgressIndicator(
                         value: progress,
                         color: color,
-                        backgroundColor: color.withValues(alpha: 0.2),
+                        backgroundColor: color.withOpacity(0.2),
                         strokeWidth: 4.0,
                       ),
                       Text(
@@ -194,9 +192,7 @@ class StandardLoadingView extends StatelessWidget {
                 'Por favor, aguarde...',
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeBody,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: GasometerDesignTokens.opacitySecondary,
-                  ),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -217,7 +213,7 @@ class StandardLoadingView extends StatelessWidget {
           if (showProgress) ...[
             Positioned.fill(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: Colors.black.withOpacity(0.3),
                 child: Center(
                   child: Container(
                     padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
@@ -276,9 +272,7 @@ class StandardLoadingView extends StatelessWidget {
               message,
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
-                color: Theme.of(context).colorScheme.onSurface.withValues(
-                  alpha: GasometerDesignTokens.opacitySecondary,
-                ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
               ),
             ),
           ],
@@ -300,9 +294,7 @@ class StandardLoadingView extends StatelessWidget {
             bottom: GasometerDesignTokens.spacingLg,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withValues(
-              alpha: GasometerDesignTokens.opacityDivider,
-            ),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
             borderRadius: GasometerDesignTokens.borderRadius(
               GasometerDesignTokens.radiusSm,
             ),
@@ -318,9 +310,7 @@ class StandardLoadingView extends StatelessWidget {
               bottom: GasometerDesignTokens.spacingMd,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withValues(
-                alpha: GasometerDesignTokens.opacityDivider,
-              ),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusCard,
               ),
@@ -334,9 +324,7 @@ class StandardLoadingView extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(
-                        alpha: GasometerDesignTokens.opacityDivider * 1.5,
-                      ),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider * 1.5),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -351,9 +339,7 @@ class StandardLoadingView extends StatelessWidget {
                           width: double.infinity,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(
-                              alpha: GasometerDesignTokens.opacityDivider * 1.5,
-                            ),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider * 1.5),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
@@ -364,9 +350,7 @@ class StandardLoadingView extends StatelessWidget {
                           width: MediaQuery.of(context).size.width * 0.4,
                           height: 14,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(
-                              alpha: GasometerDesignTokens.opacityDivider,
-                            ),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),

@@ -45,8 +45,13 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   @override
   void dispose() {
     // Para animação em andamento para evitar memory leak
-    if (_fadeController.isAnimating) {
-      _fadeController.stop();
+    try {
+      if (_fadeController.status == AnimationStatus.forward || 
+          _fadeController.status == AnimationStatus.reverse) {
+        _fadeController.stop();
+      }
+    } catch (e) {
+      // Controller já foi disposed, continuar
     }
     _pageController.dispose();
     _fadeController.dispose();
@@ -56,7 +61,6 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(calorieProvider);
-    final currentStep = state.currentStep;
     
     return Scaffold(
       appBar: AppBar(
@@ -327,10 +331,16 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
 
   void _animateTransition() {
     // Verificar se o widget ainda está montado e controller não foi disposed
-    if (!mounted || _fadeController.isDisposed) return;
+    if (!mounted) return;
     
-    _fadeController.reset();
-    _fadeController.forward();
+    // Verificar status do controller para evitar operações em controller disposed
+    try {
+      _fadeController.reset();
+      _fadeController.forward();
+    } catch (e) {
+      // Controller foi disposed, não executar animação
+      return;
+    }
   }
 
   void _handleMenuAction(String value) {
@@ -351,7 +361,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   }
 
   void _showPresetsDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Presets Rápidos'),
@@ -376,7 +386,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   }
 
   void _showResetDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resetar Calculadora'),
@@ -404,7 +414,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   void _showHistoryDialog() {
     final history = ref.read(calorieHistoryProvider);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Histórico de Cálculos'),
@@ -457,7 +467,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
     final output = ref.read(calorieOutputProvider);
     if (output == null) return;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exportar Resultado'),
@@ -521,7 +531,7 @@ via PetiVeti App
         action: SnackBarAction(
           label: 'Ver',
           onPressed: () {
-            showDialog(
+            showDialog<void>(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Resultado para Compartilhar'),
@@ -543,7 +553,7 @@ via PetiVeti App
   }
 
   void _showCalorieGuide(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Guia de Cálculo Calórico'),

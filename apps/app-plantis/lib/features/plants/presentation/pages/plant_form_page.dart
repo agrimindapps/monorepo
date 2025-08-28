@@ -46,11 +46,22 @@ class _PlantFormPageState extends State<PlantFormPage> {
     final isEditing = widget.plantId != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5), // Cor de fundo mais clara conforme mockup
+      backgroundColor: theme.brightness == Brightness.light
+          ? const Color(0xFFF5F5F5)
+          : theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(isEditing ? 'Editar Planta' : 'Nova Planta'),
-        backgroundColor: const Color(0xFFF5F5F5), // Mesmo fundo que o Scaffold
+        title: Text(
+          isEditing ? 'Editar Planta' : 'Nova Planta',
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: theme.brightness == Brightness.light
+            ? const Color(0xFFF5F5F5)
+            : theme.appBarTheme.backgroundColor,
         elevation: 0,
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
         leading: IconButton(
           onPressed: () => _handleBackPressed(context),
           icon: const Icon(Icons.close),
@@ -115,7 +126,9 @@ class _PlantFormPageState extends State<PlantFormPage> {
                   Text(
                     provider.errorMessage ?? 'Erro desconhecido',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
+                      color: theme.brightness == Brightness.light
+                          ? Colors.grey[600]
+                          : Colors.grey[400],
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -128,7 +141,9 @@ class _PlantFormPageState extends State<PlantFormPage> {
                         icon: const Icon(Icons.arrow_back),
                         label: const Text('Voltar'),
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey[600],
+                          foregroundColor: theme.brightness == Brightness.light
+                              ? Colors.grey[600]
+                              : Colors.grey[400],
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -155,80 +170,24 @@ class _PlantFormPageState extends State<PlantFormPage> {
             );
           }
 
-          return Column(
-            children: [
-              // Form content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Informações Básicas
-                      _buildSectionTitle('Informações Básicas'),
-                      const PlantFormBasicInfo(),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Informações Básicas
+                _buildSectionTitle('Informações Básicas'),
+                const PlantFormBasicInfo(),
 
-                      const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-                      // Configurações de Cuidado
-                      _buildSectionTitle('Configurações de Cuidado'),
-                      const PlantFormCareConfig(),
+                // Configurações de Cuidado
+                _buildSectionTitle('Configurações de Cuidado'),
+                const PlantFormCareConfig(),
 
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-              // Área de botões com fundo branco
-              Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
-                  ),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _handleBackPressed(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: const BorderSide(color: Color(0xFFE0E0E0)),
-                        ),
-                        child: const Text('Cancelar'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: provider.isValid && !provider.isSaving
-                            ? () => _savePlant(context)
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          disabledBackgroundColor: Colors.grey.shade300,
-                        ),
-                        child: provider.isSaving
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text('Salvar'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                const SizedBox(height: 32),
+              ],
+            ),
           );
         },
       ),

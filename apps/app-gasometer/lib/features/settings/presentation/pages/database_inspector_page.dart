@@ -196,9 +196,9 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Column(
         children: [
@@ -217,7 +217,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],
@@ -271,7 +271,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
@@ -296,7 +296,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
                   '${stats['totalBoxes']} boxes • ${stats['totalRecords']} registros',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -367,7 +367,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
             child: Row(
               children: [
                 Expanded(
@@ -415,8 +415,8 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isAvailable 
-                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                    : Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                    : Theme.of(context).colorScheme.error.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(
@@ -437,7 +437,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
                     boxInfo['description'] as String? ?? '',
                     style: TextStyle(
                       fontSize: 11,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                     ),
                   ),
                 if (boxInfo['hasError'] as bool? ?? false)
@@ -472,14 +472,14 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> with Tick
             Icon(
               Icons.inbox,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'Nenhum registro encontrado',
               style: TextStyle(
                 fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],

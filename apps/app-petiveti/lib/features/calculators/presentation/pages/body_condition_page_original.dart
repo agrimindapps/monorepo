@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/entities/body_condition_output.dart';
 import '../providers/body_condition_provider.dart';
+import '../widgets/bcs_guide_sheet.dart';
 import '../widgets/body_condition_history_panel.dart';
 import '../widgets/body_condition_input_form.dart';
 import '../widgets/body_condition_result_card.dart';
@@ -15,10 +17,10 @@ class BodyConditionPage extends ConsumerStatefulWidget {
   ConsumerState<BodyConditionPage> createState() => _BodyConditionPageState();
 }
 
-class _BodyConditionPageState extends ConsumerState<BodyConditionPage> 
+class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +36,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(bodyConditionProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Condição Corporal (BCS)'),
@@ -51,32 +53,33 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
           ),
           PopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(value),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'reset',
-                child: ListTile(
-                  leading: Icon(Icons.refresh),
-                  title: Text('Resetar'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'history',
-                child: ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('Histórico'),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: ListTile(
-                  leading: Icon(Icons.share),
-                  title: Text('Exportar'),
-                  dense: true,
-                ),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'reset',
+                    child: ListTile(
+                      leading: Icon(Icons.refresh),
+                      title: Text('Resetar'),
+                      dense: true,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'history',
+                    child: ListTile(
+                      leading: Icon(Icons.history),
+                      title: Text('Histórico'),
+                      dense: true,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'export',
+                    child: ListTile(
+                      leading: Icon(Icons.share),
+                      title: Text('Exportar'),
+                      dense: true,
+                    ),
+                  ),
+                ],
           ),
         ],
         bottom: TabBar(
@@ -92,7 +95,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
         children: [
           // Indicador de progresso/status
           _buildStatusIndicator(state),
-          
+
           // Conteúdo das abas
           Expanded(
             child: TabBarView(
@@ -100,10 +103,10 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
               children: [
                 // Aba de entrada
                 _buildInputTab(),
-                
+
                 // Aba de resultado
                 _buildResultTab(),
-                
+
                 // Aba de histórico
                 _buildHistoryTab(),
               ],
@@ -142,9 +145,15 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
           children: [
             const Icon(Icons.error_outline, color: Colors.red, size: 16),
             const SizedBox(width: 8),
-            Expanded(child: Text(state.error!, style: const TextStyle(color: Colors.red))),
+            Expanded(
+              child: Text(
+                state.error!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
             TextButton(
-              onPressed: () => ref.read(bodyConditionProvider.notifier).clearError(),
+              onPressed:
+                  () => ref.read(bodyConditionProvider.notifier).clearError(),
               child: const Text('Fechar'),
             ),
           ],
@@ -163,14 +172,25 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
               children: [
                 Icon(Icons.warning_outlined, color: Colors.orange, size: 16),
                 SizedBox(width: 8),
-                Text('Dados incompletos:', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                Text(
+                  'Dados incompletos:',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 4),
-            ...state.validationErrors.map((error) => Padding(
-              padding: const EdgeInsets.only(left: 24.0),
-              child: Text('• $error', style: const TextStyle(color: Colors.orange)),
-            )),
+            ...state.validationErrors.map(
+              (error) => Padding(
+                padding: const EdgeInsets.only(left: 24.0),
+                child: Text(
+                  '• $error',
+                  style: const TextStyle(color: Colors.orange),
+                ),
+              ),
+            ),
           ],
         ),
       );
@@ -190,7 +210,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     return Consumer(
       builder: (context, ref, child) {
         final output = ref.watch(bodyConditionOutputProvider);
-        
+
         if (output == null) {
           return const Center(
             child: Column(
@@ -225,7 +245,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     return Consumer(
       builder: (context, ref, child) {
         final history = ref.watch(bodyConditionHistoryProvider);
-        
+
         if (history.isEmpty) {
           return const Center(
             child: Column(
@@ -257,21 +277,26 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     if (_tabController.index != 0) return null;
 
     return FloatingActionButton.extended(
-      onPressed: state.canCalculate
-          ? () {
-              ref.read(bodyConditionProvider.notifier).calculate();
-              // Mover para aba de resultado após calcular
-              _tabController.animateTo(1);
-            }
-          : null,
+      onPressed:
+          state.canCalculate
+              ? () {
+                ref.read(bodyConditionProvider.notifier).calculate();
+                // Mover para aba de resultado após calcular
+                _tabController.animateTo(1);
+              }
+              : null,
       backgroundColor: state.canCalculate ? null : Colors.grey,
-      icon: state.isLoading
-          ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-            )
-          : const Icon(Icons.calculate),
+      icon:
+          state.isLoading
+              ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+              : const Icon(Icons.calculate),
       label: Text(state.isLoading ? 'Calculando...' : 'Calcular BCS'),
     );
   }
@@ -291,26 +316,29 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
   }
 
   void _showResetConfirmation() {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resetar Calculadora'),
-        content: const Text('Isso limpará todos os dados inseridos e resultados. Continuar?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Resetar Calculadora'),
+            content: const Text(
+              'Isso limpará todos os dados inseridos e resultados. Continuar?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  ref.read(bodyConditionProvider.notifier).reset();
+                  Navigator.pop(context);
+                  _tabController.animateTo(0);
+                },
+                child: const Text('Resetar'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              ref.read(bodyConditionProvider.notifier).reset();
-              Navigator.pop(context);
-              _tabController.animateTo(0);
-            },
-            child: const Text('Resetar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -320,67 +348,72 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
       _showErrorSnackBar('Nenhum resultado para exportar');
       return;
     }
-    
+
     // Validar dados antes da exportação
     if (!_validateExportData(output)) {
       _showErrorSnackBar('Dados insuficientes para exportação segura');
       return;
     }
-    
+
     _showExportDialog(output);
   }
-  
+
   bool _validateExportData(BodyConditionOutput output) {
     // Validações críticas de dados veterinários antes da exportação
     if (output.bcsScore < 1.0 || output.bcsScore > 9.0) {
       return false; // Score BCS inválido
     }
-    
+
     final input = ref.read(bodyConditionInputProvider);
     if (input.currentWeight <= 0.0 || input.currentWeight > 150.0) {
       return false; // Peso inválido
     }
-    
+
     // Verificar se dados essenciais estão presentes
     if (output.results.isEmpty) {
       return false; // Sem resultados calculados
     }
-    
+
     return true;
   }
-  
+
   void _showExportDialog(BodyConditionOutput output) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exportar Resultado BCS'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Score BCS: ${output.bcsScore.toStringAsFixed(1)}'),
-            Text('Classificação: ${_getClassificationText(output.classification)}'),
-            const SizedBox(height: 8),
-            const Text('Os dados serão exportados de forma segura e anônima.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Exportar Resultado BCS'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Score BCS: ${output.bcsScore.toStringAsFixed(1)}'),
+                Text(
+                  'Classificação: ${_getClassificationText(output.classification)}',
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Os dados serão exportados de forma segura e anônima.',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _performSecureExport(output);
+                },
+                child: const Text('Exportar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _performSecureExport(output);
-            },
-            child: const Text('Exportar'),
-          ),
-        ],
-      ),
     );
   }
-  
+
   void _performSecureExport(BodyConditionOutput output) {
     // Implementação segura da exportação
     // Em uma implementação real, aqui haveria:
@@ -388,7 +421,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     // - Remoção de informações sensíveis
     // - Geração de PDF ou outro formato
     // - Compartilhamento seguro
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Resultado exportado com segurança!'),
@@ -396,202 +429,23 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
       ),
     );
   }
-  
+
   String _getClassificationText(BcsClassification classification) {
     return classification.displayName;
   }
-  
+
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   void _showBcsGuide(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const BcsGuideSheet(),
-    );
-  }
-}
-
-/// Sheet com guia de interpretação BCS
-class BcsGuideSheet extends StatelessWidget {
-  const BcsGuideSheet({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              color: Colors.blue,
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.help, color: Colors.white),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Guia de Condição Corporal (BCS)',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildGuideSection(
-                    'O que é BCS?',
-                    'Body Condition Score (BCS) é um sistema de avaliação nutricional que analisa a condição corporal do animal através de palpação e observação visual, utilizando uma escala de 1 a 9.',
-                    Icons.info,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildGuideSection(
-                    'Como palpar as costelas?',
-                    '1. Coloque as mãos nas laterais do tórax\n2. Pressione suavemente com as pontas dos dedos\n3. Avalie a facilidade para sentir as costelas\n4. Considere a cobertura de gordura',
-                    Icons.touch_app,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildGuideSection(
-                    'Avaliação da cintura',
-                    'Observe o animal de cima:\n• Deve haver uma "cintura" visível atrás das costelas\n• A cintura deve ser mais estreita que o tórax\n• Em animais obesos, a cintura desaparece',
-                    Icons.visibility,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildGuideSection(
-                    'Perfil abdominal',
-                    'Observe o animal de lado:\n• Abdome deve estar "retraído" (tucked up)\n• Em animais magros, a retração é muito evidente\n• Em obesos, o abdome fica pendular',
-                    Icons.straighten,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildBcsScale(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGuideSection(String title, String content, IconData icon) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.blue),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              content,
-              style: const TextStyle(height: 1.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBcsScale() {
-    const bcsData = [
-      {'score': '1-2', 'condition': 'Extremamente Magro', 'color': Colors.red},
-      {'score': '3', 'condition': 'Magro', 'color': Colors.orange},
-      {'score': '4', 'condition': 'Abaixo do Ideal', 'color': Colors.amber},
-      {'score': '5', 'condition': 'Ideal', 'color': Colors.green},
-      {'score': '6', 'condition': 'Acima do Ideal', 'color': Colors.amber},
-      {'score': '7', 'condition': 'Sobrepeso', 'color': Colors.orange},
-      {'score': '8-9', 'condition': 'Obeso', 'color': Colors.red},
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.scale, color: Colors.blue),
-                SizedBox(width: 12),
-                Text(
-                  'Escala BCS (1-9)',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...bcsData.map((data) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: (data['color'] as Color).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: data['color'] as Color),
-                    ),
-                    child: Center(
-                      child: Text(
-                        data['score'] as String,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: data['color'] as Color,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(data['condition'] as String),
-                ],
-              ),
-            )),
-          ],
-        ),
-      ),
     );
   }
 }

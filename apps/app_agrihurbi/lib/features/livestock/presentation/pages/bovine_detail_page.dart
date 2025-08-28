@@ -168,7 +168,7 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -252,8 +252,8 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
                   ),
                   decoration: BoxDecoration(
                     color: _bovine!.isActive
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.1),
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: _bovine!.isActive ? Colors.green : Colors.grey,

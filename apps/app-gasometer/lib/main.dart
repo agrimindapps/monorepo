@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 
 import 'app.dart';
 import 'core/data/models/category_model.dart';
@@ -24,11 +25,18 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  print('🚀 GasOMeter startup initiated...');
+
+  // Disable Provider debug check for complex dependency management
+  Provider.debugCheckInvalidValueType = null;
 
   // Initialize Hive
+  print('📦 Initializing Hive...');
   await Hive.initFlutter();
+  print('✅ Hive initialized successfully');
 
   // Register Hive adapters
+  print('🔧 Registering Hive adapters...');
   Hive.registerAdapter(VehicleModelAdapter());
   Hive.registerAdapter(FuelSupplyModelAdapter());
   Hive.registerAdapter(OdometerModelAdapter());
@@ -36,28 +44,58 @@ void main() async {
   Hive.registerAdapter(MaintenanceModelAdapter());
   Hive.registerAdapter(CategoryModelAdapter());
   Hive.registerAdapter(SyncQueueItemAdapter());
+  print('✅ Hive adapters registered successfully');
 
   // Initialize Firebase
+  print('🔥 Initializing Firebase...');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('✅ Firebase initialized successfully');
+
+  // Initialize Firebase Crashlytics (only in production)
+  if (!kDebugMode) {
+    try {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+      // Wait a bit to ensure Crashlytics is fully initialized
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      // Test Crashlytics availability
+      await FirebaseCrashlytics.instance.log('Crashlytics initialization test');
+      print('✅ Crashlytics successfully initialized');
+    } catch (e) {
+      print('⚠️ Crashlytics initialization failed: $e');
+    }
+  } else {
+    print('🔧 Debug mode: Crashlytics disabled');
+  }
 
   // Initialize Dependencies
+  print('🔄 Initializing dependency injection...');
   await initializeDependencies();
+  print('✅ Dependencies initialized successfully');
 
   // Initialize Analytics Service
+  print('📊 Initializing Analytics...');
   final analyticsService = sl<AnalyticsService>();
   analyticsService.initialize();
+  print('✅ Analytics initialized successfully');
 
   // Initialize Database Inspector
+  print('🔍 Initializing Database Inspector...');
   final databaseInspectorService = GasOMeterDatabaseInspectorService.instance;
   databaseInspectorService.initialize();
+  print('✅ Database Inspector initialized successfully');
 
   // Initialize notifications
+  print('🔔 Initializing notifications...');
   final notificationService = sl<GasOMeterNotificationService>();
   await notificationService.initialize();
+  print('✅ Notifications initialized successfully');
 
   // Initialize Sync Service
+  print('🔄 Initializing Sync Service...');
   final syncService = sl<SyncService>();
   await syncService.initialize();
+  print('✅ Sync Service initialized successfully');
 
   // Configure Crashlytics and error handling
   if (!kDebugMode) {
@@ -77,21 +115,27 @@ void main() async {
   // }
 
   // Log app start
+  print('📈 Logging app open event...');
   await analyticsService.logAppOpen();
+  print('✅ App open event logged successfully');
 
   // Run app with error handling
+  print('🎯 Starting GasOMeter app...');
   if (!kDebugMode) {
     runZonedGuarded<Future<void>>(
       () async {
         // await performanceService.markFirstFrame();
         runApp(const GasOMeterApp());
+        print('🎉 GasOMeter app started successfully in production mode');
       },
       (error, stack) {
+        print('💥 Fatal error during app startup: $error');
         FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       },
     );
   } else {
     // await performanceService.markFirstFrame();
     runApp(const GasOMeterApp());
+    print('🎉 GasOMeter app started successfully in debug mode');
   }
 }

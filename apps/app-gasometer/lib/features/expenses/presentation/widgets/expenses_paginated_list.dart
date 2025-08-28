@@ -327,7 +327,7 @@ class ExpensesPaginatedFilters extends StatelessWidget {
     ExpensesPaginatedProvider provider,
   ) {
     return Card(
-      color: AppTheme.colors.primary.withValues(alpha: 0.1),
+      color: AppTheme.colors.primary.withOpacity(0.1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(

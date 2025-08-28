@@ -37,6 +37,7 @@ class PlantDetailsController {
   final Function(String, String, {Color? backgroundColor})? onShowSnackBarWithColor;
   final Function(Widget)? onShowDialog;
   final Function(Widget)? onShowBottomSheet;
+  final void Function(String)? onPlantDeleted;
 
   PlantDetailsController({
     required this.provider,
@@ -48,6 +49,7 @@ class PlantDetailsController {
     this.onShowSnackBarWithColor,
     this.onShowDialog,
     this.onShowBottomSheet,
+    this.onPlantDeleted,
   });
 
   /// Loads a plant by its unique identifier
@@ -218,10 +220,12 @@ class PlantDetailsController {
   /// ```
   Future<void> deletePlant(String plantId) async {
     try {
-      provider.loadPlant(plantId);  // Carrega a planta no provider
       final success = await provider.deletePlant();  // Deleta a planta atual no provider
 
       if (success) {
+        // Notificar que a planta foi deletada
+        onPlantDeleted?.call(plantId);
+        
         onShowSnackBarWithColor?.call(
           AppStrings.plantDeletedSuccessfully,
           '',

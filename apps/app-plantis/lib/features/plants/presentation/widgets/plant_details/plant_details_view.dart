@@ -9,7 +9,7 @@ import '../../../domain/entities/plant.dart';
 import '../../../../tasks/presentation/providers/tasks_provider.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
-import '../../../../../features/plants/domain/entities/plant_task.dart';
+import '../../providers/plants_list_provider.dart';
 import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
 import 'plant_image_section.dart';
@@ -79,6 +79,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
             ),
             builder: (_) => bottomSheet,
           ),
+          onPlantDeleted: (plantId) => _syncPlantDeletion(plantId),
         );
         _controller!.loadPlant(widget.plantId);
         
@@ -136,20 +137,6 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           return _buildMainContent(context, plant);
         },
       ),
-      // Enhanced FloatingActionButton with multiple actions
-      floatingActionButton: Selector<PlantDetailsProvider, Plant?>(
-        selector: (context, provider) => provider.plant,
-        builder: (context, plant, child) {
-          if (plant == null) return const SizedBox.shrink();
-
-          return _OptimizedActionButtons(
-            plant: plant,
-            onQuickActions: () => _showQuickActionsMenu(context, plant),
-            onEdit: () => _controller?.editPlant(plant),
-          );
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -622,206 +609,6 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     );
   }
   
-  /// Shows the quick actions menu in a modal bottom sheet
-  /// 
-  /// This method displays a comprehensive set of quick actions that users
-  /// can perform on a plant without navigating to different screens.
-  /// 
-  /// Quick actions include:
-  /// - Water plant (record watering)
-  /// - Fertilize plant (record fertilizing)
-  /// - Take photo (capture plant progress)
-  /// - Add note (record observations)
-  /// - Toggle favorite status
-  /// - Share plant information
-  /// - Delete plant (with confirmation)
-  /// 
-  /// The menu is presented in an accessible grid layout with clear icons
-  /// and labels for each action.
-  /// 
-  /// Parameters:
-  /// - [context]: Build context for showing the modal bottom sheet
-  /// - [plant]: The plant entity for which to show quick actions
-  void _showQuickActionsMenu(BuildContext context, Plant plant) {
-    final theme = Theme.of(context);
-    
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(AppSpacing.modalPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(AppSpacing.tipBulletSize / 2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            
-            Text(
-              AppStrings.quickActions,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            
-            // Quick action grid
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 3,
-              crossAxisSpacing: AppSpacing.lg,
-              mainAxisSpacing: AppSpacing.lg,
-              children: [
-                _QuickActionButton(
-                  icon: Icons.water_drop,
-                  label: AppStrings.water,
-                  color: Colors.blue,
-                  onTap: () => _quickWater(context, plant),
-                ),
-                _QuickActionButton(
-                  icon: Icons.grass,
-                  label: AppStrings.fertilize,
-                  color: Colors.green,
-                  onTap: () => _quickFertilize(context, plant),
-                ),
-                _QuickActionButton(
-                  icon: Icons.add_photo_alternate,
-                  label: AppStrings.photo,
-                  color: Colors.purple,
-                  onTap: () => _quickPhoto(context, plant),
-                ),
-                _QuickActionButton(
-                  icon: Icons.note_add,
-                  label: AppStrings.note,
-                  color: Colors.orange,
-                  onTap: () => _quickNote(context, plant),
-                ),
-                _QuickActionButton(
-                  icon: plant.isFavorited ? Icons.favorite : Icons.favorite_border,
-                  label: plant.isFavorited ? AppStrings.unfavorite : AppStrings.favorite,
-                  color: Colors.red,
-                  onTap: () => _toggleFavorite(plant),
-                ),
-                _QuickActionButton(
-                  icon: Icons.share,
-                  label: AppStrings.share,
-                  color: Colors.indigo,
-                  onTap: () => _sharePlant(context, plant),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Danger zone
-            Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-            const SizedBox(height: 16),
-            
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _controller?.confirmDelete(plant, _buildDeleteConfirmDialog);
-                },
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-                label: Text(
-                  AppStrings.deletePlant,
-                  style: TextStyle(color: Colors.red),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  
-  void _toggleFavorite(Plant plant) {
-    // TODO: Implement favorite toggle
-    final provider = context.read<PlantDetailsProvider>();
-    provider.toggleFavorite(plant.id);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          plant.isFavorited 
-            ? AppStrings.plantRemovedFromFavorites
-            : AppStrings.plantAddedToFavorites,
-        ),
-        backgroundColor: PlantisColors.primary,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-  
-  void _quickWater(BuildContext context, Plant plant) {
-    // TODO: Implement quick water action
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.quickWaterRecorded),
-        backgroundColor: Colors.blue,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-  
-  void _quickFertilize(BuildContext context, Plant plant) {
-    // TODO: Implement quick fertilize action
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.quickFertilizeRecorded),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-  
-  void _quickPhoto(BuildContext context, Plant plant) {
-    // TODO: Implement quick photo capture
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.photoCaptureInDevelopment),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-  
-  void _quickNote(BuildContext context, Plant plant) {
-    // TODO: Implement quick note addition
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.noteAdditionInDevelopment),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-  
-  void _sharePlant(BuildContext context, Plant plant) {
-    // TODO: Implement plant sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.sharingInDevelopment),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
   
   /// Initializes plant tasks if none exist for the current plant
   /// 
@@ -872,199 +659,8 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   /// Parameters:
   /// - [context]: Build context for showing the modal
   /// - [plant]: The plant entity for which to create the task
-  void _addNewTask(BuildContext context, Plant plant) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => _buildAddTaskModal(context, plant),
-    );
-  }
   
-  Widget _buildAddTaskModal(BuildContext context, Plant plant) {
-    final theme = Theme.of(context);
-    TaskType selectedType = TaskType.watering;
-    DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
-    String title = '';
-    String description = '';
-    
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: AppSpacing.sectionSpacing,
-            right: AppSpacing.sectionSpacing,
-            top: AppSpacing.sectionSpacing,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Text(
-                    AppStrings.newTask,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sectionSpacing),
-              
-              // Task type selection
-              Text(
-                AppStrings.taskType,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.iconPadding),
-              Wrap(
-                spacing: 8,
-                children: TaskType.values.map((type) {
-                  final isSelected = selectedType == type;
-                  return FilterChip(
-                    selected: isSelected,
-                    label: Text(_getTaskTypeLabel(type)),
-                    avatar: Icon(
-                      _getTaskIcon(type),
-                      size: 18,
-                      color: isSelected ? Colors.white : null,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() => selectedType = type);
-                        title = _getDefaultTaskTitle(type);
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              
-              // Title field
-              TextField(
-                decoration: InputDecoration(
-                  labelText: AppStrings.taskTitle,
-                  border: OutlineInputBorder(),
-                ),
-                controller: TextEditingController(text: title.isEmpty ? _getDefaultTaskTitle(selectedType) : title),
-                onChanged: (value) => title = value,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              
-              // Description field
-              TextField(
-                decoration: InputDecoration(
-                  labelText: AppStrings.descriptionOptional,
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
-                onChanged: (value) => description = value,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              
-              // Date selection
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today),
-                title: Text(AppStrings.scheduledDate),
-                subtitle: Text(
-                  '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
-                ),
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (date != null) {
-                    setState(() => selectedDate = date);
-                  }
-                },
-              ),
-              const SizedBox(height: AppSpacing.sectionSpacing),
-              
-              // Actions
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(AppStrings.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _createTask(
-                        context,
-                        plant,
-                        selectedType,
-                        title.isEmpty ? _getDefaultTaskTitle(selectedType) : title,
-                        description,
-                        selectedDate,
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: PlantisColors.primary,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: Text(AppStrings.create),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sectionSpacing),
-            ],
-          ),
-        );
-      },
-    );
-  }
   
-  /// Returns the localized display label for a task type
-  /// 
-  /// This method maps task type enums to user-friendly display strings
-  /// that are properly localized for the current app language.
-  /// 
-  /// Parameters:
-  /// - [type]: The task type enum to get the label for
-  /// 
-  /// Returns:
-  /// - A localized string label for the task type
-  /// 
-  /// Example:
-  /// ```dart
-  /// final label = _getTaskTypeLabel(TaskType.watering); // returns "Rega"
-  /// ```
-  String _getTaskTypeLabel(TaskType type) {
-    switch (type) {
-      case TaskType.watering:
-        return AppStrings.watering;
-      case TaskType.fertilizing:
-        return AppStrings.fertilizing;
-      case TaskType.pruning:
-        return AppStrings.pruning;
-      case TaskType.sunlightCheck:
-        return AppStrings.sunlightCheck;
-      case TaskType.pestInspection:
-        return AppStrings.pestInspection;
-      case TaskType.replanting:
-        return AppStrings.replanting;
-    }
-  }
   
   /// Returns the default title for a new task of the given type
   /// 
@@ -1081,39 +677,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   /// ```dart
   /// final title = _getDefaultTaskTitle(TaskType.watering); // returns "Regar planta"
   /// ```
-  String _getDefaultTaskTitle(TaskType type) {
-    switch (type) {
-      case TaskType.watering:
-        return AppStrings.waterPlant;
-      case TaskType.fertilizing:
-        return AppStrings.applyFertilizer;
-      case TaskType.pruning:
-        return AppStrings.pruneBranches;
-      case TaskType.sunlightCheck:
-        return AppStrings.checkSunExposure;
-      case TaskType.pestInspection:
-        return AppStrings.inspectPests;
-      case TaskType.replanting:
-        return AppStrings.replantInLargerPot;
-    }
-  }
   
-  IconData _getTaskIcon(TaskType type) {
-    switch (type) {
-      case TaskType.watering:
-        return Icons.water_drop;
-      case TaskType.fertilizing:
-        return Icons.grass;
-      case TaskType.pruning:
-        return Icons.content_cut;
-      case TaskType.sunlightCheck:
-        return Icons.wb_sunny;
-      case TaskType.pestInspection:
-        return Icons.bug_report;
-      case TaskType.replanting:
-        return Icons.change_circle;
-    }
-  }
   
   /// Creates and saves a new plant care task
   /// 
@@ -1133,44 +697,98 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   /// - [title]: User-provided or default title for the task
   /// - [description]: Optional detailed description of the task
   /// - [scheduledDate]: When the task should be performed
-  void _createTask(
-    BuildContext context,
-    Plant plant,
-    TaskType type,
-    String title,
-    String description,
-    DateTime scheduledDate,
-  ) {
-    final taskProvider = context.read<PlantTaskProvider>();
+  
+  void _syncPlantDeletion(String plantId) {
+    try {
+      // Tentar sincronizar com PlantsListProvider se disponível
+      final plantsProvider = context.read<PlantsListProvider>();
+      // Remove da lista local sem chamar repository novamente
+      plantsProvider.plants.removeWhere((plant) => plant.id == plantId);
+    } catch (e) {
+      // Se não conseguir encontrar o provider, não há problema
+      // A lista será atualizada no próximo reload
+    }
+  }
+
+  void _handleMenuAction(String action, Plant plant) {
+    switch (action) {
+      case 'edit':
+        _controller?.editPlant(plant);
+        break;
+      case 'delete':
+        _controller?.confirmDelete(plant, _buildDeleteConfirmDialog);
+        break;
+    }
+  }
+
+  Widget _buildDeleteConfirmDialog(Plant plant) {
+    final theme = Theme.of(context);
     
-    // Create new task
-    final newTask = PlantTask(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      plantId: plant.id,
-      type: type,
-      title: title,
-      description: description.isNotEmpty ? description : null,
-      scheduledDate: scheduledDate,
-      status: TaskStatus.pending,
-      intervalDays: 7, // Default interval of 7 days
-      createdAt: DateTime.now(),
-    );
-    
-    // Add task to provider
-    final currentTasks = taskProvider.getTasksForPlant(plant.id);
-    currentTasks.add(newTask);
-    
-    Navigator.of(context).pop();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.taskCreatedSuccessfully),
-        backgroundColor: PlantisColors.primary,
-        behavior: SnackBarBehavior.floating,
+    return AlertDialog(
+      title: const Text('Excluir planta'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tem certeza que deseja excluir "${plant.displayName}"?',
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.red.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.warning_outlined,
+                  color: Colors.red,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Esta ação não pode ser desfeita.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () async {
+            try {
+              Navigator.of(context).pop(); // Fechar diálogo
+              await _controller?.deletePlant(plant.id);
+            } catch (e) {
+              // Error já é tratado no controller
+            }
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.red,
+          ),
+          child: const Text('Excluir'),
+        ),
+      ],
     );
   }
-  
+
   void _showSnackBar(String message, String type) {
     Color? backgroundColor;
     switch (type) {
@@ -1203,99 +821,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     );
   }
   
-  Widget _buildMoreOptionsSheet(Plant plant) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(AppSpacing.tipBulletSize / 2),
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          Text(
-            AppStrings.options,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          ListTile(
-            leading: const Icon(Icons.share_outlined),
-            title: Text(AppStrings.share),
-            subtitle: Text(AppStrings.shareInfo),
-            onTap: () {
-              Navigator.of(context).pop();
-              _controller?.sharePlant(plant);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.content_copy_outlined),
-            title: Text(AppStrings.duplicate),
-            subtitle: Text(AppStrings.createCopy),
-            onTap: () {
-              Navigator.of(context).pop();
-              _controller?.duplicatePlant(plant);
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.delete_outline,
-              color: theme.colorScheme.error,
-            ),
-            title: Text(
-              AppStrings.deleteAction,
-              style: TextStyle(
-                color: theme.colorScheme.error,
-              ),
-            ),
-            subtitle: Text(AppStrings.permanentlyRemove),
-            onTap: () {
-              Navigator.of(context).pop();
-              _controller?.confirmDelete(plant, _buildDeleteConfirmDialog);
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
   
-  Widget _buildDeleteConfirmDialog(Plant plant) {
-    final theme = Theme.of(context);
-    
-    return AlertDialog(
-      title: Text(AppStrings.confirmDelete),
-      content: Text(
-        '${AppStrings.deleteConfirmMessage} "${plant.displayName}"? ${AppStrings.cannotBeUndone}',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppStrings.cancel),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            _controller?.deletePlant(plant.id);
-          },
-          style: TextButton.styleFrom(
-            foregroundColor: theme.colorScheme.error,
-          ),
-          child: Text(AppStrings.delete),
-        ),
-      ],
-    );
-  }
 
   /// Builds the main content area with plant details and tabs
   /// 
@@ -1375,40 +901,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         ),
       ),
       actions: [
-        // Favorite button
         Semantics(
-          label: plant.isFavorited 
-              ? '${AppStrings.removeFavorite} ${plant.displayName}'
-              : '${AppStrings.addFavorite} ${plant.displayName}',
+          label: 'Opções da planta ${plant.displayName}',
           button: true,
-          child: IconButton(
-            onPressed: () => _toggleFavorite(plant),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.9),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                plant.isFavorited ? Icons.favorite : Icons.favorite_border,
-                color: plant.isFavorited ? Colors.red : theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ),
-        // More options
-        Semantics(
-          label: '${AppStrings.moreOptions} ${plant.displayName}',
-          button: true,
-          child: IconButton(
-            onPressed: () => _controller?.showMoreOptions(plant, _buildMoreOptionsSheet),
+          child: PopupMenuButton<String>(
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -1424,6 +920,28 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               ),
               child: Icon(Icons.more_vert, color: theme.colorScheme.onSurface),
             ),
+            onSelected: (action) => _handleMenuAction(action, plant),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: ListTile(
+                  leading: Icon(Icons.edit_outlined),
+                  title: Text('Editar'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(Icons.delete_outline, color: Colors.red),
+                  title: Text(
+                    'Excluir',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: 8),
@@ -1496,35 +1014,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       padding: const EdgeInsets.all(16),
       child: Consumer<PlantTaskProvider>(
         builder: (context, taskProvider, child) {
-          return Column(
-            children: [
-              // Add task button
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 16),
-                child: ElevatedButton.icon(
-                  onPressed: () => _addNewTask(context, plant),
-                  icon: const Icon(Icons.add_task),
-                  label: Text(AppStrings.addNewTask),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-                    foregroundColor: PlantisColors.primary,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: PlantisColors.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              
-              // Tasks section
-              PlantTasksSection(plant: plant),
-            ],
-          );
+          return PlantTasksSection(plant: plant);
         },
       ),
     );
@@ -1738,133 +1228,4 @@ class _LoadingShimmer extends StatelessWidget {
   }
 }
 
-/// Optimized action buttons that only rebuild when plant changes
-class _OptimizedActionButtons extends StatelessWidget {
-  const _OptimizedActionButtons({
-    required this.plant,
-    required this.onQuickActions,
-    required this.onEdit,
-  });
 
-  final Plant plant;
-  final VoidCallback onQuickActions;
-  final VoidCallback onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // Quick Actions Menu
-        _OptimizedActionButton(
-          plant: plant,
-          onPressed: onQuickActions,
-          icon: Icons.more_horiz,
-          semanticLabel: '${AppStrings.quickActionsFor} ${plant.displayName}',
-          backgroundColor: PlantisColors.primary.withValues(alpha: 0.9),
-          mini: true,
-          heroTag: "quick_actions",
-        ),
-        const SizedBox(height: AppSpacing.buttonSpacing),
-        
-        // Main Edit Button
-        _OptimizedActionButton(
-          plant: plant,
-          onPressed: onEdit,
-          icon: Icons.edit,
-          semanticLabel: '${AppStrings.editPlantFor} ${plant.displayName}',
-          backgroundColor: PlantisColors.primary,
-          heroTag: "edit_plant",
-        ),
-      ],
-    );
-  }
-}
-
-/// Optimized action button that rebuilds only when needed
-class _OptimizedActionButton extends StatelessWidget {
-  const _OptimizedActionButton({
-    required this.plant,
-    required this.onPressed,
-    required this.icon,
-    required this.semanticLabel,
-    required this.backgroundColor,
-    this.mini = false,
-    this.heroTag,
-  });
-
-  final Plant plant;
-  final VoidCallback onPressed;
-  final IconData icon;
-  final String semanticLabel;
-  final Color backgroundColor;
-  final bool mini;
-  final String? heroTag;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: semanticLabel,
-      button: true,
-      child: FloatingActionButton(
-        heroTag: heroTag,
-        onPressed: onPressed,
-        backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
-        mini: mini,
-        child: Icon(icon, size: mini ? 20 : 24),
-      ),
-    );
-  }
-}
-
-/// Optimized quick action button for the grid
-class _QuickActionButton extends StatelessWidget {
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pop();
-        onTap();
-      },
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusMedium),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: AppSpacing.sectionSpacing),
-            const SizedBox(height: AppSpacing.iconPadding),
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

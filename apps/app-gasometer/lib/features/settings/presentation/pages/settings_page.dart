@@ -54,7 +54,7 @@ class SettingsPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Semantics(
@@ -94,7 +94,7 @@ class SettingsPage extends StatelessWidget {
               builder: (context, themeProvider, _) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Semantics(
@@ -168,7 +168,7 @@ class SettingsPage extends StatelessWidget {
                 child: Icon(
                   Icons.person,
                   size: GasometerDesignTokens.iconSizeXxl,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
                 ),
               ),
               const SizedBox(height: 16),
@@ -186,7 +186,7 @@ class SettingsPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                 ),
               ),
               const SizedBox(height: 20),
@@ -259,7 +259,7 @@ class SettingsPage extends StatelessWidget {
                           'Desbloqueie recursos avançados e tenha a\nmelhor experiência',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                           ),
                         ),
                       ],
@@ -317,7 +317,7 @@ class SettingsPage extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
@@ -343,7 +343,7 @@ class SettingsPage extends StatelessWidget {
               onTap: () => _showThemeDialog(context, themeProvider),
               trailing: Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
               ),
             );
           },
@@ -414,7 +414,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () => _showGenerateDataDialog(context),
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -425,7 +425,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () => _showAdvancedClearDataDialog(context),
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -442,7 +442,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -466,7 +466,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -480,7 +480,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -494,7 +494,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
         _buildSettingsItem(
@@ -508,7 +508,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -532,7 +532,7 @@ class SettingsPage extends StatelessWidget {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -597,7 +597,7 @@ class SettingsPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                   ),
                   child: Icon(
@@ -645,7 +645,7 @@ class SettingsPage extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
               size: GasometerDesignTokens.iconSizeListItem,
             ),
             const SizedBox(width: 16),
@@ -666,7 +666,7 @@ class SettingsPage extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -761,7 +761,7 @@ class SettingsPage extends StatelessWidget {
               icon,
               color: isSelected 
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                : Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -781,7 +781,7 @@ class SettingsPage extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -973,7 +973,7 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
               ),
               child: Column(
@@ -1002,9 +1002,9 @@ class _GenerateDataDialogState extends State<_GenerateDataDialog> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: Colors.green.withOpacity(0.1),
                   borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.green.withOpacity(0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1202,9 +1202,9 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: Colors.red.withOpacity(0.1),
                 borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1343,9 +1343,9 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: Colors.green.withOpacity(0.1),
                   borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.green.withOpacity(0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

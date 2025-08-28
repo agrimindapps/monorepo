@@ -325,23 +325,23 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
               _buildInsightChip(
                 theme,
                 'Variação Total',
-                insights['totalChange'],
-                insights['totalChangeColor'],
-                insights['totalChangeIcon'],
+                insights.totalChange,
+                insights.totalChangeColor,
+                insights.totalChangeIcon,
               ),
               _buildInsightChip(
                 theme,
                 'Média Período',
-                insights['averageWeight'],
+                insights.averageWeight,
                 Colors.blue,
                 Icons.bar_chart,
               ),
               _buildInsightChip(
                 theme,
                 'Tendência',
-                insights['trendDescription'],
-                insights['trendColor'],
-                insights['trendIcon'],
+                insights.trendDescription,
+                insights.trendColor,
+                insights.trendIcon,
               ),
             ],
           ),
@@ -465,8 +465,18 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
     return weights.where((weight) => weight.date.isAfter(cutoffDate)).toList();
   }
 
-  Map<String, dynamic> _calculateInsights(List<Weight> weights) {
-    if (weights.length < 2) return {};
+  WeightInsights _calculateInsights(List<Weight> weights) {
+    if (weights.length < 2) {
+      return const WeightInsights(
+        totalChange: '0.0 kg',
+        totalChangeColor: Colors.grey,
+        totalChangeIcon: Icons.trending_flat,
+        averageWeight: '0.0 kg',
+        trendDescription: 'Estável',
+        trendColor: Colors.green,
+        trendIcon: Icons.trending_flat,
+      );
+    }
     
     final firstWeight = weights.last.weight;
     final lastWeight = weights.first.weight;
@@ -506,15 +516,15 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
       trendIcon = Icons.trending_down;
     }
     
-    return {
-      'totalChange': '${totalChange.toStringAsFixed(1)} kg',
-      'totalChangeColor': totalChangeColor,
-      'totalChangeIcon': totalChangeIcon,
-      'averageWeight': '${averageWeight.toStringAsFixed(1)} kg',
-      'trendDescription': trendDescription,
-      'trendColor': trendColor,
-      'trendIcon': trendIcon,
-    };
+    return WeightInsights(
+      totalChange: '${totalChange.toStringAsFixed(1)} kg',
+      totalChangeColor: totalChangeColor,
+      totalChangeIcon: totalChangeIcon,
+      averageWeight: '${averageWeight.toStringAsFixed(1)} kg',
+      trendDescription: trendDescription,
+      trendColor: trendColor,
+      trendIcon: trendIcon,
+    );
   }
 }
 
@@ -690,6 +700,27 @@ class WeightChartPainter extends CustomPainter {
            chartType != oldDelegate.chartType ||
            showTrendLine != oldDelegate.showTrendLine;
   }
+}
+
+/// Data class for weight insights with type safety
+class WeightInsights {
+  final String totalChange;
+  final Color totalChangeColor;
+  final IconData totalChangeIcon;
+  final String averageWeight;
+  final String trendDescription;
+  final Color trendColor;
+  final IconData trendIcon;
+  
+  const WeightInsights({
+    required this.totalChange,
+    required this.totalChangeColor,
+    required this.totalChangeIcon,
+    required this.averageWeight,
+    required this.trendDescription,
+    required this.trendColor,
+    required this.trendIcon,
+  });
 }
 
 enum ChartPeriod {

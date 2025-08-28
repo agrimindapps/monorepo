@@ -26,7 +26,7 @@ class BodyConditionConstants {
   static const double fabLoadingIndicatorSize = 16.0;
   static const double fabLoadingStrokeWidth = 2.0;
   static const Color fabLoadingColor = Colors.white;
-  static const Color fabDisabledColor = Colors.grey;
+  static const Color fabDisabled = Colors.grey;
 
   // App text content
   static const String appBarTitle = 'Condição Corporal (BCS)';

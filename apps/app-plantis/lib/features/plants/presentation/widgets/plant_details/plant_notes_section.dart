@@ -28,11 +28,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildAddCommentSection(context),
-        const SizedBox(height: 24),
-        if (_comments.isEmpty)
-          _buildEmptyState(context)
-        else
+        if (_comments.isNotEmpty) ...[
+          const SizedBox(height: 24),
           _buildCommentsList(context),
+        ],
       ],
     );
   }
@@ -145,47 +144,6 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.speaker_notes_off_outlined,
-            size: 64,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhuma observação adicionada',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Registre observações sobre o crescimento, mudanças e cuidados de ${widget.plant.displayName}.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCommentsList(BuildContext context) {
     final theme = Theme.of(context);

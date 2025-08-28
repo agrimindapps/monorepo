@@ -91,7 +91,7 @@ class AuthTextFieldWidget extends StatelessWidget {
         ),
         filled: true,
         fillColor: isDark
-            ? Colors.grey[900]!.withValues(alpha: 0.5)
+            ? Colors.grey[900]!.withOpacity(0.5)
             : Colors.grey[50]!,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

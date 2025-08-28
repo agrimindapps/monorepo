@@ -191,7 +191,7 @@ class FormErrorWidget extends StatelessWidget {
           GasometerDesignTokens.radiusCard,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.error.withOpacity(0.3),
         ),
       ),
       child: Column(
@@ -302,7 +302,7 @@ class FormLoadingOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: backgroundColor ?? 
-          Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+          Theme.of(context).colorScheme.surface.withOpacity(0.8),
       child: Center(
         child: Card(
           child: Padding(
@@ -359,12 +359,12 @@ class FormHeader extends StatelessWidget {
       padding: effectivePadding,
       decoration: BoxDecoration(
         color: backgroundColor ?? 
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            Theme.of(context).colorScheme.primary.withOpacity(0.1),
         borderRadius: GasometerDesignTokens.borderRadius(
           GasometerDesignTokens.radiusCard,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -374,7 +374,7 @@ class FormHeader extends StatelessWidget {
               GasometerDesignTokens.spacingMd,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusInput,
               ),
@@ -405,7 +405,7 @@ class FormHeader extends StatelessWidget {
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeMd,
                       color: Theme.of(context).colorScheme.onSurface
-                          .withValues(alpha: 0.6),
+                          .withOpacity(0.6),
                     ),
                   ),
                 ],

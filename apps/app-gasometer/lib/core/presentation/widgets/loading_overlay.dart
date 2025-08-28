@@ -34,7 +34,7 @@ class LoadingOverlay extends StatelessWidget {
   Widget _buildOverlay(BuildContext context) {
     return Positioned.fill(
       child: Material(
-        color: overlayColor ?? Colors.black.withValues(alpha: 0.3),
+        color: overlayColor ?? Colors.black.withOpacity(0.3),
         child: Center(
           child: customLoadingWidget ?? _buildDefaultLoading(context),
         ),
@@ -50,7 +50,7 @@ class LoadingOverlay extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -74,7 +74,7 @@ class LoadingOverlay extends StatelessWidget {
             Text(
               loadingText!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -128,7 +128,7 @@ class LoadingOverlay extends StatelessWidget {
     return LoadingOverlay(
       isLoading: isLoading,
       loadingText: text,
-      overlayColor: backgroundColor ?? Colors.black.withValues(alpha: 0.5),
+      overlayColor: backgroundColor ?? Colors.black.withOpacity(0.5),
       child: child,
     );
   }
@@ -143,7 +143,7 @@ class LoadingOverlay extends StatelessWidget {
     return LoadingOverlay(
       isLoading: isLoading,
       loadingText: text,
-      overlayColor: Colors.black.withValues(alpha: 0.7),
+      overlayColor: Colors.black.withOpacity(0.7),
       customLoadingWidget: customWidget,
       child: child,
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/expense.dart';
 import '../providers/expenses_provider.dart';
@@ -249,7 +249,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
               decoration: const InputDecoration(
                 labelText: 'Descrição*',
                 hintText: 'Ex: Consulta veterinária, vacina antirrábica...',
-                border: OutlinedBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.description),
               ),
               validator: (value) {
@@ -268,7 +268,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
               decoration: const InputDecoration(
                 labelText: 'Veterinário/Local',
                 hintText: 'Nome do veterinário ou clínica',
-                border: OutlinedBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.local_hospital),
               ),
             ),
@@ -301,7 +301,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
               decoration: const InputDecoration(
                 labelText: 'Valor*',
                 hintText: '0,00',
-                border: OutlinedBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.attach_money),
                 suffixText: 'R\$',
               ),
@@ -400,7 +400,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
                 decoration: const InputDecoration(
                   labelText: 'Número do Recibo',
                   hintText: 'Ex: 12345, NF-001...',
-                  border: OutlinedBorder(),
+                  border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.receipt),
                 ),
               ),
@@ -441,7 +441,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
                 value: _recurrenceType,
                 decoration: const InputDecoration(
                   labelText: 'Frequência',
-                  border: OutlinedBorder(),
+                  border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.repeat),
                 ),
                 items: RecurrenceType.values.map((type) => DropdownMenuItem(
@@ -483,7 +483,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
               decoration: const InputDecoration(
                 labelText: 'Notas adicionais',
                 hintText: 'Informações extras sobre a despesa...',
-                border: OutlinedBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.note),
               ),
             ),
@@ -559,7 +559,10 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
       final expense = Expense(
         id: widget.expense?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         animalId: _selectedAnimalId ?? 'default_animal',
+        userId: widget.expense?.userId ?? 'default_user',
+        title: _descriptionController.text.trim(),
         category: _selectedCategory!,
+        paymentMethod: PaymentMethod.cash,
         description: _descriptionController.text.trim(),
         amount: amount,
         expenseDate: _selectedDate,
@@ -691,8 +694,3 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
   }
 }
 
-enum RecurrenceType {
-  weekly,
-  monthly,
-  yearly,
-}

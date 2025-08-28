@@ -26,7 +26,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
   
   String _searchQuery = '';
   ExpenseCategory? _filterCategory;
-  DateRange? _dateRange;
+  DateTimeRange? _dateRange;
   bool _showFilters = false;
 
   @override
@@ -643,7 +643,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _formatDateRange(DateRange range) {
+  String _formatDateRange(DateTimeRange range) {
     return '${_formatDate(range.start)} - ${_formatDate(range.end)}';
   }
 }

@@ -1,11 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/utils/debounced_search_manager.dart';
+import '../../../../core/utils/performance_benchmark.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
+import '../../domain/services/calculator_search_service.dart' as search_service;
 import '../providers/calculator_provider.dart';
 import '../widgets/calculator_card_widget.dart';
 
@@ -22,16 +26,21 @@ class CalculatorsSearchPage extends StatefulWidget {
 class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
+  late final _debouncedSearchManager = DebouncedSearchManager();
   
   CalculatorCategory? _selectedCategory;
   CalculatorComplexity? _selectedComplexity;
-  CalculatorSortOrder _sortOrder = CalculatorSortOrder.nameAsc;
+  search_service.CalculatorSortOrder _sortOrder = search_service.CalculatorSortOrder.nameAsc;
   final List<String> _selectedTags = [];
   bool _showOnlyFavorites = false;
   
   List<CalculatorEntity> _searchResults = [];
   List<String> _availableTags = [];
   bool _isSearching = false;
+  
+  // Performance benchmarking
+  int _lastSearchDuration = 0;
+  int _searchCallCount = 0;
 
   @override
   void initState() {
@@ -43,12 +52,14 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debouncedSearchManager.dispose();
     super.dispose();
   }
 
   void _loadInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<CalculatorProvider>();
+      if (!mounted) return; // ✅ Safety check
+      final provider = Provider.of<CalculatorProvider>(context, listen: false);
       _updateSearchResults();
       _extractAvailableTags(provider.calculators);
     });
@@ -77,6 +88,9 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
               
               // Filtros avançados
               _buildAdvancedFilters(),
+              
+              // Estatísticas de performance (apenas em debug)
+              if (kDebugMode) _buildPerformanceStats(),
               
               // Resultados da busca
               Expanded(
@@ -114,7 +128,10 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
                       icon: const Icon(Icons.clear),
                       onPressed: () {
                         _searchController.clear();
-                        _updateSearchResults();
+                        _debouncedSearchManager.searchWithDebounce(
+                          _searchController.text,
+                          _performOptimizedSearch,
+                        );
                       },
                     )
                   : null,
@@ -124,7 +141,10 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
-            onChanged: (_) => _updateSearchResults(),
+            onChanged: (_) => _debouncedSearchManager.searchWithDebounce(
+              _searchController.text,
+              _performOptimizedSearch,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -340,13 +360,13 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
           ),
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<CalculatorSortOrder>(
+        DropdownButtonFormField<search_service.CalculatorSortOrder>(
           value: _sortOrder,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
-          items: CalculatorSortOrder.values.map((order) {
+          items: search_service.CalculatorSortOrder.values.map((order) {
             return DropdownMenuItem(
               value: order,
               child: Text(_getSortOrderName(order)),
@@ -466,46 +486,104 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     );
   }
 
-  void _updateSearchResults() async {
+  /// Nova implementação otimizada com single-pass algorithm
+  void _performOptimizedSearch(String query) async {
+    if (!mounted) return; // ✅ Safety check at start
+    
     setState(() {
       _isSearching = true;
+      _searchCallCount++;
     });
 
-    final provider = context.read<CalculatorProvider>();
-    List<CalculatorEntity> results = List.from(provider.calculators);
+    await PerformanceBenchmark.measureAsync(
+      'search_otimizada',
+      () async {
+        final provider = Provider.of<CalculatorProvider>(context, listen: false);
+        
+        // Obter IDs dos favoritos para o filtro
+        List<String> favoriteIds = [];
+        if (_showOnlyFavorites) {
+          final favoritesService = CalculatorFavoritesService(
+            await SharedPreferences.getInstance(),
+          );
+          favoriteIds = await favoritesService.getFavoriteIds();
+        }
 
-    // Aplicar busca por texto
-    if (_searchController.text.trim().isNotEmpty) {
-      results = CalculatorSearchService.searchCalculators(
-        results,
-        _searchController.text,
-      );
-    }
+        if (!mounted) return <CalculatorEntity>[];
 
-    // Aplicar filtro de categoria
-    results = CalculatorSearchService.filterByCategory(results, _selectedCategory);
+        // Criar critérios de busca unificados
+        final criteria = search_service.SearchCriteria(
+          query: query.trim().isEmpty ? null : query.trim(),
+          category: _selectedCategory,
+          complexity: _selectedComplexity,
+          tags: _selectedTags,
+          sortOrder: _sortOrder,
+          favoriteIds: favoriteIds,
+          showOnlyFavorites: _showOnlyFavorites,
+        );
 
-    // Aplicar filtro de complexidade
-    results = CalculatorSearchService.filterByComplexity(results, _selectedComplexity);
+        // Executar busca otimizada em single-pass
+        final results = search_service.CalculatorSearchService.optimizedSearch(
+          provider.calculators,
+          criteria,
+        );
 
-    // Aplicar filtro de tags
-    results = CalculatorSearchService.filterByTags(results, _selectedTags);
+        if (!mounted) return results;
+        
+        setState(() {
+          _searchResults = results;
+          _isSearching = false;
+        });
 
-    // Aplicar filtro de favoritos
-    if (_showOnlyFavorites) {
-      final favoritesService = CalculatorFavoritesService(
-        await SharedPreferences.getInstance(),
-      );
-      results = await favoritesService.filterFavorites(results);
-    }
-
-    // Aplicar ordenação
-    results = CalculatorSearchService.sortCalculators(results, _sortOrder);
-
-    setState(() {
-      _searchResults = results;
-      _isSearching = false;
-    });
+        return results;
+      },
+    );
+  }
+  
+  /// Método legacy mantido para compatibilidade
+  void _updateSearchResults() {
+    _performOptimizedSearch(_searchController.text);
+  }
+  
+  /// Widget para exibir estatísticas de performance em debug
+  Widget _buildPerformanceStats() {
+    final stats = PerformanceBenchmark.getOperationStats('search_otimizada');
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        border: Border.all(color: Colors.green.shade200),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.speed, size: 16, color: Colors.green),
+              const SizedBox(width: 8),
+              Text(
+                'Performance Stats',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Buscas realizadas: $_searchCallCount | '
+            'Tempo médio: ${stats.averageDuration.toStringAsFixed(1)}ms | '
+            'Última busca: $_lastSearchDuration ms',
+            style: const TextStyle(fontSize: 11, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
   }
 
   void _extractAvailableTags(List<CalculatorEntity> calculators) {
@@ -525,7 +603,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
       _selectedCategory = null;
       _selectedComplexity = null;
       _selectedTags.clear();
-      _sortOrder = CalculatorSortOrder.nameAsc;
+      _sortOrder = search_service.CalculatorSortOrder.nameAsc;
       _showOnlyFavorites = false;
     });
     _updateSearchResults();
@@ -546,18 +624,19 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     }
   }
 
-  String _getSortOrderName(CalculatorSortOrder order) {
+  String _getSortOrderName(search_service.CalculatorSortOrder order) {
     switch (order) {
-      case CalculatorSortOrder.nameAsc:
+      case search_service.CalculatorSortOrder.nameAsc:
         return 'Nome (A-Z)';
-      case CalculatorSortOrder.nameDesc:
+      case search_service.CalculatorSortOrder.nameDesc:
         return 'Nome (Z-A)';
-      case CalculatorSortOrder.categoryAsc:
+      case search_service.CalculatorSortOrder.categoryAsc:
         return 'Categoria';
-      case CalculatorSortOrder.complexityAsc:
+      case search_service.CalculatorSortOrder.complexityAsc:
         return 'Complexidade (Crescente)';
-      case CalculatorSortOrder.complexityDesc:
+      case search_service.CalculatorSortOrder.complexityDesc:
         return 'Complexidade (Decrescente)';
     }
   }
+
 }

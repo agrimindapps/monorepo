@@ -6,7 +6,10 @@ import '../interfaces/i_conflict_resolver.dart';
 import '../models/conflict_data.dart';
 import '../strategies/conflict_resolution_strategy.dart';
 
+// Classe base que pode ser registrada
 @injectable
+class BaseSyncModelConflictResolver extends ConflictResolver<BaseSyncModel> {}
+
 class ConflictResolver<T extends BaseSyncModel> implements IConflictResolver<T> {
   
   @override
@@ -144,7 +147,3 @@ class ConflictResolver<T extends BaseSyncModel> implements IConflictResolver<T> 
   }
 }
 
-/// ConflictResolver específico para BaseSyncModel
-@Named('BaseSyncModelConflictResolver')
-@injectable
-class BaseSyncModelConflictResolver extends ConflictResolver<BaseSyncModel> {}

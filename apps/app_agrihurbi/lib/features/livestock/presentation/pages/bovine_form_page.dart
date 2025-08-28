@@ -70,8 +70,10 @@ class _BovineFormPageState extends State<BovineFormPage> {
   }
 
   Future<void> _loadBovineData() async {
+    if (!mounted) return; // ✅ Safety check at start
+    
     if (widget.isEditing) {
-      final provider = context.read<BovinesProvider>();
+      final provider = Provider.of<BovinesProvider>(context, listen: false);
       
       // Tenta buscar o bovino local primeiro
       var bovine = provider.getBovineById(widget.bovineId!);
@@ -85,15 +87,17 @@ class _BovineFormPageState extends State<BovineFormPage> {
         // }
       }
 
-      if (bovine != null && mounted) {
+      if (!mounted) return; // ✅ Safety check after potential async operations
+
+      if (bovine != null) {
         _populateForm(bovine);
-      } else if (mounted) {
+      } else {
         _showErrorAndGoBack('Bovino não encontrado');
         return;
       }
     }
 
-    if (mounted) {
+    if (mounted) { // ✅ Safety check before setState
       setState(() {
         _isLoading = false;
       });
@@ -493,7 +497,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
       return;
     }
 
-    final provider = context.read<BovinesProvider>();
+    final provider = Provider.of<BovinesProvider>(context, listen: false);
     final now = DateTime.now();
 
     final bovine = BovineEntity(
@@ -561,7 +565,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
   }
 
   void _confirmDelete() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),
@@ -590,10 +594,10 @@ class _BovineFormPageState extends State<BovineFormPage> {
   }
 
   void _deleteBovine() async {
-    final provider = context.read<BovinesProvider>();
+    final provider = Provider.of<BovinesProvider>(context, listen: false);
     final success = await provider.deleteBovine(widget.bovineId!, confirmed: true);
     
-    if (!mounted) return;
+    if (!mounted) return; // ✅ Safety check after async operation
     
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -615,6 +619,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
 
   void _showErrorAndGoBack(String message) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return; // ✅ Safety check
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),

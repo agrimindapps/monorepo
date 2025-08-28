@@ -7,6 +7,63 @@ import 'package:injectable/injectable.dart';
 import '../services/analytics_service.dart';
 import 'app_error.dart';
 
+/// Helper to check if Crashlytics is properly initialized
+class _CrashlyticsHelper {
+  static bool _isInitialized = false;
+  static DateTime? _lastInitCheck;
+  static const Duration _initCheckCooldown = Duration(seconds: 5);
+
+  /// Check if Crashlytics is available and initialized
+  static Future<bool> isAvailable() async {
+    // In debug mode, don't even try to use Crashlytics
+    if (kDebugMode) {
+      _isInitialized = false;
+      return false;
+    }
+
+    // If we already confirmed it's initialized, return true
+    if (_isInitialized) return true;
+
+    // Don't check too frequently
+    final now = DateTime.now();
+    if (_lastInitCheck != null && 
+        now.difference(_lastInitCheck!) < _initCheckCooldown) {
+      return _isInitialized;
+    }
+
+    _lastInitCheck = now;
+
+    try {
+      // Try to access Crashlytics instance with timeout
+      final instance = FirebaseCrashlytics.instance;
+      
+      // Try a simple operation to verify it's working with timeout
+      await instance.log('Crashlytics availability check')
+          .timeout(const Duration(seconds: 2));
+      
+      _isInitialized = true;
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Crashlytics not available: $e');
+      }
+      _isInitialized = false;
+      return false;
+    }
+  }
+
+  /// Mark as initialized (called after successful initialization)
+  static void markAsInitialized() {
+    _isInitialized = true;
+  }
+
+  /// Reset initialization status (for testing)
+  static void reset() {
+    _isInitialized = false;
+    _lastInitCheck = null;
+  }
+}
+
 /// Service responsible for reporting errors to external services
 /// Integrates with Firebase Crashlytics and Analytics
 @injectable
@@ -126,23 +183,33 @@ class ErrorReporter {
     String? appVersion,
   }) async {
     try {
-      await FirebaseCrashlytics.instance.setUserIdentifier(userId ?? 'anonymous');
-      
-      await Future.wait([
-        FirebaseCrashlytics.instance.setCustomKey('is_anonymous', isAnonymous ?? true),
-        FirebaseCrashlytics.instance.setCustomKey('is_premium', isPremium ?? false),
-        if (appVersion != null)
-          FirebaseCrashlytics.instance.setCustomKey('app_version', appVersion),
-      ]);
-
+      // Always try to set Analytics properties
       await _analyticsService.setUserProperties({
         'is_anonymous': (isAnonymous ?? true).toString(),
         'is_premium': (isPremium ?? false).toString(),
         if (appVersion != null) 'app_version': appVersion,
       });
+
+      // Only set Crashlytics context if available (not in debug mode)
+      if (!kDebugMode && await _CrashlyticsHelper.isAvailable()) {
+        final crashlyticsInstance = FirebaseCrashlytics.instance;
+        
+        await crashlyticsInstance.setUserIdentifier(userId ?? 'anonymous');
+        
+        await Future.wait([
+          crashlyticsInstance.setCustomKey('is_anonymous', isAnonymous ?? true),
+          crashlyticsInstance.setCustomKey('is_premium', isPremium ?? false),
+          if (appVersion != null)
+            crashlyticsInstance.setCustomKey('app_version', appVersion),
+        ]);
+      } else if (kDebugMode) {
+        print('🔧 Debug mode: Skipping Crashlytics user context');
+      }
     } catch (e) {
       // Don't throw error in error reporter
-      print('Failed to set user context: $e');
+      if (kDebugMode) {
+        print('Failed to set user context: $e');
+      }
     }
   }
 
@@ -168,15 +235,25 @@ class ErrorReporter {
     bool fatal,
   ) async {
     try {
+      // Check if Crashlytics is available before using it
+      if (!await _CrashlyticsHelper.isAvailable()) {
+        if (kDebugMode) {
+          print('Skipping Crashlytics report - not available');
+        }
+        return;
+      }
+
+      final crashlyticsInstance = FirebaseCrashlytics.instance;
+      
       // Set context information
       if (context != null) {
-        await FirebaseCrashlytics.instance.setCustomKey('error_context', context);
+        await crashlyticsInstance.setCustomKey('error_context', context);
       }
 
       // Set additional data as custom keys
       if (additionalData != null) {
         for (final entry in additionalData.entries) {
-          await FirebaseCrashlytics.instance.setCustomKey(
+          await crashlyticsInstance.setCustomKey(
             entry.key,
             entry.value?.toString() ?? 'null',
           );
@@ -184,9 +261,9 @@ class ErrorReporter {
       }
 
       // Set error type and severity
-      await FirebaseCrashlytics.instance.setCustomKey('error_type', error.runtimeType.toString());
-      await FirebaseCrashlytics.instance.setCustomKey('error_severity', error.severity.name);
-      await FirebaseCrashlytics.instance.setCustomKey('is_recoverable', error.isRecoverable);
+      await crashlyticsInstance.setCustomKey('error_type', error.runtimeType.toString());
+      await crashlyticsInstance.setCustomKey('error_severity', error.severity.name);
+      await crashlyticsInstance.setCustomKey('is_recoverable', error.isRecoverable);
 
       if (fatal) {
         await FirebaseCrashlytics.instance.recordFlutterFatalError(
@@ -219,19 +296,27 @@ class ErrorReporter {
     Map<String, dynamic>? additionalData,
   ) async {
     try {
-      await _analyticsService.logEvent(
-        'app_error',
-        {
-          'error_type': error.runtimeType.toString(),
-          'error_message': error.displayMessage,
-          'error_severity': error.severity.name,
-          'is_recoverable': error.isRecoverable,
-          'context': context ?? 'unknown',
-          if (additionalData != null) ...additionalData.map((key, value) => MapEntry(key, value as Object)),
-        },
-      );
+      // Create parameters map with proper types
+      final Map<String, Object> parameters = {
+        'error_type': error.runtimeType.toString(),
+        'error_message': error.displayMessage,
+        'error_severity': error.severity.name,
+        'is_recoverable': error.isRecoverable.toString(),
+        'context': context ?? 'unknown',
+      };
+
+      // Add additional data if present, ensuring no null values
+      if (additionalData != null) {
+        for (final entry in additionalData.entries) {
+          if (entry.value != null) {
+            parameters[entry.key] = entry.value.toString();
+          }
+        }
+      }
+
+      await _analyticsService.logEvent('app_error', parameters);
     } catch (e) {
-      print('Failed to report to Analytics: $e');
+      debugPrint('Failed to report to Analytics: $e');
     }
   }
 
@@ -242,18 +327,33 @@ class ErrorReporter {
     Map<String, dynamic>? data,
   }) async {
     try {
-      await FirebaseCrashlytics.instance.log('[$category] $message');
-      
-      if (data != null) {
-        for (final entry in data.entries) {
-          await FirebaseCrashlytics.instance.setCustomKey(
-            'breadcrumb_${entry.key}',
-            entry.value?.toString() ?? 'null',
-          );
+      // Only use Crashlytics in production and if available
+      if (!kDebugMode && await _CrashlyticsHelper.isAvailable()) {
+        final crashlyticsInstance = FirebaseCrashlytics.instance;
+        
+        await crashlyticsInstance.log('[$category] $message');
+        
+        if (data != null) {
+          for (final entry in data.entries) {
+            await crashlyticsInstance.setCustomKey(
+              'breadcrumb_${entry.key}',
+              entry.value?.toString() ?? 'null',
+            );
+          }
+        }
+      } else {
+        // Fallback: just log to console (always in debug mode)
+        if (kDebugMode) {
+          print('Breadcrumb [$category]: $message');
+          if (data != null) {
+            print('Data: $data');
+          }
         }
       }
     } catch (e) {
-      print('Failed to record breadcrumb: $e');
+      if (kDebugMode) {
+        print('Failed to record breadcrumb: $e');
+      }
     }
   }
 

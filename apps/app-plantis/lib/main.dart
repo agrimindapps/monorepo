@@ -64,7 +64,9 @@ void main() async {
   // Register Hive adapters
   Hive.registerAdapter(ComentarioModelAdapter()); // TypeId: 0
   Hive.registerAdapter(EspacoModelAdapter()); // TypeId: 1
-  Hive.registerAdapter(PlantaModelAdapter()); // TypeId: 2 - REATIVADO para compatibilidade com dados legacy
+  Hive.registerAdapter(
+    PlantaModelAdapter(),
+  ); // TypeId: 2 - REATIVADO para compatibilidade com dados legacy
   // Hive.registerAdapter(TarefaModelAdapter()); // TypeId: 3 - DEPRECATED: Migrado para TaskModel
   Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
 

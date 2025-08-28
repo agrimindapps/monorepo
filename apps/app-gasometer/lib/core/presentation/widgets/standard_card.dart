@@ -226,18 +226,14 @@ class CardInfoRow extends StatelessWidget {
                 icon,
                 size: GasometerDesignTokens.iconSizeXs,
                 color: iconColor ?? 
-                  Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: GasometerDesignTokens.opacitySecondary,
-                  ),
+                  Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
               ),
               SizedBox(width: GasometerDesignTokens.spacingXs + 2),
             ],
             Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(
-                  alpha: GasometerDesignTokens.opacitySecondary,
-                ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                 fontSize: GasometerDesignTokens.fontSizeMd,
               ),
             ),

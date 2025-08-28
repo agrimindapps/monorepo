@@ -304,7 +304,7 @@ class VersionedMedicationDatabase {
     
     if (since != null) {
       logsToExport = logsToExport.where((entry) => 
-          entry.value.timestamp.isAfter(since)).toList().asMap().entries;
+          entry.value.timestamp.isAfter(since));
     }
     
     return logsToExport.map((entry) => {
@@ -340,10 +340,10 @@ class VersionedMedicationDatabase {
     final entry = AuditLogEntry(
       id: _generateAuditId(),
       timestamp: DateTime.now(),
-      medicationId: details?['medicationId'] ?? 'system',
+      medicationId: (details?['medicationId'] ?? 'system') as String,
       action: action,
-      details: details ?? {},
-      checksum: AuditLogEntry.generateChecksum(details ?? {}),
+      details: details ?? <String, dynamic>{},
+      checksum: AuditLogEntry.generateChecksum(details ?? <String, dynamic>{}),
     );
     
     _auditLog.add(entry);
@@ -370,13 +370,13 @@ class VersionedMedicationDatabase {
   /// Simula carregamento de fonte segura
   static Future<Map<String, dynamic>> _fetchFromSecureSource() async {
     // Em produção, isso faria uma requisição HTTP para uma API segura
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
-    return {
+    return <String, dynamic>{
       'version': '1.2.0',
       'lastUpdated': DateTime.now().toIso8601String(),
       'medicalProtocolSource': 'Plumb Veterinary Drug Handbook 10th Edition',
-      'medications': [], // Seria populado com dados reais
+      'medications': <dynamic>[], // Seria populado com dados reais
       'references': _getDefaultReferences(),
       'integrityHash': 'abc123hash', // Hash real seria calculado
     };
@@ -385,10 +385,10 @@ class VersionedMedicationDatabase {
   /// Valida referências médicas
   static Future<void> _validateMedicalReferences(Map<String, dynamic> data) async {
     // Em produção, isso verificaria URLs, DOIs, etc.
-    final references = data['references'] as Map<String, dynamic>? ?? {};
+    final references = data['references'] as Map<String, dynamic>? ?? <String, dynamic>{};
     
     for (final entry in references.entries) {
-      final ref = MedicalReference.fromJson(entry.value);
+      final ref = MedicalReference.fromJson(entry.value as Map<String, dynamic>);
       if (ref.needsUpdate) {
         log('Referência médica desatualizada: ${ref.title}');
       }
@@ -410,7 +410,7 @@ class VersionedMedicationDatabase {
       version: '1.0.0',
       lastUpdated: DateTime.now(),
       medicalProtocolSource: 'Internal Veterinary Database v1.0',
-      references: references.map((key, value) => MapEntry(key, MedicalReference.fromJson(value))),
+      references: references.map((key, value) => MapEntry(key, MedicalReference.fromJson(value as Map<String, dynamic>))),
       medications: medications,
       auditLog: [],
       integrityHash: AuditLogEntry.generateChecksum(dataForHash),

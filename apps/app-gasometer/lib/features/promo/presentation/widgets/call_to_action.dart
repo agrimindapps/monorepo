@@ -31,7 +31,7 @@ class CallToAction extends StatelessWidget {
               width: 200,
               height: 200,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Colors.white.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -43,7 +43,7 @@ class CallToAction extends StatelessWidget {
               width: 150,
               height: 150,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Colors.white.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -78,7 +78,7 @@ class CallToAction extends StatelessWidget {
                       'Seja um dos primeiros a experimentar o GasOMeter e transforme a forma como você gerencia seu veículo.',
                       style: TextStyle(
                         fontSize: isMobile ? 16 : 18,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withOpacity(0.9),
                         height: 1.6,
                       ),
                       textAlign: TextAlign.center,
@@ -105,7 +105,7 @@ class CallToAction extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 6,
-                            shadowColor: Colors.black.withValues(alpha: 0.3),
+                            shadowColor: Colors.black.withOpacity(0.3),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -167,24 +167,24 @@ class CallToAction extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.white.withOpacity(0.2),
                         ),
                       ),
                       child: Column(
                         children: [
                           Icon(
                             Icons.security,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: Colors.white.withOpacity(0.8),
                             size: 24,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Seus dados estão seguros',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: Colors.white.withOpacity(0.9),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -193,7 +193,7 @@ class CallToAction extends StatelessWidget {
                             'Não compartilhamos suas informações e você pode cancelar a qualquer momento',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: Colors.white.withOpacity(0.7),
                             ),
                             textAlign: TextAlign.center,
                           ),

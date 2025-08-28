@@ -398,7 +398,7 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
               color: AppTheme.colors.primary,
-              backgroundColor: AppTheme.colors.primary.withValues(alpha: 0.2),
+              backgroundColor: AppTheme.colors.primary.withOpacity(0.2),
             ),
           ),
       ],

@@ -26,9 +26,7 @@ class LocalDataService {
     if (_isInitialized) return;
     
     try {
-      // Inicializar Hive
-      await Hive.initFlutter();
-      
+      // Note: Hive.initFlutter() já foi chamado no main.dart
       // Abrir as boxes
       _vehiclesBox = await Hive.openBox(_vehiclesBoxName);
       _fuelRecordsBox = await Hive.openBox(_fuelRecordsBoxName);

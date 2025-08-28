@@ -92,7 +92,7 @@ class _OdometerPageState extends State<OdometerPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -184,7 +184,7 @@ class _OdometerPageState extends State<OdometerPage> {
               child: Text(
                 _months[index],
                 style: TextStyle(
-                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -287,9 +287,7 @@ class _OdometerPageState extends State<OdometerPage> {
           label,
           style: TextStyle(
             fontSize: GasometerDesignTokens.fontSizeSm,
-            color: Theme.of(context).colorScheme.onSurface.withValues(
-              alpha: GasometerDesignTokens.opacitySecondary,
-            ),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
           ),
           textAlign: TextAlign.center,
         ),
@@ -333,9 +331,7 @@ class _OdometerPageState extends State<OdometerPage> {
                 weekday,
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeSm,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: GasometerDesignTokens.opacitySecondary,
-                  ),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                   fontWeight: GasometerDesignTokens.fontWeightMedium,
                 ),
               ),
@@ -374,9 +370,7 @@ class _OdometerPageState extends State<OdometerPage> {
                     odometer.description,
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeSm,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(
-                        alpha: GasometerDesignTokens.opacitySecondary,
-                      ),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -385,9 +379,7 @@ class _OdometerPageState extends State<OdometerPage> {
           ),
           Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(
-              alpha: GasometerDesignTokens.opacityHint,
-            ),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ],
       ),

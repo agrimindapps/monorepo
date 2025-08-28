@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/offline_sync_queue_service.dart';
 import '../../../../core/services/sync_coordinator_service.dart';
 import '../../../../core/services/task_notification_service.dart';
-import '../../../auth/presentation/providers/auth_provider.dart' as auth_provider;
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/usecases/add_task_usecase.dart';
@@ -23,38 +25,45 @@ import 'tasks_state.dart';
 /// - Comprehensive error handling and user feedback
 /// - Task filtering and search capabilities
 /// - Notification scheduling integration
+/// - Decoupled authentication state via AuthStateNotifier singleton
 ///
 /// The provider follows Clean Architecture patterns and integrates with:
 /// - Use cases for business logic execution
 /// - Sync coordinator for network operations
 /// - Offline queue for connection resilience
 /// - Notification service for user reminders
+/// - AuthStateNotifier for authentication state (breaks circular dependencies)
 class TasksProvider extends ChangeNotifier {
   final GetTasksUseCase _getTasksUseCase;
   final AddTaskUseCase _addTaskUseCase;
   final CompleteTaskUseCase _completeTaskUseCase;
   final TaskNotificationService _notificationService;
-  final auth_provider.AuthProvider _authProvider;
+  final AuthStateNotifier _authStateNotifier;
   final SyncCoordinatorService _syncCoordinator;
   final OfflineSyncQueueService _offlineQueue;
+  
+  // Stream subscription for auth state changes
+  StreamSubscription<UserEntity?>? _authSubscription;
 
   TasksProvider({
     required GetTasksUseCase getTasksUseCase,
     required AddTaskUseCase addTaskUseCase,
     required CompleteTaskUseCase completeTaskUseCase,
-    required auth_provider.AuthProvider authProvider,
+    AuthStateNotifier? authStateNotifier,
     TaskNotificationService? notificationService,
     SyncCoordinatorService? syncCoordinator,
     OfflineSyncQueueService? offlineQueue,
   }) : _getTasksUseCase = getTasksUseCase,
        _addTaskUseCase = addTaskUseCase,
        _completeTaskUseCase = completeTaskUseCase,
-       _authProvider = authProvider,
+       _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance,
        _notificationService = notificationService ?? TaskNotificationService(),
        _syncCoordinator = syncCoordinator ?? SyncCoordinatorService.instance,
        _offlineQueue = offlineQueue ?? OfflineSyncQueueService.instance {
     // Initialize notification service when provider is created
     _initializeNotificationService();
+    // Initialize auth state listener
+    _initializeAuthListener();
   }
 
   // Immutable state - this is the only mutable field
@@ -219,6 +228,24 @@ class TasksProvider extends ChangeNotifier {
     ));
   }
 
+  /// Initializes the authentication state listener
+  ///
+  /// This method sets up a subscription to the AuthStateNotifier to listen
+  /// for authentication state changes. When the user logs in/out, it
+  /// automatically reloads tasks to ensure data consistency.
+  ///
+  /// This approach breaks the circular dependency that existed when TasksProvider
+  /// directly depended on AuthProvider, while maintaining the same functionality.
+  void _initializeAuthListener() {
+    _authSubscription = _authStateNotifier.userStream.listen((user) {
+      debugPrint('🔐 TasksProvider: Auth state changed - user: ${user?.id}');
+      // Reload tasks when auth state changes to ensure data consistency
+      if (_authStateNotifier.isInitialized) {
+        loadTasks();
+      }
+    });
+  }
+
   /// Validates task ownership against the currently authenticated user
   ///
   /// This security method ensures that users can only access and modify tasks
@@ -229,8 +256,10 @@ class TasksProvider extends ChangeNotifier {
   /// - [task]: The task entity to validate ownership for
   ///
   /// Returns:
-  /// - `true` if the current user owns the task or if the task has no userId
-  /// - `false` if the task belongs to a different user or no user is authenticated
+  /// - `true` if the current user owns the task (exact userId match)
+  /// - `false` if no user is authenticated, task has null userId, or belongs to different user
+  /// 
+  /// SECURITY: Tasks with null userId are DENIED access to prevent data exposure
   ///
   /// Example:
   /// ```dart
@@ -240,7 +269,7 @@ class TasksProvider extends ChangeNotifier {
   /// }
   /// ```
   bool _validateTaskOwnership(task_entity.Task task) {
-    final currentUser = _authProvider.currentUser;
+    final currentUser = _authStateNotifier.currentUser;
     
     // If no user is authenticated, deny access
     if (currentUser == null) {
@@ -248,8 +277,15 @@ class TasksProvider extends ChangeNotifier {
       return false;
     }
     
-    // If task has no userId or matches current user, allow access
-    if (task.userId == null || task.userId == currentUser.id) {
+    // SECURITY FIX: Deny access for tasks with null userId
+    // This prevents potential exposure of orphaned or incorrectly stored tasks
+    if (task.userId == null) {
+      debugPrint('🚫 Access denied: Task has null userId (potential security risk)');
+      return false;
+    }
+    
+    // SECURITY: Only allow access if task explicitly belongs to current user
+    if (task.userId == currentUser.id) {
       return true;
     }
     
@@ -464,7 +500,7 @@ class TasksProvider extends ChangeNotifier {
 
     try {
       // Ensure task is associated with current user
-      final currentUser = _authProvider.currentUser;
+      final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         _completeGlobalOperation(TaskLoadingOperation.addingTask);
         _updateState(_state.copyWith(
@@ -1155,10 +1191,14 @@ class TasksProvider extends ChangeNotifier {
   /// the widget tree.
   @override
   void dispose() {
+    // Cancel auth state subscription to prevent memory leaks
+    _authSubscription?.cancel();
+    
     // Cancel any ongoing operations for this provider
     _syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks);
     _syncCoordinator.cancelOperations(TaskSyncOperations.addTask);
     _syncCoordinator.cancelOperations(TaskSyncOperations.completeTask);
+    
     super.dispose();
   }
 }

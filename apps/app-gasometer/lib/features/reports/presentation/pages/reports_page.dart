@@ -8,6 +8,7 @@ import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../models/stat_data.dart';
 import '../providers/reports_provider.dart';
+import 'optimized_reports_widgets.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
@@ -50,41 +51,12 @@ class _ReportsPageState extends State<ReportsPage> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Consumer<ReportsProvider>(
-                    builder: (context, reportsProvider, child) {
-                      return Column(
-                        children: [
-                          EnhancedVehicleSelector(
-                            selectedVehicleId: _selectedVehicleId,
-                            onVehicleChanged: (String? vehicleId) {
-                              setState(() {
-                                _selectedVehicleId = vehicleId;
-                              });
-                              
-                              // Load new reports data when vehicle changes
-                              if (vehicleId != null) {
-                                reportsProvider.loadAllReportsForVehicle(vehicleId);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          
-                          if (reportsProvider.isLoading)
-                            StandardLoadingView.initial(
-                              message: 'Carregando estatísticas...',
-                              height: 400,
-                            )
-                          else if (reportsProvider.hasError)
-                            _buildErrorState(reportsProvider.errorMessage!, () => reportsProvider.loadAllReportsForVehicle(_selectedVehicleId!))
-                          else ...[
-                            _buildFuelSection(context),
-                            const SizedBox(height: 24),
-                            _buildConsumptionSection(context),
-                            const SizedBox(height: 24),
-                            _buildDistanceSection(context),
-                          ],
-                        ],
-                      );
+                  child: OptimizedReportsContent(
+                    selectedVehicleId: _selectedVehicleId,
+                    onVehicleChanged: (String? vehicleId) {
+                      setState(() {
+                        _selectedVehicleId = vehicleId;
+                      });
                     },
                   ),
                 ),

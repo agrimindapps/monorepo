@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/presentation/forms/base_form_page.dart';
+import '../../../../core/presentation/widgets/enhanced_dropdown.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -124,37 +125,37 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
     );
   }
 
+  /// ✅ UX ENHANCEMENT: Enhanced vehicle selection with search and validation
   Widget _buildVehicleSelection() {
+    final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+    
     return FormSectionWidget.withTitle(
       title: 'Veículo',
       icon: Icons.directions_car,
-      content: Container(
-        padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingLg),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
-        ),
-        child: DropdownButton<String>(
-          value: formProvider.formModel.vehicleId.isEmpty ? null : formProvider.formModel.vehicleId,
-          hint: Text(
-            'Selecione o veículo',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ),
-          isExpanded: true,
-          underline: const SizedBox(),
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          ),
-          items: _buildVehicleDropdownItems(),
-          onChanged: (value) {
-            // FormProvider updateVehicle method implementation pending
-            // formProvider.updateVehicle(value!);
-          },
-        ),
+      content: VehicleDropdown(
+        selectedVehicleId: formProvider.formModel.vehicleId.isEmpty ? null : formProvider.formModel.vehicleId,
+        vehicles: vehiclesProvider.vehicles.map((vehicle) => VehicleDropdownData(
+          id: vehicle.id,
+          brand: vehicle.brand,
+          model: vehicle.model,
+          year: vehicle.year,
+          licensePlate: vehicle.licensePlate,
+        )).toList(),
+        required: true,
+        errorText: _validationResults['vehicleId']?.isValid == false 
+            ? _validationResults['vehicleId']!.message 
+            : null,
+        onChanged: (vehicleId) {
+          if (vehicleId != null) {
+            // Update form model with selected vehicle ID
+            formProvider.initialize(vehicleId: vehicleId, userId: formProvider.formModel.userId);
+            
+            // Validate selection
+            setState(() {
+              _validationResults['vehicleId'] = ValidationResult.success();
+            });
+          }
+        },
       ),
     );
   }
@@ -191,28 +192,43 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
           FormSpacing.large(),
           FormFieldRow.standard(
             children: [
-              Container(
-                padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingLg),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+              /// ✅ UX ENHANCEMENT: Enhanced maintenance type dropdown
+              EnhancedDropdown<String>(
+                label: 'Tipo',
+                value: formProvider.formModel.type == MaintenanceType.preventive ? 'preventiva' : 'corretiva',
+                prefixIcon: Icon(
+                  formProvider.formModel.type == MaintenanceType.preventive 
+                    ? Icons.schedule 
+                    : Icons.build,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
                 ),
-                child: DropdownButton<String>(
-                  value: formProvider.formModel.type == MaintenanceType.preventive ? 'preventiva' : 'corretiva',
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                items: const [
+                  EnhancedDropdownItem(
+                    value: 'preventiva',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Preventiva', style: TextStyle(fontWeight: FontWeight.w500)),
+                        Text('Manutenção planejada', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'preventiva', child: const Text('Preventiva')),
-                    DropdownMenuItem(value: 'corretiva', child: const Text('Corretiva')),
-                  ],
-                  onChanged: (value) => formProvider.updateType(
-                    value == 'preventiva' ? MaintenanceType.preventive : MaintenanceType.corrective
+                  EnhancedDropdownItem(
+                    value: 'corretiva',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Corretiva', style: TextStyle(fontWeight: FontWeight.w500)),
+                        Text('Reparo de problema', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
                   ),
+                ],
+                onChanged: (value) => formProvider.updateType(
+                  value == 'preventiva' ? MaintenanceType.preventive : MaintenanceType.corrective
                 ),
               ),
               InkWell(
@@ -475,14 +491,5 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
     }
   }
 
-  /// Constrói os itens do dropdown de veículos
-  List<DropdownMenuItem<String>> _buildVehicleDropdownItems() {
-    return Provider.of<VehiclesProvider>(context, listen: false)
-        .vehicles
-        .map((vehicle) => DropdownMenuItem<String>(
-              value: vehicle.id,
-              child: Text('${vehicle.brand} ${vehicle.model}'),
-            ))
-        .toList();
-  }
+  /// ✅ REMOVED: Old dropdown method no longer needed with EnhancedDropdown
 }

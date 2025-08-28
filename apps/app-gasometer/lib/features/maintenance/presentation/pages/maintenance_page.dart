@@ -25,6 +25,11 @@ class _MaintenancePageState extends State<MaintenancePage> {
   late final MaintenanceProvider _maintenanceProvider;
   late final VehiclesProvider _vehiclesProvider;
   
+  // ✅ PERFORMANCE FIX: Memoize filtered records
+  List<MaintenanceEntity>? _cachedFilteredRecords;
+  String? _lastVehicleId;
+  List<MaintenanceEntity>? _lastMaintenanceRecords;
+  
   @override
   void initState() {
     super.initState();
@@ -39,17 +44,32 @@ class _MaintenancePageState extends State<MaintenancePage> {
     });
   }
 
-  // ✅ PERFORMANCE FIX: Use cached provider instead of context.watch()
+  // ✅ PERFORMANCE FIX: Memoized filtered records with caching
   List<MaintenanceEntity> get _filteredRecords {
-    var filtered = _maintenanceProvider.maintenanceRecords;
+    final currentRecords = _maintenanceProvider.maintenanceRecords;
+    
+    // Check if cache is still valid
+    if (_cachedFilteredRecords != null &&
+        _lastVehicleId == _selectedVehicleId &&
+        _lastMaintenanceRecords == currentRecords) {
+      return _cachedFilteredRecords!;
+    }
+    
+    // Rebuild cache
+    var filtered = List<MaintenanceEntity>.from(currentRecords);
 
-    // Aplicar filtro por veículo selecionado
+    // Apply vehicle filter
     if (_selectedVehicleId != null) {
       filtered = filtered.where((r) => r.vehicleId == _selectedVehicleId).toList();
     }
 
-    // Ordenar por data (mais recente primeiro)
+    // Sort by date (most recent first)
     filtered.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
+
+    // Update cache
+    _cachedFilteredRecords = filtered;
+    _lastVehicleId = _selectedVehicleId;
+    _lastMaintenanceRecords = currentRecords;
 
     return filtered;
   }
@@ -153,6 +173,8 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   onVehicleChanged: (String? vehicleId) {
                     setState(() {
                       _selectedVehicleId = vehicleId;
+                      // ✅ PERFORMANCE FIX: Invalidate cache when vehicle changes
+                      _cachedFilteredRecords = null;
                     });
                   },
                 );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/maintenance_constants.dart';
@@ -17,7 +18,7 @@ import '../models/maintenance_form_model.dart';
 /// ARCHITECTURAL NOTE: This provider now uses dependency injection pattern
 /// instead of direct provider coupling to avoid circular dependencies.
 /// VehiclesProvider is accessed via BuildContext when needed.
-class MaintenanceFormProvider extends ChangeNotifier {
+class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final MaintenanceFormatterService _formatter = MaintenanceFormatterService();
   final MaintenanceValidatorService _validator = MaintenanceValidatorService();
@@ -54,10 +55,27 @@ class MaintenanceFormProvider extends ChangeNotifier {
   }
 
   // Getters
+  @override
   GlobalKey<FormState> get formKey => _formKey;
   MaintenanceFormModel get formModel => _formModel;
   bool get isInitialized => _isInitialized;
   bool get isUpdating => _isUpdating;
+  
+  // IFormProvider implementation
+  @override
+  bool get isLoading => _isUpdating;
+  
+  @override
+  String? get lastError => _formModel.lastError;
+      
+  @override
+  bool get canSubmit {
+    return _isInitialized && 
+           !_isUpdating && 
+           titleController.text.trim().isNotEmpty &&
+           _formModel.vehicleId.isNotEmpty &&
+           _formModel.errors.isEmpty;
+  }
 
   /// Sets the BuildContext for dependency injection access.
   /// This should be called when the provider is used in a widget.
@@ -529,6 +547,7 @@ class MaintenanceFormProvider extends ChangeNotifier {
   }
 
   /// Valida todo o formulário
+  @override
   bool validateForm() {
     final errors = _validator.validateCompleteForm(
       type: _formModel.type,

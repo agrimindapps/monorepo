@@ -37,8 +37,6 @@ class SyncStatusIndicator extends StatelessWidget {
   }
 
   Widget _buildIndicator(BuildContext context, SyncStatus status, int pendingCount) {
-    final theme = Theme.of(context);
-    
     if (status == SyncStatus.idle && pendingCount == 0) {
       return const SizedBox.shrink();
     }

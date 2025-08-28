@@ -1,37 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/base_provider.dart';
+import 'base_form_page.dart';
 
 /// Mixin for handling loading states in forms
 mixin FormLoadingMixin<T extends StatefulWidget> on State<T> {
   
   /// Check if the provider is in loading state
-  bool isLoading(dynamic provider) {
-    // Try to access common loading property names
-    try {
-      final isLoadingProperty = (provider as dynamic).isLoading;
-      if (isLoadingProperty is bool) {
-        return isLoadingProperty;
-      }
-    } catch (e) {
-      // Try alternative property names
-      try {
-        final loadingState = (provider as dynamic).loading;
-        if (loadingState is bool) {
-          return loadingState;
-        }
-      } catch (e2) {
-        // Try state-based loading check
-        try {
-          if (provider is BaseProvider) {
-            return provider.isLoading;
-          }
-        } catch (e3) {
-          // Ignore and fall through
-        }
-      }
-    }
-    return false;
+  /// ✅ TYPE SAFETY FIX: Use interface instead of dynamic casting
+  bool isLoading(IFormProvider provider) {
+    return provider.isLoading;
   }
 }
 
@@ -39,41 +16,9 @@ mixin FormLoadingMixin<T extends StatefulWidget> on State<T> {
 mixin FormErrorMixin<T extends StatefulWidget> on State<T> {
   
   /// Get the last error from provider
-  String? getLastError(dynamic provider) {
-    // Try to access common error property names
-    try {
-      final lastErrorProperty = (provider as dynamic).lastError;
-      if (lastErrorProperty is String) {
-        return lastErrorProperty;
-      }
-    } catch (e) {
-      // Try alternative property names
-      try {
-        final errorMessage = (provider as dynamic).errorMessage;
-        if (errorMessage is String) {
-          return errorMessage;
-        }
-      } catch (e2) {
-        // Try accessing error object
-        try {
-          if (provider is BaseProvider) {
-            return provider.error?.message;
-          }
-        } catch (e3) {
-          // Try form model error
-          try {
-            final formModel = (provider as dynamic).formModel;
-            final lastError = formModel?.lastError;
-            if (lastError is String) {
-              return lastError;
-            }
-          } catch (e4) {
-            // Ignore and fall through
-          }
-        }
-      }
-    }
-    return null;
+  /// ✅ TYPE SAFETY FIX: Use interface instead of dynamic casting
+  String? getLastError(IFormProvider provider) {
+    return provider.lastError;
   }
   
   /// Show standardized error dialog
@@ -133,71 +78,21 @@ mixin FormErrorMixin<T extends StatefulWidget> on State<T> {
 mixin FormValidationMixin<T extends StatefulWidget> on State<T> {
   
   /// Get the form key from provider
-  GlobalKey<FormState>? getFormKey(dynamic provider) {
-    // Try to access common form key property names
-    try {
-      final formKeyProperty = (provider as dynamic).formKey;
-      if (formKeyProperty is GlobalKey<FormState>) {
-        return formKeyProperty;
-      }
-    } catch (e) {
-      // Try alternative property names
-      try {
-        final formStateKey = (provider as dynamic).formStateKey;
-        if (formStateKey is GlobalKey<FormState>) {
-          return formStateKey;
-        }
-      } catch (e2) {
-        // Try accessing from form model
-        try {
-          final formModel = (provider as dynamic).formModel;
-          final formKey = formModel?.formKey;
-          if (formKey is GlobalKey<FormState>) {
-            return formKey;
-          }
-        } catch (e3) {
-          // Ignore and fall through
-        }
-      }
-    }
-    return null;
+  /// ✅ TYPE SAFETY FIX: Use interface instead of dynamic casting
+  GlobalKey<FormState>? getFormKey(IFormProvider provider) {
+    return provider.formKey;
   }
   
   /// Validate the form using provider's validation logic
-  bool validateForm(dynamic provider) {
-    // First try provider's own validation method
-    try {
-      return (provider as dynamic).validateForm() as bool;
-    } catch (e) {
-      // Provider doesn't have validateForm method, fall back to form key validation
-    }
-    
-    // Fallback to form key validation
-    final formKey = getFormKey(provider);
-    if (formKey?.currentState != null) {
-      return formKey!.currentState!.validate();
-    }
-    
-    return true; // Default to valid if no validation available
+  /// ✅ TYPE SAFETY FIX: Use interface instead of dynamic casting
+  bool validateForm(IFormProvider provider) {
+    return provider.validateForm();
   }
   
   /// Check if form can be submitted
-  bool canSubmit(dynamic provider) {
-    // First try provider's canSubmit property
-    try {
-      final canSubmitProperty = (provider as dynamic).canSubmit;
-      if (canSubmitProperty is bool) {
-        return canSubmitProperty;
-      }
-    } catch (e) {
-      // Provider doesn't have canSubmit property
-    }
-    
-    // Fallback: check if form is valid and not loading
-    final isValid = validateForm(provider);
-    final loading = (this as FormLoadingMixin).isLoading(provider);
-    
-    return isValid && !loading;
+  /// ✅ TYPE SAFETY FIX: Use interface instead of dynamic casting and this cast
+  bool canSubmit(IFormProvider provider) {
+    return provider.canSubmit;
   }
 }
 
@@ -268,6 +163,7 @@ mixin FormNavigationMixin<T extends StatefulWidget> on State<T> {
   }
   
   /// Check if provider has unsaved changes
+  /// Note: This is optional functionality, not in IFormProvider interface
   bool hasUnsavedChanges(dynamic provider) {
     try {
       final hasChangesProperty = (provider as dynamic).hasChanges;

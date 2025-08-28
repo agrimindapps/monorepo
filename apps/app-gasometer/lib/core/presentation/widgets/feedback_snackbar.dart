@@ -382,9 +382,6 @@ class _FloatingFeedbackState extends State<FloatingFeedback>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final config = FeedbackSnackBar._getTypeConfig(widget.type, theme);
-
     return SlideTransition(
       position: _slideAnimation,
       child: FadeTransition(

@@ -2,24 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../providers/auth_provider.dart';
+import '../providers/register_provider.dart';
 
 class RegisterPasswordPage extends StatefulWidget {
-  final Map<String, dynamic>? userData;
-
-  const RegisterPasswordPage({super.key, this.userData});
+  const RegisterPasswordPage({super.key});
 
   @override
   State<RegisterPasswordPage> createState() => _RegisterPasswordPageState();
 }
 
-class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
+class _RegisterPasswordPageState extends State<RegisterPasswordPage> with LoadingStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  RegisterProvider? _registerProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with existing data after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _registerProvider = di.sl<RegisterProvider>();
+      _registerProvider!.goToStep(2);
+      _passwordController.text = _registerProvider!.registerData.password;
+      _confirmPasswordController.text = _registerProvider!.registerData.confirmPassword;
+      
+      // Add listeners to update provider in real-time
+      _passwordController.addListener(() {
+        _registerProvider?.updatePassword(_passwordController.text);
+      });
+      
+      _confirmPasswordController.addListener(() {
+        _registerProvider?.updateConfirmPassword(_confirmPasswordController.text);
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -29,24 +52,41 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
   }
 
   Future<void> _handleCreateAccount() async {
-    if (_formKey.currentState!.validate()) {
-      final authProvider = context.read<AuthProvider>();
+    if (_formKey.currentState!.validate() && _registerProvider != null) {
+      // Update provider with current password values
+      _registerProvider!.updatePassword(_passwordController.text);
+      _registerProvider!.updateConfirmPassword(_confirmPasswordController.text);
+      
+      // Validate password step
+      if (_registerProvider!.validatePassword()) {
+        showLoading(message: 'Criando conta...');
+        
+        final authProvider = context.read<AuthProvider>();
+        final registerData = _registerProvider!.registerData;
 
-      await authProvider.register(
-        (widget.userData?['email'] as String?) ?? '',
-        _passwordController.text,
-        (widget.userData?['name'] as String?) ?? '',
-      );
+        await authProvider.register(
+          registerData.email,
+          registerData.password,
+          registerData.name,
+        );
 
-      if (authProvider.isAuthenticated && mounted) {
-        context.go('/plants');
+        hideLoading();
+
+        if (authProvider.isAuthenticated && mounted) {
+          // Clear registration data after successful registration
+          _registerProvider!.reset();
+          context.go('/plants');
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return buildWithLoading(
+      child: ChangeNotifierProvider.value(
+        value: _registerProvider ?? di.sl<RegisterProvider>(),
+        child: Scaffold(
       backgroundColor: PlantisColors.primary,
       body: SafeArea(
         child: Center(
@@ -144,36 +184,28 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                   const SizedBox(height: 32),
 
                   // Progress indicator (step 3/3)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: PlantisColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: PlantisColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: PlantisColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ],
+                  Consumer<RegisterProvider>(
+                    builder: (context, registerProvider, _) {
+                      final steps = registerProvider.progressSteps;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(3, (index) {
+                          return [
+                            Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: steps[index] 
+                                    ? PlantisColors.primary 
+                                    : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            if (index < 2) const SizedBox(width: 8),
+                          ];
+                        }).expand((widget) => widget).toList(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 48),
 
@@ -327,7 +359,41 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                         ),
                         const SizedBox(height: 48),
 
-                        // Error message
+                        // Error message - RegisterProvider
+                        Consumer<RegisterProvider>(
+                          builder: (context, registerProvider, _) {
+                            if (registerProvider.errorMessage != null) {
+                              return Container(
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: PlantisColors.errorLight,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: PlantisColors.error,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        registerProvider.errorMessage!,
+                                        style: const TextStyle(
+                                          color: PlantisColors.error,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+
+                        // Error message - AuthProvider
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, _) {
                             if (authProvider.errorMessage != null) {
@@ -454,7 +520,9 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
             ),
           ),
         ),
+        ),
       ),
+    ),
     );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ import '../../core/services/test_data_generator_service.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../features/development/presentation/pages/data_inspector_page.dart';
+import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
 
@@ -19,11 +19,13 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Consumer<auth_providers.AuthProvider>(
-          builder: (context, authProvider, _) {
+    return ChangeNotifierProvider<SettingsProvider>(
+      create: (context) => di.sl<SettingsProvider>()..initialize(),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
+            builder: (context, authProvider, settingsProvider, _) {
             final user = authProvider.currentUser;
             
             return Column(
@@ -264,48 +266,44 @@ class SettingsPage extends StatelessWidget {
                     context.push('/notifications-settings');
                   },
                 ),
-                Consumer<ThemeProvider>(
-                  builder: (context, themeProvider, child) {
-                    return SettingsItem(
-                      icon: Icons.dark_mode,
-                      title: 'Tema',
-                      subtitle: _getThemeSubtitle(themeProvider),
-                      iconColor: themeProvider.isDarkMode
-                          ? PlantisColors.sun
-                          : PlantisColors.primaryDark,
-                      isLast: true,
-                      trailing: Switch(
-                        value: themeProvider.isDarkMode,
-                        onChanged: (value) {
-                          if (value) {
-                            themeProvider.setDarkTheme();
-                          } else {
-                            themeProvider.setLightTheme();
-                          }
-                        },
-                        activeColor: PlantisColors.primary,
-                        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                        thumbColor: WidgetStateProperty.resolveWith((states) {
-                          if (states.contains(WidgetState.selected)) {
-                            return PlantisColors.primary;
-                          }
-                          return theme.colorScheme.onSurface.withValues(alpha: 0.6);
-                        }),
-                        trackColor: WidgetStateProperty.resolveWith((states) {
-                          if (states.contains(WidgetState.selected)) {
-                            return PlantisColors.primary.withValues(alpha: 0.5);
-                          }
-                          return theme.colorScheme.onSurface.withValues(alpha: 0.2);
-                        }),
-                      ),
-                      onTap: () {
-                        if (themeProvider.isDarkMode) {
-                          themeProvider.setLightTheme();
-                        } else {
-                          themeProvider.setDarkTheme();
-                        }
-                      },
-                    );
+                SettingsItem(
+                  icon: Icons.dark_mode,
+                  title: 'Tema',
+                  subtitle: settingsProvider.themeSubtitle,
+                  iconColor: settingsProvider.isDarkMode
+                      ? PlantisColors.sun
+                      : PlantisColors.primaryDark,
+                  isLast: true,
+                  trailing: Switch(
+                    value: settingsProvider.isDarkMode,
+                    onChanged: (value) {
+                      if (value) {
+                        settingsProvider.setDarkTheme();
+                      } else {
+                        settingsProvider.setLightTheme();
+                      }
+                    },
+                    activeColor: PlantisColors.primary,
+                    trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+                    thumbColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return PlantisColors.primary;
+                      }
+                      return theme.colorScheme.onSurface.withValues(alpha: 0.6);
+                    }),
+                    trackColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return PlantisColors.primary.withValues(alpha: 0.5);
+                      }
+                      return theme.colorScheme.onSurface.withValues(alpha: 0.2);
+                    }),
+                  ),
+                  onTap: () {
+                    if (settingsProvider.isDarkMode) {
+                      settingsProvider.setLightTheme();
+                    } else {
+                      settingsProvider.setDarkTheme();
+                    }
                   },
                 ),
               ],
@@ -437,7 +435,8 @@ class SettingsPage extends StatelessWidget {
                 const SizedBox(height: 40),
               ],
             );
-          },
+            },
+          ),
         ),
       ),
     );
@@ -467,15 +466,6 @@ class SettingsPage extends StatelessWidget {
 
 
 
-  String _getThemeSubtitle(ThemeProvider themeProvider) {
-    if (themeProvider.isDarkMode) {
-      return 'Tema escuro ativo';
-    } else if (themeProvider.isLightMode) {
-      return 'Tema claro ativo';
-    } else {
-      return 'Seguir sistema';
-    }
-  }
 
   String _getMemberSince(DateTime? createdAt) {
     if (createdAt == null) return 'Membro desde 10 dias';

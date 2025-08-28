@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/base_provider.dart';
 import '../../widgets/form_dialog.dart';
+import 'base_form_page.dart';
 import 'form_mixins.dart';
 
 /// Abstract base class for form dialogs with common functionality
@@ -141,11 +142,23 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
   }
   
   Widget _buildFormDialog(BuildContext context, T formProvider) {
-    // Check for errors and show them
-    final error = getLastError(formProvider);
+    // Check for errors and show them - cast to IFormProvider if possible
+    String? error;
+    bool loading = false;
+    bool canSubmitForm = false;
+    GlobalKey<FormState>? formKey;
+    
+    if (formProvider is IFormProvider) {
+      final provider = formProvider as IFormProvider;
+      error = provider.lastError;
+      loading = provider.isLoading;
+      canSubmitForm = provider.canSubmit;
+      formKey = provider.formKey;
+    }
+    
     if (error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showErrorSnackbar(error);
+        showErrorSnackbar(error!);
       });
     }
     
@@ -153,20 +166,25 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
       title: dialogTitle,
       subtitle: dialogSubtitle,
       headerIcon: headerIcon,
-      isLoading: isLoading(formProvider),
+      isLoading: loading,
       cancelButtonText: cancelButtonText,
       confirmButtonText: submitButtonText,
       onCancel: onFormCancel,
-      onConfirm: canSubmit(formProvider) ? () => _submitForm() : null,
+      onConfirm: canSubmitForm ? () => _submitForm() : null,
       content: Form(
-        key: getFormKey(formProvider),
+        key: formKey ?? GlobalKey<FormState>(),
         child: buildFormContent(context, formProvider),
       ),
     );
   }
   
   Future<void> _submitForm() async {
-    if (!validateForm(_formProvider)) {
+    bool isValid = false;
+    if (_formProvider is IFormProvider) {
+      isValid = (_formProvider as IFormProvider).validateForm();
+    }
+    
+    if (!isValid) {
       showErrorSnackbar('Por favor, corrija os erros no formulário');
       return;
     }

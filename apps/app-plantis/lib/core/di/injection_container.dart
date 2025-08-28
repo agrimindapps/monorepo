@@ -5,11 +5,16 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/auth/presentation/providers/auth_provider.dart'
-    as providers;
+import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
+import '../../features/auth/presentation/providers/register_provider.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
+import '../../features/settings/data/datasources/settings_local_datasource.dart';
+import '../../features/settings/data/repositories/settings_repository.dart';
+import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../features/settings/presentation/providers/backup_settings_provider.dart';
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
+import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../auth/auth_state_notifier.dart';
 import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
@@ -24,10 +29,8 @@ import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/test_data_generator_service.dart';
 import '../sync/sync_operations.dart';
-// Sync dependencies
 import '../sync/sync_queue.dart';
 import '../utils/navigation_service.dart';
-// import '../../features/account/di/account_di.dart'; // Removido - account simplificado
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
@@ -126,6 +129,9 @@ void _initCoreServices() {
 }
 
 void _initAuth() {
+  // Auth State Notifier (Singleton)
+  sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
+  
   // Auth Provider
   sl.registerLazySingleton(
     () => providers.AuthProvider(
@@ -135,6 +141,9 @@ void _initAuth() {
       subscriptionRepository: sl<ISubscriptionRepository>(),
     ),
   );
+  
+  // Register Provider  
+  sl.registerFactory(() => RegisterProvider());
 }
 
 void _initAccount() {
@@ -168,7 +177,28 @@ void _initPremium() {
 }
 
 void _initSettings() {
-  // Notifications Settings Provider
+  // Settings DataSource
+  sl.registerLazySingleton<SettingsLocalDataSource>(
+    () => SettingsLocalDataSource(prefs: sl<SharedPreferences>()),
+  );
+
+  // Settings Repository
+  sl.registerLazySingleton<ISettingsRepository>(
+    () => SettingsRepository(localDataSource: sl<SettingsLocalDataSource>()),
+  );
+
+  // Centralized Settings Provider
+  sl.registerLazySingleton<SettingsProvider>(
+    () => SettingsProvider(
+      settingsRepository: sl<ISettingsRepository>(),
+      notificationService: sl<PlantisNotificationService>(),
+      authRepository: sl<IAuthRepository>(),
+      backupService: sl<BackupService>(),
+      themeProvider: sl<ThemeProvider>(),
+    ),
+  );
+
+  // Legacy Notifications Settings Provider (for compatibility during migration)
   sl.registerFactory(
     () => NotificationsSettingsProvider(
       notificationService: sl<PlantisNotificationService>(),

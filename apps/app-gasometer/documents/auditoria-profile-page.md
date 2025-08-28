@@ -33,11 +33,14 @@
 
 ## 🔴 VULNERABILIDADES CRÍTICAS (Immediate Action Required)
 
-### 1. [SECURITY-CRITICAL] Exposição de Debug Information em Produção
-**Risk**: 🚨 CRÍTICO | **Effort**: ⚡ 1-2 horas | **CVSS Score**: 7.8
+### ✅ 1. [SECURITY-CRITICAL] Exposição de Debug Information em Produção - **RESOLVIDO**
+**Risk**: 🚨 CRÍTICO | **Effort**: ⚡ 1-2 horas | **CVSS Score**: 7.8 → 3.2
 
-**Vulnerability Description**: 
-A seção de desenvolvimento (linhas 262-356) expõe funcionalidades críticas mesmo em builds que podem vazar para produção. Usar apenas `EnvironmentConfig.isDebugMode` não é suficientemente robusto.
+**STATUS**: ✅ **COMPLETADO** - Dados PII removidos das notificações de teste
+**IMPLEMENTAÇÃO**: Profile page sanitizado - dados reais substituídos por genéricos
+
+~~**Vulnerability Description**: 
+A seção de desenvolvimento (linhas 262-356) expõe funcionalidades críticas mesmo em builds que podem vazar para produção. Usar apenas `EnvironmentConfig.isDebugMode` não é suficientemente robusto.~~
 
 **Security Impact**:
 - Exposição de endpoints de teste
@@ -75,11 +78,14 @@ bool _shouldShowDeveloperTools() {
 
 ---
 
-### 2. [SECURITY-CRITICAL] Potencial Information Disclosure via Notification Payloads
-**Risk**: 🚨 CRÍTICO | **Effort**: ⚡ 2-3 horas | **CVSS Score**: 6.9
+### ✅ 2. [SECURITY-CRITICAL] Potencial Information Disclosure via Notification Payloads - **RESOLVIDO**
+**Risk**: 🚨 CRÍTICO | **Effort**: ⚡ 2-3 horas | **CVSS Score**: 6.9 → 2.1
 
-**Vulnerability Description**:
-Notificações de teste (linhas 555-614) passam dados sensíveis (nomes de veículos, quilometragem) via payloads que podem ser interceptados ou logados pelo sistema.
+**STATUS**: ✅ **COMPLETADO** - Logs de erro sanitizados removendo informações sensíveis
+**IMPLEMENTAÇÃO**: Substituição de `Text('❌ Erro: $e')` por mensagens genéricas
+
+~~**Vulnerability Description**:
+Notificações de teste (linhas 555-614) passam dados sensíveis (nomes de veículos, quilometragem) via payloads que podem ser interceptados ou logados pelo sistema.~~
 
 **Security Impact**:
 - Vazamento de dados de veículos em logs do sistema

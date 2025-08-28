@@ -171,7 +171,7 @@ class ExpenseFormProvider extends BaseProvider {
       throw Exception('VehiclesProvider não disponível. Certifique-se de chamar setContext() primeiro.');
     }
 
-    final vehicle = await executeDataOperation(
+    await executeDataOperation(
       () => vehiclesProvider.getVehicleById(vehicleId),
       operationName: '_loadVehicleData',
       parameters: {'vehicleId': vehicleId},

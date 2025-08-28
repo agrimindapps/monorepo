@@ -124,6 +124,103 @@ class PlantFormProvider extends ChangeNotifier {
   // Form validation
   bool get isValid => _name.trim().isNotEmpty;
 
+  /// Comprehensive check for unsaved changes by comparing current form state with original/initial state
+  bool get hasUnsavedChanges {
+    // For new plants (add mode), check if any field has meaningful data
+    if (!isEditMode) {
+      return _hasAnyFormData();
+    }
+
+    // For editing existing plants, compare current state with original
+    if (_originalPlant == null) return false;
+
+    return _hasChangesFromOriginal();
+  }
+
+  /// Checks if any form field contains meaningful data (for add mode)
+  bool _hasAnyFormData() {
+    // Basic info fields - these are high value user data
+    if (_name.trim().isNotEmpty) return true;
+    if (_species.trim().isNotEmpty) return true;
+    if (_spaceId != null) return true;
+    if (_notes.trim().isNotEmpty) return true;
+    if (_plantingDate != null) return true;
+    if (_imageUrls.isNotEmpty) return true;
+
+    // Care configuration fields - meaningful settings
+    if (_wateringIntervalDays != null) return true;
+    if (_fertilizingIntervalDays != null) return true;
+    if (_waterAmount?.trim().isNotEmpty == true) return true;
+
+    // Extended care configuration - toggles and intervals are meaningful
+    if (_enableWateringCare == true && (_wateringIntervalDays != null || _lastWateringDate != null)) return true;
+    if (_enableFertilizerCare == true && (_fertilizingIntervalDays != null || _lastFertilizerDate != null)) return true;
+    if (_enableSunlightCare == true && _sunlightIntervalDays != null) return true;
+    if (_enablePestInspection == true && _pestInspectionIntervalDays != null) return true;
+    if (_enablePruning == true && _pruningIntervalDays != null) return true;
+    if (_enableReplanting == true && _replantingIntervalDays != null) return true;
+
+    return false;
+  }
+
+  /// Compares current form state with original plant data (for edit mode)
+  bool _hasChangesFromOriginal() {
+    final original = _originalPlant!;
+    final originalConfig = original.config;
+
+    // Compare basic info
+    if (_name.trim() != original.name) return true;
+    if (_species.trim() != (original.species ?? '')) return true;
+    if (_spaceId != original.spaceId) return true;
+    if (_notes.trim() != (original.notes ?? '')) return true;
+    if (_plantingDate != original.plantingDate) return true;
+    
+    // Compare images (order matters for user experience)
+    if (_imageUrls.length != original.imageUrls.length) return true;
+    for (int i = 0; i < _imageUrls.length; i++) {
+      if (i >= original.imageUrls.length || _imageUrls[i] != original.imageUrls[i]) {
+        return true;
+      }
+    }
+
+    // Compare care configuration
+    if (_wateringIntervalDays != originalConfig?.wateringIntervalDays) return true;
+    if (_fertilizingIntervalDays != originalConfig?.fertilizingIntervalDays) return true;
+    if (_pruningIntervalDays != originalConfig?.pruningIntervalDays) return true;
+    if (_waterAmount?.trim() != originalConfig?.waterAmount) return true;
+
+    // Compare extended care fields
+    if (_enableWateringCare != originalConfig?.enableWateringCare) return true;
+    if (_lastWateringDate != originalConfig?.lastWateringDate) return true;
+    if (_enableFertilizerCare != originalConfig?.enableFertilizerCare) return true;
+    if (_lastFertilizerDate != originalConfig?.lastFertilizerDate) return true;
+
+    // Compare sunlight care
+    final originalEnableSunlight = originalConfig?.sunlightCheckIntervalDays != null;
+    if (_enableSunlightCare != originalEnableSunlight) return true;
+    if (_sunlightIntervalDays != originalConfig?.sunlightCheckIntervalDays) return true;
+    // Note: lastSunlightDate is not stored in PlantConfig, it's a UI-only field
+
+    // Compare pest inspection
+    final originalEnablePest = originalConfig?.pestInspectionIntervalDays != null;
+    if (_enablePestInspection != originalEnablePest) return true;
+    if (_pestInspectionIntervalDays != originalConfig?.pestInspectionIntervalDays) return true;
+    // Note: lastPestInspectionDate is not stored in PlantConfig, it's a UI-only field
+
+    // Compare pruning
+    final originalEnablePruning = originalConfig?.pruningIntervalDays != null;
+    if (_enablePruning != originalEnablePruning) return true;
+    // Note: lastPruningDate is not stored in PlantConfig, it's a UI-only field
+
+    // Compare replanting
+    final originalEnableReplanting = originalConfig?.replantingIntervalDays != null;
+    if (_enableReplanting != originalEnableReplanting) return true;
+    if (_replantingIntervalDays != originalConfig?.replantingIntervalDays) return true;
+    // Note: lastReplantingDate is not stored in PlantConfig, it's a UI-only field
+
+    return false;
+  }
+
   Map<String, String> get fieldErrors {
     final errors = <String, String>{};
 

@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../providers/auth_provider.dart';
+import '../../utils/auth_validators.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,7 +15,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, LoadingStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -60,9 +62,13 @@ class _LoginPageState extends State<LoginPage>
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
+      showLoading(message: 'Fazendo login...');
+      
       final authProvider = context.read<AuthProvider>();
       await authProvider.login(_emailController.text, _passwordController.text);
 
+      hideLoading();
+      
       if (authProvider.isAuthenticated && mounted) {
         context.go('/plants');
       }
@@ -71,7 +77,8 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return buildWithLoading(
+      child: Scaffold(
       backgroundColor: PlantisColors.primary,
       body: SafeArea(
         child: Stack(
@@ -331,7 +338,7 @@ class _LoginPageState extends State<LoginPage>
                                           if (value == null || value.isEmpty) {
                                             return 'Por favor, insira seu email';
                                           }
-                                          if (!value.contains('@')) {
+                                          if (!AuthValidators.isValidEmail(value)) {
                                             return 'Por favor, insira um email válido';
                                           }
                                           return null;
@@ -438,13 +445,7 @@ class _LoginPageState extends State<LoginPage>
                                               ),
                                         ),
                                         validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'Por favor, insira sua senha';
-                                          }
-                                          if (value.length < 6) {
-                                            return 'A senha deve ter pelo menos 6 caracteres';
-                                          }
-                                          return null;
+                                          return AuthValidators.validatePassword(value ?? '', isRegistration: false);
                                         },
                                       ),
                                     ),
@@ -664,9 +665,14 @@ class _LoginPageState extends State<LoginPage>
                                           authProvider.isLoading
                                               ? null
                                               : () async {
+                                                showLoading(message: 'Entrando anonimamente...');
+                                                
                                                 final navigator = context;
                                                 await authProvider
                                                     .signInAnonymously();
+                                                
+                                                hideLoading();
+                                                
                                                 if (authProvider
                                                         .isAuthenticated &&
                                                     mounted) {
@@ -753,6 +759,7 @@ class _LoginPageState extends State<LoginPage>
           ],
         ),
       ),
+    ),
     );
   }
 

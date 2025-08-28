@@ -391,23 +391,47 @@ class AccountProfilePage extends StatelessWidget {
   }
 
   void _showFinalDeleteConfirmation(BuildContext context, auth_providers.AuthProvider authProvider) {
-    final controller = TextEditingController();
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmação Final'),
+        title: Text(
+          'Funcionalidade em Desenvolvimento',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Digite "EXCLUIR" para confirmar a exclusão da conta:'),
+            const Text(
+              'A exclusão de conta está em desenvolvimento e estará disponível em breve.',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'EXCLUIR',
-                border: OutlineInputBorder(),
+            const Text('Por enquanto, você pode:'),
+            const SizedBox(height: 8),
+            const Text('• Fazer logout da aplicação'),
+            const Text('• Entrar em contato conosco para solicitar a exclusão'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info, color: Colors.blue, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Implementação prevista para próxima atualização',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -415,44 +439,17 @@ class AccountProfilePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: const Text('Entendi'),
           ),
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: controller,
-            builder: (context, value, _) {
-              return ElevatedButton(
-                onPressed: value.text == 'EXCLUIR' ? () async {
-                  Navigator.of(context).pop();
-                  try {
-                    // Aqui implementaríamos a exclusão da conta
-                    await authProvider.logout();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Conta excluída com sucesso'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      context.go('/welcome');
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Erro ao excluir conta: $e'),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    }
-                  }
-                } : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Theme.of(context).colorScheme.onError,
-                ),
-                child: const Text('Excluir Conta'),
-              );
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showLogoutDialog(context, authProvider);
             },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            child: const Text('Fazer Logout'),
           ),
         ],
       ),

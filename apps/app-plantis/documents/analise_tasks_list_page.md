@@ -30,29 +30,10 @@ SliverList.builder(
 ),
 ```
 
-### 2. [SECURITY] - Task Ownership Bypass
-**Impact**: 🔥 Alto | **Effort**: ⚡ 3 horas | **Risk**: 🚨 Crítico
-
-**Description**: Validação de ownership em `_validateTaskOwnership` permite acesso se task.userId == null, potencialmente expondo dados de outros usuários.
-
-**Localização**: Linhas 242-259, 286-297
-
-**Solução Recomendada**:
-```dart
-bool _validateTaskOwnership(Task task) {
-  final currentUser = _authProvider.currentUser;
-  
-  if (currentUser == null || task.userId == null) {
-    return false; // Never allow access without proper ownership
-  }
-  
-  return task.userId == currentUser.id;
-}
-```
 
 ## ⚠️ Melhorias Importantes (Prioridade MÉDIA)
 
-### 3. [PERFORMANCE] - Expensive Date Formatting
+### 2. [PERFORMANCE] - Expensive Date Formatting
 **Impact**: 🔥 Médio | **Effort**: ⚡ 2 horas | **Risk**: 🚨 Baixo
 
 **Description**: `_formatDateHeader` recria arrays de strings em cada chamada, causando garbage collection desnecessário.
@@ -71,7 +52,7 @@ String _formatDateHeader(DateTime date) {
 }
 ```
 
-### 4. [ARCHITECTURE] - Circular Dependency Risk
+### 3. [ARCHITECTURE] - Circular Dependency Risk
 **Impact**: 🔥 Alto | **Effort**: ⚡ 6 horas | **Risk**: 🚨 Alto
 
 **Description**: TasksProvider depende de AuthProvider, e ambos fazem stream subscriptions que podem criar circular references.
@@ -94,12 +75,12 @@ class AuthStateNotifier extends ChangeNotifier {
 
 ## 🧹 Limpeza e Otimizações (Prioridade BAIXA)
 
-### 5. [CODE] - Dead Code Comments
+### 4. [CODE] - Dead Code Comments
 **Impact**: 🔥 Baixo | **Effort**: ⚡ 30min | **Risk**: 🚨 Nenhum
 
 **Description**: Código comentado para FAB e task creation dialog deveria ser removido.
 
-### 6. [ACCESSIBILITY] - Missing Semantic Labels
+### 5. [ACCESSIBILITY] - Missing Semantic Labels
 **Impact**: 🔥 Baixo | **Effort**: ⚡ 2 horas | **Risk**: 🚨 Nenhum
 
 **Description**: Botões e cards de task não têm labels semânticas para screen readers.
@@ -110,16 +91,13 @@ class AuthStateNotifier extends ChangeNotifier {
 - **Task Scheduling**: Integrar com core notification service
 
 ## 🔧 Plano de Ação
-### Fase 1 - Crítico (Imediato)
-1. Corrigir validação de ownership de tasks
-2. Implementar Selector para otimizar rebuilds
+### Fase 1 - Importante (Esta Sprint)  
+1. Implementar Selector para otimizar rebuilds
+2. Implementar cache de formatação de data
+3. Resolver circular dependency entre providers
+4. Remover código morto
 
-### Fase 2 - Importante (Esta Sprint)  
-1. Implementar cache de formatação de data
-2. Resolver circular dependency entre providers
-3. Remover código morto
-
-### Fase 3 - Melhoria (Próxima Sprint)
+### Fase 2 - Melhoria (Próxima Sprint)
 1. Adicionar semantic labels
 2. Implementar virtualization para performance
 3. Integrar com core packages

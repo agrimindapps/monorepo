@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 
@@ -123,6 +124,54 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage>
 
   @override
   Widget build(BuildContext context) {
+    // SECURITY: Prevent access in production builds
+    if (!kDebugMode) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Access Denied'),
+          backgroundColor: Colors.red,
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.security,
+                size: 80,
+                color: Colors.red,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Database Inspector',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'This feature is only available in debug builds',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'For security reasons, database inspection\nis disabled in production releases',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final theme = Theme.of(context);
 
     return Scaffold(

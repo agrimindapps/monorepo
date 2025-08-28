@@ -43,6 +43,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    // Dispose of the injected provider to prevent memory leaks
+    _plantsProvider.dispose();
     super.dispose();
   }
 

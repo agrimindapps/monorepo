@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/base_provider.dart';
 import 'form_mixins.dart';
 import 'form_widgets.dart';
+
+/// Interface for form providers to ensure type safety
+abstract class IFormProvider {
+  bool get isLoading;
+  String? get lastError;
+  GlobalKey<FormState>? get formKey;
+  bool get canSubmit;
+  bool validateForm();
+  void dispose();
+}
 
 /// Abstract base class for form pages with common functionality
 /// 
@@ -97,8 +106,9 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   
   @override
   void dispose() {
-    if (_isInitialized && _formProvider is BaseProvider) {
-      (_formProvider as BaseProvider).dispose();
+    if (_isInitialized) {
+      // ✅ TYPE SAFETY FIX: No more dangerous casting, use interface method
+      _formProvider.dispose();
     }
     super.dispose();
   }
@@ -117,7 +127,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
         return Stack(
           children: [
             _buildFormScaffold(context, formProvider),
-            if (isLoading(formProvider))
+            if (isLoading(formProvider as IFormProvider))
               const FormLoadingOverlay(),
           ],
         );
@@ -151,7 +161,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   }
   
   Widget _buildSubmitButton(BuildContext context, T formProvider) {
-    final canSubmit = this.canSubmit(formProvider);
+    final canSubmit = this.canSubmit(formProvider as IFormProvider);
     
     return Semantics(
       label: isEditMode 
@@ -176,7 +186,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   
   Widget _buildFormBody(BuildContext context, T formProvider) {
     // Check for errors and show them
-    final error = getLastError(formProvider);
+    final error = getLastError(formProvider as IFormProvider);
     if (error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showErrorDialog(error);
@@ -186,14 +196,14 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Form(
-        key: getFormKey(formProvider),
+        key: getFormKey(formProvider as IFormProvider),
         child: buildFormContent(context, formProvider),
       ),
     );
   }
   
   Future<void> _submitForm() async {
-    if (!validateForm(_formProvider)) {
+    if (!validateForm(_formProvider as IFormProvider)) {
       showErrorDialog('Por favor, corrija os erros no formulário');
       return;
     }

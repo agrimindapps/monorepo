@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
+import '../providers/register_provider.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ChangeNotifierProvider(
+      create: (_) => di.sl<RegisterProvider>()..goToStep(0),
+      child: Scaffold(
       backgroundColor: PlantisColors.primary,
       body: SafeArea(
         child: Center(
@@ -105,30 +111,28 @@ class RegisterPage extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   // Progress indicator
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: PlantisColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        color: Colors.grey.shade300,
-                      ),
-                    ],
+                  Consumer<RegisterProvider>(
+                    builder: (context, registerProvider, _) {
+                      final steps = registerProvider.progressSteps;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(3, (index) {
+                          return [
+                            Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: steps[index] 
+                                    ? PlantisColors.primary 
+                                    : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            if (index < 2) const SizedBox(width: 8),
+                          ];
+                        }).expand((widget) => widget).toList(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 48),
 
@@ -186,13 +190,16 @@ class RegisterPage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Continue button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.go('/register/personal-info');
-                      },
+                  Consumer<RegisterProvider>(
+                    builder: (context, registerProvider, _) {
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            registerProvider.nextStep();
+                            context.go('/register/personal-info');
+                          },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: PlantisColors.primary,
                         foregroundColor: Colors.white,
@@ -206,8 +213,10 @@ class RegisterPage extends StatelessWidget {
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
-                      ),
-                    ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
 
@@ -224,6 +233,7 @@ class RegisterPage extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

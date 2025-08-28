@@ -26,7 +26,7 @@ class TasksModule {
         getTasksUseCase: sl(),
         addTaskUseCase: sl(),
         completeTaskUseCase: sl(),
-        authProvider: sl(),
+        // AuthStateNotifier will be accessed as singleton, no DI needed
       ),
     );
 

@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/analytics_provider.dart';
 
@@ -12,6 +13,7 @@ class AuthProvider extends ChangeNotifier {
   final LogoutUseCase _logoutUseCase;
   final IAuthRepository _authRepository;
   final ISubscriptionRepository? _subscriptionRepository;
+  final AuthStateNotifier _authStateNotifier;
 
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -34,10 +36,12 @@ class AuthProvider extends ChangeNotifier {
     required LogoutUseCase logoutUseCase,
     required IAuthRepository authRepository,
     ISubscriptionRepository? subscriptionRepository,
+    AuthStateNotifier? authStateNotifier,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _authRepository = authRepository,
-       _subscriptionRepository = subscriptionRepository {
+       _subscriptionRepository = subscriptionRepository,
+       _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance {
     _initializeAuthState();
   }
 
@@ -57,12 +61,17 @@ class AuthProvider extends ChangeNotifier {
         if (user == null && await shouldUseAnonymousMode()) {
           // Marca como inicializado ANTES de fazer login anônimo para evitar redirecionamentos
           _isInitialized = true;
+          _authStateNotifier.updateInitializationStatus(true);
           notifyListeners();
           await signInAnonymously();
           return; // O signInAnonymously vai disparar este listener novamente
         }
 
         _isInitialized = true;
+        
+        // Update AuthStateNotifier with user changes
+        _authStateNotifier.updateUser(user);
+        _authStateNotifier.updateInitializationStatus(true);
 
         // Sincroniza com RevenueCat quando o usuário faz login (não anônimo)
         if (user != null && !isAnonymous && _subscriptionRepository != null) {
@@ -70,6 +79,7 @@ class AuthProvider extends ChangeNotifier {
           await _checkPremiumStatus();
         } else {
           _isPremium = false;
+          _authStateNotifier.updatePremiumStatus(false);
         }
 
         notifyListeners();
@@ -77,6 +87,7 @@ class AuthProvider extends ChangeNotifier {
       onError: (error) {
         _errorMessage = error.toString();
         _isInitialized = true;
+        _authStateNotifier.updateInitializationStatus(true);
         notifyListeners();
       },
     );
@@ -87,6 +98,7 @@ class AuthProvider extends ChangeNotifier {
         subscription,
       ) {
         _isPremium = subscription?.isActive ?? false;
+        _authStateNotifier.updatePremiumStatus(_isPremium);
         notifyListeners();
       });
     }
@@ -109,9 +121,11 @@ class AuthProvider extends ChangeNotifier {
       (failure) {
         debugPrint('Erro ao verificar status premium: ${failure.message}');
         _isPremium = false;
+        _authStateNotifier.updatePremiumStatus(false);
       },
       (hasPremium) {
         _isPremium = hasPremium;
+        _authStateNotifier.updatePremiumStatus(hasPremium);
       },
     );
   }
@@ -141,6 +155,9 @@ class AuthProvider extends ChangeNotifier {
       (user) {
         _currentUser = user;
         _isLoading = false;
+        
+        // Update AuthStateNotifier with new user
+        _authStateNotifier.updateUser(user);
 
         // Log login event
         _analytics?.logLogin('email');
@@ -166,6 +183,10 @@ class AuthProvider extends ChangeNotifier {
       (_) {
         _currentUser = null;
         _isLoading = false;
+        
+        // Update AuthStateNotifier with logout
+        _authStateNotifier.updateUser(null);
+        _authStateNotifier.updatePremiumStatus(false);
 
         // Log logout event
         _analytics?.logLogout();
@@ -195,6 +216,10 @@ class AuthProvider extends ChangeNotifier {
       (user) {
         _currentUser = user;
         _isLoading = false;
+        
+        // Update AuthStateNotifier with new user
+        _authStateNotifier.updateUser(user);
+        
         notifyListeners();
       },
     );
@@ -216,6 +241,9 @@ class AuthProvider extends ChangeNotifier {
       (user) {
         _currentUser = user;
         _isLoading = false;
+        
+        // Update AuthStateNotifier with anonymous user
+        _authStateNotifier.updateUser(user);
 
         // Salvar preferência de modo anônimo
         _saveAnonymousPreference();

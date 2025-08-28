@@ -82,7 +82,7 @@ class BackupRepository implements IBackupRepository {
           }
         } catch (e) {
           if (attempt == _maxRetries - 1) rethrow;
-          await Future.delayed(Duration(seconds: attempt + 1));
+          await Future<void>.delayed(Duration(seconds: attempt + 1));
         }
       }
 
@@ -179,7 +179,7 @@ class BackupRepository implements IBackupRepository {
           }
         } catch (e) {
           if (attempt == _maxRetries - 1) rethrow;
-          await Future.delayed(Duration(seconds: attempt + 1));
+          await Future<void>.delayed(Duration(seconds: attempt + 1));
         }
       }
 
@@ -236,13 +236,11 @@ class BackupRepository implements IBackupRepository {
 
   /// Obtém o usuário atual autenticado
   Future<UserEntity?> _getCurrentUser() async {
-    // TODO: Implementar método getCurrentUser no IAuthRepository
-    // Por enquanto, retorna usuário mock para desenvolvimento
-    return const UserEntity(
-      id: 'test-user-id',
-      email: 'test@example.com',
-      displayName: 'Test User',
-    );
+    try {
+      return await _authRepository.currentUser.first;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Trata erros e converte para tipos apropriados de Failure

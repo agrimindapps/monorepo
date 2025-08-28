@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
+import '../providers/register_provider.dart';
 
 class RegisterPersonalInfoPage extends StatefulWidget {
   const RegisterPersonalInfoPage({super.key});
@@ -14,6 +18,28 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  RegisterProvider? _registerProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with existing data after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _registerProvider = di.sl<RegisterProvider>();
+      _registerProvider!.goToStep(1);
+      _nameController.text = _registerProvider!.registerData.name;
+      _emailController.text = _registerProvider!.registerData.email;
+      
+      // Add listeners to update provider in real-time
+      _nameController.addListener(() {
+        _registerProvider?.updateName(_nameController.text);
+      });
+      
+      _emailController.addListener(() {
+        _registerProvider?.updateEmail(_emailController.text);
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -22,23 +48,31 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
     super.dispose();
   }
 
-  void _handleNext() {
-    if (_formKey.currentState!.validate()) {
-      // Check if email exists (simulate check)
-      if (_emailController.text.toLowerCase() == 'test@test.com') {
-        _showEmailAlreadyExistsDialog();
+  Future<void> _handleNext() async {
+    if (_formKey.currentState!.validate() && _registerProvider != null) {
+      // Update provider with current values
+      _registerProvider!.updateName(_nameController.text);
+      _registerProvider!.updateEmail(_emailController.text);
+      
+      // Validate and proceed to next step
+      final success = await _registerProvider!.validateAndProceedPersonalInfo();
+      
+      if (success) {
+        // Navigation successful, go to password page
+        if (mounted) {
+          context.go('/register/password');
+        }
       } else {
-        // Navigate to password page with data
-        context.go(
-          '/register/password',
-          extra: {'name': _nameController.text, 'email': _emailController.text},
-        );
+        // Show error - check if it's the email already exists case
+        if (_registerProvider!.errorMessage == 'Este email já possui uma conta.') {
+          _showEmailAlreadyExistsDialog();
+        }
       }
     }
   }
 
   void _showEmailAlreadyExistsDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder:
@@ -128,7 +162,9 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ChangeNotifierProvider.value(
+      value: _registerProvider ?? di.sl<RegisterProvider>(),
+      child: Scaffold(
       backgroundColor: PlantisColors.primary,
       body: SafeArea(
         child: Center(
@@ -226,33 +262,28 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                   const SizedBox(height: 32),
 
                   // Progress indicator (step 2/3)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: PlantisColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: PlantisColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        color: Colors.grey.shade300,
-                      ),
-                    ],
+                  Consumer<RegisterProvider>(
+                    builder: (context, registerProvider, _) {
+                      final steps = registerProvider.progressSteps;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(3, (index) {
+                          return [
+                            Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: steps[index] 
+                                    ? PlantisColors.primary 
+                                    : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            if (index < 2) const SizedBox(width: 8),
+                          ];
+                        }).expand((widget) => widget).toList(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 48),
 
@@ -372,7 +403,41 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 24),
+
+                        // Error message
+                        Consumer<RegisterProvider>(
+                          builder: (context, registerProvider, _) {
+                            if (registerProvider.errorMessage != null) {
+                              return Container(
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: PlantisColors.errorLight,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: PlantisColors.error,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        registerProvider.errorMessage!,
+                                        style: const TextStyle(
+                                          color: PlantisColors.error,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
 
                         // Navigation buttons
                         Row(
@@ -446,6 +511,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

@@ -13,6 +13,91 @@ import '../widgets/tasks_error_widget.dart';
 // import '../widgets/tasks_fab.dart'; // Removido - tarefas geradas automaticamente
 import '../widgets/tasks_loading_widget.dart';
 
+// Helper classes for optimized state management
+class TasksListState {
+  final bool isLoading;
+  final bool hasError;
+  final String? errorMessage;
+  final bool isEmpty;
+  final bool hasActiveOperations;
+  final String? currentOperationMessage;
+
+  const TasksListState({
+    required this.isLoading,
+    required this.hasError,
+    this.errorMessage,
+    required this.isEmpty,
+    required this.hasActiveOperations,
+    this.currentOperationMessage,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is TasksListState &&
+        other.isLoading == isLoading &&
+        other.hasError == hasError &&
+        other.errorMessage == errorMessage &&
+        other.isEmpty == isEmpty &&
+        other.hasActiveOperations == hasActiveOperations &&
+        other.currentOperationMessage == currentOperationMessage;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      isLoading,
+      hasError,
+      errorMessage,
+      isEmpty,
+      hasActiveOperations,
+      currentOperationMessage,
+    );
+  }
+}
+
+class TasksListData {
+  final List<task_entity.Task> filteredTasks;
+  final bool isLoading;
+  final TasksFilterType currentFilter;
+  final int totalTasks;
+
+  const TasksListData({
+    required this.filteredTasks,
+    required this.isLoading,
+    required this.currentFilter,
+    required this.totalTasks,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is TasksListData &&
+        other.isLoading == isLoading &&
+        other.currentFilter == currentFilter &&
+        other.totalTasks == totalTasks &&
+        _listEquals(other.filteredTasks, filteredTasks);
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      Object.hashAll(filteredTasks.map((t) => t.id)),
+      isLoading,
+      currentFilter,
+      totalTasks,
+    );
+  }
+
+  bool _listEquals<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
+
 class TaskDateGroup {
   final String dateKey;
   final List<task_entity.Task> tasks;
@@ -37,6 +122,34 @@ class TasksListPage extends StatefulWidget {
 }
 
 class _TasksListPageState extends State<TasksListPage> {
+  // Cache for date formatting to avoid recreation
+  static const List<String> _weekdays = [
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado',
+    'Domingo',
+  ];
+  
+  static const List<String> _months = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+  
+  // Date formatting cache
+  final Map<String, String> _dateFormattingCache = <String, String>{};
   @override
   void initState() {
     super.initState();
@@ -64,27 +177,37 @@ class _TasksListPageState extends State<TasksListPage> {
         backgroundColor:
             isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
         appBar: const TasksAppBar(),
-        body: Consumer<TasksProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoading && provider.allTasks.isEmpty) {
+        body: Selector<TasksProvider, TasksListState>(
+          selector: (_, provider) => TasksListState(
+            isLoading: provider.isLoading,
+            hasError: provider.hasError,
+            errorMessage: provider.errorMessage,
+            isEmpty: provider.allTasks.isEmpty,
+            hasActiveOperations: provider.hasActiveOperations,
+            currentOperationMessage: provider.currentOperationMessage,
+          ),
+          builder: (context, state, child) {
+            if (state.isLoading && state.isEmpty) {
               return const TasksLoadingWidget();
             }
 
-            if (provider.hasError) {
+            if (state.hasError) {
               return TasksErrorWidget(
-                message: provider.errorMessage!,
-                onRetry: () => provider.loadTasks(),
+                message: state.errorMessage!,
+                onRetry: () => context.read<TasksProvider>().loadTasks(),
               );
             }
 
             return RefreshIndicator(
-              onRefresh: provider.refresh,
+              onRefresh: context.read<TasksProvider>().refresh,
               child: Stack(
                 children: [
-                  _buildTasksList(provider),
+                  _buildTasksList(),
                   // Operation feedback overlay
-                  if (provider.hasActiveOperations || provider.currentOperationMessage != null)
-                    _buildOperationOverlay(provider),
+                  if (state.hasActiveOperations || state.currentOperationMessage != null)
+                    Consumer<TasksProvider>(
+                      builder: (context, provider, child) => _buildOperationOverlay(provider),
+                    ),
                 ],
               ),
             );
@@ -96,34 +219,45 @@ class _TasksListPageState extends State<TasksListPage> {
     );
   }
 
-  Widget _buildTasksList(TasksProvider provider) {
-    final tasks = provider.filteredTasks;
-
-    if (tasks.isEmpty && !provider.isLoading) {
-      return EmptyTasksWidget(
-        filterType: provider.currentFilter,
-        onAddTask: () {}, // Removido - tarefas geradas automaticamente
-      );
-    }
-
-    // Agrupar tarefas por data
-    final groupedTasks = _groupTasksByDate(tasks);
-    
-    // Verificar se deve mostrar botão "Ver todas"
-    final shouldShowViewAllButton = provider.currentFilter == TasksFilterType.upcoming && 
-                                   provider.totalTasks > tasks.length;
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(0),
-      itemCount: groupedTasks.length + (shouldShowViewAllButton ? 1 : 0),
-      itemBuilder: (context, index) {
-        // Se é o último item e deve mostrar o botão
-        if (shouldShowViewAllButton && index == groupedTasks.length) {
-          return _buildViewAllButton(provider);
+  Widget _buildTasksList() {
+    return Selector<TasksProvider, TasksListData>(
+      selector: (_, provider) => TasksListData(
+        filteredTasks: provider.filteredTasks,
+        isLoading: provider.isLoading,
+        currentFilter: provider.currentFilter,
+        totalTasks: provider.totalTasks,
+      ),
+      builder: (context, data, child) {
+        if (data.filteredTasks.isEmpty && !data.isLoading) {
+          return EmptyTasksWidget(
+            filterType: data.currentFilter,
+            onAddTask: () {}, // Removido - tarefas geradas automaticamente
+          );
         }
+
+        // Agrupar tarefas por data
+        final groupedTasks = _groupTasksByDate(data.filteredTasks);
         
-        final dateGroup = groupedTasks[index];
-        return _buildDateGroup(dateGroup);
+        // Verificar se deve mostrar botão "Ver todas"
+        final shouldShowViewAllButton = data.currentFilter == TasksFilterType.upcoming && 
+                                       data.totalTasks > data.filteredTasks.length;
+
+        return CustomScrollView(
+          slivers: [
+            SliverList.builder(
+              itemCount: groupedTasks.length + (shouldShowViewAllButton ? 1 : 0),
+              itemBuilder: (context, index) {
+                // Se é o último item e deve mostrar o botão
+                if (shouldShowViewAllButton && index == groupedTasks.length) {
+                  return _buildViewAllButton();
+                }
+                
+                final dateGroup = groupedTasks[index];
+                return _buildDateGroup(dateGroup);
+              },
+            ),
+          ],
+        );
       },
     );
   }
@@ -152,6 +286,7 @@ class _TasksListPageState extends State<TasksListPage> {
   Widget _buildDateGroup(TaskDateGroup dateGroup) {
     final theme = Theme.of(context);
     return Column(
+      key: ValueKey(dateGroup.dateKey),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header da data
@@ -191,13 +326,14 @@ class _TasksListPageState extends State<TasksListPage> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Consumer<TasksProvider>(
-      builder: (context, provider, child) {
-        final isLoading = provider.isTaskOperationLoading(task.id);
+    return Selector<TasksProvider, bool>(
+      selector: (_, provider) => provider.isTaskOperationLoading(task.id),
+      builder: (context, isLoading, child) {
         
         return GestureDetector(
           onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task),
           child: Container(
+            key: ValueKey(task.id),
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -354,64 +490,54 @@ class _TasksListPageState extends State<TasksListPage> {
     } else if (taskDate == today.subtract(const Duration(days: 1))) {
       return 'Ontem';
     } else {
-      final weekdays = [
-        'Segunda-feira',
-        'Terça-feira',
-        'Quarta-feira',
-        'Quinta-feira',
-        'Sexta-feira',
-        'Sábado',
-        'Domingo',
-      ];
-      final months = [
-        'Janeiro',
-        'Fevereiro',
-        'Março',
-        'Abril',
-        'Maio',
-        'Junho',
-        'Julho',
-        'Agosto',
-        'Setembro',
-        'Outubro',
-        'Novembro',
-        'Dezembro',
-      ];
+      // Use cache to avoid recreating the same date string
+      final cacheKey = '${date.year}-${date.month}-${date.day}-${date.weekday}';
+      
+      if (_dateFormattingCache.containsKey(cacheKey)) {
+        return _dateFormattingCache[cacheKey]!;
+      }
 
-      final weekday = weekdays[date.weekday - 1];
+      final weekday = _weekdays[date.weekday - 1];
       final day = date.day;
-      final month = months[date.month - 1];
+      final month = _months[date.month - 1];
 
-      return '$weekday, $day de $month';
+      final formatted = '$weekday, $day de $month';
+      _dateFormattingCache[cacheKey] = formatted;
+      
+      return formatted;
     }
   }
 
   // Método removido - tarefas são geradas automaticamente quando concluídas
   // Future<void> _showAddTaskDialog(BuildContext context) async {}
 
-  Widget _buildViewAllButton(TasksProvider provider) {
+  Widget _buildViewAllButton() {
     final theme = Theme.of(context);
-    final remainingTasks = provider.totalTasks - provider.filteredTasks.length;
     
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Center(
-        child: ElevatedButton.icon(
-          onPressed: () {
-            provider.setFilter(TasksFilterType.all);
-          },
-          icon: const Icon(Icons.visibility),
-          label: Text('Ver todas as tarefas (+$remainingTasks)'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.secondary,
-            foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
+    return Selector<TasksProvider, int>(
+      selector: (_, provider) => provider.totalTasks - provider.filteredTasks.length,
+      builder: (context, remainingTasks, child) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Center(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                context.read<TasksProvider>().setFilter(TasksFilterType.all);
+              },
+              icon: const Icon(Icons.visibility),
+              label: Text('Ver todas as tarefas (+$remainingTasks)'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.secondary,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

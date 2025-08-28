@@ -1,16 +1,10 @@
 import 'package:get_it/get_it.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
 
 class AuthModule {
   static void init(GetIt sl) {
-    // Providers
-    sl.registerFactory(
-      () => AuthProvider(
-        loginUseCase: sl(),
-        logoutUseCase: sl(),
-        authRepository: sl(),
-      ),
-    );
+    // Auth module is now handled in the main injection_container.dart
+    // This ensures no duplicate registrations occur
+    // Auth State Notifier and Auth Provider are registered there
   }
 }
 

@@ -557,9 +557,9 @@ class ProfilePage extends StatelessWidget {
       final notificationService = GasOMeterNotificationService();
       
       await notificationService.showFuelReminderNotification(
-        vehicleName: 'Honda Civic',
-        currentKm: 85000,
-        estimatedKmToEmpty: 32,
+        vehicleName: 'Veículo Teste',
+        currentKm: 0,
+        estimatedKmToEmpty: 0,
       );
       
       if (context.mounted) {
@@ -573,8 +573,8 @@ class ProfilePage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro: $e'),
+          const SnackBar(
+            content: Text('❌ Erro ao enviar notificação'),
             backgroundColor: Colors.red,
           ),
         );
@@ -587,10 +587,10 @@ class ProfilePage extends StatelessWidget {
       final notificationService = GasOMeterNotificationService();
       
       await notificationService.showMaintenanceReminderNotification(
-        vehicleName: 'Honda Civic',
-        maintenanceType: 'Troca de Óleo',
-        currentKm: 85000,
-        maintenanceKm: 90000,
+        vehicleName: 'Veículo Teste',
+        maintenanceType: 'Manutenção Teste',
+        currentKm: 0,
+        maintenanceKm: 1000,
       );
       
       if (context.mounted) {
@@ -604,8 +604,8 @@ class ProfilePage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro: $e'),
+          const SnackBar(
+            content: Text('❌ Erro ao enviar notificação'),
             backgroundColor: Colors.red,
           ),
         );

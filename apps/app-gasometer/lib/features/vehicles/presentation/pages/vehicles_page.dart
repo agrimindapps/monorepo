@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
@@ -44,19 +43,9 @@ class _VehiclesPageState extends State<VehiclesPage> {
             // Header fixo otimizado
             _OptimizedHeader(),
             
-            // Conteúdo com scroll
+            // ✅ PERFORMANCE FIX: Use CustomScrollView for better virtualization
             Expanded(
-              child: SingleChildScrollView(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    child: Padding(
-                      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
-                      child: _OptimizedVehiclesContent(),
-                    ),
-                  ),
-                ),
-              ),
+              child: _OptimizedVehiclesContent(),
             ),
           ],
         ),
@@ -171,7 +160,7 @@ class _OptimizedVehiclesContent extends StatelessWidget {
         if (isLoading) {
           return Column(
             children: [
-              if (vehicles.isNotEmpty) _VehicleGrid(vehicles: vehicles),
+              if (vehicles.isNotEmpty) _OptimizedVehiclesGrid(vehicles: vehicles),
               StandardLoadingView.refresh(
                 message: 'Atualizando...',
               ),
@@ -191,7 +180,7 @@ class _OptimizedVehiclesContent extends StatelessWidget {
           );
         }
         
-        return _VehicleGrid(vehicles: vehicles);
+        return _OptimizedVehiclesGrid(vehicles: vehicles);
       },
     );
   }
@@ -262,38 +251,46 @@ class _ErrorState extends StatelessWidget {
 }
 
 
-/// Grid de veículos otimizado
-class _VehicleGrid extends StatelessWidget {
+/// ✅ PERFORMANCE FIX: Grid com CustomScrollView e SliverGrid para virtualização
+class _OptimizedVehiclesGrid extends StatelessWidget {
   final List<VehicleEntity> vehicles;
   
-  const _VehicleGrid({required this.vehicles});
+  const _OptimizedVehiclesGrid({required this.vehicles});
   
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int crossAxisCount = 1;
-        if (constraints.maxWidth > 1200) {
-          crossAxisCount = 3;
-        } else if (constraints.maxWidth > 800) {
-          crossAxisCount = 2;
-        }
-
-        return AlignedGridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: GasometerDesignTokens.spacingLg,
-          crossAxisSpacing: GasometerDesignTokens.spacingLg,
-          itemCount: vehicles.length,
-          itemBuilder: (context, index) {
-            return _OptimizedVehicleCard(
-              key: ValueKey(vehicles[index].id),
-              vehicle: vehicles[index],
-            );
-          },
-        );
-      },
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16.0),
+          sliver: SliverLayoutBuilder(
+            builder: (context, constraints) {
+              int crossAxisCount = 1;
+              if (constraints.crossAxisExtent > 1200) {
+                crossAxisCount = 3;
+              } else if (constraints.crossAxisExtent > 800) {
+                crossAxisCount = 2;
+              }
+              
+              return SliverGrid.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16.0,
+                  crossAxisSpacing: 16.0,
+                  childAspectRatio: 1.2, // Ajustar conforme necessário
+                ),
+                itemCount: vehicles.length,
+                itemBuilder: (context, index) {
+                  return _OptimizedVehicleCard(
+                    key: ValueKey(vehicles[index].id),
+                    vehicle: vehicles[index],
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -64,8 +64,18 @@ class _FuelPageState extends State<FuelPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<FuelProvider, VehiclesProvider>(
-      builder: (context, fuelProvider, vehiclesProvider, child) {
+    // ✅ PERFORMANCE FIX: Use Selector2 instead of Consumer2 to prevent unnecessary rebuilds
+    return Selector2<FuelProvider, VehiclesProvider, (bool, bool, List<FuelRecordEntity>, String?, String?)>(
+      selector: (context, fuelProvider, vehiclesProvider) => (
+        fuelProvider.isLoading,
+        fuelProvider.hasError,
+        fuelProvider.fuelRecords,
+        fuelProvider.errorMessage,
+        vehiclesProvider.errorMessage,
+      ),
+      builder: (context, data, child) {
+        final (isLoading, hasError, fuelRecords, fuelError, vehiclesError) = data;
+        
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: SafeArea(
@@ -79,7 +89,7 @@ class _FuelPageState extends State<FuelPage> {
                         constraints: const BoxConstraints(maxWidth: 1200),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildContent(context, fuelProvider, vehiclesProvider)
+                          child: _buildContentOptimized(context, isLoading, hasError, fuelRecords, fuelError)
                             .withPageErrorBoundary(pageName: 'Abastecimentos'),
                         ),
                       ),
@@ -152,6 +162,89 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
+
+  // ✅ PERFORMANCE FIX: Optimized content builder with selective data consumption
+  Widget _buildContentOptimized(BuildContext context, bool isLoading, bool hasError, List<FuelRecordEntity> fuelRecords, String? errorMessage) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Use Consumer only for the specific parts that need provider access
+        Consumer<VehiclesProvider>(
+          builder: (context, vehiclesProvider, child) {
+            return EnhancedVehicleSelector(
+              selectedVehicleId: _selectedVehicleId,
+              onVehicleChanged: (String? vehicleId) {
+                setState(() {
+                  _selectedVehicleId = vehicleId;
+                });
+                
+                if (_fuelProvider.searchQuery.isNotEmpty) {
+                  _fuelProvider.clearSearch();
+                }
+                
+                if (vehicleId?.isNotEmpty == true) {
+                  _fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
+                } else {
+                  _fuelProvider.loadAllFuelRecords();
+                }
+              },
+            );
+          }
+        ).withProviderErrorBoundary(providerName: 'Vehicles'),
+        const SizedBox(height: 16),
+        
+        // Campo de busca com Consumer específico
+        Consumer<FuelProvider>(
+          builder: (context, fuelProvider, child) {
+            return SemanticFormField(
+              label: 'Campo de busca',
+              hint: 'Digite para buscar abastecimentos por posto, marca ou observação',
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Buscar por posto, marca ou observação...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: fuelProvider.searchQuery.isNotEmpty
+                      ? SemanticButton.icon(
+                          semanticLabel: 'Limpar busca',
+                          semanticHint: 'Remove o texto da busca e mostra todos os abastecimentos',
+                          onPressed: () => _fuelProvider.clearSearch(),
+                          child: const Icon(Icons.clear),
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                ),
+                onChanged: (value) => _fuelProvider.searchFuelRecords(value),
+              ),
+            );
+          }
+        ),
+        const SizedBox(height: 24),
+        
+        // Show error state
+        if (hasError && errorMessage != null)
+          _buildErrorState(errorMessage, () => _loadData())
+        else if (isLoading)
+          StandardLoadingView.initial(
+            message: 'Carregando abastecimentos...',
+            height: 400,
+          )
+        else if (fuelRecords.isEmpty)
+          _buildEmptyState()
+        else ...[
+          // Statistics with Consumer for live updates
+          Consumer<FuelProvider>(
+            builder: (context, fuelProvider, child) => _buildStatistics(fuelProvider),
+          ),
+          const SizedBox(height: 24),
+          _buildVirtualizedRecordsList(fuelRecords),
+        ],
+      ],
+    );
+  }
 
   Widget _buildContent(BuildContext context, FuelProvider fuelProvider, VehiclesProvider vehiclesProvider) {
     return Column(
@@ -309,6 +402,47 @@ class _FuelPageState extends State<FuelPage> {
           ),
         ],
       ),
+    );
+  }
+
+  // ✅ PERFORMANCE FIX: Virtualized list that can handle 1000+ records efficiently
+  Widget _buildVirtualizedRecordsList(List<FuelRecordEntity> records) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticText.heading(
+          'Histórico de Abastecimentos',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // ✅ PERFORMANCE FIX: Properly virtualized list with fixed height
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6, // Dynamic height based on screen
+          child: ListView.builder(
+            // ✅ Remove shrinkWrap and NeverScrollableScrollPhysics for proper virtualization
+            itemCount: records.length,
+            itemExtent: 120.0, // Fixed item height for better performance
+            itemBuilder: (context, index) {
+              return Consumer<VehiclesProvider>(
+                builder: (context, vehiclesProvider, child) {
+                  return _OptimizedFuelRecordCard(
+                    key: ValueKey(records[index].id),
+                    record: records[index],
+                    vehiclesProvider: vehiclesProvider,
+                    onLongPress: () => _showRecordMenu(records[index]),
+                    onTap: () => _showRecordDetails(records[index], vehiclesProvider),
+                    getVehicleName: _getVehicleName,
+                  );
+                }
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

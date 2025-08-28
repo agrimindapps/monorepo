@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -156,6 +157,65 @@ class _DataInspectorPageState extends State<DataInspectorPage>
 
   @override
   Widget build(BuildContext context) {
+    // SECURITY: Prevent access in production builds
+    if (!kDebugMode) {
+      return Scaffold(
+        backgroundColor: Colors.red.shade900,
+        appBar: AppBar(
+          backgroundColor: Colors.red,
+          title: const Text(
+            'Access Denied',
+            style: TextStyle(color: Colors.white),
+          ),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.security,
+                size: 100,
+                color: Colors.red,
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Data Inspector',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'RESTRICTED ACCESS',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                  letterSpacing: 2.0,
+                ),
+              ),
+              SizedBox(height: 16),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'This development tool is only available in debug builds.\n\nFor security and privacy protection, data inspection\nis disabled in production releases.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

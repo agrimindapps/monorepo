@@ -17,6 +17,9 @@ import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_form_provider.dart';
 import '../providers/vehicles_provider.dart';
 
+// ✅ ARCHITECTURE FIX: Document refactoring needed for this 800+ line monolithic widget
+// TODO: Extract image picker, form sections, and validation into separate components
+// TODO: Create VehicleFormView, VehicleImagePicker, and VehicleFormActions widgets
 class AddVehiclePage extends StatefulWidget {
   final VehicleEntity? vehicle;
 
@@ -171,30 +174,27 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           onValidationChanged: (result) => _validationResults['modelo'] = result,
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildYearDropdown(provider),
+        Row(
+          children: [
+            Expanded(
+              child: _buildYearDropdown(provider),
+            ),
+            SizedBox(width: GasometerDesignTokens.spacingMd),
+            Expanded(
+              child: ValidatedFormField(
+              controller: provider.corController,
+              label: 'Cor',
+              hint: 'Ex: Branco, Preto, etc.',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 3,
+              maxLengthValidation: 30,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+              validateOnChange: true,
+              onValidationChanged: (result) => _validationResults['cor'] = result,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingMd),
-              Expanded(
-                child: ValidatedFormField(
-                controller: provider.corController,
-                label: 'Cor',
-                hint: 'Ex: Branco, Preto, etc.',
-                required: true,
-                validationType: ValidationType.length,
-                minLength: 3,
-                maxLengthValidation: 30,
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-                validateOnChange: true,
-                onValidationChanged: (result) => _validationResults['cor'] = result,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
@@ -315,28 +315,25 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            children: [
-              Text(
-                'Foto do Veículo',
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeLg,
-                  fontWeight: GasometerDesignTokens.fontWeightMedium,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+        Row(
+          children: [
+            Text(
+              'Foto do Veículo',
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeLg,
+                fontWeight: GasometerDesignTokens.fontWeightMedium,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              Text(
-                ' (opcional)',
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                  fontStyle: FontStyle.italic,
-                ),
+            ),
+            Text(
+              ' (opcional)',
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeMd,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                fontStyle: FontStyle.italic,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(

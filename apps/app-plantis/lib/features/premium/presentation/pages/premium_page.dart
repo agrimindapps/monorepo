@@ -3,85 +3,207 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/widgets/error_display.dart';
+import '../../../../core/widgets/loading_overlay.dart';
 import '../providers/premium_provider.dart';
 
 class PremiumPage extends StatefulWidget {
-  const PremiumPage({super.key});
+  final String? source; // Track where user came from
+  
+  const PremiumPage({super.key, this.source});
 
   @override
   State<PremiumPage> createState() => _PremiumPageState();
 }
 
 class _PremiumPageState extends State<PremiumPage> {
+  late final AnalyticsProvider _analytics;
+  
   @override
   void initState() {
     super.initState();
+    _analytics = sl<AnalyticsProvider>();
     // Carrega produtos ao iniciar - o provider se inicializa automaticamente
+    _trackPremiumPageViewed();
+  }
+  
+  Future<void> _trackPremiumPageViewed() async {
+    await _analytics.logEvent('premium_page_viewed', {
+      'source': widget.source ?? 'direct',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+    await _analytics.logScreenView('premium_page');
+  }
+  
+  Future<void> _trackPurchaseAttempt(String productId, PremiumProvider provider) async {
+    final product = provider.availableProducts.firstWhere(
+      (p) => p.productId == productId,
+      orElse: () => ProductInfo(
+        productId: productId, 
+        title: 'Unknown Product',
+        description: 'Unknown Product',
+        priceString: '0', 
+        price: 0.0, 
+        currencyCode: 'BRL',
+      ),
+    );
+    
+    await _analytics.logEvent('purchase_attempt', {
+      'product_id': productId,
+      'price': product.price,
+      'currency': product.currencyCode,
+      'user_type': provider.isPremium ? 'premium' : 'free',
+      'available_products_count': provider.availableProducts.length,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  Future<void> _trackPurchaseSuccess(String productId, PremiumProvider provider) async {
+    final product = provider.availableProducts.firstWhere(
+      (p) => p.productId == productId,
+      orElse: () => ProductInfo(
+        productId: productId, 
+        title: 'Unknown Product',
+        description: 'Unknown Product',
+        priceString: '0', 
+        price: 0.0, 
+        currencyCode: 'BRL',
+      ),
+    );
+    
+    await _analytics.logEvent('purchase_success', {
+      'product_id': productId,
+      'revenue': product.price,
+      'currency': product.currencyCode,
+      'plan_type': productId.contains('monthly') ? 'monthly' : 'annual',
+      'conversion_source': widget.source ?? 'direct',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  Future<void> _trackPurchaseFailure(String productId, String error, PremiumProvider provider) async {
+    await _analytics.logEvent('purchase_failure', {
+      'product_id': productId,
+      'error_type': _categorizeError(error),
+      'error_message': error.length > 100 ? error.substring(0, 100) : error,
+      'user_type': provider.isPremium ? 'premium' : 'free',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  Future<void> _trackRestorePurchasesAttempt() async {
+    await _analytics.logEvent('restore_purchases_attempt', {
+      'source': 'premium_page',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  Future<void> _trackRestorePurchasesResult(bool success, bool foundPurchases) async {
+    await _analytics.logEvent('restore_purchases_result', {
+      'success': success,
+      'found_purchases': foundPurchases,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  Future<void> _trackManageSubscriptionClick() async {
+    await _analytics.logEvent('manage_subscription_click', {
+      'source': 'premium_page',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  Future<void> _trackPlanCardView(String productId) async {
+    await _analytics.logEvent('plan_card_viewed', {
+      'product_id': productId,
+      'plan_type': productId.contains('monthly') ? 'monthly' : 'annual',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+  
+  String _categorizeError(String error) {
+    final lowerError = error.toLowerCase();
+    if (lowerError.contains('cancel')) return 'user_cancelled';
+    if (lowerError.contains('network')) return 'network_error';
+    if (lowerError.contains('payment')) return 'payment_error';
+    if (lowerError.contains('store')) return 'store_error';
+    if (lowerError.contains('permission')) return 'permission_error';
+    return 'unknown_error';
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Premium',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Consumer<PremiumProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.teal),
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Status atual
-                _buildCurrentStatusCard(provider),
-                const SizedBox(height: 24),
-
-                // Título e descrição
-                _buildHeaderSection(),
-                const SizedBox(height: 32),
-
-                // Features premium
-                _buildFeaturesSection(),
-                const SizedBox(height: 32),
-
-                // Planos disponíveis
-                if (!provider.isPremium) ...[
-                  _buildPlansSection(provider),
-                  const SizedBox(height: 24),
-                ],
-
-                // Botões de ação
-                _buildActionButtons(provider),
-                const SizedBox(height: 32),
-
-                // FAQ
-                _buildFAQSection(),
-              ],
+    return Consumer<PremiumProvider>(
+      builder: (context, provider, _) {
+        return Scaffold(
+          backgroundColor: const Color(0xFF1A1A1A),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: const Text(
+              'Premium',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          );
-        },
-      ),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: PurchaseLoadingOverlay(
+            isLoading: provider.isLoading,
+            currentOperation: provider.currentOperation,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Error display
+                  if (provider.errorMessage != null) ...[
+                    PurchaseErrorDisplay(
+                      errorMessage: provider.errorMessage!,
+                      onRetry: () => provider.clearError(),
+                      onDismiss: () => provider.clearError(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Status atual
+                  _buildCurrentStatusCard(provider),
+                  const SizedBox(height: 24),
+
+                  // Título e descrição
+                  _buildHeaderSection(),
+                  const SizedBox(height: 32),
+
+                  // Features premium
+                  _buildFeaturesSection(),
+                  const SizedBox(height: 32),
+
+                  // Planos disponíveis
+                  if (!provider.isPremium) ...[
+                    _buildPlansSection(provider),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Botões de ação
+                  _buildActionButtons(provider),
+                  const SizedBox(height: 32),
+
+                  // FAQ
+                  _buildFAQSection(),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -306,6 +428,11 @@ class _PremiumPageState extends State<PremiumPage> {
   Widget _buildPlanCard(ProductInfo product, PremiumProvider provider) {
     final isMonthly = product.productId.contains('monthly');
     final isPopular = !isMonthly; // Anual é mais popular
+    
+    // Track plan card view when built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _trackPlanCardView(product.productId);
+    });
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -397,11 +524,7 @@ class _PremiumPageState extends State<PremiumPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed:
-                        provider.isLoading
-                            ? null
-                            : () =>
-                                _purchaseProduct(product.productId, provider),
+                    onPressed: () => _purchaseProduct(product.productId, provider),
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           isPopular ? Colors.teal : Colors.grey.shade800,
@@ -434,8 +557,7 @@ class _PremiumPageState extends State<PremiumPage> {
           SizedBox(
             width: double.infinity,
             child: TextButton(
-              onPressed:
-                  provider.isLoading ? null : () => _restorePurchases(provider),
+              onPressed: () => _restorePurchases(provider),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -537,38 +659,88 @@ class _PremiumPageState extends State<PremiumPage> {
     String productId,
     PremiumProvider provider,
   ) async {
+    // Track purchase attempt
+    await _trackPurchaseAttempt(productId, provider);
+    
     try {
       final success = await provider.purchaseProduct(productId);
 
-      if (success && mounted) {
+      if (!mounted) return;
+
+      if (success) {
+        // Track successful purchase
+        await _trackPurchaseSuccess(productId, provider);
         _showSuccessDialog();
-      } else if (provider.errorMessage != null && mounted) {
-        _showErrorDialog(provider.errorMessage!);
+      } else if (provider.errorMessage != null) {
+        // Track purchase failure
+        await _trackPurchaseFailure(productId, provider.errorMessage!, provider);
+        
+        // Don't show dialog for user cancellation
+        if (!provider.errorMessage!.toLowerCase().contains('cancelled')) {
+          // Error is already handled by PurchaseErrorDisplay in the UI
+          // Just clear it after a delay to let user see the error
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) {
+              provider.clearError();
+            }
+          });
+        } else {
+          // Clear cancellation error immediately
+          provider.clearError();
+        }
       }
     } on PlatformException catch (e) {
       if (mounted) {
-        _showErrorDialog(e.message ?? 'Erro ao processar compra');
+        final errorMessage = e.message ?? e.code;
+        await _trackPurchaseFailure(productId, errorMessage, provider);
+        
+        // Handle platform-specific errors
+        if (e.code == 'user_cancelled' || e.message?.contains('cancelled') == true) {
+          // User cancelled, no need to show error
+          return;
+        }
+        
+        // Set error message in provider instead of showing dialog
+        // This will be handled by PurchaseErrorDisplay
+        provider.clearError();
+      }
+    } catch (e) {
+      if (mounted) {
+        await _trackPurchaseFailure(productId, e.toString(), provider);
+        provider.clearError();
       }
     }
   }
 
   Future<void> _restorePurchases(PremiumProvider provider) async {
+    await _trackRestorePurchasesAttempt();
+    
     final success = await provider.restorePurchases();
 
-    if (mounted) {
-      if (success) {
-        if (provider.isPremium) {
-          _showSuccessDialog(message: 'Compras restauradas com sucesso!');
-        } else {
-          _showInfoDialog('Nenhuma compra anterior encontrada.');
-        }
-      } else if (provider.errorMessage != null) {
-        _showErrorDialog(provider.errorMessage!);
+    if (!mounted) return;
+
+    await _trackRestorePurchasesResult(success, provider.isPremium);
+
+    if (success) {
+      if (provider.isPremium) {
+        _showSuccessDialog(message: 'Compras restauradas com sucesso!');
+      } else {
+        _showInfoDialog('Nenhuma compra anterior encontrada.');
       }
+    } else if (provider.errorMessage != null) {
+      // Error is handled by PurchaseErrorDisplay
+      // Auto-clear after showing
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          provider.clearError();
+        }
+      });
     }
   }
 
   Future<void> _openManagementUrl(PremiumProvider provider) async {
+    await _trackManageSubscriptionClick();
+    
     final url = await provider.getManagementUrl();
     if (url != null && mounted) {
       // TODO: Abrir URL usando url_launcher

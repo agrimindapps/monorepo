@@ -394,23 +394,74 @@ class AccountProfilePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Funcionalidade em Desenvolvimento',
-          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        title: Row(
+          children: [
+            Icon(
+              Icons.construction_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Recurso em Desenvolvimento',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'A exclusão de conta está em desenvolvimento e estará disponível em breve.',
-              style: TextStyle(fontWeight: FontWeight.w500),
+              'A exclusão permanente de conta ainda não está disponível.',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 16),
-            const Text('Por enquanto, você pode:'),
-            const SizedBox(height: 8),
-            const Text('• Fazer logout da aplicação'),
-            const Text('• Entrar em contato conosco para solicitar a exclusão'),
+            const Text(
+              'Estamos trabalhando para implementar esta funcionalidade de forma segura e confiável.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.orange.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.lightbulb_outline, color: Colors.orange, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Alternativas disponíveis agora:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('• Fazer logout para sair da conta'),
+                  const Text('• Contatar o suporte para assistência'),
+                  const Text('• Aguardar a próxima atualização do app'),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -420,14 +471,15 @@ class AccountProfilePage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info, color: Colors.blue, size: 20),
+                  Icon(Icons.schedule, color: Colors.blue, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Implementação prevista para próxima atualização',
+                      'Previsão: próxima atualização do aplicativo',
                       style: TextStyle(
                         color: Colors.blue,
                         fontWeight: FontWeight.w600,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -441,15 +493,107 @@ class AccountProfilePage extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Entendi'),
           ),
+          FilledButton.tonal(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showContactSupportDialog(context);
+            },
+            style: FilledButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            child: const Text('Contatar Suporte'),
+          ),
           OutlinedButton(
             onPressed: () {
               Navigator.of(context).pop();
               _showLogoutDialog(context, authProvider);
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.error,
             ),
             child: const Text('Fazer Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showContactSupportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.support_agent_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text('Contatar Suporte'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Para solicitar a exclusão da sua conta ou tirar dúvidas, entre em contato conosco:',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.email_outlined, color: Colors.blue, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Email',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('suporte@plantapp.com'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(Icons.schedule, color: Colors.green, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Tempo de Resposta',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Respondemos em até 48 horas'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
           ),
         ],
       ),

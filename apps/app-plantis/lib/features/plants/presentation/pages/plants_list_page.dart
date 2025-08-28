@@ -16,6 +16,23 @@ import '../widgets/plants_grouped_by_spaces_view.dart';
 import '../widgets/plants_list_view.dart';
 import '../widgets/plants_loading_widget.dart';
 
+/// Plants List Page - Clean Architecture View Layer
+/// 
+/// RESPONSIBILITIES:
+/// - Presentation logic only (UI rendering)
+/// - User interaction handling (tap, scroll, etc.)
+/// - Navigation routing
+/// - Widget composition and layout
+/// 
+/// WHAT THIS VIEW DOES NOT DO:
+/// - Business logic (all in PlantsProvider)
+/// - Data operations (delegated to provider)
+/// - State management (provider handles all state)
+/// - API calls or data transformation
+/// 
+/// ARCHITECTURE PATTERN:
+/// View → Provider → Use Cases → Repository → Data Sources
+
 class PlantsListPage extends StatefulWidget {
   const PlantsListPage({super.key});
 
@@ -24,8 +41,11 @@ class PlantsListPage extends StatefulWidget {
 }
 
 class _PlantsListPageState extends State<PlantsListPage> {
+  // Provider injection - managed by DI container
   late PlantsProvider _plantsProvider;
   // late spaces.SpacesProvider _spacesProvider;
+  
+  // UI-only controller for scroll management
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -36,7 +56,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
 
     // Load data after a small delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialData();
+      _plantsProvider.loadInitialData();
     });
   }
 
@@ -48,16 +68,11 @@ class _PlantsListPageState extends State<PlantsListPage> {
     super.dispose();
   }
 
-  Future<void> _loadInitialData() async {
-    await Future.wait([
-      _plantsProvider.loadPlants(),
-      // _spacesProvider.loadSpaces(),
-    ]);
-  }
-
+  // ===== VIEW EVENT HANDLERS =====
+  // These methods only delegate to provider and handle UI interactions
+  
   Future<void> _onRefresh() async {
-    _plantsProvider.clearError();
-    await _loadInitialData();
+    await _plantsProvider.refreshPlants();
   }
 
   void _onSearchChanged(String query) {
@@ -82,6 +97,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
     _plantsProvider.setSpaceFilter(spaceId);
   }
 
+  // ===== UI-ONLY INTERACTIONS =====
+  // These methods handle pure UI interactions (scroll, navigation)
+  
   void _scrollToTop() {
     _scrollController.animateTo(
       0,
@@ -90,7 +108,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
-  void _showAddPlantModal(BuildContext context) {
+  void _navigateToAddPlant(BuildContext context) {
     context.push('/plants/add');
   }
 
@@ -98,6 +116,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // ARCHITECTURE: Provide the injected provider to the widget tree
+    // All state management flows through PlantsProvider
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _plantsProvider),
@@ -111,7 +131,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
         body: SafeArea(
           child: Column(
             children: [
-              // Optimized App Bar with granular selector
+              // ARCHITECTURE: App Bar uses granular selector for performance
+              // Only rebuilds when relevant state changes (count, search, view mode)
               Selector<PlantsProvider, AppBarData>(
                 selector:
                     (_, provider) => AppBarData(
@@ -135,7 +156,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
                 },
               ),
 
-              // Optimized lista with multiple granular selectors
+              // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
+              // Each selector only listens to specific parts of provider state
               Expanded(child: _buildOptimizedPlantsContent()),
             ],
           ),
@@ -150,7 +172,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
-  /// Optimized content builder using granular selectors
+  /// ARCHITECTURE: Optimized content builder using granular selectors for performance
+  /// Uses LoadingErrorState selector to minimize rebuilds - only rebuilds when
+  /// loading state, error state, or hasPlants state actually changes
   Widget _buildOptimizedPlantsContent() {
     return Selector<PlantsProvider, LoadingErrorState>(
       selector:
@@ -175,7 +199,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
         if (loadingErrorState.shouldShowError) {
           return PlantsErrorWidget(
             error: loadingErrorState.error!,
-            onRetry: _loadInitialData,
+            onRetry: () => _plantsProvider.loadInitialData(),
           );
         }
 
@@ -185,7 +209,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
-  /// Build the actual plants content (list/grid)
+  /// ARCHITECTURE: Build the actual plants content with PlantsDisplayData selector
+  /// This selector optimizes by only rebuilding when plant list changes, search state changes,
+  /// or search query changes. Uses efficient list comparison with _listsEqual()
   Widget _buildPlantsContent() {
     return Selector<PlantsProvider, PlantsDisplayData>(
       selector:
@@ -210,7 +236,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
             isSearching: displayData.isSearching,
             searchQuery: displayData.searchQuery,
             onClearSearch: () => _onSearchChanged(''),
-            onAddPlant: () => _showAddPlantModal(context),
+            onAddPlant: () => _navigateToAddPlant(context),
           );
         }
 
@@ -228,7 +254,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
-  /// Build view based on current view mode
+  /// ARCHITECTURE: Build view based on current view mode with ViewMode selector
+  /// Final selector layer that only rebuilds when view mode changes
   Widget _buildViewForMode(ViewMode viewMode, PlantsDisplayData displayData) {
     switch (viewMode) {
       case ViewMode.groupedBySpaces:
@@ -254,10 +281,28 @@ class _PlantsListPageState extends State<PlantsListPage> {
     }
   }
 
-  /// Efficient list comparison to avoid unnecessary rebuilds
+  /// PERFORMANCE: Efficient list comparison to avoid unnecessary rebuilds
+  /// Only compares plant IDs rather than full plant objects for better performance
+  /// Uses hash-based comparison for better performance with large lists
   bool _listsEqual(List<Plant> list1, List<Plant> list2) {
     if (list1.length != list2.length) return false;
 
+    // For small lists, direct ID comparison is faster
+    if (list1.length < 50) {
+      for (int i = 0; i < list1.length; i++) {
+        if (list1[i].id != list2[i].id) return false;
+      }
+      return true;
+    }
+
+    // For larger lists, use hash-based comparison for better performance
+    final hash1 = Object.hashAll(list1.map((plant) => plant.id));
+    final hash2 = Object.hashAll(list2.map((plant) => plant.id));
+    
+    // If hashes are different, lists are definitely different
+    if (hash1 != hash2) return false;
+    
+    // Hash collision check - fallback to ID comparison
     for (int i = 0; i < list1.length; i++) {
       if (list1[i].id != list2[i].id) return false;
     }

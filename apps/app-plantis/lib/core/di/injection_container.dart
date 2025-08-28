@@ -187,7 +187,7 @@ void _initSettings() {
     () => SettingsRepository(localDataSource: sl<SettingsLocalDataSource>()),
   );
 
-  // Centralized Settings Provider
+  // Centralized Settings Provider (Enhanced Architecture)
   sl.registerLazySingleton<SettingsProvider>(
     () => SettingsProvider(
       settingsRepository: sl<ISettingsRepository>(),
@@ -195,7 +195,7 @@ void _initSettings() {
       authRepository: sl<IAuthRepository>(),
       backupService: sl<BackupService>(),
       themeProvider: sl<ThemeProvider>(),
-    ),
+    )..initialize(), // Auto-initialize for better UX
   );
 
   // Legacy Notifications Settings Provider (for compatibility during migration)

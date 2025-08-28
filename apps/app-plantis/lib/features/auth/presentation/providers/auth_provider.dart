@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/widgets/loading_overlay.dart';
 
 class AuthProvider extends ChangeNotifier {
   final LoginUseCase _loginUseCase;
@@ -20,6 +21,7 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isInitialized = false;
   bool _isPremium = false;
+  AuthOperation? _currentOperation;
   StreamSubscription<UserEntity?>? _userSubscription;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
 
@@ -51,6 +53,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   bool get isPremium => _isPremium;
+  AuthOperation? get currentOperation => _currentOperation;
 
   void _initializeAuthState() {
     _userSubscription = _authRepository.currentUser.listen(
@@ -140,6 +143,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = AuthOperation.signIn;
     notifyListeners();
 
     final result = await _loginUseCase(
@@ -150,11 +154,13 @@ class AuthProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
       },
       (user) {
         _currentUser = user;
         _isLoading = false;
+        _currentOperation = null;
         
         // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
@@ -170,6 +176,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = AuthOperation.logout;
     notifyListeners();
 
     final result = await _logoutUseCase();
@@ -178,11 +185,13 @@ class AuthProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
       },
       (_) {
         _currentUser = null;
         _isLoading = false;
+        _currentOperation = null;
         
         // Update AuthStateNotifier with logout
         _authStateNotifier.updateUser(null);
@@ -199,6 +208,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> register(String email, String password, String name) async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = AuthOperation.signUp;
     notifyListeners();
 
     final result = await _authRepository.signUpWithEmailAndPassword(
@@ -211,11 +221,13 @@ class AuthProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
       },
       (user) {
         _currentUser = user;
         _isLoading = false;
+        _currentOperation = null;
         
         // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
@@ -228,6 +240,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signInAnonymously() async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = AuthOperation.anonymous;
     notifyListeners();
 
     final result = await _authRepository.signInAnonymously();
@@ -236,11 +249,13 @@ class AuthProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
       },
       (user) {
         _currentUser = user;
         _isLoading = false;
+        _currentOperation = null;
         
         // Update AuthStateNotifier with anonymous user
         _authStateNotifier.updateUser(user);
@@ -281,6 +296,11 @@ class AuthProvider extends ChangeNotifier {
 
   void clearError() {
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearCurrentOperation() {
+    _currentOperation = null;
     notifyListeners();
   }
 }

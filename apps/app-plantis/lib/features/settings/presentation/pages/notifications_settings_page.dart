@@ -11,8 +11,8 @@ class NotificationsSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ChangeNotifierProvider<SettingsProvider>(
-      create: (context) => di.sl<SettingsProvider>()..initialize(),
+    return ChangeNotifierProvider<SettingsProvider>.value(
+      value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Configurações de Notificações'),

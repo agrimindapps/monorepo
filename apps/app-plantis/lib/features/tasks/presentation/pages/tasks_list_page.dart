@@ -89,10 +89,10 @@ class TasksListData {
     );
   }
 
-  bool _listEquals<T>(List<T> a, List<T> b) {
+  bool _listEquals(List<task_entity.Task> a, List<task_entity.Task> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
+      if (a[i].id != b[i].id) return false;
     }
     return true;
   }

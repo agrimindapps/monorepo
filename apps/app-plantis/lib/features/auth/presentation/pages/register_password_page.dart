@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
-import '../../../../core/widgets/enhanced_loading_states.dart';
+import '../../../../core/widgets/register_loading_overlay.dart';
 import '../providers/auth_provider.dart';
 import '../providers/register_provider.dart';
 
@@ -15,7 +15,8 @@ class RegisterPasswordPage extends StatefulWidget {
   State<RegisterPasswordPage> createState() => _RegisterPasswordPageState();
 }
 
-class _RegisterPasswordPageState extends State<RegisterPasswordPage> with LoadingStateMixin {
+class _RegisterPasswordPageState extends State<RegisterPasswordPage> 
+    with RegisterLoadingStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -51,6 +52,61 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> with Loadin
     super.dispose();
   }
 
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira uma senha';
+    }
+    
+    if (value.length < 8) {
+      return 'A senha deve ter pelo menos 8 caracteres';
+    }
+    
+    // Check for uppercase letter
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'A senha deve conter pelo menos uma letra maiúscula';
+    }
+    
+    // Check for lowercase letter
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'A senha deve conter pelo menos uma letra minúscula';
+    }
+    
+    // Check for number
+    if (!RegExp(r'\d').hasMatch(value)) {
+      return 'A senha deve conter pelo menos um número';
+    }
+    
+    // Check for special character
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>_+=\-\[\]\\;/~]').hasMatch(value)) {
+      return 'A senha deve conter pelo menos um caractere especial (!@#\$%^&* etc.)';
+    }
+    
+    // Check for common weak passwords
+    final commonPasswords = [
+      '12345678', '123456789', '1234567890',
+      'password', 'senha123', 'Password1!', 'password123',
+      'admin123', 'user1234', 'qwerty123',
+      '11111111', '00000000', 'aaaaaaaa',
+      'abc12345', '123abc456', 'password!',
+    ];
+    
+    if (commonPasswords.any((weak) => value.toLowerCase().contains(weak.toLowerCase()))) {
+      return 'Esta senha é muito comum. Escolha uma senha mais segura';
+    }
+    
+    // Check for sequential patterns
+    if (RegExp(r'(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)', caseSensitive: false).hasMatch(value)) {
+      return 'A senha não deve conter sequências óbvias (123, abc, etc.)';
+    }
+    
+    // Check for repeated characters
+    if (RegExp(r'(.)\1{2,}').hasMatch(value)) {
+      return 'A senha não deve ter mais de 2 caracteres repetidos consecutivos';
+    }
+    
+    return null;
+  }
+
   Future<void> _handleCreateAccount() async {
     if (_formKey.currentState!.validate() && _registerProvider != null) {
       // Update provider with current password values
@@ -59,23 +115,33 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> with Loadin
       
       // Validate password step
       if (_registerProvider!.validatePassword()) {
-        showLoading(message: 'Criando conta...');
+        showRegisterLoading(message: 'Criando conta...');
         
         final authProvider = context.read<AuthProvider>();
         final registerData = _registerProvider!.registerData;
 
+        updateRegisterLoadingMessage('Conectando ao servidor...');
+        
         await authProvider.register(
           registerData.email,
           registerData.password,
           registerData.name,
         );
 
-        hideLoading();
-
         if (authProvider.isAuthenticated && mounted) {
+          updateRegisterLoadingMessage('Configurando perfil...');
+          await Future<void>.delayed(const Duration(milliseconds: 500)); // Small delay for UX
+          
+          hideRegisterLoading();
+          
           // Clear registration data after successful registration
           _registerProvider!.reset();
-          context.go('/plants');
+          
+          if (mounted) {
+            context.go('/plants');
+          }
+        } else {
+          hideRegisterLoading();
         }
       }
     }
@@ -83,7 +149,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> with Loadin
 
   @override
   Widget build(BuildContext context) {
-    return buildWithLoading(
+    return buildWithRegisterLoading(
       child: ChangeNotifierProvider.value(
         value: _registerProvider ?? di.sl<RegisterProvider>(),
         child: Scaffold(
@@ -235,7 +301,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> with Loadin
                           ),
                           decoration: InputDecoration(
                             hintText:
-                                'Mínimo 8 caracteres, letras, números e símbolos',
+                                'Mín. 8 caracteres: maiúscula, minúscula, número e símbolo',
                             prefixIcon: const Icon(
                               Icons.lock_outline,
                               color: PlantisColors.primary,
@@ -277,20 +343,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> with Loadin
                               ),
                             ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, insira uma senha';
-                            }
-                            if (value.length < 8) {
-                              return 'A senha deve ter pelo menos 8 caracteres';
-                            }
-                            if (!RegExp(
-                              r'^(?=.*[a-zA-Z])(?=.*\d)',
-                            ).hasMatch(value)) {
-                              return 'A senha deve conter letras e números';
-                            }
-                            return null;
-                          },
+                          validator: _validatePassword,
                         ),
                         const SizedBox(height: 24),
 

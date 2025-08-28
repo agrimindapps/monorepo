@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/register_loading_overlay.dart';
 import '../providers/register_provider.dart';
+import '../../utils/validation_helpers.dart';
 
 class RegisterPersonalInfoPage extends StatefulWidget {
   const RegisterPersonalInfoPage({super.key});
@@ -14,11 +16,18 @@ class RegisterPersonalInfoPage extends StatefulWidget {
       _RegisterPersonalInfoPageState();
 }
 
-class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
+class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> 
+    with RegisterLoadingStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   RegisterProvider? _registerProvider;
+
+  // Real-time validation state
+  String? _nameError;
+  String? _emailError;
+  bool _nameHasBeenFocused = false;
+  bool _emailHasBeenFocused = false;
 
   @override
   void initState() {
@@ -33,10 +42,12 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
       // Add listeners to update provider in real-time
       _nameController.addListener(() {
         _registerProvider?.updateName(_nameController.text);
+        _validateNameField();
       });
       
       _emailController.addListener(() {
         _registerProvider?.updateEmail(_emailController.text);
+        _validateEmailField();
       });
     });
   }
@@ -48,25 +59,69 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
     super.dispose();
   }
 
+  // Real-time validation methods
+  void _validateNameField() {
+    if (!_nameHasBeenFocused) return;
+    
+    setState(() {
+      _nameError = ValidationHelpers.validateName(_nameController.text);
+    });
+  }
+
+  void _validateEmailField() {
+    if (!_emailHasBeenFocused) return;
+    
+    setState(() {
+      _emailError = ValidationHelpers.validateEmail(_emailController.text);
+    });
+  }
+
+  void _onNameFocusChange(bool hasFocus) {
+    if (!hasFocus) {
+      setState(() {
+        _nameHasBeenFocused = true;
+      });
+      _validateNameField();
+    }
+  }
+
+  void _onEmailFocusChange(bool hasFocus) {
+    if (!hasFocus) {
+      setState(() {
+        _emailHasBeenFocused = true;
+      });
+      _validateEmailField();
+    }
+  }
+
   Future<void> _handleNext() async {
     if (_formKey.currentState!.validate() && _registerProvider != null) {
+      showRegisterLoading(message: 'Validando informações...');
+      
       // Update provider with current values
       _registerProvider!.updateName(_nameController.text);
       _registerProvider!.updateEmail(_emailController.text);
       
-      // Validate and proceed to next step
-      final success = await _registerProvider!.validateAndProceedPersonalInfo();
-      
-      if (success) {
-        // Navigation successful, go to password page
-        if (mounted) {
-          context.go('/register/password');
+      try {
+        // Validate and proceed to next step
+        final success = await _registerProvider!.validateAndProceedPersonalInfo();
+        
+        hideRegisterLoading();
+        
+        if (success) {
+          // Navigation successful, go to password page
+          if (mounted) {
+            context.go('/register/password');
+          }
+        } else {
+          // Show error - check if it's the email already exists case
+          if (_registerProvider!.errorMessage == 'Este email já possui uma conta.') {
+            _showEmailAlreadyExistsDialog();
+          }
         }
-      } else {
-        // Show error - check if it's the email already exists case
-        if (_registerProvider!.errorMessage == 'Este email já possui uma conta.') {
-          _showEmailAlreadyExistsDialog();
-        }
+      } catch (e) {
+        hideRegisterLoading();
+        // Error handling is done by the provider
       }
     }
   }
@@ -164,7 +219,8 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _registerProvider ?? di.sl<RegisterProvider>(),
-      child: Scaffold(
+      child: buildWithRegisterLoading(
+        child: Scaffold(
       backgroundColor: PlantisColors.primary,
       body: SafeArea(
         child: Center(
@@ -303,105 +359,130 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _nameController,
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Ex: João Silva',
-                            prefixIcon: const Icon(
-                              Icons.person_outline,
-                              color: PlantisColors.primary,
+                        Focus(
+                          onFocusChange: _onNameFocusChange,
+                          child: TextFormField(
+                            controller: _nameController,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
+                            decoration: InputDecoration(
+                              hintText: 'Ex: João Silva',
+                              prefixIcon: const Icon(
+                                Icons.person_outline,
                                 color: PlantisColors.primary,
-                                width: 2,
                               ),
+                              suffixIcon: _nameHasBeenFocused && _nameController.text.isNotEmpty
+                                  ? ValidationHelpers.getValidationIcon(
+                                      _nameController.text, 
+                                      ValidationHelpers.validateName,
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: _nameHasBeenFocused
+                                      ? ValidationHelpers.getBorderColor(
+                                          _nameController.text,
+                                          ValidationHelpers.validateName,
+                                        )
+                                      : PlantisColors.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: _nameHasBeenFocused
+                                      ? ValidationHelpers.getBorderColor(
+                                          _nameController.text,
+                                          ValidationHelpers.validateName,
+                                        )
+                                      : PlantisColors.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: _nameHasBeenFocused
+                                      ? ValidationHelpers.getBorderColor(
+                                          _nameController.text,
+                                          ValidationHelpers.validateName,
+                                        )
+                                      : PlantisColors.primary,
+                                  width: 2,
+                                ),
+                              ),
+                              errorText: _nameHasBeenFocused ? _nameError : null,
                             ),
+                            validator: ValidationHelpers.validateName,
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Por favor, insira seu nome completo';
-                            }
-                            if (value.trim().length < 2) {
-                              return 'Nome deve ter pelo menos 2 caracteres';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 24),
 
                         // Email field
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Email',
-                            prefixIcon: const Icon(
-                              Icons.email_outlined,
-                              color: PlantisColors.primary,
+                        Focus(
+                          onFocusChange: _onEmailFocusChange,
+                          child: TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            autocorrect: false,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
+                            decoration: InputDecoration(
+                              hintText: 'Email',
+                              prefixIcon: const Icon(
+                                Icons.email_outlined,
                                 color: PlantisColors.primary,
-                                width: 2,
                               ),
+                              suffixIcon: _emailHasBeenFocused && _emailController.text.isNotEmpty
+                                  ? ValidationHelpers.getValidationIcon(
+                                      _emailController.text, 
+                                      ValidationHelpers.validateEmail,
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: _emailHasBeenFocused
+                                      ? ValidationHelpers.getBorderColor(
+                                          _emailController.text,
+                                          ValidationHelpers.validateEmail,
+                                        )
+                                      : PlantisColors.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: _emailHasBeenFocused
+                                      ? ValidationHelpers.getBorderColor(
+                                          _emailController.text,
+                                          ValidationHelpers.validateEmail,
+                                        )
+                                      : PlantisColors.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: _emailHasBeenFocused
+                                      ? ValidationHelpers.getBorderColor(
+                                          _emailController.text,
+                                          ValidationHelpers.validateEmail,
+                                        )
+                                      : PlantisColors.primary,
+                                  width: 2,
+                                ),
+                              ),
+                              errorText: _emailHasBeenFocused ? _emailError : null,
                             ),
+                            validator: ValidationHelpers.validateEmail,
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, insira seu email';
-                            }
-                            if (!RegExp(
-                              r'^[^@]+@[^@]+\.[^@]+',
-                            ).hasMatch(value)) {
-                              return 'Por favor, insira um email válido';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 24),
 
@@ -513,6 +594,7 @@ class _RegisterPersonalInfoPageState extends State<RegisterPersonalInfoPage> {
           ),
         ),
         ),
+      ),
       ),
     );
   }

@@ -302,6 +302,19 @@ class PlantsProvider extends ChangeNotifier {
     return _plants.where((plant) => plant.spaceId == spaceId).toList();
   }
 
+  /// Load initial data for the plants list page
+  /// This method is responsible for the initial data loading business logic
+  Future<void> loadInitialData() async {
+    await loadPlants();
+  }
+
+  /// Refresh plants data and clear any existing errors
+  /// This method handles refresh operations with proper error clearing
+  Future<void> refreshPlants() async {
+    clearError();
+    await loadInitialData();
+  }
+
   // Get plants count
   int get plantsCount => _plants.length;
 

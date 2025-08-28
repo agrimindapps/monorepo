@@ -38,6 +38,19 @@ class PlantisColors {
   static const Color sunLight = Color(0xFFFFF9C4); // Light sun
   static const Color sunDark = Color(0xFFE65100); // Dark sun
 
+  // Semantic colors
+  static const Color success = Color(0xFF27AE60); // Success green
+  static const Color successLight = Color(0xFFD4EFDF); // Light success
+  static const Color error = Color(0xFFE74C3C); // Error red
+  static const Color errorLight = Color(0xFFFDEDEA); // Light error
+  static const Color warning = Color(0xFFF39C12); // Warning orange
+  static const Color warningLight = Color(0xFFFEF5E7); // Light warning
+  
+  // Text colors
+  static const Color textPrimary = Color(0xFF2C3E50); // Dark text
+  static const Color textSecondary = Color(0xFF7F8C8D); // Light text
+  static const Color textTertiary = Color(0xFFBDC3C7); // Very light text
+
   // Brand gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,

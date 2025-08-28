@@ -19,8 +19,8 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ChangeNotifierProvider<SettingsProvider>(
-      create: (context) => di.sl<SettingsProvider>()..initialize(),
+    return ChangeNotifierProvider<SettingsProvider>.value(
+      value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
       child: Scaffold(
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/loading_overlay.dart';
+import '../../../../core/widgets/error_display.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 
@@ -112,173 +114,181 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: PlantisColors.primary,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Moon icon (top right)
-            Positioned(
-              top: 24,
-              right: 24,
-              child: Icon(
-                Icons.brightness_2,
-                color: Colors.white.withValues(alpha: 0.8),
-                size: 24,
-              ),
-            ),
-
-            // Main content
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 450),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        return Scaffold(
+          backgroundColor: PlantisColors.primary,
+          body: AuthLoadingOverlay(
+            isLoading: authProvider.isLoading,
+            currentOperation: authProvider.currentOperation,
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  // Moon icon (top right)
+                  Positioned(
+                    top: 24,
+                    right: 24,
+                    child: Icon(
+                      Icons.brightness_2,
+                      color: Colors.white.withValues(alpha: 0.8),
+                      size: 24,
+                    ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Header with logo and tabs
-                      Container(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          children: [
-                            // Logo and title
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.eco,
-                                  size: 32,
-                                  color: PlantisColors.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'PlantApp',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.headlineSmall?.copyWith(
-                                    color: PlantisColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Cuidado de Plantas',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.copyWith(
-                                color: PlantisColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
 
-                            // Custom Tab Bar
-                            AnimatedBuilder(
-                              animation: _fadeInAnimation,
-                              builder: (context, child) {
-                                return Transform.translate(
-                                  offset: Offset(0, _slideAnimation.value),
-                                  child: FadeTransition(
-                                    opacity: _fadeInAnimation,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
-                                        borderRadius: BorderRadius.circular(12),
+                  // Main content
+                  Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 450),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Header with logo and tabs
+                            Container(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Column(
+                                children: [
+                                  // Logo and title
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.eco,
+                                        size: 32,
+                                        color: PlantisColors.primary,
                                       ),
-                                      child: TabBar(
-                                        controller: _tabController,
-                                        indicator: BoxDecoration(
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'PlantApp',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.headlineSmall?.copyWith(
                                           color: PlantisColors.primary,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: PlantisColors.primary
-                                                  .withValues(alpha: 0.3),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                        labelColor: Colors.white,
-                                        unselectedLabelColor:
-                                            Colors.grey.shade600,
-                                        labelStyle: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        unselectedLabelStyle: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        indicatorPadding: const EdgeInsets.all(
-                                          4,
-                                        ),
-                                        dividerColor: Colors.transparent,
-                                        tabs: const [
-                                          Tab(text: 'Entrar'),
-                                          Tab(text: 'Cadastrar'),
-                                        ],
                                       ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Cuidado de Plantas',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.copyWith(
+                                      color: PlantisColors.textSecondary,
                                     ),
                                   ),
-                                );
-                              },
+                                  const SizedBox(height: 32),
+
+                                  // Custom Tab Bar
+                                  AnimatedBuilder(
+                                    animation: _fadeInAnimation,
+                                    builder: (context, child) {
+                                      return Transform.translate(
+                                        offset: Offset(0, _slideAnimation.value),
+                                        child: FadeTransition(
+                                          opacity: _fadeInAnimation,
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade100,
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: TabBar(
+                                              controller: _tabController,
+                                              indicator: BoxDecoration(
+                                                color: PlantisColors.primary,
+                                                borderRadius: BorderRadius.circular(
+                                                  10,
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: PlantisColors.primary
+                                                        .withValues(alpha: 0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              labelColor: Colors.white,
+                                              unselectedLabelColor:
+                                                  Colors.grey.shade600,
+                                              labelStyle: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              unselectedLabelStyle: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              indicatorPadding: const EdgeInsets.all(
+                                                4,
+                                              ),
+                                              dividerColor: Colors.transparent,
+                                              tabs: const [
+                                                Tab(text: 'Entrar'),
+                                                Tab(text: 'Cadastrar'),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Tab Content
+                            Container(
+                              height: 600,
+                              padding: const EdgeInsets.only(
+                                left: 32,
+                                right: 32,
+                                bottom: 32,
+                              ),
+                              child: TabBarView(
+                                controller: _tabController,
+                                children: [_buildLoginTab(), _buildRegisterTab()],
+                              ),
                             ),
                           ],
                         ),
                       ),
-
-                      // Tab Content
-                      Container(
-                        height: 600,
-                        padding: const EdgeInsets.only(
-                          left: 32,
-                          right: 32,
-                          bottom: 32,
-                        ),
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [_buildLoginTab(), _buildRegisterTab()],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
 
-            // Copyright footer
-            Positioned(
-              bottom: 16,
-              left: 0,
-              right: 0,
-              child: Text(
-                '© 2025 PlantApp - Todos os direitos reservados',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 12,
-                ),
+                  // Copyright footer
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    right: 0,
+                    child: Text(
+                      '© 2025 PlantApp - Todos os direitos reservados',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -496,30 +506,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
                         if (authProvider.errorMessage != null) {
-                          return Container(
-                            padding: const EdgeInsets.all(12),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: PlantisColors.errorLight,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: PlantisColors.error,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    authProvider.errorMessage!,
-                                    style: const TextStyle(
-                                      color: PlantisColors.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          return AuthErrorDisplay(
+                            errorMessage: authProvider.errorMessage!,
+                            onRetry: _handleLogin,
+                            onDismiss: () => authProvider.clearError(),
                           );
                         }
                         return const SizedBox.shrink();
@@ -527,47 +517,29 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     ),
 
                     // Login button
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        return SizedBox(
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed:
-                                authProvider.isLoading ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: PlantisColors.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 2,
-                              shadowColor: PlantisColors.primary.withValues(
-                                alpha: 0.3,
-                              ),
-                            ),
-                            child:
-                                authProvider.isLoading
-                                    ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
-                                    : const Text(
-                                      'Entrar',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: PlantisColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        );
-                      },
+                          elevation: 2,
+                          shadowColor: PlantisColors.primary.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                        child: const Text(
+                          'Entrar',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 24),
 
@@ -600,72 +572,51 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     const SizedBox(height: 24),
 
                     // Anonymous login button
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        return SizedBox(
-                          height: 48,
-                          child: OutlinedButton(
-                            onPressed:
-                                authProvider.isLoading
-                                    ? null
-                                    : () async {
-                                      await authProvider.signInAnonymously();
-                                      if (authProvider.isAuthenticated &&
-                                          mounted) {
-                                        // ignore: use_build_context_synchronously
-                                        context.go('/plants');
-                                      }
-                                    },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: PlantisColors.primary,
-                              side: BorderSide(
-                                color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 1,
-                              shadowColor: Colors.black.withValues(alpha: 0.1),
+                    SizedBox(
+                      height: 48,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          await context.read<AuthProvider>().signInAnonymously();
+                          final authProvider = context.read<AuthProvider>();
+                          if (authProvider.isAuthenticated && mounted) {
+                            // ignore: use_build_context_synchronously
+                            context.go('/plants');
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: PlantisColors.primary,
+                          side: BorderSide(
+                            color: PlantisColors.primary.withValues(
+                              alpha: 0.3,
                             ),
-                            child:
-                                authProvider.isLoading
-                                    ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              PlantisColors.primary,
-                                            ),
-                                      ),
-                                    )
-                                    : const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.person_outline,
-                                          size: 20,
-                                          color: PlantisColors.primary,
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Continuar sem conta',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: PlantisColors.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            width: 1.5,
                           ),
-                        );
-                      },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 1,
+                          shadowColor: Colors.black.withValues(alpha: 0.1),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_outline,
+                              size: 20,
+                              color: PlantisColors.primary,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Continuar sem conta',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: PlantisColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -961,30 +912,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
                         if (authProvider.errorMessage != null) {
-                          return Container(
-                            padding: const EdgeInsets.all(12),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: PlantisColors.errorLight,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: PlantisColors.error,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    authProvider.errorMessage!,
-                                    style: const TextStyle(
-                                      color: PlantisColors.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          return AuthErrorDisplay(
+                            errorMessage: authProvider.errorMessage!,
+                            onRetry: _handleRegister,
+                            onDismiss: () => authProvider.clearError(),
                           );
                         }
                         return const SizedBox.shrink();
@@ -992,44 +923,26 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     ),
 
                     // Register button
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        return SizedBox(
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed:
-                                authProvider.isLoading ? null : _handleRegister,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: PlantisColors.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 2,
-                            ),
-                            child:
-                                authProvider.isLoading
-                                    ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
-                                    : const Text(
-                                      'Criar Conta',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _handleRegister,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: PlantisColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      },
+                          elevation: 2,
+                        ),
+                        child: const Text(
+                          'Criar Conta',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
 

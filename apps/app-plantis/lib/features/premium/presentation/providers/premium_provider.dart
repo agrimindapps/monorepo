@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../data/services/subscription_sync_service.dart';
+import '../../../../core/widgets/loading_overlay.dart';
 
 class PremiumProvider extends ChangeNotifier {
   final ISubscriptionRepository _subscriptionRepository;
@@ -14,6 +15,7 @@ class PremiumProvider extends ChangeNotifier {
   List<ProductInfo> _availableProducts = [];
   bool _isLoading = false;
   String? _errorMessage;
+  PurchaseOperation? _currentOperation;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
   StreamSubscription<UserEntity?>? _authStream;
 
@@ -34,6 +36,7 @@ class PremiumProvider extends ChangeNotifier {
   bool get isPremium => _currentSubscription?.isActive ?? false;
   bool get isInTrial => _currentSubscription?.isInTrial ?? false;
   bool get canPurchasePremium => !_isAnonymousUser;
+  PurchaseOperation? get currentOperation => _currentOperation;
 
   bool get _isAnonymousUser {
     // Verifica se o usuário atual é anônimo através do AuthRepository
@@ -100,6 +103,7 @@ class PremiumProvider extends ChangeNotifier {
   Future<void> _checkCurrentSubscription() async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = PurchaseOperation.loadProducts;
     notifyListeners();
 
     final result = await _subscriptionRepository.getCurrentSubscription();
@@ -108,11 +112,13 @@ class PremiumProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
       },
       (subscription) {
         _currentSubscription = subscription;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
       },
     );
@@ -135,6 +141,7 @@ class PremiumProvider extends ChangeNotifier {
   Future<bool> purchaseProduct(String productId) async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = PurchaseOperation.purchase;
     notifyListeners();
 
     final result = await _subscriptionRepository.purchaseProduct(
@@ -145,6 +152,7 @@ class PremiumProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
         return false;
       },
@@ -175,6 +183,7 @@ class PremiumProvider extends ChangeNotifier {
         );
 
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
         return true;
       },
@@ -184,6 +193,7 @@ class PremiumProvider extends ChangeNotifier {
   Future<bool> restorePurchases() async {
     _isLoading = true;
     _errorMessage = null;
+    _currentOperation = PurchaseOperation.restore;
     notifyListeners();
 
     final result = await _subscriptionRepository.restorePurchases();
@@ -192,6 +202,7 @@ class PremiumProvider extends ChangeNotifier {
       (failure) {
         _errorMessage = failure.message;
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
         return false;
       },
@@ -206,6 +217,7 @@ class PremiumProvider extends ChangeNotifier {
           }
         }
         _isLoading = false;
+        _currentOperation = null;
         notifyListeners();
         return true;
       },
@@ -228,6 +240,11 @@ class PremiumProvider extends ChangeNotifier {
 
   void clearError() {
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearCurrentOperation() {
+    _currentOperation = null;
     notifyListeners();
   }
 

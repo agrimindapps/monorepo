@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
+import '../../../premium/presentation/providers/premium_provider.dart';
 
 class PromotionalPage extends StatefulWidget {
   const PromotionalPage({super.key});
@@ -714,6 +716,13 @@ class _PromotionalPageState extends State<PromotionalPage>
   }
 
   void _handleSubscription(BuildContext context) {
+    final premiumProvider = context.read<PremiumProvider?>();
+    
+    if (premiumProvider == null) {
+      _showSubscriptionConfirmation(context);
+      return;
+    }
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -772,7 +781,7 @@ class _PromotionalPageState extends State<PromotionalPage>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _showSubscriptionConfirmation(context);
+              _startPremiumTrial(context, premiumProvider);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: PlantisColors.primary,
@@ -781,6 +790,37 @@ class _PromotionalPageState extends State<PromotionalPage>
             child: const Text('Iniciar Teste'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _startPremiumTrial(BuildContext context, PremiumProvider premiumProvider) async {
+    // Try to purchase the first available product (trial)
+    if (premiumProvider.availableProducts.isNotEmpty) {
+      final firstProduct = premiumProvider.availableProducts.first;
+      final success = await premiumProvider.purchaseProduct(firstProduct.productId);
+      
+      if (success && context.mounted) {
+        _showSuccessMessage(context, 'Teste premium iniciado com sucesso!');
+      } else if (context.mounted) {
+        _showSubscriptionConfirmation(context);
+      }
+    } else {
+      _showSubscriptionConfirmation(context);
+    }
+  }
+
+  void _showSuccessMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: PlantisColors.success,
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
       ),
     );
   }
@@ -801,21 +841,193 @@ class _PromotionalPageState extends State<PromotionalPage>
   }
 
   void _showMoreInfo(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mais informações disponíveis em breve!'),
-        backgroundColor: PlantisColors.secondary,
-        behavior: SnackBarBehavior.floating,
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Sobre o Plantis Premium',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'O Plantis Premium oferece recursos avançados para jardineiros que querem levar o cuidado das plantas ao próximo nível.',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '🌱 Recursos Inclusos:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '• Plantas ilimitadas\n'
+                '• Lembretes inteligentes personalizados\n'
+                '• Backup automático na nuvem\n'
+                '• Análises detalhadas de crescimento\n'
+                '• Identificação de plantas por IA\n'
+                '• Diagnóstico de doenças\n'
+                '• Temas personalizados\n'
+                '• Suporte prioritário 24/7',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '💡 Por que Premium?',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Com o Premium, suas plantas ficam mais saudáveis através de cuidados baseados em dados científicos e tecnologia avançada.',
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: PlantisColors.leaf.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PlantisColors.leaf.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.security,
+                      color: PlantisColors.leaf,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Teste grátis por 7 dias, depois R\$ 12,90/mês. Cancele a qualquer momento.',
+                        style: TextStyle(
+                          color: PlantisColors.leaf.withValues(alpha: 0.8),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _handleSubscription(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PlantisColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Iniciar Teste'),
+          ),
+        ],
       ),
     );
   }
 
   void _shareApp(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Compartilhamento disponível em breve!'),
-        backgroundColor: PlantisColors.water,
-        behavior: SnackBarBehavior.floating,
+    // Show sharing dialog with app information
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Compartilhar Plantis',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Ajude seus amigos a cuidarem melhor das plantas deles!',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: PlantisColors.leaf.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: PlantisColors.leaf.withValues(alpha: 0.3),
+                ),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Plantis - Cuidado de Plantas',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Cuide das suas plantas com amor e tecnologia. O melhor app para jardineiros iniciantes e experientes!',
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '• Lembretes inteligentes\n'
+                    '• Diário visual das plantas\n'
+                    '• Dicas personalizadas\n'
+                    '• Organização por espaços',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Copie o texto acima e compartilhe onde quiser!',
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Obrigado por compartilhar o Plantis! 🌱'),
+                  backgroundColor: PlantisColors.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PlantisColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Compartilhar'),
+          ),
+        ],
       ),
     );
   }

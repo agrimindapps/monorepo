@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/colors.dart';
+import '../../core/widgets/loading_overlay.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 class LandingPage extends StatefulWidget {
@@ -107,23 +108,35 @@ class _LandingPageState extends State<LandingPage>
         ),
       ),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
+        child: Semantics(
+          label: 'Carregando aplicativo Plantis',
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.eco, size: 80, color: Colors.white),
               ),
-              child: const Icon(Icons.eco, size: 80, color: Colors.white),
-            ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            ),
-          ],
+              const SizedBox(height: 24),
+              const Text(
+                'Inicializando...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -142,32 +155,44 @@ class _LandingPageState extends State<LandingPage>
         ),
       ),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
+        child: Semantics(
+          label: 'Redirecionando para o aplicativo',
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.eco, size: 80, color: Colors.white),
               ),
-              child: const Icon(Icons.eco, size: 80, color: Colors.white),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Bem-vindo de volta!',
-              style: TextStyle(
+              const SizedBox(height: 24),
+              const Text(
+                'Bem-vindo de volta!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Redirecionando...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const CircularProgressIndicator(
                 color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                strokeWidth: 2,
               ),
-            ),
-            const SizedBox(height: 16),
-            const CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

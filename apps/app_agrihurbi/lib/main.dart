@@ -9,6 +9,7 @@ import 'package:app_agrihurbi/core/utils/hive_initializer.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/providers/livestock_provider.dart';
+import 'package:app_agrihurbi/features/markets/presentation/providers/market_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -47,6 +48,9 @@ class AgriHurbiApp extends StatelessWidget {
         
         // Calculator Provider
         ChangeNotifierProvider(create: (_) => getIt<CalculatorProvider>()),
+        
+        // Market Provider
+        ChangeNotifierProvider(create: (_) => getIt<MarketProvider>()),
       ],
       child: MaterialApp.router(
         title: AppConstants.appName,

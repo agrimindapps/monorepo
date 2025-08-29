@@ -9,6 +9,8 @@ import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_detail_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_form_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_search_page.dart';
+import 'package:app_agrihurbi/features/markets/presentation/pages/market_detail_page.dart';
+import 'package:app_agrihurbi/features/markets/presentation/pages/markets_list_page.dart';
 import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
 import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
 import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
@@ -362,7 +364,7 @@ class AppRouter {
                 name: 'market-detail',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return MarketDetailPage(id: id);
+                  return MarketDetailPage(marketId: id);
                 },
               ),
             ],
@@ -629,22 +631,6 @@ class NewsDetailPage extends StatelessWidget {
   );
 }
 
-class MarketsListPage extends StatelessWidget {
-  const MarketsListPage({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: Text('Markets List Page')),
-  );
-}
-
-class MarketDetailPage extends StatelessWidget {
-  final String id;
-  const MarketDetailPage({super.key, required this.id});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    body: Center(child: Text('Market Detail Page - ID: $id')),
-  );
-}
 
 // Settings and News pages are now imported from their respective feature modules
 

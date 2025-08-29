@@ -19,6 +19,9 @@ import '../../features/subscription/data/models/subscription_model.dart';
 import '../../features/news/data/models/commodity_price_model.dart';
 import '../../features/news/data/models/news_article_model.dart';
 
+// Import markets models
+import '../../features/markets/data/models/market_enums_adapter.dart';
+
 /// Inicializador do Hive para configuração de adapters
 /// 
 /// Centraliza o registro de todos os adapters Hive do app
@@ -48,6 +51,9 @@ class HiveInitializer {
       
       // Registrar adapters de news
       _registerNewsAdapters();
+      
+      // Registrar adapters de markets
+      _registerMarketsAdapters();
       
       debugPrint('HiveInitializer: Configuração do Hive concluída');
     } catch (e, stackTrace) {
@@ -214,6 +220,19 @@ class HiveInitializer {
       debugPrint('HiveInitializer: News adapters registrados');
     } catch (e) {
       debugPrint('HiveInitializer: Erro ao registrar adapters de news - $e');
+      rethrow;
+    }
+  }
+
+  /// Registra adapters relacionados aos markets
+  static void _registerMarketsAdapters() {
+    try {
+      // Register market enum adapters - TypeIds: 7-8
+      registerMarketAdapters();
+      
+      debugPrint('HiveInitializer: Markets adapters registrados');
+    } catch (e) {
+      debugPrint('HiveInitializer: Erro ao registrar adapters de markets - $e');
       rethrow;
     }
   }

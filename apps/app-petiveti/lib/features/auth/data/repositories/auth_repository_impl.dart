@@ -4,13 +4,15 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/user_model.dart';
 
-class AuthRepositoryImpl implements AuthRepository {
+class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository {
   final AuthLocalDataSource localDataSource;
   final AuthRemoteDataSource remoteDataSource;
   StreamSubscription<UserModel?>? _authStateSubscription;
@@ -22,23 +24,89 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User>> signInWithEmail(String email, String password) async {
-    try {
-      final user = await remoteDataSource.signInWithEmail(email, password);
-      await localDataSource.cacheUser(user);
-      return Right(user);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      // Still return success even if caching fails
-      try {
-        final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha na autenticação'));
-      } catch (_) {
-        return Left(CacheFailure(message: e.message));
-      }
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return await logTimedOperation<Either<Failure, User>>(
+      category: LogCategory.auth,
+      operation: LogOperation.login,
+      message: 'sign in with email',
+      metadata: {'email': email, 'method': 'email'},
+      operationFunction: () async {
+        try {
+          await logOperationStart(
+            category: LogCategory.auth,
+            operation: LogOperation.login,
+            message: 'authenticating user with email',
+            metadata: {'email': email},
+          );
+
+          final user = await remoteDataSource.signInWithEmail(email, password);
+          
+          await logLocalStorageOperation(
+            category: LogCategory.auth,
+            operation: LogOperation.create,
+            message: 'caching user session',
+            metadata: {'user_id': user.id, 'email': user.email},
+          );
+          
+          await localDataSource.cacheUser(user);
+          
+          await logOperationSuccess(
+            category: LogCategory.auth,
+            operation: LogOperation.login,
+            message: 'sign in with email',
+            metadata: {'user_id': user.id, 'email': user.email},
+          );
+          
+          return Right(user);
+        } on ServerException catch (e, stackTrace) {
+          await logOperationError(
+            category: LogCategory.auth,
+            operation: LogOperation.login,
+            message: 'sign in with email - server error',
+            error: e,
+            stackTrace: stackTrace,
+            metadata: {'email': email},
+          );
+          return Left(AuthFailure(message: e.message));
+        } on CacheException catch (e, stackTrace) {
+          await logOperationError(
+            category: LogCategory.auth,
+            operation: LogOperation.create,
+            message: 'failed to cache user session',
+            error: e,
+            stackTrace: stackTrace,
+            metadata: {'email': email},
+          );
+          
+          // Still return success even if caching fails
+          try {
+            final user = await remoteDataSource.getCurrentUser();
+            if (user != null) {
+              await logOperationSuccess(
+                category: LogCategory.auth,
+                operation: LogOperation.login,
+                message: 'sign in with email (cache failed but auth succeeded)',
+                metadata: {'user_id': user.id, 'cache_failed': true},
+              );
+              return Right(user);
+            } else {
+              return const Left(AuthFailure(message: 'Falha na autenticação'));
+            }
+          } catch (_) {
+            return Left(CacheFailure(message: e.message));
+          }
+        } catch (e, stackTrace) {
+          await logOperationError(
+            category: LogCategory.auth,
+            operation: LogOperation.login,
+            message: 'sign in with email - unexpected error',
+            error: e,
+            stackTrace: stackTrace,
+            metadata: {'email': email},
+          );
+          return Left(AuthFailure(message: 'Erro inesperado: $e'));
+        }
+      },
+    );
   }
 
   @override

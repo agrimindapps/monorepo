@@ -1,4 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,8 +9,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // Initialize Firebase
-    await Firebase.initializeApp();
+    // Skip Firebase initialization in debug/development mode
+    // TODO: Add proper Firebase configuration when needed
+    if (kDebugMode) {
+      print('Running in debug mode - Firebase initialization skipped');
+    }
     
     // Initialize dependency injection (includes Hive initialization)
     await di.init();

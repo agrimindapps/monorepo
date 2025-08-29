@@ -3,13 +3,15 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../domain/entities/appointment.dart';
 import '../../domain/repositories/appointment_repository.dart';
 import '../datasources/appointment_local_datasource.dart';
 import '../datasources/appointment_remote_datasource.dart';
 import '../models/appointment_model.dart';
 
-class AppointmentRepositoryImpl implements AppointmentRepository {
+class AppointmentRepositoryImpl with LoggableRepositoryMixin implements AppointmentRepository {
   final AppointmentLocalDataSource localDataSource;
   final AppointmentRemoteDataSource remoteDataSource;
   final Connectivity connectivity;

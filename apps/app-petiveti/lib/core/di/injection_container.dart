@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/animals/data/datasources/animal_local_datasource.dart';
 import '../../features/animals/data/datasources/animal_remote_datasource.dart';
+import '../../features/animals/data/models/animal_model.dart';
 import '../../features/animals/data/repositories/animal_repository_hybrid_impl.dart';
 import '../../features/animals/domain/repositories/animal_repository.dart';
 import '../../features/animals/domain/usecases/add_animal.dart';
@@ -76,6 +80,11 @@ import '../../features/weight/domain/usecases/get_weights_by_animal_id.dart';
 import '../../features/weight/domain/usecases/update_weight.dart';
 import '../auth/auth_service.dart';
 import '../cache/cache_service.dart';
+import '../logging/datasources/log_local_datasource.dart';
+import '../logging/datasources/log_local_datasource_simple_impl.dart';
+import '../logging/repositories/log_repository.dart';
+import '../logging/repositories/log_repository_impl.dart';
+import '../logging/services/logging_service.dart';
 import '../notifications/notification_service.dart';
 import '../optimization/lazy_loader.dart';
 import '../performance/performance_service.dart' as local_perf;
@@ -97,20 +106,53 @@ Future<void> init() async {
   // Core services
   _registerCoreServices();
   
-  // Features services
+  // Features services (always register auth, but with mocks in web debug)
   _registerAuthFeature();
-  _registerSubscriptionFeature();
-  _registerAnimalsFeature();
-  _registerAppointmentsFeature();
-  _registerVaccinesFeature();
-  _registerMedicationsFeature();
-  _registerWeightFeature();
-  _registerRemindersFeature();
-  _registerExpensesFeature();
-  _registerCalculatorsFeature();
+  
+  // Skip other Firebase-dependent ones in web debug
+  if (!kIsWeb || !kDebugMode) {
+    _registerSubscriptionFeature();
+    _registerAppointmentsFeature();
+    _registerVaccinesFeature();
+    _registerRemindersFeature();
+    _registerExpensesFeature();
+  }
+  
+  // Always register non-Firebase features
+  _registerAnimalsFeature(); // Uses only Hive
+  _registerMedicationsFeature(); // Local only
+  _registerWeightFeature(); // Local only
+  _registerCalculatorsFeature(); // No Firebase
 
-  // Core services that depend on features
-  _registerCoreAuthServices();
+  // Core services that depend on features (skip in web debug)
+  if (!kIsWeb || !kDebugMode) {
+    _registerCoreAuthServices();
+  }
+  
+  // Initialize logging service after all dependencies are registered
+  await _initializeLoggingService();
+}
+
+Future<void> _initializeLoggingService() async {
+  try {
+    // Skip Firebase services in web debug mode
+    if (kIsWeb && kDebugMode) {
+      await LoggingService.instance.initialize(
+        logRepository: getIt<LogRepository>(),
+        analytics: null,
+        crashlytics: null,
+      );
+    } else {
+      await LoggingService.instance.initialize(
+        logRepository: getIt<LogRepository>(),
+        analytics: getIt<FirebaseAnalytics>(),
+        crashlytics: getIt<FirebaseCrashlytics>(),
+      );
+    }
+  } catch (e) {
+    // If logging service fails to initialize, continue without it
+    print('Warning: Failed to initialize LoggingService: $e');
+  }
 }
 
 void _registerExternalServices() {
@@ -119,15 +161,28 @@ void _registerExternalServices() {
     () => Connectivity(),
   );
   
-  // Firebase Auth
-  getIt.registerLazySingleton<firebase_auth.FirebaseAuth>(
-    () => firebase_auth.FirebaseAuth.instance,
-  );
-  
-  // Firebase Firestore
-  getIt.registerLazySingleton<FirebaseFirestore>(
-    () => FirebaseFirestore.instance,
-  );
+  // Skip Firebase registration on web debug to avoid JavaScript errors
+  if (!kIsWeb || !kDebugMode) {
+    // Firebase Auth
+    getIt.registerLazySingleton<firebase_auth.FirebaseAuth>(
+      () => firebase_auth.FirebaseAuth.instance,
+    );
+    
+    // Firebase Firestore
+    getIt.registerLazySingleton<FirebaseFirestore>(
+      () => FirebaseFirestore.instance,
+    );
+
+    // Firebase Analytics
+    getIt.registerLazySingleton<FirebaseAnalytics>(
+      () => FirebaseAnalytics.instance,
+    );
+
+    // Firebase Crashlytics
+    getIt.registerLazySingleton<FirebaseCrashlytics>(
+      () => FirebaseCrashlytics.instance,
+    );
+  }
 
   // Google Sign In
   getIt.registerLazySingleton<GoogleSignIn>(
@@ -143,6 +198,17 @@ void _registerCoreServices() {
   // Hive Service
   getIt.registerLazySingleton<HiveService>(
     () => HiveService.instance,
+  );
+  
+  // Logging Services
+  getIt.registerLazySingleton<LogLocalDataSource>(
+    () => LogLocalDataSourceSimpleImpl(),
+  );
+  
+  getIt.registerLazySingleton<LogRepository>(
+    () => LogRepositoryImpl(
+      localDataSource: getIt<LogLocalDataSource>(),
+    ),
   );
   
   // Notification Service
@@ -167,73 +233,129 @@ void _registerCoreServices() {
 }
 
 void _registerAuthFeature() {
-  // Data Sources
+  // Data Sources - local always works
   getIt.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(
       sharedPreferences: getIt<SharedPreferences>(),
     ),
   );
   
-  getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(
-      firebaseAuth: getIt<firebase_auth.FirebaseAuth>(),
-      firestore: getIt<FirebaseFirestore>(),
-      googleSignIn: getIt<GoogleSignIn>(),
-    ),
-  );
-  
-  // Repository
-  getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      localDataSource: getIt<AuthLocalDataSource>(),
-      remoteDataSource: getIt<AuthRemoteDataSource>(),
-    ),
-  );
-  
-  // Use Cases
-  getIt.registerLazySingleton<SignInWithEmail>(
-    () => SignInWithEmail(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SignUpWithEmail>(
-    () => SignUpWithEmail(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SignInWithGoogle>(
-    () => SignInWithGoogle(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SignInWithApple>(
-    () => SignInWithApple(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SignInWithFacebook>(
-    () => SignInWithFacebook(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SignOut>(
-    () => SignOut(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<GetCurrentUser>(
-    () => GetCurrentUser(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SendEmailVerification>(
-    () => SendEmailVerification(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<SendPasswordResetEmail>(
-    () => SendPasswordResetEmail(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<UpdateProfile>(
-    () => UpdateProfile(getIt<AuthRepository>()),
-  );
-  
-  getIt.registerLazySingleton<DeleteAccount>(
-    () => DeleteAccount(getIt<AuthRepository>()),
-  );
+  // Mock remote data source and repository for web debug to avoid Firebase errors
+  if (kIsWeb && kDebugMode) {
+    getIt.registerLazySingleton<AuthRemoteDataSource>(
+      () => _MockAuthRemoteDataSource(),
+    );
+    
+    getIt.registerLazySingleton<AuthRepository>(
+      () => _MockAuthRepository(),
+    );
+    
+    // Mock Use Cases for web debug
+    getIt.registerLazySingleton<SignInWithEmail>(
+      () => _MockSignInWithEmail(),
+    );
+    
+    getIt.registerLazySingleton<SignUpWithEmail>(
+      () => _MockSignUpWithEmail(),
+    );
+    
+    getIt.registerLazySingleton<SignInWithGoogle>(
+      () => _MockSignInWithGoogle(),
+    );
+    
+    getIt.registerLazySingleton<SignInWithApple>(
+      () => _MockSignInWithApple(),
+    );
+    
+    getIt.registerLazySingleton<SignInWithFacebook>(
+      () => _MockSignInWithFacebook(),
+    );
+    
+    getIt.registerLazySingleton<SignOut>(
+      () => _MockSignOut(),
+    );
+    
+    getIt.registerLazySingleton<GetCurrentUser>(
+      () => _MockGetCurrentUser(),
+    );
+    
+    getIt.registerLazySingleton<SendEmailVerification>(
+      () => _MockSendEmailVerification(),
+    );
+    
+    getIt.registerLazySingleton<SendPasswordResetEmail>(
+      () => _MockSendPasswordResetEmail(),
+    );
+    
+    getIt.registerLazySingleton<UpdateProfile>(
+      () => _MockUpdateProfile(),
+    );
+    
+    getIt.registerLazySingleton<DeleteAccount>(
+      () => _MockDeleteAccount(),
+    );
+  } else {
+    getIt.registerLazySingleton<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(
+        firebaseAuth: firebase_auth.FirebaseAuth.instance,
+        firestore: FirebaseFirestore.instance, 
+        googleSignIn: getIt<GoogleSignIn>(),
+      ),
+    );
+    
+    // Repository
+    getIt.registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(
+        localDataSource: getIt<AuthLocalDataSource>(),
+        remoteDataSource: getIt<AuthRemoteDataSource>(),
+      ),
+    );
+    
+    // Real Use Cases
+    getIt.registerLazySingleton<SignInWithEmail>(
+      () => SignInWithEmail(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SignUpWithEmail>(
+      () => SignUpWithEmail(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SignInWithGoogle>(
+      () => SignInWithGoogle(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SignInWithApple>(
+      () => SignInWithApple(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SignInWithFacebook>(
+      () => SignInWithFacebook(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SignOut>(
+      () => SignOut(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<GetCurrentUser>(
+      () => GetCurrentUser(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SendEmailVerification>(
+      () => SendEmailVerification(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<SendPasswordResetEmail>(
+      () => SendPasswordResetEmail(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<UpdateProfile>(
+      () => UpdateProfile(getIt<AuthRepository>()),
+    );
+    
+    getIt.registerLazySingleton<DeleteAccount>(
+      () => DeleteAccount(getIt<AuthRepository>()),
+    );
+  }
 }
 
 void _registerAnimalsFeature() {
@@ -242,18 +364,36 @@ void _registerAnimalsFeature() {
     () => AnimalLocalDataSourceImpl(getIt<HiveService>()),
   );
   
-  getIt.registerLazySingleton<AnimalRemoteDataSource>(
-    () => AnimalRemoteDataSourceImpl(),
-  );
+  // Mock remote datasource for web debug to avoid Firebase errors
+  if (kIsWeb && kDebugMode) {
+    getIt.registerLazySingleton<AnimalRemoteDataSource>(
+      () => _MockAnimalRemoteDataSource(),
+    );
+  } else {
+    getIt.registerLazySingleton<AnimalRemoteDataSource>(
+      () => AnimalRemoteDataSourceImpl(),
+    );
+  }
   
-  // Repository (hybrid with local + remote sync)
-  getIt.registerLazySingleton<AnimalRepository>(
-    () => AnimalRepositoryHybridImpl(
-      localDataSource: getIt<AnimalLocalDataSource>(),
-      remoteDataSource: getIt<AnimalRemoteDataSource>(),
-      connectivity: getIt<Connectivity>(),
-    ),
-  );
+  // Repository (hybrid with local + remote sync, or local-only in web debug)
+  if (kIsWeb && kDebugMode) {
+    // Use local-only implementation for web debug
+    getIt.registerLazySingleton<AnimalRepository>(
+      () => AnimalRepositoryHybridImpl(
+        localDataSource: getIt<AnimalLocalDataSource>(),
+        remoteDataSource: getIt<AnimalRemoteDataSource>(),
+        connectivity: getIt<Connectivity>(),
+      ),
+    );
+  } else {
+    getIt.registerLazySingleton<AnimalRepository>(
+      () => AnimalRepositoryHybridImpl(
+        localDataSource: getIt<AnimalLocalDataSource>(),
+        remoteDataSource: getIt<AnimalRemoteDataSource>(),
+        connectivity: getIt<Connectivity>(),
+      ),
+    );
+  }
   
   // Use Cases
   getIt.registerLazySingleton<GetAnimals>(
@@ -670,4 +810,394 @@ void _registerCoreAuthServices() {
       subscriptionRepository: getIt<SubscriptionRepository>(),
     ),
   );
+}
+
+/// Mock AnimalRemoteDataSource for web debug mode
+class _MockAnimalRemoteDataSource implements AnimalRemoteDataSource {
+  @override
+  Future<List<AnimalModel>> getAnimals(String userId) async {
+    // Return empty list in debug mode
+    return [];
+  }
+
+  @override
+  Future<AnimalModel?> getAnimalById(String id) async {
+    // Return null in debug mode
+    return null;
+  }
+
+  @override
+  Future<String> addAnimal(AnimalModel animal, String userId) async {
+    // Return fake ID in debug mode
+    return 'mock_id_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  @override
+  Future<void> updateAnimal(AnimalModel animal) async {
+    // Do nothing in debug mode
+    return;
+  }
+
+  @override
+  Future<void> deleteAnimal(String id) async {
+    // Do nothing in debug mode
+    return;
+  }
+
+  @override
+  Stream<List<AnimalModel>> streamAnimals(String userId) {
+    // Return empty stream in debug mode
+    return Stream.value([]);
+  }
+
+  @override
+  Stream<AnimalModel?> streamAnimal(String id) {
+    // Return null stream in debug mode
+    return Stream.value(null);
+  }
+}
+
+// Mock Auth implementations for web debug mode
+class _MockAuthRemoteDataSource implements AuthRemoteDataSource {
+  @override
+  Future<UserModel> signInWithEmail(String email, String password) async {
+    // Return mock user for debug mode
+    return _createMockUser();
+  }
+
+  @override
+  Future<UserModel> signUpWithEmail(String email, String password, String? name) async {
+    // Return mock user for debug mode
+    return _createMockUser();
+  }
+
+  @override
+  Future<UserModel> signInWithGoogle() async {
+    // Return mock user for debug mode
+    return _createMockUser();
+  }
+
+  @override
+  Future<UserModel> signInWithApple() async {
+    // Return mock user for debug mode
+    return _createMockUser();
+  }
+
+  @override
+  Future<UserModel> signInWithFacebook() async {
+    // Return mock user for debug mode
+    return _createMockUser();
+  }
+
+  @override
+  Future<void> signOut() async {
+    // Do nothing in debug mode
+    return;
+  }
+
+  @override
+  Future<UserModel?> getCurrentUser() async {
+    // Return null in debug mode (not signed in)
+    return null;
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    // Do nothing in debug mode
+    return;
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    // Do nothing in debug mode
+    return;
+  }
+
+  @override
+  Future<UserModel> updateProfile(String? name, String? photoUrl) async {
+    // Return mock user for debug mode
+    return _createMockUser();
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    // Do nothing in debug mode
+    return;
+  }
+
+  @override
+  Stream<UserModel?> watchAuthState() {
+    // Return null stream in debug mode
+    return Stream.value(null);
+  }
+
+  UserModel _createMockUser() {
+    final now = DateTime.now();
+    return UserModel(
+      id: 'mock_user_id',
+      email: 'mock@example.com',
+      name: 'Mock User',
+      role: UserRole.user,
+      provider: AuthProvider.email,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+}
+
+class _MockAuthRepository implements AuthRepository {
+  @override
+  Future<Either<Failure, User>> signInWithEmail(String email, String password) async {
+    return Right(_createMockUser());
+  }
+
+  @override
+  Future<Either<Failure, User>> signUpWithEmail(String email, String password, String? name) async {
+    return Right(_createMockUser());
+  }
+
+  @override
+  Future<Either<Failure, User>> signInWithGoogle() async {
+    return Right(_createMockUser());
+  }
+
+  @override
+  Future<Either<Failure, User>> signInWithApple() async {
+    return Right(_createMockUser());
+  }
+
+  @override
+  Future<Either<Failure, User>> signInWithFacebook() async {
+    return Right(_createMockUser());
+  }
+
+  @override
+  Future<Either<Failure, void>> signOut() async {
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, User?>> getCurrentUser() async {
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> sendEmailVerification() async {
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> sendPasswordResetEmail(String email) async {
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, User>> updateProfile(String? name, String? photoUrl) async {
+    return Right(_createMockUser());
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount() async {
+    return const Right(null);
+  }
+
+  @override
+  Stream<Either<Failure, User?>> watchAuthState() {
+    return Stream.value(const Right(null));
+  }
+
+  User _createMockUser() {
+    final now = DateTime.now();
+    return User(
+      id: 'mock_user_id',
+      email: 'mock@example.com',
+      name: 'Mock User',
+      role: UserRole.user,
+      provider: AuthProvider.email,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+}
+
+// Mock UseCase implementations
+class _MockSignInWithEmail implements SignInWithEmail {
+  @override
+  Future<Either<Failure, User>> call(SignInWithEmailParams params) async {
+    final now = DateTime.now();
+    return Right(User(
+      id: 'mock_user_id',
+      email: params.email,
+      name: 'Mock User',
+      role: UserRole.user,
+      provider: AuthProvider.email,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSignUpWithEmail implements SignUpWithEmail {
+  @override
+  Future<Either<Failure, User>> call(SignUpWithEmailParams params) async {
+    final now = DateTime.now();
+    return Right(User(
+      id: 'mock_user_id',
+      email: params.email,
+      name: params.name ?? 'Mock User',
+      role: UserRole.user,
+      provider: AuthProvider.email,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSignInWithGoogle implements SignInWithGoogle {
+  @override
+  Future<Either<Failure, User>> call(NoParams params) async {
+    final now = DateTime.now();
+    return Right(User(
+      id: 'mock_user_id',
+      email: 'mock.google@example.com',
+      name: 'Mock Google User',
+      role: UserRole.user,
+      provider: AuthProvider.google,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSignInWithApple implements SignInWithApple {
+  @override
+  Future<Either<Failure, User>> call(NoParams params) async {
+    final now = DateTime.now();
+    return Right(User(
+      id: 'mock_user_id',
+      email: 'mock.apple@example.com',
+      name: 'Mock Apple User',
+      role: UserRole.user,
+      provider: AuthProvider.apple,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSignInWithFacebook implements SignInWithFacebook {
+  @override
+  Future<Either<Failure, User>> call(NoParams params) async {
+    final now = DateTime.now();
+    return Right(User(
+      id: 'mock_user_id',
+      email: 'mock.facebook@example.com',
+      name: 'Mock Facebook User',
+      role: UserRole.user,
+      provider: AuthProvider.facebook,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSignOut implements SignOut {
+  @override
+  Future<Either<Failure, void>> call(NoParams params) async {
+    return const Right(null);
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockGetCurrentUser implements GetCurrentUser {
+  @override
+  Future<Either<Failure, User?>> call(NoParams params) async {
+    return const Right(null);
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSendEmailVerification implements SendEmailVerification {
+  @override
+  Future<Either<Failure, void>> call(NoParams params) async {
+    return const Right(null);
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockSendPasswordResetEmail implements SendPasswordResetEmail {
+  @override
+  Future<Either<Failure, void>> call(String email) async {
+    return const Right(null);
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockUpdateProfile implements UpdateProfile {
+  @override
+  Future<Either<Failure, User>> call(UpdateProfileParams params) async {
+    final now = DateTime.now();
+    return Right(User(
+      id: 'mock_user_id',
+      email: 'mock@example.com',
+      name: params.name ?? 'Mock User',
+      photoUrl: params.photoUrl,
+      role: UserRole.user,
+      provider: AuthProvider.email,
+      isEmailVerified: true,
+      isPremium: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
+}
+
+class _MockDeleteAccount implements DeleteAccount {
+  @override
+  Future<Either<Failure, void>> call(NoParams params) async {
+    return const Right(null);
+  }
+
+  @override
+  AuthRepository get repository => throw UnimplementedError();
 }

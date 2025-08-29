@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../../domain/repositories/animal_repository.dart';
@@ -107,16 +109,42 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
         super(const AnimalsState());
 
   Future<void> loadAnimals() async {
+    await LoggingService.instance.trackUserAction(
+      category: LogCategory.animals,
+      operation: LogOperation.read,
+      action: 'load_animals_initiated',
+      metadata: {'from': 'animals_provider'},
+    );
+
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _getAnimals(const NoParams());
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) {
+        LoggingService.instance.logError(
+          category: LogCategory.animals,
+          operation: LogOperation.read,
+          message: 'Failed to load animals in provider',
+          error: failure.message,
+          metadata: {'provider': 'animals_provider'},
+        );
+        
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
       (animals) {
+        LoggingService.instance.logInfo(
+          category: LogCategory.animals,
+          operation: LogOperation.read,
+          message: 'Successfully loaded animals in provider',
+          metadata: {
+            'provider': 'animals_provider',
+            'count': animals.length,
+          },
+        );
         state = state.copyWith(
           animals: animals,
           isLoading: false,

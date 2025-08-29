@@ -69,6 +69,9 @@ class HiveService {
       // Boxes para configurações e cache
       await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.settings);
       await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.cache);
+      
+      // Logging box (JSON strings for now)
+      await Hive.openBox<String>('logs_json');
     } catch (e) {
       // Log do erro mas não falha a inicialização
       print('Erro ao abrir boxes: $e');

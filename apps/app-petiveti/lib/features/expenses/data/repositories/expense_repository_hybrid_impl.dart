@@ -3,6 +3,8 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
@@ -10,7 +12,7 @@ import '../datasources/expense_local_datasource.dart';
 import '../datasources/expense_remote_datasource.dart';
 import '../models/expense_model.dart';
 
-class ExpenseRepositoryHybridImpl implements ExpenseRepository {
+class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements ExpenseRepository {
   final ExpenseLocalDataSource localDataSource;
   final ExpenseRemoteDataSource remoteDataSource;
   final Connectivity connectivity;

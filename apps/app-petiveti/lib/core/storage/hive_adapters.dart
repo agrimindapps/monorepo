@@ -4,6 +4,8 @@ import 'package:hive/hive.dart';
 /// Deve ser chamado antes de usar qualquer Box
 class HiveAdapters {
   static void registerAdapters() {
+    // Note: LogEntry adapters will be registered when generated
+    // For now, we'll initialize without them and handle in LogLocalDataSourceImpl
     // Animals - TypeAdapter 0
     if (!Hive.isAdapterRegistered(0)) {
       // Hive.registerAdapter(AnimalModelAdapter());
@@ -149,4 +151,5 @@ class HiveBoxNames {
   static const String userSubscriptions = 'user_subscriptions';
   static const String settings = 'settings';
   static const String cache = 'cache';
+  static const String logs = 'logs';
 }

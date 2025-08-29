@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart' as di;
+import '../../core/interfaces/i_premium_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import 'constants/comentarios_design_tokens.dart';
 import 'domain/entities/comentario_entity.dart';
@@ -82,8 +83,9 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
             Expanded(
               child: Consumer<ComentariosProvider>(
                 builder: (context, provider, child) {
-                  // Verificar se o usuário é premium (temporariamente desabilitado - sempre retorna false)
-                  final isPremium = false; // TODO: Implementar verificação real de premium
+                  // Verificar se o usuário é premium usando o service real
+                  final premiumService = di.sl<IPremiumService>();
+                  final isPremium = premiumService.isPremium;
                   
                   if (!isPremium) {
                     return Center(
@@ -130,7 +132,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
                               width: double.infinity,
                               child: ElevatedButton.icon(
                                 onPressed: () {
-                                  // TODO: Implementar navegação para premium
+                                  premiumService.navigateToPremium();
                                 },
                                 icon: const Icon(
                                   Icons.rocket_launch,
@@ -187,8 +189,9 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
       ),
       floatingActionButton: Consumer<ComentariosProvider>(
         builder: (context, provider, child) {
-          // Verificar se o usuário é premium (temporariamente desabilitado - sempre retorna false)
-          final isPremium = false; // TODO: Implementar verificação real de premium
+          // Verificar se o usuário é premium usando o service real
+          final premiumService = di.sl<IPremiumService>();
+          final isPremium = premiumService.isPremium;
           
           return FloatingActionButton(
             onPressed: provider.isOperating || !isPremium ? null : () => _onAddComentario(context, provider),

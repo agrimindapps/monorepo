@@ -1473,8 +1473,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Widget _buildAddCommentSection() {
     final theme = Theme.of(context);
     
-    // Verificar se o usuário é premium (temporariamente desabilitado - sempre retorna false)
-    final isPremium = false; // TODO: Implementar verificação real de premium
+    // Verificar se o usuário é premium usando o service real
+    final isPremium = _premiumService.isPremium;
     
     if (!isPremium) {
       return Container(
@@ -1520,7 +1520,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Implementar navegação para premium
+                  _premiumService.navigateToPremium();
                 },
                 icon: const Icon(
                   Icons.rocket_launch,

@@ -178,6 +178,18 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                                     : Colors.grey.shade400,
                                 fontSize: 14,
                               ),
+                              suffixIcon: widget.controller.text.isNotEmpty
+                                  ? IconButton(
+                                      onPressed: widget.onClear,
+                                      icon: Icon(
+                                        Icons.clear_rounded,
+                                        color: widget.isDark
+                                            ? Colors.grey.shade400
+                                            : Colors.grey.shade500,
+                                        size: 20,
+                                      ),
+                                    )
+                                  : null,
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -195,53 +207,8 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                             ),
                           ),
                         ),
-                        _buildViewToggleButtons(),
                         const SizedBox(width: 8),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return ScaleTransition(
-                              scale: animation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: widget.controller.text.isNotEmpty
-                              ? InkWell(
-                                  key: const ValueKey('clear'),
-                                  onTap: widget.onClear,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    padding: const EdgeInsets.all(8.0),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      color: _isFocused
-                                          ? (widget.isDark
-                                              ? Colors.red.shade800
-                                                  .withValues(alpha: 0.2)
-                                              : Colors.red.shade100
-                                                  .withValues(alpha: 0.5))
-                                          : Colors.transparent,
-                                    ),
-                                    child: Icon(
-                                      Icons.clear,
-                                      color: widget.isDark
-                                          ? Colors.grey.shade400
-                                          : Colors.grey.shade500,
-                                      size: 18,
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox(
-                                  key: ValueKey('empty'),
-                                  width: 34,
-                                  height: 34,
-                                ),
-                        ),
+                        _buildViewToggleButtons(),
                       ],
                     ),
                   ),

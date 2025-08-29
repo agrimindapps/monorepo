@@ -61,6 +61,10 @@ class PlantsProvider extends ChangeNotifier {
 
   // Load all plants
   Future<void> loadPlants() async {
+    if (kDebugMode) {
+      print('📋 PlantsProvider.loadPlants() - Iniciando carregamento');
+    }
+
     // Only show loading if no plants exist yet (first load)
     final shouldShowLoading = _plants.isEmpty;
 
@@ -72,8 +76,19 @@ class PlantsProvider extends ChangeNotifier {
     final result = await _getPlantsUseCase.call(const NoParams());
 
     result.fold(
-      (failure) => _setError(_getErrorMessage(failure)), 
+      (failure) {
+        if (kDebugMode) {
+          print('❌ PlantsProvider.loadPlants() - Falha: ${_getErrorMessage(failure)}');
+        }
+        _setError(_getErrorMessage(failure));
+      }, 
       (plants) {
+        if (kDebugMode) {
+          print('✅ PlantsProvider.loadPlants() - Sucesso: ${plants.length} plantas carregadas');
+          for (final plant in plants) {
+            print('   - ${plant.name} (${plant.id})');
+          }
+        }
         // Successful load - ensure error is cleared and plants are updated
         _clearError();
         _plants = _sortPlants(plants);
@@ -83,6 +98,10 @@ class PlantsProvider extends ChangeNotifier {
 
     if (shouldShowLoading) {
       _setLoading(false);
+    }
+    
+    if (kDebugMode) {
+      print('📋 PlantsProvider.loadPlants() - Finalizado');
     }
   }
 
@@ -311,8 +330,18 @@ class PlantsProvider extends ChangeNotifier {
   /// Refresh plants data and clear any existing errors
   /// This method handles refresh operations with proper error clearing
   Future<void> refreshPlants() async {
+    if (kDebugMode) {
+      print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
+      print('🔄 PlantsProvider.refreshPlants() - Plantas antes: ${_plants.length}');
+    }
+    
     clearError();
     await loadInitialData();
+    
+    if (kDebugMode) {
+      print('✅ PlantsProvider.refreshPlants() - Refresh completo');
+      print('🔄 PlantsProvider.refreshPlants() - Plantas depois: ${_plants.length}');
+    }
   }
 
   // Get plants count

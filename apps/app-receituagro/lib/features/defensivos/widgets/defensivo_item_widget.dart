@@ -91,21 +91,21 @@ class DefensivoItemWidget extends StatelessWidget {
     const color = Color(0xFF4CAF50); // Verde padrão como no mockup
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: Colors.grey.withValues(alpha: 0.08),
                 spreadRadius: 1,
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -113,8 +113,8 @@ class DefensivoItemWidget extends StatelessWidget {
             children: [
               // Ícone circular à esquerda (como no mockup)
               Container(
-                width: 48,
-                height: 48,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
@@ -122,10 +122,10 @@ class DefensivoItemWidget extends StatelessWidget {
                 child: const Icon(
                   FontAwesomeIcons.leaf,
                   color: color,
-                  size: 20,
+                  size: 18,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               // Conteúdo principal
               Expanded(
                 child: Column(
@@ -135,25 +135,25 @@ class DefensivoItemWidget extends StatelessWidget {
                     Text(
                       defensivo.displayName,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     // Ingrediente ativo
                     Text(
                       defensivo.displayIngredient,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Colors.grey[600],
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     // Tag da categoria
                     Row(
                       children: [

@@ -9,6 +9,36 @@ import '../providers/register_provider.dart';
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
+  void _showSocialLoginDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Em Desenvolvimento'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.construction,
+              size: 48,
+              color: Colors.orange,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'O login social está em desenvolvimento e estará disponível em breve!',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -167,13 +197,13 @@ class RegisterPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildSocialButton('G', 'Google', Colors.red, () {
-                        // TODO: Implement Google login
+                        _showSocialLoginDialog(context);
                       }),
                       _buildSocialButton('', 'Apple', Colors.black, () {
-                        // TODO: Implement Apple login
+                        _showSocialLoginDialog(context);
                       }, icon: Icons.apple),
                       _buildSocialButton('', 'Microsoft', Colors.blue, () {
-                        // TODO: Implement Microsoft login
+                        _showSocialLoginDialog(context);
                       }, icon: Icons.window),
                     ],
                   ),

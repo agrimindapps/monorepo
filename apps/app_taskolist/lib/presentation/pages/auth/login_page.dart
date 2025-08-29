@@ -26,6 +26,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  bool _isAnonymousLoading = false;
   bool _rememberMe = false;
   
   // Animation controllers
@@ -150,7 +151,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   Future<void> _handleAnonymousLogin() async {
     print('🔄 Iniciando login anônimo...');
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _isAnonymousLoading = true;
+    });
     HapticFeedback.lightImpact();
     
     try {
@@ -160,7 +164,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
     } catch (e) {
       print('❌ Erro no login anônimo: $e');
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isAnonymousLoading = false;
+        });
         _showAnimatedSnackBar(
           message: 'Erro no login anônimo: ${_getErrorMessage(e)}',
           isError: true,
@@ -443,20 +450,88 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _handleGoogleLogin() async {
-    setState(() => _isLoading = true);
-    HapticFeedback.lightImpact();
-    
-    try {
-      await ref.read(authNotifierProvider.notifier).signInWithGoogle();
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        _showAnimatedSnackBar(
-          message: 'Login com Google não disponível ainda',
-          isError: false,
-        );
-      }
-    }
+    _showSocialLoginDialog('Google');
+  }
+
+  Future<void> _handleAppleLogin() async {
+    _showSocialLoginDialog('Apple');
+  }
+
+  void _showSocialLoginDialog(String provider) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.orange.withAlpha(26),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.construction_rounded,
+                color: Colors.orange,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('Em Desenvolvimento'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Login com $provider',
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'O login social está em desenvolvimento e estará disponível em uma futura atualização!',
+              style: TextStyle(fontSize: 14, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withAlpha(13),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withAlpha(51)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.blue[600],
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Por enquanto, use o login com email ou modo anônimo.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Entendi'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _shakeForm() {
@@ -508,6 +583,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
         data: (user) {
           print('✅ Auth listener: Usuário autenticado: ${user?.id}');
           if (user != null && mounted) {
+            // Reset loading states
+            setState(() {
+              _isLoading = false;
+              _isAnonymousLoading = false;
+            });
             print('🚀 Navegando para HomePage...');
             Navigator.of(context).pushReplacement(
               PageRouteBuilder(
@@ -625,9 +705,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                   
                                   // Login button
                                   _buildGradientButton(
-                                    onPressed: _isLoading ? null : _handleLogin,
+                                    onPressed: (_isLoading || _isAnonymousLoading) ? null : _handleLogin,
                                     text: 'Entrar',
-                                    isLoading: _isLoading,
+                                    isLoading: _isLoading && !_isAnonymousLoading,
                                   ),
                                   const SizedBox(height: 24),
                                   
@@ -1080,7 +1160,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             ),
             const SizedBox(width: 16),
             _buildSocialButton(
-              onPressed: _isLoading ? null : () {},
+              onPressed: _isLoading ? null : _handleAppleLogin,
               icon: Icons.apple_rounded,
               color: Colors.white,
             ),

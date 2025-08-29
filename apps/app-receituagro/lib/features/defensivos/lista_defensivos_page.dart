@@ -360,10 +360,11 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         ),
       );
     } else {
-      return ListView.builder(
+      return ListView.separated(
         controller: _scrollController,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         itemCount: _displayedDefensivos.length + (_isLoadingMore ? 2 : 1), // +1 para espaço, +1 para loading
+        separatorBuilder: (context, index) => const SizedBox(height: 1),
         itemBuilder: (context, index) {
           // Loading indicator no meio da lista
           if (_isLoadingMore && index == _displayedDefensivos.length) {

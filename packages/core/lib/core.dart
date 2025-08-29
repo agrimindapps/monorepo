@@ -66,6 +66,7 @@ export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/selective_sync_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
+export 'src/infrastructure/services/web_notification_service.dart';
 // Hive Storage Infrastructure
 export 'src/infrastructure/storage/hive/hive_storage.dart';
 export 'src/presentation/theme/base/base_colors.dart';

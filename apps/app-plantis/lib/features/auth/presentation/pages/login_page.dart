@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
+import '../../../../core/widgets/loading_overlay.dart';
 import '../providers/auth_provider.dart';
 import '../../utils/auth_validators.dart';
 
@@ -73,6 +74,88 @@ class _LoginPageState extends State<LoginPage>
         context.go('/plants');
       }
     }
+  }
+
+  void _showSocialLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Em Desenvolvimento'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.construction,
+              size: 48,
+              color: Colors.orange,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'O login social está em desenvolvimento e estará disponível em breve!',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAnonymousLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Login Anônimo'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Como funciona o login anônimo:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('• Você pode usar o app sem criar conta'),
+            Text('• Seus dados ficam apenas no dispositivo'),
+            Text('• Limitação: dados podem ser perdidos se o app for desinstalado'),
+            Text('• Sem backup na nuvem'),
+            Text('• Sem sincronização entre dispositivos'),
+            SizedBox(height: 16),
+            Text(
+              'Deseja prosseguir?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              showLoading(message: 'Entrando anonimamente...');
+              
+              final authProvider = context.read<AuthProvider>();
+              await authProvider.signInAnonymously();
+              
+              hideLoading();
+              
+              if (authProvider.isAuthenticated && mounted) {
+                context.go('/plants');
+              }
+            },
+            child: const Text('Prosseguir'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -566,12 +649,13 @@ class _LoginPageState extends State<LoginPage>
                               // Login button
                               Consumer<AuthProvider>(
                                 builder: (context, authProvider, _) {
+                                  final isAnonymousLoading = authProvider.currentOperation == AuthOperation.anonymous;
                                   return SizedBox(
                                     width: double.infinity,
                                     height: 48,
                                     child: ElevatedButton(
                                       onPressed:
-                                          authProvider.isLoading
+                                          (authProvider.isLoading || isAnonymousLoading)
                                               ? null
                                               : _handleLogin,
                                       style: ElevatedButton.styleFrom(
@@ -628,26 +712,20 @@ class _LoginPageState extends State<LoginPage>
                                     'G',
                                     'Google',
                                     Colors.red,
-                                    () {
-                                      // TODO: Implement Google login
-                                    },
+                                    _showSocialLoginDialog,
                                   ),
                                   _buildSocialButton(
                                     '',
                                     'Apple',
                                     Colors.black,
-                                    () {
-                                      // TODO: Implement Apple login
-                                    },
+                                    _showSocialLoginDialog,
                                     icon: Icons.apple,
                                   ),
                                   _buildSocialButton(
                                     '',
                                     'Microsoft',
                                     Colors.blue,
-                                    () {
-                                      // TODO: Implement Microsoft login
-                                    },
+                                    _showSocialLoginDialog,
                                     icon: Icons.window,
                                   ),
                                 ],
@@ -664,22 +742,7 @@ class _LoginPageState extends State<LoginPage>
                                       onPressed:
                                           authProvider.isLoading
                                               ? null
-                                              : () async {
-                                                showLoading(message: 'Entrando anonimamente...');
-                                                
-                                                final navigator = context;
-                                                await authProvider
-                                                    .signInAnonymously();
-                                                
-                                                hideLoading();
-                                                
-                                                if (authProvider
-                                                        .isAuthenticated &&
-                                                    mounted) {
-                                                  // ignore: use_build_context_synchronously
-                                                  navigator.go('/plants');
-                                                }
-                                              },
+                                              : _showAnonymousLoginDialog,
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: PlantisColors.primary,
                                         side: BorderSide(

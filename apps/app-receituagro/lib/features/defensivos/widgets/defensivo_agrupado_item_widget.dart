@@ -29,25 +29,25 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
 
   Widget _buildListItem(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       color: isDark ? const Color(0xFF2A2A2E) : Colors.white,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
               _buildIcon(),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildListContent(),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               _buildTrailingContent(),
             ],
           ),
@@ -87,28 +87,21 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
     final icon = item.isDefensivo ? _getDefensivoIcon() : _getCategoryIcon();
     
     return Container(
-      width: viewMode.isList ? 48 : 56,
-      height: viewMode.isList ? 48 : 56,
+      width: viewMode.isList ? 40 : 56,
+      height: viewMode.isList ? 40 : 56,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: color.withValues(alpha: 0.3),
-          width: 1.5,
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Center(
         child: Icon(
           icon,
           color: color,
-          size: viewMode.isList ? 20 : 24,
+          size: viewMode.isList ? 18 : 24,
         ),
       ),
     );
@@ -122,27 +115,27 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
         Text(
           item.displayTitle,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             color: isDark ? Colors.white : Colors.black87,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        if (item.displaySubtitle.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Text(
-            item.displaySubtitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        const SizedBox(height: 2),
+        Text(
+          item.hasCount 
+              ? '${item.displayCount} Registros'
+              : item.displaySubtitle,
+          style: TextStyle(
+            fontSize: 13,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
-        ],
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         if (item.hasIngredienteAtivo) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           _buildIngredienteChip(),
         ],
       ],
@@ -187,24 +180,6 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
   }
 
   Widget _buildTrailingContent() {
-    if (item.hasCount) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildCountChip(),
-          const SizedBox(height: 8),
-          Icon(
-            item.isDefensivo 
-                ? Icons.open_in_new_rounded 
-                : Icons.chevron_right_rounded,
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-            size: 20,
-          ),
-        ],
-      );
-    }
-    
     return Icon(
       item.isDefensivo 
           ? Icons.open_in_new_rounded 
@@ -267,23 +242,8 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
   }
 
   Color _getItemColor() {
-    if (item.isDefensivo) {
-      return const Color(0xFF2E7D32); // Verde para defensivos
-    }
-    
-    // Cores por categoria para grupos
-    switch (category) {
-      case DefensivosAgrupadosCategory.fabricantes:
-        return const Color(0xFF1976D2); // Azul
-      case DefensivosAgrupadosCategory.classeAgronomica:
-        return const Color(0xFF7B1FA2); // Roxo
-      case DefensivosAgrupadosCategory.ingredienteAtivo:
-        return const Color(0xFFD32F2F); // Vermelho
-      case DefensivosAgrupadosCategory.modoAcao:
-        return const Color(0xFFF57C00); // Laranja
-      default:
-        return const Color(0xFF388E3C); // Verde padrão
-    }
+    // Todos os ícones devem ser verdes como nos mockups
+    return const Color(0xFF4CAF50);
   }
 
   IconData _getDefensivoIcon() {

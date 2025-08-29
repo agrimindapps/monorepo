@@ -17,8 +17,9 @@ class PlantisNotificationService {
   static const String _appName = 'Plantis';
   static const int _primaryColor = 0xFF4CAF50; // Verde plantas
 
-  final INotificationRepository _notificationRepository =
-      LocalNotificationService();
+  final INotificationRepository _notificationRepository = kIsWeb 
+      ? WebNotificationService()
+      : LocalNotificationService();
   bool _isInitialized = false;
 
   /// Inicializa o serviço de notificações do Plantis

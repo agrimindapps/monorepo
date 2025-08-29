@@ -130,6 +130,14 @@ class ComentariosService extends ChangeNotifier {
     return true;
   }
 
+  bool isPremiumUser() {
+    return _premiumService?.isPremium ?? false;
+  }
+
+  bool canUseComments() {
+    return isPremiumUser();
+  }
+
   String generateId() {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }

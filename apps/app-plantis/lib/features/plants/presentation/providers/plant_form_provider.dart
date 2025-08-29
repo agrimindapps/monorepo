@@ -508,11 +508,31 @@ class PlantFormProvider extends ChangeNotifier {
 
   // Save plant
   Future<bool> savePlant() async {
+    if (kDebugMode) {
+      print('🌱 PlantFormProvider.savePlant() - Iniciando salvamento');
+      print('🌱 PlantFormProvider.savePlant() - isEditMode: $isEditMode');
+      print('🌱 PlantFormProvider.savePlant() - isValid: $isValid');
+    }
+    
     if (!isValid) return false;
 
     _isSaving = true;
     _errorMessage = null;
     notifyListeners();
+
+    if (kDebugMode) {
+      if (isEditMode) {
+        final params = _buildUpdateParams();
+        print('🌱 PlantFormProvider.savePlant() - UPDATE params:');
+        print('   - id: ${params.id}');
+        print('   - name: ${params.name}');
+      } else {
+        final params = _buildAddParams();
+        print('🌱 PlantFormProvider.savePlant() - ADD params:');
+        print('   - id: ${params.id}');
+        print('   - name: ${params.name}');
+      }
+    }
 
     final result =
         isEditMode
@@ -522,9 +542,19 @@ class PlantFormProvider extends ChangeNotifier {
     bool success = false;
     result.fold(
       (failure) {
+        if (kDebugMode) {
+          print('❌ PlantFormProvider.savePlant() - FALHA: ${failure.message}');
+        }
         _errorMessage = _getErrorMessage(failure);
       },
       (savedPlant) {
+        if (kDebugMode) {
+          print('✅ PlantFormProvider.savePlant() - SUCESSO:');
+          print('   - savedPlant.id: ${savedPlant.id}');
+          print('   - savedPlant.name: ${savedPlant.name}');
+          print('   - savedPlant.createdAt: ${savedPlant.createdAt}');
+          print('   - savedPlant.updatedAt: ${savedPlant.updatedAt}');
+        }
         success = true;
         _originalPlant = savedPlant;
         _populateFormFromPlant(savedPlant);
@@ -533,6 +563,10 @@ class PlantFormProvider extends ChangeNotifier {
 
     _isSaving = false;
     notifyListeners();
+
+    if (kDebugMode) {
+      print('🌱 PlantFormProvider.savePlant() - Finalizando salvamento, success: $success');
+    }
 
     return success;
   }

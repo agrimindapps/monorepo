@@ -15,16 +15,31 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
 
   @override
   Future<Either<Failure, Plant>> call(AddPlantParams params) async {
+    if (kDebugMode) {
+      print('🌱 AddPlantUseCase.call() - Iniciando adição de planta');
+      print('🌱 AddPlantUseCase.call() - params.name: ${params.name}');
+      print('🌱 AddPlantUseCase.call() - params.id: ${params.id}');
+    }
+
     // Validate plant data
     final validationResult = _validatePlant(params);
     if (validationResult != null) {
+      if (kDebugMode) {
+        print('❌ AddPlantUseCase.call() - Validação falhou: ${validationResult.message}');
+      }
       return Left(validationResult);
     }
 
     // Create plant with timestamps
     final now = DateTime.now();
+    final generatedId = params.id ?? _generateId();
+    
+    if (kDebugMode) {
+      print('🌱 AddPlantUseCase.call() - Criando planta com id: $generatedId');
+    }
+    
     final plant = Plant(
-      id: params.id ?? _generateId(),
+      id: generatedId,
       name: params.name.trim(),
       species: params.species?.trim(),
       spaceId: params.spaceId,
@@ -38,15 +53,37 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       isDirty: true,
     );
 
+    if (kDebugMode) {
+      print('🌱 AddPlantUseCase.call() - Chamando repository.addPlant()');
+    }
+
     // Salvar planta primeiro
     final plantResult = await repository.addPlant(plant);
 
-    return plantResult.fold((failure) => Left(failure), (savedPlant) async {
+    return plantResult.fold((failure) {
+      if (kDebugMode) {
+        print('❌ AddPlantUseCase.call() - Repository.addPlant falhou: ${failure.message}');
+      }
+      return Left(failure);
+    }, (savedPlant) async {
+      if (kDebugMode) {
+        print('✅ AddPlantUseCase.call() - Repository.addPlant sucesso:');
+        print('   - savedPlant.id: ${savedPlant.id}');
+        print('   - savedPlant.name: ${savedPlant.name}');
+        print('   - savedPlant.createdAt: ${savedPlant.createdAt}');
+      }
+
       // Gerar tarefas automáticas se o use case estiver disponível e há configuração
       if (generateInitialTasksUseCase != null && savedPlant.config != null) {
+        if (kDebugMode) {
+          print('🌱 AddPlantUseCase.call() - Gerando tarefas iniciais');
+        }
         await _generateInitialTasks(savedPlant);
       }
 
+      if (kDebugMode) {
+        print('✅ AddPlantUseCase.call() - Processo completo, retornando planta');
+      }
       return Right(savedPlant);
     });
   }

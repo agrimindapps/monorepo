@@ -28,7 +28,7 @@ class CommentsListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (comentarios.isEmpty) {
-      return const EmptyCommentsState();
+      return const SizedBox.shrink();
     }
 
     return ListView.builder(

@@ -86,6 +86,11 @@ Future<void> init() async {
     () => ReceitaAgroNotificationService(),
   );
   
+  // Registro adicional para compatibilidade com código que busca por classe concreta
+  sl.registerLazySingleton<ReceitaAgroNotificationService>(
+    () => sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
+  );
+  
   // Storage Service - Adapter que usa HiveStorageService do core
   sl.registerLazySingleton<ReceitaAgroStorageService>(
     () => ReceitaAgroStorageService(),
@@ -310,6 +315,11 @@ Future<void> init() async {
   // Repository Implementation para Diagnósticos
   sl.registerLazySingleton<IDiagnosticosRepository>(
     () => DiagnosticosRepositoryImpl(sl<DiagnosticoCoreRepository>()),
+  );
+  
+  // Registro adicional para compatibilidade com código que busca por classe concreta
+  sl.registerLazySingleton<DiagnosticosRepositoryImpl>(
+    () => sl<IDiagnosticosRepository>() as DiagnosticosRepositoryImpl,
   );
 
   // Use Cases para Diagnósticos

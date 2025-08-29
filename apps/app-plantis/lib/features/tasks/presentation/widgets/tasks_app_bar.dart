@@ -248,8 +248,6 @@ class _TasksAppBarState extends State<TasksAppBar> {
                                     context,
                                     TasksFilterType.upcoming,
                                   ),
-                              showBadge: true,
-                              badgeCount: provider.upcomingTasksCount,
                             ),
                           ],
                         );
@@ -290,7 +288,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${provider.totalTasks} ${AppStrings.totalTasksFormat}'.replaceAll('%d', '${provider.totalTasks}'),
+                AppStrings.totalTasksFormat.replaceAll('%d', '${provider.totalTasks}'),
                 style: TextStyle(
                   color: theme.colorScheme.secondary,
                   fontSize: 14,

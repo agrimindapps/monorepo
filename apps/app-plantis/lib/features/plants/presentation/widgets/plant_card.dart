@@ -132,29 +132,43 @@ class PlantCard extends StatelessWidget {
     final theme = Theme.of(context);
     final pendingTasks = _getPendingTasksCount();
 
+    // Determinar cor, ícone e texto baseado no número de tarefas
+    final Color badgeColor;
+    final Color backgroundColor;
+    final IconData icon;
+    final String text;
+
     if (pendingTasks == 0) {
-      return const SizedBox.shrink();
+      badgeColor = theme.colorScheme.primary;
+      backgroundColor = theme.colorScheme.primaryContainer.withValues(alpha: 0.15);
+      icon = Icons.check_circle;
+      text = 'Sem tarefas';
+    } else {
+      badgeColor = theme.colorScheme.error;
+      backgroundColor = theme.colorScheme.errorContainer.withValues(alpha: 0.15);
+      icon = Icons.schedule;
+      text = '$pendingTasks pendentes';
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer.withValues(alpha: 0.15),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.error.withValues(alpha: 0.3),
+          color: badgeColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.schedule, color: theme.colorScheme.error, size: 14),
+          Icon(icon, color: badgeColor, size: 14),
           const SizedBox(width: 6),
           Text(
-            '$pendingTasks pendentes',
+            text,
             style: TextStyle(
-              color: theme.colorScheme.error,
+              color: badgeColor,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -268,19 +282,12 @@ class PlantCard extends StatelessWidget {
   }
 
   int _getPendingTasksCount() {
-    // Tasks integration pending
-    // For now, return a mock value based on plant name for demonstration
-    switch (plant.displayName.toLowerCase()) {
-      case 'teste':
-        return 6;
-      case 'monstera deliciosa':
-        return 10;
-      case 'espada de são jorge':
-        return 10;
-      case 'suculenta echeveria':
-        return 10;
-      default:
-        return 6;
-    }
+    // TODO: Integrar com TasksProvider para contar tarefas reais pendentes
+    // Por enquanto, retornar 0 até a integração com o sistema de tarefas ser implementada
+    return 0;
+    
+    // Implementação futura:
+    // final tasksProvider = Provider.of<TasksProvider>(context, listen: false);
+    // return tasksProvider.getPendingTasksCountForPlant(plant.id);
   }
 }

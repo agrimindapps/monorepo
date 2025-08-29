@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 import '../../../../../core/data/models/legacy/planta_model.dart';
@@ -13,6 +14,7 @@ abstract class PlantsLocalDatasource {
   Future<void> addPlant(Plant plant);
   Future<void> updatePlant(Plant plant);
   Future<void> deletePlant(String id);
+  Future<void> hardDeletePlant(String id);
   Future<List<Plant>> searchPlants(String query);
   Future<List<Plant>> getPlantsBySpace(String spaceId);
   Future<void> clearCache();
@@ -154,14 +156,49 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   @override
   Future<void> addPlant(Plant plant) async {
     try {
+      if (kDebugMode) {
+        print('🌱 PlantsLocalDatasourceImpl.addPlant() - Iniciando');
+        print(
+          '🌱 PlantsLocalDatasourceImpl.addPlant() - plant.id: ${plant.id}',
+        );
+        print(
+          '🌱 PlantsLocalDatasourceImpl.addPlant() - plant.name: ${plant.name}',
+        );
+      }
+
       final hiveBox = await box;
+
+      // Verificar se a planta já existe
+      if (hiveBox.containsKey(plant.id)) {
+        if (kDebugMode) {
+          print(
+            '⚠️ PlantsLocalDatasourceImpl.addPlant() - Planta já existe com id: ${plant.id}',
+          );
+        }
+      }
+
       final plantaModel = _plantToPlantaModel(plant);
       final plantJson = jsonEncode(plantaModel.toJson());
+
+      if (kDebugMode) {
+        print('🌱 PlantsLocalDatasourceImpl.addPlant() - Gravando no Hive');
+      }
+
       await hiveBox.put(plant.id, plantJson);
+
+      if (kDebugMode) {
+        print('✅ PlantsLocalDatasourceImpl.addPlant() - Gravado com sucesso');
+        print(
+          '🌱 PlantsLocalDatasourceImpl.addPlant() - Total de plantas no box: ${hiveBox.length}',
+        );
+      }
 
       // Invalidate cache
       _invalidateCache();
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsLocalDatasourceImpl.addPlant() - Erro: $e');
+      }
       throw CacheFailure(
         'Erro ao salvar planta no cache local: ${e.toString()}',
       );
@@ -214,6 +251,51 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
     } catch (e) {
       throw CacheFailure(
         'Erro ao deletar planta do cache local: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Remove fisicamente a planta do Hive (para resolver duplicações)
+  @override
+  Future<void> hardDeletePlant(String id) async {
+    try {
+      if (kDebugMode) {
+        print('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Iniciando');
+        print('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - id: $id');
+      }
+
+      final hiveBox = await box;
+
+      // Verificar se existe antes de deletar
+      final exists = hiveBox.containsKey(id);
+      if (kDebugMode) {
+        print(
+          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Registro existe: $exists',
+        );
+        print(
+          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total antes da remoção: ${hiveBox.length}',
+        );
+      }
+
+      await hiveBox.delete(id);
+
+      if (kDebugMode) {
+        print(
+          '✅ PlantsLocalDatasourceImpl.hardDeletePlant() - Removido fisicamente',
+        );
+        print(
+          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total após remoção: ${hiveBox.length}',
+        );
+      }
+
+      // Invalidate cache
+      _invalidateCache();
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsLocalDatasourceImpl.hardDeletePlant() - Erro: $e');
+      }
+      throw CacheFailure(
+        'Erro ao remover fisicamente planta do cache local: ${e.toString()}',
       );
     }
   }

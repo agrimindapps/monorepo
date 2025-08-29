@@ -81,9 +81,18 @@ class DatabaseInspectorService {
           box = await Hive.openBox(boxKey);
         } catch (e) {
           if (kDebugMode) {
-            print('Error opening Hive box $boxKey: $e');
+            print('Error loading Hive box $boxKey: $e');
           }
-          throw Exception('Box not found and could not be opened: $boxKey');
+          // Se a box já estiver aberta, tenta acessar diretamente
+          if (e.toString().contains('already open')) {
+            try {
+              box = Hive.box(boxKey);
+            } catch (e2) {
+              throw Exception('Box $boxKey cannot be accessed: $e2');
+            }
+          } else {
+            throw Exception('Box not found and could not be opened: $boxKey');
+          }
         }
       }
       

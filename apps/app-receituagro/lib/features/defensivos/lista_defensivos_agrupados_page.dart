@@ -367,6 +367,16 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
     _applyCurrentFilter();
   }
 
+  void _scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   void _handleItemTap(DefensivoAgrupadoItemModel item) {
     if (item.isDefensivo) {
       // Navigate to defensivo details
@@ -551,8 +561,8 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
       subtitle: _getSubtitle(),
       leftIcon: _getHeaderIcon(),
       rightIcon: _state.isAscending 
-          ? Icons.arrow_upward_outlined 
-          : Icons.arrow_downward_outlined,
+          ? Icons.keyboard_arrow_up 
+          : Icons.keyboard_arrow_down,
       isDark: _state.isDark,
       showBackButton: true,
       showActions: true,
@@ -632,10 +642,11 @@ class _ListaDefensivosAgrupadosPageState extends State<ListaDefensivosAgrupadosP
 
   Widget _buildListView() {
     if (_state.selectedViewMode.isList) {
-      return ListView.builder(
+      return ListView.separated(
         controller: _scrollController,
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(vertical: 4),
         itemCount: _state.defensivosListFiltered.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 1),
         itemBuilder: (context, index) {
           final item = _state.defensivosListFiltered[index];
           return DefensivoAgrupadoItemWidget(

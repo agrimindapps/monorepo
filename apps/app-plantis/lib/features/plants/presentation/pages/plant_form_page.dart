@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/plant_form_provider.dart';
+import '../providers/plants_provider.dart';
 import '../widgets/plant_form_basic_info.dart';
 import '../widgets/plant_form_care_config.dart';
 
@@ -216,6 +218,18 @@ class _PlantFormPageState extends State<PlantFormPage> {
 
     if (mounted) {
       if (success) {
+        if (kDebugMode) {
+          print('🔄 PlantFormPage._savePlant() - Atualizando lista de plantas');
+        }
+        
+        // Atualizar a lista de plantas antes de navegar
+        final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+        await plantsProvider.refreshPlants();
+        
+        if (kDebugMode) {
+          print('✅ PlantFormPage._savePlant() - Lista atualizada, navegando de volta');
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

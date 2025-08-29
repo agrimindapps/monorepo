@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/plant.dart';
@@ -155,17 +156,41 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, Plant>> addPlant(Plant plant) async {
     try {
+      if (kDebugMode) {
+        print('🌱 PlantsRepositoryImpl.addPlant() - Iniciando');
+        print('🌱 PlantsRepositoryImpl.addPlant() - plant.id: ${plant.id}');
+        print('🌱 PlantsRepositoryImpl.addPlant() - plant.name: ${plant.name}');
+      }
+
       final userId = await _currentUserId;
       if (userId == null) {
+        if (kDebugMode) {
+          print('❌ PlantsRepositoryImpl.addPlant() - Usuário não autenticado');
+        }
         return const Left(ServerFailure('Usuário não autenticado'));
+      }
+
+      if (kDebugMode) {
+        print('🌱 PlantsRepositoryImpl.addPlant() - userId: $userId');
       }
 
       final plantModel = PlantModel.fromEntity(plant);
 
+      if (kDebugMode) {
+        print('🌱 PlantsRepositoryImpl.addPlant() - Salvando localmente primeiro');
+      }
+
       // Always save locally first
       await localDatasource.addPlant(plantModel);
 
+      if (kDebugMode) {
+        print('✅ PlantsRepositoryImpl.addPlant() - Salvo localmente com sucesso');
+      }
+
       if (await networkInfo.isConnected) {
+        if (kDebugMode) {
+          print('🌱 PlantsRepositoryImpl.addPlant() - Conectado, tentando salvar remotamente');
+        }
         try {
           // Try to save remotely
           final remotePlant = await remoteDatasource.addPlant(
@@ -173,21 +198,57 @@ class PlantsRepositoryImpl implements PlantsRepository {
             userId,
           );
 
-          // Update local with remote ID and sync status
+          if (kDebugMode) {
+            print('✅ PlantsRepositoryImpl.addPlant() - Salvo remotamente com sucesso');
+            print('🌱 PlantsRepositoryImpl.addPlant() - remotePlant.id: ${remotePlant.id}');
+          }
+
+          // Se o ID mudou (local vs remoto), remover o registro local antigo para evitar duplicação
+          if (plantModel.id != remotePlant.id) {
+            if (kDebugMode) {
+              print('🌱 PlantsRepositoryImpl.addPlant() - IDs diferentes, removendo registro local antigo');
+              print('   - ID local: ${plantModel.id}');
+              print('   - ID remoto: ${remotePlant.id}');
+            }
+            await localDatasource.hardDeletePlant(plantModel.id);
+            
+            if (kDebugMode) {
+              print('✅ PlantsRepositoryImpl.addPlant() - Registro local antigo removido');
+            }
+          }
+
+          // Update/add local with remote ID and sync status
           await localDatasource.updatePlant(remotePlant);
+
+          if (kDebugMode) {
+            print('✅ PlantsRepositoryImpl.addPlant() - Local atualizado com dados remotos');
+          }
 
           return Right(remotePlant);
         } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ PlantsRepositoryImpl.addPlant() - Falha ao salvar remotamente: $e');
+            print('🌱 PlantsRepositoryImpl.addPlant() - Retornando versão local');
+          }
           // If remote fails, return local version (will sync later)
           return Right(plantModel);
         }
       } else {
+        if (kDebugMode) {
+          print('🌱 PlantsRepositoryImpl.addPlant() - Offline, retornando versão local');
+        }
         // Offline - return local version
         return Right(plantModel);
       }
     } on CacheFailure catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsRepositoryImpl.addPlant() - CacheFailure: ${e.message}');
+      }
       return Left(e);
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsRepositoryImpl.addPlant() - Erro inesperado: $e');
+      }
       return Left(
         UnknownFailure('Erro inesperado ao adicionar planta: ${e.toString()}'),
       );

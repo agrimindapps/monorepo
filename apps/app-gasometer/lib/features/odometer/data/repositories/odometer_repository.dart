@@ -2,13 +2,25 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 import '../../../../core/cache/cache_manager.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
+import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../models/odometer_model.dart';
 
 /// Repository para persistência de leituras de odômetro usando Hive com cache strategy
-class OdometerRepository with CachedRepository<OdometerEntity> {
+class OdometerRepository with CachedRepository<OdometerEntity>, LoggableRepositoryMixin {
   static const String _boxName = 'odometer';
   late Box<OdometerModel> _box;
+  final LoggingService _loggingService;
+
+  OdometerRepository(this._loggingService);
+
+  @override
+  LoggingService get loggingService => _loggingService;
+
+  @override
+  String get repositoryCategory => LogCategory.odometer;
 
   /// Initializes the repository
   Future<void> initialize() async {
@@ -23,38 +35,84 @@ class OdometerRepository with CachedRepository<OdometerEntity> {
 
   /// Saves new odometer reading
   Future<OdometerEntity?> saveOdometerReading(OdometerEntity reading) async {
-    try {
-      final model = _entityToModel(reading);
-      await _box.put(reading.id, model);
-      return _modelToEntity(model);
-    } catch (e) {
-      throw Exception('Erro ao salvar leitura de odômetro: $e');
-    }
+    return await withLogging<OdometerEntity?>(
+      operation: LogOperation.create,
+      entityType: 'OdometerReading',
+      entityId: reading.id,
+      metadata: {
+        'vehicle_id': reading.vehicleId,
+        'value': reading.value,
+        'type': reading.type.name,
+      },
+      operationFunc: () async {
+        final model = _entityToModel(reading);
+        await _box.put(reading.id, model);
+        
+        // Log local storage
+        await logLocalStorage(
+          action: 'saved',
+          entityType: 'OdometerReading',
+          entityId: reading.id,
+          metadata: {'storage_type': 'hive'},
+        );
+        
+        return _modelToEntity(model);
+      },
+    );
   }
 
   /// Updates existing odometer reading
   Future<OdometerEntity?> updateOdometerReading(OdometerEntity reading) async {
-    try {
-      if (!_box.containsKey(reading.id)) {
-        throw Exception('Leitura de odômetro não encontrada');
-      }
-      
-      final model = _entityToModel(reading);
-      await _box.put(reading.id, model);
-      return _modelToEntity(model);
-    } catch (e) {
-      throw Exception('Erro ao atualizar leitura de odômetro: $e');
-    }
+    return await withLogging<OdometerEntity?>(
+      operation: LogOperation.update,
+      entityType: 'OdometerReading',
+      entityId: reading.id,
+      metadata: {
+        'vehicle_id': reading.vehicleId,
+        'value': reading.value,
+        'type': reading.type.name,
+      },
+      operationFunc: () async {
+        if (!_box.containsKey(reading.id)) {
+          throw Exception('Leitura de odômetro não encontrada');
+        }
+        
+        final model = _entityToModel(reading);
+        await _box.put(reading.id, model);
+        
+        // Log local storage
+        await logLocalStorage(
+          action: 'updated',
+          entityType: 'OdometerReading',
+          entityId: reading.id,
+          metadata: {'storage_type': 'hive'},
+        );
+        
+        return _modelToEntity(model);
+      },
+    );
   }
 
   /// Removes odometer reading by ID
   Future<bool> deleteOdometerReading(String readingId) async {
-    try {
-      await _box.delete(readingId);
-      return true;
-    } catch (e) {
-      throw Exception('Erro ao remover leitura de odômetro: $e');
-    }
+    return await withLogging<bool>(
+      operation: LogOperation.delete,
+      entityType: 'OdometerReading',
+      entityId: readingId,
+      operationFunc: () async {
+        await _box.delete(readingId);
+        
+        // Log local storage
+        await logLocalStorage(
+          action: 'deleted',
+          entityType: 'OdometerReading',
+          entityId: readingId,
+          metadata: {'storage_type': 'hive'},
+        );
+        
+        return true;
+      },
+    );
   }
 
   /// Finds odometer reading by ID

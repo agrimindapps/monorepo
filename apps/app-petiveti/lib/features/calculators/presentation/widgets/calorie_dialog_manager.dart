@@ -22,7 +22,7 @@ class CalorieDialogManager {
 
   /// Show presets selection dialog
   void showPresetsDialog({VoidCallback? onPresetLoaded}) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Presets Rápidos'),

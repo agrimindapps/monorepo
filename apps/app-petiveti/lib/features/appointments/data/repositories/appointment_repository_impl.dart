@@ -25,7 +25,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     try {
       // Try to get data from remote first if connected
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         try {
@@ -56,7 +56,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     try {
       // Try to get data from remote first if connected
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         try {
@@ -99,7 +99,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
       // If not found locally and connected, try remote
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         // Note: We'd need to implement getAppointmentById in remote datasource
@@ -127,7 +127,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
       // Try to sync with remote if connected
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         try {
@@ -160,7 +160,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
       // Try to sync with remote if connected
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         try {
@@ -191,7 +191,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
       // Try to sync with remote if connected
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         try {
@@ -221,7 +221,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     try {
       // Try to get data from remote first if connected
       final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
         try {

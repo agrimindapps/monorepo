@@ -7,6 +7,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import '../datasources/maintenance_local_data_source.dart';
@@ -17,6 +19,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final MaintenanceRemoteDataSource remoteDataSource;
   final MaintenanceLocalDataSource localDataSource;
   final Connectivity connectivity;
+  final LoggingService loggingService;
 
   // Controle de sync em background
   Completer<void>? _syncInProgress;
@@ -27,6 +30,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     required this.remoteDataSource,
     required this.localDataSource,
     required this.connectivity,
+    required this.loggingService,
   });
 
   Future<bool> get _isConnected async {
@@ -176,22 +180,122 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<Either<Failure, MaintenanceEntity>> addMaintenanceRecord(MaintenanceEntity maintenance) async {
+    await loggingService.logOperationStart(
+      category: LogCategory.maintenance,
+      operation: LogOperation.create,
+      message: 'Starting maintenance record creation for vehicle ${maintenance.vehicleId}',
+      metadata: {
+        'maintenance_id': maintenance.id,
+        'vehicle_id': maintenance.vehicleId,
+        'maintenance_type': maintenance.type.displayName,
+        'cost': maintenance.cost.toString(),
+        'odometer_reading': maintenance.odometer.toString(),
+        'service_date': maintenance.serviceDate.toIso8601String(),
+        'status': maintenance.status.displayName,
+      },
+    );
+
     try {
+      await loggingService.logInfo(
+        category: LogCategory.maintenance,
+        message: 'Saving maintenance record to local storage',
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+        },
+      );
+
       // Always save locally first
       final localRecord = await localDataSource.addMaintenanceRecord(maintenance);
+
+      await loggingService.logInfo(
+        category: LogCategory.maintenance,
+        message: 'Maintenance record saved to local storage successfully',
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+        },
+      );
       
       if (await _isConnected) {
+        await loggingService.logInfo(
+          category: LogCategory.maintenance,
+          message: 'Connection available, attempting remote sync',
+          metadata: {
+            'maintenance_id': maintenance.id,
+            'vehicle_id': maintenance.vehicleId,
+          },
+        );
+
         try {
           await remoteDataSource.addMaintenanceRecord(maintenance);
+          
+          await loggingService.logInfo(
+            category: LogCategory.maintenance,
+            message: 'Maintenance record synced to remote storage',
+            metadata: {
+              'maintenance_id': maintenance.id,
+              'vehicle_id': maintenance.vehicleId,
+            },
+          );
         } catch (e) {
-          // Continue with local save if remote fails
+          await loggingService.logOperationWarning(
+            category: LogCategory.maintenance,
+            operation: LogOperation.sync,
+            message: 'Failed to sync maintenance record to remote',
+            metadata: {
+              'maintenance_id': maintenance.id,
+              'vehicle_id': maintenance.vehicleId,
+              'error': e.toString(),
+            },
+          );
         }
+      } else {
+        await loggingService.logInfo(
+          category: LogCategory.maintenance,
+          message: 'No connection available, maintenance saved offline',
+          metadata: {
+            'maintenance_id': maintenance.id,
+            'vehicle_id': maintenance.vehicleId,
+          },
+        );
       }
       
+      await loggingService.logOperationSuccess(
+        category: LogCategory.maintenance,
+        operation: LogOperation.create,
+        message: 'Maintenance record creation completed successfully',
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+          'synced': await _isConnected,
+        },
+      );
+
       return Right(localRecord);
     } on CacheException catch (e) {
+      await loggingService.logOperationError(
+        category: LogCategory.maintenance,
+        operation: LogOperation.create,
+        message: 'Cache error during maintenance record creation',
+        error: e,
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+        },
+      );
       return Left(CacheFailure(e.message));
     } catch (e) {
+      await loggingService.logOperationError(
+        category: LogCategory.maintenance,
+        operation: LogOperation.create,
+        message: 'Unexpected error during maintenance record creation',
+        error: e,
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+        },
+      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }

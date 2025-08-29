@@ -77,7 +77,7 @@ class _MarketsListPageState extends State<MarketsListPage>
             builder: (context, provider, _) {
               return IconButton(
                 icon: provider.isRefreshing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
@@ -388,12 +388,12 @@ class _LoadingList extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 5,
-      itemBuilder: (context, index) => const Card(
+      itemBuilder: (context, index) => Card(
         child: ListTile(
           leading: CircleAvatar(backgroundColor: AppTheme.borderColor),
-          title: _ShimmerContainer(width: 120, height: 16),
-          subtitle: _ShimmerContainer(width: 80, height: 12),
-          trailing: _ShimmerContainer(width: 60, height: 20),
+          title: const _ShimmerContainer(width: 120, height: 16),
+          subtitle: const _ShimmerContainer(width: 80, height: 12),
+          trailing: const _ShimmerContainer(width: 60, height: 20),
         ),
       ),
     );

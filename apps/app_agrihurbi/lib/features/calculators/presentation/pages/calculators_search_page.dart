@@ -6,12 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/debounced_search_manager.dart';
 import '../../../../core/utils/performance_benchmark.dart';
+import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
 import '../../domain/services/calculator_search_service.dart' as search_service;
+import '../../domain/services/calculator_ui_service.dart';
 import '../providers/calculator_provider.dart';
-import '../widgets/calculator_card_widget.dart';
+import '../widgets/calculator_search_bar_widget.dart';
+import '../widgets/calculator_search_filters_widget.dart';
+import '../widgets/calculator_search_results_widget.dart';
 
 /// Página de busca avançada de calculadoras
 /// 
@@ -31,7 +35,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
   CalculatorCategory? _selectedCategory;
   CalculatorComplexity? _selectedComplexity;
   search_service.CalculatorSortOrder _sortOrder = search_service.CalculatorSortOrder.nameAsc;
-  final List<String> _selectedTags = [];
+  List<String> _selectedTags = [];
   bool _showOnlyFavorites = false;
   
   List<CalculatorEntity> _searchResults = [];
@@ -39,7 +43,6 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
   bool _isSearching = false;
   
   // Performance benchmarking
-  int _lastSearchDuration = 0;
   int _searchCallCount = 0;
 
   @override
@@ -84,17 +87,67 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
           return Column(
             children: [
               // Barra de busca
-              _buildSearchBar(),
+              CalculatorSearchBarWidget(
+                controller: _searchController,
+                onChanged: (_) => _debouncedSearchManager.searchWithDebounce(
+                  _searchController.text,
+                  _performOptimizedSearch,
+                ),
+                isLoading: _isSearching,
+              ),
               
               // Filtros avançados
-              _buildAdvancedFilters(),
-              
-              // Estatísticas de performance (apenas em debug)
-              if (kDebugMode) _buildPerformanceStats(),
+              CalculatorSearchFiltersWidget(
+                selectedCategory: _selectedCategory,
+                selectedComplexity: _selectedComplexity,
+                selectedTags: _selectedTags,
+                sortOrder: _sortOrder,
+                showOnlyFavorites: _showOnlyFavorites,
+                availableTags: _availableTags,
+                onCategoryChanged: (category) {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                  _updateSearchResults();
+                },
+                onComplexityChanged: (complexity) {
+                  setState(() {
+                    _selectedComplexity = complexity;
+                  });
+                  _updateSearchResults();
+                },
+                onTagsChanged: (tags) {
+                  setState(() {
+                    _selectedTags = tags;
+                  });
+                  _updateSearchResults();
+                },
+                onSortOrderChanged: (order) {
+                  setState(() {
+                    _sortOrder = order;
+                  });
+                  _updateSearchResults();
+                },
+                onFavoritesFilterChanged: (showFavorites) {
+                  setState(() {
+                    _showOnlyFavorites = showFavorites;
+                  });
+                  _updateSearchResults();
+                },
+                onClearFilters: _clearAllFilters,
+                onApplyFilters: _updateSearchResults,
+              ),
               
               // Resultados da busca
               Expanded(
-                child: _buildSearchResults(provider),
+                child: CalculatorSearchResultsWidget(
+                  searchResults: _searchResults,
+                  isSearching: _isSearching,
+                  showCategory: _selectedCategory == null,
+                  scrollController: _scrollController,
+                  onClearFilters: _clearAllFilters,
+                  searchCallCount: _searchCallCount,
+                ),
               ),
             ],
           );
@@ -103,388 +156,21 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Digite para buscar calculadoras...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        _debouncedSearchManager.searchWithDebounce(
-                          _searchController.text,
-                          _performOptimizedSearch,
-                        );
-                      },
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            ),
-            onChanged: (_) => _debouncedSearchManager.searchWithDebounce(
-              _searchController.text,
-              _performOptimizedSearch,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Busque por nome, descrição, categoria ou parâmetros',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchBarWidget
 
-  Widget _buildAdvancedFilters() {
-    return ExpansionTile(
-      title: const Text('Filtros Avançados'),
-      leading: const Icon(Icons.filter_list),
-      initiallyExpanded: false,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Categoria
-              _buildCategoryFilter(),
-              const SizedBox(height: 16),
-              
-              // Complexidade
-              _buildComplexityFilter(),
-              const SizedBox(height: 16),
-              
-              // Tags
-              _buildTagsFilter(),
-              const SizedBox(height: 16),
-              
-              // Ordenação
-              _buildSortOrderFilter(),
-              const SizedBox(height: 16),
-              
-              // Favoritos
-              _buildFavoritesFilter(),
-              const SizedBox(height: 16),
-              
-              // Botões de ação
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: _clearAllFilters,
-                    child: const Text('Limpar Filtros'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _updateSearchResults,
-                    child: const Text('Aplicar Filtros'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  Widget _buildCategoryFilter() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Categoria',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilterChip(
-              label: const Text('Todas'),
-              selected: _selectedCategory == null,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedCategory = selected ? null : _selectedCategory;
-                });
-                _updateSearchResults();
-              },
-            ),
-            ...CalculatorCategory.values.map((category) {
-              return FilterChip(
-                label: Text(category.displayName),
-                selected: _selectedCategory == category,
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = selected ? category : null;
-                  });
-                  _updateSearchResults();
-                },
-              );
-            }),
-          ],
-        ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  Widget _buildComplexityFilter() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Complexidade',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilterChip(
-              label: const Text('Todas'),
-              selected: _selectedComplexity == null,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedComplexity = selected ? null : _selectedComplexity;
-                });
-                _updateSearchResults();
-              },
-            ),
-            ...CalculatorComplexity.values.map((complexity) {
-              return FilterChip(
-                label: Text(_getComplexityName(complexity)),
-                selected: _selectedComplexity == complexity,
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedComplexity = selected ? complexity : null;
-                  });
-                  _updateSearchResults();
-                },
-              );
-            }),
-          ],
-        ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  Widget _buildTagsFilter() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Tags',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        if (_availableTags.isEmpty)
-          Text(
-            'Nenhuma tag disponível',
-            style: Theme.of(context).textTheme.bodySmall,
-          )
-        else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _availableTags.map((tag) {
-              return FilterChip(
-                label: Text(tag),
-                selected: _selectedTags.contains(tag),
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedTags.add(tag);
-                    } else {
-                      _selectedTags.remove(tag);
-                    }
-                  });
-                  _updateSearchResults();
-                },
-              );
-            }).toList(),
-          ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  Widget _buildSortOrderFilter() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Ordenação',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<search_service.CalculatorSortOrder>(
-          value: _sortOrder,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-          items: search_service.CalculatorSortOrder.values.map((order) {
-            return DropdownMenuItem(
-              value: order,
-              child: Text(_getSortOrderName(order)),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              setState(() {
-                _sortOrder = value;
-              });
-              _updateSearchResults();
-            }
-          },
-        ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  Widget _buildFavoritesFilter() {
-    return Row(
-      children: [
-        Checkbox(
-          value: _showOnlyFavorites,
-          onChanged: (value) {
-            setState(() {
-              _showOnlyFavorites = value ?? false;
-            });
-            _updateSearchResults();
-          },
-        ),
-        const SizedBox(width: 8),
-        Text(
-          'Mostrar apenas favoritas',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  Widget _buildSearchResults(CalculatorProvider provider) {
-    if (_isSearching) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Buscando calculadoras...'),
-          ],
-        ),
-      );
-    }
-
-    if (_searchResults.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhuma calculadora encontrada',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Tente ajustar os termos de busca\nou os filtros selecionados',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _clearAllFilters,
-              child: const Text('Limpar Filtros'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Cabeçalho dos resultados
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '${_searchResults.length} ${_searchResults.length == 1 ? "calculadora encontrada" : "calculadoras encontradas"}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        
-        // Lista de resultados
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            itemCount: _searchResults.length,
-            itemBuilder: (context, index) {
-              final calculator = _searchResults[index];
-              return CalculatorCardWidget(
-                calculator: calculator,
-                isFavorite: provider.isCalculatorFavorite(calculator.id),
-                onTap: () => _navigateToCalculator(calculator.id),
-                onFavoriteToggle: () => provider.toggleFavorite(calculator.id),
-                showCategory: _selectedCategory == null,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchResultsWidget
 
   /// Nova implementação otimizada com single-pass algorithm
   void _performOptimizedSearch(String query) async {
@@ -545,55 +231,11 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     _performOptimizedSearch(_searchController.text);
   }
   
-  /// Widget para exibir estatísticas de performance em debug
-  Widget _buildPerformanceStats() {
-    final stats = PerformanceBenchmark.getOperationStats('search_otimizada');
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        border: Border.all(color: Colors.green.shade200),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.speed, size: 16, color: Colors.green),
-              const SizedBox(width: 8),
-              Text(
-                'Performance Stats',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Buscas realizadas: $_searchCallCount | '
-            'Tempo médio: ${stats.averageDuration.toStringAsFixed(1)}ms | '
-            'Última busca: $_lastSearchDuration ms',
-            style: const TextStyle(fontSize: 11, color: Colors.black87),
-          ),
-        ],
-      ),
-    );
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchResultsWidget
 
   void _extractAvailableTags(List<CalculatorEntity> calculators) {
-    final allTags = <String>{};
-    for (final calculator in calculators) {
-      allTags.addAll(calculator.tags);
-    }
-    
     setState(() {
-      _availableTags = allTags.toList()..sort();
+      _availableTags = CalculatorUIService.extractAvailableTags(calculators);
     });
   }
 
@@ -609,34 +251,10 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     _updateSearchResults();
   }
 
-  void _navigateToCalculator(String calculatorId) {
-    context.push('/home/calculators/detail/$calculatorId');
-  }
+  // Método removido - funcionalidade movida para widgets
 
-  String _getComplexityName(CalculatorComplexity complexity) {
-    switch (complexity) {
-      case CalculatorComplexity.low:
-        return 'Simples';
-      case CalculatorComplexity.medium:
-        return 'Intermediária';
-      case CalculatorComplexity.high:
-        return 'Avançada';
-    }
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
-  String _getSortOrderName(search_service.CalculatorSortOrder order) {
-    switch (order) {
-      case search_service.CalculatorSortOrder.nameAsc:
-        return 'Nome (A-Z)';
-      case search_service.CalculatorSortOrder.nameDesc:
-        return 'Nome (Z-A)';
-      case search_service.CalculatorSortOrder.categoryAsc:
-        return 'Categoria';
-      case search_service.CalculatorSortOrder.complexityAsc:
-        return 'Complexidade (Crescente)';
-      case search_service.CalculatorSortOrder.complexityDesc:
-        return 'Complexidade (Decrescente)';
-    }
-  }
+  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
 }

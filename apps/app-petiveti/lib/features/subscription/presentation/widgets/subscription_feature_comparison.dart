@@ -16,7 +16,7 @@ class SubscriptionFeatureComparison extends StatelessWidget {
             const SizedBox(height: 16),
             _buildHeader(context),
             const Divider(height: 16),
-            ..._buildFeatureRows(),
+            ..._buildFeatureRows(context),
           ],
         ),
       ),
@@ -53,7 +53,7 @@ class SubscriptionFeatureComparison extends StatelessWidget {
             'Premium',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -62,7 +62,7 @@ class SubscriptionFeatureComparison extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildFeatureRows() {
+  List<Widget> _buildFeatureRows(BuildContext context) {
     final features = [
       const _FeatureRow('Animais ilimitados', free: false, premium: true),
       const _FeatureRow('Todas as calculadoras', free: false, premium: true),
@@ -75,11 +75,11 @@ class SubscriptionFeatureComparison extends StatelessWidget {
     ];
 
     return features
-        .map((feature) => _buildFeatureRow(feature))
+        .map((feature) => _buildFeatureRow(context, feature))
         .toList();
   }
 
-  Widget _buildFeatureRow(_FeatureRow feature) {
+  Widget _buildFeatureRow(BuildContext context, _FeatureRow feature) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -92,20 +92,20 @@ class SubscriptionFeatureComparison extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: _buildFeatureIcon(feature.free),
+            child: _buildFeatureIcon(context, feature.free),
           ),
           Expanded(
-            child: _buildFeatureIcon(feature.premium),
+            child: _buildFeatureIcon(context, feature.premium),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFeatureIcon(bool available) {
+  Widget _buildFeatureIcon(BuildContext context, bool available) {
     return Icon(
       available ? Icons.check_circle : Icons.cancel,
-      color: available ? Colors.green : Colors.red,
+      color: available ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
       size: 20,
     );
   }

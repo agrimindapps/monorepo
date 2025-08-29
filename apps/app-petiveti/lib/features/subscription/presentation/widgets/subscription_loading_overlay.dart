@@ -18,7 +18,7 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
 
     return Positioned.fill(
       child: ColoredBox(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
         child: Center(
           child: Card(
             child: Padding(

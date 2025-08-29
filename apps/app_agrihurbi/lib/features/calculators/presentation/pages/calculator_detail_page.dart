@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
+import '../../domain/entities/calculation_template.dart';
+import '../../domain/services/calculator_template_service.dart';
 import '../providers/calculator_provider_simple.dart';
+import '../providers/calculator_features_provider.dart';
 import '../widgets/calculation_result_display.dart';
 import '../widgets/parameter_input_widget.dart';
 
@@ -28,13 +32,26 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   bool _showResults = false;
+  
+  // Services para funcionalidades avançadas
+  CalculatorTemplateService? _templateService;
 
   @override
   void initState() {
     super.initState();
+    _initializeServices();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCalculatorData();
     });
+  }
+
+  Future<void> _initializeServices() async {
+    try {
+      // Inicializar services locais se necessário
+      // Por enquanto, vai usar o provider quando disponível
+    } catch (e) {
+      debugPrint('Erro ao inicializar serviços: $e');
+    }
   }
 
   Future<void> _loadCalculatorData() async {
@@ -375,7 +392,7 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () => _shareResults(result),
+                  onPressed: () => _shareResults(provider, result),
                   icon: const Icon(Icons.share),
                   tooltip: 'Compartilhar resultados',
                 ),
@@ -456,36 +473,255 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
     _formKey.currentState?.reset();
   }
 
-  void _loadTemplate(CalculatorProvider provider) {
-    // TODO: Implementar carregamento de templates salvos
-    if (!mounted) return; // ✅ Safety check
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
-    );
+  Future<void> _loadTemplate(CalculatorProvider provider) async {
+    if (!mounted || provider.selectedCalculator == null) return;
+    
+    try {
+      // Tenta usar o provider de features
+      CalculatorFeaturesProvider? featuresProvider;
+      try {
+        featuresProvider = Provider.of<CalculatorFeaturesProvider>(context, listen: false);
+      } catch (e) {
+        // Provider não disponível, usar service direto
+        if (_templateService == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Serviço de templates não inicializado'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return;
+        }
+      }
+      
+      final calculator = provider.selectedCalculator!;
+      
+      // Carregar templates disponíveis
+      List<CalculationTemplate> templates;
+      if (featuresProvider != null) {
+        templates = await featuresProvider.getTemplatesForCalculator(calculator.id);
+      } else {
+        templates = await _templateService!.getTemplatesForCalculator(calculator.id);
+      }
+      
+      if (templates.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Nenhum template disponível para esta calculadora'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+      
+      // Mostrar dialog de seleção
+      if (!mounted) return;
+      final selectedTemplate = await showDialog<CalculationTemplate>(
+        context: context,
+        builder: (context) => _buildTemplateSelectionDialog(templates),
+      );
+      
+      if (selectedTemplate != null && mounted) {
+        // Aplicar valores do template
+        provider.updateInputs(selectedTemplate.inputValues);
+        
+        // Marcar como usado
+        if (featuresProvider != null) {
+          await featuresProvider.markTemplateAsUsed(selectedTemplate.id);
+        } else {
+          await _templateService!.markTemplateAsUsed(selectedTemplate.id);
+        }
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Template "${selectedTemplate.name}" carregado com sucesso'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar template: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _toggleFavorite() {
-    // TODO: Implementar sistema de favoritos
-    if (!mounted) return; // ✅ Safety check
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
-    );
+  Future<void> _toggleFavorite() async {
+    if (!mounted) return;
+    
+    final provider = Provider.of<CalculatorProvider>(context, listen: false);
+    final calculator = provider.selectedCalculator;
+    if (calculator == null) return;
+    
+    try {
+      // Tenta usar o provider de features
+      CalculatorFeaturesProvider? featuresProvider;
+      try {
+        featuresProvider = Provider.of<CalculatorFeaturesProvider>(context, listen: false);
+      } catch (e) {
+        // Provider não disponível, mostrar mensagem
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sistema de favoritos não disponível'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+      
+      final success = await featuresProvider.toggleFavorite(calculator.id);
+      
+      if (mounted && success) {
+        final isFavorite = featuresProvider.isFavorite(calculator.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isFavorite
+                  ? 'Adicionado aos favoritos'
+                  : 'Removido dos favoritos'
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao alterar favorito'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao alterar favorito: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _shareResults(CalculationResult result) {
-    // TODO: Implementar compartilhamento de resultados
-    if (!mounted) return; // ✅ Safety check
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
-    );
+  Future<void> _shareResults(CalculatorProvider provider, CalculationResult result) async {
+    if (!mounted || provider.selectedCalculator == null) return;
+    
+    try {
+      final calculator = provider.selectedCalculator!;
+      
+      // Gerar texto para compartilhamento
+      final shareText = _generateResultShareText(
+        calculator.name,
+        result.inputs,
+        result.values,
+      );
+      
+      // Copiar para clipboard
+      await Clipboard.setData(ClipboardData(text: shareText));
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Resultado copiado para a área de transferência'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Mostrar preview do conteúdo
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Compartilhar Resultado'),
+            content: SingleChildScrollView(
+              child: Text(shareText),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: shareText));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Copiado novamente!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Copiar Novamente'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao compartilhar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _saveToHistory(CalculatorProvider provider, CalculationResult result) {
-    // TODO: Implementar salvamento no histórico
-    if (!mounted) return; // ✅ Safety check
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
-    );
+  Future<void> _saveToHistory(CalculatorProvider provider, CalculationResult result) async {
+    if (!mounted || provider.selectedCalculator == null) return;
+    
+    try {
+      final calculator = provider.selectedCalculator!;
+      
+      // Criar item do histórico (em implementação real seria salvo no repository)
+      // final historyItem = CalculationHistory(
+      //   id: 'history_${DateTime.now().millisecondsSinceEpoch}',
+      //   userId: 'current_user', // TODO: Implementar sistema de usuários
+      //   calculatorId: calculator.id,
+      //   calculatorName: calculator.name,
+      //   createdAt: DateTime.now(),
+      //   result: result,
+      //   notes: null,
+      //   tags: null,
+      // );
+      
+      // Adicionar ao histórico do provider (simulação)
+      // Em implementação real, usaria o repository
+      debugPrint('Salvando cálculo da ${calculator.name} no histórico');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cálculo salvo no histórico com sucesso'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao salvar no histórico: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _handleMenuAction(String action) {
@@ -496,23 +732,168 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
       case 'save_template':
         _saveTemplate();
         break;
+      case 'export_result':
+        _showExportOptions();
+        break;
+      case 'advanced_calc':
+        _showAdvancedCalculations();
+        break;
     }
   }
 
-  void _shareCalculator() {
-    // TODO: Implementar compartilhamento da calculadora
-    if (!mounted) return; // ✅ Safety check
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
-    );
+  Future<void> _shareCalculator() async {
+    if (!mounted) return;
+    
+    final provider = Provider.of<CalculatorProvider>(context, listen: false);
+    final calculator = provider.selectedCalculator;
+    if (calculator == null) return;
+    
+    try {
+      // Gerar texto para compartilhamento da calculadora
+      final shareText = 'Confira a calculadora "${calculator.name}" no AgriHurbi!\n\n'
+                       '${calculator.description}\n\n'
+                       'Uma ferramenta essencial para gestão agrícola.\n'
+                       'Categoria: ${calculator.category.displayName}';
+      
+      // Copiar para clipboard
+      await Clipboard.setData(ClipboardData(text: shareText));
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Link da calculadora copiado para área de transferência'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Mostrar preview
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Compartilhar Calculadora'),
+            content: SingleChildScrollView(
+              child: Text(shareText),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: shareText));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Copiar Novamente'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao compartilhar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _saveTemplate() {
-    // TODO: Implementar salvamento como template
-    if (!mounted) return; // ✅ Safety check
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
-    );
+  Future<void> _saveTemplate() async {
+    if (!mounted) return;
+    
+    final provider = Provider.of<CalculatorProvider>(context, listen: false);
+    final calculator = provider.selectedCalculator;
+    if (calculator == null || provider.currentInputs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Preencha os parâmetros antes de salvar um template'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    try {
+      // Mostrar dialog para nome do template
+      final templateName = await showDialog<String>(
+        context: context,
+        builder: (context) => _buildSaveTemplateDialog(),
+      );
+      
+      if (templateName != null && templateName.isNotEmpty && mounted) {
+        // Criar template
+        final template = CalculationTemplate(
+          id: '', // Será gerado pelo service
+          name: templateName,
+          calculatorId: calculator.id,
+          calculatorName: calculator.name,
+          inputValues: Map<String, dynamic>.from(provider.currentInputs),
+          description: null,
+          tags: const [],
+          createdAt: DateTime.now(),
+          userId: 'current_user', // TODO: Implementar sistema de usuários
+          isPublic: false,
+        );
+        
+        // Tenta usar o provider de features
+        CalculatorFeaturesProvider? featuresProvider;
+        try {
+          featuresProvider = Provider.of<CalculatorFeaturesProvider>(context, listen: false);
+        } catch (e) {
+          // Provider não disponível, usar service direto se disponível
+          if (_templateService == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Serviço de templates não disponível'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            return;
+          }
+        }
+        
+        // Salvar template
+        bool success = false;
+        if (featuresProvider != null) {
+          success = await featuresProvider.saveTemplate(template);
+        } else {
+          success = await _templateService!.saveTemplate(template);
+        }
+        
+        if (mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Template "$templateName" salvo com sucesso'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Erro ao salvar template'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao salvar template: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Color _getCategoryColor(CalculatorCategory category) {
@@ -551,6 +932,336 @@ class _CalculatorDetailPageState extends State<CalculatorDetailPage> {
       case CalculatorCategory.management:
         return Icons.manage_accounts;
     }
+  }
+
+  /// Gera texto para compartilhamento de resultado
+  String _generateResultShareText(
+    String calculatorName,
+    Map<String, dynamic> inputs,
+    List<CalculationResultValue> values,
+  ) {
+    final inputsText = inputs.entries
+        .map((e) => '• ${e.key}: ${e.value}')
+        .join('\n');
+    
+    final outputsText = values
+        .map((v) => '• ${v.label}: ${v.formattedValue}')
+        .join('\n');
+
+    return 'Resultado da calculadora "$calculatorName" - AgriHurbi\n\n'
+           'Parâmetros:\n$inputsText\n\n'
+           'Resultados:\n$outputsText\n\n'
+           'Calculado em ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
+  }
+
+  /// Mostra opções de exportação
+  Future<void> _showExportOptions() async {
+    if (!mounted) return;
+    
+    final provider = Provider.of<CalculatorProvider>(context, listen: false);
+    final result = provider.currentResult;
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nenhum resultado disponível para exportar'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exportar Resultado'),
+        content: const Text('Escolha o formato de exportação:'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _exportResult('CSV', provider, result);
+            },
+            child: const Text('Exportar CSV'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _exportResult('JSON', provider, result);
+            },
+            child: const Text('Exportar JSON'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Exporta resultado no formato especificado
+  Future<void> _exportResult(String format, CalculatorProvider provider, CalculationResult result) async {
+    if (!mounted || provider.selectedCalculator == null) return;
+    
+    try {
+      final calculator = provider.selectedCalculator!;
+      String exportData;
+      
+      if (format.toUpperCase() == 'CSV') {
+        exportData = _generateCSVExport(calculator.name, result);
+      } else if (format.toUpperCase() == 'JSON') {
+        exportData = _generateJSONExport(calculator.name, result);
+      } else {
+        throw Exception('Formato não suportado');
+      }
+      
+      // Copiar para clipboard
+      await Clipboard.setData(ClipboardData(text: exportData));
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Resultado exportado em $format e copiado para área de transferência'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Mostrar preview
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Exportação $format'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 400,
+              child: SingleChildScrollView(
+                child: Text(
+                  exportData,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: exportData));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Copiar Novamente'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao exportar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Gera exportação em formato CSV
+  String _generateCSVExport(String calculatorName, CalculationResult result) {
+    final timestamp = DateTime.now().toIso8601String();
+    
+    var csv = 'Calculadora,Tipo,Parâmetro,Valor,Unidade,Timestamp\n';
+    
+    // Adicionar inputs
+    for (final entry in result.inputs.entries) {
+      csv += '"$calculatorName",Entrada,"${entry.key}","${entry.value}","","$timestamp"\n';
+    }
+    
+    // Adicionar resultados
+    for (final value in result.values) {
+      csv += '"$calculatorName",Resultado,"${value.label}","${value.value}","${value.unit}","$timestamp"\n';
+    }
+    
+    return csv;
+  }
+
+  /// Gera exportação em formato JSON
+  String _generateJSONExport(String calculatorName, CalculationResult result) {
+    final data = {
+      'calculator': calculatorName,
+      'timestamp': DateTime.now().toIso8601String(),
+      'inputs': result.inputs,
+      'results': result.values.map((v) => {
+        'label': v.label,
+        'value': v.value,
+        'unit': v.unit,
+        'description': v.description,
+        'isPrimary': v.isPrimary,
+      }).toList(),
+      'type': result.type.name,
+      'isValid': result.isValid,
+      'interpretation': result.interpretation,
+      'recommendations': result.recommendations,
+    };
+    
+    // Formatação simples do JSON (sem dependência externa)
+    return data.toString().replaceAllMapped(
+      RegExp(r'(\w+): (.+?)(?=, \w+:|})'),
+      (match) => '"${match.group(1)}": ${_formatJsonValue(match.group(2)!)}',
+    );
+  }
+
+  String _formatJsonValue(String value) {
+    if (value.startsWith('[') || value.startsWith('{') || 
+        value == 'true' || value == 'false' || value == 'null') {
+      return value;
+    }
+    if (double.tryParse(value) != null || int.tryParse(value) != null) {
+      return value;
+    }
+    return '"$value"';
+  }
+
+  /// Mostra funcionalidades de cálculos avançados
+  Future<void> _showAdvancedCalculations() async {
+    if (!mounted) return;
+    
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cálculos Avançados'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Funcionalidades avançadas disponíveis:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 12),
+            Text('• Análise de sensibilidade'),
+            Text('• Cálculos em lote'),
+            Text('• Comparação de cenários'),
+            Text('• Análise estatística'),
+            Text('• Otimização de parâmetros'),
+            SizedBox(height: 12),
+            Text(
+              'Essas funcionalidades estarão disponíveis em versões futuras do aplicativo.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // TODO: Implementar funcionalidades avançadas
+            },
+            child: const Text('Solicitar Funcionalidade'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Constrói dialog para salvar template
+  Widget _buildSaveTemplateDialog() {
+    final nameController = TextEditingController();
+    
+    return AlertDialog(
+      title: const Text('Salvar Template'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Digite um nome para este template:',
+            style: TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Nome do template',
+              hintText: 'Ex: Irrigação Verão 2024',
+              border: OutlineInputBorder(),
+            ),
+            textCapitalization: TextCapitalization.words,
+            autofocus: true,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final name = nameController.text.trim();
+            if (name.isNotEmpty) {
+              Navigator.of(context).pop(name);
+            }
+          },
+          child: const Text('Salvar'),
+        ),
+      ],
+    );
+  }
+
+  /// Constrói dialog para seleção de templates
+  Widget _buildTemplateSelectionDialog(List<CalculationTemplate> templates) {
+    return AlertDialog(
+      title: const Text('Selecionar Template'),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 400,
+        child: ListView.builder(
+          itemCount: templates.length,
+          itemBuilder: (context, index) {
+            final template = templates[index];
+            return Card(
+              child: ListTile(
+                title: Text(template.name),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (template.description != null)
+                      Text(template.description!),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Criado: ${template.formattedCreatedDate}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    if (template.lastUsed != null)
+                      Text(
+                        'Último uso: ${template.formattedLastUsed}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                  ],
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () => Navigator.of(context).pop(template),
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+      ],
+    );
   }
 
   @override

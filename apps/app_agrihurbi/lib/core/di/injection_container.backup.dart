@@ -32,6 +32,7 @@ import 'package:app_agrihurbi/features/livestock/data/repositories/livestock_rep
 import 'package:app_agrihurbi/features/livestock/domain/repositories/livestock_repository.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/create_bovine.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/delete_bovine.dart';
+import 'package:app_agrihurbi/features/livestock/domain/usecases/get_bovine_by_id.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/get_bovines.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/get_equines.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/search_animals.dart';
@@ -208,6 +209,7 @@ Future<void> configureDependencies() async {
   getIt.registerSingleton<bovines_providers.BovinesProvider>(
     bovines_providers.BovinesProvider(
       getAllBovines: getIt<GetAllBovinesUseCase>(),
+      getBovineById: getIt<GetBovineByIdUseCase>(),
       createBovine: getIt<CreateBovineUseCase>(),
       updateBovine: getIt<UpdateBovineUseCase>(),
       deleteBovine: getIt<DeleteBovineUseCase>(),

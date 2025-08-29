@@ -23,7 +23,7 @@ class ExpenseRepositoryHybridImpl implements ExpenseRepository {
 
   Future<bool> get isConnected async {
     final result = await connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    return !result.contains(ConnectivityResult.none);
   }
 
   @override

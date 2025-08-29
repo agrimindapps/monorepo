@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/usecases/create_bovine.dart';
 import '../../domain/usecases/delete_bovine.dart';
+import '../../domain/usecases/get_bovine_by_id.dart';
 import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/update_bovine.dart';
 
@@ -14,16 +15,19 @@ import '../../domain/usecases/update_bovine.dart';
 @singleton
 class BovinesProvider extends ChangeNotifier {
   final GetAllBovinesUseCase _getAllBovines;
+  final GetBovineByIdUseCase _getBovineById;
   final CreateBovineUseCase _createBovine;
   final UpdateBovineUseCase _updateBovine;
   final DeleteBovineUseCase _deleteBovine;
 
   BovinesProvider({
     required GetAllBovinesUseCase getAllBovines,
+    required GetBovineByIdUseCase getBovineById,
     required CreateBovineUseCase createBovine,
     required UpdateBovineUseCase updateBovine,
     required DeleteBovineUseCase deleteBovine,
   })  : _getAllBovines = getAllBovines,
+        _getBovineById = getBovineById,
         _createBovine = createBovine,
         _updateBovine = updateBovine,
         _deleteBovine = deleteBovine;
@@ -34,6 +38,7 @@ class BovinesProvider extends ChangeNotifier {
   BovineEntity? _selectedBovine;
   
   bool _isLoading = false;
+  bool _isLoadingBovine = false;
   bool _isCreating = false;
   bool _isUpdating = false;
   bool _isDeleting = false;
@@ -47,6 +52,7 @@ class BovinesProvider extends ChangeNotifier {
   BovineEntity? get selectedBovine => _selectedBovine;
   
   bool get isLoading => _isLoading;
+  bool get isLoadingBovine => _isLoadingBovine;
   bool get isCreating => _isCreating;
   bool get isUpdating => _isUpdating;
   bool get isDeleting => _isDeleting;
@@ -246,27 +252,63 @@ class BovinesProvider extends ChangeNotifier {
     }
   }
 
-  /// Carrega um bovino específico por ID e o define como selecionado
+  /// Carrega um bovino específico por ID usando use case dedicado
+  /// 
+  /// Esta implementação:
+  /// 1. Busca localmente primeiro no cache em memória
+  /// 2. Se não encontrar, usa o use case que implementa local-first strategy
+  /// 3. O repository busca no cache Hive e depois remotamente se necessário
+  /// 4. Define automaticamente o bovino como selecionado se encontrado
   Future<bool> loadBovineById(String id) async {
-    // Primeiro tenta buscar localmente
-    final localBovine = getBovineById(id);
-    if (localBovine != null) {
-      _selectedBovine = localBovine;
+    _isLoadingBovine = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Primeiro tenta buscar no cache em memória
+      final localBovine = getBovineById(id);
+      if (localBovine != null) {
+        _selectedBovine = localBovine;
+        _isLoadingBovine = false;
+        notifyListeners();
+        debugPrint('BovinesProvider: Bovino encontrado no cache - $id');
+        return true;
+      }
+
+      // Se não encontrou no cache, usa o use case (busca Hive + remoto)
+      final result = await _getBovineById(GetBovineByIdParams(bovineId: id));
+      
+      bool success = false;
+      result.fold(
+        (failure) {
+          _errorMessage = failure.message;
+          debugPrint('BovinesProvider: Erro ao carregar bovino por ID - ${failure.message}');
+        },
+        (bovine) {
+          // Adiciona ao cache em memória se não estiver presente
+          final existingIndex = _bovines.indexWhere((b) => b.id == bovine.id);
+          if (existingIndex == -1) {
+            _bovines.add(bovine);
+          } else {
+            _bovines[existingIndex] = bovine;
+          }
+          
+          _selectedBovine = bovine;
+          success = true;
+          debugPrint('BovinesProvider: Bovino carregado individualmente - ${bovine.id}');
+        },
+      );
+
+      _isLoadingBovine = false;
       notifyListeners();
-      return true;
-    }
-    
-    // Se não encontrou localmente, recarrega todos os bovinos
-    await loadBovines();
-    final bovine = getBovineById(id);
-    
-    if (bovine != null) {
-      _selectedBovine = bovine;
+      return success;
+    } catch (e) {
+      _errorMessage = 'Erro inesperado ao carregar bovino: $e';
+      _isLoadingBovine = false;
       notifyListeners();
-      return true;
+      debugPrint('BovinesProvider: Exceção ao carregar bovino - $e');
+      return false;
     }
-    
-    return false;
   }
 
   /// Busca bovinos por raça

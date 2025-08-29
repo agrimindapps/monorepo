@@ -7,6 +7,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/services/logging_service.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/repositories/fuel_repository.dart';
@@ -19,12 +21,14 @@ class FuelRepositoryImpl implements FuelRepository {
   final FuelRemoteDataSource remoteDataSource;
   final Connectivity connectivity;
   final AuthRepository authRepository;
+  final LoggingService loggingService;
 
   FuelRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.connectivity,
     required this.authRepository,
+    required this.loggingService,
   });
 
   Future<bool> _isConnected() async {
@@ -156,29 +160,149 @@ class FuelRepositoryImpl implements FuelRepository {
 
   @override
   Future<Either<Failure, FuelRecordEntity>> addFuelRecord(FuelRecordEntity fuelRecord) async {
+    await loggingService.logOperationStart(
+      category: LogCategory.fuel,
+      operation: LogOperation.create,
+      message: 'Starting fuel record creation for vehicle ${fuelRecord.vehicleId}',
+      metadata: {
+        'vehicle_id': fuelRecord.vehicleId,
+        'fuel_type': fuelRecord.fuelType.toString(),
+        'liters': fuelRecord.liters.toString(),
+        'cost': fuelRecord.totalPrice.toString(),
+        'odometer_reading': fuelRecord.odometer.toString(),
+        'is_full_tank': fuelRecord.fullTank.toString(),
+      },
+    );
+
     try {
       final userId = await _getCurrentUserId();
       
+      await loggingService.logInfo(
+        category: LogCategory.fuel,
+        message: 'Saving fuel record to local storage',
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+        },
+      );
+
       // Always save locally first
       final localRecord = await localDataSource.addFuelRecord(fuelRecord);
+
+      await loggingService.logInfo(
+        category: LogCategory.fuel,
+        message: 'Fuel record saved to local storage successfully',
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+        },
+      );
       
       if (await _isConnected() && userId != null) {
+        await loggingService.logInfo(
+          category: LogCategory.fuel,
+          message: 'Connection available, attempting remote sync',
+          metadata: {
+            'fuel_id': fuelRecord.id,
+            'vehicle_id': fuelRecord.vehicleId,
+            'user_id': userId,
+          },
+        );
+
         try {
           // Then sync to remote
           final remoteRecord = await remoteDataSource.addFuelRecord(userId, fuelRecord);
+          
+          await loggingService.logOperationSuccess(
+            category: LogCategory.fuel,
+            operation: LogOperation.create,
+            message: 'Fuel record created and synced successfully',
+            metadata: {
+              'fuel_id': fuelRecord.id,
+              'vehicle_id': fuelRecord.vehicleId,
+              'user_id': userId,
+              'synced': true,
+            },
+          );
+
           return Right(remoteRecord);
         } catch (e) {
           // If remote fails, still return local success
+          await loggingService.logOperationWarning(
+            category: LogCategory.fuel,
+            operation: LogOperation.sync,
+            message: 'Failed to sync fuel record to remote, saved locally',
+            metadata: {
+              'fuel_id': fuelRecord.id,
+              'vehicle_id': fuelRecord.vehicleId,
+              'user_id': userId,
+              'error': e.toString(),
+            },
+          );
+
+          await loggingService.logOperationSuccess(
+            category: LogCategory.fuel,
+            operation: LogOperation.create,
+            message: 'Fuel record created locally (remote sync failed)',
+            metadata: {
+              'fuel_id': fuelRecord.id,
+              'vehicle_id': fuelRecord.vehicleId,
+              'synced': false,
+            },
+          );
+
           return Right(localRecord);
         }
       } else {
+        await loggingService.logOperationSuccess(
+          category: LogCategory.fuel,
+          operation: LogOperation.create,
+          message: 'Fuel record created offline',
+          metadata: {
+            'fuel_id': fuelRecord.id,
+            'vehicle_id': fuelRecord.vehicleId,
+            'offline': true,
+            'reason': userId == null ? 'no_user' : 'no_connection',
+          },
+        );
+
         return Right(localRecord);
       }
     } on ServerException catch (e) {
+      await loggingService.logOperationError(
+        category: LogCategory.fuel,
+        operation: LogOperation.create,
+        message: 'Server error during fuel record creation',
+        error: e,
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+        },
+      );
       return Left(ServerFailure(e.message));
     } on CacheException catch (e) {
+      await loggingService.logOperationError(
+        category: LogCategory.fuel,
+        operation: LogOperation.create,
+        message: 'Cache error during fuel record creation',
+        error: e,
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+        },
+      );
       return Left(CacheFailure(e.message));
     } catch (e) {
+      await loggingService.logOperationError(
+        category: LogCategory.fuel,
+        operation: LogOperation.create,
+        message: 'Unexpected error during fuel record creation',
+        error: e,
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+        },
+      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }

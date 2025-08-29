@@ -271,10 +271,10 @@ static List<CalculatorEntity> filterByCategory(List<CalculatorEntity> items, Cal
 ## 🚀 PRÓXIMOS PASSOS
 
 ### **Validação de Performance**:
-1. **Teste de carga**: Validar com 1000+ calculadoras
+1. **Validação de carga**: Validar com 1000+ calculadoras
 2. **Memory profiling**: Confirmar redução de 30% na memória
 3. **FPS monitoring**: Validar 60fps constante em scroll
-4. **User testing**: Feedback da experiência real
+4. **Feedback do usuário**: Validação da experiência real
 
 ### **Otimizações Adicionais** (Futuras):
 1. **Lazy loading**: Para datasets muito grandes
@@ -288,8 +288,8 @@ static List<CalculatorEntity> filterByCategory(List<CalculatorEntity> items, Cal
 
 ### **Status de Implementação**: 
 - 🟢 **100% Implementado**: Todas as otimizações críticas
-- 🟢 **Testado**: Análise sintática e estrutural aprovada  
-- 🟡 **Em validação**: Aguardando testes de performance real
+- 🟢 **Analisado**: Análise sintática e estrutural aprovada  
+- 🟡 **Em validação**: Aguardando verificação de performance real
 
 ### **Impacto Esperado**:
 - 🚀 **4x mais rápido**: Search de 800ms → <200ms

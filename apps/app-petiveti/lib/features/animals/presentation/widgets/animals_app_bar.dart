@@ -66,8 +66,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
             ),
       leading: _isSearching
           ? Semantics(
-              label: 'Voltar para a lista de pets',
-              hint: 'Toque para sair do modo de busca',
+              label: AnimalsConstants.backToList,
+              hint: AnimalsConstants.backToListHint,
               button: true,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -84,10 +84,10 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
       actions: [
         if (!_isSearching) ...[
           Semantics(
-            label: 'Buscar pets',
+            label: AnimalsConstants.searchPets,
             hint: hasActiveFilters 
-                ? 'Busca ativa. Toque para buscar pets por nome'
-                : 'Toque para buscar pets por nome',
+                ? AnimalsConstants.searchActiveHint
+                : AnimalsConstants.searchPetsAccessibilityHint,
             button: true,
             child: IconButton(
               icon: Icon(
@@ -105,11 +105,11 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
           ),
           Semantics(
             label: hasActiveFilters 
-                ? 'Filtros ativos - Configurar filtros'
-                : 'Filtros - Configurar filtros',
+                ? AnimalsConstants.filtersActiveLabel
+                : AnimalsConstants.filtersLabel,
             hint: hasActiveFilters
-                ? 'Filtros aplicados. Toque para modificar os filtros de espécie, gênero e tamanho'
-                : 'Toque para filtrar pets por espécie, gênero e tamanho',
+                ? AnimalsConstants.filtersActiveHint
+                : AnimalsConstants.filtersHint,
             button: true,
             child: IconButton(
               icon: Icon(
@@ -125,8 +125,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
         if (_isSearching) ...[
           if (animalsState.filter.searchQuery.isNotEmpty)
             Semantics(
-              label: 'Limpar busca',
-              hint: 'Toque para limpar o campo de busca',
+              label: AnimalsConstants.clearSearch,
+              hint: AnimalsConstants.clearSearchHint,
               button: true,
               child: IconButton(
                 icon: const Icon(Icons.clear),
@@ -138,8 +138,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
             ),
         ],
         Semantics(
-          label: 'Menu de opções',
-          hint: 'Toque para abrir menu com sincronização, configurações e outras opções',
+          label: AnimalsConstants.optionsMenu,
+          hint: AnimalsConstants.optionsMenuHint,
           button: true,
           child: PopupMenuButton<String>(
             onSelected: (value) {
@@ -159,8 +159,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
               PopupMenuItem(
                 value: 'sync',
                 child: Semantics(
-                  label: 'Sincronizar pets',
-                  hint: 'Toque para sincronizar a lista de pets com o servidor',
+                  label: AnimalsConstants.syncPets,
+                  hint: AnimalsConstants.syncPetsHint,
                   button: true,
                   child: Row(
                     children: const [
@@ -175,8 +175,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                 PopupMenuItem(
                   value: 'clear_filters',
                   child: Semantics(
-                    label: 'Limpar todos os filtros',
-                    hint: 'Toque para remover todos os filtros aplicados e mostrar todos os pets',
+                    label: AnimalsConstants.clearAllFilters,
+                    hint: AnimalsConstants.clearAllFiltersHint,
                     button: true,
                     child: Row(
                       children: const [
@@ -190,8 +190,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
               PopupMenuItem(
                 value: 'settings',
                 child: Semantics(
-                  label: 'Configurações',
-                  hint: 'Toque para abrir as configurações do aplicativo',
+                  label: AnimalsConstants.settingsLabel,
+                  hint: AnimalsConstants.settingsHint,
                   button: true,
                   child: Row(
                     children: const [
@@ -211,8 +211,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
 
   Widget _buildSearchField() {
     return Semantics(
-      label: 'Campo de busca de pets',
-      hint: 'Digite o nome do pet que você está procurando',
+      label: AnimalsConstants.searchFieldLabel,
+      hint: AnimalsConstants.searchFieldHint,
       textField: true,
       child: TextField(
         controller: _searchController,
@@ -308,8 +308,8 @@ class _AnimalsFilterBottomSheetState
               ),
               const Spacer(),
               Semantics(
-                label: 'Limpar todos os filtros',
-                hint: 'Toque para remover todos os filtros de espécie, gênero e tamanho',
+                label: AnimalsConstants.clearAllFiltersDialog,
+                hint: AnimalsConstants.clearAllFiltersDialogHint,
                 button: true,
                 child: TextButton(
                   onPressed: () {
@@ -322,8 +322,8 @@ class _AnimalsFilterBottomSheetState
               ),
               const SizedBox(width: 8),
               Semantics(
-                label: 'Aplicar filtros',
-                hint: 'Toque para aplicar os filtros selecionados e fechar o menu',
+                label: AnimalsConstants.applyFilters,
+                hint: AnimalsConstants.applyFiltersHint,
                 button: true,
                 child: ElevatedButton(
                   onPressed: () {
@@ -341,8 +341,8 @@ class _AnimalsFilterBottomSheetState
           _buildFilterSection(
             AnimalsConstants.species,
             Semantics(
-              label: 'Filtro de espécie',
-              hint: 'Selecione uma espécie para filtrar seus pets',
+              label: AnimalsConstants.speciesFilterLabel,
+              hint: AnimalsConstants.speciesFilterHint,
               button: true,
               child: DropdownButton<AnimalSpecies?>(
                 value: _tempFilter.speciesFilter,
@@ -372,8 +372,8 @@ class _AnimalsFilterBottomSheetState
           _buildFilterSection(
             AnimalsConstants.gender,
             Semantics(
-              label: 'Filtro de gênero',
-              hint: 'Selecione um gênero para filtrar seus pets',
+              label: AnimalsConstants.genderFilterLabel,
+              hint: AnimalsConstants.genderFilterHint,
               button: true,
               child: DropdownButton<AnimalGender?>(
                 value: _tempFilter.genderFilter,
@@ -403,8 +403,8 @@ class _AnimalsFilterBottomSheetState
           _buildFilterSection(
             AnimalsConstants.size,
             Semantics(
-              label: 'Filtro de tamanho',
-              hint: 'Selecione um tamanho para filtrar seus pets',
+              label: AnimalsConstants.sizeFilterLabel,
+              hint: AnimalsConstants.sizeFilterHint,
               button: true,
               child: DropdownButton<AnimalSize?>(
                 value: _tempFilter.sizeFilter,

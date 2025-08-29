@@ -305,7 +305,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   List<Widget> _buildCurrentSubscriptionSection(SubscriptionState state) {
     if (state.isLoadingCurrentSubscription) {
       return [
-        SubscriptionSkeletonLoaders.buildCurrentSubscriptionSkeleton(),
+        SubscriptionSkeletonLoaders.buildCurrentSubscriptionSkeleton(context),
         const SizedBox(height: 24),
       ];
     } else if (state.currentSubscription != null) {
@@ -348,7 +348,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   /// @returns List of widgets for subscription plans section
   List<Widget> _buildPlansSection(SubscriptionState state) {
     if (state.isLoadingPlans) {
-      return [SubscriptionSkeletonLoaders.buildPlanCardsSkeleton()];
+      return [SubscriptionSkeletonLoaders.buildPlanCardsSkeleton(context)];
     } else if (state.availablePlans.isNotEmpty) {
       return state.availablePlans
           .where((p) => !p.isFree)

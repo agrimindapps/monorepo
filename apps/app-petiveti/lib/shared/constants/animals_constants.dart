@@ -18,6 +18,41 @@ class AnimalsConstants {
   static const String size = 'Porte';
   static const String allSizes = 'Todos os portes';
   
+  // Accessibility strings
+  static const String addNewPetSemantic = 'Adicionar novo pet';
+  static const String addNewPetHint = 'Toque para abrir o formulário de cadastro de pets';
+  static const String backToList = 'Voltar para a lista de pets';
+  static const String backToListHint = 'Toque para sair do modo de busca';
+  static const String searchPets = 'Buscar pets';
+  static const String searchPetsAccessibilityHint = 'Toque para buscar pets por nome';
+  static const String searchActiveHint = 'Busca ativa. Toque para buscar pets por nome';
+  static const String filtersLabel = 'Filtros - Configurar filtros';
+  static const String filtersActiveLabel = 'Filtros ativos - Configurar filtros';
+  static const String filtersHint = 'Toque para filtrar pets por espécie, gênero e tamanho';
+  static const String filtersActiveHint = 'Filtros aplicados. Toque para modificar os filtros de espécie, gênero e tamanho';
+  static const String clearSearch = 'Limpar busca';
+  static const String clearSearchHint = 'Toque para limpar o campo de busca';
+  static const String optionsMenu = 'Menu de opções';
+  static const String optionsMenuHint = 'Toque para abrir menu com sincronização, configurações e outras opções';
+  static const String syncPets = 'Sincronizar pets';
+  static const String syncPetsHint = 'Toque para sincronizar a lista de pets com o servidor';
+  static const String clearAllFilters = 'Limpar todos os filtros';
+  static const String clearAllFiltersHint = 'Toque para remover todos os filtros aplicados e mostrar todos os pets';
+  static const String settingsLabel = 'Configurações';
+  static const String settingsHint = 'Toque para abrir as configurações do aplicativo';
+  static const String searchFieldLabel = 'Campo de busca de pets';
+  static const String searchFieldHint = 'Digite o nome do pet que você está procurando';
+  static const String clearAllFiltersDialog = 'Limpar todos os filtros';
+  static const String clearAllFiltersDialogHint = 'Toque para remover todos os filtros de espécie, gênero e tamanho';
+  static const String applyFilters = 'Aplicar filtros';
+  static const String applyFiltersHint = 'Toque para aplicar os filtros selecionados e fechar o menu';
+  static const String speciesFilterLabel = 'Filtro de espécie';
+  static const String speciesFilterHint = 'Selecione uma espécie para filtrar seus pets';
+  static const String genderFilterLabel = 'Filtro de gênero';
+  static const String genderFilterHint = 'Selecione um gênero para filtrar seus pets';
+  static const String sizeFilterLabel = 'Filtro de tamanho';
+  static const String sizeFilterHint = 'Selecione um tamanho para filtrar seus pets';
+  
   // UI Constants
   static const double filterContainerPadding = 16.0;
   static const double filterSectionSpacing = 16.0;

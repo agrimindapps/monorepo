@@ -106,9 +106,7 @@ borderRadius: BorderRadius.circular(12),  // Aparece 3 vezes
 ### **Fase 3 - MELHORIA (Próxima Sprint)**
 1. Extrair magic numbers para constantes
 2. Centralizar definições de design tokens
-3. Adicionar testes unitários para navegação
 
 ## 💡 Sugestões Arquiteturais
 - Considerar extrair navigation logic para um service
-- Implementar WidgetTests para verificar navegação
 - Criar design system unificado (AppTheme + AppColors)

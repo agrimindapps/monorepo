@@ -60,8 +60,8 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
         ],
       ),
       floatingActionButton: Semantics(
-        label: 'Adicionar novo pet',
-        hint: 'Toque para abrir o formulário de cadastro de pets',
+        label: AnimalsConstants.addNewPetSemantic,
+        hint: AnimalsConstants.addNewPetHint,
         button: true,
         child: FloatingActionButton(
           onPressed: _listController.addAnimal,

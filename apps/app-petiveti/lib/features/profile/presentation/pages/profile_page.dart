@@ -373,7 +373,7 @@ class ProfilePage extends ConsumerWidget {
     AppDialogs.showAboutApp(
       context,
       appName: 'PetiVeti',
-      appIcon: const Icon(Icons.pets, size: 32, color: Colors.blue),
+      appIcon: Icon(Icons.pets, size: 32, color: Theme.of(context).colorScheme.primary),
       customDescription: 'App completo para cuidados veterinários com calculadoras especializadas, controle de medicamentos, agendamento de consultas e muito mais.',
       showTechnicalInfo: true,
     );

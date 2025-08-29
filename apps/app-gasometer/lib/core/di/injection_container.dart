@@ -7,6 +7,13 @@ import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Logging imports
+import '../logging/data/datasources/log_local_data_source.dart';
+import '../logging/data/datasources/log_remote_data_source.dart';
+import '../logging/data/repositories/log_repository_impl.dart';
+import '../logging/repositories/log_repository.dart';
+import '../logging/services/logging_service.dart';
+
 // Auth imports
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -50,6 +57,8 @@ import '../../features/maintenance/presentation/providers/maintenance_provider.d
 // Odometer imports
 import '../../features/odometer/data/repositories/odometer_repository.dart';
 import '../../features/odometer/presentation/providers/odometer_provider.dart';
+// Expenses imports
+import '../../features/expenses/data/repositories/expenses_repository.dart';
 // Premium imports
 import '../../features/premium/data/datasources/premium_local_data_source.dart';
 import '../../features/premium/data/datasources/premium_remote_data_source.dart';
@@ -132,6 +141,10 @@ Future<void> initializeDependencies() async {
   // Core Services
   sl.registerLazySingleton<LocalDataService>(() => LocalDataService());
   sl.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
+  
+  // Logging Service - requires AnalyticsService and LogRepository
+  sl.registerLazySingleton<LoggingService>(() => LoggingService(sl(), sl()));
+  
   sl.registerLazySingleton<AuthRateLimiter>(() => AuthRateLimiter(sl()));
   sl.registerLazySingleton<GasOMeterNotificationService>(() => GasOMeterNotificationService());
   sl.registerLazySingleton<PlatformService>(() => const PlatformService());
@@ -207,7 +220,24 @@ Future<void> initializeDependencies() async {
     () => PremiumRemoteDataSourceImpl(sl()),
   );
 
+  // Log Data Sources
+  sl.registerLazySingleton<LogLocalDataSource>(
+    () => LogLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<LogRemoteDataSource>(
+    () => LogRemoteDataSourceImpl(firestore: sl()),
+  );
+
   // ===== Repositories =====
+  
+  // Log Repository
+  sl.registerLazySingleton<LogRepository>(
+    () => LogRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+      connectivity: sl(),
+    ),
+  );
   
   // Vehicle Repository
   sl.registerLazySingleton<VehicleRepository>(
@@ -216,6 +246,7 @@ Future<void> initializeDependencies() async {
       remoteDataSource: sl(),
       connectivity: sl(),
       authRepository: sl(),
+      loggingService: sl(),
     ),
   );
 
@@ -234,6 +265,7 @@ Future<void> initializeDependencies() async {
       remoteDataSource: sl(),
       connectivity: sl(),
       authRepository: sl(),
+      loggingService: sl(),
     ),
   );
 
@@ -248,12 +280,20 @@ Future<void> initializeDependencies() async {
       remoteDataSource: sl(),
       localDataSource: sl(),
       connectivity: sl(),
+      loggingService: sl(),
     ),
   );
 
   // Odometer Repository
   sl.registerLazySingleton<OdometerRepository>(() {
-    final repository = OdometerRepository();
+    final repository = OdometerRepository(sl<LoggingService>());
+    // Initialize will be called when needed, avoiding blocking registration
+    return repository;
+  });
+
+  // Expenses Repository
+  sl.registerLazySingleton<ExpensesRepository>(() {
+    final repository = ExpensesRepository(sl<LoggingService>());
     // Initialize will be called when needed, avoiding blocking registration
     return repository;
   });

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 abstract final class SubscriptionSkeletonLoaders {
   
   /// Skeleton for current subscription card
-  static Widget buildCurrentSubscriptionSkeleton() {
+  static Widget buildCurrentSubscriptionSkeleton(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -17,7 +17,7 @@ abstract final class SubscriptionSkeletonLoaders {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -26,7 +26,7 @@ abstract final class SubscriptionSkeletonLoaders {
                   width: 150,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -37,7 +37,7 @@ abstract final class SubscriptionSkeletonLoaders {
               width: 200,
               height: 24,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -48,7 +48,7 @@ abstract final class SubscriptionSkeletonLoaders {
                   width: 80,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -57,7 +57,7 @@ abstract final class SubscriptionSkeletonLoaders {
                   width: 60,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -70,7 +70,7 @@ abstract final class SubscriptionSkeletonLoaders {
                   child: Container(
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -84,7 +84,7 @@ abstract final class SubscriptionSkeletonLoaders {
   }
 
   /// Skeleton for subscription plan cards
-  static Widget buildPlanCardsSkeleton() {
+  static Widget buildPlanCardsSkeleton(BuildContext context) {
     return Column(
       children: List.generate(2, (index) => Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -104,7 +104,7 @@ abstract final class SubscriptionSkeletonLoaders {
                             width: 150,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -113,7 +113,7 @@ abstract final class SubscriptionSkeletonLoaders {
                             width: 200,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -124,7 +124,7 @@ abstract final class SubscriptionSkeletonLoaders {
                       width: 80,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -139,7 +139,7 @@ abstract final class SubscriptionSkeletonLoaders {
                         width: 16,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -148,7 +148,7 @@ abstract final class SubscriptionSkeletonLoaders {
                         width: 120 + (featureIndex * 20),
                         height: 14,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -160,7 +160,7 @@ abstract final class SubscriptionSkeletonLoaders {
                   width: double.infinity,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),

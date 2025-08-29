@@ -182,7 +182,6 @@ class DatabaseOptimizer {
 
   /// Limpeza automática de cache
   void cleanupCache({bool aggressive = false}) {
-    final now = DateTime.now();
     final keysToRemove = <String>[];
     
     for (final entry in _queryCache.entries) {

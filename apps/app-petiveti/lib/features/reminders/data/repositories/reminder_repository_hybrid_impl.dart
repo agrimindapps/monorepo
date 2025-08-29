@@ -22,7 +22,7 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
 
   Future<bool> get isConnected async {
     final result = await connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    return !result.contains(ConnectivityResult.none);
   }
 
   @override

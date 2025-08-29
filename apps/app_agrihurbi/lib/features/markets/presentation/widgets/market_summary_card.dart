@@ -206,7 +206,7 @@ class MarketSummaryCard extends StatelessWidget {
           ),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               color: AppTheme.textSecondaryColor,
             ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/register_page_coordinator.dart';
 import '../widgets/register_page_header.dart';
@@ -246,8 +245,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Criar Conta'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(

@@ -167,7 +167,6 @@ ErrorHandler.showErrorSnackbar(context, failure);  // ❌ Context unsafe after a
 ### **Para Engineering Team**
 1. **Pair programming** recomendado para security fixes
 2. **Tech debt** deve ser priorizado no backlog
-3. **Testing strategy** precisa ser implementada
 4. **Documentation** urgentemente necessária
 
 ## 🏆 PÁGINAS MODELO

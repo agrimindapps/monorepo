@@ -156,7 +156,7 @@ class NewsArticleModel extends NewsArticleEntity {
       sourceUrl: sourceUrl ?? this.sourceUrl,
       imageUrl: imageUrl ?? this.imageUrl,
       publishedAt: publishedAt ?? this.publishedAt,
-      category: category ?? _category,
+      category: category ?? this._category,
       tags: tags ?? this.tags,
       isPremium: isPremium ?? this.isPremium,
       readTimeMinutes: readTimeMinutes ?? this.readTimeMinutes,

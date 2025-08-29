@@ -140,7 +140,6 @@ phone: _phoneController.text.trim().isEmpty
 ### **Fase 3 - MELHORIA (Próxima Sprint)**
 1. Criar design system com spacing consistente
 2. Implementar internacionalização
-3. Adicionar testes abrangentes
 4. Otimizar performance e UX
 
 ## 💡 Sugestões Arquiteturais

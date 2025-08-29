@@ -120,7 +120,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
     final response = await _dioClient.get('$_baseEndpoint/$id');
     
     final data = response.data as Map<String, dynamic>;
-    return MarketModel.fromJson(data['market']);
+    return MarketModel.fromJson(data['market'] as Map<String, dynamic>);
   }
 
   @override
@@ -180,7 +180,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
     final response = await _dioClient.get('$_baseEndpoint/summary');
     
     final data = response.data as Map<String, dynamic>;
-    return MarketSummaryModel.fromJson(data['summary']);
+    return MarketSummaryModel.fromJson(data['summary'] as Map<String, dynamic>);
   }
 
   @override

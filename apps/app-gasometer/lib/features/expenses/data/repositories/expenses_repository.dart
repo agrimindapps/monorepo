@@ -5,14 +5,26 @@ import 'package:hive/hive.dart';
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
+import '../../../../core/logging/entities/log_entry.dart';
+import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
+import '../../../../core/logging/services/logging_service.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../models/expense_model.dart';
 
 /// Repository para persistência de despesas usando Hive com cache strategy
-class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpensesRepository {
+class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositoryMixin implements IExpensesRepository {
   static const String _boxName = 'expenses';
   late Box<ExpenseModel> _box;
+  final LoggingService _loggingService;
+
+  ExpensesRepository(this._loggingService);
+
+  @override
+  LoggingService get loggingService => _loggingService;
+
+  @override
+  String get repositoryCategory => LogCategory.expenses;
 
   /// Inicializa o repositório
   @override
@@ -66,79 +78,122 @@ class ExpensesRepository with CachedRepository<ExpenseEntity> implements IExpens
   /// Salva nova despesa
   @override
   Future<ExpenseEntity?> saveExpense(ExpenseEntity expense) async {
-    try {
-      final model = _entityToModel(expense);
-      await _box.put(expense.id, model);
-      
-      final entity = _modelToEntity(model);
-      
-      // Cache a entidade
-      cacheEntity(entityCacheKey(expense.id), entity);
-      
-      // Invalidar caches de listas relacionadas
-      invalidateListCache('all_expenses');
-      invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
-      invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
-      
-      return entity;
-    } catch (e) {
-      throw Exception('Erro ao salvar despesa: $e');
-    }
+    return await withLogging<ExpenseEntity?>(
+      operation: LogOperation.create,
+      entityType: 'Expense',
+      entityId: expense.id,
+      metadata: {
+        'vehicle_id': expense.vehicleId,
+        'type': expense.type.name,
+        'amount': expense.amount,
+      },
+      operationFunc: () async {
+        final model = _entityToModel(expense);
+        await _box.put(expense.id, model);
+        
+        final entity = _modelToEntity(model);
+        
+        // Log local storage
+        await logLocalStorage(
+          action: 'saved',
+          entityType: 'Expense',
+          entityId: expense.id,
+          metadata: {'storage_type': 'hive'},
+        );
+        
+        // Cache a entidade
+        cacheEntity(entityCacheKey(expense.id), entity);
+        
+        // Invalidar caches de listas relacionadas
+        invalidateListCache('all_expenses');
+        invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
+        invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
+        
+        return entity;
+      },
+    );
   }
 
   /// Atualiza despesa existente
   @override
   Future<ExpenseEntity?> updateExpense(ExpenseEntity expense) async {
-    try {
-      if (!_box.containsKey(expense.id)) {
-        throw Exception('Despesa não encontrada');
-      }
-      
-      final model = _entityToModel(expense);
-      await _box.put(expense.id, model);
-      
-      final entity = _modelToEntity(model);
-      
-      // Atualizar cache da entidade
-      cacheEntity(entityCacheKey(expense.id), entity);
-      
-      // Invalidar caches de listas relacionadas
-      invalidateListCache('all_expenses');
-      invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
-      invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
-      
-      return entity;
-    } catch (e) {
-      throw Exception('Erro ao atualizar despesa: $e');
-    }
+    return await withLogging<ExpenseEntity?>(
+      operation: LogOperation.update,
+      entityType: 'Expense',
+      entityId: expense.id,
+      metadata: {
+        'vehicle_id': expense.vehicleId,
+        'type': expense.type.name,
+        'amount': expense.amount,
+      },
+      operationFunc: () async {
+        if (!_box.containsKey(expense.id)) {
+          throw Exception('Despesa não encontrada');
+        }
+        
+        final model = _entityToModel(expense);
+        await _box.put(expense.id, model);
+        
+        final entity = _modelToEntity(model);
+        
+        // Log local storage
+        await logLocalStorage(
+          action: 'updated',
+          entityType: 'Expense',
+          entityId: expense.id,
+          metadata: {'storage_type': 'hive'},
+        );
+        
+        // Atualizar cache da entidade
+        cacheEntity(entityCacheKey(expense.id), entity);
+        
+        // Invalidar caches de listas relacionadas
+        invalidateListCache('all_expenses');
+        invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
+        invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
+        
+        return entity;
+      },
+    );
   }
 
   /// Remove despesa por ID
   @override
   Future<bool> deleteExpense(String expenseId) async {
-    try {
-      // Buscar dados antes de deletar para invalidação seletiva
-      final expenseToDelete = _box.get(expenseId);
-      
-      await _box.delete(expenseId);
-      
-      // Remover do cache
-      invalidateCache(entityCacheKey(expenseId));
-      
-      // Invalidação seletiva baseada na despesa removida
-      if (expenseToDelete != null) {
-        invalidateListCache('all_expenses');
-        invalidateListCache(vehicleCacheKey(expenseToDelete.veiculoId, 'expenses'));
-        invalidateListCache(typeCacheKey(expenseToDelete.tipo, 'expenses'));
-      } else {
-        // Fallback para invalidação completa apenas se não conseguir dados específicos
-        invalidateListCache('all_expenses');
-      }
-      
-      return true;
-    } catch (e) {
-      throw Exception('Erro ao remover despesa: $e');
-    }
+    return await withLogging<bool>(
+      operation: LogOperation.delete,
+      entityType: 'Expense',
+      entityId: expenseId,
+      operationFunc: () async {
+        // Buscar dados antes de deletar para invalidação seletiva
+        final expenseToDelete = _box.get(expenseId);
+        
+        await _box.delete(expenseId);
+        
+        // Log local storage
+        await logLocalStorage(
+          action: 'deleted',
+          entityType: 'Expense',
+          entityId: expenseId,
+          metadata: {'storage_type': 'hive'},
+        );
+        
+        // Remover do cache
+        invalidateCache(entityCacheKey(expenseId));
+        
+        // Invalidação seletiva baseada na despesa removida
+        if (expenseToDelete != null) {
+          invalidateListCache('all_expenses');
+          invalidateListCache(vehicleCacheKey(expenseToDelete.veiculoId, 'expenses'));
+          invalidateListCache(typeCacheKey(expenseToDelete.tipo, 'expenses'));
+        } else {
+          // Fallback para invalidação completa apenas se não conseguir dados específicos
+          invalidateListCache('all_expenses');
+        }
+        
+        return true;
+      },
+    );
   }
 
   /// Busca despesa por ID

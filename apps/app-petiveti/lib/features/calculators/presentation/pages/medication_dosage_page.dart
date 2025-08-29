@@ -541,7 +541,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
   }
 
   void _showPrescriptionExport(BuildContext context, MedicationDosageProvider provider) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -561,7 +561,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
   }
 
   void _showHistoryBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

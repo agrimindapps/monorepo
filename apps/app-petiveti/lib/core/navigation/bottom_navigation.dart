@@ -27,8 +27,6 @@ class MainBottomNavigation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentTab = ref.watch(currentTabProvider);
-
     return Scaffold(
       body: child,
       bottomNavigationBar: DecoratedBox(

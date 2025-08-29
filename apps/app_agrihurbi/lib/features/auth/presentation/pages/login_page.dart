@@ -1,5 +1,6 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
@@ -55,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Icon(
                         Icons.agriculture,
                         size: 60,
-                        color: AppTheme.textLightColor,
+                        color: DesignTokens.textLightColor,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -132,8 +133,9 @@ class _LoginPageState extends State<LoginPage> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppTheme.textLightColor,
+                                  DesignTokens.textLightColor,
                                 ),
+
                               ),
                             )
                           : const Text('Entrar'),
@@ -177,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             const Icon(
                               Icons.error_outline,
-                              color: AppTheme.errorColor,
+                              color: DesignTokens.errorColor,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
@@ -185,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: Text(
                                 authProvider.errorMessage!,
                                 style: const TextStyle(
-                                  color: AppTheme.errorColor,
+                                  color: DesignTokens.errorColor,
                                   fontSize: 14,
                                 ),
                               ),
@@ -193,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                             IconButton(
                               icon: const Icon(
                                 Icons.close,
-                                color: AppTheme.errorColor,
+                                color: DesignTokens.errorColor,
                                 size: 18,
                               ),
                               onPressed: authProvider.clearError,

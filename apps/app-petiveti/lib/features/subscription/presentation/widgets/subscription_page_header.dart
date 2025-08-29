@@ -8,7 +8,7 @@ class SubscriptionPageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildIcon(),
+        _buildIcon(context),
         const SizedBox(height: 16),
         _buildTitle(context),
         const SizedBox(height: 8),
@@ -17,11 +17,11 @@ class SubscriptionPageHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon() {
-    return const Icon(
+  Widget _buildIcon(BuildContext context) {
+    return Icon(
       Icons.star,
       size: 64,
-      color: Colors.amber,
+      color: Theme.of(context).colorScheme.secondary,
     );
   }
 
@@ -39,7 +39,7 @@ class SubscriptionPageHeader extends StatelessWidget {
     return Text(
       'Acesse todas as funcionalidades premium e cuide melhor dos seus pets',
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
       textAlign: TextAlign.center,
     );

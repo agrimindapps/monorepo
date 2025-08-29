@@ -115,7 +115,6 @@ import 'package:app_agrihurbi/core/constants/app_constants.dart';  // ❌ Usado 
 1. Criar design system com constantes padronizadas
 2. Implementar sistema de internacionalização
 3. Extrair componentes reutilizáveis (ErrorContainer, LoginForm)
-4. Adicionar testes unitários e de widget
 
 ## 💡 Sugestões Arquiteturais
 

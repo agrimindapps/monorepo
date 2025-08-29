@@ -58,6 +58,9 @@ class CalorieConstants {
   // Step navigation
   static const int reviewStepIndex = 4;
   static const int firstStepIndex = 0;
+  
+  // Animation values
+  static const double defaultOpacityValue = 1.0;
 }
 
 /// Color constants for the calorie calculator page

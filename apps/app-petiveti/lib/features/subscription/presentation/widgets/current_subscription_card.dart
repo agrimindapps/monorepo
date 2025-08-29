@@ -20,7 +20,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final plan = subscription.plan;
-    final statusInfo = _getStatusInfo();
+    final statusInfo = _getStatusInfo(context);
 
     return Card(
       elevation: 4,
@@ -60,7 +60,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
 
   Widget _buildPlanInfo(BuildContext context, dynamic plan) {
     return Text(
-      plan.title as String,
+      plan?.title?.toString() ?? 'Plano não identificado',
       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -87,7 +87,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         ),
         const Spacer(),
         Text(
-          plan.formattedPrice as String,
+          plan?.formattedPrice?.toString() ?? 'Preço não disponível',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -104,7 +104,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'Expira em: ${_formatDate(subscription.expirationDate!)}',
-          style: TextStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ]);
     }
@@ -114,8 +114,8 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'Teste grátis termina em ${subscription.daysUntilTrialEnd} dias',
-          style: const TextStyle(
-            color: Colors.blue,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -127,8 +127,8 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'Sua assinatura expira em ${subscription.daysUntilExpiration} dias',
-          style: const TextStyle(
-            color: Colors.orange,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.secondary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -146,7 +146,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: state.isCancelling ? null : () => _showCancelDialog(context, ref),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
+                foregroundColor: Theme.of(context).colorScheme.error,
               ),
               icon: state.isCancelling
                   ? const SizedBox(
@@ -207,7 +207,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
               Navigator.of(context).pop();
               SubscriptionPageCoordinator.cancelSubscription(ref, context, userId);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Cancelar'),
           ),
         ],
@@ -215,21 +215,21 @@ class CurrentSubscriptionCard extends ConsumerWidget {
     );
   }
 
-  _SubscriptionStatusInfo _getStatusInfo() {
-    Color statusColor = Colors.green;
+  _SubscriptionStatusInfo _getStatusInfo(BuildContext context) {
+    Color statusColor = Theme.of(context).colorScheme.primary;
     String statusText = 'Ativo';
     
     if (subscription.isCancelled) {
-      statusColor = Colors.red;
+      statusColor = Theme.of(context).colorScheme.error;
       statusText = 'Cancelado';
     } else if (subscription.isPaused) {
-      statusColor = Colors.orange;
+      statusColor = Theme.of(context).colorScheme.secondary;
       statusText = 'Pausado';
     } else if (subscription.isExpired) {
-      statusColor = Colors.red;
+      statusColor = Theme.of(context).colorScheme.error;
       statusText = 'Expirado';
     } else if (subscription.isInTrialPeriod) {
-      statusColor = Colors.blue;
+      statusColor = Theme.of(context).colorScheme.tertiary;
       statusText = 'Período de teste';
     }
 

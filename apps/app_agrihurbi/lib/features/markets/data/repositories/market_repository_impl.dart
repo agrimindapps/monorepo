@@ -67,7 +67,7 @@ class MarketRepositoryImpl implements MarketRepository {
       final cachedMarkets = await _localDataSource.getCachedMarkets();
       
       if (cachedMarkets.isEmpty) {
-        return const Left(MarketCacheFailure('Nenhum dado em cache disponível'));
+        return const Left(MarketCacheFailure(message: 'Nenhum dado em cache disponível'));
       }
       
       return Right(cachedMarkets.map((m) => m.toEntity()).toList());
@@ -97,7 +97,7 @@ class MarketRepositoryImpl implements MarketRepository {
         if (cachedMarket != null) {
           return Right(cachedMarket.toEntity());
         }
-        return const Left(MarketNetworkFailure('Sem conexão e dados não encontrados no cache'));
+        return const Left(MarketNetworkFailure(message: 'Sem conexão e dados não encontrados no cache'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -192,7 +192,7 @@ class MarketRepositoryImpl implements MarketRepository {
         if (cachedSummary != null) {
           return Right(cachedSummary.toEntity());
         }
-        return const Left(MarketCacheFailure('Resumo do mercado não disponível offline'));
+        return const Left(MarketCacheFailure(message: 'Resumo do mercado não disponível offline'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -300,7 +300,7 @@ class MarketRepositoryImpl implements MarketRepository {
         );
         return Right(remoteHistory.map((h) => h.toEntity()).toList());
       } else {
-        return const Left(MarketNetworkFailure('Histórico de preços requer conexão'));
+        return const Left(MarketNetworkFailure(message: 'Histórico de preços requer conexão'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -378,7 +378,7 @@ class MarketRepositoryImpl implements MarketRepository {
         await _localDataSource.clearMarketsCache();
         return const Right(null);
       } else {
-        return const Left(MarketNetworkFailure('Necessária conexão para atualizar dados'));
+        return const Left(MarketNetworkFailure(message: 'Necessária conexão para atualizar dados'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -423,7 +423,7 @@ class MarketRepositoryImpl implements MarketRepository {
     } else if (exception is CacheException) {
       return const MarketCacheFailure();
     } else {
-      return MarketDataFailure('Erro inesperado: $exception');
+      return MarketDataFailure(message: 'Erro inesperado: $exception');
     }
   }
 

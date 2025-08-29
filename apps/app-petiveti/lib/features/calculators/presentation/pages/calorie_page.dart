@@ -279,7 +279,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
     return Expanded(
       child: FadeTransition(
         opacity: _animationManager.fadeAnimation ?? 
-          const AlwaysStoppedAnimation(1.0),
+          const AlwaysStoppedAnimation(CalorieConstants.defaultOpacityValue),
         child: state.hasResult 
             ? _buildResultView(state)
             : _buildStepperView(state),

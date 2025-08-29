@@ -673,7 +673,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   }
 
   Future<void> _runOptimizations() async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const AlertDialog(
@@ -696,11 +696,13 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
       
       log('Performance optimizations completed', name: 'PerformanceDashboard');
     } finally {
-      Navigator.of(context).pop();
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Optimizations completed!')),
-      );
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Optimizations completed!')),
+        );
+      }
       
       setState(() {});
     }
@@ -711,9 +713,11 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     _navOptimizer.clearNavigationCache();
     _dbOptimizer.cleanupCache(aggressive: true);
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All caches cleared!')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All caches cleared!')),
+      );
+    }
     
     setState(() {});
   }
@@ -721,9 +725,11 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   void _compactDatabase() async {
     await _dbOptimizer.runAutoOptimizations();
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Database compacted!')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Database compacted!')),
+      );
+    }
   }
 
   void _forceGC() {

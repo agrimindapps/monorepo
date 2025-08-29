@@ -80,8 +80,8 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ],
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: CircleAvatar(
                     backgroundColor: AppTheme.secondaryColor,
                     child: Icon(

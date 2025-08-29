@@ -1,96 +1,100 @@
 import 'package:flutter/material.dart';
+import 'design_tokens.dart';
+import 'app_text_styles.dart';
 
-/// Application theme configuration
+/// Application theme configuration using Design Tokens
+/// This consolidates all theme-related constants and eliminates duplication
 class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
-  static const Color primaryColor = Color(0xFF2E7D32); // Green for agriculture
-  static const Color secondaryColor = Color(0xFF4CAF50);
-  static const Color accentColor = Color(0xFFFF9800); // Orange for emphasis
-  static const Color backgroundColor = Color(0xFFF5F5F5);
-  static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color errorColor = Color(0xFFD32F2F);
-  static const Color successColor = Color(0xFF388E3C);
-  static const Color warningColor = Color(0xFFF57C00);
-  static const Color infoColor = Color(0xFF1976D2);
   
-  // Text Colors
-  static const Color textPrimaryColor = Color(0xFF212121);
-  static const Color textSecondaryColor = Color(0xFF757575);
-  static const Color textLightColor = Color(0xFFFFFFFF);
+  // Legacy color getters for backward compatibility
+  // These will be deprecated - use DesignTokens directly
+  static Color get primaryColor => DesignTokens.primaryColor;
+  static Color get secondaryColor => DesignTokens.secondaryColor;
+  static Color get accentColor => DesignTokens.accentColor;
+  static Color get backgroundColor => DesignTokens.backgroundColor;
+  static Color get surfaceColor => DesignTokens.surfaceColor;
+  static Color get errorColor => DesignTokens.errorColor;
+  static Color get successColor => DesignTokens.successColor;
+  static Color get warningColor => DesignTokens.warningColor;
+  static Color get infoColor => DesignTokens.infoColor;
+  static Color get textPrimaryColor => DesignTokens.textPrimaryColor;
+  static Color get textSecondaryColor => DesignTokens.textSecondaryColor;
+  static Color get textLightColor => DesignTokens.textLightColor;
+  static Color get borderColor => DesignTokens.borderColor;
+  static Color get dividerColor => DesignTokens.dividerColor;
   
-  // Border Colors
-  static const Color borderColor = Color(0xFFE0E0E0);
-  static const Color dividerColor = Color(0xFFBDBDBD);
-  
+  // Theme type enum
+  static const light = ThemeMode.light;
+  static const dark = ThemeMode.dark;
+  static const system = ThemeMode.system;
+
   /// Light theme configuration
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
-        primary: primaryColor,
-        secondary: secondaryColor,
-        surface: surfaceColor,
-        error: errorColor,
-        onPrimary: textLightColor,
-        onSecondary: textLightColor,
-        onSurface: textPrimaryColor,
-        onError: textLightColor,
+        primary: DesignTokens.primaryColor,
+        secondary: DesignTokens.secondaryColor,
+        surface: DesignTokens.surfaceColor,
+        error: DesignTokens.errorColor,
+        onPrimary: DesignTokens.textLightColor,
+        onSecondary: DesignTokens.textLightColor,
+        onSurface: DesignTokens.textPrimaryColor,
+        onError: DesignTokens.textLightColor,
       ),
       
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: primaryColor,
-        foregroundColor: textLightColor,
-        elevation: 0,
+        backgroundColor: DesignTokens.primaryColor,
+        foregroundColor: DesignTokens.textLightColor,
+        elevation: DesignTokens.appBarElevation,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: textLightColor,
-        ),
+        titleTextStyle: AppTextStyles.appBarTitle,
       ),
       
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: textLightColor,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: DesignTokens.primaryColor,
+          foregroundColor: DesignTokens.textLightColor,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 12,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: AppTextStyles.button,
+          elevation: 1,
         ),
       ),
       
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primaryColor,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          foregroundColor: DesignTokens.primaryColor,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 12,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          side: const BorderSide(color: primaryColor),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          side: const BorderSide(color: DesignTokens.primaryColor),
+          textStyle: AppTextStyles.button,
         ),
       ),
       
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primaryColor,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+          foregroundColor: DesignTokens.primaryColor,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
           ),
+          textStyle: AppTextStyles.button,
         ),
       ),
       
@@ -98,32 +102,32 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: borderColor),
+          borderSide: const BorderSide(color: DesignTokens.borderColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: borderColor),
+          borderSide: const BorderSide(color: DesignTokens.borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: primaryColor, width: 2),
+          borderSide: const BorderSide(color: DesignTokens.primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: errorColor),
+          borderSide: const BorderSide(color: DesignTokens.errorColor),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: errorColor, width: 2),
+          borderSide: const BorderSide(color: DesignTokens.errorColor, width: 2),
         ),
         filled: true,
-        fillColor: surfaceColor,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        fillColor: DesignTokens.surfaceColor,
+        contentPadding: const EdgeInsets.all(16),
       ),
       
       // Card Theme
       cardTheme: CardThemeData(
-        color: surfaceColor,
+        color: DesignTokens.surfaceColor,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -133,94 +137,34 @@ class AppTheme {
       
       // Divider Theme
       dividerTheme: const DividerThemeData(
-        color: dividerColor,
+        color: DesignTokens.dividerColor,
         thickness: 1,
         space: 1,
       ),
       
       // Icon Theme
       iconTheme: const IconThemeData(
-        color: textSecondaryColor,
+        color: DesignTokens.textSecondaryColor,
         size: 24,
       ),
       
       // Text Theme
       textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: textPrimaryColor,
-        ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: textPrimaryColor,
-        ),
-        displaySmall: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: textPrimaryColor,
-        ),
-        headlineLarge: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-          color: textPrimaryColor,
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: textPrimaryColor,
-        ),
-        headlineSmall: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: textPrimaryColor,
-        ),
-        titleLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: textPrimaryColor,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: textPrimaryColor,
-        ),
-        titleSmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: textPrimaryColor,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: textPrimaryColor,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: textPrimaryColor,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-          color: textSecondaryColor,
-        ),
-        labelLarge: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: textPrimaryColor,
-        ),
-        labelMedium: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: textSecondaryColor,
-        ),
-        labelSmall: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: textSecondaryColor,
-        ),
+        displayLarge: AppTextStyles.displayLarge,
+        displayMedium: AppTextStyles.displayMedium,
+        displaySmall: AppTextStyles.displaySmall,
+        headlineLarge: AppTextStyles.headlineLarge,
+        headlineMedium: AppTextStyles.headlineMedium,
+        headlineSmall: AppTextStyles.headlineSmall,
+        titleLarge: AppTextStyles.titleLarge,
+        titleMedium: AppTextStyles.titleMedium,
+        titleSmall: AppTextStyles.titleSmall,
+        bodyLarge: AppTextStyles.bodyLarge,
+        bodyMedium: AppTextStyles.bodyMedium,
+        bodySmall: AppTextStyles.bodySmall,
+        labelLarge: AppTextStyles.labelLarge,
+        labelMedium: AppTextStyles.labelMedium,
+        labelSmall: AppTextStyles.labelSmall,
       ),
     );
   }
@@ -231,48 +175,45 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
-        primary: primaryColor,
-        secondary: secondaryColor,
-        surface: Color(0xFF121212),
-        error: errorColor,
-        onPrimary: textLightColor,
-        onSecondary: textLightColor,
-        onSurface: textLightColor,
-        onError: textLightColor,
+        primary: DesignTokens.primaryColor,
+        secondary: DesignTokens.secondaryColor,
+        surface: DesignTokens.surfaceDarkColor,
+        error: DesignTokens.errorColor,
+        onPrimary: DesignTokens.textLightColor,
+        onSecondary: DesignTokens.textLightColor,
+        onSurface: DesignTokens.textLightColor,
+        onError: DesignTokens.textLightColor,
       ),
       
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1E1E1E),
-        foregroundColor: textLightColor,
+        backgroundColor: DesignTokens.backgroundDarkColor,
+        foregroundColor: DesignTokens.textLightColor,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: textLightColor,
-        ),
+        titleTextStyle: AppTextStyles.appBarTitle,
       ),
       
       // Button Themes (similar to light theme but with dark adaptations)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: textLightColor,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: DesignTokens.primaryColor,
+          foregroundColor: DesignTokens.textLightColor,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 12,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: AppTextStyles.button,
+          elevation: 1,
         ),
       ),
       
       // Card Theme
       cardTheme: CardThemeData(
-        color: const Color(0xFF1E1E1E),
+        color: DesignTokens.backgroundDarkColor,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -283,51 +224,26 @@ class AppTheme {
   }
 }
 
-/// Custom colors for specific use cases
+/// Legacy AppColors class for backward compatibility
+/// @deprecated Use DesignTokens directly instead
 class AppColors {
-  // Status Colors
-  static const Color active = Color(0xFF4CAF50);
-  static const Color inactive = Color(0xFF9E9E9E);
-  static const Color pending = Color(0xFFFF9800);
-  static const Color completed = Color(0xFF2196F3);
+  // Status Colors (redirected to DesignTokens)
+  static Color get active => DesignTokens.marketUpColor;
+  static Color get inactive => DesignTokens.marketNeutralColor;
+  static Color get pending => DesignTokens.marketPendingColor;
+  static Color get completed => DesignTokens.infoColor;
   
-  // Livestock Colors
-  static const Color cattle = Color(0xFF8D6E63);
-  static const Color horses = Color(0xFF795548);
-  static const Color sheep = Color(0xFFE0E0E0);
-  static const Color goats = Color(0xFFBCAAA4);
-  static const Color pigs = Color(0xFFFFAB91);
-  static const Color poultry = Color(0xFFFFCC02);
+  // Livestock Colors (redirected to DesignTokens)
+  static Color get cattle => DesignTokens.cattleColor;
+  static Color get horses => DesignTokens.horsesColor;
+  static Color get sheep => DesignTokens.sheepColor;
+  static Color get goats => DesignTokens.goatsColor;
+  static Color get pigs => DesignTokens.pigsColor;
+  static Color get poultry => DesignTokens.poultryColor;
   
-  // Weather Colors
-  static const Color sunny = Color(0xFFFFEB3B);
-  static const Color cloudy = Color(0xFF9E9E9E);
-  static const Color rainy = Color(0xFF2196F3);
-  static const Color stormy = Color(0xFF673AB7);
-}
-
-/// Text styles for specific components
-class AppTextStyles {
-  static const TextStyle cardTitle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    color: AppTheme.textPrimaryColor,
-  );
-  
-  static const TextStyle cardSubtitle = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.normal,
-    color: AppTheme.textSecondaryColor,
-  );
-  
-  static const TextStyle buttonText = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-  );
-  
-  static const TextStyle caption = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.normal,
-    color: AppTheme.textSecondaryColor,
-  );
+  // Weather Colors (redirected to DesignTokens)
+  static Color get sunny => DesignTokens.sunnyColor;
+  static Color get cloudy => DesignTokens.cloudyColor;
+  static Color get rainy => DesignTokens.rainyColor;
+  static Color get stormy => DesignTokens.stormyColor;
 }

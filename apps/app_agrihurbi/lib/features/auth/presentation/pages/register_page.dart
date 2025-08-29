@@ -1,5 +1,6 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
@@ -187,8 +188,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppTheme.textLightColor,
+                                  DesignTokens.textLightColor,
                                 ),
+
                               ),
                             )
                           : const Text('Criar conta'),
@@ -232,7 +234,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           children: [
                             const Icon(
                               Icons.error_outline,
-                              color: AppTheme.errorColor,
+                              color: DesignTokens.errorColor,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
@@ -240,7 +242,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: Text(
                                 authProvider.errorMessage!,
                                 style: const TextStyle(
-                                  color: AppTheme.errorColor,
+                                  color: DesignTokens.errorColor,
                                   fontSize: 14,
                                 ),
                               ),
@@ -248,7 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             IconButton(
                               icon: const Icon(
                                 Icons.close,
-                                color: AppTheme.errorColor,
+                                color: DesignTokens.errorColor,
                                 size: 18,
                               ),
                               onPressed: authProvider.clearError,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -372,8 +373,9 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
 
-            // Development Section
-            SettingsSection(
+            // Development Section - Only visible in debug mode
+            if (kDebugMode)
+              SettingsSection(
                 title: 'Desenvolvimento',
                 children: [
                   SettingsItem(

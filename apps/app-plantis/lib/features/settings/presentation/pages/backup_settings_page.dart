@@ -198,7 +198,7 @@ class BackupSettingsPage extends StatelessWidget {
                       ),
                       Text(
                         '${(provider.backupProgress * 100).toInt()}%',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: PlantisColors.primary,
                           fontWeight: FontWeight.bold,
@@ -237,7 +237,7 @@ class BackupSettingsPage extends StatelessWidget {
                       ),
                       Text(
                         '${(provider.restoreProgress * 100).toInt()}%',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: PlantisColors.leaf,
                           fontWeight: FontWeight.bold,

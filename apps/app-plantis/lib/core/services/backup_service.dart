@@ -21,7 +21,6 @@ import 'secure_storage_service.dart';
 @singleton
 class BackupService {
   final IBackupRepository _backupRepository;
-  final IAuthRepository _authRepository;
   final PlantsRepository _plantsRepository;
   final SpacesRepository _spacesRepository;
   final TasksRepository _tasksRepository;
@@ -32,13 +31,11 @@ class BackupService {
 
   BackupService({
     required IBackupRepository backupRepository,
-    required IAuthRepository authRepository,
     required PlantsRepository plantsRepository,
     required SpacesRepository spacesRepository,
     required TasksRepository tasksRepository,
     required SecureStorageService storageService,
   }) : _backupRepository = backupRepository,
-       _authRepository = authRepository,
        _plantsRepository = plantsRepository,
        _spacesRepository = spacesRepository,
        _tasksRepository = tasksRepository,
@@ -287,7 +284,7 @@ class BackupService {
       if (needsRollback && preRestoreBackup != null) {
         debugPrint('🔄 Executando rollback...');
         try {
-          await _executeRollback(preRestoreBackup!);
+          await _executeRollback(preRestoreBackup);
           debugPrint('✅ Rollback executado com sucesso');
           
           // Log do rollback

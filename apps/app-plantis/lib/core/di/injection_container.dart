@@ -199,7 +199,6 @@ void _initSettings() {
     () => SettingsProvider(
       settingsRepository: sl<ISettingsRepository>(),
       notificationService: sl<PlantisNotificationService>(),
-      authRepository: sl<IAuthRepository>(),
       backupService: sl<BackupService>(),
       themeProvider: sl<ThemeProvider>(),
     )..initialize(), // Auto-initialize for better UX
@@ -227,7 +226,6 @@ void _initBackup() {
   sl.registerSingleton<BackupService>(
     BackupService(
       backupRepository: sl<IBackupRepository>(),
-      authRepository: sl<IAuthRepository>(),
       plantsRepository: sl(),
       spacesRepository: sl(),
       tasksRepository: sl(),

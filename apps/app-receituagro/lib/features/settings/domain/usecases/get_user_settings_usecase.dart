@@ -113,12 +113,18 @@ class GetUserSettingsUseCase {
   Future<UserSettingsEntity> getForContext(String userId, SettingsContext context) async {
     final settings = await call(userId);
 
-    return switch (context) {
-      SettingsContext.accessibility => _optimizeForAccessibility(settings),
-      SettingsContext.performance => _optimizeForPerformance(settings),
-      SettingsContext.privacy => _optimizeForPrivacy(settings),
-      SettingsContext.default_ => settings,
-    };
+    switch (context) {
+      case SettingsContext.accessibility:
+        return _optimizeForAccessibility(settings);
+      case SettingsContext.performance:
+        return _optimizeForPerformance(settings);
+      case SettingsContext.privacy:
+        return _optimizeForPrivacy(settings);
+      case SettingsContext.default_:
+        return settings;
+      default:
+        return settings;
+    }
   }
 
   /// Optimize settings for accessibility

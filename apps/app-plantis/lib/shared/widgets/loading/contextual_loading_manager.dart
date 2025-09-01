@@ -138,7 +138,7 @@ class _ContextualLoadingListenerState extends State<ContextualLoadingListener> {
 
   Widget _buildDefaultLoadingOverlay(LoadingState state) {
     return Positioned.fill(
-      child: Container(
+      child: ColoredBox(
         color: Colors.black.withValues(alpha: 0.3),
         child: Center(
           child: Container(

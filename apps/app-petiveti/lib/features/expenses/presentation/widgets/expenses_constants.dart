@@ -4,7 +4,7 @@ import '../../domain/entities/expense.dart';
 /// **Expenses Constants**
 /// 
 /// Centralized constants for expense categories, colors, and configurations.
-abstract final class ExpensesConstants {
+abstract class ExpensesConstants {
   // Category configurations
   static const List<Map<String, dynamic>> expenseCategories = [
     {'name': 'Consultas', 'icon': Icons.medical_services, 'color': Colors.blue, 'category': ExpenseCategory.consultation},

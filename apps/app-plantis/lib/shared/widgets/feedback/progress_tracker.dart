@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 
 import 'feedback_system.dart';
 import 'haptic_service.dart';
@@ -206,7 +207,7 @@ class ProgressOperation extends ChangeNotifier {
   String? _currentMessage;
   double _progress;
   OperationState _state;
-  DateTime _startTime;
+  final DateTime _startTime;
   Duration? _estimatedTime;
   BuildContext? context;
   
@@ -487,13 +488,13 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
           size: 24,
         );
       case OperationState.completed:
-        return Icon(
+        return const Icon(
           Icons.check_circle,
           color: Colors.green,
           size: 24,
         );
       case OperationState.failed:
-        return Icon(
+        return const Icon(
           Icons.error,
           color: Colors.red,
           size: 24,

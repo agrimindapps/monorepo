@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 
-class AuthModule {
+// ignore: avoid_classes_with_only_static_members
+abstract class AuthModule {
   static void init(GetIt sl) {
     // Auth module is now handled in the main injection_container.dart
     // This ensures no duplicate registrations occur
@@ -8,19 +9,22 @@ class AuthModule {
   }
 }
 
-class PlantsModule {
+// ignore: avoid_classes_with_only_static_members
+abstract class PlantsModule {
   static void init(GetIt sl) {
     // Implementation moved to dedicated module file
   }
 }
 
-class SpacesModule {
+// ignore: avoid_classes_with_only_static_members
+abstract class SpacesModule {
   static void init(GetIt sl) {
     // Implementation moved to dedicated module file
   }
 }
 
-class CommentsModule {
+// ignore: avoid_classes_with_only_static_members
+abstract class CommentsModule {
   static void init(GetIt sl) {
     // TODO: Implement comments module dependencies
     // Providers
@@ -30,7 +34,8 @@ class CommentsModule {
   }
 }
 
-class PremiumModule {
+// ignore: avoid_classes_with_only_static_members
+abstract class PremiumModule {
   static void init(GetIt sl) {
     // TODO: Implement premium module dependencies
     // Providers
@@ -40,7 +45,8 @@ class PremiumModule {
   }
 }
 
-class AppServicesModule {
+// ignore: avoid_classes_with_only_static_members
+abstract class AppServicesModule {
   static void init(GetIt sl) {
     // TODO: Implement app-wide services
     // Navigation service

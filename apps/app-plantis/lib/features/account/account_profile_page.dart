@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../core/services/data_sanitization_service.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../shared/widgets/loading/loading_components.dart';
+import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
 
 class AccountProfilePage extends StatefulWidget {
   const AccountProfilePage({super.key});
@@ -148,7 +148,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.info_outline,
                               color: Colors.orange,
                               size: 20,
@@ -195,7 +195,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 ],
 
                 // Ações da conta
-                Container(
+                DecoratedBox(
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(16.0),
@@ -204,7 +204,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                     children: [
                       if (!isAnonymous) ...[
                         ListTile(
-                          leading: Icon(
+                          leading: const Icon(
                             Icons.edit_outlined,
                             color: PlantisColors.primary,
                           ),
@@ -217,7 +217,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                         ),
                         const Divider(height: 1),
                         ListTile(
-                          leading: Icon(
+                          leading: const Icon(
                             Icons.security_outlined,
                             color: PlantisColors.primary,
                           ),
@@ -367,10 +367,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
+              child: const Row(
                 children: [
                   Icon(Icons.warning, color: Colors.red, size: 20),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Esta ação é irreversível',
@@ -455,14 +455,14 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   color: Colors.orange.withValues(alpha: 0.3),
                 ),
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Icon(Icons.lightbulb_outline, color: Colors.orange, size: 20),
-                      const SizedBox(width: 8),
-                      const Text(
+                      SizedBox(width: 8),
+                      Text(
                         'Alternativas disponíveis agora:',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
@@ -471,10 +471,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text('• Fazer logout para sair da conta'),
-                  const Text('• Contatar o suporte para assistência'),
-                  const Text('• Aguardar a próxima atualização do app'),
+                  SizedBox(height: 8),
+                  Text('• Fazer logout para sair da conta'),
+                  Text('• Contatar o suporte para assistência'),
+                  Text('• Aguardar a próxima atualização do app'),
                 ],
               ),
             ),
@@ -485,10 +485,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
+              child: const Row(
                 children: [
                   Icon(Icons.schedule, color: Colors.blue, size: 20),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Previsão: próxima atualização do aplicativo',
@@ -570,11 +570,11 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.email_outlined, color: Colors.blue, size: 20),
-                      const SizedBox(width: 8),
-                      const Text(
+                      SizedBox(width: 8),
+                      Text(
                         'Email',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
@@ -586,11 +586,11 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   const SizedBox(height: 8),
                   Text(DataSanitizationService.getSupportContactInfo()['email']!),
                   const SizedBox(height: 16),
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.schedule, color: Colors.green, size: 20),
-                      const SizedBox(width: 8),
-                      const Text(
+                      SizedBox(width: 8),
+                      Text(
                         'Tempo de Resposta',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
-import '../../core/widgets/loading_overlay.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 class LandingPage extends StatefulWidget {

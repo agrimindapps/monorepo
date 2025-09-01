@@ -112,7 +112,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
     
     if (mounted) {
       setState(() => _showSaved = false);
-      _saveController.reverse();
+      await _saveController.reverse();
     }
   }
 
@@ -151,14 +151,14 @@ class _SaveIndicatorState extends State<SaveIndicator>
     
     if (_showSaved) {
       return Chip(
-        avatar: Icon(
+        avatar: const Icon(
           Icons.check_circle,
           color: Colors.green,
           size: 18,
         ),
         label: Text(widget.savedText ?? 'Salvo!'),
         backgroundColor: Colors.green.withValues(alpha: 0.1),
-        side: BorderSide(color: Colors.green),
+        side: const BorderSide(color: Colors.green),
       );
     }
     
@@ -185,7 +185,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
       label: Text(widget.saveText ?? 'Alterações não salvas'),
       onPressed: widget.onSave,
       backgroundColor: Colors.orange.withValues(alpha: 0.1),
-      side: BorderSide(color: Colors.orange),
+      side: const BorderSide(color: Colors.orange),
     );
   }
 
@@ -246,7 +246,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
     if (_showSaved) {
       return Semantics(
         label: 'Alterações salvas com sucesso',
-        child: Icon(
+        child: const Icon(
           Icons.check_circle,
           color: Colors.green,
           size: 24,
@@ -367,7 +367,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
       );
     }
     
-    return Icon(
+    return const Icon(
       Icons.warning,
       color: Colors.orange,
       size: 20,

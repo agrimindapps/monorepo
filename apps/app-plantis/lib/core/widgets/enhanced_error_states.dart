@@ -436,9 +436,4 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
 
     return widget.child;
   }
-
-  void _handleError(String error) {
-    setState(() => _error = error);
-    widget.onError?.call(error);
-  }
 }

@@ -106,12 +106,16 @@ class AccessibilityTestHelper {
       switch (issue.severity) {
         case AccessibilitySeverity.low:
           penalty += 5;
+          break;
         case AccessibilitySeverity.medium:
           penalty += 15;
+          break;
         case AccessibilitySeverity.high:
           penalty += 25;
+          break;
         case AccessibilitySeverity.critical:
           penalty += 40;
+          break;
       }
     }
     

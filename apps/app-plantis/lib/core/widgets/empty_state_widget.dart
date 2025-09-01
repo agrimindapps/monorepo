@@ -117,7 +117,7 @@ class EmptyStateWidget extends StatelessWidget {
         );
 
       case TasksFilterType.today:
-        return EmptyStateConfig(
+        return const EmptyStateConfig(
           icon: Icons.today,
           title: AppStrings.noTasksToday,
           description: AppStrings.noTasksTodayDescription,
@@ -125,7 +125,7 @@ class EmptyStateWidget extends StatelessWidget {
         );
 
       case TasksFilterType.overdue:
-        return EmptyStateConfig(
+        return const EmptyStateConfig(
           icon: Icons.check_circle,
           title: AppStrings.noOverdueTasks,
           description: AppStrings.noOverdueTasksDescription,
@@ -143,7 +143,7 @@ class EmptyStateWidget extends StatelessWidget {
         );
 
       case TasksFilterType.completed:
-        return EmptyStateConfig(
+        return const EmptyStateConfig(
           icon: Icons.history,
           title: AppStrings.noCompletedTasks,
           description: AppStrings.noCompletedTasksDescription,

@@ -136,15 +136,18 @@ class _OptimizedVehiclesContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<VehiclesProvider, (bool, bool, List<VehicleEntity>, String?)>(
-      selector: (context, provider) => (
-        provider.isLoading,
-        provider.isInitialized,
-        provider.vehicles,
-        provider.errorMessage,
-      ),
+    return Selector<VehiclesProvider, Map<String, dynamic>>(
+      selector: (context, provider) => {
+        'isLoading': provider.isLoading,
+        'isInitialized': provider.isInitialized,
+        'vehicles': provider.vehicles,
+        'errorMessage': provider.errorMessage,
+      },
       builder: (context, data, child) {
-        final (isLoading, isInitialized, vehicles, errorMessage) = data;
+        final isLoading = data['isLoading'] as bool;
+        final isInitialized = data['isInitialized'] as bool;
+        final vehicles = data['vehicles'] as List<VehicleEntity>;
+        final errorMessage = data['errorMessage'] as String?;
         
         // Mostrar loading apenas se não inicializou ainda
         if (!isInitialized) {

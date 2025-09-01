@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../services/enhanced_image_cache_manager.dart';
 import '../services/image_preloader_service.dart';
 
 /// Unified image widget that consolidates all image display functionality
@@ -278,7 +277,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
 
     // Apply border if specified
     if (widget.borderColor != null && widget.borderWidth != null) {
-      child = Container(
+      child = DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(
             color: widget.borderColor!,
@@ -519,9 +518,7 @@ class _LRUImageCache {
     }
     _head = node;
 
-    if (_tail == null) {
-      _tail = node;
-    }
+    _tail ??= node;
   }
 
   void _removeNode(_CacheNode node) {

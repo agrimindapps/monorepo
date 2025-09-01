@@ -14,8 +14,7 @@ import '../../../features/plants/presentation/providers/plant_form_provider.dart
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';
 import '../../../features/plants/presentation/providers/plants_provider.dart';
 
-// ignore: avoid_classes_with_only_static_members
-class PlantsDIModule {
+abstract class PlantsDIModule {
   static void init(GetIt sl) {
     // Data sources
     sl.registerLazySingleton<PlantsLocalDatasource>(

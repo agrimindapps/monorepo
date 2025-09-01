@@ -29,7 +29,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Positioned.fill(
-            child: Container(
+            child: ColoredBox(
               color: (overlayColor ?? Colors.black).withValues(alpha: opacity),
               child: preventInteraction
                   ? AbsorbPointer(

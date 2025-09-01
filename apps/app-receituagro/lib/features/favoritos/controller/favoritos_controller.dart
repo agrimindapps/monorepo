@@ -115,7 +115,7 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
     } catch (e) {
       const message = 'Não foi possível remover dos favoritos';
       if (_notificationService != null) {
-        _notificationService.showError(message);
+        _notificationService!.showError(message);
       } else {
         debugPrint('Erro: $message');
       }
@@ -128,7 +128,7 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
     } catch (e) {
       const message = 'Não foi possível remover dos favoritos';
       if (_notificationService != null) {
-        _notificationService.showError(message);
+        _notificationService!.showError(message);
       } else {
         debugPrint('Erro: $message');
       }
@@ -141,7 +141,7 @@ class FavoritosController extends ChangeNotifier with WidgetsBindingObserver {
     } catch (e) {
       const message = 'Não foi possível remover dos favoritos';
       if (_notificationService != null) {
-        _notificationService.showError(message);
+        _notificationService!.showError(message);
       } else {
         debugPrint('Erro: $message');
       }

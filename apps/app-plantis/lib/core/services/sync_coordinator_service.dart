@@ -123,7 +123,7 @@ class SyncCoordinatorService {
     // Cancel active operations
     for (final op in _activeOperations.values) {
       op.completer.completeError(
-        SyncCancelledException('All operations were cleared'),
+        const SyncCancelledException('All operations were cleared'),
       );
     }
     _activeOperations.clear();
@@ -132,7 +132,7 @@ class SyncCoordinatorService {
     while (_operationQueue.isNotEmpty) {
       final op = _operationQueue.removeFirst();
       op.completer.completeError(
-        SyncCancelledException('All operations were cleared'),
+        const SyncCancelledException('All operations were cleared'),
       );
     }
 

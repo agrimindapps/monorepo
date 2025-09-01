@@ -18,7 +18,7 @@ import '../providers/auth_provider.dart';
 /// @author PetiVeti Development Team
 /// @since 1.0.0
 /// @version 1.3.0 - Enhanced error handling and navigation flow
-abstract final class RegisterPageCoordinator {
+abstract class RegisterPageCoordinator {
   
   /// **Handle Registration Form Submission**
   /// 

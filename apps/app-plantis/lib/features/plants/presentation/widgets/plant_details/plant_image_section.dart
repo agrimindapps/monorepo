@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/services/image_service.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../optimized_image_widget.dart';

@@ -150,9 +150,13 @@ class PlantDetailsHeader extends StatelessWidget {
     );
   }
 
-  ({Color color, IconData icon, String label}) _getCareStatus() {
+  _CareStatus _getCareStatus() {
     if (plant.config?.wateringIntervalDays == null) {
-      return (color: Colors.grey, icon: Icons.help_outline, label: 'Sem info');
+      return const _CareStatus(
+        color: Colors.grey,
+        icon: Icons.help_outline,
+        label: 'Sem info',
+      );
     }
 
     final daysSincePlanting =
@@ -164,15 +168,23 @@ class PlantDetailsHeader extends StatelessWidget {
     final daysSinceLastWatering = daysSincePlanting % wateringInterval;
 
     if (daysSinceLastWatering >= wateringInterval) {
-      return (color: Colors.red, icon: Icons.water_drop, label: 'Regar agora');
+      return const _CareStatus(
+        color: Colors.red,
+        icon: Icons.water_drop,
+        label: 'Regar agora',
+      );
     } else if (daysSinceLastWatering >= (wateringInterval * 0.8).round()) {
-      return (
+      return const _CareStatus(
         color: Colors.orange,
         icon: Icons.water_drop_outlined,
         label: 'Regar em breve',
       );
     } else {
-      return (color: Colors.green, icon: Icons.check_circle, label: 'Em dia');
+      return const _CareStatus(
+        color: Colors.green,
+        icon: Icons.check_circle,
+        label: 'Em dia',
+      );
     }
   }
 
@@ -201,4 +213,16 @@ class PlantDetailsHeader extends StatelessWidget {
       }
     }
   }
+}
+
+class _CareStatus {
+  final Color color;
+  final IconData icon;
+  final String label;
+
+  const _CareStatus({
+    required this.color,
+    required this.icon,
+    required this.label,
+  });
 }

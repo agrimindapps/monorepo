@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/localization/app_strings.dart';
-import '../../core/constants/tasks_constants.dart';
-import '../../domain/entities/task.dart';
 import '../../../plants/domain/entities/plant.dart';
 import '../../../plants/presentation/providers/plants_provider.dart';
+import '../../core/constants/tasks_constants.dart';
+import '../../domain/entities/task.dart';
 
 /// Comprehensive task creation dialog with intelligent form handling
 ///
@@ -211,7 +211,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
             size: TasksConstants.taskDialogIconSize,
           ),
           const SizedBox(width: 12),
-          Text(AppStrings.newTaskTitle),
+          const Text(AppStrings.newTaskTitle),
         ],
       ),
       content: SingleChildScrollView(
@@ -251,10 +251,10 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: _handleCancel, child: Text(AppStrings.cancel)),
+        TextButton(onPressed: _handleCancel, child: const Text(AppStrings.cancel)),
         ElevatedButton(
           onPressed: _handleConfirm,
-          child: Text(AppStrings.createTaskButton),
+          child: const Text(AppStrings.createTaskButton),
         ),
       ],
     );
@@ -302,7 +302,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
                         size: TasksConstants.taskTypeIconSize,
                         color: theme.colorScheme.primary,
                       ),
-                      SizedBox(width: TasksConstants.taskDialogIconSpacing),
+                      const SizedBox(width: TasksConstants.taskDialogIconSpacing),
                       Text(type.displayName),
                     ],
                   ),
@@ -371,7 +371,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
               child: DropdownButton<String>(
                 value: _selectedPlantId,
                 isExpanded: true,
-                hint: Text(AppStrings.selectPlantHint),
+                hint: const Text(AppStrings.selectPlantHint),
                 onChanged: (plantId) {
                   setState(() => _selectedPlantId = plantId);
                 },
@@ -385,7 +385,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
                           size: TasksConstants.taskTypeIconSize,
                           color: theme.colorScheme.secondary,
                         ),
-                        SizedBox(width: TasksConstants.taskDialogIconSpacing),
+                        const SizedBox(width: TasksConstants.taskDialogIconSpacing),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -589,7 +589,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
                         size: TasksConstants.priorityIconSize,
                         color: _getPriorityColor(priority, theme),
                       ),
-                      SizedBox(width: TasksConstants.taskDialogIconSpacing),
+                      const SizedBox(width: TasksConstants.taskDialogIconSpacing),
                       Text(priority.displayName),
                     ],
                   ),
@@ -616,7 +616,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
       context: context,
       initialDate: _dueDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: TasksConstants.datePickerMaxDays)),
+      lastDate: DateTime.now().add(const Duration(days: TasksConstants.datePickerMaxDays)),
       helpText: AppStrings.dueDatePickerHelp,
       confirmText: AppStrings.confirmButton,
       cancelText: AppStrings.cancelButton,

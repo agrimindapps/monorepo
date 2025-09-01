@@ -216,7 +216,7 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
   }
 
   Widget _buildModalStyle() {
-    return Container(
+    return ColoredBox(
       color: Colors.black.withValues(alpha: 0.5),
       child: Center(
         child: SlideTransition(

@@ -7,6 +7,7 @@ part 'comentario_model.g.dart';
 /// TypeId: 0 - Sequential numbering
 @HiveType(typeId: 0)
 // ignore: must_be_immutable
+// ignore_for_file: overridden_fields
 class ComentarioModel extends BaseSyncModel {
   // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override

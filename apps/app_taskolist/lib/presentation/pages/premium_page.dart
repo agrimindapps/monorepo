@@ -278,17 +278,17 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
   }
 
   List<Widget> _buildFeaturesList() {
-    const features = [
-      ('Tarefas ilimitadas', Icons.task_alt),
-      ('Subtarefas ilimitadas', Icons.subdirectory_arrow_right),
-      ('Filtros avançados', Icons.filter_list),
-      ('Tags personalizadas', Icons.label),
-      ('Controle de tempo', Icons.timer),
-      ('Analytics de produtividade', Icons.analytics),
-      ('Sincronização na nuvem', Icons.cloud_sync),
-      ('Exportar dados', Icons.file_download),
-      ('Suporte prioritário', Icons.support_agent),
-      ('Temas personalizados', Icons.palette),
+    final features = [
+      _Feature('Tarefas ilimitadas', Icons.task_alt),
+      _Feature('Subtarefas ilimitadas', Icons.subdirectory_arrow_right),
+      _Feature('Filtros avançados', Icons.filter_list),
+      _Feature('Tags personalizadas', Icons.label),
+      _Feature('Controle de tempo', Icons.timer),
+      _Feature('Analytics de produtividade', Icons.analytics),
+      _Feature('Sincronização na nuvem', Icons.cloud_sync),
+      _Feature('Exportar dados', Icons.file_download),
+      _Feature('Suporte prioritário', Icons.support_agent),
+      _Feature('Temas personalizados', Icons.palette),
     ];
 
     return features.map((feature) => Padding(
@@ -302,14 +302,14 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              feature.$2,
+              feature.icon,
               size: 16,
               color: Colors.white,
             ),
           ),
           const SizedBox(width: 12),
           Text(
-            feature.$1,
+            feature.title,
             style: const TextStyle(fontSize: 16),
           ),
         ],
@@ -527,4 +527,11 @@ class _ProductCard extends StatelessWidget {
       return 'Cobrado mensalmente';
     }
   }
+}
+
+class _Feature {
+  final String title;
+  final IconData icon;
+
+  const _Feature(this.title, this.icon);
 }

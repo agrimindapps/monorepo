@@ -1,12 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import 'feedback_system.dart';
-import 'haptic_service.dart';
-import 'toast_service.dart';
 import 'animated_feedback.dart';
+import 'haptic_service.dart';
 
 /// Sistema de confirmação com feedback visual e háptico
 /// Para ações críticas que precisam de confirmação do usuário
@@ -305,17 +302,17 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
           iconColor: theme.colorScheme.primary,
         );
       case ConfirmationType.success:
-        return ConfirmationColors(
+        return const ConfirmationColors(
           backgroundColor: Colors.green,
           iconColor: Colors.green,
         );
       case ConfirmationType.warning:
-        return ConfirmationColors(
+        return const ConfirmationColors(
           backgroundColor: Colors.orange,
           iconColor: Colors.orange,
         );
       case ConfirmationType.error:
-        return ConfirmationColors(
+        return const ConfirmationColors(
           backgroundColor: Colors.red,
           iconColor: Colors.red,
         );
@@ -947,17 +944,17 @@ class ConfirmationBottomSheet extends StatelessWidget {
           iconColor: theme.colorScheme.primary,
         );
       case ConfirmationType.success:
-        return ConfirmationColors(
+        return const ConfirmationColors(
           backgroundColor: Colors.green,
           iconColor: Colors.green,
         );
       case ConfirmationType.warning:
-        return ConfirmationColors(
+        return const ConfirmationColors(
           backgroundColor: Colors.orange,
           iconColor: Colors.orange,
         );
       case ConfirmationType.error:
-        return ConfirmationColors(
+        return const ConfirmationColors(
           backgroundColor: Colors.red,
           iconColor: Colors.red,
         );

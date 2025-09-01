@@ -304,25 +304,36 @@ class UserSettingsProvider extends ChangeNotifier {
 
   /// Get language display name
   String getLanguageDisplayName(String languageCode) {
-    return switch (languageCode) {
-      'pt-BR' => 'Português (Brasil)',
-      'en-US' => 'English (US)',
-      'es-ES' => 'Español (España)',
-      _ => languageCode,
-    };
+    switch (languageCode) {
+      case 'pt-BR':
+        return 'Português (Brasil)';
+      case 'en-US':
+        return 'English (US)';
+      case 'es-ES':
+        return 'Español (España)';
+      default:
+        return languageCode;
+    }
   }
 
   /// Check if a feature is available
   bool isFeatureAvailable(String feature) {
-    return switch (feature) {
-      'speechToText' => speechToTextEnabled,
-      'darkTheme' => true,
-      'notifications' => true,
-      'analytics' => true,
-      'sound' => true,
-      'developmentMode' => true,
-      _ => false,
-    };
+    switch (feature) {
+      case 'speechToText':
+        return speechToTextEnabled;
+      case 'darkTheme':
+        return true;
+      case 'notifications':
+        return true;
+      case 'analytics':
+        return true;
+      case 'sound':
+        return true;
+      case 'developmentMode':
+        return true;
+      default:
+        return false;
+    }
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
@@ -323,7 +325,7 @@ class PlantFormProvider extends ChangeNotifier {
           // Remove imagem anterior se existir
           if (_imageUrls.isNotEmpty) {
             final oldImageUrl = _imageUrls.first;
-            imageService.deleteImage(oldImageUrl); // Fire and forget
+            unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
           }
           _imageUrls.clear();
           _imageUrls.add(downloadUrl);
@@ -353,7 +355,7 @@ class PlantFormProvider extends ChangeNotifier {
           // Remove imagem anterior se existir
           if (_imageUrls.isNotEmpty) {
             final oldImageUrl = _imageUrls.first;
-            imageService.deleteImage(oldImageUrl); // Fire and forget
+            unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
           }
           _imageUrls.clear();
           _imageUrls.add(downloadUrl);
@@ -759,15 +761,15 @@ class PlantFormProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure _:
+      case ValidationFailure:
         return failure.message;
-      case NotFoundFailure _:
+      case NotFoundFailure:
         return 'Planta não encontrada';
-      case NetworkFailure _:
+      case NetworkFailure:
         return 'Sem conexão com a internet';
-      case ServerFailure _:
+      case ServerFailure:
         return 'Erro no servidor. Tente novamente.';
-      case CacheFailure _:
+      case CacheFailure:
         return 'Erro local. Verifique o armazenamento.';
       default:
         return 'Erro inesperado. Tente novamente.';

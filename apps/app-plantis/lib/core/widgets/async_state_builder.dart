@@ -171,6 +171,7 @@ class AsyncErrorState<T> extends AsyncState<T> {
 }
 
 class AsyncSuccessState<T> extends AsyncState<T> {
+  @override
   final T data;
   
   const AsyncSuccessState(this.data);

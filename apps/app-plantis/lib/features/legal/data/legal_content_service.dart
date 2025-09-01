@@ -1,6 +1,6 @@
-import '../presentation/widgets/base_legal_page.dart';
-import '../../../core/theme/plantis_colors.dart';
 import '../../../core/constants/app_config.dart';
+import '../../../core/theme/plantis_colors.dart';
+import '../presentation/widgets/base_legal_page.dart';
 
 /// Service for managing legal content in structured data format
 /// Makes legal content easily updatable without code changes
@@ -396,7 +396,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     final totalSections = privacySections.length + termsSections.length;
     
     // Simple version based on date and content count
-    return '${_lastUpdatedDate}_v${totalSections}';
+    return '${_lastUpdatedDate}_v$totalSections';
   }
 
   /// Get contact information for legal support

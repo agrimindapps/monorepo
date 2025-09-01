@@ -105,7 +105,7 @@ class AuthProvider extends ChangeNotifier {
 
     // Escuta mudanças na assinatura
     if (_subscriptionRepository != null) {
-      _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
+      _subscriptionStream = _subscriptionRepository!.subscriptionStatus.listen((
         subscription,
       ) {
         _isPremium = subscription?.isActive ?? false;
@@ -118,7 +118,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _syncUserWithRevenueCat(String userId) async {
     if (_subscriptionRepository == null) return;
 
-    await _subscriptionRepository.setUser(
+    await _subscriptionRepository!.setUser(
       userId: userId,
       attributes: {'app': 'plantis', 'email': _currentUser?.email ?? ''},
     );
@@ -127,7 +127,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _checkPremiumStatus() async {
     if (_subscriptionRepository == null) return;
 
-    final result = await _subscriptionRepository.hasPlantisSubscription();
+    final result = await _subscriptionRepository!.hasPlantisSubscription();
     result.fold(
       (failure) {
         if (kDebugMode) {

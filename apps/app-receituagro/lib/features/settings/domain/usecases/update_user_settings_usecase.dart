@@ -182,16 +182,24 @@ class UpdateUserSettingsUseCase {
     String key,
     dynamic value
   ) {
-    return switch (key) {
-      'isDarkTheme' => currentSettings.copyWith(isDarkTheme: value as bool),
-      'notificationsEnabled' => currentSettings.copyWith(notificationsEnabled: value as bool),
-      'soundEnabled' => currentSettings.copyWith(soundEnabled: value as bool),
-      'language' => currentSettings.copyWith(language: value as String),
-      'isDevelopmentMode' => currentSettings.copyWith(isDevelopmentMode: value as bool),
-      'speechToTextEnabled' => currentSettings.copyWith(speechToTextEnabled: value as bool),
-      'analyticsEnabled' => currentSettings.copyWith(analyticsEnabled: value as bool),
-      _ => throw InvalidUpdateException('Cannot update setting: $key'),
-    };
+    switch (key) {
+      case 'isDarkTheme':
+        return currentSettings.copyWith(isDarkTheme: value as bool);
+      case 'notificationsEnabled':
+        return currentSettings.copyWith(notificationsEnabled: value as bool);
+      case 'soundEnabled':
+        return currentSettings.copyWith(soundEnabled: value as bool);
+      case 'language':
+        return currentSettings.copyWith(language: value as String);
+      case 'isDevelopmentMode':
+        return currentSettings.copyWith(isDevelopmentMode: value as bool);
+      case 'speechToTextEnabled':
+        return currentSettings.copyWith(speechToTextEnabled: value as bool);
+      case 'analyticsEnabled':
+        return currentSettings.copyWith(analyticsEnabled: value as bool);
+      default:
+        throw InvalidUpdateException('Cannot update setting: $key');
+    }
   }
 
   /// Check subscription status (mock implementation)

@@ -12,7 +12,6 @@ class SettingsProvider extends ChangeNotifier {
   final PlantisNotificationService _notificationService;
   final BackupService? _backupService;
   final ThemeProvider? _themeProvider;
-  final IAuthRepository _authRepository;
 
   // Estado unificado
   SettingsEntity _settings = SettingsEntity.defaults();
@@ -24,14 +23,12 @@ class SettingsProvider extends ChangeNotifier {
   SettingsProvider({
     required ISettingsRepository settingsRepository,
     required PlantisNotificationService notificationService,
-    required IAuthRepository authRepository,
     BackupService? backupService,
     ThemeProvider? themeProvider,
   })  : _settingsRepository = settingsRepository,
         _notificationService = notificationService,
         _backupService = backupService,
-        _themeProvider = themeProvider,
-        _authRepository = authRepository;
+        _themeProvider = themeProvider;
 
   // Getters
   SettingsEntity get settings => _settings;
@@ -409,11 +406,6 @@ class SettingsProvider extends ChangeNotifier {
 
   void _clearError() {
     _errorMessage = null;
-    notifyListeners();
-  }
-
-  void _clearSuccess() {
-    _successMessage = null;
     notifyListeners();
   }
 

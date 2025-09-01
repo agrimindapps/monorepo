@@ -36,7 +36,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
             .timeout(timeoutDuration)
             .first;
         
-        if (user != null && user.id != null && user.id!.isNotEmpty) {
+        if (user != null && user.id.isNotEmpty) {
           return user.id;
         }
         

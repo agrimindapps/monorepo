@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/app_strings.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
-import '../../../../../core/localization/app_strings.dart';
 
 /// Controller responsible for business logic of the plant details screen
 /// 

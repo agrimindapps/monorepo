@@ -326,7 +326,7 @@ class TasksProvider extends ChangeNotifier {
     );
 
     if (!_validateTaskOwnership(task)) {
-      throw UnauthorizedAccessException('You are not authorized to modify this task');
+      throw const UnauthorizedAccessException('You are not authorized to modify this task');
     }
 
     return task;
@@ -751,7 +751,7 @@ class TasksProvider extends ChangeNotifier {
       _updateState(_state.copyWith(
         errorMessage: e.message,
       ));
-      throw e;
+      rethrow;
     } catch (e) {
       _completeTaskLoadingOperation(taskId);
       _updateState(_state.copyWith(

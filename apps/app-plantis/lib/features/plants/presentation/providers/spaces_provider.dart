@@ -202,13 +202,13 @@ class SpacesProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure _:
+      case ValidationFailure:
         return failure.message;
-      case CacheFailure _:
+      case CacheFailure:
         return failure.message;
-      case NetworkFailure _:
+      case NetworkFailure:
         return 'Sem conexão com a internet';
-      case ServerFailure _:
+      case ServerFailure:
         // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
@@ -216,7 +216,7 @@ class SpacesProvider extends ChangeNotifier {
           return 'Erro de autenticação. Tente fazer login novamente.';
         }
         return failure.message;
-      case NotFoundFailure _:
+      case NotFoundFailure:
         return failure.message;
       default:
         return 'Erro inesperado';

@@ -1,12 +1,14 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/localization/app_strings.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../core/utils/task_display_utils.dart';
+import '../../domain/entities/task.dart' as task_entity;
 import '../providers/tasks_provider.dart';
 import '../providers/tasks_state.dart';
-import '../../domain/entities/task.dart' as task_entity;
 
 /// Enhanced app bar for tasks with search, filtering, and quick actions
 ///
@@ -89,7 +91,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
   }
 
   void _showFilterDialog() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -210,7 +212,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(140),
-        child: Container(
+        child: ColoredBox(
           color: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
           child: Column(
             children: [
@@ -382,7 +384,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
   }
 
   Widget _buildFilterChip(String label, VoidCallback onRemove, ThemeData theme) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.primary,
         borderRadius: BorderRadius.circular(16),
@@ -457,15 +459,11 @@ class _FilterButton extends StatelessWidget {
   final String text;
   final bool isSelected;
   final VoidCallback onTap;
-  final bool showBadge;
-  final int badgeCount;
 
   const _FilterButton({
     required this.text,
     required this.isSelected,
     required this.onTap,
-    this.showBadge = false,
-    this.badgeCount = 0,
   });
 
   @override
@@ -492,24 +490,8 @@ class _FilterButton extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            if (showBadge && badgeCount > 0 && isSelected) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '$badgeCount',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+            // Badge functionality removed as it was unused
+            // Badge display removed as it was unused
           ],
         ),
       ),
@@ -522,7 +504,7 @@ class _FilterBottomSheet extends StatefulWidget {
   final List<task_entity.TaskType> activeTaskTypes;
   final List<task_entity.TaskPriority> activePriorities;
   final String? selectedPlantFilter;
-  final Function({
+  final void Function({
     List<TasksFilterType>? filters,
     List<task_entity.TaskType>? taskTypes,
     List<task_entity.TaskPriority>? priorities,
@@ -569,7 +551,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -671,7 +653,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     String title,
     Iterable<T> options,
     List<T> selectedItems,
-    Function(T) onToggle,
+    void Function(T) onToggle,
     String Function(T) getName,
   ) {
     final theme = Theme.of(context);

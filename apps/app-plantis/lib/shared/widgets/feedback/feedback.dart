@@ -35,23 +35,22 @@
 library feedback;
 
 import 'package:flutter/material.dart';
-import 'unified_feedback_system.dart';
-import 'feedback_system.dart';
+
 import '../loading/contextual_loading_manager.dart';
-
-// Core system
-export 'unified_feedback_system.dart';
-
-// Individual components
-export 'feedback_system.dart';
-export 'animated_feedback.dart';
-export 'haptic_service.dart';
-export 'toast_service.dart';
-export 'progress_tracker.dart';
-export 'confirmation_system.dart';
+import 'feedback_system.dart';
+import 'unified_feedback_system.dart';
 
 // Loading integration
 export '../loading/contextual_loading_manager.dart';
+export 'animated_feedback.dart';
+export 'confirmation_system.dart';
+// Individual components
+export 'feedback_system.dart';
+export 'haptic_service.dart';
+export 'progress_tracker.dart';
+export 'toast_service.dart';
+// Core system
+export 'unified_feedback_system.dart';
 
 // Pre-defined contexts for common operations
 class FeedbackOperations {

@@ -162,32 +162,43 @@ class SemanticButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveOnPressed = enabled ? onPressed : null;
     
-    Widget button = switch (type) {
-      ButtonType.elevated => ElevatedButton(
+    Widget button;
+    switch (type) {
+      case ButtonType.elevated:
+        button = ElevatedButton(
           onPressed: effectiveOnPressed,
           style: style,
           child: child,
-        ),
-      ButtonType.text => TextButton(
+        );
+        break;
+      case ButtonType.text:
+        button = TextButton(
           onPressed: effectiveOnPressed,
           style: style,
           child: child,
-        ),
-      ButtonType.outlined => OutlinedButton(
+        );
+        break;
+      case ButtonType.outlined:
+        button = OutlinedButton(
           onPressed: effectiveOnPressed,
           style: style,
           child: child,
-        ),
-      ButtonType.icon => IconButton(
+        );
+        break;
+      case ButtonType.icon:
+        button = IconButton(
           onPressed: effectiveOnPressed,
           style: style,
           icon: child,
-        ),
-      ButtonType.fab => FloatingActionButton(
+        );
+        break;
+      case ButtonType.fab:
+        button = FloatingActionButton(
           onPressed: effectiveOnPressed,
           child: child,
-        ),
-    };
+        );
+        break;
+    }
 
     return Semantics(
       label: semanticLabel,

@@ -242,11 +242,30 @@ final expensesProvider = StateNotifierProvider<ExpensesNotifier, ExpensesState>(
   );
 });
 
+// Parameter class for category provider
+class CategoryExpenseParams {
+  final String userId;
+  final ExpenseCategory category;
+  
+  const CategoryExpenseParams(this.userId, this.category);
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CategoryExpenseParams &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          category == other.category;
+
+  @override
+  int get hashCode => userId.hashCode ^ category.hashCode;
+}
+
 // Individual category provider
-final categoryExpensesProvider = FutureProvider.family<List<Expense>, (String, ExpenseCategory)>((ref, params) async {
+final categoryExpensesProvider = FutureProvider.family<List<Expense>, CategoryExpenseParams>((ref, params) async {
   final notifier = ref.read(expensesProvider.notifier);
-  await notifier.loadExpensesByCategory(params.$1, params.$2);
-  return notifier.getExpensesByCategory(params.$2);
+  await notifier.loadExpensesByCategory(params.userId, params.category);
+  return notifier.getExpensesByCategory(params.category);
 });
 
 // Stream provider for real-time updates

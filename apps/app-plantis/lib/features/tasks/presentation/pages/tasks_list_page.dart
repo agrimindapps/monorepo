@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/accessibility_tokens.dart';
-import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/feedback/feedback.dart';
-
+import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../providers/tasks_provider.dart';
 import '../providers/tasks_state.dart';
@@ -14,9 +12,7 @@ import '../widgets/task_completion_dialog.dart';
 // import '../widgets/task_creation_dialog.dart'; // Removido - tarefas geradas automaticamente
 import '../widgets/tasks_app_bar.dart';
 import '../widgets/tasks_error_boundary.dart';
-import '../widgets/tasks_error_widget.dart';
 // import '../widgets/tasks_fab.dart'; // Removido - tarefas geradas automaticamente
-import '../widgets/tasks_loading_widget.dart';
 
 // Helper classes for optimized state management
 class TasksListState {
@@ -212,7 +208,7 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
 
             if (state.hasError) {
               return ErrorRecovery(
-                errorMessage: state.errorMessage!,
+                errorMessage: state.errorMessage,
                 onRetry: () {
                   final provider = context.read<TasksProvider>();
                   provider.clearError();
@@ -523,23 +519,6 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         return Icons.grass;
       default:
         return Icons.task_alt;
-    }
-  }
-
-  String _getTaskTypeName(task_entity.TaskType type) {
-    switch (type) {
-      case task_entity.TaskType.watering:
-        return 'rega';
-      case task_entity.TaskType.fertilizing:
-        return 'adubação';
-      case task_entity.TaskType.pruning:
-        return 'poda';
-      case task_entity.TaskType.pestInspection:
-        return 'inspeção de pragas';
-      case task_entity.TaskType.repotting:
-        return 'replantio';
-      default:
-        return 'tarefa geral';
     }
   }
 

@@ -182,16 +182,24 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
     String key,
     dynamic value,
   ) {
-    return switch (key) {
-      'isDarkTheme' => entity.copyWith(isDarkTheme: value as bool),
-      'notificationsEnabled' => entity.copyWith(notificationsEnabled: value as bool),
-      'soundEnabled' => entity.copyWith(soundEnabled: value as bool),
-      'language' => entity.copyWith(language: value as String),
-      'isDevelopmentMode' => entity.copyWith(isDevelopmentMode: value as bool),
-      'speechToTextEnabled' => entity.copyWith(speechToTextEnabled: value as bool),
-      'analyticsEnabled' => entity.copyWith(analyticsEnabled: value as bool),
-      _ => entity,
-    };
+    switch (key) {
+      case 'isDarkTheme':
+        return entity.copyWith(isDarkTheme: value as bool);
+      case 'notificationsEnabled':
+        return entity.copyWith(notificationsEnabled: value as bool);
+      case 'soundEnabled':
+        return entity.copyWith(soundEnabled: value as bool);
+      case 'language':
+        return entity.copyWith(language: value as String);
+      case 'isDevelopmentMode':
+        return entity.copyWith(isDevelopmentMode: value as bool);
+      case 'speechToTextEnabled':
+        return entity.copyWith(speechToTextEnabled: value as bool);
+      case 'analyticsEnabled':
+        return entity.copyWith(analyticsEnabled: value as bool);
+      default:
+        return entity;
+    }
   }
 
   /// Validate imported data structure

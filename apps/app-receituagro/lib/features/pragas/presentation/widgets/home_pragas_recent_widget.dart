@@ -52,7 +52,9 @@ class HomePragasRecentWidget extends StatelessWidget {
   }
 
   Widget _buildPragaItem(BuildContext context, PragaEntity praga) {
-    final (emoji, type) = _getEmojiAndType(praga.tipoPraga);
+    final emojiAndType = _getEmojiAndType(praga.tipoPraga);
+    final emoji = emojiAndType.emoji;
+    final type = emojiAndType.type;
     
     return ContentListItemWidget(
       title: praga.nomeComum,
@@ -89,16 +91,16 @@ class HomePragasRecentWidget extends StatelessWidget {
     );
   }
 
-  (String, String) _getEmojiAndType(String tipoPraga) {
+  _EmojiAndType _getEmojiAndType(String tipoPraga) {
     switch (tipoPraga) {
       case '1':
-        return ('🐛', 'Inseto');
+        return _EmojiAndType('🐛', 'Inseto');
       case '2':
-        return ('🦠', 'Doença');
+        return _EmojiAndType('🦠', 'Doença');
       case '3':
-        return ('🌿', 'Planta');
+        return _EmojiAndType('🌿', 'Planta');
       default:
-        return ('🐛', 'Inseto');
+        return _EmojiAndType('🐛', 'Inseto');
     }
   }
 
@@ -130,4 +132,12 @@ class HomePragasRecentWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Helper class to replace record syntax for Dart 2.x compatibility
+class _EmojiAndType {
+  final String emoji;
+  final String type;
+  
+  const _EmojiAndType(this.emoji, this.type);
 }

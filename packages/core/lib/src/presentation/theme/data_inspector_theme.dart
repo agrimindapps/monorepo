@@ -113,7 +113,7 @@ class DataInspectorTheme {
         foregroundColor: brightness == Brightness.dark ? Colors.white : Colors.white,
         elevation: 0,
       ),
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: brightness == Brightness.dark ? Colors.white : Colors.white,
         unselectedLabelColor: (brightness == Brightness.dark ? Colors.white : Colors.white).withValues(alpha: 0.7),
         indicatorColor: brightness == Brightness.dark ? Colors.white : Colors.white,

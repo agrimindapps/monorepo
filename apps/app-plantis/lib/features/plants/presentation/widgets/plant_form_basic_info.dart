@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/image_service.dart';
-import '../../domain/usecases/spaces_usecases.dart';
 import '../../../auth/utils/validation_helpers.dart';
+import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';

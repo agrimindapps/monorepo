@@ -186,7 +186,7 @@ class _LoadingButtonState extends State<LoadingButton>
       case LoadingButtonType.icon:
         return IconButton(
           onPressed: _isDisabled ? null : _handlePress,
-          style: widget.style as ButtonStyle?,
+          style: widget.style,
           icon: _buildButtonChild(),
         );
     }
@@ -194,8 +194,8 @@ class _LoadingButtonState extends State<LoadingButton>
 
   Widget _buildButtonChild() {
     if (_showSuccess) {
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
+      return const AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -203,18 +203,18 @@ class _LoadingButtonState extends State<LoadingButton>
               Icons.check_circle,
               color: Colors.green,
               size: 20,
-              key: const ValueKey('success'),
+              key: ValueKey('success'),
             ),
-            const SizedBox(width: 8),
-            const Text('Sucesso!'),
+            SizedBox(width: 8),
+            Text('Sucesso!'),
           ],
         ),
       );
     }
 
     if (_showError) {
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
+      return const AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -222,10 +222,10 @@ class _LoadingButtonState extends State<LoadingButton>
               Icons.error,
               color: Colors.red,
               size: 20,
-              key: const ValueKey('error'),
+              key: ValueKey('error'),
             ),
-            const SizedBox(width: 8),
-            const Text('Erro'),
+            SizedBox(width: 8),
+            Text('Erro'),
           ],
         ),
       );

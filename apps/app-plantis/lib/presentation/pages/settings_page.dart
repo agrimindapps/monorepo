@@ -182,7 +182,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       // Plan Header
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.star_outline,
                             color: PlantisColors.primary,
                             size: 24,

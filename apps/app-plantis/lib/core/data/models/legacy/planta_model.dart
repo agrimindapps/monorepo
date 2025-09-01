@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'package:hive/hive.dart';
 import '../base_sync_model.dart';
 import '../comentario_model.dart';

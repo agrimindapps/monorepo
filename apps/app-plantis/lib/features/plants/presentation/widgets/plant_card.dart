@@ -236,8 +236,6 @@ class PlantCard extends StatelessWidget {
 
   void _showDeleteConfirmation(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     showDialog(
       context: context,
       builder:

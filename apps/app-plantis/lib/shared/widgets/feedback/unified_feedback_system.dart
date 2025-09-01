@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../loading/contextual_loading_manager.dart';
+import 'confirmation_system.dart';
 import 'feedback_system.dart';
 import 'haptic_service.dart';
-import 'toast_service.dart';
 import 'progress_tracker.dart';
-import 'confirmation_system.dart';
-import 'animated_feedback.dart';
+import 'toast_service.dart';
 
 /// Sistema unificado de feedback que integra todos os componentes
 /// Trabalha em conjunto com ContextualLoadingManager para experiência completa
@@ -66,7 +65,7 @@ class UnifiedFeedbackSystem {
         await HapticService.success();
       }
       
-      if (showToast) {
+      if (showToast && context.mounted) {
         ToastService.showSuccess(
           context: context,
           message: successMessage ?? 'Operação concluída com sucesso!',
@@ -74,12 +73,14 @@ class UnifiedFeedbackSystem {
       }
       
       // 5. Feedback visual animado
-      FeedbackSystem.showSuccess(
-        context: context,
-        message: successMessage ?? 'Sucesso!',
-        animation: successAnimation,
-        includeHaptic: false, // Já foi feito acima
-      );
+      if (context.mounted) {
+        FeedbackSystem.showSuccess(
+          context: context,
+          message: successMessage ?? 'Sucesso!',
+          animation: successAnimation,
+          includeHaptic: false, // Já foi feito acima
+        );
+      }
       
       return result;
     } catch (error) {
@@ -93,7 +94,7 @@ class UnifiedFeedbackSystem {
       
       final errorMsg = errorMessage ?? 'Erro na operação: ${error.toString()}';
       
-      if (showToast) {
+      if (showToast && context.mounted) {
         ToastService.showError(
           context: context,
           message: errorMsg,
@@ -104,12 +105,14 @@ class UnifiedFeedbackSystem {
         );
       }
       
-      FeedbackSystem.showError(
-        context: context,
-        message: errorMsg,
-        animation: ErrorAnimationType.shake,
-        includeHaptic: false,
-      );
+      if (context.mounted) {
+        FeedbackSystem.showError(
+          context: context,
+          message: errorMsg,
+          animation: ErrorAnimationType.shake,
+          includeHaptic: false,
+        );
+      }
       
       rethrow;
     }
@@ -119,7 +122,7 @@ class UnifiedFeedbackSystem {
   static Future<T> executeWithProgress<T>({
     required BuildContext context,
     required String operationKey,
-    required Future<T> Function(Function(double, String?) progressCallback) operation,
+    required Future<T> Function(void Function(double, String?) progressCallback) operation,
     required String title,
     String? description,
     String? successMessage,
@@ -253,7 +256,7 @@ class UnifiedFeedbackSystem {
   /// Backup com progresso
   static Future<T> backup<T>({
     required BuildContext context,
-    required Future<T> Function(Function(double, String?) progressCallback) backupOperation,
+    required Future<T> Function(void Function(double, String?) progressCallback) backupOperation,
   }) async {
     return executeWithProgress<T>(
       context: context,
@@ -268,7 +271,7 @@ class UnifiedFeedbackSystem {
   /// Upload de imagem com progresso
   static Future<T> uploadImage<T>({
     required BuildContext context,
-    required Future<T> Function(Function(double, String?) progressCallback) uploadOperation,
+    required Future<T> Function(void Function(double, String?) progressCallback) uploadOperation,
     required String imageName,
   }) async {
     return executeWithProgress<T>(
@@ -484,11 +487,11 @@ class _UnifiedFeedbackProviderState extends State<UnifiedFeedbackProvider> {
       child = Stack(
         children: [
           child,
-          Positioned(
+          const Positioned(
             bottom: 16,
             left: 0,
             right: 0,
-            child: const ProgressTrackerPanel(showOnlyActive: true),
+            child: ProgressTrackerPanel(showOnlyActive: true),
           ),
         ],
       );

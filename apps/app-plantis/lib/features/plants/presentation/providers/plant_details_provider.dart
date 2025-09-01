@@ -138,13 +138,13 @@ class PlantDetailsProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case NotFoundFailure _:
+      case NotFoundFailure:
         return 'Planta não encontrada';
-      case NetworkFailure _:
+      case NetworkFailure:
         return 'Sem conexão com a internet';
-      case ServerFailure _:
+      case ServerFailure:
         return 'Erro no servidor. Tente novamente.';
-      case CacheFailure _:
+      case CacheFailure:
         return 'Erro local. Verifique o armazenamento.';
       default:
         return 'Erro inesperado. Tente novamente.';

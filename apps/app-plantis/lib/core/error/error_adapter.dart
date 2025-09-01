@@ -8,14 +8,14 @@ class ErrorAdapter {
   /// Converte Failure para AppError
   static AppError failureToAppError(Failure failure) {
     switch (failure.runtimeType) {
-      case NetworkFailure _:
+      case NetworkFailure:
         return NetworkError(
           message: failure.message,
           code: 'NETWORK_ERROR',
           details: failure.toString(),
         );
 
-      case ServerFailure _:
+      case ServerFailure:
         return ExternalServiceError(
           message: failure.message,
           code: 'SERVER_ERROR',
@@ -23,14 +23,14 @@ class ErrorAdapter {
           serviceName: 'API',
         );
 
-      case CacheFailure _:
+      case CacheFailure:
         return StorageError(
           message: failure.message,
           code: 'CACHE_ERROR',
           details: failure.toString(),
         );
 
-      case NotFoundFailure _:
+      case NotFoundFailure:
         return BusinessError(
           message: failure.message,
           code: 'NOT_FOUND',
@@ -38,21 +38,21 @@ class ErrorAdapter {
           businessRule: 'RESOURCE_NOT_FOUND',
         );
 
-      case AuthFailure _:
+      case AuthFailure:
         return AuthenticationError(
           message: failure.message,
           code: 'UNAUTHORIZED',
           details: failure.toString(),
         );
 
-      case ValidationFailure _:
+      case ValidationFailure:
         return ValidationError(
           message: failure.message,
           code: 'VALIDATION_ERROR',
           details: failure.toString(),
         );
 
-      case UnknownFailure _:
+      case UnknownFailure:
       default:
         return UnknownError(
           message: failure.message,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Collection of skeleton loading widgets for subscription page
-abstract final class SubscriptionSkeletonLoaders {
+abstract class SubscriptionSkeletonLoaders {
   
   /// Skeleton for current subscription card
   static Widget buildCurrentSubscriptionSkeleton(BuildContext context) {

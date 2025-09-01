@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../data/services/subscription_sync_service.dart';
 import '../../../../core/widgets/loading_overlay.dart';
+import '../../data/services/subscription_sync_service.dart';
 
 class PremiumProvider extends ChangeNotifier {
   final ISubscriptionRepository _subscriptionRepository;

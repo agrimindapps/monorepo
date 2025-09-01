@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'haptic_service.dart';
-import 'feedback_system.dart';
 
 /// Serviço de toast messages contextuais e não intrusivas
 /// Complementa o FeedbackSystem para mensagens rápidas
@@ -204,7 +202,7 @@ class ToastService {
   
   static void _processQueue() {
     if (_toastQueue.isNotEmpty && !_isShowingToast) {
-      final nextController = _toastQueue.removeAt(0);
+      _toastQueue.removeAt(0);
       // Recuperar contexto pode ser complexo, por isso toasts em fila são limitados
       // Em uma implementação real, você poderia usar um GlobalKey para o contexto
     }

@@ -145,14 +145,14 @@ class NotificationSettingsEntity {
   });
 
   factory NotificationSettingsEntity.defaults() {
-    return NotificationSettingsEntity(
+    return const NotificationSettingsEntity(
       permissionsGranted: false,
       taskRemindersEnabled: true,
       overdueNotificationsEnabled: true,
       dailySummaryEnabled: true,
       reminderMinutesBefore: 60,
-      dailySummaryTime: const TimeOfDay(hour: 8, minute: 0),
-      taskTypeSettings: const {
+      dailySummaryTime: TimeOfDay(hour: 8, minute: 0),
+      taskTypeSettings: {
         'Regar': true,
         'Adubar': true,
         'Podar': true,

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../../../../../core/theme/colors.dart';
-import '../../../../../core/localization/app_strings.dart';
 import '../../../../../core/constants/app_spacing.dart';
+import '../../../../../core/localization/app_strings.dart';
+import '../../../../../core/theme/colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
@@ -358,14 +358,14 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _LoadingShimmer(height: AppSpacing.xl, width: 150),
-          const SizedBox(height: AppSpacing.iconPadding),
-          const _LoadingShimmer(height: AppSpacing.lg, width: double.infinity),
-          const SizedBox(height: AppSpacing.xs),
-          const _LoadingShimmer(height: AppSpacing.lg, width: 250),
+          _LoadingShimmer(height: AppSpacing.xl, width: 150),
+          SizedBox(height: AppSpacing.iconPadding),
+          _LoadingShimmer(height: AppSpacing.lg, width: double.infinity),
+          SizedBox(height: AppSpacing.xs),
+          _LoadingShimmer(height: AppSpacing.lg, width: 250),
         ],
       ),
     );
@@ -470,7 +470,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                     child: ElevatedButton.icon(
                       onPressed: () => _controller?.refresh(widget.plantId),
                       icon: const Icon(Icons.refresh),
-                      label: Text(AppStrings.tryAgain),
+                      label: const Text(AppStrings.tryAgain),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: PlantisColors.primary,
                         foregroundColor: Colors.white,
@@ -490,7 +490,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                         child: OutlinedButton.icon(
                           onPressed: () => Navigator.of(context).pop(),
                           icon: const Icon(Icons.arrow_back),
-                          label: Text(AppStrings.goBack),
+                          label: const Text(AppStrings.goBack),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: AppSpacing.buttonSpacing),
                             shape: RoundedRectangleBorder(
@@ -504,7 +504,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                         child: TextButton.icon(
                           onPressed: () => _showErrorHelp(context),
                           icon: const Icon(Icons.help_outline),
-                          label: Text(AppStrings.help),
+                          label: const Text(AppStrings.help),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: AppSpacing.buttonSpacing),
                           ),
@@ -641,12 +641,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppStrings.needHelp),
-        content: Text(AppStrings.helpMessage),
+        title: const Text(AppStrings.needHelp),
+        content: const Text(AppStrings.helpMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppStrings.understood),
+            child: const Text(AppStrings.understood),
           ),
         ],
       ),
@@ -1171,7 +1171,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                   color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(60),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.warning_amber_outlined,
                   size: 60,
                   color: Colors.orange,
@@ -1215,7 +1215,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                         child: ElevatedButton.icon(
                           onPressed: () => _controller?.editPlant(plant),
                           icon: const Icon(Icons.edit),
-                          label: Text(AppStrings.editPlant),
+                          label: const Text(AppStrings.editPlant),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: PlantisColors.primary,
                             foregroundColor: Colors.white,
@@ -1234,7 +1234,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                   OutlinedButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.arrow_back),
-                    label: Text(AppStrings.goBack),
+                    label: const Text(AppStrings.goBack),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(

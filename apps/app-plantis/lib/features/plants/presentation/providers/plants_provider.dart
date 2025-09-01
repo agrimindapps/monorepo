@@ -601,11 +601,11 @@ class PlantsProvider extends ChangeNotifier {
     }
 
     switch (failure.runtimeType) {
-      case ValidationFailure _:
+      case ValidationFailure:
         return failure.message.isNotEmpty 
             ? failure.message 
             : 'Dados inválidos fornecidos';
-      case CacheFailure _:
+      case CacheFailure:
         // More specific cache error messages
         if (failure.message.contains('PlantaModelAdapter') ||
             failure.message.contains('TypeAdapter')) {
@@ -618,9 +618,9 @@ class PlantsProvider extends ChangeNotifier {
         return failure.message.isNotEmpty 
             ? 'Cache: ${failure.message}' 
             : 'Erro ao acessar dados locais';
-      case NetworkFailure _:
+      case NetworkFailure:
         return 'Sem conexão com a internet. Verifique sua conectividade.';
-      case ServerFailure _:
+      case ServerFailure:
         // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
@@ -636,7 +636,7 @@ class PlantsProvider extends ChangeNotifier {
         return failure.message.isNotEmpty 
             ? 'Servidor: ${failure.message}' 
             : 'Erro no servidor';
-      case NotFoundFailure _:
+      case NotFoundFailure:
         return failure.message.isNotEmpty 
             ? failure.message 
             : 'Dados não encontrados';

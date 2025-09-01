@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
@@ -66,7 +65,7 @@ class AccessiblePlantCard extends StatelessWidget {
           } : null,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            constraints: BoxConstraints(
+            constraints: const BoxConstraints(
               minHeight: AccessibilityTokens.largeTouchTargetSize + 16,
             ),
             padding: const EdgeInsets.all(16),
@@ -411,8 +410,8 @@ class AccessibleEmptyState extends StatelessWidget {
               if (actionText != null && onAction != null) ...[
                 const SizedBox(height: 24),
                 AccessibleButton(
-                  onPressed: onAction!,
-                  semanticLabel: actionText!,
+                  onPressed: onAction,
+                  semanticLabel: actionText,
                   child: Text(actionText!),
                 ),
               ],

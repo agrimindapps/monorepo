@@ -13,7 +13,7 @@
 /// @author PetiVeti Development Team
 /// @since 1.0.0
 /// @version 1.3.0 - Enhanced validation patterns
-abstract final class RegisterFormValidator {
+abstract class RegisterFormValidator {
   
   /// **Name Field Validation**
   /// 

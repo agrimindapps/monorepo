@@ -16,7 +16,7 @@ import '../../../../shared/constants/profile_constants.dart';
 /// @author PetiVeti Development Team
 /// @since 1.0.0
 /// @version 1.3.0 - Enhanced state management
-abstract final class ProfileStateHandlers {
+abstract class ProfileStateHandlers {
 
   /// **Profile Loading State**
   /// 

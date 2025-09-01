@@ -68,16 +68,20 @@ class _FuelPageState extends State<FuelPage> {
   @override
   Widget build(BuildContext context) {
     // ✅ PERFORMANCE FIX: Use Selector2 instead of Consumer2 to prevent unnecessary rebuilds
-    return Selector2<FuelProvider, VehiclesProvider, (bool, bool, List<FuelRecordEntity>, String?, String?)>(
-      selector: (context, fuelProvider, vehiclesProvider) => (
-        fuelProvider.isLoading,
-        fuelProvider.hasError,
-        fuelProvider.fuelRecords,
-        fuelProvider.errorMessage,
-        vehiclesProvider.errorMessage,
-      ),
+    return Selector2<FuelProvider, VehiclesProvider, Map<String, dynamic>>(
+      selector: (context, fuelProvider, vehiclesProvider) => {
+        'isLoading': fuelProvider.isLoading,
+        'hasError': fuelProvider.hasError,
+        'fuelRecords': fuelProvider.fuelRecords,
+        'fuelError': fuelProvider.errorMessage,
+        'vehiclesError': vehiclesProvider.errorMessage,
+      },
       builder: (context, data, child) {
-        final (isLoading, hasError, fuelRecords, fuelError, vehiclesError) = data;
+        final isLoading = data['isLoading'] as bool;
+        final hasError = data['hasError'] as bool;
+        final fuelRecords = data['fuelRecords'] as List<FuelRecordEntity>;
+        final fuelError = data['fuelError'] as String?;
+        final vehiclesError = data['vehiclesError'] as String?;
         
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,

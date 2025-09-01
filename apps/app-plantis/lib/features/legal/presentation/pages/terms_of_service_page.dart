@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/plantis_colors.dart';
-import '../widgets/base_legal_page.dart';
 import '../../data/legal_content_service.dart';
+import '../widgets/base_legal_page.dart';
 
 class TermsOfServicePage extends BaseLegalPage {
   const TermsOfServicePage({super.key})

@@ -13,8 +13,15 @@ import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 
+/// Modern login page with enhanced UX inspired by gasometer design
+/// Adapted for Inside Garden branding and plant care theme
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final bool? showBackButton;
+
+  const LoginPage({
+    super.key,
+    this.showBackButton,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -27,18 +34,20 @@ class _LoginPageState extends State<LoginPage>
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isSignUpMode = false; // Tab navigation state
   
   // Focus nodes para navegação por teclado
   late final FocusNode _emailFocusNode;
   late final FocusNode _passwordFocusNode;
   late final FocusNode _loginButtonFocusNode;
 
-  // Enhanced animations
+  // Enhanced animations inspired by gasometer
   late AnimationController _animationController;
   late AnimationController _backgroundController;
   late Animation<double> _fadeInAnimation;
   late Animation<double> _slideAnimation;
   late Animation<double> _backgroundAnimation;
+  late Animation<double> _logoAnimation;
 
   @override
   void initState() {
@@ -49,13 +58,14 @@ class _LoginPageState extends State<LoginPage>
     _passwordFocusNode = getFocusNode('password');
     _loginButtonFocusNode = getFocusNode('login_button');
     
+    // Enhanced animation setup inspired by gasometer
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
     
     _backgroundController = AnimationController(
-      duration: const Duration(seconds: 20),
+      duration: const Duration(seconds: 15),
       vsync: this,
     )..repeat();
 
@@ -66,7 +76,7 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
 
-    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
+    _slideAnimation = Tween<double>(begin: 80.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
@@ -77,6 +87,14 @@ class _LoginPageState extends State<LoginPage>
       CurvedAnimation(
         parent: _backgroundController,
         curve: Curves.linear,
+      ),
+    );
+
+    // Logo animation for modern branding
+    _logoAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
       ),
     );
 
@@ -97,12 +115,15 @@ class _LoginPageState extends State<LoginPage>
       showLoading(message: 'Fazendo login...');
       
       final authProvider = context.read<AuthProvider>();
+      final router = GoRouter.of(context);
       await authProvider.login(_emailController.text, _passwordController.text);
 
+      if (!mounted) return;
+      
       hideLoading();
       
-      if (authProvider.isAuthenticated && mounted) {
-        context.go('/plants');
+      if (authProvider.isAuthenticated) {
+        router.go('/plants');
       }
     }
   }
@@ -174,12 +195,15 @@ class _LoginPageState extends State<LoginPage>
               showLoading(message: 'Entrando anonimamente...');
               
               final authProvider = context.read<AuthProvider>();
+              final router = GoRouter.of(context);
               await authProvider.signInAnonymously();
+              
+              if (!mounted) return;
               
               hideLoading();
               
-              if (authProvider.isAuthenticated && mounted) {
-                context.go('/plants');
+              if (authProvider.isAuthenticated) {
+                router.go('/plants');
               }
             },
             child: const Text('Prosseguir'),
@@ -193,195 +217,344 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 900;
+    final isTablet = size.width > 600 && size.width <= 900;
     final isMobile = size.width <= 600;
     
     return buildWithLoading(
       child: Scaffold(
         body: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  PlantisColors.primary,
-                  PlantisColors.primary.withValues(alpha: 0.8),
-                  PlantisColors.primary.withValues(alpha: 0.6),
-                ],
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Animated background pattern
-                _buildAnimatedBackground(),
-                
-                // Floating elements
-                _buildFloatingElements(),
-                
-                // Main content
-                Center(
-                  child: SingleChildScrollView(
-                    child: FadeTransition(
-                      opacity: _fadeInAnimation,
-                      child: AnimatedBuilder(
-                        animation: _slideAnimation,
-                        builder: (context, child) {
-                          return Transform.translate(
-                            offset: Offset(0, _slideAnimation.value),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: isMobile 
-                                    ? size.width * 0.9 
-                                    : (isDesktop ? 900 : 450),
-                                minHeight: 0,
-                              ),
-                              child: Card(
-                                elevation: 25,
-                                shadowColor: Colors.black.withValues(alpha: 0.3),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                color: Colors.white,
-                                child: Container(
-                                  padding: EdgeInsets.all(isMobile ? 24.0 : 40.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      // Modern header with enhanced logo
-                                      _buildEnhancedHeader(context),
-                                      SizedBox(height: isMobile ? 32 : 40),
-
-                                      // Modern tab navigation
-                                      _buildModernTabNavigation(context),
-                                      SizedBox(height: isMobile ? 24 : 32),
-
-                                      // Form
-                                      Form(
-                                        key: _formKey,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            // Enhanced Email field
-                                            AccessibleTextField(
-                                              controller: _emailController,
-                                              focusNode: _emailFocusNode,
-                                              nextFocusNode: _passwordFocusNode,
-                                              labelText: 'E-mail',
-                                              hintText: 'Digite seu email',
-                                              semanticLabel: 'Campo de e-mail para login',
-                                              keyboardType: TextInputType.emailAddress,
-                                              textInputAction: TextInputAction.next,
-                                              isRequired: true,
-                                              validator: (value) {
-                                                if (value == null || value.isEmpty) {
-                                                  return 'Por favor, insira seu email';
-                                                }
-                                                if (!AuthValidators.isValidEmail(value)) {
-                                                  return 'Por favor, insira um email válido';
-                                                }
-                                                return null;
-                                              },
-                                              prefixIcon: const Icon(Icons.email_outlined),
-                                            ),
-                                            const SizedBox(height: 20),
-
-                                            // Enhanced Password field
-                                            AccessibleTextField(
-                                              controller: _passwordController,
-                                              focusNode: _passwordFocusNode,
-                                              labelText: 'Senha',
-                                              hintText: 'Digite sua senha',
-                                              semanticLabel: 'Campo de senha para login',
-                                              obscureText: _obscurePassword,
-                                              textInputAction: TextInputAction.done,
-                                              isRequired: true,
-                                              validator: (value) {
-                                                return AuthValidators.validatePassword(value ?? '', isRegistration: false);
-                                              },
-                                              prefixIcon: const Icon(Icons.lock_outline),
-                                              suffixIcon: Semantics(
-                                                label: _obscurePassword 
-                                                    ? AccessibilityTokens.getSemanticLabel('show_password', 'Mostrar senha')
-                                                    : AccessibilityTokens.getSemanticLabel('hide_password', 'Ocultar senha'),
-                                                button: true,
-                                                child: IconButton(
-                                                  icon: Icon(
-                                                    _obscurePassword
-                                                        ? Icons.visibility_outlined
-                                                        : Icons.visibility_off_outlined,
-                                                    color: PlantisColors.primary.withValues(alpha: 0.7),
-                                                    size: 22,
-                                                  ),
-                                                  onPressed: () {
-                                                    AccessibilityTokens.performHapticFeedback('light');
-                                                    setState(() {
-                                                      _obscurePassword = !_obscurePassword;
-                                                    });
-                                                    // Anunciar mudança para screen readers
-                                                    final message = _obscurePassword ? 'Senha oculta' : 'Senha visível';
-                                                    SemanticsService.announce(message, TextDirection.ltr);
-                                                  },
-                                                ),
-                                              ),
-                                              onSubmitted: (value) {
-                                                _loginButtonFocusNode.requestFocus();
-                                              },
-                                            ),
-                                            const SizedBox(height: 20),
-
-                                            // Enhanced remember me and forgot password
-                                            _buildRememberAndForgotSection(),
-                                            const SizedBox(height: 28),
-
-                                            // Enhanced error message
-                                            _buildErrorMessage(),
-
-                                            // Enhanced login button
-                                            _buildAccessibleLoginButton(),
-                                            const SizedBox(height: 32),
-
-                                            // Enhanced divider with social login
-                                            _buildSocialLoginSection(),
-                                            
-                                            const SizedBox(height: 24),
-                                            
-                                            // Enhanced anonymous login
-                                            _buildAnonymousLoginSection(),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Enhanced footer
-                _buildModernFooter(),
-              ],
-            ),
+          child: _buildModernBackground(
+            child: _buildResponsiveLayout(context, size, isDesktop, isTablet, isMobile),
           ),
         ),
       ),
     );
   }
 
-  // Enhanced UI Components
-  Widget _buildAnimatedBackground() {
+  /// Modern background with plant-themed gradient and animations
+  Widget _buildModernBackground({required Widget child}) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primary,
+            PlantisColors.primaryLight,
+            Color(0xFF2ECC71), // Fresh plant green
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Enhanced background pattern with plant motifs
+          _buildPlantBackgroundPattern(),
+          // Floating plant elements
+          _buildFloatingPlantElements(),
+          // Main content
+          child,
+        ],
+      ),
+    );
+  }
+
+  /// Responsive layout inspired by gasometer design
+  Widget _buildResponsiveLayout(BuildContext context, Size size, bool isDesktop, bool isTablet, bool isMobile) {
+    return Center(
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isMobile
+                ? size.width * 0.9
+                : (isTablet ? 500 : 1000),
+            maxHeight: isMobile
+                ? double.infinity
+                : (isTablet ? 650 : 650),
+          ),
+          child: Card(
+            elevation: 20,
+            shadowColor: Colors.black.withValues(alpha: 0.2),
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: isDesktop
+                ? _buildDesktopLayout()
+                : _buildMobileLayout(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Desktop layout with branding sidebar
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Left side with Inside Garden branding
+        Expanded(
+          flex: 5,
+          child: _buildPlantBrandingSide(),
+        ),
+        // Right side with form
+        Expanded(
+          flex: 4,
+          child: FadeTransition(
+            opacity: _fadeInAnimation,
+            child: AnimatedBuilder(
+              animation: _slideAnimation,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, _slideAnimation.value),
+                  child: Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: _buildAuthContent(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Mobile layout with compact branding
+  Widget _buildMobileLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: FadeTransition(
+        opacity: _fadeInAnimation,
+        child: AnimatedBuilder(
+          animation: _slideAnimation,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: Offset(0, _slideAnimation.value),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildMobileBranding(),
+                  const SizedBox(height: 32),
+                  _buildAuthContent(),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Plant-themed branding sidebar for desktop
+  Widget _buildPlantBrandingSide() {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(24),
+        bottomLeft: Radius.circular(24),
+      ),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              PlantisColors.primary,
+              PlantisColors.primaryLight,
+              Color(0xFF27AE60),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Enhanced logo with animation
+              ScaleTransition(
+                scale: _logoAnimation,
+                child: _buildModernLogo(isWhite: true, size: 40),
+              ),
+              const SizedBox(height: 40),
+              const Text(
+                'Inside Garden',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: 60,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Transforme seu lar em um jardim inteligente. Cuidado personalizado para cada planta.',
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.6,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 40),
+              // Animated plant illustration
+              Expanded(
+                child: Center(
+                  child: AnimatedBuilder(
+                    animation: _backgroundAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: 1.0 + (0.1 * math.sin(_backgroundAnimation.value * 2 * math.pi)),
+                        child: Container(
+                          padding: const EdgeInsets.all(30),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.eco,
+                            color: Colors.white,
+                            size: 120,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              // Security indicator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.security_rounded,
+                    color: Colors.white70,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Cuidado seguro e personalizado',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Mobile branding with compact design
+  Widget _buildMobileBranding() {
+    return Column(
+      children: [
+        ScaleTransition(
+          scale: _logoAnimation,
+          child: _buildModernLogo(
+            isWhite: false,
+            size: 32,
+            color: PlantisColors.primary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Inside Garden',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: PlantisColors.primary,
+            letterSpacing: -0.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Cuidado inteligente de plantas',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: 50,
+          height: 3,
+          decoration: BoxDecoration(
+            color: PlantisColors.primary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Enhanced logo component
+  Widget _buildModernLogo({
+    required bool isWhite,
+    required double size,
+    Color? color,
+  }) {
+    final logoColor = isWhite ? Colors.white : (color ?? PlantisColors.primary);
+    
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: logoColor.withValues(alpha: 0.1),
+            border: Border.all(
+              color: logoColor.withValues(alpha: 0.3),
+              width: 2,
+            ),
+          ),
+          child: Icon(
+            Icons.eco,
+            color: logoColor,
+            size: size,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          'Inside Garden',
+          style: TextStyle(
+            fontSize: size * 0.8,
+            fontWeight: FontWeight.w700,
+            color: logoColor,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Enhanced background pattern with plant motifs
+  Widget _buildPlantBackgroundPattern() {
     return AnimatedBuilder(
       animation: _backgroundAnimation,
       builder: (context, child) {
         return Positioned.fill(
           child: CustomPaint(
-            painter: BackgroundPatternPainter(
+            painter: PlantBackgroundPatternPainter(
               animation: _backgroundAnimation.value,
               primaryColor: PlantisColors.primary,
             ),
@@ -391,39 +564,71 @@ class _LoginPageState extends State<LoginPage>
     );
   }
   
-  Widget _buildFloatingElements() {
+  /// Floating plant elements with enhanced animations
+  Widget _buildFloatingPlantElements() {
     return Stack(
       children: [
-        // Top floating leaves
+        // Top right floating leaf
         Positioned(
-          top: 100,
-          right: 30,
+          top: 80,
+          right: 40,
           child: AnimatedBuilder(
             animation: _backgroundController,
             builder: (context, child) {
               return Transform.rotate(
-                angle: _backgroundAnimation.value * 2 * 3.14159,
-                child: Icon(
-                  Icons.eco,
-                  color: Colors.white.withValues(alpha: 0.1),
-                  size: 40,
+                angle: _backgroundAnimation.value * 2 * math.pi * 0.5,
+                child: Transform.translate(
+                  offset: Offset(
+                    10 * math.sin(_backgroundAnimation.value * 2 * math.pi),
+                    5 * math.cos(_backgroundAnimation.value * 2 * math.pi),
+                  ),
+                  child: Icon(
+                    Icons.eco,
+                    color: Colors.white.withValues(alpha: 0.12),
+                    size: 45,
+                  ),
                 ),
               );
             },
           ),
         ),
+        // Bottom left flower
         Positioned(
-          bottom: 150,
-          left: 20,
+          bottom: 120,
+          left: 30,
           child: AnimatedBuilder(
             animation: _backgroundController,
             builder: (context, child) {
               return Transform.rotate(
-                angle: -_backgroundAnimation.value * 1.5 * 3.14159,
+                angle: -_backgroundAnimation.value * 1.3 * math.pi,
+                child: Transform.scale(
+                  scale: 1.0 + (0.1 * math.sin(_backgroundAnimation.value * 3 * math.pi)),
+                  child: Icon(
+                    Icons.local_florist,
+                    color: Colors.white.withValues(alpha: 0.1),
+                    size: 38,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        // Middle floating seed
+        Positioned(
+          top: 200,
+          left: 60,
+          child: AnimatedBuilder(
+            animation: _backgroundController,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(
+                  15 * math.sin(_backgroundAnimation.value * 1.5 * math.pi),
+                  8 * math.cos(_backgroundAnimation.value * 1.8 * math.pi),
+                ),
                 child: Icon(
-                  Icons.local_florist,
-                  color: Colors.white.withValues(alpha: 0.1),
-                  size: 35,
+                  Icons.grain,
+                  color: Colors.white.withValues(alpha: 0.08),
+                  size: 28,
                 ),
               );
             },
@@ -433,119 +638,113 @@ class _LoginPageState extends State<LoginPage>
     );
   }
   
-  Widget _buildEnhancedHeader(BuildContext context) {
+  /// Auth content with modern tabs and form
+  Widget _buildAuthContent() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Logo with glow effect
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [
-                PlantisColors.primary.withValues(alpha: 0.2),
-                PlantisColors.primary.withValues(alpha: 0.05),
-                Colors.transparent,
-              ],
-            ),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: PlantisColors.primary.withValues(alpha: 0.1),
-              border: Border.all(
-                color: PlantisColors.primary.withValues(alpha: 0.2),
-                width: 2,
+        // Modern tab navigation inspired by gasometer
+        _buildModernTabNavigation(),
+        const SizedBox(height: 32),
+        // Form content
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.0, 0.1),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
               ),
-            ),
-            child: const Icon(
-              Icons.eco,
-              size: 40,
-              color: PlantisColors.primary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        
-        // App name with modern typography
-        ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            colors: [PlantisColors.primary, PlantisColors.primary.withValues(alpha: 0.7)],
-          ).createShader(bounds),
-          child: Text(
-            'PlantApp',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        
-        // Subtitle
-        Text(
-          'Cuidado inteligente de plantas',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w400,
-          ),
+            );
+          },
+          child: _isSignUpMode
+              ? Container(
+                  key: const ValueKey('signup'),
+                  child: _buildSignUpForm(),
+                )
+              : Container(
+                  key: const ValueKey('login'),
+                  child: _buildLoginForm(),
+                ),
         ),
       ],
     );
   }
   
-  Widget _buildModernTabNavigation(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
-      ),
+  /// Modern tab navigation inspired by gasometer design
+  Widget _buildModernTabNavigation() {
+    return Center(
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: PlantisColors.primary.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Text(
-                'Entrar',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: PlantisColors.primary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+          // Login Tab
+          _buildTab(
+            title: 'Entrar',
+            isActive: !_isSignUpMode,
+            onTap: () {
+              if (_isSignUpMode) {
+                setState(() {
+                  _isSignUpMode = false;
+                });
+              }
+            },
           ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => context.go('/register'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Cadastrar',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+          const SizedBox(width: 40),
+          // Register Tab  
+          _buildTab(
+            title: 'Cadastrar',
+            isActive: _isSignUpMode,
+            onTap: () {
+              if (!_isSignUpMode) {
+                setState(() {
+                  _isSignUpMode = true;
+                });
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Individual tab widget with smooth animations
+  Widget _buildTab({
+    required String title,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: isActive
+                  ? PlantisColors.primary
+                  : Colors.grey.shade500,
+            ),
+            child: Text(title),
+          ),
+          const SizedBox(height: 8),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            height: 3,
+            width: 50,
+            decoration: BoxDecoration(
+              color: isActive ? PlantisColors.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
         ],
@@ -697,22 +896,23 @@ class _LoginPageState extends State<LoginPage>
           ),
           hapticPattern: 'medium',
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 300),
             height: 56,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               gradient: LinearGradient(
                 colors: (authProvider.isLoading || isAnonymousLoading)
                     ? [Colors.grey.shade300, Colors.grey.shade400]
-                    : [PlantisColors.primary, PlantisColors.primary.withValues(alpha: 0.8)],
+                    : [PlantisColors.primary, PlantisColors.primaryLight],
               ),
               boxShadow: [
                 BoxShadow(
                   color: (authProvider.isLoading || isAnonymousLoading)
                       ? Colors.grey.withValues(alpha: 0.3)
-                      : PlantisColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+                      : PlantisColors.primary.withValues(alpha: 0.4),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                  spreadRadius: -2,
                 ),
               ],
             ),
@@ -736,6 +936,7 @@ class _LoginPageState extends State<LoginPage>
                         fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
+                        letterSpacing: 0.5,
                       ),
                     ),
             ),
@@ -906,60 +1107,233 @@ class _LoginPageState extends State<LoginPage>
     );
   }
   
-  Widget _buildModernFooter() {
-    return Positioned(
-      bottom: 20,
-      left: 0,
-      right: 0,
-      child: AnimatedBuilder(
-        animation: _fadeInAnimation,
-        builder: (context, child) {
-          return FadeTransition(
-            opacity: _fadeInAnimation,
-            child: Text(
-              '© 2025 PlantApp - Cuidado inteligente de plantas',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
+  /// Login form with enhanced fields
+  Widget _buildLoginForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Enhanced Email field
+          AccessibleTextField(
+            controller: _emailController,
+            focusNode: _emailFocusNode,
+            nextFocusNode: _passwordFocusNode,
+            labelText: 'E-mail',
+            hintText: 'Digite seu email',
+            semanticLabel: 'Campo de e-mail para login',
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            isRequired: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Por favor, insira seu email';
+              }
+              if (!AuthValidators.isValidEmail(value)) {
+                return 'Por favor, insira um email válido';
+              }
+              return null;
+            },
+            prefixIcon: const Icon(Icons.email_outlined),
+          ),
+          const SizedBox(height: 20),
+
+          // Enhanced Password field
+          AccessibleTextField(
+            controller: _passwordController,
+            focusNode: _passwordFocusNode,
+            labelText: 'Senha',
+            hintText: 'Digite sua senha',
+            semanticLabel: 'Campo de senha para login',
+            obscureText: _obscurePassword,
+            textInputAction: TextInputAction.done,
+            isRequired: true,
+            validator: (value) {
+              return AuthValidators.validatePassword(value ?? '', isRegistration: false);
+            },
+            prefixIcon: const Icon(Icons.lock_outline),
+            suffixIcon: Semantics(
+              label: _obscurePassword 
+                  ? AccessibilityTokens.getSemanticLabel('show_password', 'Mostrar senha')
+                  : AccessibilityTokens.getSemanticLabel('hide_password', 'Ocultar senha'),
+              button: true,
+              child: IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: PlantisColors.primary.withValues(alpha: 0.7),
+                  size: 22,
+                ),
+                onPressed: () {
+                  AccessibilityTokens.performHapticFeedback('light');
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                  // Anunciar mudança para screen readers
+                  final message = _obscurePassword ? 'Senha oculta' : 'Senha visível';
+                  SemanticsService.announce(message, TextDirection.ltr);
+                },
               ),
             ),
-          );
-        },
+            onSubmitted: (value) {
+              _loginButtonFocusNode.requestFocus();
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Enhanced remember me and forgot password
+          _buildRememberAndForgotSection(),
+          const SizedBox(height: 28),
+
+          // Enhanced error message
+          _buildErrorMessage(),
+
+          // Enhanced login button
+          _buildAccessibleLoginButton(),
+          const SizedBox(height: 32),
+
+          // Enhanced divider with social login
+          _buildSocialLoginSection(),
+          
+          const SizedBox(height: 24),
+          
+          // Enhanced anonymous login
+          _buildAnonymousLoginSection(),
+        ],
+      ),
+    );
+  }
+
+  /// Sign up form placeholder
+  Widget _buildSignUpForm() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        children: [
+          Icon(
+            Icons.construction,
+            size: 64,
+            color: PlantisColors.primary.withValues(alpha: 0.6),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Cadastro em Desenvolvimento',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: PlantisColors.primary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'A funcionalidade de cadastro estará disponível em breve. Por enquanto, use o login anônimo para explorar o app!',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          OutlinedButton(
+            onPressed: () {
+              setState(() {
+                _isSignUpMode = false;
+              });
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: PlantisColors.primary,
+              side: const BorderSide(color: PlantisColors.primary),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Voltar ao Login',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// Custom painter for background pattern
-class BackgroundPatternPainter extends CustomPainter {
+/// Enhanced plant-themed background painter
+class PlantBackgroundPatternPainter extends CustomPainter {
   final double animation;
   final Color primaryColor;
   
-  BackgroundPatternPainter({
+  PlantBackgroundPatternPainter({
     required this.animation,
     required this.primaryColor,
   });
   
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = primaryColor.withValues(alpha: 0.05)
+    // Base organic shapes
+    final basePaint = Paint()
+      ..color = primaryColor.withValues(alpha: 0.03)
       ..style = PaintingStyle.fill;
     
-    // Draw floating circles
-    for (int i = 0; i < 5; i++) {
-      final x = (size.width * (i + 1) / 6) + (50 * math.sin(animation * 2 + i));
-      final y = (size.height * (i + 1) / 7) + (30 * math.cos(animation * 1.5 + i));
-      final radius = 20 + (10 * math.sin(animation * 3 + i));
+    // Floating organic circles (like seeds)
+    for (int i = 0; i < 6; i++) {
+      final x = (size.width * (i + 1) / 7) + (40 * math.sin(animation * 1.5 + i));
+      final y = (size.height * (i + 1) / 8) + (25 * math.cos(animation * 1.2 + i));
+      final radius = 15 + (8 * math.sin(animation * 2.5 + i));
       
-      canvas.drawCircle(Offset(x, y), radius, paint);
+      canvas.drawCircle(Offset(x, y), radius, basePaint);
+    }
+    
+    // Leaf-like curved lines
+    final linePaint = Paint()
+      ..color = primaryColor.withValues(alpha: 0.04)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    
+    for (int i = 0; i < 4; i++) {
+      final path = Path();
+      final startX = size.width * (i + 1) / 5;
+      final startY = size.height * 0.2 + (100 * math.sin(animation + i));
+      
+      path.moveTo(startX, startY);
+      path.quadraticBezierTo(
+        startX + 30 + (20 * math.cos(animation * 0.8 + i)),
+        startY + 40 + (15 * math.sin(animation * 0.6 + i)),
+        startX + 10 + (25 * math.sin(animation * 0.5 + i)),
+        startY + 80 + (20 * math.cos(animation * 0.7 + i)),
+      );
+      
+      canvas.drawPath(path, linePaint);
+    }
+    
+    // Subtle dots pattern (like pollen or small seeds)
+    final dotPaint = Paint()
+      ..color = primaryColor.withValues(alpha: 0.02)
+      ..style = PaintingStyle.fill;
+    
+    for (int i = 0; i < size.width; i += 60) {
+      for (int j = 0; j < size.height; j += 60) {
+        final offsetX = 10 * math.sin(animation * 0.3 + i * 0.01);
+        final offsetY = 8 * math.cos(animation * 0.4 + j * 0.01);
+        canvas.drawCircle(
+          Offset(i.toDouble() + offsetX, j.toDouble() + offsetY), 
+          2.5, 
+          dotPaint,
+        );
+      }
     }
   }
   
   @override
-  bool shouldRepaint(BackgroundPatternPainter oldDelegate) {
+  bool shouldRepaint(PlantBackgroundPatternPainter oldDelegate) {
     return oldDelegate.animation != animation;
   }
 }

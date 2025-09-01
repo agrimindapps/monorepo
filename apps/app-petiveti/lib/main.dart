@@ -7,22 +7,18 @@ import 'core/di/injection_container.dart' as di;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     // Skip Firebase initialization in debug/development mode
     // TODO: Add proper Firebase configuration when needed
     if (kDebugMode) {
       print('Running in debug mode - Firebase initialization skipped');
     }
-    
+
     // Initialize dependency injection (includes Hive initialization)
     await di.init();
-    
-    runApp(
-      const ProviderScope(
-        child: PetiVetiApp(),
-      ),
-    );
+
+    runApp(const ProviderScope(child: PetiVetiApp()));
   } catch (error) {
     // Handle initialization errors
     runApp(
@@ -32,18 +28,11 @@ Future<void> main() async {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red,
-                ),
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
                 const Text(
                   'Erro de inicialização',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(

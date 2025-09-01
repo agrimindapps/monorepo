@@ -1,5 +1,4 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/data/models/backup_model.dart';
 import '../../../../core/services/backup_service.dart';
 import '../../../../core/theme/plantis_colors.dart';
+import '../../../../features/premium/presentation/providers/premium_provider.dart';
 import '../../../../presentation/widgets/settings_item.dart';
 import '../../../../presentation/widgets/settings_section.dart';
 import '../providers/backup_settings_provider.dart';
@@ -23,7 +23,6 @@ class BackupSettingsPage extends StatelessWidget {
     return ChangeNotifierProvider<BackupSettingsProvider>(
       create: (context) => BackupSettingsProvider(
         backupService: context.read<BackupService>(),
-        subscriptionRepository: context.read<ISubscriptionRepository>(),
         connectivity: context.read<Connectivity>(),
       ),
       child: Scaffold(
@@ -47,36 +46,40 @@ class BackupSettingsPage extends StatelessWidget {
             onPressed: () => context.pop(),
           ),
         ),
-        body: Consumer<BackupSettingsProvider>(
-          builder: (context, provider, child) {
-            // Verifica se é usuário premium
-            if (!provider.isPremiumUser) {
+        body: Consumer<PremiumProvider>(
+          builder: (context, premiumProvider, child) {
+            // Verificação de segurança: usar PremiumProvider real
+            if (!premiumProvider.isPremium) {
               return _buildPremiumRequired(context);
             }
 
-            return RefreshIndicator(
-              onRefresh: provider.refresh,
-              color: PlantisColors.primary,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Status e ação rápida
-                    _buildQuickActionCard(context, provider),
-                    const SizedBox(height: 24),
+            return Consumer<BackupSettingsProvider>(
+              builder: (context, provider, child) {
+                return RefreshIndicator(
+                  onRefresh: provider.refresh,
+                  color: PlantisColors.primary,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Status e ação rápida
+                        _buildQuickActionCard(context, provider),
+                        const SizedBox(height: 24),
 
-                    // Configurações de backup
-                    _buildBackupSettings(context, provider),
-                    const SizedBox(height: 24),
+                        // Configurações de backup
+                        _buildBackupSettings(context, provider),
+                        const SizedBox(height: 24),
 
-                    // Lista de backups
-                    _buildBackupsList(context, provider),
-                    const SizedBox(height: 40),
-                  ],
-                ),
-              ),
+                        // Lista de backups
+                        _buildBackupsList(context, provider),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -171,36 +174,78 @@ class BackupSettingsPage extends StatelessWidget {
 
             // Progresso do backup
             if (provider.isCreatingBackup) ...[
-              LinearProgressIndicator(
-                value: provider.backupProgress,
-                backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-                valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.primary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Criando backup... ${(provider.backupProgress * 100).toInt()}%',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LinearProgressIndicator(
+                    value: provider.backupProgress,
+                    backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.primary),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Criando backup...',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${(provider.backupProgress * 100).toInt()}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: PlantisColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
             ],
 
             // Progresso da restauração
             if (provider.isRestoringBackup) ...[
-              LinearProgressIndicator(
-                value: provider.restoreProgress,
-                backgroundColor: PlantisColors.leaf.withValues(alpha: 0.1),
-                valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.leaf),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Restaurando backup... ${(provider.restoreProgress * 100).toInt()}%',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LinearProgressIndicator(
+                    value: provider.restoreProgress,
+                    backgroundColor: PlantisColors.leaf.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.leaf),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          provider.restoreStatusMessage ?? 'Restaurando backup...',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${(provider.restoreProgress * 100).toInt()}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: PlantisColors.leaf,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
             ],
@@ -209,7 +254,7 @@ class BackupSettingsPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: provider.canCreateBackup ? () {
+                onPressed: provider.canCreateBackup && !provider.isRestoringBackup ? () {
                   provider.createBackup();
                 } : null,
                 icon: provider.isCreatingBackup 
@@ -225,7 +270,9 @@ class BackupSettingsPage extends StatelessWidget {
                 label: Text(
                   provider.isCreatingBackup 
                       ? 'Criando Backup...' 
-                      : 'Fazer Backup Agora',
+                      : provider.isRestoringBackup
+                          ? 'Restaurando...'
+                          : 'Fazer Backup Agora',
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PlantisColors.primary,

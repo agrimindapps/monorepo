@@ -134,7 +134,7 @@ class _SettingsPageRefactoredState extends State<SettingsPageRefactored> {
 
   Widget _buildSettingsContent() {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       children: const [
         // App Info Section
         AppInfoSection(),

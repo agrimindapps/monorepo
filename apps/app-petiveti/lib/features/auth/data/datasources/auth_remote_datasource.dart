@@ -16,6 +16,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> signInWithGoogle();
   Future<UserModel> signInWithApple();
   Future<UserModel> signInWithFacebook();
+  Future<UserModel> signInAnonymously();
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
   Future<void> sendEmailVerification();
@@ -195,6 +196,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException(message: _getAuthErrorMessage(e));
     } catch (e) {
       throw ServerException(message: 'Erro no login com Facebook: $e');
+    }
+  }
+
+  @override
+  Future<UserModel> signInAnonymously() async {
+    try {
+      final userCredential = await firebaseAuth.signInAnonymously();
+      
+      if (userCredential.user == null) {
+        throw const ServerException(message: 'Falha no login anônimo');
+      }
+
+      // Create anonymous user document in Firestore
+      await _createAnonymousUserDocument(userCredential.user!);
+
+      return await _createUserModelFromFirebaseUser(userCredential.user!);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw ServerException(message: _getAuthErrorMessage(e));
+    } catch (e) {
+      throw ServerException(message: 'Erro no login anônimo: $e');
     }
   }
 
@@ -406,6 +427,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
+  Future<void> _createAnonymousUserDocument(firebase_auth.User firebaseUser) async {
+    try {
+      final now = DateTime.now();
+      await firestore.collection('users').doc(firebaseUser.uid).set({
+        'email': 'anonymous@petiveti.com',
+        'name': 'Usuário Anônimo',
+        'photoUrl': null,
+        'role': domain.UserRole.user.toString().split('.').last,
+        'provider': domain.AuthProvider.anonymous.toString().split('.').last,
+        'isEmailVerified': false,
+        'isPremium': false,
+        'premiumExpiresAt': null,
+        'metadata': <String, dynamic>{
+          'isAnonymous': true,
+        },
+        'createdAt': now.millisecondsSinceEpoch,
+        'updatedAt': now.millisecondsSinceEpoch,
+        'lastLoginAt': now.millisecondsSinceEpoch,
+      });
+    } catch (e) {
+      throw ServerException(message: 'Erro ao criar documento do usuário anônimo: $e');
+    }
+  }
+
   Future<void> _updateUserDocument(String uid, String? name, String? photoUrl) async {
     try {
       final updates = <String, dynamic>{
@@ -449,7 +494,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   domain.AuthProvider _parseAuthProvider(List<firebase_auth.UserInfo> providerData) {
-    if (providerData.isEmpty) return domain.AuthProvider.email;
+    if (providerData.isEmpty) return domain.AuthProvider.anonymous;
 
     final primaryProvider = providerData.first.providerId;
     switch (primaryProvider) {
@@ -459,6 +504,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return domain.AuthProvider.apple;
       case 'facebook.com':
         return domain.AuthProvider.facebook;
+      case 'firebase':
+        return domain.AuthProvider.anonymous;
       default:
         return domain.AuthProvider.email;
     }

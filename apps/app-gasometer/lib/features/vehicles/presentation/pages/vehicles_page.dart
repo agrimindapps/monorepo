@@ -29,7 +29,10 @@ class _VehiclesPageState extends State<VehiclesPage> {
     
     // Inicializar provider de forma lazy
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _vehiclesProvider.initialize();
+      // Verificar se o widget ainda está montado antes de inicializar
+      if (mounted) {
+        _vehiclesProvider.initialize();
+      }
     });
   }
 

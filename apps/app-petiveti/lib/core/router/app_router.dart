@@ -9,11 +9,16 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/calculators/presentation/pages/animal_age_page.dart';
 import '../../features/calculators/presentation/pages/body_condition_page.dart';
+import '../../features/calculators/presentation/pages/calculators_main_page.dart';
+import '../../features/calculators/presentation/pages/calorie_page.dart';
+import '../../features/calculators/presentation/pages/medication_dosage_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -23,23 +28,27 @@ import '../navigation/bottom_navigation.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
   
+  // Determine initial route based on auth state
+  final initialRoute = authState.isAuthenticated ? '/' : '/promo';
+  
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: initialRoute,
     debugLogDiagnostics: true,
     redirect: (context, state) {
       final isAuthenticated = authState.isAuthenticated;
       final isOnAuthPage = state.matchedLocation.startsWith('/login') || 
                            state.matchedLocation.startsWith('/register');
       final isOnSplash = state.matchedLocation == '/splash';
-
-      // If not authenticated and not on auth pages or splash, redirect to login
-      if (!isAuthenticated && !isOnAuthPage && !isOnSplash) {
-        return '/login';
+      final isOnPromo = state.matchedLocation == '/promo';
+      
+      // If authenticated, redirect to home (except splash)
+      if (isAuthenticated && (isOnPromo || isOnAuthPage)) {
+        return '/';
       }
 
-      // If authenticated and on auth pages, redirect to home
-      if (isAuthenticated && isOnAuthPage) {
-        return '/';
+      // If not authenticated and trying to access protected pages, redirect to promo
+      if (!isAuthenticated && !isOnAuthPage && !isOnSplash && !isOnPromo) {
+        return '/promo';
       }
 
       return null; // No redirect needed
@@ -242,41 +251,51 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/calculators',
         name: 'calculators',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.calculate,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Calculadoras Veterinárias',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Esta funcionalidade será implementada em breve.',
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
+        builder: (context, state) => const CalculatorsMainPage(),
         routes: [
           GoRoute(
             path: '/body-condition',
             name: 'body-condition-calculator',
             builder: (context, state) => const BodyConditionPage(),
+          ),
+          GoRoute(
+            path: '/calorie',
+            name: 'calorie-calculator',
+            builder: (context, state) => const CaloriePage(),
+          ),
+          GoRoute(
+            path: '/medication-dosage',
+            name: 'medication-dosage-calculator',
+            builder: (context, state) => const MedicationDosagePage(),
+          ),
+          GoRoute(
+            path: '/animal-age',
+            name: 'animal-age-calculator',
+            builder: (context, state) => const AnimalAgePage(),
+          ),
+          GoRoute(
+            path: '/ideal-weight',
+            name: 'ideal-weight-calculator',
+            builder: (context, state) => Scaffold(
+              appBar: AppBar(title: const Text('Calculadora de Peso Ideal')),
+              body: const Center(child: Text('Calculadora de Peso Ideal - Em desenvolvimento')),
+            ),
+          ),
+          GoRoute(
+            path: '/fluid-therapy',
+            name: 'fluid-therapy-calculator',
+            builder: (context, state) => Scaffold(
+              appBar: AppBar(title: const Text('Calculadora de Fluidoterapia')),
+              body: const Center(child: Text('Calculadora de Fluidoterapia - Em desenvolvimento')),
+            ),
+          ),
+          GoRoute(
+            path: '/hydration',
+            name: 'hydration-calculator', 
+            builder: (context, state) => Scaffold(
+              appBar: AppBar(title: const Text('Calculadora de Hidratação')),
+              body: const Center(child: Text('Calculadora de Hidratação - Em desenvolvimento')),
+            ),
           ),
         ],
       ),
@@ -294,6 +313,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       
       // Rotas fora do shell (sem bottom navigation)
+      GoRoute(
+        path: '/promo',
+        name: 'promo',
+        builder: (context, state) => const PromoPage(),
+      ),
+      
       GoRoute(
         path: '/splash',
         name: 'splash',

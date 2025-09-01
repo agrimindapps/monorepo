@@ -34,7 +34,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -241,7 +241,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
 
   Widget _buildFiltrosOrdenacao(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),

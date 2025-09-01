@@ -3,10 +3,32 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/colors.dart';
-import '../../../../core/widgets/loading_overlay.dart';
 import '../../../../core/widgets/error_display.dart';
+import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/forgot_password_dialog.dart';
+
+// Data class for granular Selector optimization
+class AuthLoadingState {
+  final bool isLoading;
+  final String? currentOperation;
+
+  const AuthLoadingState({
+    required this.isLoading,
+    this.currentOperation,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AuthLoadingState &&
+          isLoading == other.isLoading &&
+          currentOperation == other.currentOperation;
+
+  @override
+  int get hashCode => Object.hash(isLoading, currentOperation);
+}
 
 class AuthPage extends StatefulWidget {
   final int initialTab; // 0 = login, 1 = register
@@ -114,13 +136,17 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        return Scaffold(
-          backgroundColor: PlantisColors.primary,
-          body: AuthLoadingOverlay(
-            isLoading: authProvider.isLoading,
-            currentOperation: authProvider.currentOperation,
+    return Scaffold(
+      backgroundColor: PlantisColors.primary,
+      body: Selector<AuthProvider, AuthLoadingState>(
+        selector: (context, provider) => AuthLoadingState(
+          isLoading: provider.isLoading,
+          currentOperation: provider.currentOperation?.name,
+        ),
+        builder: (context, loadingState, child) {
+          return AuthLoadingOverlay(
+            isLoading: loadingState.isLoading,
+            currentOperation: context.read<AuthProvider>().currentOperation,
             child: SafeArea(
               child: Stack(
                 children: [
@@ -286,9 +312,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 ],
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -478,9 +504,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                         ),
                         const Spacer(),
                         TextButton(
-                          onPressed: () {
-                            // TODO: Implement forgot password
-                          },
+                          onPressed: _showForgotPasswordDialog,
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -503,13 +527,17 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     const SizedBox(height: 24),
 
                     // Error message
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        if (authProvider.errorMessage != null) {
+                    Selector<AuthProvider, String?>(
+                      selector: (context, provider) => provider.errorMessage,
+                      builder: (context, errorMessage, _) {
+                        if (errorMessage != null) {
                           return AuthErrorDisplay(
-                            errorMessage: authProvider.errorMessage!,
+                            errorMessage: errorMessage,
                             onRetry: _handleLogin,
-                            onDismiss: () => authProvider.clearError(),
+                            onDismiss: () {
+                              final provider = context.read<AuthProvider>();
+                              provider.clearError();
+                            },
                           );
                         }
                         return const SizedBox.shrink();
@@ -576,10 +604,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       height: 48,
                       child: OutlinedButton(
                         onPressed: () async {
-                          await context.read<AuthProvider>().signInAnonymously();
                           final authProvider = context.read<AuthProvider>();
+                          await authProvider.signInAnonymously();
                           if (authProvider.isAuthenticated && mounted) {
-                            // ignore: use_build_context_synchronously
                             context.go('/plants');
                           }
                         },
@@ -909,13 +936,17 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     const SizedBox(height: 24),
 
                     // Error message
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) {
-                        if (authProvider.errorMessage != null) {
+                    Selector<AuthProvider, String?>(
+                      selector: (context, provider) => provider.errorMessage,
+                      builder: (context, errorMessage, _) {
+                        if (errorMessage != null) {
                           return AuthErrorDisplay(
-                            errorMessage: authProvider.errorMessage!,
+                            errorMessage: errorMessage,
                             onRetry: _handleRegister,
-                            onDismiss: () => authProvider.clearError(),
+                            onDismiss: () {
+                              final provider = context.read<AuthProvider>();
+                              provider.clearError();
+                            },
                           );
                         }
                         return const SizedBox.shrink();
@@ -962,6 +993,15 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
           ),
         );
       },
+    );
+  }
+
+  /// Exibe o dialog para reset de senha
+  void _showForgotPasswordDialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const ForgotPasswordDialog(),
     );
   }
 

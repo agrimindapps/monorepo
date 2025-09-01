@@ -477,12 +477,15 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
       if (success) {
         if (mounted) {
+          // Fechar o dialog imediatamente após sucesso local
+          Navigator.of(context).pop(true);
+          
+          // Mostrar confirmação após fechar o dialog
           final successMessage = formProvider.isEditing 
               ? OdometerConstants.successMessages['edicaoSucesso']!
               : OdometerConstants.successMessages['cadastroSucesso']!;
               
           _showSuccess(successMessage);
-          Navigator.of(context).pop(true);
         }
       } else {
         if (mounted) {

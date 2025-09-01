@@ -1,11 +1,32 @@
 import '../../../../core/storage/hive_service.dart';
 import '../models/calculation_history_model.dart';
 
-/// Data source local para calculadoras usando HiveService
-class CalculatorLocalDatasource {
+/// Interface abstrata para data source local de calculadoras
+abstract class CalculatorLocalDatasource {
+  Future<void> saveCalculationHistory(CalculationHistoryModel history);
+  Future<List<CalculationHistoryModel>> getCalculationHistory({
+    String? calculatorId,
+    String? animalId,
+    int? limit,
+    DateTime? fromDate,
+    DateTime? toDate,
+  });
+  Future<void> deleteCalculationHistory(String id);
+  Future<void> addFavoriteCalculator(String calculatorId);
+  Future<void> removeFavoriteCalculator(String calculatorId);
+  Future<List<String>> getFavoriteCalculatorIds();
+  Future<void> incrementCalculatorUsage(String calculatorId);
+  Future<Map<String, int>> getCalculatorUsageStats();
+  Future<CalculationHistoryModel?> getCalculationHistoryById(String id);
+  Future<void> clearCalculationHistory();
+  Future<bool> isFavoriteCalculator(String calculatorId);
+}
+
+/// Implementação do data source local para calculadoras usando HiveService
+class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   final HiveService _hiveService;
   
-  CalculatorLocalDatasource(this._hiveService);
+  CalculatorLocalDatasourceImpl(this._hiveService);
   
   static const String _historyBoxName = 'calculation_history';
   static const String _favoritesBoxName = 'favorite_calculators';

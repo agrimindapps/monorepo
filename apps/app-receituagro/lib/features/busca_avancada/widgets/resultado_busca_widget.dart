@@ -6,7 +6,7 @@ import '../../../core/services/diagnostico_integration_service.dart';
 /// Organiza os resultados de forma visualmente atrativa
 class ResultadoBuscaWidget extends StatelessWidget {
   final List<DiagnosticoDetalhado> resultados;
-  final Function(DiagnosticoDetalhado) onDiagnosticoTap;
+  final void Function(DiagnosticoDetalhado) onDiagnosticoTap;
   final String? filtroAtual;
 
   const ResultadoBuscaWidget({
@@ -36,7 +36,7 @@ class ResultadoBuscaWidget extends StatelessWidget {
 
   Widget _buildHeaderResultados(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
@@ -151,7 +151,7 @@ class ResultadoBuscaWidget extends StatelessWidget {
             onTap: () => onDiagnosticoTap(diagnostico),
             borderRadius: BorderRadius.circular(12),
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -393,7 +393,7 @@ class ResultadoBuscaWidget extends StatelessWidget {
 
   Widget _buildEstadoVazio(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

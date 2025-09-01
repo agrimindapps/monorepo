@@ -35,6 +35,7 @@ dependencies:
   equatable: ^2.0.7
   dartz: ^0.10.1
   package_info_plus: ^8.1.2
+  url_launcher: ^6.2.1
   
   # Social Authentication
   google_sign_in: ^6.2.1

@@ -283,7 +283,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     } else if (_errorMessage != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               Icon(

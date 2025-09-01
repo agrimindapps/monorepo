@@ -773,6 +773,10 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       
       if (mounted) {
         if (success) {
+          // Fechar o dialog imediatamente após sucesso local
+          Navigator.of(context).pop(true);
+          
+          // Mostrar confirmação após fechar o dialog
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(widget.vehicle != null 
@@ -781,7 +785,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
-          Navigator.of(context).pop(true); // Retorna true para indicar sucesso
         } else {
           // Se falhou, mostrar o erro do provider se disponível
           final errorMessage = vehiclesProvider.errorMessage ?? 'Erro desconhecido ao salvar veículo';

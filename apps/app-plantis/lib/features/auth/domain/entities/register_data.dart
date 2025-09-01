@@ -29,29 +29,28 @@ class RegisterData {
     );
   }
 
-  /// Validates name field
   String? validateName() {
-    if (name.trim().isEmpty) {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
       return 'Por favor, insira seu nome completo';
     }
-    if (name.trim().length < 2) {
+    if (trimmedName.length < 2) {
       return 'Nome deve ter pelo menos 2 caracteres';
     }
     return null;
   }
 
-  /// Validates email field
   String? validateEmail() {
-    if (email.isEmpty) {
+    final trimmedEmail = email.trim().toLowerCase();
+    if (trimmedEmail.isEmpty) {
       return 'Por favor, insira seu email';
     }
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(trimmedEmail)) {
       return 'Por favor, insira um email válido';
     }
     return null;
   }
 
-  /// Validates password field
   String? validatePassword() {
     if (password.isEmpty) {
       return 'Por favor, insira uma senha';
@@ -59,13 +58,9 @@ class RegisterData {
     if (password.length < 8) {
       return 'A senha deve ter pelo menos 8 caracteres';
     }
-    if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)').hasMatch(password)) {
-      return 'A senha deve conter letras e números';
-    }
     return null;
   }
 
-  /// Validates confirm password field
   String? validateConfirmPassword() {
     if (confirmPassword.isEmpty) {
       return 'Por favor, confirme sua senha';
@@ -76,22 +71,18 @@ class RegisterData {
     return null;
   }
 
-  /// Validates personal info step (name and email)
   bool get isPersonalInfoValid {
     return validateName() == null && validateEmail() == null;
   }
 
-  /// Validates password step
   bool get isPasswordValid {
     return validatePassword() == null && validateConfirmPassword() == null;
   }
 
-  /// Checks if all data is valid for registration
   bool get isValid {
     return isPersonalInfoValid && isPasswordValid;
   }
 
-  /// Clears all data
   RegisterData clear() {
     return const RegisterData();
   }
@@ -99,7 +90,6 @@ class RegisterData {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
     return other is RegisterData &&
       other.name == name &&
       other.email == email &&
@@ -119,6 +109,6 @@ class RegisterData {
 
   @override
   String toString() {
-    return 'RegisterData(name: $name, email: $email, currentStep: $currentStep)';
+    return 'RegisterData(hasName: ${name.isNotEmpty}, hasEmail: ${email.isNotEmpty}, currentStep: $currentStep)';
   }
 }

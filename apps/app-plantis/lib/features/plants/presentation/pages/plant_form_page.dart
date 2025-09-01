@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import '../widgets/plant_form_basic_info.dart';
@@ -17,7 +18,7 @@ class PlantFormPage extends StatefulWidget {
   State<PlantFormPage> createState() => _PlantFormPageState();
 }
 
-class _PlantFormPageState extends State<PlantFormPage> {
+class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
   bool _initialized = false;
 
   @override
@@ -73,25 +74,16 @@ class _PlantFormPageState extends State<PlantFormPage> {
             builder: (context, provider, child) {
               if (provider.isLoading) return const SizedBox.shrink();
 
-              return TextButton(
-                onPressed: provider.isValid ? () => _savePlant(context) : null,
-                child:
-                    provider.isSaving
-                        ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : Text(
-                          'Salvar',
-                          style: TextStyle(
-                            color:
-                                provider.isValid
-                                    ? theme.colorScheme.primary
-                                    : theme.disabledColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+              return SaveButton(
+                onSave: () => _savePlant(context),
+                text: 'Salvar',
+                enabled: provider.isValid && !provider.isSaving,
+                onSuccess: () {
+                  // Success handled in _savePlant method
+                },
+                onError: () {
+                  // Error handled in _savePlant method
+                },
               );
             },
           ),
@@ -100,75 +92,47 @@ class _PlantFormPageState extends State<PlantFormPage> {
       body: Consumer<PlantFormProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (provider.hasError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    isEditing ? Icons.edit_off : Icons.error_outline,
-                    size: 64,
-                    color: theme.colorScheme.error.withValues(alpha: 0.6),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    isEditing 
-                        ? 'Erro ao carregar dados da planta'
-                        : 'Erro ao inicializar formulário',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    provider.errorMessage ?? 'Erro desconhecido',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.brightness == Brightness.light
-                          ? Colors.grey[600]
-                          : Colors.grey[400],
-                    ),
-                    textAlign: TextAlign.center,
+                  SkeletonShapes.rectangularImage(
+                    height: 200,
+                    width: 200,
                   ),
                   const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () => context.pop(),
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Voltar'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.brightness == Brightness.light
-                              ? Colors.grey[600]
-                              : Colors.grey[400],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          provider.clearError();
-                          if (widget.plantId != null) {
-                            provider.initializeForEdit(widget.plantId!);
-                          } else {
-                            provider.initializeForAdd();
-                          }
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Tentar novamente'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
+                  SkeletonShapes.text(height: 20, width: 150),
+                  const SizedBox(height: 12),
+                  SkeletonShapes.text(height: 16, width: 200),
+                  const SizedBox(height: 24),
+                  ...List.generate(3, (index) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: SkeletonShapes.listTile(),
+                  )),
                 ],
               ),
+            );
+          }
+
+          if (provider.hasError) {
+            return ErrorRecovery(
+              errorMessage: isEditing 
+                  ? 'Erro ao carregar dados da planta: ${provider.errorMessage}'
+                  : 'Erro ao inicializar formulário: ${provider.errorMessage}',
+              onRetry: () {
+                provider.clearError();
+                if (widget.plantId != null) {
+                  provider.initializeForEdit(widget.plantId!);
+                } else {
+                  provider.initializeForAdd();
+                }
+              },
+              onDismiss: () => context.pop(),
+              style: ErrorRecoveryStyle.card,
+              showRetryButton: true,
+              showDismissButton: true,
+              retryText: 'Tentar Novamente',
+              dismissText: 'Voltar',
             );
           }
 
@@ -213,42 +177,90 @@ class _PlantFormPageState extends State<PlantFormPage> {
 
   Future<void> _savePlant(BuildContext context) async {
     final provider = Provider.of<PlantFormProvider>(context, listen: false);
+    final plantName = provider.name.trim();
     
-    final success = await provider.savePlant();
+    // Start contextual loading
+    startSaveLoading(itemName: plantName.isNotEmpty ? plantName : 'planta');
+    
+    try {
+      final success = await provider.savePlant();
 
-    if (mounted) {
-      if (success) {
-        if (kDebugMode) {
-          print('🔄 PlantFormPage._savePlant() - Atualizando lista de plantas');
-        }
+      if (mounted) {
+        // Stop loading
+        stopSaveLoading();
         
-        // Atualizar a lista de plantas antes de navegar
-        final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-        await plantsProvider.refreshPlants();
-        
-        if (kDebugMode) {
-          print('✅ PlantFormPage._savePlant() - Lista atualizada, navegando de volta');
-        }
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.plantId != null
-                  ? 'Planta atualizada com sucesso!'
-                  : 'Planta adicionada com sucesso!',
+        if (success) {
+          if (kDebugMode) {
+            print('🔄 PlantFormPage._savePlant() - Atualizando lista de plantas');
+          }
+          
+          // Atualizar a lista de plantas antes de navegar
+          final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+          await plantsProvider.refreshPlants();
+          
+          if (kDebugMode) {
+            print('✅ PlantFormPage._savePlant() - Lista atualizada, navegando de volta');
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.plantId != null
+                          ? 'Planta atualizada com sucesso!'
+                          : 'Planta adicionada com sucesso!',
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
             ),
-            backgroundColor: Colors.green,
-          ),
-        );
-        context.pop();
-      } else {
-        final theme = Theme.of(context);
+          );
+          context.pop();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
+                  ),
+                ],
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        stopSaveLoading();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
-            backgroundColor: theme.colorScheme.error,
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Erro inesperado ao salvar planta: $e'),
+                ),
+              ],
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
+      }
+      if (kDebugMode) {
+        print('❌ PlantFormPage._savePlant() - Erro: $e');
       }
     }
   }

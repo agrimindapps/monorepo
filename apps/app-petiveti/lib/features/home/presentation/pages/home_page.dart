@@ -20,6 +20,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     // Initialize data loading with post-frame callback
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       _loadHomeData();
     });
   }

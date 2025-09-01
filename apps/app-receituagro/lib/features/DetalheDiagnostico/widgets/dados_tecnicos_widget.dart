@@ -80,7 +80,7 @@ class DadosTecnicosWidget extends StatelessWidget {
     final config = _getDadoTecnicoConfig(label);
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -199,7 +199,7 @@ class DadosTecnicosWidget extends StatelessWidget {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [

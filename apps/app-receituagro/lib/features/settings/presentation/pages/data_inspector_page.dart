@@ -1,0 +1,42 @@
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
+/// Data Inspector Page for ReceitaAgro - Using Unified Implementation
+/// Configured with green theme and ReceitaAgro-specific custom boxes
+class DataInspectorPage extends StatelessWidget {
+  const DataInspectorPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const UnifiedDataInspectorPage(
+      appName: 'ReceitaAgro',
+      primaryColor: Colors.green,
+      customBoxes: <CustomBoxType>[
+        CustomBoxType(
+          key: 'receituagro_preferences',
+          displayName: 'Preferências',
+          description: 'Configurações e preferências do usuário',
+          module: 'ReceitaAgro',
+        ),
+        CustomBoxType(
+          key: 'receituagro_cache',
+          displayName: 'Cache',
+          description: 'Dados em cache do aplicativo',
+          module: 'ReceitaAgro',
+        ),
+        CustomBoxType(
+          key: 'receituagro_favorites',
+          displayName: 'Favoritos',
+          description: 'Itens marcados como favoritos',
+          module: 'ReceitaAgro',
+        ),
+        CustomBoxType(
+          key: 'receituagro_offline_data',
+          displayName: 'Dados Offline',
+          description: 'Dados armazenados para uso offline',
+          module: 'ReceitaAgro',
+        ),
+      ],
+    );
+  }
+}

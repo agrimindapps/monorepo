@@ -43,7 +43,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       );
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        await Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
       if (mounted) {
@@ -149,204 +149,134 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Criar Conta'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.arrow_back, color: Colors.black87),
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20),
+                
+                // Header moderno
+                _buildModernHeader(context),
+                const SizedBox(height: 40),
 
-                  // Título
-                  Text(
-                    'Criar nova conta',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Preencha os dados abaixo para começar',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
+                // Campo Nome
+                _buildModernTextField(
+                  controller: _nameController,
+                  label: 'Nome completo',
+                  icon: Icons.person_outlined,
+                  keyboardType: TextInputType.name,
+                  textCapitalization: TextCapitalization.words,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira seu nome';
+                    }
+                    if (value.length < 2) {
+                      return 'Nome deve ter pelo menos 2 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
 
-                  // Campo Nome
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome completo',
-                      prefixIcon: Icon(Icons.person_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira seu nome';
-                      }
-                      if (value.length < 2) {
-                        return 'Nome deve ter pelo menos 2 caracteres';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                // Campo Email
+                _buildModernTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  icon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira seu email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Por favor, insira um email válido';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
 
-                  // Campo Email
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira seu email';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Por favor, insira um email válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                // Campo Senha
+                _buildModernTextField(
+                  controller: _passwordController,
+                  label: 'Senha',
+                  icon: Icons.lock_outlined,
+                  isPassword: true,
+                  obscureText: !_isPasswordVisible,
+                  onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira uma senha';
+                    }
+                    if (value.length < 6) {
+                      return 'A senha deve ter pelo menos 6 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
 
-                  // Campo Senha
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'Senha',
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira uma senha';
-                      }
-                      if (value.length < 6) {
-                        return 'A senha deve ter pelo menos 6 caracteres';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                // Campo Confirmar Senha
+                _buildModernTextField(
+                  controller: _confirmPasswordController,
+                  label: 'Confirmar senha',
+                  icon: Icons.lock_outline,
+                  isPassword: true,
+                  obscureText: !_isConfirmPasswordVisible,
+                  onTogglePassword: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, confirme sua senha';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'As senhas não coincidem';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 32),
 
-                  // Campo Confirmar Senha
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: !_isConfirmPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'Confirmar senha',
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                          });
-                        },
-                      ),
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, confirme sua senha';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'As senhas não coincidem';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 32),
+                // Botão de Registro Moderno
+                _buildModernButton(),
 
-                  // Botão de Registro
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _handleRegister,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Criar Conta'),
-                  ),
+                const SizedBox(height: 32),
 
-                  const SizedBox(height: 24),
+                // Social Login Moderno
+                _buildModernSocialLogin(),
 
-                  // Divisor
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey[300])),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'ou registre-se com',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                        ),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey[300])),
-                    ],
-                  ),
+                const SizedBox(height: 32),
 
-                  const SizedBox(height: 20),
-
-                  // Botões de social login
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildSocialButton(
-                        onPressed: _isLoading ? null : () => _showSocialLoginDialog('Google'),
-                        icon: Icons.g_mobiledata_rounded,
-                        color: Colors.red,
-                        label: 'Google',
-                      ),
-                      const SizedBox(width: 16),
-                      _buildSocialButton(
-                        onPressed: _isLoading ? null : () => _showSocialLoginDialog('Apple'),
-                        icon: Icons.apple_rounded,
-                        color: Colors.black87,
-                        label: 'Apple',
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Link para login
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Já tem uma conta? Faça login'),
-                  ),
-                ],
-              ),
+                // Link para login
+                _buildLoginLink(),
+              ],
             ),
           ),
         ),
@@ -354,39 +284,304 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _buildSocialButton({
-    required VoidCallback? onPressed,
-    required IconData icon,
-    required Color color,
+  /// Header moderno com logo e texto
+  Widget _buildModernHeader(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.task_alt_rounded,
+            color: Colors.white,
+            size: 40,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Criar nova conta',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Preencha os dados abaixo para começar',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.grey[600],
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Campo de texto moderno com estilo personalizado
+  Widget _buildModernTextField({
+    required TextEditingController controller,
     required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    TextCapitalization? textCapitalization,
+    bool isPassword = false,
+    bool? obscureText,
+    VoidCallback? onTogglePassword,
+    String? Function(String?)? validator,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        textCapitalization: textCapitalization ?? TextCapitalization.none,
+        obscureText: obscureText ?? false,
+        style: const TextStyle(fontSize: 16),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 16,
+          ),
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+          ),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    (obscureText ?? false) ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey[600],
+                  ),
+                  onPressed: onTogglePassword,
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  /// Botão de registro moderno com gradiente
+  Widget _buildModernButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: _isLoading
+              ? [Colors.grey[400]!, Colors.grey[500]!]
+              : [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: _isLoading
+            ? null
+            : [
+                BoxShadow(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+          onTap: _isLoading ? null : _handleRegister,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
+            child: _isLoading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text(
+                    'Criar Conta',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
-            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Social login moderno
+  Widget _buildModernSocialLogin() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Expanded(child: Divider(color: Colors.grey)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'ou registre-se com',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            const Expanded(child: Divider(color: Colors.grey)),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: _buildModernSocialButton(
+                label: 'Google',
+                icon: Icons.g_mobiledata_rounded,
+                color: Colors.red,
+                onPressed: () => _showSocialLoginDialog('Google'),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildModernSocialButton(
+                label: 'Apple',
+                icon: Icons.apple_rounded,
+                color: Colors.black87,
+                onPressed: () => _showSocialLoginDialog('Apple'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Botão social moderno
+  Widget _buildModernSocialButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _isLoading ? null : onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: _isLoading ? Colors.grey : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Link para login moderno
+  Widget _buildLoginLink() {
+    return TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: RichText(
+        text: TextSpan(
+          text: 'Já tem uma conta? ',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+          children: [
+            TextSpan(
+              text: 'Faça login',
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

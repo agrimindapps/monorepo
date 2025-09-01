@@ -143,7 +143,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
 
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -203,8 +203,8 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
 
         return Center(
           child: Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(32),
+            margin: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               color: theme.cardColor,
               borderRadius: BorderRadius.circular(12),
@@ -333,7 +333,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
 
   Widget _buildInformacoesTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       child: Consumer<DefensivoDetailsProvider>(
         builder: (context, provider, child) {
           if (provider.defensivo == null) {
@@ -358,7 +358,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
 
   Widget _buildTecnologiaTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -393,7 +393,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
       child: Consumer<ComentariosProvider>(
         builder: (context, comentariosProvider, child) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 // Usar widgets de comentários existentes ou criar novos
@@ -411,7 +411,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(8.0),
                           child: Text(comentario.conteudo),
                         ),
                       );
@@ -432,7 +432,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
     return Center(
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 32),
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: const Color(0xFF4CAF50).withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
@@ -445,7 +445,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
                 color: const Color(0xFF4CAF50).withOpacity(0.2),
                 shape: BoxShape.circle,
@@ -580,7 +580,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
         children: [
           // Header da seção
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -625,7 +625,7 @@ class _DetalheDefensivoCleanPageState extends State<DetalheDefensivoCleanPage>
           ),
           // Conteúdo da seção
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             child: SelectableText(
               content,
               style: TextStyle(

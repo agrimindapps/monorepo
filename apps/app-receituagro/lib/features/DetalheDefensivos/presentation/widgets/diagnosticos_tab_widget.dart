@@ -32,7 +32,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
             _buildFilters(diagnosticosProvider),
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8.0),
                 child: _buildContent(context, diagnosticosProvider),
               ),
             ),
@@ -44,7 +44,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
 
   Widget _buildFilters(DiagnosticosProvider provider) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           // Campo de pesquisa
@@ -208,7 +208,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
       onTap: () => _showDiagnosticDialog(context, diagnostico),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -295,7 +295,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
 
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -421,7 +421,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(12),
@@ -443,7 +443,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
               ),
               // Actions
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
                     Expanded(

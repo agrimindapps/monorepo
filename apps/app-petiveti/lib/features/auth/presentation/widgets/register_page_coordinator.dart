@@ -139,7 +139,7 @@ abstract final class RegisterPageCoordinator {
   /// 
   /// @param context Build context for navigation
   static void navigateToLogin(BuildContext context) {
-    context.pop();
+    context.go('/login');
   }
 
   /// **Show Error Message**

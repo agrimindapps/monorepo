@@ -45,6 +45,8 @@ class _OdometerPageState extends State<OdometerPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       _loadOdometerData();
     });
   }

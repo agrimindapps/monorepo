@@ -1,26 +1,37 @@
 import 'package:flutter/material.dart';
 
-/// Real-time validation helpers for form fields
+/// Real-time validation helpers for form fields with enhanced security
 class ValidationHelpers {
-  /// Validates name field in real-time
+  /// Validates name field in real-time with enhanced security
   static String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Por favor, insira seu nome completo';
     }
-    if (value.trim().length < 2) {
+    
+    final trimmedName = value.trim();
+    
+    if (trimmedName.length < 2) {
       return 'Nome deve ter pelo menos 2 caracteres';
     }
-    if (value.trim().length > 100) {
+    if (trimmedName.length > 100) {
       return 'Nome não pode ter mais de 100 caracteres';
     }
-    // Check for valid characters (letters, spaces, hyphens, apostrophes)
-    if (!RegExp(r"^[a-zA-ZÀ-ÿ\s\-']+$").hasMatch(value.trim())) {
+    
+    // Enhanced security: check for malicious characters that could be used for injection
+    if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedName)) {
+      return 'Nome contém caracteres não permitidos';
+    }
+    
+    // Allow only letters, spaces, hyphens, apostrophes, and accented characters
+    if (!RegExp(r"^[a-zA-ZÀ-ÿ\s\-']+$").hasMatch(trimmedName)) {
       return 'Nome deve conter apenas letras';
     }
+    
     return null;
   }
 
-  /// Validates email field in real-time
+  /// Validates email field in real-time with enhanced security
+  /// Uses AuthValidators for consistent security standards
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Por favor, insira seu email';
@@ -28,41 +39,67 @@ class ValidationHelpers {
     
     final email = value.trim().toLowerCase();
     
-    // Basic email format validation
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(email)) {
+    // Enhanced email validation with security checks
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
       return 'Por favor, insira um email válido';
     }
     
-    // More comprehensive email validation
-    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
-      return 'Formato de email inválido';
+    // Prevent multiple @ symbols
+    if (email.split('@').length != 2) {
+      return 'Email contém formato inválido';
     }
     
-    // Length validation
-    if (email.length > 254) {
+    // Check for suspicious patterns that could indicate injection attempts
+    if (email.contains('..') || 
+        email.startsWith('.') || 
+        email.endsWith('.') ||
+        email.contains('@.') ||
+        email.contains('.@')) {
+      return 'Email contém caracteres não permitidos';
+    }
+    
+    // Maximum email length for security
+    if (email.length > 320) {
       return 'Email muito longo';
     }
     
     return null;
   }
 
-  /// Validates password field in real-time
+  /// Validates password field in real-time with enhanced security requirements
+  /// Consistent with AuthValidators.validatePassword for security uniformity
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira sua senha';
     }
     
-    if (value.length < 6) {
-      return 'Senha deve ter pelo menos 6 caracteres';
+    // Consistent minimum length requirement (8 characters)
+    if (value.length < 8) {
+      return 'A senha deve ter pelo menos 8 caracteres';
     }
     
     if (value.length > 128) {
       return 'Senha muito longa';
     }
     
-    // Check for at least one letter and one number for better security
+    // Enhanced security: require letters and numbers
     if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
-      return 'Senha deve conter pelo menos uma letra e um número';
+      return 'A senha deve conter letras e números';
+    }
+    
+    // Check for common weak patterns
+    final commonWeakPatterns = [
+      r'12345',
+      r'abcde',
+      r'qwert',
+      r'password',
+      r'senha',
+    ];
+    
+    for (final pattern in commonWeakPatterns) {
+      if (value.toLowerCase().contains(pattern)) {
+        return 'Senha muito simples. Evite sequências comuns';
+      }
     }
     
     return null;
@@ -185,5 +222,59 @@ class ValidationHelpers {
   /// Determines if real-time validation should be shown
   static bool shouldShowValidation(String? value, bool hasBeenFocused) {
     return hasBeenFocused && hasMinimumInput(value);
+  }
+  
+  /// Sanitizes text input to prevent injection attacks
+  /// Removes or escapes potentially dangerous characters
+  static String sanitizeTextInput(String input) {
+    if (input.isEmpty) return input;
+    
+    // Remove dangerous characters that could be used for injection
+    String sanitized = input
+        .replaceAll(RegExp(r'[<>"\\]'), '') // Remove HTML/script injection chars
+        .replaceAll(RegExp(r'[\n\r\t]'), ' ') // Replace line breaks with spaces
+        .trim();
+    
+    // Limit length to prevent buffer overflow attacks
+    if (sanitized.length > 500) {
+      sanitized = sanitized.substring(0, 500);
+    }
+    
+    return sanitized;
+  }
+  
+  /// Sanitizes plant name input with specific rules
+  static String sanitizePlantName(String input) {
+    if (input.isEmpty) return input;
+    
+    String sanitized = sanitizeTextInput(input);
+    
+    // Additional plant name specific sanitization
+    // Allow only safe characters for plant names
+    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z\u00C0-\u00FF0-9\s\-.,()]'), '');
+    
+    // Limit to reasonable plant name length
+    if (sanitized.length > 100) {
+      sanitized = sanitized.substring(0, 100);
+    }
+    
+    return sanitized.trim();
+  }
+  
+  /// Sanitizes notes/description input
+  static String sanitizeNotes(String input) {
+    if (input.isEmpty) return input;
+    
+    String sanitized = input
+        .replaceAll(RegExp(r'[<>"\\]'), '') // Remove dangerous chars
+        .replaceAll(RegExp(r'[\r\t]'), ' ') // Replace tabs with spaces
+        .replaceAll(RegExp(r'\n{3,}'), '\n\n'); // Limit consecutive newlines
+    
+    // Limit notes to reasonable length
+    if (sanitized.length > 1000) {
+      sanitized = sanitized.substring(0, 1000);
+    }
+    
+    return sanitized.trim();
   }
 }

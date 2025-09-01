@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/animal.dart';
 import '../providers/animals_provider.dart';
-import 'add_animal_form.dart';
+import 'add_pet_dialog.dart';
 
 class AnimalsListController {
   final BuildContext context;
@@ -15,21 +15,9 @@ class AnimalsListController {
   });
 
   void addAnimal() {
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => AddAnimalForm(
-        onSave: (animal) async {
-          Navigator.pop(context);
-          await ref.read(animalsProvider.notifier).addAnimal(animal);
-          
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Pet adicionado com sucesso!')),
-            );
-          }
-        },
-      ),
+      builder: (context) => const AddPetDialog(),
     );
   }
 
@@ -77,22 +65,9 @@ class AnimalsListController {
   }
 
   void editAnimal(Animal animal) {
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => AddAnimalForm(
-        animal: animal,
-        onSave: (updatedAnimal) async {
-          Navigator.pop(context);
-          await ref.read(animalsProvider.notifier).updateAnimal(updatedAnimal);
-          
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Pet atualizado com sucesso!')),
-            );
-          }
-        },
-      ),
+      builder: (context) => AddPetDialog(animal: animal),
     );
   }
 

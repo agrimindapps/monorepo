@@ -1,39 +1,54 @@
 /// Security-enhanced validation utilities for authentication
 class AuthValidators {
-  /// Secure email validation using comprehensive RegExp
+  /// Enhanced secure email validation using comprehensive RegExp
   /// 
-  /// This validator checks for:
-  /// - Valid email format with proper local and domain parts
-  /// - Minimum security requirements for email structure
-  /// - Protection against common email injection patterns
+  /// This validator provides comprehensive protection against:
+  /// - Email injection attacks
+  /// - Malformed email addresses
+  /// - Suspicious patterns that could indicate malicious input
+  /// - Buffer overflow attempts via extremely long emails
   static bool isValidEmail(String email) {
     if (email.isEmpty) return false;
     
     // Trim whitespace and convert to lowercase for validation
     final cleanEmail = email.trim().toLowerCase();
     
-    // Comprehensive email validation regex
-    // Matches RFC 5322 specification with security considerations
+    // Enhanced email validation regex with stricter security
+    // More restrictive than basic RFC compliance for security
     final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+      r'^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$'
     );
     
-    // Additional security checks
+    // Primary format validation
     if (!emailRegex.hasMatch(cleanEmail)) return false;
     
-    // Prevent multiple @ symbols
+    // Prevent multiple @ symbols (injection protection)
     if (cleanEmail.split('@').length != 2) return false;
     
-    // Check for suspicious patterns
+    // Enhanced suspicious pattern detection
     if (cleanEmail.contains('..') || 
         cleanEmail.startsWith('.') || 
         cleanEmail.endsWith('.') ||
         cleanEmail.contains('@.') ||
-        cleanEmail.contains('.@')) {
+        cleanEmail.contains('.@') ||
+        cleanEmail.contains('.-') ||
+        cleanEmail.contains('-.')) {
       return false;
     }
     
-    // Maximum email length for security
+    // Check for potential script injection patterns in email
+    if (RegExp(r'[<>"\\\s\n\r\t]').hasMatch(cleanEmail)) {
+      return false;
+    }
+    
+    // Validate local part length (before @)
+    final parts = cleanEmail.split('@');
+    if (parts[0].length > 64 || parts[0].isEmpty) return false;
+    
+    // Validate domain part length (after @)
+    if (parts[1].length > 253 || parts[1].isEmpty) return false;
+    
+    // Maximum total email length for security (RFC 5321 limit)
     if (cleanEmail.length > 320) return false;
     
     return true;

@@ -446,10 +446,10 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: provider.recentDefensivos.length,
         separatorBuilder: (context, index) => Divider(
-          height: 1,
+          height: 0.5,
           thickness: 0.5,
-          indent: 80, // Alinhado com o texto (ícone + espaço)
-          endIndent: 16,
+          indent: 64, // Alinhado com o texto (ícone + espaço reduzido)
+          endIndent: 8,
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
         itemBuilder: (context, index) {
@@ -486,10 +486,10 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: provider.newDefensivos.length,
         separatorBuilder: (context, index) => Divider(
-          height: 1,
+          height: 0.5,
           thickness: 0.5,
-          indent: 80, // Alinhado com o texto (ícone + espaço)
-          endIndent: 16,
+          indent: 64, // Alinhado com o texto (ícone + espaço reduzido)
+          endIndent: 8,
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
         itemBuilder: (context, index) {

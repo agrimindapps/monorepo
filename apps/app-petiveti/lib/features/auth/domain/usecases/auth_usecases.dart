@@ -125,6 +125,17 @@ class SignInWithFacebook implements UseCase<User, NoParams> {
   }
 }
 
+class SignInAnonymously implements UseCase<User, NoParams> {
+  final AuthRepository repository;
+
+  SignInAnonymously(this.repository);
+
+  @override
+  Future<Either<Failure, User>> call(NoParams params) async {
+    return await repository.signInAnonymously();
+  }
+}
+
 class SignOut implements UseCase<void, NoParams> {
   final AuthRepository repository;
 

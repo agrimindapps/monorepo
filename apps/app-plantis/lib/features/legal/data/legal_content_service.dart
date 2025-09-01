@@ -1,5 +1,6 @@
 import '../presentation/widgets/base_legal_page.dart';
 import '../../../core/theme/plantis_colors.dart';
+import '../../../core/constants/app_config.dart';
 
 /// Service for managing legal content in structured data format
 /// Makes legal content easily updatable without code changes
@@ -189,12 +190,12 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
       {
         'title': 'Contato e Suporte',
         'content': '''**Para questões sobre privacidade:**
-• Email: privacidade@plantis.app
+• Email: privacy@plantis.app
 • Dentro do app: Menu > Configurações > Privacidade
-• Central de ajuda online disponível 24/7
+• Central de ajuda: https://help.plantis.app
 
 **Nosso compromisso:**
-• Resposta em até 48 horas úteis
+• Respondemos em até 48 horas úteis
 • Suporte completo em português
 • Assistência para exercer seus direitos
 • Esclarecimento de dúvidas sem burocracia
@@ -326,10 +327,11 @@ Para questões relacionadas a direitos do consumidor, aplicam-se as disposiçõe
       {
         'title': 'Contato',
         'content': '''Para dúvidas sobre estes Termos de Uso:
-• Email: suporte@plantis.app
+• Email: privacy@plantis.app
+• Central de ajuda: https://help.plantis.app
 • Dentro do aplicativo: Menu > Ajuda > Contato
 
-Responderemos suas questões dentro de 48 horas úteis.''',
+Responderemos suas questões em até 48 horas úteis.''',
       },
     ],
   };
@@ -395,5 +397,73 @@ Responderemos suas questões dentro de 48 horas úteis.''',
     
     // Simple version based on date and content count
     return '${_lastUpdatedDate}_v${totalSections}';
+  }
+
+  /// Get contact information for legal support
+  static Map<String, String> getContactInfo() {
+    return {
+      'support_email': AppConfig.supportEmailUrl,
+      'help_center_url': AppConfig.helpCenterUrl,
+      'contact_form_url': AppConfig.contactFormUrl,
+      'privacy_policy_url': AppConfig.privacyPolicyUrl,
+      'terms_of_service_url': AppConfig.termsOfServiceUrl,
+    };
+  }
+
+  /// Get support actions for legal pages
+  static List<Map<String, dynamic>> getSupportActions() {
+    return [
+      {
+        'id': 'email_support',
+        'title': 'Enviar Email',
+        'description': 'Entre em contato via email',
+        'icon': 'email',
+        'action': 'email',
+        'url': AppConfig.supportEmailUrl,
+      },
+      {
+        'id': 'help_center',
+        'title': 'Central de Ajuda',
+        'description': 'Acesse nossa central de ajuda online',
+        'icon': 'help',
+        'action': 'open_url',
+        'url': AppConfig.helpCenterUrl,
+      },
+      {
+        'id': 'contact_form',
+        'title': 'Formulário de Contato',
+        'description': 'Preencha nosso formulário online',
+        'icon': 'contact_form',
+        'action': 'open_url',
+        'url': AppConfig.contactFormUrl,
+      },
+    ];
+  }
+
+  /// Validate if all configured URLs are properly formatted
+  static Map<String, bool> validateUrls() {
+    final contactInfo = getContactInfo();
+    final validationResults = <String, bool>{};
+    
+    for (final entry in contactInfo.entries) {
+      validationResults[entry.key] = AppConfig.isValidUrl(entry.value);
+    }
+    
+    return validationResults;
+  }
+
+  /// Get environment-specific legal content metadata
+  static Map<String, dynamic> getContentMetadata() {
+    return {
+      'last_updated': _lastUpdatedDate,
+      'formatted_date': getFormattedLastUpdatedDate(),
+      'has_recent_updates': hasRecentUpdates(),
+      'content_version': getContentVersion(),
+      'environment': AppConfig.isProduction ? 'production' : 'development',
+      'privacy_sections_count': (_privacyPolicyContent['sections'] as List).length,
+      'terms_sections_count': (_termsOfServiceContent['sections'] as List).length,
+      'contact_info': getContactInfo(),
+      'url_validations': validateUrls(),
+    };
   }
 }

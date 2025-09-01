@@ -49,6 +49,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           setState(() {
             _currentIndex = index;
           });
+          
+          // Recarrega favoritos quando a tab for selecionada
+          if (index == 2) { // Index 2 é a página de favoritos
+            FavoritosPage.reloadIfActive();
+          }
         },
         elevation: 8,
         items: const [

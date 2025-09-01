@@ -11,6 +11,7 @@ enum AuthProvider {
   google,
   apple,
   facebook,
+  anonymous,
 }
 
 class User extends Equatable {
@@ -84,7 +85,10 @@ class User extends Equatable {
 
   bool get needsEmailVerification => !isEmailVerified && provider == AuthProvider.email;
 
+  bool get isAnonymous => provider == AuthProvider.anonymous;
+
   String get displayName {
+    if (isAnonymous) return 'Usuário Anônimo';
     if (name != null && name!.isNotEmpty) return name!;
     return email.split('@').first;
   }

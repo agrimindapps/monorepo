@@ -1,9 +1,16 @@
+import '../../domain/calculators/advanced_diet_calculator.dart';
 import '../../domain/calculators/anesthesia_calculator.dart';
+import '../../domain/calculators/animal_age_calculator.dart';
 import '../../domain/calculators/body_condition_calculator.dart';
 import '../../domain/calculators/caloric_needs_calculator.dart';
+import '../../domain/calculators/diabetes_insulin_calculator.dart';
+import '../../domain/calculators/fluid_therapy_calculator.dart';
 import '../../domain/calculators/hydration_calculator.dart';
+import '../../domain/calculators/ideal_weight_calculator.dart';
 import '../../domain/calculators/medication_dosage_calculator.dart';
+import '../../domain/calculators/pregnancy_birth_calculator.dart';
 import '../../domain/calculators/pregnancy_calculator.dart';
+import '../../domain/calculators/unit_conversion_calculator.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculator.dart';
 import '../../domain/repositories/calculator_repository.dart';
@@ -12,19 +19,25 @@ import '../models/calculation_history_model.dart';
 
 /// Implementação do repositório de calculadoras
 class CalculatorRepositoryImpl implements CalculatorRepository {
-  const CalculatorRepositoryImpl(this._localDataSource);
+  CalculatorRepositoryImpl(this._localDataSource);
   
   final CalculatorLocalDatasource _localDataSource;
 
   // Cache estático das calculadoras para melhor performance
   static final List<Calculator> _calculators = [
-    const AnesthesiaCalculator(),
     const BodyConditionCalculator(),
     const CaloricNeedsCalculator(),
-    const HydrationCalculator(),
     const MedicationDosageCalculator(),
+    const AnesthesiaCalculator(),
+    const AnimalAgeCalculator(),
+    const DiabetesInsulinCalculator(),
+    const FluidTherapyCalculator(),
+    const HydrationCalculator(),
+    const IdealWeightCalculator(),
     const PregnancyCalculator(),
-    // Outras calculadoras serão adicionadas gradualmente conforme são corrigidas
+    const PregnancyBirthCalculator(),
+    UnitConversionCalculator(),
+    AdvancedDietCalculator(),
   ];
 
   @override

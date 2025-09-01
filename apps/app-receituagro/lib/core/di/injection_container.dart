@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
+// DetalheDefensivos DI
+import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 // Culturas dependencies removed - using direct CulturaCoreRepository access
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 // Diagnósticos Clean Architecture
@@ -385,6 +387,9 @@ Future<void> init() async {
   );
   
   // ===== MÓDULOS ESPECÍFICOS =====
+  
+  // Configurar DI do módulo DetalheDefensivos
+  initDefensivoDetailsDI();
   
   // Configurar DI do módulo de Favoritos  
   FavoritosDI.registerDependencies();

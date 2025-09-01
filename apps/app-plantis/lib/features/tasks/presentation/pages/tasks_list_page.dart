@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../core/theme/accessibility_tokens.dart';
+import '../../../../shared/widgets/loading/loading_components.dart';
+import '../../../../shared/widgets/feedback/feedback.dart';
 
 import '../../domain/entities/task.dart' as task_entity;
 import '../providers/tasks_provider.dart';
@@ -121,7 +126,7 @@ class TasksListPage extends StatefulWidget {
   State<TasksListPage> createState() => _TasksListPageState();
 }
 
-class _TasksListPageState extends State<TasksListPage> {
+class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMixin, LoadingPageMixin, UnifiedFeedbackMixin {
   // Cache for date formatting to avoid recreation
   static const List<String> _weekdays = [
     'Segunda-feira',
@@ -156,6 +161,8 @@ class _TasksListPageState extends State<TasksListPage> {
 
     // Load tasks on initialization with delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       context.read<TasksProvider>().loadTasks();
       // Set default filter to "Today"
       context.read<TasksProvider>().setFilter(TasksFilterType.today);
@@ -163,17 +170,27 @@ class _TasksListPageState extends State<TasksListPage> {
   }
 
   @override
+  void dispose() {
+    // CRITICAL MEMORY LEAK FIX: Clear date formatting cache to prevent memory leaks
+    _dateFormattingCache.clear();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return TasksErrorBoundary(
-      onRetry: () {
-        final provider = context.read<TasksProvider>();
-        provider.clearError();
-        provider.loadTasks();
-      },
-      child: Scaffold(
+    return UnifiedFeedbackProvider(
+      child: ContextualLoadingListener(
+        context: LoadingContexts.taskComplete,
+        child: TasksErrorBoundary(
+        onRetry: () {
+          final provider = context.read<TasksProvider>();
+          provider.clearError();
+          provider.loadTasks();
+        },
+        child: Scaffold(
         backgroundColor:
             isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
         appBar: const TasksAppBar(),
@@ -188,13 +205,21 @@ class _TasksListPageState extends State<TasksListPage> {
           ),
           builder: (context, state, child) {
             if (state.isLoading && state.isEmpty) {
-              return const TasksLoadingWidget();
+              return LoadingPresets.taskListSkeleton(
+                count: LoadingConstants.listSkeletonCount,
+              );
             }
 
             if (state.hasError) {
-              return TasksErrorWidget(
-                message: state.errorMessage!,
-                onRetry: () => context.read<TasksProvider>().loadTasks(),
+              return ErrorRecovery(
+                errorMessage: state.errorMessage!,
+                onRetry: () {
+                  final provider = context.read<TasksProvider>();
+                  provider.clearError();
+                  provider.loadTasks();
+                },
+                style: ErrorRecoveryStyle.card,
+                showRetryButton: true,
               );
             }
 
@@ -215,6 +240,8 @@ class _TasksListPageState extends State<TasksListPage> {
         ),
         // FAB removido - tarefas são geradas automaticamente quando concluídas
         // floatingActionButton: const TasksFab(),
+      ),
+        ),
       ),
     );
   }
@@ -330,9 +357,18 @@ class _TasksListPageState extends State<TasksListPage> {
       selector: (_, provider) => provider.isTaskOperationLoading(task.id),
       builder: (context, isLoading, child) {
         
-        return GestureDetector(
+        return Semantics(
+          label: 'Tarefa: ${task.title} para ${task.plantName}',
+          hint: isLoading ? 'Tarefa sendo processada' : 'Toque duas vezes para marcar como concluída',
+          button: true,
+          enabled: !isLoading,
           onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task),
-          child: Container(
+          child: GestureDetector(
+            onTap: isLoading ? null : () {
+              AccessibilityTokens.performHapticFeedback('light');
+              _showTaskCompletionDialog(context, task);
+            },
+            child: Container(
             key: ValueKey(task.id),
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             padding: const EdgeInsets.all(16),
@@ -430,6 +466,7 @@ class _TasksListPageState extends State<TasksListPage> {
               ),
             ],
           ),
+            ),
           ),
         );
       },
@@ -443,21 +480,32 @@ class _TasksListPageState extends State<TasksListPage> {
     );
 
     if (result != null && context.mounted) {
-      // Use the completion date and notes from the dialog
-      final success = await context.read<TasksProvider>().completeTask(
-        task.id, 
-        notes: result.notes,
+      // Use unified feedback system for task completion
+      await UnifiedFeedbackSystem.completeTask(
+        context: context,
+        completeOperation: () async {
+          // Use the completion date and notes from the dialog
+          final success = await context.read<TasksProvider>().completeTask(
+            task.id, 
+            notes: result.notes,
+          );
+          
+          if (!success) {
+            throw Exception('Falha ao concluir tarefa');
+          }
+          
+          // Anunciar para screen readers
+          if (context.mounted) {
+            AccessibilityTokens.announceForAccessibility(
+              context, 
+              'Tarefa "${task.title}" marcada como concluída',
+            );
+          }
+          
+          return success;
+        },
+        taskName: task.title,
       );
-      
-      if (success && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Tarefa "${task.title}" marcada como concluída!'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     }
   }
 
@@ -475,6 +523,23 @@ class _TasksListPageState extends State<TasksListPage> {
         return Icons.grass;
       default:
         return Icons.task_alt;
+    }
+  }
+
+  String _getTaskTypeName(task_entity.TaskType type) {
+    switch (type) {
+      case task_entity.TaskType.watering:
+        return 'rega';
+      case task_entity.TaskType.fertilizing:
+        return 'adubação';
+      case task_entity.TaskType.pruning:
+        return 'poda';
+      case task_entity.TaskType.pestInspection:
+        return 'inspeção de pragas';
+      case task_entity.TaskType.repotting:
+        return 'replantio';
+      default:
+        return 'tarefa geral';
     }
   }
 

@@ -74,7 +74,7 @@ class _CulturaSearchFieldState extends State<CulturaSearchField>
         opacity: _fadeAnimation,
         child: Container(
           margin: const EdgeInsets.fromLTRB(8, 8, 8, 12),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: widget.isDark ? const Color(0xFF222228) : Colors.white,
             borderRadius: BorderRadius.circular(16),

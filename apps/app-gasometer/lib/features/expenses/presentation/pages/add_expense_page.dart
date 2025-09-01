@@ -662,10 +662,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
     if (success) {
       if (mounted) {
+        // Fechar o dialog imediatamente após sucesso local
+        Navigator.of(context).pop(true);
+        
+        // Mostrar confirmação após fechar o dialog
         _showSuccessSnackBar(widget.expenseToEdit != null 
           ? 'Despesa atualizada com sucesso!'
           : 'Despesa adicionada com sucesso!');
-        Navigator.of(context).pop(true);
       }
     } else {
       _showErrorSnackBar('Erro ao salvar despesa');

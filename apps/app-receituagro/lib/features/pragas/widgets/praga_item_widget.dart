@@ -39,7 +39,7 @@ class PragaItemWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               _buildIcon(),

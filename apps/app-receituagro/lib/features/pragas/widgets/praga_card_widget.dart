@@ -74,7 +74,7 @@ class PragaCardWidget extends StatelessWidget {
         onTap: onTap,
         child: Container(
           height: customHeight ?? 120,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               // Imagem/Ícone
@@ -177,7 +177,7 @@ class PragaCardWidget extends StatelessWidget {
               // Conteúdo expandido
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(8.0),
                   child: _buildFeaturedContentSection(),
                 ),
               ),

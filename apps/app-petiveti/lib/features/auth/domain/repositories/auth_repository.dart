@@ -8,6 +8,7 @@ abstract class AuthRepository {
   Future<Either<Failure, User>> signInWithGoogle();
   Future<Either<Failure, User>> signInWithApple();
   Future<Either<Failure, User>> signInWithFacebook();
+  Future<Either<Failure, User>> signInAnonymously();
   Future<Either<Failure, void>> signOut();
   Future<Either<Failure, User?>> getCurrentUser();
   Future<Either<Failure, void>> sendEmailVerification();

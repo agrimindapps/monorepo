@@ -26,31 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeProvider();
-    });
-  }
-
-  Future<void> _initializeProvider() async {
-    if (!mounted) return;
-    
-    try {
-      final provider = context.read<SettingsProvider>();
-      final deviceIdentityService = di.sl<DeviceIdentityService>();
-      
-      // Get unique device ID for anonymous user
-      final deviceId = await deviceIdentityService.getDeviceUuid();
-      
-      if (mounted) {
-        await provider.initialize(deviceId);
-      }
-    } catch (e) {
-      // Fallback to a basic default if device service fails
-      if (mounted) {
-        final provider = context.read<SettingsProvider>();
-        await provider.initialize('anonymous_user_${DateTime.now().millisecondsSinceEpoch}');
-      }
-    }
+    // Remove o addPostFrameCallback - não precisamos mais dele
   }
 
   @override
@@ -58,59 +34,78 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Scaffold(
-      backgroundColor: theme.cardColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildModernHeader(context, isDark),
-            Expanded(
-              child: Consumer<SettingsProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+    return ChangeNotifierProvider(
+      create: (_) => di.sl<SettingsProvider>(),
+      builder: (context, child) {
+        // Initialize the provider here where we have access to context
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final provider = context.read<SettingsProvider>();
+          try {
+            final deviceService = di.sl<DeviceIdentityService>();
+            final deviceId = await deviceService.getDeviceUuid();
+            await provider.initialize(deviceId);
+          } catch (e) {
+            debugPrint('Error initializing settings: $e');
+            // Fallback to anonymous user
+            await provider.initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
+          }
+        });
+        return child!;
+      },
+      child: Scaffold(
+        backgroundColor: theme.cardColor,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildModernHeader(context, isDark),
+              Expanded(
+                child: Consumer<SettingsProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
 
-                  if (provider.error != null) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: theme.colorScheme.error,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Erro ao carregar configurações',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            provider.error!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                    if (provider.error != null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: theme.colorScheme.error,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () => provider.refresh(),
-                            child: const Text('Tentar Novamente'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                            const SizedBox(height: 16),
+                            Text(
+                              'Erro ao carregar configurações',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              provider.error!,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () => provider.refresh(),
+                              child: const Text('Tentar Novamente'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                  return _buildSettingsContent();
-                },
+                    return _buildSettingsContent();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -118,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildSettingsContent() {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       children: const [
         // App Info Section
         AppInfoSection(),

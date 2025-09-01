@@ -39,6 +39,8 @@ class _MaintenancePageState extends State<MaintenancePage> {
     
     // Inicializar providers de forma lazy
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       _maintenanceProvider.loadAllMaintenanceRecords();
       _vehiclesProvider.initialize();
     });

@@ -227,7 +227,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     if (provider.errorMessage != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               Icon(
@@ -269,7 +269,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     if (provider.pragas.isEmpty && _searchText.isNotEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               Icon(

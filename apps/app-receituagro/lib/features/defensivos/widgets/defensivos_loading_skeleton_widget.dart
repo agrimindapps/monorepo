@@ -91,7 +91,7 @@ class _DefensivosLoadingSkeletonWidgetState extends State<DefensivosLoadingSkele
           borderRadius: BorderRadius.circular(12),
         ),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               _buildSkeletonContainer(56, 56, true),

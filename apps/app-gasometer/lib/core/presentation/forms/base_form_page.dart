@@ -73,7 +73,13 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   /// Called after successful form submission
   void onFormSubmitSuccess() {
     if (mounted) {
+      // Fechar o dialog imediatamente após sucesso local
       Navigator.of(context).pop(true);
+      
+      // Mostrar confirmação após fechar o dialog
+      showSuccessSnackbar(isEditMode 
+          ? '$pageTitle atualizado com sucesso!' 
+          : '$pageTitle cadastrado com sucesso!');
     }
   }
   

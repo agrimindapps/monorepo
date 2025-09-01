@@ -65,7 +65,13 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
   /// Called after successful form submission
   void onFormSubmitSuccess() {
     if (mounted) {
+      // Fechar o dialog imediatamente após sucesso local
       Navigator.of(context).pop(true);
+      
+      // Mostrar confirmação após fechar o dialog
+      showSuccessSnackbar(isEditMode 
+          ? 'Item atualizado com sucesso!' 
+          : 'Item cadastrado com sucesso!');
     }
   }
   

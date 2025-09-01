@@ -1,0 +1,182 @@
+# Quality Gates Configuration
+# Defines thresholds and rules for code quality enforcement
+
+version: "1.0.0"
+
+# File Size Limits
+file_size_limits:
+  critical_threshold: 500    # Hard limit - blocks commits
+  warning_threshold: 300     # Soft limit - generates warnings
+  info_threshold: 250        # Information threshold
+  
+  # Widget-specific limits
+  widget_max_lines: 100
+  build_method_max_lines: 50
+
+# Architecture Rules
+architecture_rules:
+  enforce_clean_architecture: true
+  
+  # Layer separation rules
+  presentation_layer_rules:
+    - no_direct_data_imports
+    - must_use_usecases
+    - proper_provider_disposal
+  
+  domain_layer_rules:
+    - no_framework_dependencies
+    - pure_dart_only
+  
+  data_layer_rules:
+    - implement_repository_contracts
+    - proper_error_handling
+
+# Performance Rules
+performance_rules:
+  max_setstate_calls: 10
+  enforce_const_constructors: true
+  check_memory_leaks: true
+  check_stream_disposal: true
+  max_consumer_widgets: 5
+
+# Security Rules
+security_rules:
+  check_hardcoded_secrets: true
+  require_input_validation: true
+  check_print_statements: true
+  
+  # Patterns to flag as potential secrets
+  secret_patterns:
+    - "stripe_key"
+    - "google_api"
+    - "generic_hash"
+    - "password_hardcoded"
+
+# App-specific Configurations
+app_configurations:
+  app-receituagro:
+    # Recently refactored - strict enforcement
+    file_size_limits:
+      critical_threshold: 400  # Stricter than default
+      warning_threshold: 250
+    
+    architecture_rules:
+      enforce_widget_separation: true
+      max_lines_per_widget: 80
+    
+    # Special patterns for agricultural app
+    custom_rules:
+      - check_diagnostic_data_handling
+      - validate_defensive_data_access
+  
+  app-gasometer:
+    # Vehicle app - focus on data privacy
+    security_rules:
+      check_vehicle_data_privacy: true
+      validate_analytics_events: true
+  
+  app-plantis:
+    # Plant care app - focus on performance
+    performance_rules:
+      check_notification_handling: true
+      validate_scheduling_logic: true
+  
+  app_taskolist:
+    # Task app with Riverpod - different patterns
+    architecture_rules:
+      use_riverpod_patterns: true
+      enforce_clean_architecture: true
+
+# CI/CD Integration Settings
+ci_settings:
+  fail_on_critical: true
+  warn_on_medium: true
+  generate_reports: true
+  
+  # PR Comment Settings
+  pr_comments:
+    enabled: true
+    max_issues_displayed: 10
+    include_suggestions: true
+  
+  # Artifact Settings
+  artifacts:
+    generate_json: true
+    generate_html: true
+    retention_days: 30
+
+# Reporting Configuration
+reporting:
+  formats:
+    - console
+    - json
+    - html
+  
+  console_output:
+    use_colors: true
+    show_icons: true
+    max_issues_per_category: 10
+  
+  html_output:
+    include_charts: true
+    include_trends: true
+    theme: "modern"
+  
+  json_output:
+    include_metadata: true
+    pretty_print: true
+
+# Quality Metrics
+quality_metrics:
+  health_score_calculation:
+    critical_penalty: 5.0
+    warning_penalty: 2.0
+    info_penalty: 0.5
+    max_score: 10.0
+  
+  trend_tracking:
+    enabled: true
+    history_days: 30
+    track_improvements: true
+
+# Exemptions and Overrides
+exemptions:
+  # Files that can exceed normal limits
+  file_size_exemptions:
+    - "*/generated/*.dart"
+    - "*/l10n/*.dart"
+    - "*/mock_data/*.dart"
+  
+  # Temporary exemptions (with expiry)
+  temporary_exemptions:
+    - path: "lib/legacy/old_implementation.dart"
+      reason: "Legacy code being phased out"
+      expires: "2024-12-31"
+      max_lines: 1000
+
+# Auto-fix Configuration
+auto_fix:
+  enabled: false  # Disabled by default for safety
+  
+  safe_fixes:
+    - add_const_constructors
+    - remove_unused_imports
+    - format_code
+  
+  risky_fixes:
+    - split_large_widgets
+    - extract_build_methods
+
+# Integration Settings
+integrations:
+  git_hooks:
+    pre_commit: true
+    pre_push: false
+  
+  ide_integration:
+    vscode_settings: true
+    analysis_options: true
+  
+  monitoring:
+    slack_notifications: false
+    email_reports: false

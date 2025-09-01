@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/services/data_sanitization_service.dart';
 import '../../domain/entities/register_data.dart';
 
 class RegisterProvider extends ChangeNotifier {
@@ -140,6 +141,9 @@ class RegisterProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _setError('Erro ao verificar email. Tente novamente.');
+      if (kDebugMode) {
+        debugPrint('Erro verificação email: ${DataSanitizationService.sanitizeForLogging(e.toString())}');
+      }
       return false;
     }
   }
@@ -221,12 +225,13 @@ class RegisterProvider extends ChangeNotifier {
     ];
   }
 
-  /// Debug method to print current state
+  /// Debug method to print current state (sanitized for security)
   @override
   String toString() {
-    return 'RegisterProvider(step: ${_registerData.currentStep}, '
-           'name: ${_registerData.name}, '
-           'email: ${_registerData.email}, '
-           'hasError: ${_errorMessage != null})';
+    final sanitizedData = 'RegisterProvider(step: ${_registerData.currentStep}, '
+                         'hasName: ${_registerData.name.isNotEmpty}, '
+                         'hasEmail: ${_registerData.email.isNotEmpty}, '
+                         'hasError: ${_errorMessage != null})';
+    return DataSanitizationService.sanitizeForLogging(sanitizedData);
   }
 }

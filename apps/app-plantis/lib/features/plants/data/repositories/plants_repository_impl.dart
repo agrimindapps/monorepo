@@ -42,7 +42,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
         
         // If user is null or has empty ID, wait and retry (except on last attempt)
         if (attempt < maxRetries) {
-          await Future.delayed(Duration(milliseconds: 500 * attempt));
+          await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
           continue;
         }
         
@@ -57,7 +57,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
         }
         
         // Wait before retrying, with exponential backoff
-        await Future.delayed(Duration(milliseconds: 500 * attempt));
+        await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
       }
     }
     

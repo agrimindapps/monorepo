@@ -24,17 +24,6 @@ class AnimalsErrorHandler extends ConsumerStatefulWidget {
 }
 
 class _AnimalsErrorHandlerState extends ConsumerState<AnimalsErrorHandler> {
-  @override
-  void initState() {
-    super.initState();
-    _setupErrorListener();
-  }
-
-  void _setupErrorListener() {
-    ref.listen<AnimalsState>(animalsProvider, (previous, next) {
-      _handleError(previous, next);
-    });
-  }
 
   void _handleError(AnimalsState? previous, AnimalsState next) {
     // Only show new errors
@@ -64,7 +53,7 @@ class _AnimalsErrorHandlerState extends ConsumerState<AnimalsErrorHandler> {
     );
     
     // Clear error after showing snackbar
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(animalsProvider.notifier).clearError();
       }
@@ -77,6 +66,11 @@ class _AnimalsErrorHandlerState extends ConsumerState<AnimalsErrorHandler> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to errors in build method
+    ref.listen<AnimalsState>(animalsProvider, (previous, next) {
+      _handleError(previous, next);
+    });
+    
     // This is an invisible component that only handles errors
     // We return an empty container since we don't need visible UI
     return const SizedBox.shrink();

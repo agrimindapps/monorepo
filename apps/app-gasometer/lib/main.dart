@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,7 @@ import 'core/data/models/category_model.dart';
 import 'core/di/injection_container.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/database_inspector_service.dart';
+import 'core/services/gasometer_firebase_service.dart';
 import 'core/services/gasometer_notification_service.dart';
 import 'core/sync/models/sync_queue_item.dart';
 import 'core/sync/services/sync_service.dart';
@@ -20,6 +22,7 @@ import 'features/fuel/data/models/fuel_supply_model.dart';
 import 'features/maintenance/data/models/maintenance_model.dart';
 import 'features/odometer/data/models/odometer_model.dart';
 // Import Hive adapters
+import 'core/logging/entities/log_entry.dart';
 import 'features/vehicles/data/models/vehicle_model.dart';
 import 'firebase_options.dart';
 
@@ -44,6 +47,11 @@ void main() async {
   Hive.registerAdapter(MaintenanceModelAdapter());
   Hive.registerAdapter(CategoryModelAdapter());
   Hive.registerAdapter(SyncQueueItemAdapter());
+
+  // Register LogEntry adapter for logging system
+  if (!Hive.isAdapterRegistered(20)) {
+    Hive.registerAdapter(LogEntryAdapter());
+  }
   print('✅ Hive adapters registered successfully');
 
   // Initialize Firebase
@@ -51,12 +59,25 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print('✅ Firebase initialized successfully');
 
+  // Configure Firestore settings
+  if (kDebugMode) {
+    try {
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      );
+      print('🔧 Firestore configurado para desenvolvimento');
+    } catch (e) {
+      print('⚠️ Falha na configuração do Firestore: $e');
+    }
+  }
+
   // Initialize Firebase Crashlytics (only in production)
   if (!kDebugMode) {
     try {
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
       // Wait a bit to ensure Crashlytics is fully initialized
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
 
       // Test Crashlytics availability
       await FirebaseCrashlytics.instance.log('Crashlytics initialization test');
@@ -118,6 +139,16 @@ void main() async {
   print('📈 Logging app open event...');
   await analyticsService.logAppOpen();
   print('✅ App open event logged successfully');
+
+  // Test Firebase connectivity (only in debug mode)
+  if (kDebugMode) {
+    print('🔍 Testing Firebase connectivity...');
+    final connectivityResult = await GasometerFirebaseService.checkFirebaseConnectivity();
+    print('🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}');
+    if ((connectivityResult['errors'] as List).isNotEmpty) {
+      print('⚠️ Firebase connectivity errors: ${connectivityResult['errors']}');
+    }
+  }
 
   // Run app with error handling
   print('🎯 Starting GasOMeter app...');

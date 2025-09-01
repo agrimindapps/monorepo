@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../../domain/entities/user.dart';
@@ -16,22 +17,26 @@ class AuthState {
   final AuthStatus status;
   final User? user;
   final String? error;
+  final bool isAnonymous;
 
   const AuthState({
     this.status = AuthStatus.initial,
     this.user,
     this.error,
+    this.isAnonymous = false,
   });
 
   AuthState copyWith({
     AuthStatus? status,
     User? user,
     String? error,
+    bool? isAnonymous,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       error: error,
+      isAnonymous: isAnonymous ?? this.isAnonymous,
     );
   }
 
@@ -46,6 +51,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignInWithGoogle _signInWithGoogle;
   final SignInWithApple _signInWithApple;
   final SignInWithFacebook _signInWithFacebook;
+  final SignInAnonymously _signInAnonymously;
   final SignOut _signOut;
   final GetCurrentUser _getCurrentUser;
   final SendEmailVerification _sendEmailVerification;
@@ -67,6 +73,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     this._signInWithGoogle,
     this._signInWithApple,
     this._signInWithFacebook,
+    this._signInAnonymously,
     this._signOut,
     this._getCurrentUser,
     this._sendEmailVerification,
@@ -84,10 +91,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
         status: AuthStatus.unauthenticated,
         error: failure.message,
       ),
-      (user) => state = state.copyWith(
-        status: user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated,
-        user: user,
-      ),
+      (user) async {
+        final isAnonymous = user?.isAnonymous ?? false;
+        
+        // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
+        if (user == null && await shouldUseAnonymousMode()) {
+          await signInAnonymously();
+          return;
+        }
+        
+        state = state.copyWith(
+          status: user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated,
+          user: user,
+          isAnonymous: isAnonymous,
+        );
+      },
     );
   }
 
@@ -274,6 +292,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  Future<bool> signInAnonymously() async {
+    state = state.copyWith(status: AuthStatus.loading, error: null);
+
+    final result = await _signInAnonymously(const NoParams());
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          status: AuthStatus.error,
+          error: failure.message,
+        );
+        return false;
+      },
+      (user) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+          isAnonymous: true,
+        );
+        
+        // Salvar preferência de modo anônimo
+        _saveAnonymousPreference();
+        
+        return true;
+      },
+    );
+  }
+
   Future<void> signOut() async {
     state = state.copyWith(status: AuthStatus.loading);
 
@@ -349,6 +395,40 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  // Anonymous authentication helper methods
+  Future<void> _saveAnonymousPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('use_anonymous_mode', true);
+    } catch (e) {
+      // Ignora erros de persistência para não afetar o fluxo principal
+    }
+  }
+
+  Future<bool> shouldUseAnonymousMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('use_anonymous_mode') ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> clearAnonymousPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('use_anonymous_mode');
+    } catch (e) {
+      // Ignora erros de persistência
+    }
+  }
+
+  Future<void> initializeAnonymousIfNeeded() async {
+    if (!state.isAuthenticated && await shouldUseAnonymousMode()) {
+      await signInAnonymously();
+    }
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -358,6 +438,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     getIt<SignInWithGoogle>(),
     getIt<SignInWithApple>(),
     getIt<SignInWithFacebook>(),
+    getIt<SignInAnonymously>(),
     getIt<SignOut>(),
     getIt<GetCurrentUser>(),
     getIt<SendEmailVerification>(),

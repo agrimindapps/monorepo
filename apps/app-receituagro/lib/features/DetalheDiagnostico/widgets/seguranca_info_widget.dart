@@ -90,7 +90,7 @@ class SegurancaInfoWidget extends StatelessWidget {
     final segurancaConfig = _getSegurancaConfig(tipo, valor);
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: segurancaConfig.backgroundColor,
         borderRadius: BorderRadius.circular(12),

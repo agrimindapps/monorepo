@@ -157,7 +157,7 @@ class PragasProvider extends ChangeNotifier {
         allPragasResult.fold(
           (failure) => throw Exception(failure.message),
           (allPragas) {
-            for (final historyItem in historyItems.take(3)) {
+            for (final historyItem in historyItems.take(10)) {
               final praga = allPragas.firstWhere(
                 (p) => p.idReg == historyItem.id || p.nomeComum == historyItem.name,
                 orElse: () => const PragaEntity(
@@ -177,7 +177,7 @@ class PragasProvider extends ChangeNotifier {
             _recentPragas = RandomSelectionService.combineHistoryWithRandom(
               historicPragas,
               allPragas,
-              3,
+              10,
               RandomSelectionService.selectRandomPragas,
             );
           },
@@ -190,7 +190,7 @@ class PragasProvider extends ChangeNotifier {
   }
 
   /// Carrega pragas sugeridas
-  Future<void> loadSuggestedPragas({int limit = 5}) async {
+  Future<void> loadSuggestedPragas({int limit = 10}) async {
     await _executeUseCase(() async {
       // Tenta usar o use case original, mas com fallback para seleção aleatória
       try {

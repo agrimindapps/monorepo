@@ -48,7 +48,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
 
   Widget _buildHeader(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.blue.shade400, Colors.blue.shade600],
@@ -113,7 +113,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
   Widget _buildComparacaoCards(ThemeData theme) {
     return Container(
       height: 200,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: defensivos.length,
@@ -144,7 +144,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
         side: BorderSide(color: cor, width: 2),
       ),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -314,7 +314,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(8.0),
       child: Column(
         children: criterios.map((criterio) {
           return Container(
@@ -336,7 +336,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
               borderRadius: const BorderRadius.only(
@@ -364,7 +364,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               children: (criterio['items'] as List).map<Widget>((item) {
                 return Container(

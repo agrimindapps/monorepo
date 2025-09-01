@@ -61,7 +61,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
       if (authState.isAuthenticated) {
         context.go(SplashConstants.homeRoute);
       } else {
-        context.go(SplashConstants.loginRoute);
+        context.go(SplashConstants.promoRoute);
       }
     });
   }

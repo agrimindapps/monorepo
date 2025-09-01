@@ -6,6 +6,7 @@ import '../repositories/i_user_settings_repository.dart';
 /// Handles default creation, validation, and migration logic.
 class GetUserSettingsUseCase {
   final IUserSettingsRepository _repository;
+  String? _currentUserId; // Track current userId for fixing corrupted data
 
   GetUserSettingsUseCase(this._repository);
 
@@ -14,6 +15,8 @@ class GetUserSettingsUseCase {
     if (userId.isEmpty) {
       throw InvalidUserIdException('User ID cannot be empty');
     }
+
+    _currentUserId = userId; // Store for use in fixing corrupted data
 
     // Try to get existing settings
     var settings = await _repository.getUserSettings(userId);
@@ -75,7 +78,9 @@ class GetUserSettingsUseCase {
     var fixed = settings;
 
     if (settings.userId.isEmpty) {
-      throw InvalidSettingsException('Cannot fix settings with empty user ID');
+      // Handle corrupted data by creating new default settings
+      // This commonly happens with old cached data
+      return UserSettingsEntity.createDefault(_currentUserId ?? 'anonymous-fallback');
     }
 
     if (settings.language.isEmpty) {

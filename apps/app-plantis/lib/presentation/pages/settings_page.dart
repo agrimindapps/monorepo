@@ -10,28 +10,37 @@ import '../../core/theme/plantis_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../features/development/presentation/pages/data_inspector_page.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../../shared/widgets/loading/loading_components.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+  
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ChangeNotifierProvider<SettingsProvider>.value(
-      value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
-      child: Scaffold(
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
-            builder: (context, authProvider, settingsProvider, _) {
-            final user = authProvider.currentUser;
-            
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+    return ContextualLoadingListener(
+      context: LoadingContexts.settings,
+      child: ChangeNotifierProvider<SettingsProvider>.value(
+        value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
+        child: Scaffold(
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
+              builder: (context, authProvider, settingsProvider, _) {
+                final user = authProvider.currentUser;
+                
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 // Header com título e boas-vindas
                 const SizedBox(height: 8),
                 Center(
@@ -437,7 +446,8 @@ class SettingsPage extends StatelessWidget {
                 const SizedBox(height: 40),
               ],
             );
-            },
+              },
+            ),
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
 import '../../features/auth/presentation/providers/register_provider.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
@@ -28,6 +29,7 @@ import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/test_data_generator_service.dart';
+import '../services/url_launcher_service.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
 import '../utils/navigation_service.dart';
@@ -123,9 +125,13 @@ void _initCoreServices() {
   // Image Service
   sl.registerLazySingleton(() => local.ImageService());
 
+  // URL Launcher Service
+  sl.registerLazySingleton(() => UrlLauncherService());
+
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl(), sl()));
+  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
 }
 
 void _initAuth() {
@@ -138,6 +144,7 @@ void _initAuth() {
       loginUseCase: sl(),
       logoutUseCase: sl(),
       authRepository: sl(),
+      resetPasswordUseCase: sl(),
       subscriptionRepository: sl<ISubscriptionRepository>(),
     ),
   );
@@ -246,7 +253,6 @@ void _initBackup() {
   sl.registerFactory(
     () => BackupSettingsProvider(
       backupService: sl<BackupService>(),
-      subscriptionRepository: sl<ISubscriptionRepository>(),
       connectivity: sl<Connectivity>(),
     ),
   );

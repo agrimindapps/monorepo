@@ -3,10 +3,18 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
+import '../../core/services/data_sanitization_service.dart';
 import '../../core/theme/plantis_colors.dart';
+import '../../shared/widgets/loading/loading_components.dart';
 
-class AccountProfilePage extends StatelessWidget {
+class AccountProfilePage extends StatefulWidget {
   const AccountProfilePage({super.key});
+  
+  @override
+  State<AccountProfilePage> createState() => _AccountProfilePageState();
+}
+
+class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPageMixin {
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,7 @@ class AccountProfilePage extends StatelessWidget {
                       CircleAvatar(
                         radius: 30,
                         backgroundColor: PlantisColors.primary,
-                        child: user?.hasProfilePhoto == true
+                        child: DataSanitizationService.shouldShowProfilePhoto(user, isAnonymous)
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(30),
                                 child: Image.network(
@@ -60,7 +68,7 @@ class AccountProfilePage extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Text(
-                                      user.initials,
+                                      DataSanitizationService.sanitizeInitials(user, isAnonymous),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,
@@ -71,7 +79,7 @@ class AccountProfilePage extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                user?.initials ?? 'UA',
+                                DataSanitizationService.sanitizeInitials(user, isAnonymous),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -87,14 +95,14 @@ class AccountProfilePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user?.displayName ?? 'Usuário Anônimo',
+                              DataSanitizationService.sanitizeDisplayName(user, isAnonymous),
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              user?.email ?? 'usuario@anonimo.com',
+                              DataSanitizationService.sanitizeEmail(user, isAnonymous),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -296,8 +304,16 @@ class AccountProfilePage extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
+              
+              // Start auth loading
+              startAuthLoading(operation: 'Fazendo logout...');
+              
               try {
                 await authProvider.logout();
+                
+                // Stop loading
+                stopAuthLoading();
+                
                 if (context.mounted) {
                   context.go('/welcome');
                 }
@@ -305,7 +321,7 @@ class AccountProfilePage extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Erro ao sair: $e'),
+                      content: Text('Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}'),
                       backgroundColor: Theme.of(context).colorScheme.error,
                     ),
                   );
@@ -568,7 +584,7 @@ class AccountProfilePage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text('suporte@plantapp.com'),
+                  Text(DataSanitizationService.getSupportContactInfo()['email']!),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -584,7 +600,7 @@ class AccountProfilePage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text('Respondemos em até 48 horas'),
+                  Text(DataSanitizationService.getSupportContactInfo()['response_time']!),
                 ],
               ),
             ),

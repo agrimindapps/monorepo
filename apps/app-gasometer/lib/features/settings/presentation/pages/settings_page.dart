@@ -1,7 +1,9 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/data_cleaner_service.dart';
@@ -9,8 +11,36 @@ import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import 'database_inspector_page.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _globalErrorBoundaryEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadErrorBoundaryPreference();
+  }
+
+  Future<void> _loadErrorBoundaryPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _globalErrorBoundaryEnabled = prefs.getBool('global_error_boundary_enabled') ?? true;
+    });
+  }
+
+  Future<void> _saveErrorBoundaryPreference(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('global_error_boundary_enabled', enabled);
+    setState(() {
+      _globalErrorBoundaryEnabled = enabled;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -406,6 +436,23 @@ class SettingsPage extends StatelessWidget {
       title: 'Desenvolvimento',
       icon: Icons.developer_mode,
       children: [
+        // 🚨 Toggle GlobalErrorBoundary
+        _buildSettingsItem(
+          context,
+          icon: _globalErrorBoundaryEnabled ? Icons.shield : Icons.shield_outlined,
+          title: 'Global Error Boundary',
+          subtitle: _globalErrorBoundaryEnabled 
+              ? 'Ativo - Captura erros globalmente'
+              : '⚠️ DESABILITADO - Erros aparecem diretamente',
+          onTap: () => _showErrorBoundaryToggleDialog(context),
+          trailing: Switch(
+            value: _globalErrorBoundaryEnabled,
+            onChanged: (enabled) {
+              _saveErrorBoundaryPreference(enabled);
+              _showRestartMessage(context);
+            },
+          ),
+        ),
         _buildSettingsItem(
           context,
           icon: Icons.science,
@@ -847,6 +894,141 @@ class SettingsPage extends StatelessWidget {
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
+  /// Dialog explicativo sobre o GlobalErrorBoundary
+  void _showErrorBoundaryToggleDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                _globalErrorBoundaryEnabled ? Icons.shield : Icons.shield_outlined,
+                color: _globalErrorBoundaryEnabled ? Colors.green : Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              const Text('Global Error Boundary'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Controla como erros são tratados na aplicação:',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 16),
+              
+              // Estado Ativo
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.shield, color: Colors.green, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ATIVO (Recomendado)',
+                             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                        Text('• Captura erros globalmente'),
+                        Text('• Exibe tela de erro amigável'),
+                        Text('• Permite recuperação da aplicação'),
+                        Text('• Usuário final não vê crashes'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Estado Desabilitado
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.shield_outlined, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('DESABILITADO (Debug)',
+                             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                        Text('⚠️ Erros aparecem diretamente'),
+                        Text('• Melhor para debug/desenvolvimento'),
+                        Text('• Mostra stack traces completos'),
+                        Text('• App pode crashar completamente'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info, color: Colors.amber[700], size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Mudanças requerem reinicialização do app para ter efeito.',
+                        style: TextStyle(fontSize: 12, color: Colors.amber[700]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Mensagem de reinicialização necessária
+  void _showRestartMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.restart_alt, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Configuração salva. Reinicie o app para aplicar mudanças.',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
       ),
     );
   }

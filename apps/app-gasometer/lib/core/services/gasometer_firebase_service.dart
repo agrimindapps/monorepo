@@ -13,6 +13,61 @@ class GasometerFirebaseService {
   static const String _appId = 'gasometer';
   
   static final AnalyticsService _analytics = AnalyticsService();
+  
+  /// Diagnóstico de conectividade Firebase
+  static Future<Map<String, dynamic>> checkFirebaseConnectivity() async {
+    final result = <String, dynamic>{
+      'timestamp': DateTime.now().toIso8601String(),
+      'connectivity': {},
+      'firestore': {},
+      'errors': <String>[],
+    };
+    
+    try {
+      // Test basic connectivity
+      result['connectivity']['internet'] = await _hasInternetConnection();
+      
+      // Test Firestore connectivity
+      final startTime = DateTime.now();
+      await FirebaseFirestore.instance
+          .collection('_health_check')
+          .doc('test')
+          .set({'timestamp': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+      
+      final duration = DateTime.now().difference(startTime);
+      result['firestore']['write_success'] = true;
+      result['firestore']['write_duration_ms'] = duration.inMilliseconds;
+      result['firestore']['status'] = 'connected';
+      
+      print('✅ Firebase connectivity test successful (${duration.inMilliseconds}ms)');
+      
+    } catch (e) {
+      result['firestore']['write_success'] = false;
+      result['firestore']['status'] = 'failed';
+      result['errors'].add('Firestore test failed: $e');
+      
+      print('❌ Firebase connectivity test failed: $e');
+      
+      // Log analytics event
+      _analytics.logEvent('firebase_connectivity_test', {
+        'success': false,
+        'error': e.toString(),
+        'app_id': _appId,
+      });
+    }
+    
+    return result;
+  }
+  
+  /// Verifica conectividade básica com internet
+  static Future<bool> _hasInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('firebase.googleapis.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Salvar dados de abastecimento
   static Future<void> saveFuelData({

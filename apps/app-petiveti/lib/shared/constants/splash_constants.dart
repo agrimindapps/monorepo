@@ -39,22 +39,52 @@ class SplashConstants {
 
   // App text content
   static const String appName = 'PetiVeti';
-  static const String appTagline = 'Cuidando do seu melhor amigo';
+  static const String appTagline = 'Cuidados completos para seu melhor amigo';
+  static const String appDescription = 'O aplicativo mais completo para tutores que se preocupam com a saúde e bem-estar de seus pets. Acompanhe vacinas, medicamentos, peso, consultas e muito mais.';
+  static const String launchStatus = 'EM BREVE';
+  
+  // Launch Information
+  static final DateTime launchDate = DateTime(2025, 10, 1);
+  static const String launchDateFormatted = '1/10/2025';
+  
+  // Hero image URL
+  static const String heroImageUrl = 'https://fkjakafxqciukoesqvkp.supabase.co/storage/v1/object/public/agrihurb/website/vetipeti.png';
 
   // Routes
   static const String homeRoute = '/';
-  static const String loginRoute = '/login';
+  static const String promoRoute = '/promo';
 }
 
-/// Color constants for the splash page
+/// Color constants for the splash page and promo
 /// For theme-aware colors, use these methods with Theme.of(context)
 class SplashColors {
   // Private constructor to prevent instantiation
   SplashColors._();
 
+  // Main Theme Colors
+  static const Color primaryColor = Color(0xFF6A1B9A); // Purple 800
+  static const Color accentColor = Color(0xFF03A9F4); // Light Blue 500
+  static const Color backgroundColor = Color(0xFFF5F5F5); // Grey 100
+  static const Color textColor = Color(0xFF333333); // Dark Grey
+  static const Color whiteColor = Colors.white;
+  static const Color blackColor = Colors.black;
+
+  // Feature Colors
+  static const Color petProfilesColor = Color(0xFF6A1B9A); // Purple 700
+  static const Color vaccinesColor = Color(0xFFD32F2F); // Red 600
+  static const Color medicationsColor = Color(0xFF388E3C); // Green 700
+  static const Color weightControlColor = Color(0xFFFF8F00); // Orange 700
+  static const Color appointmentsColor = Color(0xFF1976D2); // Blue 600
+  static const Color remindersColor = Color(0xFF00796B); // Teal 700
+
+  // Hero Gradient
+  static const List<Color> heroGradient = [
+    Color(0xFF6A1B9A), // Purple 800
+    Color(0xFF4A148C), // Purple 900
+  ];
+
   // Background colors
-  static Color getBackgroundColor(BuildContext context) => 
-      Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1);
+  static Color getBackgroundColor(BuildContext context) => backgroundColor;
       
   static Color getLogoContainerColor(BuildContext context) => 
       Theme.of(context).colorScheme.surface;
@@ -77,8 +107,7 @@ class SplashColors {
   static Color getShadowColor(BuildContext context) => 
       Theme.of(context).colorScheme.primary.withValues(alpha: SplashConstants.logoShadowOpacity);
       
-  // Fallback static colors for backwards compatibility
-  static Color backgroundColor = Colors.blue[50]!;
+  // Legacy static colors for backwards compatibility (removed duplicate backgroundColor)
   static const Color logoContainerColor = Colors.white;
   static const Color logoIconColor = Colors.blue;
   static Color titleColor = Colors.blue[700]!;

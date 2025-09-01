@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/subscription_service.dart';
+import '../widgets/auth_guard.dart';
+import 'home_page.dart';
 
 class PremiumPage extends ConsumerStatefulWidget {
   const PremiumPage({super.key});
@@ -119,6 +121,17 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AuthGuard(child: HomePage()),
+              ),
+            );
+          },
+        ),
         actions: [
           TextButton(
             onPressed: _restorePurchases,
@@ -235,6 +248,29 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                       ],
                     ),
                   ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Continue without Premium button
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AuthGuard(child: HomePage()),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Continuar sem Premium',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

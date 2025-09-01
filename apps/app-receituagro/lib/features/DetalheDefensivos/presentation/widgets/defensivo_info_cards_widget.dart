@@ -153,7 +153,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
         children: [
           // Header do card
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -196,7 +196,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
           ),
           // Conteúdo do card
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,

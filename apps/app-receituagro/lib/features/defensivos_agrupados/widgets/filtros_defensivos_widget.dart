@@ -72,7 +72,7 @@ class FiltrosDefensivosWidget extends StatelessWidget {
         ),
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 // Primeira linha: Ordenação e Toxicidade
@@ -252,7 +252,7 @@ class FiltrosDefensivosWidget extends StatelessWidget {
 
   Widget _buildFiltrosBooleanos(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),

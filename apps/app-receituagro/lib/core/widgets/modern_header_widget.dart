@@ -136,21 +136,22 @@ class ModernHeaderWidget extends StatelessWidget {
                   )),
             ],
 
-            GestureDetector(
-              onTap: onRightIconPressed,
-              child: Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(
-                  rightIcon ?? Icons.more_vert,
-                  color: Colors.white,
-                  size: 17,
+            if (rightIcon != null || onRightIconPressed != null)
+              GestureDetector(
+                onTap: onRightIconPressed,
+                child: Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(
+                    rightIcon ?? Icons.more_vert,
+                    color: Colors.white,
+                    size: 17,
+                  ),
                 ),
               ),
-            ),
           ],
         ],
       ),

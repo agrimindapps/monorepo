@@ -38,7 +38,7 @@ class DefensivoCompletoCardWidget extends StatelessWidget {
         onTap: modoComparacao ? onSelecaoChanged : onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -135,7 +135,7 @@ class DefensivoCompletoCardWidget extends StatelessWidget {
 
   Widget _buildInformacoesBasicas(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
@@ -234,7 +234,7 @@ class DefensivoCompletoCardWidget extends StatelessWidget {
 
   Widget _buildEstatisticasUso(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [

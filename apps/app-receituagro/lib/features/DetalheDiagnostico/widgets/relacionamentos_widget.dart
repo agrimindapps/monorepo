@@ -132,7 +132,7 @@ class RelacionamentosWidget extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               Container(
@@ -192,7 +192,7 @@ class RelacionamentosWidget extends StatelessWidget {
 
   Widget _buildEstatisticasCard(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [

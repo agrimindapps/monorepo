@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/register_loading_overlay.dart';
-import '../providers/register_provider.dart';
 import '../../utils/validation_helpers.dart';
+import '../providers/register_provider.dart';
 
 class RegisterPersonalInfoPage extends StatefulWidget {
   const RegisterPersonalInfoPage({super.key});

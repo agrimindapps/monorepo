@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/di/injection_container.dart';
 import 'core/presentation/widgets/global_error_boundary.dart';
@@ -15,8 +17,38 @@ import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/reports/presentation/providers/reports_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
 
-class GasOMeterApp extends StatelessWidget {
+class GasOMeterApp extends StatefulWidget {
   const GasOMeterApp({super.key});
+
+  @override
+  State<GasOMeterApp> createState() => _GasOMeterAppState();
+}
+
+class _GasOMeterAppState extends State<GasOMeterApp> {
+  bool _globalErrorBoundaryEnabled = true;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadErrorBoundaryPreference();
+  }
+
+  Future<void> _loadErrorBoundaryPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _globalErrorBoundaryEnabled = prefs.getBool('global_error_boundary_enabled') ?? true;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Se falhar, manter como ativo por segurança
+      setState(() {
+        _globalErrorBoundaryEnabled = true;
+        _isLoading = false;
+      });
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -85,20 +117,33 @@ class GasOMeterApp extends StatelessWidget {
         builder: (context, child) {
           final router = AppRouter.router(context);
           
-          return GlobalErrorBoundary(
-            child: Consumer<ThemeProvider>(
-              builder: (context, themeProvider, _) {
-                return MaterialApp.router(
-                  title: 'GasOMeter - Controle de Veículos',
-                  theme: GasometerTheme.lightTheme,
-                  darkTheme: GasometerTheme.darkTheme,
-                  themeMode: themeProvider.themeMode,
-                  routerConfig: router,
-                  debugShowCheckedModeBanner: false,
-                );
-              },
-            ),
+          final app = Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return MaterialApp.router(
+                title: 'GasOMeter - Controle de Veículos',
+                theme: GasometerTheme.lightTheme,
+                darkTheme: GasometerTheme.darkTheme,
+                themeMode: themeProvider.themeMode,
+                routerConfig: router,
+                debugShowCheckedModeBanner: false,
+              );
+            },
           );
+          
+          // Enquanto carrega as preferências, usar configuração padrão
+          if (_isLoading) {
+            return app; // Temporariamente sem ErrorBoundary durante loading
+          }
+          
+          // 🚨 DEBUG: GlobalErrorBoundary pode ser desabilitado via configurações
+          if (!_globalErrorBoundaryEnabled) {
+            if (kDebugMode) {
+              debugPrint('🚨 GlobalErrorBoundary DESABILITADO via configurações');
+            }
+            return app;
+          }
+          
+          return GlobalErrorBoundary(child: app);
         },
       );
   }

@@ -118,7 +118,7 @@ class _PragasListViewState extends State<PragasListView> {
         children: [
           // Cabeçalho com busca e filtros
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 // TODO: Implementar widgets de busca e filtro

@@ -44,12 +44,19 @@ class _PromoPageState extends State<PromoPage> {
   }
 
   void _checkAuthenticationAndRedirect() {
+    // Verificar se o widget ainda está montado antes de acessar o context
+    if (!mounted) return;
+    
     final authProvider = context.read<AuthProvider>();
     
     // Se o usuário estiver autenticado (incluindo anônimo), redirecionar para a página interna
     if (authProvider.isAuthenticated) {
       debugPrint('🔐 Usuário autenticado na página promocional, redirecionando para página interna');
-      context.go('/');
+      
+      // Verificar novamente se ainda está montado antes da navegação
+      if (mounted) {
+        context.go('/');
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/image_service.dart';
 import '../../domain/usecases/spaces_usecases.dart';
+import '../../../auth/utils/validation_helpers.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';
@@ -363,25 +364,49 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Plant name (required)
+            // Plant name (required) with security validation
             _buildTextField(
               controller: _nameController,
               label: 'Nome da planta',
               hint: 'Ex: Minha Rosa Vermelha',
               isRequired: true,
               errorText: fieldErrors['name'],
-              onChanged: provider.setName,
+              onChanged: (value) {
+                // Sanitize input before processing
+                final sanitizedValue = ValidationHelpers.sanitizePlantName(value);
+                provider.setName(sanitizedValue);
+                // Update controller if sanitization changed the value
+                if (sanitizedValue != value) {
+                  _nameController.text = sanitizedValue;
+                  _nameController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: sanitizedValue.length),
+                  );
+                }
+              },
+              validator: (value) => _validatePlantName(value),
               icon: Icons.local_florist,
             ),
 
             const SizedBox(height: 20),
 
-            // Plant species (optional)
+            // Plant species (optional) with security validation
             _buildTextField(
               controller: _speciesController,
               label: 'Espécie',
               hint: 'Ex: Rosa gallica',
-              onChanged: provider.setSpecies,
+              onChanged: (value) {
+                // Sanitize input before processing
+                final sanitizedValue = ValidationHelpers.sanitizePlantName(value);
+                provider.setSpecies(sanitizedValue);
+                // Update controller if sanitization changed the value
+                if (sanitizedValue != value) {
+                  _speciesController.text = sanitizedValue;
+                  _speciesController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: sanitizedValue.length),
+                  );
+                }
+              },
+              validator: (value) => _validateSpecies(value),
               icon: Icons.science,
             ),
 
@@ -410,13 +435,25 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
             const SizedBox(height: 20),
 
-            // Notes (optional)
+            // Notes (optional) with security validation
             _buildTextField(
               controller: _notesController,
               label: 'Observações',
               hint: 'Adicione notas sobre a planta...',
               maxLines: 4,
-              onChanged: provider.setNotes,
+              onChanged: (value) {
+                // Sanitize input before processing
+                final sanitizedValue = ValidationHelpers.sanitizeNotes(value);
+                provider.setNotes(sanitizedValue);
+                // Update controller if sanitization changed the value
+                if (sanitizedValue != value) {
+                  _notesController.text = sanitizedValue;
+                  _notesController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: sanitizedValue.length),
+                  );
+                }
+              },
+              validator: (value) => _validateNotes(value),
               icon: Icons.note,
             ),
           ],
@@ -434,6 +471,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     String? errorText,
     bool isRequired = false,
     int maxLines = 1,
+    String? Function(String?)? validator,
   }) {
     final theme = Theme.of(context);
 
@@ -466,6 +504,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           controller: controller,
           maxLines: maxLines,
           onChanged: onChanged,
+          validator: validator,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(
@@ -691,5 +730,69 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       // Espaço existente selecionado
       plantProvider.setSpaceId(value);
     }
+  }
+  
+  /// Validates plant name with security checks
+  String? _validatePlantName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Por favor, insira o nome da planta';
+    }
+    
+    final trimmedValue = value.trim();
+    
+    if (trimmedValue.length < 2) {
+      return 'Nome deve ter pelo menos 2 caracteres';
+    }
+    
+    if (trimmedValue.length > 100) {
+      return 'Nome muito longo (máximo 100 caracteres)';
+    }
+    
+    // Check for potentially malicious characters
+    if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedValue)) {
+      return 'Nome contém caracteres não permitidos';
+    }
+    
+    return null;
+  }
+  
+  /// Validates plant species with security checks
+  String? _validateSpecies(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Species is optional
+    }
+    
+    final trimmedValue = value.trim();
+    
+    if (trimmedValue.length > 100) {
+      return 'Espécie muito longa (máximo 100 caracteres)';
+    }
+    
+    // Check for potentially malicious characters
+    if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedValue)) {
+      return 'Espécie contém caracteres não permitidos';
+    }
+    
+    return null;
+  }
+  
+  /// Validates notes with security checks
+  String? _validateNotes(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Notes are optional
+    }
+    
+    final trimmedValue = value.trim();
+    
+    if (trimmedValue.length > 1000) {
+      return 'Observações muito longas (máximo 1000 caracteres)';
+    }
+    
+    // Check for potentially malicious characters (allow newlines for notes)
+    if (RegExp(r'[<>"\\]').hasMatch(trimmedValue)) {
+      return 'Observações contêm caracteres não permitidos';
+    }
+    
+    return null;
   }
 }

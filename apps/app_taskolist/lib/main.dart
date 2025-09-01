@@ -16,6 +16,7 @@ import 'infrastructure/services/crashlytics_service.dart';
 import 'infrastructure/services/notification_service.dart';
 import 'infrastructure/services/performance_service.dart';
 import 'presentation/pages/home_page.dart';
+import 'presentation/pages/promotional_page.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/widgets/auth_guard.dart';
 
@@ -23,9 +24,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Configurar Crashlytics para capturar erros Flutter
   if (!kIsWeb) {
@@ -56,10 +55,12 @@ void main() async {
   NavigationService.initialize(providerContainer);
   NotificationActionsService.initialize(providerContainer);
 
-  runApp(UncontrolledProviderScope(
-    container: providerContainer,
-    child: const TaskManagerApp(),
-  ));
+  runApp(
+    UncontrolledProviderScope(
+      container: providerContainer,
+      child: const TaskManagerApp(),
+    ),
+  );
 }
 
 Future<void> _initializeFirebaseServices() async {
@@ -98,11 +99,14 @@ Future<void> _initializeFirebaseServices() async {
 
     // Log de inicialização bem-sucedida
     await crashlyticsService.log('App initialized successfully');
-    await analyticsService.logEvent('app_initialized', parameters: {
-      'platform': 'flutter',
-      'environment': kDebugMode ? 'debug' : 'production',
-      'notifications_enabled': notificationInitialized,
-    });
+    await analyticsService.logEvent(
+      'app_initialized',
+      parameters: {
+        'platform': 'flutter',
+        'environment': kDebugMode ? 'debug' : 'production',
+        'notifications_enabled': notificationInitialized,
+      },
+    );
 
     debugPrint('🚀 Firebase services initialized successfully');
 
@@ -160,9 +164,7 @@ class TaskManagerApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       navigatorKey: NavigationService.navigatorKey,
-      home: const AuthGuard(
-        child: HomePage(),
-      ),
+      home: const PromotionalPage(),
     );
   }
 }

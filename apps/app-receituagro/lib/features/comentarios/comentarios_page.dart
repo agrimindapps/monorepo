@@ -51,6 +51,8 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
     super.initState();
     // Initialize data loading in initState instead of build method
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       _initializeData();
     });
   }
@@ -90,8 +92,9 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
                   if (!isPremium) {
                     return Center(
                       child: Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(24),
+                        width: 280,
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF3E0),
                           borderRadius: BorderRadius.circular(16),
@@ -242,7 +245,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
               shape: BoxShape.circle,
@@ -277,7 +280,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
 
   Widget _buildComentariosList(List<ComentarioEntity> comentarios) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8.0),
       itemCount: comentarios.length,
       itemBuilder: (context, index) {
         final comentario = comentarios[index];
@@ -811,7 +814,7 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
                     width: 2,
                   ),
                 ),
-                contentPadding: const EdgeInsets.all(16),
+                contentPadding: const EdgeInsets.all(8.0),
                 counterText: '',
               ),
             ),

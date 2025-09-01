@@ -35,7 +35,10 @@ class _FuelPageState extends State<FuelPage> {
     _vehiclesProvider = context.read<VehiclesProvider>();
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
+      // Verificar se o widget ainda está montado antes de carregar dados
+      if (mounted) {
+        _loadData();
+      }
     });
   }
 

@@ -27,40 +27,49 @@ class MainBottomNavigation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
+    return Stack(
+      children: [
+        child, // This will be the individual page with its own Scaffold
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: MainTab.values.map((tab) {
-                final isSelected = _isTabSelected(tab, currentLocation);
-                
-                return _NavBarItem(
-                  tab: tab,
-                  isSelected: isSelected,
-                  onTap: () {
-                    ref.read(currentTabProvider.notifier).state = tab;
-                    _navigateToTab(context, tab);
-                  },
-                );
-              }).toList(),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: MainTab.values.map((tab) {
+                    final isSelected = _isTabSelected(tab, currentLocation);
+                    
+                    return Expanded(
+                      child: _NavBarItem(
+                        tab: tab,
+                        isSelected: isSelected,
+                        onTap: () {
+                          ref.read(currentTabProvider.notifier).state = tab;
+                          _navigateToTab(context, tab);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -121,12 +130,14 @@ class _NavBarItem extends StatelessWidget {
     
     final tabInfo = _getTabInfo(tab);
     
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected 
               ? colorScheme.primary.withValues(alpha: 0.1)
@@ -135,6 +146,7 @@ class _NavBarItem extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -154,10 +166,12 @@ class _NavBarItem extends StatelessWidget {
                     ? colorScheme.primary
                     : colorScheme.onSurfaceVariant,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 10,
               ),
               child: Text(tabInfo['label'] as String? ?? ''),
             ),
           ],
+        ),
         ),
       ),
     );

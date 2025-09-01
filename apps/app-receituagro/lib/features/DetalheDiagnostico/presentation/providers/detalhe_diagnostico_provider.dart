@@ -1,0 +1,222 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/diagnostico_hive_extension.dart';
+import '../../../../core/interfaces/i_premium_service.dart';
+import '../../../../core/models/diagnostico_hive.dart';
+import '../../../../core/repositories/diagnostico_hive_repository.dart';
+import '../../../../core/repositories/favoritos_hive_repository.dart';
+
+class DetalheDiagnosticoProvider extends ChangeNotifier {
+  final DiagnosticoHiveRepository _repository = sl<DiagnosticoHiveRepository>();
+  final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
+  final IPremiumService _premiumService = sl<IPremiumService>();
+
+  // Estado do loading e erro
+  bool _isLoading = false;
+  bool _hasError = false;
+  String? _errorMessage;
+
+  // Estado dos dados
+  DiagnosticoHive? _diagnostico;
+  Map<String, String> _diagnosticoData = {};
+  bool _isFavorited = false;
+  bool _isPremium = false;
+
+  // Estado do compartilhamento
+  bool _isSharingContent = false;
+
+  // Getters
+  bool get isLoading => _isLoading;
+  bool get hasError => _hasError;
+  String? get errorMessage => _errorMessage;
+  DiagnosticoHive? get diagnostico => _diagnostico;
+  Map<String, String> get diagnosticoData => _diagnosticoData;
+  bool get isFavorited => _isFavorited;
+  bool get isPremium => _isPremium;
+  bool get isSharingContent => _isSharingContent;
+
+  /// Carrega os dados do diagnóstico
+  Future<void> loadDiagnosticoData(String diagnosticoId) async {
+    _setLoadingState(true);
+    
+    try {
+      // Verifica se há dados na base local
+      final totalDiagnosticos = _repository.count;
+      
+      // Busca diagnóstico por ID
+      final diagnostico = _repository.getById(diagnosticoId);
+      
+      if (diagnostico != null) {
+        _diagnostico = diagnostico;
+        _diagnosticoData = diagnostico.toDataMap();
+        _setLoadingState(false);
+      } else {
+        _setErrorState(
+          totalDiagnosticos == 0
+              ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
+              : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.'
+        );
+      }
+    } catch (e) {
+      _setErrorState('Erro ao acessar dados locais: $e. Tente reiniciar o aplicativo ou resincronizar os dados.');
+    }
+  }
+
+  /// Carrega o status de premium do usuário
+  Future<void> loadPremiumStatus() async {
+    try {
+      final premium = await _premiumService.isPremiumUser();
+      _isPremium = premium;
+      notifyListeners();
+    } catch (e) {
+      // Em caso de erro, manter como não premium
+      _isPremium = false;
+      notifyListeners();
+    }
+  }
+
+  /// Carrega o estado de favorito
+  void loadFavoritoState(String diagnosticoId) {
+    _isFavorited = _favoritosRepository.isFavorito('diagnosticos', diagnosticoId);
+    notifyListeners();
+  }
+
+  /// Alterna o estado de favorito
+  Future<bool> toggleFavorito(String diagnosticoId, Map<String, String> itemData) async {
+    final wasAlreadyFavorited = _isFavorited;
+    
+    // Atualiza UI otimisticamente
+    _isFavorited = !wasAlreadyFavorited;
+    notifyListeners();
+
+    // Executa operação
+    final success = wasAlreadyFavorited
+        ? await _favoritosRepository.removeFavorito('diagnosticos', diagnosticoId)
+        : await _favoritosRepository.addFavorito('diagnosticos', diagnosticoId, itemData);
+
+    if (!success) {
+      // Reverter estado em caso de falha
+      _isFavorited = wasAlreadyFavorited;
+      notifyListeners();
+    }
+
+    return success;
+  }
+
+  /// Cria texto para compartilhamento
+  String buildShareText(String diagnosticoId, String nomeDefensivo, String nomePraga, String cultura) {
+    final buffer = StringBuffer();
+    
+    // Header
+    buffer.writeln('🔬 DIAGNÓSTICO RECEITUAGRO');
+    buffer.writeln('═' * 30);
+    buffer.writeln();
+    
+    // Informações básicas
+    buffer.writeln('📋 INFORMAÇÕES GERAIS');
+    buffer.writeln('• Defensivo: $nomeDefensivo');
+    buffer.writeln('• Praga: $nomePraga');
+    buffer.writeln('• Cultura: $cultura');
+    buffer.writeln();
+    
+    // Ingrediente ativo e classificações
+    if (_diagnosticoData['ingredienteAtivo']?.isNotEmpty ?? false) {
+      buffer.writeln('🧪 INGREDIENTE ATIVO');
+      buffer.writeln('• ${_diagnosticoData['ingredienteAtivo']}');
+      buffer.writeln();
+    }
+    
+    buffer.writeln('⚠️ CLASSIFICAÇÕES');
+    buffer.writeln('• Toxicológica: ${_diagnosticoData['toxico'] ?? 'N/A'}');
+    buffer.writeln('• Ambiental: ${_diagnosticoData['classAmbiental'] ?? 'N/A'}');
+    buffer.writeln('• Agronômica: ${_diagnosticoData['classeAgronomica'] ?? 'N/A'}');
+    buffer.writeln();
+    
+    // Detalhes técnicos
+    buffer.writeln('🔧 DETALHES TÉCNICOS');
+    if (_diagnosticoData['formulacao']?.isNotEmpty ?? false) {
+      buffer.writeln('• Formulação: ${_diagnosticoData['formulacao']}');
+    }
+    if (_diagnosticoData['modoAcao']?.isNotEmpty ?? false) {
+      buffer.writeln('• Modo de Ação: ${_diagnosticoData['modoAcao']}');
+    }
+    if (_diagnosticoData['mapa']?.isNotEmpty ?? false) {
+      buffer.writeln('• Registro MAPA: ${_diagnosticoData['mapa']}');
+    }
+    buffer.writeln();
+    
+    // Aplicação
+    buffer.writeln('💧 INSTRUÇÕES DE APLICAÇÃO');
+    if (_diagnosticoData['dosagem']?.isNotEmpty ?? false) {
+      buffer.writeln('• Dosagem: ${_diagnosticoData['dosagem']}');
+    }
+    if (_diagnosticoData['vazaoTerrestre']?.isNotEmpty ?? false) {
+      buffer.writeln('• Vazão Terrestre: ${_diagnosticoData['vazaoTerrestre']}');
+    }
+    if (_diagnosticoData['vazaoAerea']?.isNotEmpty ?? false) {
+      buffer.writeln('• Vazão Aérea: ${_diagnosticoData['vazaoAerea']}');
+    }
+    if (_diagnosticoData['intervaloAplicacao']?.isNotEmpty ?? false) {
+      buffer.writeln('• Intervalo de Aplicação: ${_diagnosticoData['intervaloAplicacao']}');
+    }
+    if (_diagnosticoData['intervaloSeguranca']?.isNotEmpty ?? false) {
+      buffer.writeln('• Intervalo de Segurança: ${_diagnosticoData['intervaloSeguranca']}');
+    }
+    buffer.writeln();
+    
+    // Tecnologia se disponível
+    if (_diagnosticoData['tecnologia']?.isNotEmpty ?? false) {
+      buffer.writeln('🎯 TECNOLOGIA DE APLICAÇÃO');
+      buffer.writeln(_diagnosticoData['tecnologia']);
+      buffer.writeln();
+    }
+    
+    // Footer
+    buffer.writeln('═' * 30);
+    buffer.writeln('📱 Gerado pelo ReceitaAgro');
+    buffer.writeln('Sua ferramenta de diagnóstico agrícola');
+    
+    return buffer.toString();
+  }
+
+  /// Copia texto para área de transferência
+  Future<bool> copyToClipboard(String text) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Define estado de loading
+  void _setLoadingState(bool loading) {
+    _isLoading = loading;
+    _hasError = false;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Define estado de erro
+  void _setErrorState(String message) {
+    _isLoading = false;
+    _hasError = true;
+    _errorMessage = message;
+    notifyListeners();
+  }
+
+  /// Reinicia dados para nova consulta
+  void reset() {
+    _isLoading = false;
+    _hasError = false;
+    _errorMessage = null;
+    _diagnostico = null;
+    _diagnosticoData = {};
+    _isFavorited = false;
+    _isSharingContent = false;
+    notifyListeners();
+  }
+
+}

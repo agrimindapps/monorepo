@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
 import '../../core/widgets/loading_overlay.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -14,7 +16,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AccessibilityFocusMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -49,6 +51,8 @@ class _LandingPageState extends State<LandingPage>
 
     // Verifica se o usuário já está logado e redireciona
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
       _checkUserLoginStatus();
     });
   }
@@ -109,7 +113,8 @@ class _LandingPageState extends State<LandingPage>
       ),
       child: Center(
         child: Semantics(
-          label: 'Carregando aplicativo Plantis',
+          label: AccessibilityTokens.getSemanticLabel('loading', 'Carregando aplicativo Plantis'),
+          liveRegion: true,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -251,16 +256,22 @@ class _LandingPageState extends State<LandingPage>
           const Spacer(),
 
           // Login button
-          ElevatedButton(
-            onPressed: () => context.go('/login'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: PlantisColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              elevation: 2,
+          AccessibleButton(
+            onPressed: () {
+              AccessibilityTokens.performHapticFeedback('light');
+              context.go('/login');
+            },
+            semanticLabel: AccessibilityTokens.getSemanticLabel('login_button', 'Ir para página de login'),
+            tooltip: 'Fazer login no aplicativo',
+            minimumSize: const Size(
+              AccessibilityTokens.recommendedTouchTargetSize + 32, 
+              AccessibilityTokens.recommendedTouchTargetSize,
+            ),
+            backgroundColor: Colors.white,
+            foregroundColor: PlantisColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
             ),
             child: const Text(
               'Entrar',
@@ -299,14 +310,17 @@ class _LandingPageState extends State<LandingPage>
                   const SizedBox(height: 32),
 
                   // Main title
-                  const Text(
-                    'Cuide das Suas Plantas\ncom Amor e Tecnologia',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      'Cuide das Suas Plantas\ncom Amor e Tecnologia',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: AccessibilityTokens.getAccessibleFontSize(context, 32),
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -326,21 +340,28 @@ class _LandingPageState extends State<LandingPage>
                   // CTA Button
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => context.go('/login'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: PlantisColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 4,
+                    child: AccessibleButton(
+                      onPressed: () {
+                        AccessibilityTokens.performHapticFeedback('medium');
+                        context.go('/login');
+                      },
+                      semanticLabel: 'Começar a usar o Plantis gratuitamente',
+                      tooltip: 'Criar conta ou fazer login no aplicativo',
+                      minimumSize: const Size(
+                        double.infinity, 
+                        AccessibilityTokens.largeTouchTargetSize,
                       ),
-                      child: const Text(
+                      backgroundColor: Colors.white,
+                      foregroundColor: PlantisColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      hapticPattern: 'medium',
+                      child: Text(
                         'Começar Agora - É Grátis!',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -360,12 +381,15 @@ class _LandingPageState extends State<LandingPage>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
       child: Column(
         children: [
-          const Text(
-            'Por que escolher o Plantis?',
-            style: TextStyle(
-              color: PlantisColors.primary,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          Semantics(
+            header: true,
+            child: Text(
+              'Por que escolher o Plantis?',
+              style: TextStyle(
+                color: PlantisColors.primary,
+                fontSize: AccessibilityTokens.getAccessibleFontSize(context, 28),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: 16),

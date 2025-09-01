@@ -1,0 +1,158 @@
+name: Quality Gates CI
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better analysis
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        cache: true
+    
+    - name: Get dependencies
+      run: |
+        cd apps/app-receituagro && flutter pub get
+        cd ../app-gasometer && flutter pub get
+        cd ../app-plantis && flutter pub get
+        cd ../app_taskolist && flutter pub get
+    
+    - name: Run Quality Gates - All Apps
+      run: |
+        dart scripts/quality_gates.dart --app=all --check=all --ci --report=json
+    
+    - name: Upload Quality Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: quality-gates-report
+        path: quality_gates_report.json
+    
+    - name: Comment PR with Quality Report
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          try {
+            const report = JSON.parse(fs.readFileSync('quality_gates_report.json', 'utf8'));
+            
+            const summary = `## 🚦 Quality Gates Report
+            
+            **Summary:**
+            - Total Issues: ${report.summary.total_issues}
+            - Critical: ${report.summary.critical} 🔴
+            - Warning: ${report.summary.warning} 🟡
+            - Info: ${report.summary.info} 🔵
+            
+            **Status:** ${report.summary.critical > 0 ? '❌ Failed' : '✅ Passed'}
+            
+            ${report.summary.critical > 0 ? `**Critical Issues (${report.summary.critical}):**` : ''}
+            ${report.issues.filter(i => i.severity === 'critical').slice(0, 5).map(i => `- **${i.app}${i.file}**: ${i.message}`).join('\n')}
+            ${report.issues.filter(i => i.severity === 'critical').length > 5 ? '\n... and more' : ''}
+            
+            ${report.summary.critical > 0 ? `
+            **Action Required:**
+            Please fix critical issues before merging. These violations prevent maintaining code quality standards.
+            ` : '🎉 All quality gates passed!'}
+            
+            <details>
+            <summary>View Full Report</summary>
+            
+            \`\`\`json
+            ${JSON.stringify(report, null, 2).substring(0, 2000)}
+            \`\`\`
+            </details>
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+          } catch (error) {
+            console.log('No quality report found or error reading report:', error);
+          }
+
+  file-size-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check for large files
+      run: |
+        echo "🔍 Checking for files exceeding 500 lines..."
+        
+        large_files=$(find apps/ -name "*.dart" -exec wc -l {} + | \
+          awk '$1 > 500 {print $1 " lines: " $2}' | \
+          sort -nr || true)
+        
+        if [ ! -z "$large_files" ]; then
+          echo "❌ Found files exceeding 500 lines:"
+          echo "$large_files"
+          echo ""
+          echo "These files violate the established quality standards."
+          echo "Please refactor them before merging."
+          exit 1
+        else
+          echo "✅ All files are within size limits (<500 lines)"
+        fi
+
+  architecture-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+    
+    - name: Run Flutter Analyzer
+      run: |
+        echo "🏗️ Running Flutter analyzer for architecture compliance..."
+        
+        for app in app-receituagro app-gasometer app-plantis app_taskolist; do
+          echo "Analyzing $app..."
+          cd apps/$app
+          flutter analyze --fatal-infos --fatal-warnings || exit 1
+          cd ../..
+        done
+        
+        echo "✅ All apps pass architecture analysis"
+
+  performance-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+    
+    - name: Performance Analysis
+      run: |
+        echo "⚡ Running performance analysis..."
+        dart scripts/quality_gates.dart --app=all --check=performance --ci
+        echo "✅ Performance analysis complete"

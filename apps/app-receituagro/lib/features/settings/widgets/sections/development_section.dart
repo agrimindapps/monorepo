@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/settings_design_tokens.dart';
+import '../../presentation/pages/data_inspector_page.dart';
 import '../../presentation/providers/settings_provider.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
@@ -65,6 +66,15 @@ class DevelopmentSection extends StatelessWidget {
                 title: 'Remover Licença Teste',
                 subtitle: 'Remove licença premium ativa',
                 onTap: () => _removeTestLicense(context),
+                showDivider: true,
+              ),
+              SettingsListTile(
+                leadingIcon: Icons.storage,
+                iconColor: Colors.green.shade600,
+                backgroundColor: Colors.green.withValues(alpha: 0.1),
+                title: 'Inspetor de Dados',
+                subtitle: 'Visualizar e gerenciar dados locais',
+                onTap: () => _openDataInspector(context),
               ),
             ],
           ),
@@ -280,5 +290,13 @@ class DevelopmentSection extends StatelessWidget {
         }
       }
     }
+  }
+
+  Future<void> _openDataInspector(BuildContext context) async {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const DataInspectorPage(),
+      ),
+    );
   }
 }

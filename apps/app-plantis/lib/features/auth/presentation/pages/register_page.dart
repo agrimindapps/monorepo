@@ -10,7 +10,7 @@ class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
   void _showSocialLoginDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Em Desenvolvimento'),

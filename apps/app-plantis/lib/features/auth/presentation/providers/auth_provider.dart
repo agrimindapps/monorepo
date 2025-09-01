@@ -7,7 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/widgets/loading_overlay.dart';
+import '../../domain/usecases/reset_password_usecase.dart';
 
 class AuthProvider extends ChangeNotifier {
   final LoginUseCase _loginUseCase;
@@ -15,6 +17,7 @@ class AuthProvider extends ChangeNotifier {
   final IAuthRepository _authRepository;
   final ISubscriptionRepository? _subscriptionRepository;
   final AuthStateNotifier _authStateNotifier;
+  final ResetPasswordUseCase _resetPasswordUseCase;
 
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -37,13 +40,15 @@ class AuthProvider extends ChangeNotifier {
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
     required IAuthRepository authRepository,
+    required ResetPasswordUseCase resetPasswordUseCase,
     ISubscriptionRepository? subscriptionRepository,
     AuthStateNotifier? authStateNotifier,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _authRepository = authRepository,
        _subscriptionRepository = subscriptionRepository,
-       _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance {
+       _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance,
+       _resetPasswordUseCase = resetPasswordUseCase {
     _initializeAuthState();
   }
 
@@ -87,10 +92,13 @@ class AuthProvider extends ChangeNotifier {
 
         notifyListeners();
       },
-      onError: (error) {
+      onError: (Object error) {
         _errorMessage = error.toString();
         _isInitialized = true;
         _authStateNotifier.updateInitializationStatus(true);
+        if (kDebugMode) {
+          debugPrint('Auth error: ${DataSanitizationService.sanitizeForLogging(error.toString())}');
+        }
         notifyListeners();
       },
     );
@@ -122,7 +130,9 @@ class AuthProvider extends ChangeNotifier {
     final result = await _subscriptionRepository.hasPlantisSubscription();
     result.fold(
       (failure) {
-        debugPrint('Erro ao verificar status premium: ${failure.message}');
+        if (kDebugMode) {
+          debugPrint('Erro verificar premium: ${DataSanitizationService.sanitizeForLogging(failure.message)}');
+        }
         _isPremium = false;
         _authStateNotifier.updatePremiumStatus(false);
       },
@@ -273,7 +283,9 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('use_anonymous_mode', true);
     } catch (e) {
-      debugPrint('Erro ao salvar preferência anônima: $e');
+      if (kDebugMode) {
+        debugPrint('Erro salvar preferência anônima: ${DataSanitizationService.sanitizeForLogging(e.toString())}');
+      }
     }
   }
 
@@ -302,5 +314,35 @@ class AuthProvider extends ChangeNotifier {
   void clearCurrentOperation() {
     _currentOperation = null;
     notifyListeners();
+  }
+
+  /// Solicita reset de senha via email
+  /// 
+  /// [email] - Email do usuário para receber o link de reset
+  /// 
+  /// Returns:
+  /// - true: Email enviado com sucesso
+  /// - false: Erro no envio (verificar errorMessage)
+  Future<bool> resetPassword(String email) async {
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await _resetPasswordUseCase(email);
+
+    return result.fold(
+      (failure) {
+        _errorMessage = failure.message;
+        notifyListeners();
+        return false;
+      },
+      (_) {
+        // Log evento de reset de senha
+        _analytics?.logEvent('password_reset_requested', {
+          'method': 'email',
+        });
+        
+        return true;
+      },
+    );
   }
 }

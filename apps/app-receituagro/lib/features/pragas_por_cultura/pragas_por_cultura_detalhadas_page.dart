@@ -172,7 +172,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
                       // Seletor de cultura
                       SliverToBoxAdapter(
                         child: Container(
-                          margin: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.all(8.0),
                           child: CulturaSelectorWidget(
                             culturas: _culturas,
                             culturaIdSelecionada: _culturaIdSelecionada,
@@ -286,7 +286,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -339,7 +339,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -395,8 +395,8 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
     final theme = Theme.of(context);
     
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(32),
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -464,7 +464,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -520,7 +520,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
       isScrollControlled: true,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

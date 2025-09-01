@@ -211,7 +211,7 @@ class HomeDefensivosProvider extends ChangeNotifier {
       
       final historicDefensivos = <FitossanitarioHive>[];
       
-      for (final historyItem in historyItems.take(3)) {
+      for (final historyItem in historyItems.take(10)) {
         final defensivo = allDefensivos.firstWhere(
           (d) => d.idReg == historyItem.id,
           orElse: () => allDefensivos.firstWhere(
@@ -236,12 +236,12 @@ class HomeDefensivosProvider extends ChangeNotifier {
       _recentDefensivos = RandomSelectionService.combineHistoryWithRandom(
         historicDefensivos,
         allDefensivos,
-        3,
+        10,
         RandomSelectionService.selectRandomDefensivos,
       );
       
       // Para "novos", usa seleção aleatória com lógica de "mais recentes"
-      _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 4);
+      _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
       
     } catch (e) {
       // Em caso de erro, usa seleção aleatória como fallback

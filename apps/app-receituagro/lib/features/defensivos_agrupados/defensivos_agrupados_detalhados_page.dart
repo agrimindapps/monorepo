@@ -235,7 +235,7 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -291,8 +291,8 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     final theme = Theme.of(context);
     
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(32),
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -362,7 +362,7 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
         // Filtros
         SliverToBoxAdapter(
           child: Container(
-            margin: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(8.0),
             child: FiltrosDefensivosWidget(
               ordenacao: _ordenacao,
               filtroToxicidade: _filtroToxicidade,
@@ -425,7 +425,7 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

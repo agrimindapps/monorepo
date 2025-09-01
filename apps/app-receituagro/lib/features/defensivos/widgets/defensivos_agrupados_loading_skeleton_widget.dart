@@ -97,7 +97,7 @@ class _DefensivosAgrupadosLoadingSkeletonWidgetState
       ),
       color: widget.isDark ? const Color(0xFF2A2A2E) : Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
             _buildShimmerBox(48, 48, 12),
@@ -137,7 +137,7 @@ class _DefensivosAgrupadosLoadingSkeletonWidgetState
       ),
       color: widget.isDark ? const Color(0xFF2A2A2E) : Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

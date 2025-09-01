@@ -79,6 +79,11 @@ export 'src/presentation/widgets/image_widgets.dart';
 // ========== PRESENTATION LAYER ==========
 // Widgets
 export 'src/presentation/widgets/loading_widget.dart';
+
+// ========== DATA INSPECTOR ==========
+// Unified Data Inspector for all monorepo apps
+export 'src/presentation/data_inspector.dart';
+
 // ========== SHARED LAYER ==========
 // Config
 export 'src/shared/config/environment_config.dart';

@@ -24,17 +24,24 @@ class _ReportsPageState extends State<ReportsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Verificar se o widget ainda está montado antes de acessar o context
+      if (!mounted) return;
+      
       final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
       final reportsProvider = Provider.of<ReportsProvider>(context, listen: false);
       
       if (vehiclesProvider.vehicles.isNotEmpty) {
         final vehicleId = vehiclesProvider.vehicles.first.id;
-        setState(() {
-          _selectedVehicleId = vehicleId;
-        });
         
-        // Load reports data for the selected vehicle
-        reportsProvider.loadAllReportsForVehicle(vehicleId);
+        // Verificar novamente se ainda está montado antes do setState
+        if (mounted) {
+          setState(() {
+            _selectedVehicleId = vehicleId;
+          });
+          
+          // Load reports data for the selected vehicle
+          reportsProvider.loadAllReportsForVehicle(vehicleId);
+        }
       }
     });
   }

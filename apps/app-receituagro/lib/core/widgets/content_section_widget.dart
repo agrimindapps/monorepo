@@ -180,12 +180,12 @@ class ContentListItemWidget extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
             // Leading widget ou ícone padrão
             leading ?? _buildDefaultIcon(theme),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             
             // Conteúdo principal
             Expanded(
@@ -195,25 +195,25 @@ class ContentListItemWidget extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (category != null) ...[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     _buildCategoryTag(theme),
                   ],
                 ],
@@ -234,8 +234,8 @@ class ContentListItemWidget extends StatelessWidget {
 
   Widget _buildDefaultIcon(ThemeData theme) {
     return Container(
-      width: 48,
-      height: 48,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
         shape: BoxShape.circle,
@@ -243,7 +243,7 @@ class ContentListItemWidget extends StatelessWidget {
       child: Icon(
         icon ?? Icons.eco,
         color: const Color(0xFF4CAF50),
-        size: 24,
+        size: 20,
       ),
     );
   }

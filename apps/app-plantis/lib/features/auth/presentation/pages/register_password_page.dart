@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/register_loading_overlay.dart';
+import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 import '../providers/register_provider.dart';
 
@@ -52,59 +53,9 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage>
     super.dispose();
   }
 
+  /// Use AuthValidators for consistent password validation across the app
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira uma senha';
-    }
-    
-    if (value.length < 8) {
-      return 'A senha deve ter pelo menos 8 caracteres';
-    }
-    
-    // Check for uppercase letter
-    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos uma letra maiúscula';
-    }
-    
-    // Check for lowercase letter
-    if (!RegExp(r'[a-z]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos uma letra minúscula';
-    }
-    
-    // Check for number
-    if (!RegExp(r'\d').hasMatch(value)) {
-      return 'A senha deve conter pelo menos um número';
-    }
-    
-    // Check for special character
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>_+=\-\[\]\\;/~]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos um caractere especial (!@#\$%^&* etc.)';
-    }
-    
-    // Check for common weak passwords
-    final commonPasswords = [
-      '12345678', '123456789', '1234567890',
-      'password', 'senha123', 'Password1!', 'password123',
-      'admin123', 'user1234', 'qwerty123',
-      '11111111', '00000000', 'aaaaaaaa',
-      'abc12345', '123abc456', 'password!',
-    ];
-    
-    if (commonPasswords.any((weak) => value.toLowerCase().contains(weak.toLowerCase()))) {
-      return 'Esta senha é muito comum. Escolha uma senha mais segura';
-    }
-    
-    // Check for sequential patterns
-    if (RegExp(r'(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)', caseSensitive: false).hasMatch(value)) {
-      return 'A senha não deve conter sequências óbvias (123, abc, etc.)';
-    }
-    
-    // Check for repeated characters
-    if (RegExp(r'(.)\1{2,}').hasMatch(value)) {
-      return 'A senha não deve ter mais de 2 caracteres repetidos consecutivos';
-    }
-    
-    return null;
+    return AuthValidators.validatePassword(value ?? '', isRegistration: true);
   }
 
   Future<void> _handleCreateAccount() async {
@@ -401,13 +352,10 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage>
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, confirme sua senha';
-                            }
-                            if (value != _passwordController.text) {
-                              return 'As senhas não coincidem';
-                            }
-                            return null;
+                            return AuthValidators.validatePasswordConfirmation(
+                              _passwordController.text,
+                              value ?? '',
+                            );
                           },
                         ),
                         const SizedBox(height: 48),

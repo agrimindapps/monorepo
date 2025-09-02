@@ -102,19 +102,25 @@ class PaymentActionsWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildFooterLink(
-          'Termos de Uso',
-          provider.openTermsOfUse,
+        Expanded(
+          child: _buildFooterLink(
+            'Termos',
+            provider.openTermsOfUse,
+          ),
         ),
         _buildFooterDivider(),
-        _buildFooterLink(
-          'Política de Privacidade',
-          provider.openPrivacyPolicy,
+        Expanded(
+          child: _buildFooterLink(
+            'Privacidade',
+            provider.openPrivacyPolicy,
+          ),
         ),
         _buildFooterDivider(),
-        _buildFooterLink(
-          'Restaurar',
-          provider.restorePurchases,
+        Expanded(
+          child: _buildFooterLink(
+            'Restaurar',
+            provider.restorePurchases,
+          ),
         ),
       ],
     );
@@ -126,9 +132,10 @@ class PaymentActionsWidget extends StatelessWidget {
       onPressed: provider.isLoading ? null : onPressed,
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.white.withValues(alpha: 0.7),
-          fontSize: 14,
+          fontSize: 12,
         ),
       ),
     );

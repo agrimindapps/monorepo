@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/accessibility_tokens.dart';
+import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../shared/widgets/feedback/feedback.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -190,7 +191,8 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         backgroundColor:
             isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
         appBar: const TasksAppBar(),
-        body: Selector<TasksProvider, TasksListState>(
+        body: ResponsiveLayout(
+          child: Selector<TasksProvider, TasksListState>(
           selector: (_, provider) => TasksListState(
             isLoading: provider.isLoading,
             hasError: provider.hasError,
@@ -233,6 +235,7 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
               ),
             );
           },
+          ),
         ),
         // FAB removido - tarefas são geradas automaticamente quando concluídas
         // floatingActionButton: const TasksFab(),

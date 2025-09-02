@@ -100,7 +100,7 @@ class NavigationService implements INavigationService {
       // For now, show dialog with URL (since url_launcher isn't added yet)
       final context = currentContext;
       if (context != null) {
-        showDialog(
+        await showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Abrir Link'),
@@ -138,7 +138,7 @@ class MockNavigationService implements INavigationService {
   @override
   Future<T?> navigateTo<T extends Object?>(String routeName, {Object? arguments}) async {
     debugPrint('MockNavigationService: Navigate to $routeName');
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return null;
   }
   
@@ -152,7 +152,7 @@ class MockNavigationService implements INavigationService {
       );
     }
     
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return null;
   }
   
@@ -200,7 +200,7 @@ class MockNavigationService implements INavigationService {
     debugPrint('MockNavigationService: Opening URL: $url');
     
     if (_context != null) {
-      showDialog(
+      await showDialog<void>(
         context: _context!,
         builder: (context) => AlertDialog(
           title: const Text('Abrir Link (Mock)'),
@@ -218,7 +218,7 @@ class MockNavigationService implements INavigationService {
       );
     }
     
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
   
   @override

@@ -106,8 +106,8 @@ class DataInitializationService {
       developer.log('Carregados ${jsonData.length} registros de ${category.name}', name: 'DataInitializationService');
       
       // Salva no repositório
-      final saveResult = await category.repository.loadFromJson(jsonData, currentVersion);
-      if (saveResult.isLeft() as bool) {
+      final dynamic saveResult = await category.repository.loadFromJson(jsonData, currentVersion);
+      if (saveResult is Either && saveResult.isLeft()) {
         return Left(Exception('Erro ao salvar dados de ${category.name}: ${saveResult.fold((e) => e.toString(), (r) => '')}'));
       }
       

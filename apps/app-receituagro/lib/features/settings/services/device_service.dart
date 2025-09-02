@@ -70,7 +70,7 @@ class MockDeviceService implements IDeviceService {
   Future<bool> canLaunchUrl(String url) async {
     // Mock implementation - always return true
     // In real implementation would use url_launcher
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return true;
   }
   
@@ -78,7 +78,7 @@ class MockDeviceService implements IDeviceService {
   Future<bool> launchUrl(String url, {LaunchMode mode = LaunchMode.external}) async {
     // Mock implementation - simulate successful launch
     debugPrint('Launching URL: $url (mode: $mode)');
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     return true;
   }
 }

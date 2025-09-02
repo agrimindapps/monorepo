@@ -161,7 +161,7 @@ class ComparacaoDefensivosWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    defensivo.defensivo.nomeComum ?? defensivo.defensivo.nomeTecnico,
+                    defensivo.defensivo.nomeComum.isNotEmpty ? defensivo.defensivo.nomeComum : defensivo.defensivo.nomeTecnico,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

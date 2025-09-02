@@ -35,13 +35,13 @@ class ReceitaAgroHiveService {
     try {
       // Versão temporária usando Map ao invés de objetos tipados
       await Future.wait([
-        Hive.openBox<Map>(_boxCulturas),
-        Hive.openBox<Map>(_boxDiagnosticos), 
-        Hive.openBox<Map>(_boxFitossanitarios),
-        Hive.openBox<Map>(_boxFitossanitariosInfo),
-        Hive.openBox<Map>(_boxPlantasInf),
-        Hive.openBox<Map>(_boxPragas),
-        Hive.openBox<Map>(_boxPragasInf),
+        Hive.openBox<Map<dynamic, dynamic>>(_boxCulturas),
+        Hive.openBox<Map<dynamic, dynamic>>(_boxDiagnosticos), 
+        Hive.openBox<Map<dynamic, dynamic>>(_boxFitossanitarios),
+        Hive.openBox<Map<dynamic, dynamic>>(_boxFitossanitariosInfo),
+        Hive.openBox<Map<dynamic, dynamic>>(_boxPlantasInf),
+        Hive.openBox<Map<dynamic, dynamic>>(_boxPragas),
+        Hive.openBox<Map<dynamic, dynamic>>(_boxPragasInf),
       ]);
       
       developer.log('Todas as boxes foram abertas com sucesso', name: 'ReceitaAgroHiveService');
@@ -58,7 +58,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxPragas)) return [];
       
-      final box = Hive.box<Map>(_boxPragas);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxPragas);
       return box.values.cast<Map<String, dynamic>>().toList();
     } catch (e) {
       developer.log('Erro ao obter pragas: $e', name: 'ReceitaAgroHiveService');
@@ -71,7 +71,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxPragas)) return null;
       
-      final box = Hive.box<Map>(_boxPragas);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxPragas);
       final praga = box.get(id);
       return praga?.cast<String, dynamic>();
     } catch (e) {
@@ -85,7 +85,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxFitossanitarios)) return [];
       
-      final box = Hive.box<Map>(_boxFitossanitarios);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxFitossanitarios);
       return box.values.cast<Map<String, dynamic>>().toList();
     } catch (e) {
       developer.log('Erro ao obter fitossanitários: $e', name: 'ReceitaAgroHiveService');
@@ -98,7 +98,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxFitossanitarios)) return null;
       
-      final box = Hive.box<Map>(_boxFitossanitarios);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxFitossanitarios);
       final fitossanitario = box.get(id);
       return fitossanitario?.cast<String, dynamic>();
     } catch (e) {
@@ -112,7 +112,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxDiagnosticos)) return [];
       
-      final box = Hive.box<Map>(_boxDiagnosticos);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxDiagnosticos);
       return box.values.cast<Map<String, dynamic>>().toList();
     } catch (e) {
       developer.log('Erro ao obter diagnósticos: $e', name: 'ReceitaAgroHiveService');
@@ -125,7 +125,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxDiagnosticos)) return null;
       
-      final box = Hive.box<Map>(_boxDiagnosticos);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxDiagnosticos);
       final diagnostico = box.get(id);
       return diagnostico?.cast<String, dynamic>();
     } catch (e) {
@@ -139,7 +139,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxCulturas)) return [];
       
-      final box = Hive.box<Map>(_boxCulturas);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxCulturas);
       return box.values.cast<Map<String, dynamic>>().toList();
     } catch (e) {
       developer.log('Erro ao obter culturas: $e', name: 'ReceitaAgroHiveService');
@@ -152,7 +152,7 @@ class ReceitaAgroHiveService {
     try {
       if (!Hive.isBoxOpen(_boxCulturas)) return null;
       
-      final box = Hive.box<Map>(_boxCulturas);
+      final box = Hive.box<Map<dynamic, dynamic>>(_boxCulturas);
       final cultura = box.get(id);
       return cultura?.cast<String, dynamic>();
     } catch (e) {
@@ -167,7 +167,7 @@ class ReceitaAgroHiveService {
       await openBoxes();
       
       // Dados de teste para pragas
-      final pragasBox = Hive.box<Map>(_boxPragas);
+      final pragasBox = Hive.box<Map<dynamic, dynamic>>(_boxPragas);
       await pragasBox.put('1', {
         'idReg': '1',
         'nomeComum': 'Lagarta-da-soja',
@@ -179,7 +179,7 @@ class ReceitaAgroHiveService {
       });
       
       // Dados de teste para culturas
-      final culturasBox = Hive.box<Map>(_boxCulturas);
+      final culturasBox = Hive.box<Map<dynamic, dynamic>>(_boxCulturas);
       await culturasBox.put('1', {
         'id': '1',
         'nomeCultura': 'Soja',
@@ -196,13 +196,13 @@ class ReceitaAgroHiveService {
   static Future<void> closeBoxes() async {
     try {
       await Future.wait([
-        if (Hive.isBoxOpen(_boxCulturas)) Hive.box(_boxCulturas).close(),
-        if (Hive.isBoxOpen(_boxDiagnosticos)) Hive.box(_boxDiagnosticos).close(),
-        if (Hive.isBoxOpen(_boxFitossanitarios)) Hive.box(_boxFitossanitarios).close(),
-        if (Hive.isBoxOpen(_boxFitossanitariosInfo)) Hive.box(_boxFitossanitariosInfo).close(),
-        if (Hive.isBoxOpen(_boxPlantasInf)) Hive.box(_boxPlantasInf).close(),
-        if (Hive.isBoxOpen(_boxPragas)) Hive.box(_boxPragas).close(),
-        if (Hive.isBoxOpen(_boxPragasInf)) Hive.box(_boxPragasInf).close(),
+        if (Hive.isBoxOpen(_boxCulturas)) Hive.box<Map<dynamic, dynamic>>(_boxCulturas).close(),
+        if (Hive.isBoxOpen(_boxDiagnosticos)) Hive.box<Map<dynamic, dynamic>>(_boxDiagnosticos).close(),
+        if (Hive.isBoxOpen(_boxFitossanitarios)) Hive.box<Map<dynamic, dynamic>>(_boxFitossanitarios).close(),
+        if (Hive.isBoxOpen(_boxFitossanitariosInfo)) Hive.box<Map<dynamic, dynamic>>(_boxFitossanitariosInfo).close(),
+        if (Hive.isBoxOpen(_boxPlantasInf)) Hive.box<Map<dynamic, dynamic>>(_boxPlantasInf).close(),
+        if (Hive.isBoxOpen(_boxPragas)) Hive.box<Map<dynamic, dynamic>>(_boxPragas).close(),
+        if (Hive.isBoxOpen(_boxPragasInf)) Hive.box<Map<dynamic, dynamic>>(_boxPragasInf).close(),
       ]);
       
       developer.log('Todas as boxes foram fechadas', name: 'ReceitaAgroHiveService');

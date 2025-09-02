@@ -55,8 +55,8 @@ class HiveAdapterRegistry {
     'plantas_inf': 'receituagro_plantas_inf',
     'pragas_inf': 'receituagro_pragas_inf',
     'premium_status': 'receituagro_premium_status',
-    'comentarios': 'receituagro_comentarios',
-    'favoritos': 'receituagro_favoritos',
+    'comentarios': 'comentarios',
+    'favoritos': 'receituagro_user_favorites',
   };
 
   /// Abre todas as boxes necessárias
@@ -104,7 +104,7 @@ class HiveAdapterRegistry {
   /// Helper para fechar box se estiver aberta
   static Future<void> _closeBoxIfOpen(String boxName) async {
     if (Hive.isBoxOpen(boxName)) {
-      await Hive.box(boxName).close();
+      await Hive.box<dynamic>(boxName).close();
     }
   }
 

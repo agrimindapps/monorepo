@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart' as di;
+import '../../shared/widgets/responsive_layout.dart';
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/test_data_generator_service.dart';
 import '../../core/theme/plantis_colors.dart';
@@ -32,9 +33,10 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
       child: ChangeNotifierProvider<SettingsProvider>.value(
         value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
         child: Scaffold(
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
+          body: ResponsiveLayout(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
               builder: (context, authProvider, settingsProvider, _) {
                 final user = authProvider.currentUser;
                 
@@ -447,6 +449,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               ],
             );
               },
+              ),
             ),
           ),
         ),

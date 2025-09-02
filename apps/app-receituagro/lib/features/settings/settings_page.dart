@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/responsive_content_wrapper.dart';
 import 'presentation/providers/settings_provider.dart';
 import 'widgets/sections/about_section.dart';
 import 'widgets/sections/app_info_section.dart';
@@ -55,9 +56,10 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Scaffold(
         backgroundColor: theme.cardColor,
         body: SafeArea(
-          child: Column(
-            children: [
-              _buildModernHeader(context, isDark),
+          child: ResponsiveContentWrapper(
+            child: Column(
+              children: [
+                _buildModernHeader(context, isDark),
               Expanded(
                 child: Consumer<SettingsProvider>(
                   builder: (context, provider, child) {
@@ -104,7 +106,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

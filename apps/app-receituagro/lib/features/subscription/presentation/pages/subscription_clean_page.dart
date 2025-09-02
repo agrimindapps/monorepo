@@ -8,13 +8,13 @@ import '../widgets/subscription_plans_widget.dart';
 import '../widgets/subscription_status_widget.dart';
 
 /// Página principal de subscription refatorada
-/// 
+///
 /// Responsabilidades:
 /// - Orchestração da UI principal
 /// - Gerenciamento de mensagens/snackbars
 /// - Loading state management
 /// - Navegação entre diferentes views (ativo vs planos)
-/// 
+///
 /// Estrutura:
 /// - Header com título e botão de fechar
 /// - Loading indicator quando necessário
@@ -29,20 +29,10 @@ class SubscriptionCleanPage extends StatefulWidget {
 }
 
 class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
-  
-  @override
-  void initState() {
-    super.initState();
-    // Inicializar carregamento dos dados
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SubscriptionProvider>().loadSubscriptionData();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SubscriptionProvider(),
+      create: (_) => SubscriptionProvider()..loadSubscriptionData(),
       child: Consumer<SubscriptionProvider>(
         builder: (context, provider, child) {
           // Mostrar mensagens se existirem
@@ -69,10 +59,10 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
                   children: [
                     // Header com título e botão de fechar
                     _buildHeader(context),
-                    
+
                     // Conteúdo principal
                     Expanded(
-                      child: provider.isLoading 
+                      child: provider.isLoading
                           ? _buildLoadingView()
                           : provider.hasActiveSubscription
                               ? _buildActiveSubscriptionView(provider)
@@ -132,17 +122,17 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
         children: [
           // Status da subscription ativa
           SubscriptionStatusWidget(provider: provider),
-          
+
           const SizedBox(height: 24),
-          
+
           // Lista de recursos/benefícios
           SubscriptionBenefitsWidget(
             provider: provider,
             showModernStyle: false, // Estilo card para subscription ativa
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Ações de gerenciamento
           PaymentActionsWidget(
             provider: provider,
@@ -155,62 +145,58 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
 
   /// View para seleção de planos (usuário sem subscription)
   Widget _buildPlansView(SubscriptionProvider provider) {
-    return Column(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                
-                // Título principal
-                const Text(
-                  'Tenha acesso ilimitado\na todos os recursos',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                  ),
-                ),
-                
-                const SizedBox(height: 40),
-                
-                // Seleção de planos
-                SubscriptionPlansWidget(provider: provider),
-                
-                const SizedBox(height: 40),
-                
-                // Lista de benefícios/recursos
-                SubscriptionBenefitsWidget(
-                  provider: provider,
-                  showModernStyle: true, // Estilo moderno para marketing
-                ),
-                
-                const Spacer(),
-                
-                // Botão principal de compra
-                PaymentActionsWidget(
-                  provider: provider,
-                  showPurchaseButton: true,
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Links de rodapé (Termos, Privacidade, Restaurar)
-                PaymentActionsWidget(
-                  provider: provider,
-                  showFooterLinks: true,
-                ),
-                
-                const SizedBox(height: 20),
-              ],
+    return Expanded(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+
+            // Título principal
+            const Text(
+              'Tenha acesso ilimitado\na todos os recursos',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                height: 1.2,
+              ),
             ),
-          ),
+
+            const SizedBox(height: 24),
+
+            // Seleção de planos
+            SubscriptionPlansWidget(provider: provider),
+
+            const SizedBox(height: 24),
+
+            // Lista de benefícios/recursos
+            SubscriptionBenefitsWidget(
+              provider: provider,
+              showModernStyle: true, // Estilo moderno para marketing
+            ),
+
+            const SizedBox(height: 32),
+
+            // Botão principal de compra
+            PaymentActionsWidget(
+              provider: provider,
+              showPurchaseButton: true,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Links de rodapé (Termos, Privacidade, Restaurar)
+            PaymentActionsWidget(
+              provider: provider,
+              showFooterLinks: true,
+            ),
+
+            const SizedBox(height: 24),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -241,7 +227,8 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
   }
 
   /// Helper para mostrar snackbars
-  void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
+  void _showSnackBar(
+      BuildContext context, String message, Color backgroundColor) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

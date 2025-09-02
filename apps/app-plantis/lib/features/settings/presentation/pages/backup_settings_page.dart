@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/data/models/backup_model.dart';
+import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../core/services/backup_service.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../features/premium/presentation/providers/premium_provider.dart';
@@ -46,8 +47,9 @@ class BackupSettingsPage extends StatelessWidget {
             onPressed: () => context.pop(),
           ),
         ),
-        body: Consumer<PremiumProvider>(
-          builder: (context, premiumProvider, child) {
+        body: ResponsiveLayout(
+          child: Consumer<PremiumProvider>(
+            builder: (context, premiumProvider, child) {
             // Verificação de segurança: usar PremiumProvider real
             if (!premiumProvider.isPremium) {
               return _buildPremiumRequired(context);
@@ -81,7 +83,8 @@ class BackupSettingsPage extends StatelessWidget {
                 );
               },
             );
-          },
+            },
+          ),
         ),
       ),
     );

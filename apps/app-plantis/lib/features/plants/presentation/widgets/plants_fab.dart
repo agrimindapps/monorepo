@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/di/injection_container.dart' as di;
+import '../providers/plant_form_provider.dart';
+import 'plant_form_dialog.dart';
 
 class PlantsFab extends StatelessWidget {
   final VoidCallback onScrollToTop;
@@ -11,8 +15,22 @@ class PlantsFab extends StatelessWidget {
     required this.scrollController,
   });
 
-  void _onAddPlant(BuildContext context) {
-    context.push('/plants/add');
+  Future<void> _onAddPlant(BuildContext context) async {
+    // Criar um novo provider para a dialog
+    final plantFormProvider = di.sl<PlantFormProvider>();
+    
+    // Mostrar dialog com o provider
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ChangeNotifierProvider.value(
+        value: plantFormProvider,
+        child: const PlantFormDialog(),
+      ),
+    );
+    
+    // Limpar o provider após fechar a dialog
+    plantFormProvider.dispose();
   }
 
   @override

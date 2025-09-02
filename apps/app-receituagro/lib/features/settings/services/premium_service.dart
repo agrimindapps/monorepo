@@ -74,7 +74,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   
   @override
   Future<void> generateTestSubscription() async {
-    await Future.delayed(const Duration(milliseconds: 500)); // Simulate API call
+    await Future<void>.delayed(const Duration(milliseconds: 500)); // Simulate API call
     
     _status = PremiumStatus(
       isActive: true,
@@ -88,7 +88,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   
   @override
   Future<void> removeTestSubscription() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     
     if (_status.isTestSubscription) {
       _status = const PremiumStatus(isActive: false);
@@ -105,7 +105,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   @override
   Future<void> checkPremiumStatus() async {
     // Mock status check - in real implementation would check with backend
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     // Status remains unchanged in mock
   }
 }

@@ -56,12 +56,15 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
 
   /// Carrega dados iniciais
   Future<void> _loadInitialData() async {
-    // Inicializar provider da praga
-    _pragaProvider.initialize(widget.pragaName, widget.pragaScientificName);
+    // Inicializar provider da praga de forma assíncrona
+    await _pragaProvider.initializeAsync(widget.pragaName, widget.pragaScientificName);
     
     // Se praga carregada com sucesso, carregar diagnósticos
     if (_pragaProvider.pragaData != null) {
       await _diagnosticosProvider.loadDiagnosticos(_pragaProvider.pragaData!.idReg);
+    } else {
+      // Fallback: tentar carregar usando o nome da praga diretamente
+      await _diagnosticosProvider.loadDiagnosticos(widget.pragaName);
     }
   }
 

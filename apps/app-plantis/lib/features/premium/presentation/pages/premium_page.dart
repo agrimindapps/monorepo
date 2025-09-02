@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_config.dart';
+import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/services/url_launcher_service.dart';
@@ -244,18 +245,19 @@ class _PremiumPageState extends State<PremiumPage> with LoadingPageMixin {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        body: Selector<PremiumProvider, PremiumLoadingState>(
-          selector: (context, provider) => PremiumLoadingState(
-            isLoading: provider.isLoading,
-            currentOperation: provider.currentOperation,
-          ),
-          builder: (context, loadingState, child) {
-            return PurchaseLoadingOverlay(
-              isLoading: loadingState.isLoading,
-              currentOperation: loadingState.currentOperation,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
+        body: ResponsiveLayout(
+          child: Selector<PremiumProvider, PremiumLoadingState>(
+            selector: (context, provider) => PremiumLoadingState(
+              isLoading: provider.isLoading,
+              currentOperation: provider.currentOperation,
+            ),
+            builder: (context, loadingState, child) {
+              return PurchaseLoadingOverlay(
+                isLoading: loadingState.isLoading,
+                currentOperation: loadingState.currentOperation,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Error display with improved recovery
@@ -287,6 +289,7 @@ class _PremiumPageState extends State<PremiumPage> with LoadingPageMixin {
             ),
             );
           },
+          ),
         ),
       ),
     );

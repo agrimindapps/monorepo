@@ -73,7 +73,7 @@ class RegisterPage extends StatelessWidget {
                       const Icon(Icons.eco, size: 32, color: PlantisColors.primary),
                       const SizedBox(width: 8),
                       Text(
-                        'PlantApp',
+                        'Inside Garden',
                         style: Theme.of(
                           context,
                         ).textTheme.headlineSmall?.copyWith(

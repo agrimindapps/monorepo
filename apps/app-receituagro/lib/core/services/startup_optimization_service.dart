@@ -133,7 +133,7 @@ class StartupOptimizationService {
 
     // Carrega em background
     for (final imagePath in imagesToPreload) {
-      _imageService.loadImage(imagePath).catchError((e) {
+      _imageService.loadImage(imagePath).catchError((Object e) {
         developer.log('Warning: Failed to preload contextual image $imagePath: $e', 
                      name: 'StartupOptimization');
         return null;

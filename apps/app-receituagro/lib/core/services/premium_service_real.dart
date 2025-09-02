@@ -21,6 +21,10 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   // Stream controller para premiumStatusStream
   final StreamController<bool> _statusStreamController =
       StreamController<bool>.broadcast();
+  
+  Timer? _syncDebounceTimer;
+  DateTime? _lastSyncTime;
+  static const Duration _syncCooldown = Duration(minutes: 5);
 
   PremiumServiceReal({
     required PremiumHiveRepository hiveRepository,
@@ -80,10 +84,23 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
     }
   }
 
-  /// Sincronização em background
+  /// Sincronização em background com debounce
   void _syncOnlineInBackground() {
-    Future.delayed(Duration.zero, () async {
+    // Cancela timer anterior se existe
+    _syncDebounceTimer?.cancel();
+    
+    // Verifica se precisa respeitar cooldown
+    final now = DateTime.now();
+    if (_lastSyncTime != null && 
+        now.difference(_lastSyncTime!) < _syncCooldown) {
+      debugPrint('⏳ Premium sync em cooldown, pulando...');
+      return;
+    }
+    
+    // Agenda nova sincronização com debounce
+    _syncDebounceTimer = Timer(const Duration(seconds: 2), () async {
       try {
+        _lastSyncTime = DateTime.now();
         await _syncWithRevenueCat();
       } catch (e) {
         debugPrint('Background sync failed: $e');
@@ -405,6 +422,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
 
   @override
   void dispose() {
+    _syncDebounceTimer?.cancel();
     _statusStreamController.close();
     super.dispose();
   }

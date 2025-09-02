@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
+import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../../../core/localization/app_strings.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../domain/entities/plant.dart';
@@ -150,7 +151,8 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               ? const Color(0xFF1C1C1E)
               : theme.colorScheme.surface,
       // Optimized with Selector - only rebuilds when plant loading state changes
-      body: Selector<PlantDetailsProvider, Map<String, dynamic>>(
+      body: ResponsiveLayout(
+        child: Selector<PlantDetailsProvider, Map<String, dynamic>>(
         selector: (context, provider) => {
           'isLoading': provider.isLoading,
           'hasError': provider.hasError,
@@ -180,6 +182,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           // Tela principal com a planta carregada
           return _buildMainContent(context, plant);
         },
+        ),
       ),
     );
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/design/design_tokens.dart';
-import '../../../culturas/lista_culturas_page.dart';
-import '../../lista_pragas_page.dart';
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../providers/home_pragas_provider.dart';
 
 /// Widget para exibir grid de estatísticas/categorias na home de pragas
@@ -330,44 +330,19 @@ class HomePragasStatsWidget extends StatelessWidget {
   void _navigateToCategory(BuildContext context, String category) {
     switch (category) {
       case 'culturas':
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const ListaCulturasPage(),
-          ),
-        );
+        context.read<AppNavigationProvider>().navigateToListaCulturas();
         break;
       case 'insetos':
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const ListaPragasPage(pragaType: '1'),
-          ),
-        );
+        context.read<AppNavigationProvider>().navigateToListaPragas(pragaType: '1');
         break;
       case 'doencas':
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const ListaPragasPage(pragaType: '2'),
-          ),
-        );
+        context.read<AppNavigationProvider>().navigateToListaPragas(pragaType: '2');
         break;
       case 'plantas':
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const ListaPragasPage(pragaType: '3'),
-          ),
-        );
+        context.read<AppNavigationProvider>().navigateToListaPragas(pragaType: '3');
         break;
       default:
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const ListaPragasPage(),
-          ),
-        );
+        context.read<AppNavigationProvider>().navigateToListaPragas();
     }
   }
 }

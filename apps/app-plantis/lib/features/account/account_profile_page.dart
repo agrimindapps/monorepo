@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/services/data_sanitization_service.dart';
+import '../../shared/widgets/responsive_layout.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../shared/widgets/loading/loading_components.dart';
 import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
@@ -35,9 +36,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
         centerTitle: true,
         iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Consumer<auth_providers.AuthProvider>(
+      body: ResponsiveLayout(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Consumer<auth_providers.AuthProvider>(
           builder: (context, authProvider, _) {
             final user = authProvider.currentUser;
             final isAnonymous = authProvider.isAnonymous;
@@ -269,6 +271,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
               ],
             );
           },
+          ),
         ),
       ),
     );

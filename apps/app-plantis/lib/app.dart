@@ -10,6 +10,7 @@ import 'features/plants/presentation/providers/plant_task_provider.dart';
 import 'features/plants/presentation/providers/plants_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/tasks/presentation/providers/tasks_provider.dart';
+import 'shared/widgets/desktop_keyboard_shortcuts.dart';
 
 class PlantisApp extends StatelessWidget {
   const PlantisApp({super.key});
@@ -30,13 +31,15 @@ class PlantisApp extends StatelessWidget {
 
         return Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
-            return MaterialApp.router(
-              title: 'Plantis - Cuidado de Plantas',
-              theme: PlantisTheme.lightTheme,
-              darkTheme: PlantisTheme.darkTheme,
-              themeMode: themeProvider.themeMode,
-              routerConfig: router,
-              debugShowCheckedModeBanner: false,
+            return DesktopKeyboardShortcuts(
+              child: MaterialApp.router(
+                title: 'Plantis - Cuidado de Plantas',
+                theme: PlantisTheme.lightTheme,
+                darkTheme: PlantisTheme.darkTheme,
+                themeMode: themeProvider.themeMode,
+                routerConfig: router,
+                debugShowCheckedModeBanner: false,
+              ),
             );
           },
         );

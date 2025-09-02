@@ -114,7 +114,7 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     filtrados.sort((a, b) {
       switch (_ordenacao) {
         case 'nome':
-          return (a.defensivo.nomeComum ?? '').compareTo(b.defensivo.nomeComum ?? '');
+          return a.defensivo.nomeComum.compareTo(b.defensivo.nomeComum);
         case 'fabricante':
           return (a.defensivo.fabricante ?? '').compareTo(b.defensivo.fabricante ?? '');
         case 'usos':

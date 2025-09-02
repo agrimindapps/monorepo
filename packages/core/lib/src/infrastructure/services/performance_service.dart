@@ -425,9 +425,12 @@ class PerformanceService implements IPerformanceRepository {
         totalMemory: (result['total'] as int?) ?? 0,
         availableMemory: (result['available'] as int?) ?? 0,
       );
+    } on MissingPluginException {
+      debugPrint('⚠️ iOS memory usage plugin not implemented, using fallback');
+      return await _getGenericMemoryUsage();
     } catch (e) {
       debugPrint('❌ Error getting iOS memory usage: $e');
-      return const MemoryUsage(usedMemory: 0, totalMemory: 0, availableMemory: 0);
+      return await _getGenericMemoryUsage();
     }
   }
 

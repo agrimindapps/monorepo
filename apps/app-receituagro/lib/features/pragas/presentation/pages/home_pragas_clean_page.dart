@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/responsive_content_wrapper.dart';
 import '../providers/home_pragas_provider.dart';
 import '../widgets/home_pragas_error_widget.dart';
 import '../widgets/home_pragas_recent_widget.dart';
@@ -39,17 +40,19 @@ class _HomePragasContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Consumer<HomePragasProvider>(
-          builder: (context, provider, child) {
-            return Column(
-              children: [
-                _buildHeader(context, isDark, provider),
-                Expanded(
-                  child: _buildBody(context, provider),
-                ),
-              ],
-            );
-          },
+        child: ResponsiveContentWrapper(
+          child: Consumer<HomePragasProvider>(
+            builder: (context, provider, child) {
+              return Column(
+                children: [
+                  _buildHeader(context, isDark, provider),
+                  Expanded(
+                    child: _buildBody(context, provider),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

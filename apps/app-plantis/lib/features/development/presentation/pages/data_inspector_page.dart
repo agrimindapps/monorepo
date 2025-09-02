@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/responsive_layout.dart';
+
 /// Data Inspector Page for Plantis - Using Unified Implementation
 /// Configured with developer dark theme and Plantis-specific custom boxes
 /// Maintains security protection for production builds

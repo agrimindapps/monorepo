@@ -111,6 +111,13 @@ class HomeDefensivosProvider extends ChangeNotifier {
       // Carrega dados do repositório na main thread (necessário para Hive)
       final defensivos = _repository.getActiveDefensivos();
       
+      // Verifica se há dados carregados
+      if (defensivos.isEmpty) {
+        _setError('Base de dados ainda não foi carregada.\n\nAguarde alguns instantes ou tente novamente.\nOs dados estão sendo sincronizados em segundo plano.');
+        _resetToDefaultValues();
+        return;
+      }
+      
       // Performance optimization: Move heavy statistical calculations to background isolate
       final statistics = await compute(_calculateDefensivosStatistics, defensivos);
       

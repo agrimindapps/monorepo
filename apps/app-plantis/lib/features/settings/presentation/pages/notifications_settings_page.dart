@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../shared/widgets/responsive_layout.dart';
 import '../providers/settings_provider.dart';
 
 // Data classes for granular Selector optimization
@@ -131,16 +132,17 @@ class NotificationsSettingsPage extends StatelessWidget {
           title: const Text('Configurações de Notificações'),
           backgroundColor: theme.colorScheme.surface,
         ),
-        body: Selector<SettingsProvider, bool>(
-          selector: (context, provider) => provider.isLoading,
-          builder: (context, isLoading, child) {
-            if (isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        body: ResponsiveLayout(
+          child: Selector<SettingsProvider, bool>(
+            selector: (context, provider) => provider.isLoading,
+            builder: (context, isLoading, child) {
+              if (isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Status das notificações
@@ -168,7 +170,8 @@ class NotificationsSettingsPage extends StatelessWidget {
                 ],
               ),
             );
-          },
+            },
+          ),
         ),
       ),
     );

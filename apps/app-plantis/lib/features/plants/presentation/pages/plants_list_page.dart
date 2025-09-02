@@ -3,11 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../shared/widgets/responsive_layout.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
+import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import '../selectors/plants_selectors.dart';
 import '../widgets/empty_plants_widget.dart';
+import '../widgets/plant_form_dialog.dart';
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_error_widget.dart';
 import '../widgets/plants_fab.dart';
@@ -108,8 +111,22 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
-  void _navigateToAddPlant(BuildContext context) {
-    context.push('/plants/add');
+  Future<void> _navigateToAddPlant(BuildContext context) async {
+    // Criar um novo provider para a dialog
+    final plantFormProvider = di.sl<PlantFormProvider>();
+    
+    // Mostrar dialog com o provider
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ChangeNotifierProvider.value(
+        value: plantFormProvider,
+        child: const PlantFormDialog(),
+      ),
+    );
+    
+    // Limpar o provider após fechar a dialog
+    plantFormProvider.dispose();
   }
 
   @override
@@ -128,38 +145,40 @@ class _PlantsListPageState extends State<PlantsListPage> {
             theme.brightness == Brightness.dark
                 ? const Color(0xFF1C1C1E)
                 : theme.colorScheme.surface,
-        body: SafeArea(
-          child: Column(
-            children: [
-              // ARCHITECTURE: App Bar uses granular selector for performance
-              // Only rebuilds when relevant state changes (count, search, view mode)
-              Selector<PlantsProvider, AppBarData>(
-                selector:
-                    (_, provider) => AppBarData(
-                      plantsCount: provider.plantsCount,
-                      searchQuery: provider.searchQuery,
-                      viewMode: provider.viewMode,
-                    ),
-                shouldRebuild: (previous, next) {
-                  return previous.plantsCount != next.plantsCount ||
-                      previous.searchQuery != next.searchQuery ||
-                      previous.viewMode != next.viewMode;
-                },
-                builder: (context, appBarData, child) {
-                  return PlantsAppBar(
-                    plantsCount: appBarData.plantsCount,
-                    searchQuery: appBarData.searchQuery,
-                    onSearchChanged: _onSearchChanged,
-                    viewMode: appBarData.viewMode,
-                    onViewModeChanged: _onViewModeChanged,
-                  );
-                },
-              ),
+        body: ResponsiveLayout(
+          child: SafeArea(
+            child: Column(
+              children: [
+                // ARCHITECTURE: App Bar uses granular selector for performance
+                // Only rebuilds when relevant state changes (count, search, view mode)
+                Selector<PlantsProvider, AppBarData>(
+                  selector:
+                      (_, provider) => AppBarData(
+                        plantsCount: provider.plantsCount,
+                        searchQuery: provider.searchQuery,
+                        viewMode: provider.viewMode,
+                      ),
+                  shouldRebuild: (previous, next) {
+                    return previous.plantsCount != next.plantsCount ||
+                        previous.searchQuery != next.searchQuery ||
+                        previous.viewMode != next.viewMode;
+                  },
+                  builder: (context, appBarData, child) {
+                    return PlantsAppBar(
+                      plantsCount: appBarData.plantsCount,
+                      searchQuery: appBarData.searchQuery,
+                      onSearchChanged: _onSearchChanged,
+                      viewMode: appBarData.viewMode,
+                      onViewModeChanged: _onViewModeChanged,
+                    );
+                  },
+                ),
 
-              // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
-              // Each selector only listens to specific parts of provider state
-              Expanded(child: _buildOptimizedPlantsContent()),
-            ],
+                // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
+                // Each selector only listens to specific parts of provider state
+                Expanded(child: _buildOptimizedPlantsContent()),
+              ],
+            ),
           ),
         ),
 

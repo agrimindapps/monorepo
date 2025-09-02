@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/navigation/app_navigation_provider.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import 'detalhe_praga_page.dart';
 import 'domain/entities/praga_entity.dart';
 import 'models/praga_view_mode.dart';
 import 'presentation/providers/pragas_provider.dart';
@@ -114,18 +114,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   void _handleItemTap(PragaEntity praga) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder:
-            (context) => DetalhePragaPage(
-              pragaName: praga.nomeComum,
-              pragaScientificName:
-                  praga.nomeCientifico.isNotEmpty
-                      ? praga.nomeCientifico
-                      : 'Nome científico não disponível',
-            ),
-      ),
+    context.read<AppNavigationProvider>().navigateToDetalhePraga(
+      pragaName: praga.nomeComum,
+      pragaScientificName: praga.nomeCientifico.isNotEmpty
+          ? praga.nomeCientifico
+          : 'Nome científico não disponível',
     );
   }
 

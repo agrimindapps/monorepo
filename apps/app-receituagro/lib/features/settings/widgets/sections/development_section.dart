@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/pages/data_inspector_page.dart';
 import '../../presentation/providers/settings_provider.dart';
@@ -75,6 +76,15 @@ class DevelopmentSection extends StatelessWidget {
                 title: 'Inspetor de Dados',
                 subtitle: 'Visualizar e gerenciar dados locais',
                 onTap: () => _openDataInspector(context),
+                showDivider: true,
+              ),
+              SettingsListTile(
+                leadingIcon: Icons.navigation,
+                iconColor: Colors.blue.shade600,
+                backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                title: 'Teste de Navegação',
+                subtitle: 'Testar sistema de navegação interna',
+                onTap: () => _openNavigationTest(context),
               ),
             ],
           ),
@@ -298,5 +308,9 @@ class DevelopmentSection extends StatelessWidget {
         builder: (context) => const DataInspectorPage(),
       ),
     );
+  }
+
+  void _openNavigationTest(BuildContext context) {
+    context.read<AppNavigationProvider>().navigateToNavigationTest();
   }
 }

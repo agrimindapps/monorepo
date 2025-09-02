@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Cores específicas do Plantis (foco em plantas e natureza)
 class PlantisColors {
-  // Primary colors (teal/turquoise theme for nature/plants)
-  static const Color primary = Color(0xFF20B2AA); // Turquoise
-  static const Color primaryLight = Color(0xFF52E4DC); // Light turquoise
-  static const Color primaryDark = Color(0xFF00827A); // Dark turquoise
+  // Primary colors (green theme for nature/plants)
+  static const Color primary = Color(0xFF0D945A); // Deep green
+  static const Color primaryLight = Color(0xFF4DB377); // Light green
+  static const Color primaryDark = Color(0xFF0A7548); // Dark green
 
   // Secondary colors
   static const Color secondary = Color(0xFF98D8C8); // Mint green
@@ -86,25 +86,25 @@ class PlantisColors {
   static Color getPrimaryShade(int shade) {
     switch (shade) {
       case 50:
-        return const Color(0xFFE0F2F1);
+        return const Color(0xFFE3F2E8);
       case 100:
-        return const Color(0xFFB2DFDB);
+        return const Color(0xFFB8DFC7);
       case 200:
-        return const Color(0xFF80CBC4);
+        return const Color(0xFF8BCAA2);
       case 300:
-        return const Color(0xFF4DB6AC);
+        return const Color(0xFF5EB57D);
       case 400:
-        return const Color(0xFF26A69A);
+        return const Color(0xFF3DA562);
       case 500:
         return primary;
       case 600:
-        return const Color(0xFF00695C);
+        return const Color(0xFF0B8752);
       case 700:
-        return const Color(0xFF004D40);
+        return const Color(0xFF097747);
       case 800:
         return primaryDark;
       case 900:
-        return const Color(0xFF00251A);
+        return const Color(0xFF065030);
       default:
         return primary;
     }

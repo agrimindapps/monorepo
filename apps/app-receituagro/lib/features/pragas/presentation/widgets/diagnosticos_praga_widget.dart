@@ -204,27 +204,32 @@ class DiagnosticosPragaWidget extends StatelessWidget {
 
   /// Constrói estado vazio
   Widget _buildEmptyState() {
-    return Builder(
-      builder: (context) => Center(
+    return Consumer<DiagnosticosPragaProvider>(
+      builder: (context, provider, child) => Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.search_off,
+                provider.diagnosticos.isEmpty ? Icons.bug_report_outlined : Icons.search_off,
                 size: 64,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
               Text(
-                'Nenhum diagnóstico encontrado',
+                provider.diagnosticos.isEmpty 
+                    ? 'Nenhum diagnóstico disponível'
+                    : 'Nenhum diagnóstico encontrado',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'Tente ajustar os filtros de pesquisa',
+                provider.diagnosticos.isEmpty
+                    ? 'Esta praga ainda não possui diagnósticos cadastrados ou os dados estão sendo carregados'
+                    : 'Tente ajustar os filtros de pesquisa',
                 style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
               ),
             ],
           ),

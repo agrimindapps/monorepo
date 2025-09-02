@@ -63,7 +63,7 @@ class DataCleaningService {
       
       // Verifica se a box está aberta
       if (Hive.isBoxOpen(boxName)) {
-        final box = Hive.box(boxName);
+        final box = Hive.box<dynamic>(boxName);
         final itemCount = box.length;
         
         await box.clear();
@@ -77,7 +77,7 @@ class DataCleaningService {
           name: 'DataCleaningService');
         
         try {
-          final box = await Hive.openBox(boxName);
+          final box = await Hive.openBox<dynamic>(boxName);
           final itemCount = box.length;
           
           await box.clear();
@@ -148,7 +148,7 @@ class DataCleaningService {
       for (final boxName in _boxNames) {
         try {
           if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box(boxName);
+            final box = Hive.box<dynamic>(boxName);
             stats[boxName] = box.length;
           } else {
             stats[boxName] = 0;
@@ -173,7 +173,7 @@ class DataCleaningService {
       for (final boxName in _boxNames) {
         try {
           if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box(boxName);
+            final box = Hive.box<dynamic>(boxName);
             if (box.isNotEmpty) {
               return true;
             }
@@ -194,7 +194,7 @@ class DataCleaningService {
 
   /// Limpa dados específicos com callback de progresso
   Future<Either<Exception, void>> clearDataWithProgress({
-    required Function(String boxName, int total) onProgress,
+    required void Function(String boxName, int total) onProgress,
   }) async {
     try {
       developer.log('Iniciando limpeza com callback de progresso...', name: 'DataCleaningService');
@@ -210,7 +210,7 @@ class DataCleaningService {
         }
         
         // Pequena pausa para permitir atualização da UI
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
       }
       
       developer.log('Limpeza com progresso concluída', name: 'DataCleaningService');
@@ -230,7 +230,7 @@ class DataCleaningService {
       for (final boxName in _boxNames) {
         try {
           if (Hive.isBoxOpen(boxName)) {
-            await Hive.box(boxName).close();
+            await Hive.box<dynamic>(boxName).close();
             developer.log('Box $boxName fechado', name: 'DataCleaningService');
           }
         } catch (e) {

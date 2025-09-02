@@ -58,6 +58,16 @@ class DetalhePragaProvider extends ChangeNotifier {
     _loadComentarios();
   }
 
+  /// Versão assíncrona de initialize que aguarda dados estarem disponíveis
+  Future<void> initializeAsync(String pragaName, String pragaScientificName) async {
+    _pragaName = pragaName;
+    _pragaScientificName = pragaScientificName;
+    
+    await _loadFavoritoStateAsync();
+    _loadPremiumStatus();
+    await _loadComentarios();
+  }
+
   /// Carrega estado de favorito da praga
   void _loadFavoritoState() {
     // Busca a praga real pelo nome para obter o ID único
@@ -68,6 +78,36 @@ class DetalhePragaProvider extends ChangeNotifier {
     if (_pragaData != null) {
       _isFavorited = _favoritosRepository.isFavorito('praga', _pragaData!.idReg);
     } else {
+      // Fallback para nome se não encontrar no repositório
+      _isFavorited = _favoritosRepository.isFavorito('praga', _pragaName);
+    }
+    
+    notifyListeners();
+  }
+
+  /// Versão assíncrona que aguarda dados estarem disponíveis
+  Future<void> _loadFavoritoStateAsync() async {
+    debugPrint('🔍 Buscando praga: $_pragaName');
+    
+    // Tenta usar dados síncronos primeiro
+    final pragas = _pragasRepository.getAll()
+        .where((p) => p.nomeComum == _pragaName);
+    
+    // Se não encontrou, tenta versão assíncrona
+    if (pragas.isEmpty) {
+      debugPrint('⏳ Dados síncronos não encontrados, tentando busca assíncrona...');
+      final allPragas = await _pragasRepository.getAllAsync();
+      final pragasAsync = allPragas.where((p) => p.nomeComum == _pragaName);
+      _pragaData = pragasAsync.isNotEmpty ? pragasAsync.first : null;
+    } else {
+      _pragaData = pragas.first;
+    }
+    
+    if (_pragaData != null) {
+      debugPrint('✅ Praga encontrada: ${_pragaData!.idReg} - ${_pragaData!.nomeComum}');
+      _isFavorited = _favoritosRepository.isFavorito('praga', _pragaData!.idReg);
+    } else {
+      debugPrint('❌ Praga não encontrada: $_pragaName');
       // Fallback para nome se não encontrar no repositório
       _isFavorited = _favoritosRepository.isFavorito('praga', _pragaName);
     }

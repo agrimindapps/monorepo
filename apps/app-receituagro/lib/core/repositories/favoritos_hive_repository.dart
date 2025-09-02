@@ -24,6 +24,7 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
   }
 
   /// Versão async para garantir que o box esteja aberto
+  @override
   Future<List<FavoritoItemHive>> getAllAsync() async {
     try {
       final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');

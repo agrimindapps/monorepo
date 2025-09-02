@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/widgets/loading/loading_components.dart';
+import '../../../../shared/widgets/responsive_layout.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import '../widgets/plant_form_basic_info.dart';
@@ -89,8 +90,9 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
           ),
         ],
       ),
-      body: Consumer<PlantFormProvider>(
-        builder: (context, provider, child) {
+      body: ResponsiveLayout(
+        child: Consumer<PlantFormProvider>(
+          builder: (context, provider, child) {
           if (provider.isLoading) {
             return Center(
               child: Column(
@@ -155,7 +157,8 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
               ],
             ),
           );
-        },
+          },
+        ),
       ),
     );
   }

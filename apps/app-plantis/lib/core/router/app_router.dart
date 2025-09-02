@@ -22,7 +22,7 @@ import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
-import '../../shared/widgets/main_scaffold.dart';
+import '../../shared/widgets/web_optimized_navigation.dart';
 import '../di/injection_container.dart';
 import '../utils/navigation_service.dart';
 
@@ -130,9 +130,9 @@ class AppRouter {
               (context, state) => const AuthPage(initialTab: 1), // Register tab
         ),
 
-        // Main Shell Route with Bottom Navigation
+        // Main Shell Route with Web Optimized Navigation
         ShellRoute(
-          builder: (context, state, child) => MainScaffold(child: child),
+          builder: (context, state, child) => WebOptimizedNavigation(child: child),
           routes: [
             // Plants Routes
             GoRoute(

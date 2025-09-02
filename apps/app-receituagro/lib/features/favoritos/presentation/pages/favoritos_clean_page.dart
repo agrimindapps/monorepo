@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/responsive_content_wrapper.dart';
 import '../../favoritos_di.dart';
 import '../providers/favoritos_provider_simplified.dart';
 import '../widgets/favoritos_tabs_widget.dart';
@@ -72,17 +73,19 @@ class _FavoritosCleanPageState extends State<FavoritosCleanPage>
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
-          child: Column(
-            children: [
-              _buildModernHeader(context, isDark),
-              const SizedBox(height: 20),
-              Expanded(
-                child: FavoritosTabsWidget(
-                  tabController: _tabController,
-                  onReload: _reloadFavoritos,
+          child: ResponsiveContentWrapper(
+            child: Column(
+              children: [
+                _buildModernHeader(context, isDark),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: FavoritosTabsWidget(
+                    tabController: _tabController,
+                    onReload: _reloadFavoritos,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

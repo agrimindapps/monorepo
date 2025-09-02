@@ -64,7 +64,7 @@ class RemoteAssetService {
       'fallback_url': 'https://backup.receituagro.com/images/',
       'cache_duration_hours': 24,
       'critical_local_assets': ['a.jpg', 'Nao classificado.jpg'],
-      'assets': []
+      'assets': <String>[]
     };
   }
 
@@ -310,7 +310,7 @@ class RemoteAssetService {
       }
       
       // Pequena pausa entre lotes
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
     
     developer.log('Background sync completed', name: 'RemoteAssetService');

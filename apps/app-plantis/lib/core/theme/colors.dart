@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class PlantisColors {
   // Primary Colors
-  static const Color primary = Color(0xFF20B2AA);
-  static const Color primaryLight = Color(0xFF52E4DC);
-  static const Color primaryDark = Color(0xFF00827A);
+  static const Color primary = Color(0xFF0D945A);
+  static const Color primaryLight = Color(0xFF4DB377);
+  static const Color primaryDark = Color(0xFF0A7548);
 
   // Secondary Colors
   static const Color secondary = Color(0xFF98D8C8);

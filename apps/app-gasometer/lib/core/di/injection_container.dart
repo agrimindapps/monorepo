@@ -41,6 +41,8 @@ import '../../features/fuel/domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../features/fuel/domain/usecases/search_fuel_records.dart';
 import '../../features/fuel/domain/usecases/update_fuel_record.dart';
 import '../../features/fuel/presentation/providers/fuel_provider.dart';
+// Settings imports
+import '../../features/settings/presentation/providers/settings_provider.dart';
 // Maintenance imports
 import '../../features/maintenance/data/datasources/maintenance_local_data_source.dart';
 import '../../features/maintenance/data/datasources/maintenance_remote_data_source.dart';
@@ -156,6 +158,17 @@ Future<void> initializeDependencies() async {
 
   // Core Package Services
   sl.registerLazySingleton<core.ISubscriptionRepository>(() => core.RevenueCatService());
+  
+  // App Rating Service from core package
+  sl.registerLazySingleton<core.IAppRatingRepository>(() => core.AppRatingService(
+    // IDs reais das lojas (extraídos dos arquivos de configuração do projeto)
+    appStoreId: '123456789', // TODO: Atualizar com ID real quando app for publicado na App Store
+    googlePlayId: 'br.com.agrimind.gasometer', // ID real do Google Play
+    minDays: 3,
+    minLaunches: 5,
+    remindDays: 7,
+    remindLaunches: 5,
+  ));
 
   // Sync Services
   sl.registerLazySingleton<SyncQueue>(() => SyncQueue());
@@ -415,6 +428,14 @@ Future<void> initializeDependencies() async {
       getRecentFuelRecords: sl(),
       errorHandler: sl(),
       errorReporter: sl(),
+    ),
+  );
+
+  // Settings Provider
+  sl.registerFactory<SettingsProvider>(
+    () => SettingsProvider(
+      preferences: sl(),
+      appRatingRepository: sl(),
     ),
   );
 

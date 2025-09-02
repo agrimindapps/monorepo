@@ -15,6 +15,7 @@ import 'features/maintenance/presentation/providers/maintenance_provider.dart';
 import 'features/odometer/presentation/providers/odometer_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/reports/presentation/providers/reports_provider.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
 
 class GasOMeterApp extends StatefulWidget {
@@ -64,6 +65,11 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // Theme Provider - independent
         ChangeNotifierProvider(
           create: (_) => ThemeProvider()..initialize(),
+        ),
+        
+        // Settings Provider - independent
+        ChangeNotifierProvider(
+          create: (_) => sl<SettingsProvider>(),
         ),
         
         // Sync Status Provider - independent

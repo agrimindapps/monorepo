@@ -1,0 +1,196 @@
+import 'package:dartz/dartz.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/utils/typedef.dart';
+import '../../domain/entities/defensivo_entity.dart';
+import '../../domain/repositories/defensivo_repository.dart';
+import '../models/defensivo_model.dart';
+
+/// Implementação do repositório de defensivos
+/// 
+/// Esta classe implementa o contrato definido no domain layer,
+/// usando o FitossanitarioHiveRepository como fonte de dados
+class DefensivoRepositoryImpl implements DefensivoRepository {
+  const DefensivoRepositoryImpl(this._hiveRepository);
+
+  final FitossanitarioHiveRepository _hiveRepository;
+
+  @override
+  ResultFuture<DefensivoEntity> getDefensivoById(String idReg) async {
+    try {
+      final defensivos = _hiveRepository.getAll();
+      final defensivo = defensivos
+          .where((d) => d.idReg == idReg)
+          .firstOrNull;
+
+      if (defensivo == null) {
+        return Left(CacheFailure('Defensivo não encontrado com ID: $idReg'));
+      }
+
+      final model = DefensivoModel.fromHive(defensivo);
+      return Right(model);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivo: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<DefensivoEntity> getDefensivoByName(String nome) async {
+    try {
+      final defensivos = _hiveRepository.getAll();
+      final defensivo = defensivos
+          .where((d) => 
+              d.nomeComum.toLowerCase() == nome.toLowerCase() ||
+              d.nomeTecnico.toLowerCase() == nome.toLowerCase())
+          .firstOrNull;
+
+      if (defensivo == null) {
+        return Left(CacheFailure('Defensivo não encontrado com nome: $nome'));
+      }
+
+      final model = DefensivoModel.fromHive(defensivo);
+      return Right(model);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivo por nome: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<List<DefensivoEntity>> getDefensivosByFabricante(String fabricante) async {
+    try {
+      final defensivos = _hiveRepository.getAll();
+      final filteredDefensivos = defensivos
+          .where((d) => d.fabricante?.toLowerCase().contains(fabricante.toLowerCase()) == true)
+          .map((hive) => DefensivoModel.fromHive(hive))
+          .toList();
+
+      return Right(filteredDefensivos);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos por fabricante: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<List<DefensivoEntity>> getDefensivosByIngredienteAtivo(String ingredienteAtivo) async {
+    try {
+      final defensivos = _hiveRepository.getAll();
+      final filteredDefensivos = defensivos
+          .where((d) => d.ingredienteAtivo?.toLowerCase().contains(ingredienteAtivo.toLowerCase()) == true)
+          .map((hive) => DefensivoModel.fromHive(hive))
+          .toList();
+
+      return Right(filteredDefensivos);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos por ingrediente ativo: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<List<DefensivoEntity>> getDefensivos({
+    String? fabricante,
+    String? classeAgronomica,
+    String? ingredienteAtivo,
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      var defensivos = _hiveRepository.getAll();
+
+      // Aplicar filtros
+      if (fabricante != null && fabricante.isNotEmpty) {
+        defensivos = defensivos
+            .where((d) => d.fabricante?.toLowerCase().contains(fabricante.toLowerCase()) == true)
+            .toList();
+      }
+
+      if (classeAgronomica != null && classeAgronomica.isNotEmpty) {
+        defensivos = defensivos
+            .where((d) => d.classeAgronomica?.toLowerCase().contains(classeAgronomica.toLowerCase()) == true)
+            .toList();
+      }
+
+      if (ingredienteAtivo != null && ingredienteAtivo.isNotEmpty) {
+        defensivos = defensivos
+            .where((d) => d.ingredienteAtivo?.toLowerCase().contains(ingredienteAtivo.toLowerCase()) == true)
+            .toList();
+      }
+
+      // Aplicar paginação
+      if (offset != null && offset > 0) {
+        if (offset >= defensivos.length) {
+          return const Right([]);
+        }
+        defensivos = defensivos.skip(offset).toList();
+      }
+
+      if (limit != null && limit > 0) {
+        defensivos = defensivos.take(limit).toList();
+      }
+
+      final models = defensivos
+          .map((hive) => DefensivoModel.fromHive(hive))
+          .toList();
+
+      return Right(models);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<List<DefensivoEntity>> searchDefensivos(String query) async {
+    try {
+      if (query.trim().isEmpty) {
+        return const Right([]);
+      }
+
+      final searchQuery = query.toLowerCase();
+      final defensivos = _hiveRepository.getAll();
+      
+      final filteredDefensivos = defensivos
+          .where((d) => 
+              d.nomeComum.toLowerCase().contains(searchQuery) ||
+              d.nomeTecnico.toLowerCase().contains(searchQuery) ||
+              (d.fabricante?.toLowerCase().contains(searchQuery) == true) ||
+              (d.ingredienteAtivo?.toLowerCase().contains(searchQuery) == true) ||
+              (d.classeAgronomica?.toLowerCase().contains(searchQuery) == true))
+          .map((hive) => DefensivoModel.fromHive(hive))
+          .toList();
+
+      // Ordenar por relevância (nome comum primeiro)
+      filteredDefensivos.sort((a, b) {
+        final aComumMatch = a.nomeComum.toLowerCase().contains(searchQuery);
+        final bComumMatch = b.nomeComum.toLowerCase().contains(searchQuery);
+        
+        if (aComumMatch && !bComumMatch) return -1;
+        if (!aComumMatch && bComumMatch) return 1;
+        return a.nomeComum.compareTo(b.nomeComum);
+      });
+
+      return Right(filteredDefensivos);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao pesquisar defensivos: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Stream<List<DefensivoEntity>> watchDefensivos() async* {
+    try {
+      // Como o Hive não oferece streams nativamente, 
+      // podemos simular com refresh periódico
+      while (true) {
+        final defensivos = _hiveRepository.getAll();
+        final models = defensivos
+            .map((hive) => DefensivoModel.fromHive(hive))
+            .toList();
+        
+        yield models;
+        
+        // Aguarda 5 segundos antes do próximo refresh
+        await Future.delayed(const Duration(seconds: 5));
+      }
+    } catch (e) {
+      yield [];
+    }
+  }
+}

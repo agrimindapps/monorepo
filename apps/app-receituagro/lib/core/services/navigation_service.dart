@@ -21,6 +21,9 @@ abstract class INavigationService {
   /// Open external URL
   Future<void> openUrl(String url);
   
+  /// Open external URL (alias for compatibility)
+  Future<void> openExternalUrl(String url);
+  
   /// Get current context
   BuildContext? get currentContext;
 }
@@ -122,6 +125,12 @@ class NavigationService implements INavigationService {
       showSnackBar('Erro ao abrir link', backgroundColor: Colors.red);
     }
   }
+
+  @override
+  Future<void> openExternalUrl(String url) async {
+    // Alias for openUrl for compatibility
+    return openUrl(url);
+  }
   
   @override
   BuildContext? get currentContext => navigatorKey.currentContext;
@@ -219,6 +228,12 @@ class MockNavigationService implements INavigationService {
     }
     
     await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
+
+  @override
+  Future<void> openExternalUrl(String url) async {
+    // Alias for openUrl for compatibility
+    return openUrl(url);
   }
   
   @override

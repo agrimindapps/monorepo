@@ -9,9 +9,12 @@ class DiagnosticoMapper {
   static DiagnosticoEntity fromDiagnosticosEntity(DiagEntity.DiagnosticoEntity entity) {
     return DiagnosticoEntity(
       id: entity.id,
-      nome: entity.nomeDefensivo ?? 'Nome não informado',
+      idDefensivo: entity.idDefensivo,
+      nomeDefensivo: entity.nomeDefensivo,
+      nomeCultura: entity.nomeCultura,
+      nomePraga: entity.nomePraga,
+      dosagem: entity.dosagem.displayDosagem,
       ingredienteAtivo: entity.idDefensivo,
-      dosagem: entity.dosagem.toString(),
       cultura: entity.nomeCultura ?? 'Não especificado',
       grupo: entity.nomePraga ?? 'Não especificado',
     );

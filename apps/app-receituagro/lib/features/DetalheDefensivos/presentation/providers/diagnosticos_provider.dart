@@ -1,111 +1,162 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/diagnostico_entity.dart';
-import '../../domain/usecases/get_diagnosticos_usecase.dart';
+import '../../domain/usecases/get_diagnosticos_by_defensivo_usecase.dart';
+import '../../data/repositories/diagnostico_repository_impl.dart';
 
-/// Provider para gerenciar estado dos diagnósticos
-/// Responsabilidade única: busca, filtro e pesquisa de diagnósticos
-class DiagnosticosProvider extends ChangeNotifier {
-  final GetDiagnosticosUsecase _getDiagnosticosUsecase;
+/// Provider para o repositório de diagnósticos
+final diagnosticoRepositoryProvider = Provider((ref) {
+  return DiagnosticoRepositoryImpl(sl());
+});
 
-  DiagnosticosProvider({
-    GetDiagnosticosUsecase? getDiagnosticosUsecase,
-  }) : _getDiagnosticosUsecase = getDiagnosticosUsecase ?? sl<GetDiagnosticosUsecase>();
+/// Provider para o caso de uso de buscar diagnósticos por defensivo
+final getDiagnosticosByDefensivoUseCaseProvider = Provider((ref) {
+  final repository = ref.watch(diagnosticoRepositoryProvider);
+  return GetDiagnosticosByDefensivoUseCase(repository);
+});
 
-  List<DiagnosticoEntity> _diagnosticos = [];
-  bool _isLoading = false;
-  bool _hasError = false;
-  String _errorMessage = '';
-  String _searchQuery = '';
-  String _selectedCultura = 'Todas';
+/// Estado para os diagnósticos
+class DiagnosticosState {
+  final List<DiagnosticoEntity> diagnosticos;
+  final bool isLoading;
+  final String? errorMessage;
+  final String searchQuery;
+  final String? selectedCultura;
+  final Map<String, List<DiagnosticoEntity>> diagnosticosGrouped;
 
-  // Lista de culturas disponíveis
-  final List<String> _culturas = [
-    'Todas',
-    'Arroz',
-    'Braquiária',
-    'Cana-de-açúcar',
-    'Café',
-    'Milho',
-    'Soja'
-  ];
+  const DiagnosticosState({
+    this.diagnosticos = const [],
+    this.isLoading = false,
+    this.errorMessage,
+    this.searchQuery = '',
+    this.selectedCultura,
+    this.diagnosticosGrouped = const {},
+  });
 
-  // Getters
-  List<DiagnosticoEntity> get diagnosticos => _getFilteredDiagnosticos();
-  List<DiagnosticoEntity> get allDiagnosticos => _diagnosticos;
-  List<String> get culturas => _culturas;
-  bool get isLoading => _isLoading;
-  bool get hasError => _hasError;
-  String get errorMessage => _errorMessage;
-  String get searchQuery => _searchQuery;
-  String get selectedCultura => _selectedCultura;
-
-  /// Carrega diagnósticos relacionados ao defensivo
-  Future<void> loadDiagnosticos(String defensivoId) async {
-    _setLoading(true);
-    _clearError();
-
-    final result = await _getDiagnosticosUsecase(
-      GetDiagnosticosParams(defensivoId: defensivoId),
+  DiagnosticosState copyWith({
+    List<DiagnosticoEntity>? diagnosticos,
+    bool? isLoading,
+    String? errorMessage,
+    String? searchQuery,
+    String? selectedCultura,
+    Map<String, List<DiagnosticoEntity>>? diagnosticosGrouped,
+  }) {
+    return DiagnosticosState(
+      diagnosticos: diagnosticos ?? this.diagnosticos,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage ?? this.errorMessage,
+      searchQuery: searchQuery ?? this.searchQuery,
+      selectedCultura: selectedCultura ?? this.selectedCultura,
+      diagnosticosGrouped: diagnosticosGrouped ?? this.diagnosticosGrouped,
     );
+  }
+
+  bool get hasError => errorMessage != null;
+  bool get hasData => diagnosticos.isNotEmpty;
+  bool get isEmpty => diagnosticos.isEmpty && !isLoading && !hasError;
+}
+
+/// Notifier para gerenciar o estado dos diagnósticos
+class DiagnosticosNotifier extends StateNotifier<DiagnosticosState> {
+  DiagnosticosNotifier(this._getDiagnosticosUseCase) 
+      : super(const DiagnosticosState());
+
+  final GetDiagnosticosByDefensivoUseCase _getDiagnosticosUseCase;
+  List<DiagnosticoEntity> _originalDiagnosticos = [];
+
+  /// Carrega diagnósticos para um defensivo
+  Future<void> loadDiagnosticos(String idDefensivo) async {
+    if (state.isLoading) return;
+
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+    );
+
+    final params = GetDiagnosticosByDefensivoParams(
+      idDefensivo: idDefensivo,
+      cultura: state.selectedCultura,
+      searchQuery: state.searchQuery,
+    );
+
+    final result = await _getDiagnosticosUseCase(params);
 
     result.fold(
       (failure) {
-        _setError('Erro ao carregar diagnósticos: ${failure.message}');
-        _setLoading(false);
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+        );
       },
       (diagnosticos) {
-        _diagnosticos = diagnosticos;
-        _setLoading(false);
+        _originalDiagnosticos = diagnosticos;
+        final grouped = _groupDiagnosticosByCultura(diagnosticos);
+        state = state.copyWith(
+          isLoading: false,
+          diagnosticos: diagnosticos,
+          diagnosticosGrouped: grouped,
+          errorMessage: null,
+        );
       },
     );
   }
 
-  /// Atualiza query de pesquisa
-  void updateSearchQuery(String query) {
-    _searchQuery = query;
-    notifyListeners();
+  /// Aplica filtro de pesquisa
+  void setSearchQuery(String query) {
+    if (state.searchQuery == query) return;
+    
+    state = state.copyWith(searchQuery: query);
+    _applyFilters();
   }
 
-  /// Atualiza cultura selecionada
-  void updateSelectedCultura(String cultura) {
-    _selectedCultura = cultura;
-    notifyListeners();
+  /// Seleciona uma cultura específica
+  void setSelectedCultura(String? cultura) {
+    if (state.selectedCultura == cultura) return;
+    
+    state = state.copyWith(selectedCultura: cultura);
+    _applyFilters();
   }
 
-  /// Limpa filtros
-  void clearFilters() {
-    _searchQuery = '';
-    _selectedCultura = 'Todas';
-    notifyListeners();
-  }
+  /// Aplica filtros aos dados já carregados
+  void _applyFilters() {
+    var filteredDiagnosticos = List<DiagnosticoEntity>.from(_originalDiagnosticos);
 
-  /// Retorna diagnósticos filtrados
-  List<DiagnosticoEntity> _getFilteredDiagnosticos() {
-    List<DiagnosticoEntity> filtered = _diagnosticos;
-
-    // Filtrar por cultura
-    if (_selectedCultura != 'Todas') {
-      filtered = filtered.where((d) => d.cultura == _selectedCultura).toList();
+    // Filtro por cultura
+    if (state.selectedCultura != null && 
+        state.selectedCultura!.isNotEmpty && 
+        state.selectedCultura != 'Todas') {
+      filteredDiagnosticos = filteredDiagnosticos
+          .where((d) => d.cultura.toLowerCase() == state.selectedCultura!.toLowerCase())
+          .toList();
     }
 
-    // Filtrar por pesquisa
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      filtered = filtered.where((d) =>
-          d.nome.toLowerCase().contains(query) ||
-          d.ingredienteAtivo.toLowerCase().contains(query) ||
-          d.cultura.toLowerCase().contains(query)).toList();
+    // Filtro por query de busca
+    if (state.searchQuery.isNotEmpty) {
+      final query = state.searchQuery.toLowerCase();
+      filteredDiagnosticos = filteredDiagnosticos
+          .where((d) =>
+              d.nome.toLowerCase().contains(query) ||
+              d.cultura.toLowerCase().contains(query) ||
+              d.grupo.toLowerCase().contains(query) ||
+              d.ingredienteAtivo.toLowerCase().contains(query))
+          .toList();
     }
 
-    return filtered;
+    final grouped = _groupDiagnosticosByCultura(filteredDiagnosticos);
+    
+    state = state.copyWith(
+      diagnosticos: filteredDiagnosticos,
+      diagnosticosGrouped: grouped,
+    );
   }
 
   /// Agrupa diagnósticos por cultura
-  Map<String, List<DiagnosticoEntity>> get diagnosticosGroupedByCultura {
+  Map<String, List<DiagnosticoEntity>> _groupDiagnosticosByCultura(
+    List<DiagnosticoEntity> diagnosticos,
+  ) {
     final Map<String, List<DiagnosticoEntity>> grouped = {};
 
-    for (final diagnostico in _getFilteredDiagnosticos()) {
+    for (final diagnostico in diagnosticos) {
       if (!grouped.containsKey(diagnostico.cultura)) {
         grouped[diagnostico.cultura] = [];
       }
@@ -117,36 +168,63 @@ class DiagnosticosProvider extends ChangeNotifier {
     final Map<String, List<DiagnosticoEntity>> sortedGrouped = {};
 
     for (final key in sortedKeys) {
+      // Ordenar diagnósticos dentro de cada cultura
+      grouped[key]!.sort((a, b) => a.nome.compareTo(b.nome));
       sortedGrouped[key] = grouped[key]!;
     }
 
     return sortedGrouped;
   }
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
+  /// Lista de culturas disponíveis
+  List<String> get availableCulturas {
+    final culturas = {'Todas'};
+    for (final diagnostico in _originalDiagnosticos) {
+      culturas.add(diagnostico.cultura);
+    }
+    return culturas.toList()..sort();
   }
 
-  void _setError(String message) {
-    _hasError = true;
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _hasError = false;
-    _errorMessage = '';
-  }
-
-  /// Reset do provider
-  void reset() {
-    _diagnosticos = [];
-    _isLoading = false;
-    _hasError = false;
-    _errorMessage = '';
-    _searchQuery = '';
-    _selectedCultura = 'Todas';
-    notifyListeners();
+  /// Limpa os dados
+  void clearData() {
+    state = const DiagnosticosState();
+    _originalDiagnosticos = [];
   }
 }
+
+/// Provider para o notifier de diagnósticos
+final diagnosticosNotifierProvider = 
+    StateNotifierProvider<DiagnosticosNotifier, DiagnosticosState>((ref) {
+  final useCase = ref.watch(getDiagnosticosByDefensivoUseCaseProvider);
+  return DiagnosticosNotifier(useCase);
+});
+
+/// Provider conveniente para lista de diagnósticos
+final diagnosticosListProvider = Provider<List<DiagnosticoEntity>>((ref) {
+  final state = ref.watch(diagnosticosNotifierProvider);
+  return state.diagnosticos;
+});
+
+/// Provider conveniente para diagnósticos agrupados
+final diagnosticosGroupedProvider = Provider<Map<String, List<DiagnosticoEntity>>>((ref) {
+  final state = ref.watch(diagnosticosNotifierProvider);
+  return state.diagnosticosGrouped;
+});
+
+/// Provider conveniente para culturas disponíveis
+final availableCulturasProvider = Provider<List<String>>((ref) {
+  final notifier = ref.watch(diagnosticosNotifierProvider.notifier);
+  return notifier.availableCulturas;
+});
+
+/// Provider conveniente para estado de loading
+final isLoadingDiagnosticosProvider = Provider<bool>((ref) {
+  final state = ref.watch(diagnosticosNotifierProvider);
+  return state.isLoading;
+});
+
+/// Provider conveniente para erros
+final diagnosticosErrorProvider = Provider<String?>((ref) {
+  final state = ref.watch(diagnosticosNotifierProvider);
+  return state.errorMessage;
+});

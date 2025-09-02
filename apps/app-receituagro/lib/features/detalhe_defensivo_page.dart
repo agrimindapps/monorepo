@@ -4,7 +4,7 @@ import '../core/di/injection_container.dart';
 import '../core/widgets/modern_header_widget.dart';
 import 'navigation/bottom_nav_wrapper.dart';
 import 'DetalheDefensivos/presentation/providers/detalhe_defensivo_provider.dart';
-import 'DetalheDefensivos/presentation/providers/diagnosticos_provider.dart';
+import 'DetalheDefensivos/presentation/providers/diagnosticos_provider_legacy.dart';
 import 'DetalheDefensivos/presentation/widgets/defensivo_info_cards_widget.dart';
 import 'DetalheDefensivos/presentation/widgets/diagnosticos_tab_widget.dart';
 import 'DetalheDefensivos/presentation/widgets/tecnologia_tab_widget.dart';

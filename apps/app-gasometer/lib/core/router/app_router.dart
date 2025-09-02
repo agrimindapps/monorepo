@@ -7,7 +7,6 @@ import '../constants/ui_constants.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/debug/test_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/maintenance/presentation/pages/add_maintenance_page.dart';
@@ -33,50 +32,43 @@ class AppRouter {
       // Provider not ready yet during initialization - will be set later
       authProvider = null;
     }
-    
+
     const platformService = PlatformService();
     final routeGuard = RouteGuard(authProvider, platformService);
-    
+
     return GoRouter(
       initialLocation: routeGuard.getInitialLocation(),
-      redirect: (context, state) => routeGuard.handleRedirect(state.matchedLocation),
+      redirect: (context, state) =>
+          routeGuard.handleRedirect(state.matchedLocation),
       routes: [
-        // Test Route (Temporary for debugging)
-        GoRoute(
-          path: '/test',
-          name: 'test',
-          builder: (context, state) => const TestPage(),
-        ),
-        
         // Promo Routes (Landing Page and Policies)
         GoRoute(
           path: '/promo',
           name: 'promo',
           builder: (context, state) => const PromoPage(),
         ),
-        
+
         // Privacy Policy Route
         GoRoute(
           path: '/privacy',
           name: 'privacy',
           builder: (context, state) => const PrivacyPolicyPage(),
         ),
-        
+
         // Terms & Conditions Route
         GoRoute(
           path: '/terms',
           name: 'terms',
           builder: (context, state) => const TermsConditionsPage(),
         ),
-        
+
         // Auth Routes
         GoRoute(
           path: '/login',
           name: 'login',
           builder: (context, state) => const LoginPage(),
         ),
-        
-        
+
         // Main Shell Route
         ShellRoute(
           builder: (context, state, child) => MainNavigation(child: child),
@@ -87,15 +79,14 @@ class AppRouter {
               name: 'home',
               builder: (context, state) => const VehiclesPage(),
             ),
-            
-            
+
             // Odometer
             GoRoute(
               path: '/odometer',
               name: 'odometer',
               builder: (context, state) => const OdometerPage(),
             ),
-            
+
             // Fuel
             GoRoute(
               path: '/fuel',
@@ -109,7 +100,7 @@ class AppRouter {
                 ),
               ],
             ),
-            
+
             // Maintenance
             GoRoute(
               path: '/maintenance',
@@ -123,21 +114,21 @@ class AppRouter {
                 ),
               ],
             ),
-            
+
             // Reports
             GoRoute(
               path: '/reports',
               name: 'reports',
               builder: (context, state) => const ReportsPage(),
             ),
-            
+
             // Settings
             GoRoute(
               path: '/settings',
               name: 'settings',
               builder: (context, state) => const SettingsPage(),
             ),
-            
+
             // Profile
             GoRoute(
               path: '/profile',

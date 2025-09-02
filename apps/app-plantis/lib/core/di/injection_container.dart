@@ -21,10 +21,18 @@ import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/sync_status_provider.dart';
 import '../services/backup_scheduler.dart';
+import '../services/backup_audit_service.dart';
+import '../services/backup_data_transformer_service.dart';
+import '../services/backup_restore_service.dart';
 import '../services/backup_service.dart';
+import '../services/backup_validation_service.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/image_service.dart' as local;
 import '../services/notification_manager.dart';
+import '../services/interfaces/i_task_notification_manager.dart';
+import '../services/interfaces/i_plant_notification_manager.dart';
+import '../services/interfaces/i_notification_permission_manager.dart';
+import '../services/interfaces/i_notification_schedule_manager.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
@@ -119,14 +127,21 @@ void _initCoreServices() {
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
 
-  // Notification Manager
+  // Notification Manager - registrado com interfaces segregadas
   sl.registerLazySingleton(() => NotificationManager());
+  
+  // Interfaces segregadas para diferentes responsabilidades (ISP)
+  sl.registerLazySingleton<ITaskNotificationManager>(() => sl<NotificationManager>());
+  sl.registerLazySingleton<IPlantNotificationManager>(() => sl<NotificationManager>());
+  sl.registerLazySingleton<INotificationPermissionManager>(() => sl<NotificationManager>());
+  sl.registerLazySingleton<INotificationScheduleManager>(() => sl<NotificationManager>());
 
   // Image Service
   sl.registerLazySingleton(() => local.ImageService());
 
   // URL Launcher Service
   sl.registerLazySingleton(() => UrlLauncherService());
+  
 
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
@@ -222,14 +237,43 @@ void _initBackup() {
     ),
   );
 
-  // Backup Service
-  sl.registerSingleton<BackupService>(
-    BackupService(
-      backupRepository: sl<IBackupRepository>(),
+  // Backup Services (Refatorados seguindo SOLID)
+  sl.registerLazySingleton<BackupValidationService>(
+    () => const BackupValidationService(),
+  );
+  
+  sl.registerLazySingleton<BackupDataTransformerService>(
+    () => const BackupDataTransformerService(),
+  );
+  
+  sl.registerLazySingleton<BackupAuditService>(
+    () => BackupAuditService(storageService: sl<SecureStorageService>()),
+  );
+  
+  sl.registerLazySingleton<BackupRestoreService>(
+    () => BackupRestoreService(
       plantsRepository: sl(),
       spacesRepository: sl(),
       tasksRepository: sl(),
       storageService: sl<SecureStorageService>(),
+      validationService: sl<BackupValidationService>(),
+      transformerService: sl<BackupDataTransformerService>(),
+      auditService: sl<BackupAuditService>(),
+    ),
+  );
+
+  // Legacy Backup Service (mantido para compatibilidade)
+  sl.registerSingleton<BackupService>(
+    BackupService(
+      backupRepository: sl<IBackupRepository>(),
+      validationService: sl<BackupValidationService>(),
+      transformerService: sl<BackupDataTransformerService>(),
+      restoreService: sl<BackupRestoreService>(),
+      auditService: sl<BackupAuditService>(),
+      storageService: sl<SecureStorageService>(),
+      plantsRepository: sl(),
+      spacesRepository: sl(),
+      tasksRepository: sl(),
     ),
   );
 

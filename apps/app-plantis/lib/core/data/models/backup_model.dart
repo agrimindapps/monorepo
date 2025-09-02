@@ -2,6 +2,7 @@ import 'dart:convert';
 
 /// Model que representa um backup completo do usuário
 class BackupModel {
+  final String? id;
   final String version;
   final DateTime timestamp;
   final String userId;
@@ -9,6 +10,7 @@ class BackupModel {
   final BackupData data;
 
   const BackupModel({
+    this.id,
     required this.version,
     required this.timestamp,
     required this.userId,
@@ -19,6 +21,7 @@ class BackupModel {
   /// Cria backup a partir de JSON
   factory BackupModel.fromJson(Map<String, dynamic> json) {
     return BackupModel(
+      id: json['id'] as String?,
       version: json['version'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
       userId: json['userId'] as String,
@@ -30,6 +33,7 @@ class BackupModel {
   /// Converte backup para JSON
   Map<String, dynamic> toJson() {
     return {
+      if (id != null) 'id': id,
       'version': version,
       'timestamp': timestamp.toIso8601String(),
       'userId': userId,
@@ -84,6 +88,7 @@ class BackupModel {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is BackupModel &&
+        other.id == id &&
         other.version == version &&
         other.timestamp == timestamp &&
         other.userId == userId;
@@ -91,7 +96,7 @@ class BackupModel {
 
   @override
   int get hashCode {
-    return Object.hash(version, timestamp, userId);
+    return Object.hash(id, version, timestamp, userId);
   }
 }
 
@@ -254,48 +259,6 @@ class BackupInfo {
   }
 }
 
-/// Opções de restauração de backup
-class RestoreOptions {
-  final bool restorePlants;
-  final bool restoreTasks;
-  final bool restoreSpaces;
-  final bool restoreSettings;
-  final RestoreMergeStrategy mergeStrategy;
-
-  const RestoreOptions({
-    this.restorePlants = true,
-    this.restoreTasks = true,
-    this.restoreSpaces = true,
-    this.restoreSettings = true,
-    this.mergeStrategy = RestoreMergeStrategy.merge,
-  });
-
-  RestoreOptions copyWith({
-    bool? restorePlants,
-    bool? restoreTasks,
-    bool? restoreSpaces,
-    bool? restoreSettings,
-    RestoreMergeStrategy? mergeStrategy,
-  }) {
-    return RestoreOptions(
-      restorePlants: restorePlants ?? this.restorePlants,
-      restoreTasks: restoreTasks ?? this.restoreTasks,
-      restoreSpaces: restoreSpaces ?? this.restoreSpaces,
-      restoreSettings: restoreSettings ?? this.restoreSettings,
-      mergeStrategy: mergeStrategy ?? this.mergeStrategy,
-    );
-  }
-}
-
-/// Estratégias de merge durante restauração
-enum RestoreMergeStrategy {
-  /// Substitui dados existentes pelos do backup
-  replace,
-  /// Faz merge dos dados (mantém existentes + adiciona novos)
-  merge,
-  /// Apenas adiciona dados que não existem
-  addOnly,
-}
 
 /// Resultado de uma operação de backup
 class BackupResult {
@@ -338,40 +301,3 @@ class BackupResult {
   }
 }
 
-/// Resultado de uma operação de restauração
-class RestoreResult {
-  final bool success;
-  final int itemsRestored;
-  final String? errorMessage;
-  final DateTime timestamp;
-  final Map<String, int> restoredCounts;
-
-  const RestoreResult({
-    required this.success,
-    required this.itemsRestored,
-    this.errorMessage,
-    required this.timestamp,
-    this.restoredCounts = const {},
-  });
-
-  factory RestoreResult.success({
-    required int itemsRestored,
-    required Map<String, int> restoredCounts,
-  }) {
-    return RestoreResult(
-      success: true,
-      itemsRestored: itemsRestored,
-      timestamp: DateTime.now(),
-      restoredCounts: restoredCounts,
-    );
-  }
-
-  factory RestoreResult.error(String errorMessage) {
-    return RestoreResult(
-      success: false,
-      itemsRestored: 0,
-      errorMessage: errorMessage,
-      timestamp: DateTime.now(),
-    );
-  }
-}

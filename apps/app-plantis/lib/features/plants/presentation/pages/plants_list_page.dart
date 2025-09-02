@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../shared/widgets/responsive_layout.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
@@ -37,16 +36,22 @@ import '../widgets/plants_loading_widget.dart';
 /// View → Provider → Use Cases → Repository → Data Sources
 
 class PlantsListPage extends StatefulWidget {
-  const PlantsListPage({super.key});
+  final PlantsProvider plantsProvider;
+  final PlantFormProvider Function() plantFormProviderFactory;
+  
+  const PlantsListPage({
+    super.key,
+    required this.plantsProvider,
+    required this.plantFormProviderFactory,
+  });
 
   @override
   State<PlantsListPage> createState() => _PlantsListPageState();
 }
 
 class _PlantsListPageState extends State<PlantsListPage> {
-  // Provider injection - managed by DI container
+  // Provider injection - now via constructor
   late PlantsProvider _plantsProvider;
-  // late spaces.SpacesProvider _spacesProvider;
   
   // UI-only controller for scroll management
   final ScrollController _scrollController = ScrollController();
@@ -54,8 +59,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
   @override
   void initState() {
     super.initState();
-    _plantsProvider = di.sl<PlantsProvider>();
-    // _spacesProvider = di.sl<spaces.SpacesProvider>();
+    _plantsProvider = widget.plantsProvider;
 
     // Load data after a small delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -66,8 +70,6 @@ class _PlantsListPageState extends State<PlantsListPage> {
   @override
   void dispose() {
     _scrollController.dispose();
-    // Dispose of the injected provider to prevent memory leaks
-    _plantsProvider.dispose();
     super.dispose();
   }
 
@@ -113,7 +115,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
 
   Future<void> _navigateToAddPlant(BuildContext context) async {
     // Criar um novo provider para a dialog
-    final plantFormProvider = di.sl<PlantFormProvider>();
+    final plantFormProvider = widget.plantFormProviderFactory();
     
     // Mostrar dialog com o provider
     final result = await showDialog<bool>(

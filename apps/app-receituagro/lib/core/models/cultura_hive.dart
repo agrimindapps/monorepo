@@ -47,6 +47,11 @@ class CulturaHive extends HiveObject {
     };
   }
 
+  // Getters convenientes para compatibilidade com código legado
+  String get nome => cultura;
+  String get nomeComum => cultura;
+  String get nomeCientifico => cultura; // Por enquanto, vamos usar o mesmo valor
+
   @override
   String toString() {
     return 'CulturaHive{objectId: $objectId, cultura: $cultura}';

@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../models/sync_queue_item.dart';
 import '../../services/sync_service.dart';
+import '../../services/sync_status_manager.dart';
 
 @injectable
 class SyncStatusProvider extends ChangeNotifier {

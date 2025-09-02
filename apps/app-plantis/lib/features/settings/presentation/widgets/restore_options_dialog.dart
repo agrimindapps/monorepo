@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/data/models/backup_model.dart';
+import '../../../../core/services/backup_restore_service.dart' show RestoreOptions, RestoreMergeStrategy;
 import '../../../../core/theme/plantis_colors.dart';
 
 /// Dialog para escolher opções de restauração do backup
@@ -183,11 +184,16 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
                 ),
                 value: strategy,
                 groupValue: options.mergeStrategy,
-                onChanged: (value) => setState(() {
-                  options = options.copyWith(mergeStrategy: value);
-                }),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      options = options.copyWith(mergeStrategy: value);
+                    });
+                  }
+                },
                 activeColor: PlantisColors.primary,
                 contentPadding: EdgeInsets.zero,
+                focusNode: FocusNode(skipTraversal: true),
               ),
             ),
 
@@ -302,6 +308,7 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
       activeColor: color,
       contentPadding: EdgeInsets.zero,
       controlAffinity: ListTileControlAffinity.leading,
+      focusNode: FocusNode(skipTraversal: true),
     );
   }
 
@@ -312,8 +319,8 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
         return 'Substituir';
       case RestoreMergeStrategy.merge:
         return 'Combinar';
-      case RestoreMergeStrategy.addOnly:
-        return 'Apenas Adicionar';
+      case RestoreMergeStrategy.skip:
+        return 'Pular Existentes';
     }
   }
 
@@ -324,8 +331,8 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
         return 'Remove dados existentes e substitui pelos do backup';
       case RestoreMergeStrategy.merge:
         return 'Mantém dados existentes e adiciona os do backup';
-      case RestoreMergeStrategy.addOnly:
-        return 'Adiciona apenas dados que não existem';
+      case RestoreMergeStrategy.skip:
+        return 'Pula dados que já existem';
     }
   }
 

@@ -5,8 +5,11 @@ import '../../core/extensions/diagnostico_detalhado_extension.dart';
 import '../../core/services/diagnostico_integration_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import 'widgets/comparacao_defensivos_widget.dart';
-import 'widgets/defensivo_completo_card_widget.dart';
+import 'widgets/defensivos_error_state_widget.dart';
+import 'widgets/defensivos_list_widget.dart';
+import 'widgets/defensivos_loading_state_widget.dart';
 import 'widgets/filtros_defensivos_widget.dart';
+import 'widgets/sort_options_dialog_widget.dart';
 
 /// Página que mostra defensivos com informações completas
 /// Integra dados de FitossanitarioHive + FitossanitarioInfoHive + DiagnosticoHive
@@ -169,9 +172,12 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
                 _buildModernHeader(isDark),
                 Expanded(
                   child: isLoading
-                      ? _buildLoadingState()
+                      ? const DefensivosLoadingStateWidget()
                       : hasError
-                          ? _buildErrorState()
+                          ? DefensivosErrorStateWidget(
+                              errorMessage: _errorMessage,
+                              onRetry: _carregarDefensivos,
+                            )
                           : _buildContent(),
                 ),
               ],
@@ -231,259 +237,59 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     );
   }
 
-  Widget _buildLoadingState() {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1976D2), Color(0xFF42A5F5)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                strokeWidth: 3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Carregando defensivos...',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Integrando dados de múltiplas fontes',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState() {
-    final theme = Theme.of(context);
-    
-    return Container(
-      margin: const EdgeInsets.all(8.0),
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.error_outline,
-              size: 40,
-              color: Colors.red,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Erro ao carregar defensivos',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _errorMessage ?? 'Verifique sua conexão e tente novamente',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _carregarDefensivos,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Tentar Novamente'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildContent() {
     return CustomScrollView(
       slivers: [
         // Filtros
         SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.all(8.0),
-            child: FiltrosDefensivosWidget(
-              ordenacao: _ordenacao,
-              filtroToxicidade: _filtroToxicidade,
-              filtroTipo: _filtroTipo,
-              apenasComercializados: _apenasComercializados,
-              apenasElegiveis: _apenasElegiveis,
-              onOrdenacaoChanged: (valor) => setState(() {
-                _ordenacao = valor;
-                _aplicarFiltros();
-              }),
-              onToxicidadeChanged: (valor) => setState(() {
-                _filtroToxicidade = valor;
-                _aplicarFiltros();
-              }),
-              onTipoChanged: (valor) => setState(() {
-                _filtroTipo = valor;
-                _aplicarFiltros();
-              }),
-              onComercializadosChanged: (valor) => setState(() {
-                _apenasComercializados = valor;
-                _aplicarFiltros();
-              }),
-              onElegiveisChanged: (valor) => setState(() {
-                _apenasElegiveis = valor;
-                _aplicarFiltros();
-              }),
+          child: RepaintBoundary(
+            child: Container(
+              margin: const EdgeInsets.all(8.0),
+              child: FiltrosDefensivosWidget(
+                ordenacao: _ordenacao,
+                filtroToxicidade: _filtroToxicidade,
+                filtroTipo: _filtroTipo,
+                apenasComercializados: _apenasComercializados,
+                apenasElegiveis: _apenasElegiveis,
+                onOrdenacaoChanged: (valor) => setState(() {
+                  _ordenacao = valor;
+                  _aplicarFiltros();
+                }),
+                onToxicidadeChanged: (valor) => setState(() {
+                  _filtroToxicidade = valor;
+                  _aplicarFiltros();
+                }),
+                onTipoChanged: (valor) => setState(() {
+                  _filtroTipo = valor;
+                  _aplicarFiltros();
+                }),
+                onComercializadosChanged: (valor) => setState(() {
+                  _apenasComercializados = valor;
+                  _aplicarFiltros();
+                }),
+                onElegiveisChanged: (valor) => setState(() {
+                  _apenasElegiveis = valor;
+                  _aplicarFiltros();
+                }),
+              ),
             ),
           ),
         ),
         
         // Lista de defensivos
-        if (_defensivosFiltrados.isEmpty)
-          SliverToBoxAdapter(child: _buildEstadoVazio())
-        else
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final defensivo = _defensivosFiltrados[index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: DefensivoCompletoCardWidget(
-                    defensivoCompleto: defensivo,
-                    modoComparacao: _modoComparacao,
-                    isSelecionado: _defensivosSelecionados.contains(defensivo),
-                    onTap: () => _navegarParaDetalhes(defensivo),
-                    onSelecaoChanged: _modoComparacao 
-                        ? () => _toggleSelecaoDefensivo(defensivo)
-                        : null,
-                  ),
-                );
-              },
-              childCount: _defensivosFiltrados.length,
-            ),
-          ),
+        DefensivosListWidget(
+          defensivos: _defensivosFiltrados,
+          modoComparacao: _modoComparacao,
+          defensivosSelecionados: _defensivosSelecionados,
+          onTap: _navegarParaDetalhes,
+          onSelecaoChanged: _modoComparacao ? _toggleSelecaoDefensivo : null,
+          onClearFilters: _limparFiltros,
+        ),
       ],
     );
   }
 
-  Widget _buildEstadoVazio() {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.search_off,
-              size: 40,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Nenhum defensivo encontrado',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tente ajustar os filtros para encontrar mais resultados.',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                _filtroToxicidade = 'todos';
-                _filtroTipo = 'todos';
-                _apenasComercializados = false;
-                _apenasElegiveis = false;
-                _aplicarFiltros();
-              });
-            },
-            icon: const Icon(Icons.clear),
-            label: const Text('Limpar Filtros'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _navegarParaDetalhes(DefensivoCompleto defensivo) {
     // Navigator.pushNamed(
@@ -515,35 +321,25 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
   }
 
   void _mostrarOpcoesOrdenacao() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ordenar por'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildOpcaoOrdenacao('Prioridade', 'prioridade'),
-            _buildOpcaoOrdenacao('Nome', 'nome'),
-            _buildOpcaoOrdenacao('Fabricante', 'fabricante'),
-            _buildOpcaoOrdenacao('Quantidade de Usos', 'usos'),
-          ],
-        ),
-      ),
+    SortOptionsDialogWidget.show(
+      context,
+      ordenacaoAtual: _ordenacao,
+      onOrdenacaoChanged: (valor) {
+        setState(() {
+          _ordenacao = valor;
+          _aplicarFiltros();
+        });
+      },
     );
   }
 
-  Widget _buildOpcaoOrdenacao(String label, String valor) {
-    return RadioListTile<String>(
-      title: Text(label),
-      value: valor,
-      groupValue: _ordenacao,
-      onChanged: (value) {
-        setState(() {
-          _ordenacao = value!;
-          _aplicarFiltros();
-        });
-        Navigator.of(context).pop();
-      },
-    );
+  void _limparFiltros() {
+    setState(() {
+      _filtroToxicidade = 'todos';
+      _filtroTipo = 'todos';
+      _apenasComercializados = false;
+      _apenasElegiveis = false;
+      _aplicarFiltros();
+    });
   }
 }

@@ -84,6 +84,10 @@ void main() async {
   final notificationService = PlantisNotificationService();
   await notificationService.initialize();
 
+  // Initialize app rating tracking
+  final appRatingService = di.sl<IAppRatingRepository>();
+  await appRatingService.incrementUsageCount();
+
   // Run app
   if (EnvironmentConfig.enableAnalytics) {
     // Run app in guarded zone for Crashlytics only in production/staging

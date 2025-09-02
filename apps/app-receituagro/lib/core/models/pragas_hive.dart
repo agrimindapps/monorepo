@@ -195,6 +195,9 @@ class PragasHive extends HiveObject {
     };
   }
 
+  // Getters convenientes para compatibilidade com código legado
+  String? get descricao => tipoPraga.isNotEmpty ? tipoPraga : null; // Usando tipoPraga como descrição
+
   @override
   String toString() {
     return 'PragasHive{objectId: $objectId, nomeComum: $nomeComum, nomeCientifico: $nomeCientifico}';

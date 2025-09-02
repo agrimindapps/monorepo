@@ -301,6 +301,12 @@ class RevenueCatService implements ISubscriptionRepository {
   }
 
   @override
+  Future<Either<Failure, String?>> getSubscriptionManagementUrl() async {
+    // Alias para getManagementUrl para compatibilidade
+    return getManagementUrl();
+  }
+
+  @override
   Future<Either<Failure, void>> cancelSubscription({
     String? reason,
   }) async {

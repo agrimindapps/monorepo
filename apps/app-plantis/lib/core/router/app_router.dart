@@ -13,6 +13,7 @@ import '../../features/plants/presentation/pages/plant_form_page.dart';
 import '../../features/plants/presentation/pages/plants_list_page.dart';
 import '../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../features/plants/presentation/providers/plant_form_provider.dart';
+import '../../features/plants/presentation/providers/plants_provider.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
@@ -138,7 +139,10 @@ class AppRouter {
             GoRoute(
               path: plants,
               name: 'plants',
-              builder: (context, state) => const PlantsListPage(),
+              builder: (context, state) => PlantsListPage(
+                plantsProvider: sl<PlantsProvider>(),
+                plantFormProviderFactory: () => sl<PlantFormProvider>(),
+              ),
               routes: [
                 GoRoute(
                   path: 'add',

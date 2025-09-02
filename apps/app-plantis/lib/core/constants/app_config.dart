@@ -25,8 +25,8 @@ class AppConfig {
   static const String _facebookUrl = 'https://facebook.com/plantisapp';
   
   /// Store URLs
-  static const String _appStoreUrl = 'https://apps.apple.com/app/plantis/id123456789';
-  static const String _googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.plantis.app';
+  static const String _appStoreUrl = 'https://apps.apple.com/app/plantis/id123456789'; // TODO: Atualizar quando publicado
+  static const String _googlePlayUrl = 'https://play.google.com/store/apps/details?id=br.com.agrimind.especiesorquideas';
   static const String _webAppUrl = 'https://app.plantis.app';
   
   /// Premium and Subscription Management URLs

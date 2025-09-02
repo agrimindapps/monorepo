@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/error_boundary.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
@@ -12,6 +11,9 @@ import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../providers/fuel_provider.dart';
+import '../widgets/fuel_empty_state.dart';
+import '../widgets/fuel_error_state.dart';
+import '../widgets/fuel_statistics_row.dart';
 
 class FuelPage extends StatefulWidget {
   const FuelPage({super.key});
@@ -330,37 +332,7 @@ class _FuelPageState extends State<FuelPage> {
   Widget _buildStatistics(FuelProvider fuelProvider) {
     // Use cached statistics from provider instead of calculating in build method
     final statistics = fuelProvider.statistics;
-
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            'Total de Litros',
-            '${statistics.totalLiters.toStringAsFixed(1)} L',
-            Icons.water_drop,
-            Colors.blue,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatCard(
-            'Gasto Total',
-            'R\$ ${statistics.totalCost.toStringAsFixed(2)}',
-            Icons.attach_money,
-            Colors.green,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatCard(
-            'Preço Médio',
-            'R\$ ${statistics.averagePrice.toStringAsFixed(2)}/L',
-            Icons.trending_up,
-            Colors.orange,
-          ),
-        ),
-      ],
-    );
+    return FuelStatisticsRow(statistics: statistics);
   }
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
@@ -528,13 +500,8 @@ class _FuelPageState extends State<FuelPage> {
 
 
   Widget _buildEmptyState() {
-    return EnhancedEmptyState.generic(
-      icon: Icons.local_gas_station_outlined,
-      title: 'Nenhum abastecimento encontrado',
-      description: 'Registre seu primeiro abastecimento para começar a controlar o consumo do seu veículo',
-      actionLabel: 'Registrar Abastecimento',
-      onAction: () => context.go('/fuel/add'),
-      height: 400,
+    return FuelEmptyState(
+      onAddRecord: () => context.go('/fuel/add'),
     );
   }
 
@@ -751,50 +718,9 @@ class _FuelPageState extends State<FuelPage> {
 
 
   Widget _buildErrorState(String error, VoidCallback onRetry) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(48.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Semantics(
-              label: 'Erro de carregamento',
-              hint: 'Ícone indicando erro no carregamento dos dados',
-              child: Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SemanticText.heading(
-              'Erro ao carregar dados',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SemanticText(
-              error,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            SemanticButton(
-              semanticLabel: 'Tentar carregar novamente',
-              semanticHint: 'Tenta recarregar os dados dos abastecimentos após o erro',
-              type: ButtonType.elevated,
-              onPressed: onRetry,
-              child: const Text('Tentar novamente'),
-            ),
-          ],
-        ),
-      ),
+    return FuelErrorState(
+      error: error,
+      onRetry: onRetry,
     );
   }
 

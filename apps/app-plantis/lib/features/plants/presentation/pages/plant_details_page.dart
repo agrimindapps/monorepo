@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../providers/plant_details_provider.dart';
 import '../providers/plant_task_provider.dart';
+import '../providers/plant_comments_provider.dart';
 import '../widgets/plant_details/plant_details_view.dart';
 
 /// Plant details page with proper dependency injection
@@ -32,6 +33,9 @@ class PlantDetailsPage extends StatelessWidget {
         ),
         ChangeNotifierProvider<PlantTaskProvider>.value(
           value: di.sl<PlantTaskProvider>(),
+        ),
+        ChangeNotifierProvider<PlantCommentsProvider>.value(
+          value: di.sl<PlantCommentsProvider>(),
         ),
       ],
       child: PlantDetailsView(plantId: plantId),

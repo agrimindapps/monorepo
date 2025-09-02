@@ -1,65 +1,114 @@
-/// Entity que representa um diagnóstico relacionado a um defensivo
-/// Segue os princípios Clean Architecture - sem dependências externas
-class DiagnosticoEntity {
+import 'package:equatable/equatable.dart';
+
+/// Entidade de domínio que representa um diagnóstico
+/// 
+/// Esta entidade representa a relação entre defensivo, praga e cultura,
+/// seguindo os princípios de Clean Architecture
+class DiagnosticoEntity extends Equatable {
   final String id;
-  final String nome;
-  final String ingredienteAtivo;
+  final String idDefensivo;
+  final String? nomeDefensivo;
+  final String? nomeCultura;
+  final String? nomePraga;
   final String dosagem;
+  final String? unidadeDosagem;
+  final String? modoAplicacao;
+  final int? intervaloDias;
+  final String? observacoes;
+  final String ingredienteAtivo;
   final String cultura;
   final String grupo;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const DiagnosticoEntity({
     required this.id,
-    required this.nome,
-    required this.ingredienteAtivo,
+    required this.idDefensivo,
+    this.nomeDefensivo,
+    this.nomeCultura,
+    this.nomePraga,
     required this.dosagem,
+    this.unidadeDosagem,
+    this.modoAplicacao,
+    this.intervaloDias,
+    this.observacoes,
+    required this.ingredienteAtivo,
     required this.cultura,
     required this.grupo,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is DiagnosticoEntity &&
-        other.id == id &&
-        other.nome == nome &&
-        other.ingredienteAtivo == ingredienteAtivo &&
-        other.dosagem == dosagem &&
-        other.cultura == cultura &&
-        other.grupo == grupo;
-  }
+  /// Getters computados
+  String get dosagemFormatada => 
+      dosagem + (unidadeDosagem ?? '');
+  
+  String get intervaloFormatado => 
+      intervaloDias != null ? '$intervaloDias dias' : 'Não especificado';
 
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        nome.hashCode ^
-        ingredienteAtivo.hashCode ^
-        dosagem.hashCode ^
-        cultura.hashCode ^
-        grupo.hashCode;
-  }
+  bool get hasCompleteInfo => 
+      nomeDefensivo != null && 
+      nomeCultura != null && 
+      nomePraga != null &&
+      dosagem.isNotEmpty;
 
-  @override
-  String toString() {
-    return 'DiagnosticoEntity(id: $id, nome: $nome, ingredienteAtivo: $ingredienteAtivo, dosagem: $dosagem, cultura: $cultura, grupo: $grupo)';
-  }
+  String get aplicacaoInfo => modoAplicacao ?? 'Pulverização foliar';
 
-  /// Cria uma cópia com alguns campos alterados
+  String get nome => nomeDefensivo ?? 'Defensivo não identificado';
+
+  /// Método para criar uma nova instância com valores alterados
   DiagnosticoEntity copyWith({
     String? id,
-    String? nome,
-    String? ingredienteAtivo,
+    String? idDefensivo,
+    String? nomeDefensivo,
+    String? nomeCultura,
+    String? nomePraga,
     String? dosagem,
+    String? unidadeDosagem,
+    String? modoAplicacao,
+    int? intervaloDias,
+    String? observacoes,
+    String? ingredienteAtivo,
     String? cultura,
     String? grupo,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return DiagnosticoEntity(
       id: id ?? this.id,
-      nome: nome ?? this.nome,
-      ingredienteAtivo: ingredienteAtivo ?? this.ingredienteAtivo,
+      idDefensivo: idDefensivo ?? this.idDefensivo,
+      nomeDefensivo: nomeDefensivo ?? this.nomeDefensivo,
+      nomeCultura: nomeCultura ?? this.nomeCultura,
+      nomePraga: nomePraga ?? this.nomePraga,
       dosagem: dosagem ?? this.dosagem,
+      unidadeDosagem: unidadeDosagem ?? this.unidadeDosagem,
+      modoAplicacao: modoAplicacao ?? this.modoAplicacao,
+      intervaloDias: intervaloDias ?? this.intervaloDias,
+      observacoes: observacoes ?? this.observacoes,
+      ingredienteAtivo: ingredienteAtivo ?? this.ingredienteAtivo,
       cultura: cultura ?? this.cultura,
       grupo: grupo ?? this.grupo,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        idDefensivo,
+        nomeDefensivo,
+        nomeCultura,
+        nomePraga,
+        dosagem,
+        unidadeDosagem,
+        modoAplicacao,
+        intervaloDias,
+        observacoes,
+        ingredienteAtivo,
+        cultura,
+        grupo,
+        createdAt,
+        updatedAt,
+      ];
 }

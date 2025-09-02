@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/data/models/backup_model.dart';
 import '../../../../core/services/backup_service.dart';
+import '../../../../core/services/backup_restore_service.dart' show RestoreOptions, RestoreResult;
 
 /// Provider para gerenciar configurações e operações de backup
 class BackupSettingsProvider extends ChangeNotifier {

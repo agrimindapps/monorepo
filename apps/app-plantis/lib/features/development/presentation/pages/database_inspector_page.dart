@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-/// Database Inspector Page for Plantis - Using Unified Implementation
+/// Consolidated Data Inspector Page for Plantis - Using Unified Implementation
 /// Configured with developer dark theme and Plantis-specific custom boxes
 /// Maintains security protection for production builds
 class DatabaseInspectorPage extends StatelessWidget {
@@ -44,4 +44,9 @@ class DatabaseInspectorPage extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Alias for backward compatibility
+class DataInspectorPage extends DatabaseInspectorPage {
+  const DataInspectorPage({super.key});
 }

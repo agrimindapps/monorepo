@@ -50,6 +50,9 @@ abstract class ISubscriptionRepository {
   /// Obtém URL para gerenciar assinatura (redirect para loja)
   Future<Either<Failure, String?>> getManagementUrl();
 
+  /// Obtém URL para gerenciar assinatura (alias para compatibilidade)
+  Future<Either<Failure, String?>> getSubscriptionManagementUrl();
+
   /// Cancela assinatura (onde aplicável)
   Future<Either<Failure, void>> cancelSubscription({
     String? reason,

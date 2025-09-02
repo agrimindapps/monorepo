@@ -2,10 +2,19 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../di/injection_container.dart';
+import 'interfaces/i_task_notification_manager.dart';
+import 'interfaces/i_plant_notification_manager.dart';
+import 'interfaces/i_notification_permission_manager.dart';
+import 'interfaces/i_notification_schedule_manager.dart';
 import 'plantis_notification_service.dart';
 
 /// Gerenciador centralizado de notificações do Plantis
-class NotificationManager {
+/// Implementa interfaces segregadas seguindo o princípio ISP
+class NotificationManager implements 
+    ITaskNotificationManager,
+    IPlantNotificationManager,
+    INotificationPermissionManager,
+    INotificationScheduleManager {
   static final NotificationManager _instance = NotificationManager._internal();
   factory NotificationManager() => _instance;
   NotificationManager._internal();

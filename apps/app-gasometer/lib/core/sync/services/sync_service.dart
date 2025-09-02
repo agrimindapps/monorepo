@@ -10,159 +10,16 @@ import '../../services/analytics_service.dart';
 import '../models/sync_queue_item.dart';
 import '../strategies/conflict_resolution_strategy.dart';
 import 'conflict_resolver.dart';
+import 'sync_error_handler.dart';
 import 'sync_operations.dart';
 import 'sync_queue.dart';
+import 'sync_recovery_service.dart';
+import 'sync_retry_config.dart';
+import 'sync_status_manager.dart';
 
-enum SyncStatus {
-  idle,
-  syncing,
-  error,
-  success,
-  conflict,
-  offline
-}
 
-/// Tipos específicos de erro de sincronização
-enum SyncErrorType {
-  /// Erro de conectividade/rede
-  network,
-  /// Erro de autenticação
-  authentication,
-  /// Erro de timeout
-  timeout,
-  /// Erro de servidor (5xx)
-  server,
-  /// Erro de validação/dados inválidos
-  validation,
-  /// Erro de conflito de dados
-  conflict,
-  /// Erro desconhecido
-  unknown,
-}
 
-/// Exceção específica de sincronização com contexto detalhado
-class SyncException implements Exception {
-  final SyncErrorType type;
-  final String message;
-  final String? details;
-  final dynamic originalError;
-  final StackTrace? stackTrace;
-  final int? statusCode;
-  final String? operationType;
-  final String? modelType;
-  final DateTime timestamp;
 
-  SyncException({
-    required this.type,
-    required this.message,
-    this.details,
-    this.originalError,
-    this.stackTrace,
-    this.statusCode,
-    this.operationType,
-    this.modelType,
-  }) : timestamp = DateTime.now();
-
-  SyncException.now({
-    required this.type,
-    required this.message,
-    this.details,
-    this.originalError,
-    this.stackTrace,
-    this.statusCode,
-    this.operationType,
-    this.modelType,
-  }) : timestamp = DateTime.now();
-
-  @override
-  String toString() {
-    final buffer = StringBuffer('SyncException: $message');
-    if (details != null) {
-      buffer.write(' - $details');
-    }
-    if (statusCode != null) {
-      buffer.write(' (Status: $statusCode)');
-    }
-    if (operationType != null) {
-      buffer.write(' [Operation: $operationType]');
-    }
-    if (modelType != null) {
-      buffer.write(' [Model: $modelType]');
-    }
-    return buffer.toString();
-  }
-
-  /// Determina se o erro é recuperável (pode fazer retry)
-  bool get isRetryable {
-    switch (type) {
-      case SyncErrorType.network:
-      case SyncErrorType.timeout:
-      case SyncErrorType.server:
-        return true;
-      case SyncErrorType.authentication:
-      case SyncErrorType.validation:
-      case SyncErrorType.conflict:
-      case SyncErrorType.unknown:
-        return false;
-    }
-  }
-
-  /// Sugere estratégia de recovery para o erro
-  String get recoveryStrategy {
-    switch (type) {
-      case SyncErrorType.network:
-        return 'Verifique sua conexão com a internet';
-      case SyncErrorType.authentication:
-        return 'Faça login novamente';
-      case SyncErrorType.timeout:
-        return 'Aguarde um momento e tente novamente';
-      case SyncErrorType.server:
-        return 'Servidor temporariamente indisponível';
-      case SyncErrorType.validation:
-        return 'Dados inválidos precisam ser corrigidos';
-      case SyncErrorType.conflict:
-        return 'Conflito de dados precisa ser resolvido';
-      case SyncErrorType.unknown:
-        return 'Erro inesperado';
-    }
-  }
-}
-
-/// Configuração para retry com exponential backoff
-class RetryConfig {
-  final int maxAttempts;
-  final Duration initialDelay;
-  final double backoffMultiplier;
-  final Duration maxDelay;
-  final bool jitterEnabled;
-
-  const RetryConfig({
-    this.maxAttempts = 3,
-    this.initialDelay = const Duration(seconds: 1),
-    this.backoffMultiplier = 2.0,
-    this.maxDelay = const Duration(seconds: 30),
-    this.jitterEnabled = true,
-  });
-
-  /// Calcula o delay para uma tentativa específica
-  Duration getDelay(int attempt) {
-    final baseDelay = Duration(
-      milliseconds: (initialDelay.inMilliseconds * 
-        (backoffMultiplier * attempt)).round(),
-    );
-    
-    final delay = baseDelay > maxDelay ? maxDelay : baseDelay;
-    
-    if (jitterEnabled) {
-      // Adiciona jitter de ±25% para evitar thundering herd
-      final jitter = (delay.inMilliseconds * 0.25).round();
-      final randomJitter = (jitter * (2 * (0.5 - 0.5))).round(); // Simulando random
-      return Duration(milliseconds: delay.inMilliseconds + randomJitter);
-    }
-    
-    return delay;
-  }
-}
 
 /// Serviço principal de sincronização que orquestra todas as operações
 @singleton
@@ -173,22 +30,17 @@ class SyncService {
   final AnalyticsService _analytics;
   final AuthRepository _authRepository;
 
-  final StreamController<SyncStatus> _statusController = 
-      StreamController<SyncStatus>.broadcast();
-  
-  final StreamController<String> _messageController = 
-      StreamController<String>.broadcast();
-      
-  final StreamController<SyncException> _errorController = 
-      StreamController<SyncException>.broadcast();
+  // New SOLID services
+  late final SyncStatusManager _statusManager;
+  late final SyncErrorHandler _errorHandler;
+  late final SyncRecoveryService _recoveryService;
 
-  Stream<SyncStatus> get statusStream => _statusController.stream;
-  Stream<String> get messageStream => _messageController.stream;
+  Stream<SyncStatus> get statusStream => _statusManager.statusStream;
+  Stream<String> get messageStream => _statusManager.messageStream;
   Stream<List<SyncQueueItem>> get queueStream => _syncQueue.queueStream;
-  Stream<SyncException> get errorStream => _errorController.stream;
+  Stream<SyncException> get errorStream => _errorHandler.errorStream;
 
-  SyncStatus _currentStatus = SyncStatus.idle;
-  SyncStatus get currentStatus => _currentStatus;
+  SyncStatus get currentStatus => _statusManager.currentStatus;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -201,13 +53,7 @@ class SyncService {
   bool _isDisposed = false;
   
   // Configuração de retry
-  static const RetryConfig _defaultRetryConfig = RetryConfig(
-    maxAttempts: 3,
-    initialDelay: Duration(seconds: 1),
-    backoffMultiplier: 2.0,
-    maxDelay: Duration(seconds: 16),
-    jitterEnabled: true,
-  );
+  static const RetryConfig _defaultRetryConfig = RetryConfig.defaultConfig;
   
   // Controle de retry
   int _currentRetryAttempt = 0;
@@ -219,7 +65,22 @@ class SyncService {
     this._conflictResolver,
     this._analytics,
     this._authRepository,
-  );
+  ) {
+    // Initialize SOLID services
+    _statusManager = SyncStatusManager();
+    _errorHandler = SyncErrorHandler(_analytics);
+    _recoveryService = SyncRecoveryService(_authRepository);
+    
+    // Setup recovery callbacks
+    _recoveryService.setRecoveryCallbacks(
+      onNetworkRecovery: _performSync,
+      onServerRecovery: _performSync,
+      onTimeoutRecovery: _performSync,
+      onAuthRequired: () {
+        // Handle auth required
+      },
+    );
+  }
 
   /// Inicializa o serviço de sincronização
   Future<void> initialize() async {
@@ -267,7 +128,7 @@ class SyncService {
       _updateMessage('${operation.name.toUpperCase()} adicionado à fila: $modelType');
       
       // Tenta sincronizar automaticamente se estiver online
-      if (_syncOperations.isOnline && _currentStatus != SyncStatus.syncing) {
+      if (_syncOperations.isOnline && currentStatus != SyncStatus.syncing) {
         unawaited(_performSync());
       }
 
@@ -284,7 +145,7 @@ class SyncService {
       throw StateError('SyncService não foi inicializado');
     }
 
-    if (_currentStatus == SyncStatus.syncing) {
+    if (currentStatus == SyncStatus.syncing) {
       debugPrint('⏸️ Sync já em andamento, ignorando...');
       return;
     }
@@ -347,7 +208,7 @@ class SyncService {
       }
 
       // Verificar se já está sincronizando (double-check dentro do lock)
-      if (_currentStatus == SyncStatus.syncing) {
+      if (currentStatus == SyncStatus.syncing) {
         debugPrint('⏸️ Sync já em andamento, ignorando...');
         return;
       }
@@ -411,7 +272,7 @@ class SyncService {
         }
         
         // Calcular delay para próxima tentativa
-        final delay = config.getDelay(attempt);
+        final delay = config.calculateDelay(attempt);
         
         _updateStatus(SyncStatus.error);
         _updateMessage(
@@ -606,7 +467,7 @@ class SyncService {
     
     // Tentar novamente quando a conectividade for restaurada
     Timer(const Duration(minutes: 1), () {
-      if (_syncOperations.isOnline && _currentStatus != SyncStatus.syncing) {
+      if (_syncOperations.isOnline && currentStatus != SyncStatus.syncing) {
         debugPrint('🌐 Conectividade restaurada, tentando sincronizar...');
         unawaited(_performSync());
       }
@@ -619,7 +480,7 @@ class SyncService {
     
     // Tentar novamente com delay aumentado
     Timer(const Duration(minutes: 2), () {
-      if (_syncOperations.isOnline && _currentStatus != SyncStatus.syncing) {
+      if (_syncOperations.isOnline && currentStatus != SyncStatus.syncing) {
         debugPrint('⏳ Tentando sincronizar após timeout...');
         unawaited(_performSync());
       }
@@ -632,7 +493,7 @@ class SyncService {
     
     // Tentar novamente após delay maior
     Timer(const Duration(minutes: 5), () {
-      if (_syncOperations.isOnline && _currentStatus != SyncStatus.syncing) {
+      if (_syncOperations.isOnline && currentStatus != SyncStatus.syncing) {
         debugPrint('🚑 Tentando sincronizar após erro de servidor...');
         unawaited(_performSync());
       }
@@ -681,8 +542,8 @@ class SyncService {
   void _notifyError(SyncException error) {
     if (_isDisposed) return;
     
-    if (!_errorController.isClosed) {
-      _errorController.add(error);
+    if (!_errorHandler.errorController.isClosed) {
+      _errorHandler.errorController.add(error);
     }
   }
 
@@ -690,7 +551,7 @@ class SyncService {
   void _startAutoSync() {
     _autoSyncTimer?.cancel();
     _autoSyncTimer = Timer.periodic(_autoSyncInterval, (timer) {
-      if (_syncOperations.isOnline && _currentStatus != SyncStatus.syncing) {
+      if (_syncOperations.isOnline && currentStatus != SyncStatus.syncing) {
         unawaited(_performSync());
       }
     });
@@ -728,7 +589,7 @@ class SyncService {
     final connectivityStats = _syncOperations.getConnectivityStats();
     
     return {
-      'status': _currentStatus.name,
+      'status': currentStatus.name,
       'is_initialized': _isInitialized,
       'auto_sync_enabled': _autoSyncTimer != null,
       'retry_state': {
@@ -807,10 +668,10 @@ class SyncService {
   void _updateStatus(SyncStatus status) {
     if (_isDisposed) return;
     
-    if (_currentStatus != status) {
-      _currentStatus = status;
-      if (!_statusController.isClosed) {
-        _statusController.add(status);
+    if (currentStatus != status) {
+      _statusManager.updateStatus(status);
+      if (!_statusManager.statusController.isClosed) {
+        _statusManager.statusController.add(status);
       }
       debugPrint('📊 Status sync: ${status.name}');
     }
@@ -820,8 +681,8 @@ class SyncService {
   void _updateMessage(String message) {
     if (_isDisposed) return;
     
-    if (!_messageController.isClosed) {
-      _messageController.add(message);
+    if (!_statusManager.messageController.isClosed) {
+      _statusManager.messageController.add(message);
     }
     debugPrint('💬 Sync message: $message');
   }
@@ -850,14 +711,14 @@ class SyncService {
     }
     
     // Fechar streams de forma segura
-    if (!_statusController.isClosed) {
-      await _statusController.close();
+    if (!_statusManager.statusController.isClosed) {
+      await _statusManager.statusController.close();
     }
-    if (!_messageController.isClosed) {
-      await _messageController.close();
+    if (!_statusManager.messageController.isClosed) {
+      await _statusManager.messageController.close();
     }
-    if (!_errorController.isClosed) {
-      await _errorController.close();
+    if (!_errorHandler.errorController.isClosed) {
+      await _errorHandler.errorController.close();
     }
     
     // Dispose da queue

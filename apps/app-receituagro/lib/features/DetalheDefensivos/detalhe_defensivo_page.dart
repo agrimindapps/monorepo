@@ -4,7 +4,7 @@ import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../navigation/bottom_nav_wrapper.dart';
 import 'presentation/providers/detalhe_defensivo_provider.dart';
-import 'presentation/providers/diagnosticos_provider.dart';
+import '../diagnosticos/presentation/providers/diagnosticos_provider.dart';
 import 'presentation/widgets/defensivo_info_cards_widget.dart';
 import 'presentation/widgets/diagnosticos_tab_widget.dart';
 import 'presentation/widgets/tecnologia_tab_widget.dart';
@@ -52,7 +52,19 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       premiumService: sl(),
     );
 
-    _diagnosticosProvider = DiagnosticosProvider();
+    _diagnosticosProvider = DiagnosticosProvider(
+      getDiagnosticosUseCase: sl(),
+      getDiagnosticoByIdUseCase: sl(),
+      getRecomendacoesUseCase: sl(),
+      getDiagnosticosByDefensivoUseCase: sl(),
+      getDiagnosticosByCulturaUseCase: sl(),
+      getDiagnosticosByPragaUseCase: sl(),
+      searchDiagnosticosWithFiltersUseCase: sl(),
+      getDiagnosticoStatsUseCase: sl(),
+      validateCompatibilidadeUseCase: sl(),
+      searchDiagnosticosByPatternUseCase: sl(),
+      getDiagnosticoFiltersDataUseCase: sl(),
+    );
   }
 
   Future<void> _loadData() async {
@@ -60,7 +72,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     
     // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
     if (_defensivoProvider.defensivoData != null) {
-      await _diagnosticosProvider.loadDiagnosticos(_defensivoProvider.defensivoData!.idReg);
+      await _diagnosticosProvider.getDiagnosticosByDefensivo(_defensivoProvider.defensivoData!.idReg);
     }
   }
 

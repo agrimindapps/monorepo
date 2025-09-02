@@ -16,8 +16,74 @@ analyzer:
     
 linter:
   rules:
-    # Overrides específicos para app-gasometer se necessário
-    # (manter mínimo possível para consistência)
+    # =========================================================================
+    # SOLID PRINCIPLES ENFORCEMENT - Refatoramento Phase 1
+    # =========================================================================
     
-    # Permitir prints em desenvolvimento (será removido em produção)
-    avoid_print: false
+    # Single Responsibility Principle (SRP)
+    prefer_single_quotes: true
+    avoid_classes_with_only_static_members: true
+    avoid_function_literals_in_foreach_calls: true
+    
+    # Open/Closed Principle (OCP)
+    prefer_final_fields: true
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    
+    # Interface Segregation Principle (ISP)
+    avoid_empty_else: true
+    avoid_unnecessary_containers: true
+    
+    # Dependency Inversion Principle (DIP)
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+    
+    # =========================================================================
+    # CODE QUALITY ENFORCEMENT
+    # =========================================================================
+    
+    # Complexity Control (God Class Prevention)
+    # Note: Dart analyzer will flag files > 1000 lines
+    lines_longer_than_80_chars: false  # Allow until refactoring
+    
+    # Performance
+    avoid_slow_async_io: true
+    avoid_web_libraries_in_flutter: true
+    use_build_context_synchronously: true
+    
+    # Maintainability
+    sort_constructors_first: true
+    sort_child_properties_last: true
+    sort_unnamed_constructors_first: true
+    
+    # Error Prevention
+    use_key_in_widget_constructors: true
+    avoid_print: false  # Temporarily allowed during refactoring
+    
+    # =========================================================================
+    # REFACTORING SUPPORT RULES
+    # =========================================================================
+    
+    # Widget Extraction Support
+    avoid_returning_null_for_void: true
+    sized_box_for_whitespace: true
+    use_decorated_box: true
+    
+    # State Management
+    prefer_function_declarations_over_variables: true
+    
+    # Testing Support
+    avoid_relative_lib_imports: true
+    prefer_relative_imports: true
+    
+    # Documentation (Temporarily relaxed)
+    public_member_api_docs: false  # Will be enforced post-refactoring
+    
+    # =========================================================================
+    # PHASE-SPECIFIC OVERRIDES (Remove after refactoring)
+    # =========================================================================
+    
+    # Temporarily allow during refactoring phase
+    file_names: false  # Will enforce snake_case post-refactoring

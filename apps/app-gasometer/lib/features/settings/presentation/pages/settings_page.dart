@@ -1,14 +1,16 @@
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../widgets/settings_item.dart';
+import '../widgets/settings_section.dart';
+import '../providers/settings_provider.dart';
 import 'database_inspector_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -19,28 +21,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _globalErrorBoundaryEnabled = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadErrorBoundaryPreference();
-  }
-
-  Future<void> _loadErrorBoundaryPreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _globalErrorBoundaryEnabled = prefs.getBool('global_error_boundary_enabled') ?? true;
-    });
-  }
-
-  Future<void> _saveErrorBoundaryPreference(bool enabled) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('global_error_boundary_enabled', enabled);
-    setState(() {
-      _globalErrorBoundaryEnabled = enabled;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -358,15 +338,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildAppearanceSection(BuildContext context) {
-    return _buildSection(
-      context,
+    return SettingsSection(
       title: 'Aparência',
       icon: Icons.palette,
       children: [
         Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
-            return _buildSettingsItem(
-              context,
+            return SettingsItem(
               icon: Icons.brightness_6,
               title: 'Tema',
               subtitle: _getThemeDescription(themeProvider.themeMode),
@@ -383,78 +361,82 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildNotificationSection(BuildContext context) {
-    return _buildSection(
-      context,
+    return SettingsSection(
       title: 'Notificações',
       icon: Icons.notifications,
       children: [
-        _buildSettingsItem(
-          context,
-          icon: Icons.notification_important,
-          title: 'Lembretes de Manutenção',
-          subtitle: 'Receba notificações para manutenções pendentes',
-          trailing: Semantics(
-            label: 'Lembretes de manutenção ativados',
-            hint: 'Interruptor para ativar ou desativar notificações de manutenções pendentes',
-            onTap: () {
-              // TODO: Implement notification toggle
-            },
-            child: Switch(
-              value: true, // TODO: Connect to actual setting
-              onChanged: (value) {
-                // TODO: Implement notification toggle
-              },
-            ),
-          ),
+        Consumer<SettingsProvider>(
+          builder: (context, settingsProvider, _) {
+            return SettingsItem(
+              icon: Icons.notification_important,
+              title: 'Lembretes de Manutenção',
+              subtitle: 'Receba notificações para manutenções pendentes',
+              trailing: Semantics(
+                label: settingsProvider.notificationsEnabled
+                    ? 'Lembretes de manutenção ativados'
+                    : 'Lembretes de manutenção desativados',
+                hint: 'Interruptor para ativar ou desativar notificações de manutenções pendentes',
+                child: Switch(
+                  value: settingsProvider.notificationsEnabled,
+                  onChanged: settingsProvider.isLoading
+                      ? null
+                      : (value) => settingsProvider.toggleNotifications(value),
+                ),
+              ),
+            );
+          },
         ),
-        _buildSettingsItem(
-          context,
-          icon: Icons.local_gas_station,
-          title: 'Alertas de Combustível',
-          subtitle: 'Notificações sobre consumo e economia',
-          trailing: Semantics(
-            label: 'Alertas de combustível desativados',
-            hint: 'Interruptor para ativar ou desativar notificações sobre consumo e economia de combustível',
-            onTap: () {
-              // TODO: Implement fuel alerts toggle
-            },
-            child: Switch(
-              value: false, // TODO: Connect to actual setting
-              onChanged: (value) {
-                // TODO: Implement fuel alerts toggle
-              },
-            ),
-          ),
+        Consumer<SettingsProvider>(
+          builder: (context, settingsProvider, _) {
+            return SettingsItem(
+              icon: Icons.local_gas_station,
+              title: 'Alertas de Combustível',
+              subtitle: 'Notificações sobre consumo e economia',
+              trailing: Semantics(
+                label: settingsProvider.fuelAlertsEnabled
+                    ? 'Alertas de combustível ativados'
+                    : 'Alertas de combustível desativados',
+                hint: 'Interruptor para ativar ou desativar notificações sobre consumo e economia de combustível',
+                child: Switch(
+                  value: settingsProvider.fuelAlertsEnabled,
+                  onChanged: settingsProvider.isLoading
+                      ? null
+                      : (value) => settingsProvider.toggleFuelAlerts(value),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
   }
 
   Widget _buildDevelopmentSection(BuildContext context) {
-    return _buildSection(
-      context,
+    return SettingsSection(
       title: 'Desenvolvimento',
       icon: Icons.developer_mode,
       children: [
         // 🚨 Toggle GlobalErrorBoundary
-        _buildSettingsItem(
-          context,
-          icon: _globalErrorBoundaryEnabled ? Icons.shield : Icons.shield_outlined,
-          title: 'Global Error Boundary',
-          subtitle: _globalErrorBoundaryEnabled 
-              ? 'Ativo - Captura erros globalmente'
-              : '⚠️ DESABILITADO - Erros aparecem diretamente',
-          onTap: () => _showErrorBoundaryToggleDialog(context),
-          trailing: Switch(
-            value: _globalErrorBoundaryEnabled,
-            onChanged: (enabled) {
-              _saveErrorBoundaryPreference(enabled);
-              _showRestartMessage(context);
-            },
-          ),
+        Consumer<SettingsProvider>(
+          builder: (context, settingsProvider, _) {
+            return SettingsItem(
+              icon: settingsProvider.globalErrorBoundaryEnabled ? Icons.shield : Icons.shield_outlined,
+              title: 'Global Error Boundary',
+              subtitle: settingsProvider.globalErrorBoundaryEnabled 
+                  ? 'Ativo - Captura erros globalmente'
+                  : '⚠️ DESABILITADO - Erros aparecem diretamente',
+              onTap: () => _showErrorBoundaryToggleDialog(context),
+              trailing: Switch(
+                value: settingsProvider.globalErrorBoundaryEnabled,
+                onChanged: settingsProvider.isLoading ? null : (enabled) {
+                  settingsProvider.toggleErrorBoundary(enabled);
+                  _showRestartMessage(context);
+                },
+              ),
+            );
+          },
         ),
-        _buildSettingsItem(
-          context,
+        SettingsItem(
           icon: Icons.science,
           title: 'Simular Dados',
           subtitle: 'Inserir dados de teste (2 veículos, 14\nmeses)',
@@ -464,8 +446,7 @@ class _SettingsPageState extends State<SettingsPage> {
             color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
-        _buildSettingsItem(
-          context,
+        SettingsItem(
           icon: Icons.delete,
           title: 'Remover Dados',
           subtitle: 'Limpar todo o banco de dados local',
@@ -475,8 +456,7 @@ class _SettingsPageState extends State<SettingsPage> {
             color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
           ),
         ),
-        _buildSettingsItem(
-          context,
+        SettingsItem(
           icon: Icons.storage,
           title: 'Inspetor de Banco',
           subtitle: 'Visualizar dados do Hive\nSharedPreferences',
@@ -497,13 +477,11 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSupportSection(BuildContext context) {
-    return _buildSection(
-      context,
+    return SettingsSection(
       title: 'Suporte',
       icon: Icons.help,
       children: [
-        _buildSettingsItem(
-          context,
+        SettingsItem(
           icon: Icons.help_outline,
           title: 'Central de Ajuda',
           subtitle: 'Perguntas frequentes e tutoriais',
@@ -513,11 +491,11 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
+          isFirst: true,
         ),
-        _buildSettingsItem(
-          context,
+        SettingsItem(
           icon: Icons.email,
           title: 'Contato',
           subtitle: 'Entre em contato conosco',
@@ -527,11 +505,10 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
-        _buildSettingsItem(
-          context,
+        SettingsItem(
           icon: Icons.bug_report,
           title: 'Reportar Bug',
           subtitle: 'Relatar problemas ou sugestões',
@@ -541,22 +518,19 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
-        _buildSettingsItem(
-          context,
-          icon: Icons.star,
+        SettingsItem(
+          icon: Icons.star_rate,
           title: 'Avaliar o App',
-          subtitle: 'Avalie nossa experiência na loja',
-          onTap: () {
-            // App store rating implementation pending
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
-          },
+          subtitle: 'Deixe sua avaliação na loja',
+          onTap: () => _showRateAppDialog(context),
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
+          isLast: true,
         ),
       ],
     );
@@ -906,9 +880,13 @@ class _SettingsPageState extends State<SettingsPage> {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(
-                _globalErrorBoundaryEnabled ? Icons.shield : Icons.shield_outlined,
-                color: _globalErrorBoundaryEnabled ? Colors.green : Colors.orange,
+              Consumer<SettingsProvider>(
+                builder: (context, settingsProvider, _) {
+                  return Icon(
+                    settingsProvider.globalErrorBoundaryEnabled ? Icons.shield : Icons.shield_outlined,
+                    color: settingsProvider.globalErrorBoundaryEnabled ? Colors.green : Colors.orange,
+                  );
+                },
               ),
               const SizedBox(width: 8),
               const Text('Global Error Boundary'),
@@ -1031,6 +1009,108 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  void _showRateAppDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(
+              Icons.star_rate,
+              color: Colors.orange,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Avaliar o App',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Você está gostando do GasOMeter? Sua avaliação é muito importante para nós!',
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Star rating visual
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) => const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Icon(
+                  Icons.star,
+                  color: Colors.orange,
+                  size: 32,
+                ),
+              )),
+            ),
+            
+            const SizedBox(height: 20),
+            Text(
+              'Avalie na loja de aplicativos e ajude outros usuários a descobrir o GasOMeter!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Talvez mais tarde',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _handleRateApp(context);
+            },
+            icon: const Icon(Icons.star, size: 18),
+            label: const Text('Avaliar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleRateApp(BuildContext context) async {
+    try {
+      final appRatingService = di.sl<IAppRatingRepository>();
+      final success = await appRatingService.showRatingDialog(context: context);
+      
+      if (success && mounted) {
+        _showSnackBar(context, 'Obrigado pelo feedback!');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(context, 'Erro ao abrir a loja: $e');
+      }
+    }
   }
 }
 
@@ -1713,4 +1793,5 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
       ),
     );
   }
+
 }

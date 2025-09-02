@@ -1,6 +1,9 @@
 import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
 
+// Core Package Integration
+import 'core_package_integration.dart';
+
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
@@ -17,6 +20,7 @@ import '../../features/favoritos/data/services/favoritos_storage_service.dart' a
 import '../../features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart';
 import '../../features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart';
 import '../../features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart';
+import '../../features/favoritos/domain/usecases/favoritos_usecases_stub.dart';
 import '../../features/favoritos/favoritos_di.dart';
 import '../../features/favoritos/services/favoritos_cache_service.dart';
 import '../../features/favoritos/services/favoritos_navigation_service.dart';
@@ -48,6 +52,10 @@ import '../services/receituagro_storage_service.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // ===== CORE PACKAGE INTEGRATION (FASE 2.6 FINAL) =====
+  // Initialize all Core Package services first
+  await CorePackageIntegration.initializeCoreServices();
+  
   // Core Storage Service - HiveStorageService do packages/core
   sl.registerLazySingleton<HiveStorageService>(
     () => HiveStorageService(),
@@ -307,6 +315,10 @@ Future<void> init() async {
     ),
   );
 
+  // Agregador de Use Cases para Favoritos (stub temporário)
+  sl.registerLazySingleton<FavoritosUsecases>(
+    () => const FavoritosUsecases(),
+  );
 
   // ===== CULTURAS SIMPLIFIED =====
   // Clean Architecture removed - using direct CulturaCoreRepository access

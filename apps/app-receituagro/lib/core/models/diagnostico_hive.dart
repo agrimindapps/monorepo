@@ -153,6 +153,15 @@ class DiagnosticoHive extends HiveObject {
     };
   }
 
+  // Getters convenientes para compatibilidade com código legado
+  String get id => idReg;
+  String get nome => nomeDefensivo ?? 'Defensivo desconhecido';
+  String get cultura => nomeCultura ?? 'Cultura desconhecida';
+  String get praga => nomePraga ?? 'Praga desconhecida';
+  String get sintomas => dsMax; // Usando dsMax como sintomas por compatibilidade
+  String get situacao => 'Ativo'; // Situação padrão
+  String get tipo => 'Diagnóstico'; // Tipo padrão
+
   @override
   String toString() {
     return 'DiagnosticoHive{objectId: $objectId, nomeDefensivo: $nomeDefensivo, nomePraga: $nomePraga}';

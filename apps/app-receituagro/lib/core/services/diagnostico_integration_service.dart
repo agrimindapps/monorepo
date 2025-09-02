@@ -364,6 +364,11 @@ class DiagnosticoDetalhado {
     final formulacao = defensivo?.formulacao?.toLowerCase() ?? '';
     return formulacao.contains('ul') || formulacao.contains('eo');
   }
+
+  // Getter para compatibilidade com código legado
+  List<FitossanitarioHive> get defensivos {
+    return defensivo != null ? [defensivo!] : [];
+  }
 }
 
 /// Modelo que representa um defensivo com informações completas

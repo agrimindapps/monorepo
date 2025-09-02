@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
-import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicles_provider.dart';
+import '../widgets/vehicle_card.dart';
 import 'add_vehicle_page.dart';
 
 class VehiclesPage extends StatefulWidget {
@@ -48,12 +48,67 @@ class _VehiclesPageState extends State<VehiclesPage> {
             
             // ✅ PERFORMANCE FIX: Use CustomScrollView for better virtualization
             Expanded(
-              child: _OptimizedVehiclesContent(),
+              child: _OptimizedVehiclesContent(
+                onEditVehicle: _editVehicle,
+                onDeleteVehicle: _deleteVehicle,
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: _OptimizedFloatingActionButton(),
+    );
+  }
+  
+  void _editVehicle(BuildContext context, VehicleEntity vehicle) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AddVehiclePage(vehicle: vehicle),
+    );
+    
+    // Se resultado for true, atualizar lista
+    if (result == true && context.mounted) {
+      await context.read<VehiclesProvider>().loadVehicles();
+    }
+  }
+  
+  void _deleteVehicle(BuildContext context, VehicleEntity vehicle) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirmar exclusão'),
+        content: Text(
+          'Tem certeza que deseja excluir o veículo ${vehicle.brand} ${vehicle.model}?',
+        ),
+        actions: [
+          SemanticButton(
+            semanticLabel: 'Cancelar exclusão',
+            semanticHint: 'Fecha a confirmação sem excluir o veículo',
+            type: ButtonType.text,
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          SemanticButton(
+            semanticLabel: 'Confirmar exclusão do veículo',
+            semanticHint: 'Exclui permanentemente o veículo e todos os seus dados',
+            type: ButtonType.text,
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              final success = await context.read<VehiclesProvider>().deleteVehicle(vehicle.id);
+              if (success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Veículo excluído com sucesso'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -121,6 +176,13 @@ class _OptimizedHeader extends StatelessWidget {
 
 /// Conteúdo principal otimizado com Selector
 class _OptimizedVehiclesContent extends StatelessWidget {
+  final void Function(BuildContext, VehicleEntity) onEditVehicle;
+  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
+  
+  const _OptimizedVehiclesContent({
+    required this.onEditVehicle,
+    required this.onDeleteVehicle,
+  });
   
   Future<void> _navigateToAddVehicle(BuildContext context) async {
     final result = await showDialog<bool>(
@@ -166,7 +228,11 @@ class _OptimizedVehiclesContent extends StatelessWidget {
         if (isLoading) {
           return Column(
             children: [
-              if (vehicles.isNotEmpty) _OptimizedVehiclesGrid(vehicles: vehicles),
+              if (vehicles.isNotEmpty) _OptimizedVehiclesGrid(
+                vehicles: vehicles,
+                onEditVehicle: onEditVehicle,
+                onDeleteVehicle: onDeleteVehicle,
+              ),
               StandardLoadingView.refresh(
                 message: 'Atualizando...',
               ),
@@ -186,7 +252,11 @@ class _OptimizedVehiclesContent extends StatelessWidget {
           );
         }
         
-        return _OptimizedVehiclesGrid(vehicles: vehicles);
+        return _OptimizedVehiclesGrid(
+          vehicles: vehicles,
+          onEditVehicle: onEditVehicle,
+          onDeleteVehicle: onDeleteVehicle,
+        );
       },
     );
   }
@@ -260,8 +330,14 @@ class _ErrorState extends StatelessWidget {
 /// ✅ PERFORMANCE FIX: Grid com CustomScrollView e SliverGrid para virtualização
 class _OptimizedVehiclesGrid extends StatelessWidget {
   final List<VehicleEntity> vehicles;
+  final void Function(BuildContext, VehicleEntity) onEditVehicle;
+  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
   
-  const _OptimizedVehiclesGrid({required this.vehicles});
+  const _OptimizedVehiclesGrid({
+    required this.vehicles,
+    required this.onEditVehicle,
+    required this.onDeleteVehicle,
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -287,9 +363,11 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
                 ),
                 itemCount: vehicles.length,
                 itemBuilder: (context, index) {
-                  return _OptimizedVehicleCard(
+                  return VehicleCard(
                     key: ValueKey(vehicles[index].id),
                     vehicle: vehicles[index],
+                    onEdit: () => onEditVehicle(context, vehicles[index]),
+                    onDelete: () => onDeleteVehicle(context, vehicles[index]),
                   );
                 },
               );
@@ -301,262 +379,6 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
   }
 }
 
-/// Card de veículo otimizado
-class _OptimizedVehicleCard extends StatelessWidget {
-  final VehicleEntity vehicle;
-  
-  const _OptimizedVehicleCard({super.key, required this.vehicle});
-  
-  @override
-  Widget build(BuildContext context) {
-    final semanticLabel = 'Veículo ${vehicle.brand} ${vehicle.model} ${vehicle.year}, placa ${vehicle.licensePlate}, ${vehicle.currentOdometer.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km';
-    
-    return SemanticCard(
-      semanticLabel: semanticLabel,
-      semanticHint: 'Card com informações do veículo. Contém botões para editar ou excluir',
-      child: Column(
-        children: [
-          _VehicleCardHeader(vehicle: vehicle),
-          Divider(
-            height: 1,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-          _VehicleCardContent(vehicle: vehicle),
-          _VehicleCardActions(vehicle: vehicle),
-        ],
-      ),
-    );
-  }
-}
-
-/// Header do card de veículo
-class _VehicleCardHeader extends StatelessWidget {
-  final VehicleEntity vehicle;
-  
-  const _VehicleCardHeader({required this.vehicle});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: GasometerDesignTokens.paddingAll(
-        GasometerDesignTokens.spacingLg,
-      ),
-      child: Row(
-        children: [
-          Semantics(
-            label: 'Ícone do veículo',
-            hint: 'Representação visual do veículo ${vehicle.brand} ${vehicle.model}',
-            child: CircleAvatar(
-              radius: GasometerDesignTokens.iconSizeAvatar / 2,
-              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
-              child: Icon(
-                Icons.directions_car,
-                color: Theme.of(context).colorScheme.primary,
-                size: GasometerDesignTokens.iconSizeListItem,
-              ),
-            ),
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingMd),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SemanticText.heading(
-                  '${vehicle.brand} ${vehicle.model}',
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeLg,
-                    fontWeight: GasometerDesignTokens.fontWeightBold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SemanticText.subtitle(
-                  '${vehicle.year} • ${vehicle.color}',
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeMd,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Conteúdo do card de veículo
-class _VehicleCardContent extends StatelessWidget {
-  final VehicleEntity vehicle;
-  
-  const _VehicleCardContent({required this.vehicle});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: GasometerDesignTokens.paddingAll(
-        GasometerDesignTokens.spacingLg,
-      ),
-      child: Semantics(
-        label: 'Informações do veículo ${vehicle.brand} ${vehicle.model}',
-        child: Column(
-          children: [
-            CardInfoRow(
-              label: 'Placa',
-              value: vehicle.licensePlate,
-              icon: Icons.credit_card,
-            ),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
-            CardInfoRow(
-              label: 'Combustível',
-              value: vehicle.supportedFuels.map((f) => f.displayName).join(', '),
-              icon: Icons.local_gas_station,
-            ),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
-            CardInfoRow(
-              label: 'Km Inicial',
-              value: '${(vehicle.metadata['initialOdometer'] ?? vehicle.metadata['odometroInicial'] ?? 0).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km',
-              icon: Icons.speed,
-            ),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
-            CardInfoRow(
-              label: 'Km Atual',
-              value: '${vehicle.currentOdometer.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km',
-              icon: Icons.trending_up,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-/// Ações do card de veículo
-class _VehicleCardActions extends StatelessWidget {
-  final VehicleEntity vehicle;
-  
-  const _VehicleCardActions({required this.vehicle});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: GasometerDesignTokens.paddingOnly(
-        left: GasometerDesignTokens.spacingSm,
-        right: GasometerDesignTokens.spacingSm,
-        top: GasometerDesignTokens.spacingXs,
-        bottom: GasometerDesignTokens.spacingXs,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          SemanticButton(
-            semanticLabel: 'Editar veículo ${vehicle.brand} ${vehicle.model}',
-            semanticHint: 'Abre formulário para editar as informações deste veículo',
-            type: ButtonType.text,
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              padding: GasometerDesignTokens.paddingOnly(
-                left: GasometerDesignTokens.spacingMd,
-                right: GasometerDesignTokens.spacingMd,
-                top: GasometerDesignTokens.spacingSm,
-                bottom: GasometerDesignTokens.spacingSm,
-              ),
-            ),
-            onPressed: () => _editVehicle(context, vehicle),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.edit, size: GasometerDesignTokens.iconSizeXs),
-                const SizedBox(width: 4),
-                const Text('Editar'),
-              ],
-            ),
-          ),
-          SemanticButton(
-            semanticLabel: 'Excluir veículo ${vehicle.brand} ${vehicle.model}',
-            semanticHint: 'Remove permanentemente este veículo e todos os seus dados',
-            type: ButtonType.text,
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-              padding: GasometerDesignTokens.paddingOnly(
-                left: GasometerDesignTokens.spacingMd,
-                right: GasometerDesignTokens.spacingMd,
-                top: GasometerDesignTokens.spacingSm,
-                bottom: GasometerDesignTokens.spacingSm,
-              ),
-            ),
-            onPressed: () => _deleteVehicle(context, vehicle),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.delete, size: GasometerDesignTokens.iconSizeXs),
-                const SizedBox(width: 4),
-                const Text('Excluir'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _editVehicle(BuildContext context, VehicleEntity vehicle) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AddVehiclePage(vehicle: vehicle),
-    );
-    
-    // Se resultado for true, atualizar lista
-    if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
-    }
-  }
-  
-  void _deleteVehicle(BuildContext context, VehicleEntity vehicle) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar exclusão'),
-        content: Text(
-          'Tem certeza que deseja excluir o veículo ${vehicle.brand} ${vehicle.model}?',
-        ),
-        actions: [
-          SemanticButton(
-            semanticLabel: 'Cancelar exclusão',
-            semanticHint: 'Fecha a confirmação sem excluir o veículo',
-            type: ButtonType.text,
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
-          ),
-          SemanticButton(
-            semanticLabel: 'Confirmar exclusão do veículo',
-            semanticHint: 'Exclui permanentemente o veículo e todos os seus dados',
-            type: ButtonType.text,
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              final success = await context.read<VehiclesProvider>().deleteVehicle(vehicle.id);
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Veículo excluído com sucesso'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// FloatingActionButton otimizado
 class _OptimizedFloatingActionButton extends StatelessWidget {

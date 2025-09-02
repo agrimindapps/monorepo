@@ -2,13 +2,16 @@ import 'package:get_it/get_it.dart';
 
 import '../../../features/plants/data/datasources/local/plants_local_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
+import '../../../features/plants/data/repositories/plant_comments_repository_impl.dart';
 import '../../../features/plants/data/repositories/plants_repository_impl.dart';
+import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../../features/plants/domain/repositories/plants_repository.dart';
 import '../../../features/plants/domain/services/task_generation_service.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
+import '../../../features/plants/presentation/providers/plant_comments_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../../features/plants/presentation/providers/plant_form_provider.dart';
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';
@@ -33,6 +36,11 @@ abstract class PlantsDIModule {
         networkInfo: sl(),
         authService: sl(),
       ),
+    );
+
+    // Plant Comments Repository
+    sl.registerLazySingleton<PlantCommentsRepository>(
+      () => PlantCommentsRepositoryImpl(),
     );
 
     // Use cases
@@ -80,5 +88,8 @@ abstract class PlantsDIModule {
 
     // Plant task provider
     sl.registerFactory(() => PlantTaskProvider(taskGenerationService: sl()));
+
+    // Plant comments provider  
+    sl.registerFactory(() => PlantCommentsProvider(repository: sl()));
   }
 }

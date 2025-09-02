@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../shared/widgets/responsive_layout.dart';
+import 'package:core/core.dart';
+
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/test_data_generator_service.dart';
+import '../../shared/widgets/responsive_layout.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
-import '../../features/development/presentation/pages/data_inspector_page.dart';
+import '../../features/development/presentation/pages/database_inspector_page.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../shared/widgets/loading/loading_components.dart';
 import '../widgets/settings_item.dart';
@@ -432,11 +434,20 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               title: 'Sobre o App',
               children: [
                 SettingsItem(
+                  icon: Icons.star_rate,
+                  title: 'Avaliar o App',
+                  subtitle: 'Deixe sua avaliação na loja',
+                  iconColor: PlantisColors.sun,
+                  isFirst: true,
+                  onTap: () {
+                    _showRateAppDialog(context);
+                  },
+                ),
+                SettingsItem(
                   icon: Icons.info,
                   title: 'Informações do App',
                   subtitle: 'Versão, suporte e feedback',
                   iconColor: PlantisColors.primary,
-                  isFirst: true,
                   isLast: true,
                   onTap: () {
                     _showAboutDialog(context);
@@ -499,6 +510,157 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     }
   }
 
+
+  void _showRateAppDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(
+              Icons.star_rate,
+              color: PlantisColors.sun,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Avaliar o App',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Está gostando do Plantis?',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Star rating visual
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) => const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Icon(
+                  Icons.star,
+                  color: PlantisColors.sun,
+                  size: 32,
+                ),
+              )),
+            ),
+            
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: PlantisColors.primaryLight.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PlantisColors.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.favorite,
+                    color: PlantisColors.flower,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Obrigado por fazer parte da nossa comunidade!',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Mais tarde',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _handleRateApp(context);
+            },
+            icon: const Icon(Icons.star, size: 18),
+            label: const Text('Avaliar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PlantisColors.sun,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleRateApp(BuildContext context) async {
+    try {
+      final appRatingService = di.sl<IAppRatingRepository>();
+      final success = await appRatingService.showRatingDialog(context: context);
+      
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Obrigado pelo feedback!'),
+            backgroundColor: PlantisColors.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro inesperado: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
 
   void _showAboutDialog(BuildContext context) {
     showDialog(

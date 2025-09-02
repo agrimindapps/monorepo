@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/sync_service.dart';
+import '../../services/sync_status_manager.dart';
 import '../providers/sync_status_provider.dart';
 
 /// Widget que exibe o status atual da sincronização

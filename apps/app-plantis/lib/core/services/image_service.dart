@@ -5,15 +5,75 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// Tipos de upload disponíveis para o app-plantis
-enum ImageUploadType {
-  plant('plants'),
-  space('spaces'),
-  task('tasks'),
-  profile('profiles');
+/// Interface para configuração de tipos de upload (Open/Closed Principle)
+abstract class ImageUploadConfig {
+  String get folder;
+  String get name;
+  int get maxSizeInMB;
+  List<String> get allowedExtensions;
+}
 
-  const ImageUploadType(this.folder);
-  final String folder;
+/// Implementações concretas dos tipos de upload
+class PlantUploadConfig implements ImageUploadConfig {
+  @override
+  String get folder => 'plants';
+  @override
+  String get name => 'Plant Image';
+  @override
+  int get maxSizeInMB => 5;
+  @override
+  List<String> get allowedExtensions => ['.jpg', '.jpeg', '.png', '.webp'];
+}
+
+class SpaceUploadConfig implements ImageUploadConfig {
+  @override
+  String get folder => 'spaces';
+  @override
+  String get name => 'Space Image';
+  @override
+  int get maxSizeInMB => 5;
+  @override
+  List<String> get allowedExtensions => ['.jpg', '.jpeg', '.png', '.webp'];
+}
+
+class TaskUploadConfig implements ImageUploadConfig {
+  @override
+  String get folder => 'tasks';
+  @override
+  String get name => 'Task Image';
+  @override
+  int get maxSizeInMB => 3;
+  @override
+  List<String> get allowedExtensions => ['.jpg', '.jpeg', '.png'];
+}
+
+class ProfileUploadConfig implements ImageUploadConfig {
+  @override
+  String get folder => 'profiles';
+  @override
+  String get name => 'Profile Image';
+  @override
+  int get maxSizeInMB => 2;
+  @override
+  List<String> get allowedExtensions => ['.jpg', '.jpeg', '.png'];
+}
+
+/// Factory para tipos de upload (facilita extensibilidade)
+class ImageUploadConfigFactory {
+  static final Map<String, ImageUploadConfig> _configs = {
+    'plants': PlantUploadConfig(),
+    'spaces': SpaceUploadConfig(),
+    'tasks': TaskUploadConfig(),
+    'profiles': ProfileUploadConfig(),
+  };
+
+  static ImageUploadConfig? getConfig(String type) => _configs[type];
+  
+  static void registerConfig(String type, ImageUploadConfig config) {
+    _configs[type] = config;
+  }
+  
+  static List<String> get availableTypes => _configs.keys.toList();
 }
 
 /// Service de imagens local para app-plantis
@@ -74,7 +134,7 @@ class PlantisImageService {
   }
 
   /// Selecionar múltiplas imagens
-  Future<List<File>> pickMultipleImages() async {
+  Future<List<File>> pickMultipleImages({String uploadType = 'plants'}) async {
     try {
       final List<XFile> images = await _picker.pickMultipleMedia(
         maxWidth: 1200,
@@ -82,11 +142,11 @@ class PlantisImageService {
         imageQuality: 80,
       );
       
-      // Filtrar apenas imagens
+      // Filtrar apenas imagens válidas para o tipo específico
       final List<File> imageFiles = [];
       for (final xFile in images) {
         final file = File(xFile.path);
-        if (isValidImageFile(file)) {
+        if (isValidImageFile(file, uploadType: uploadType)) {
           imageFiles.add(file);
         }
       }
@@ -99,19 +159,22 @@ class PlantisImageService {
   }
 
   /// Verificar se um arquivo é uma imagem válida
-  bool isValidImageFile(File file) {
+  bool isValidImageFile(File file, {String uploadType = 'plants'}) {
+    final config = ImageUploadConfigFactory.getConfig(uploadType);
+    if (config == null) return false;
+    
     final extension = file.path.toLowerCase();
-    return extension.endsWith('.jpg') ||
-           extension.endsWith('.jpeg') ||
-           extension.endsWith('.png') ||
-           extension.endsWith('.webp');
+    return config.allowedExtensions.any((ext) => extension.endsWith(ext));
   }
 
   /// Verificar tamanho do arquivo
-  Future<bool> isFileSizeValid(File file, {int maxSizeInMB = 5}) async {
+  Future<bool> isFileSizeValid(File file, {String uploadType = 'plants', int? maxSizeInMB}) async {
     try {
+      final config = ImageUploadConfigFactory.getConfig(uploadType);
+      final maxSize = maxSizeInMB ?? config?.maxSizeInMB ?? 5;
+      
       final int bytes = await file.length();
-      final int maxBytes = maxSizeInMB * 1024 * 1024;
+      final int maxBytes = maxSize * 1024 * 1024;
       return bytes <= maxBytes;
     } catch (error) {
       debugPrint('Erro ao verificar tamanho do arquivo: $error');
@@ -128,6 +191,22 @@ class PlantisImageService {
       debugPrint('Erro ao obter tamanho do arquivo: $error');
       return 0.0;
     }
+  }
+
+  /// Validar arquivo com configuração específica
+  Future<bool> validateImageFile(File file, String uploadType) async {
+    if (!isValidImageFile(file, uploadType: uploadType)) {
+      debugPrint('Arquivo não é uma imagem válida para o tipo: $uploadType');
+      return false;
+    }
+    
+    if (!await isFileSizeValid(file, uploadType: uploadType)) {
+      final config = ImageUploadConfigFactory.getConfig(uploadType);
+      debugPrint('Arquivo muito grande. Máximo permitido: ${config?.maxSizeInMB ?? 5}MB');
+      return false;
+    }
+    
+    return true;
   }
 
   /// Upload de imagem para Firebase Storage
@@ -269,3 +348,14 @@ class PlantisImageService {
 
 // Alias para compatibilidade
 typedef ImageService = PlantisImageService;
+
+// Enum mantido para compatibilidade com código existente
+enum ImageUploadType {
+  plant('plants'),
+  space('spaces'),
+  task('tasks'),
+  profile('profiles');
+
+  const ImageUploadType(this.folder);
+  final String folder;
+}

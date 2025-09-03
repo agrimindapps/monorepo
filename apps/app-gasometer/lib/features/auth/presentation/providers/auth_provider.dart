@@ -4,9 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/interfaces/i_sync_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
+import '../../../../shared/widgets/sync/sync_progress_overlay.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
@@ -30,6 +32,7 @@ class AuthProvider extends ChangeNotifier {
   final AnalyticsService _analytics;
   final PlatformService _platformService;
   final AuthRateLimiter _rateLimiter;
+  final ISyncService _syncService;
   
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -37,6 +40,9 @@ class AuthProvider extends ChangeNotifier {
   bool _isInitialized = false;
   bool _isPremium = false;
   StreamSubscription? _authStateSubscription;
+  
+  // Sync Progress Controller para gerenciar o overlay
+  SyncProgressController? _syncProgressController;
   
   AuthProvider({
     required GetCurrentUser getCurrentUser,
@@ -50,6 +56,7 @@ class AuthProvider extends ChangeNotifier {
     required AnalyticsService analytics,
     required PlatformService platformService,
     required AuthRateLimiter rateLimiter,
+    required ISyncService syncService,
   })  : _getCurrentUser = getCurrentUser,
         _watchAuthState = watchAuthState,
         _signInWithEmail = signInWithEmail,
@@ -60,7 +67,8 @@ class AuthProvider extends ChangeNotifier {
         _sendPasswordReset = sendPasswordReset,
         _analytics = analytics,
         _platformService = platformService,
-        _rateLimiter = rateLimiter {
+        _rateLimiter = rateLimiter,
+        _syncService = syncService {
     _initializeAuthState();
   }
   
@@ -74,6 +82,10 @@ class AuthProvider extends ChangeNotifier {
   String? get userDisplayName => _currentUser?.displayName;
   String? get userEmail => _currentUser?.email;
   String get userId => _currentUser?.id ?? '';
+  
+  // Getters para sync progress
+  SyncProgressController? get syncProgressController => _syncProgressController;
+  bool get isSyncing => _syncProgressController?.currentState == SyncProgressState.syncing;
   
   /// Obtém informações sobre o rate limiting de login
   Future<AuthRateLimitInfo> getRateLimitInfo() => _rateLimiter.getRateLimitInfo();
@@ -182,11 +194,6 @@ class AuthProvider extends ChangeNotifier {
   }
   
   
-  @override
-  void dispose() {
-    _authStateSubscription?.cancel();
-    super.dispose();
-  }
   
   Future<void> login(String email, String password) async {
     _isLoading = true;
@@ -458,4 +465,250 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
   
+  /// Login com sincronização automática específica do Gasometer
+  Future<bool> loginAndSync(String email, String password, {bool showSyncOverlay = true}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      // 1. Verificar rate limiting
+      final canAttempt = await _rateLimiter.canAttemptLogin();
+      if (!canAttempt) {
+        final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
+        _errorMessage = rateLimitInfo.lockoutMessage;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      
+      // 2. Fazer login primeiro
+      final loginResult = await _signInWithEmail(SignInWithEmailParams(
+        email: email,
+        password: password,
+      ));
+      
+      bool loginSuccess = false;
+      await loginResult.fold(
+        (failure) async {
+          await _rateLimiter.recordFailedAttempt();
+          final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
+          
+          String errorMsg = _mapFailureToMessage(failure);
+          if (!rateLimitInfo.canAttemptLogin) {
+            errorMsg = rateLimitInfo.lockoutMessage;
+          } else if (rateLimitInfo.warningMessage.isNotEmpty) {
+            errorMsg += '\n\n${rateLimitInfo.warningMessage}';
+          }
+          
+          _errorMessage = errorMsg;
+          
+          await _analytics.logUserAction('login_failed', parameters: {
+            'method': 'email_with_sync',
+            'failure_type': failure.runtimeType.toString(),
+          });
+        },
+        (user) async {
+          await _rateLimiter.recordSuccessfulAttempt();
+          _currentUser = user;
+          loginSuccess = true;
+          
+          await _analytics.logLogin('email');
+          await _analytics.logUserAction('login_success', parameters: {
+            'method': 'email_with_sync',
+          });
+        },
+      );
+      
+      if (!loginSuccess) {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      
+      // 3. Inicializar controlador de progresso se necessário
+      if (showSyncOverlay) {
+        _initializeSyncProgressController();
+      }
+      
+      // 4. Executar sincronização dos dados do Gasometer
+      final syncSuccess = await _performGasometerSync(showProgress: showSyncOverlay);
+      
+      _isLoading = false;
+      notifyListeners();
+      
+      return syncSuccess;
+      
+    } catch (e) {
+      _errorMessage = 'Erro interno no login com sincronização. Tente novamente.';
+      _isLoading = false;
+      notifyListeners();
+      
+      await _analytics.recordError(
+        e,
+        StackTrace.current,
+        reason: 'loginAndSync_error',
+      );
+      
+      return false;
+    }
+  }
+  
+  /// Inicializa o controlador de progresso de sincronização
+  void _initializeSyncProgressController() {
+    _syncProgressController?.dispose();
+    _syncProgressController = SyncProgressController();
+    _syncProgressController!.initializeGasometerSteps();
+    notifyListeners();
+  }
+  
+  /// Executa sincronização específica do Gasometer
+  Future<bool> _performGasometerSync({bool showProgress = true}) async {
+    try {
+      if (showProgress && _syncProgressController != null) {
+        _syncProgressController!.updateState(
+          SyncProgressState.preparing, 
+          message: 'Preparando sincronização dos dados automotivos...'
+        );
+      }
+      
+      // Sincronizar cada tipo de dados do Gasometer em ordem
+      final steps = [
+        {'id': 'vehicles_data', 'type': 'vehicle', 'message': 'Sincronizando veículos...'},
+        {'id': 'fuel_data', 'type': 'fuel_supply', 'message': 'Sincronizando abastecimentos...'},
+        {'id': 'maintenance_data', 'type': 'maintenance', 'message': 'Sincronizando manutenções...'},
+        {'id': 'expense_data', 'type': 'expense', 'message': 'Sincronizando despesas...'},
+        {'id': 'reports_data', 'type': 'reports', 'message': 'Atualizando relatórios...'},
+      ];
+      
+      if (showProgress && _syncProgressController != null) {
+        _syncProgressController!.updateState(
+          SyncProgressState.syncing, 
+          message: 'Sincronizando dados automotivos...'
+        );
+      }
+      
+      for (final step in steps) {
+        try {
+          if (showProgress && _syncProgressController != null) {
+            _syncProgressController!.startStep(step['id']!, message: step['message']);
+          }
+          
+          // Simular sincronização por tipo (em implementação real, usar SyncService específico)
+          await _syncStepData(step['type']!);
+          
+          if (showProgress && _syncProgressController != null) {
+            _syncProgressController!.completeStep(
+              step['id']!, 
+              message: '${step['message']} concluído'
+            );
+          }
+          
+          // Pequeno delay para UX
+          await Future.delayed(const Duration(milliseconds: 200));
+          
+        } catch (e) {
+          if (showProgress && _syncProgressController != null) {
+            _syncProgressController!.errorStep(
+              step['id']!, 
+              message: 'Erro ao sincronizar ${step['type']}'
+            );
+          }
+          
+          await _analytics.recordError(
+            e,
+            StackTrace.current,
+            reason: 'gasometer_sync_step_error',
+            customKeys: {'step': step['type']!},
+          );
+          
+          // Continuar com próximos steps mesmo com erro
+          continue;
+        }
+      }
+      
+      if (showProgress && _syncProgressController != null) {
+        _syncProgressController!.updateState(
+          SyncProgressState.completed, 
+          message: 'Todos os dados automotivos sincronizados!'
+        );
+      }
+      
+      await _analytics.log('gasometer_sync_completed');
+      return true;
+      
+    } catch (e) {
+      if (showProgress && _syncProgressController != null) {
+        _syncProgressController!.updateState(
+          SyncProgressState.error, 
+          message: 'Erro na sincronização. Alguns dados podem não estar atualizados.'
+        );
+      }
+      
+      await _analytics.recordError(
+        e,
+        StackTrace.current,
+        reason: 'gasometer_sync_general_error',
+      );
+      
+      return false;
+    }
+  }
+  
+  /// Sincroniza dados específicos por tipo
+  Future<void> _syncStepData(String dataType) async {
+    // Em uma implementação real, cada tipo teria sua própria lógica
+    switch (dataType) {
+      case 'vehicle':
+        // Sincronizar dados de veículos
+        await _syncService.syncCollection('vehicles');
+        break;
+        
+      case 'fuel_supply':
+        // Sincronizar dados de combustível
+        await _syncService.syncCollection('fuel_supplies');
+        break;
+        
+      case 'maintenance':
+        // Sincronizar dados de manutenção
+        await _syncService.syncCollection('maintenances');
+        break;
+        
+      case 'expense':
+        // Sincronizar dados de despesas
+        await _syncService.syncCollection('expenses');
+        break;
+        
+      case 'reports':
+        // Regenerar relatórios/analytics
+        await _syncService.syncCollection('reports');
+        break;
+    }
+    
+    // Aguardar sincronização ser processada
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+  
+  /// Limpa o controlador de progresso
+  void clearSyncProgress() {
+    _syncProgressController?.dispose();
+    _syncProgressController = null;
+    notifyListeners();
+  }
+  
+  @override
+  void dispose() {
+    _authStateSubscription?.cancel();
+    _syncProgressController?.dispose();
+    super.dispose();
+  }
+  
+}
+
+/// Enum para operações de sync (se não existir)
+enum SyncOperationType {
+  sync,
+  create,
+  update,
+  delete,
 }

@@ -1,30 +1,39 @@
-# Sistema de Layout Responsivo - App Plantis
+# Web Optimized Navigation - Sidebar Moderna
 
-## 🎯 Visão Geral
+Sistema de navegação otimizado para Flutter Web com sidebar moderna inspirada em dashboards profissionais.
 
-Este sistema implementa layouts responsivos em todas as páginas do app Plantis (exceto login e páginas promocionais) para proporcionar uma melhor experiência em desktop e tablets largos.
+## 🎯 Funcionalidades
 
-## ✅ Páginas Implementadas
+### Responsividade Web-First
+- **Desktop (≥1200px)**: Sidebar fixa com navegação moderna
+- **Mobile (<1200px)**: Mantém navegação atual (drawer/bottom nav)
+- **Breakpoint automático**: Transição suave entre layouts
 
-### Páginas Principais
-- ✅ **PlantsListPage** - Lista de plantas
-- ✅ **PlantDetailsView** - Detalhes da planta  
-- ✅ **PlantFormPage** - Formulário de plantas
-- ✅ **TasksListPage** - Lista de tarefas
+### Componentes Implementados
 
-### Páginas de Configurações
-- ✅ **SettingsPage** - Configurações principais
-- ✅ **BackupSettingsPage** - Configurações de backup
-- ✅ **NotificationsSettingsPage** - Configurações de notificações
+#### `WebOptimizedNavigationShell`
+Layout principal que gerencia sidebar vs navegação mobile baseado na largura da tela.
 
-### Páginas de Conta
-- ✅ **AccountProfilePage** - Perfil da conta
-- ✅ **PremiumPage** - Página premium
+#### `ModernSidebar`
+Sidebar completa com:
+- **Header**: Logo + nome do app com gradiente
+- **Navegação**: 4 itens essenciais com badges dinâmicos
+- **Footer**: Informações do usuário + status
 
-### Páginas Excluídas (conforme especificado)
-- ❌ **LandingPage** - Página inicial/promocional
-- ❌ **PromotionalPage** - Página promocional específica
-- ❌ Páginas de autenticação (`/features/auth/`)
+#### `DesktopKeyboardShortcuts`
+Navegação por teclado:
+- **1-4**: Navegação rápida entre páginas
+- **Esc**: Voltar/cancelar
+- **Ctrl+N**: Nova planta (futuro)
+
+### Itens de Navegação
+
+| Ícone | Página | Shortcut | Badge |
+|-------|--------|----------|-------|
+| ✅ | Tarefas | `1` | Pendentes |
+| 🌱 | Plantas | `2` | - |
+| ⚙️ | Configurações | `3` | - |
+| 👤 | Perfil | `4` | - |
 
 ## 🚀 Como Usar
 

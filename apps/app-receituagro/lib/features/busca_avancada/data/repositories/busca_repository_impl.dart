@@ -1,13 +1,13 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/repositories/cultura_core_repository.dart';
+import '../../../../core/repositories/diagnostico_core_repository.dart';
+import '../../../../core/repositories/fitossanitario_core_repository.dart';
+import '../../../../core/repositories/pragas_core_repository.dart';
+import '../../../../core/services/diagnostico_integration_service.dart';
 import '../../domain/entities/busca_entity.dart';
 import '../../domain/repositories/i_busca_repository.dart';
-import '../../../../core/repositories/diagnostico_core_repository.dart';
-import '../../../../core/repositories/pragas_core_repository.dart';
-import '../../../../core/repositories/fitossanitario_core_repository.dart';
-import '../../../../core/repositories/cultura_core_repository.dart';
-import '../../../../core/services/diagnostico_integration_service.dart';
 import '../mappers/busca_mapper.dart';
 
 /// Implementação do repositório de busca avançada
@@ -124,7 +124,7 @@ class BuscaRepositoryImpl implements IBuscaRepository {
         final defensivosFiltrados = defensivos.where((d) =>
           d.nomeComum.toLowerCase().contains(queryLower) ||
           d.nomeTecnico.toLowerCase().contains(queryLower) ||
-          d.ingredienteAtivo.toLowerCase().contains(queryLower) ||
+          (d.ingredienteAtivo?.toLowerCase().contains(queryLower) ?? false) ||
           (d.fabricante?.toLowerCase().contains(queryLower) ?? false)
         ).take(limitValue ~/ 4).toList();
         
@@ -135,9 +135,7 @@ class BuscaRepositoryImpl implements IBuscaRepository {
       if (tipos == null || tipos.contains('cultura')) {
         final culturas = await _culturasRepo.getAllAsync();
         final culturasFiltradas = culturas.where((c) =>
-          c.nome.toLowerCase().contains(queryLower) ||
-          c.nomeComum.toLowerCase().contains(queryLower) ||
-          c.nomeCientifico.toLowerCase().contains(queryLower)
+          c.cultura.toLowerCase().contains(queryLower)
         ).take(limitValue ~/ 4).toList();
         
         resultados.addAll(BuscaMapper.culturasToEntityList(culturasFiltradas));
@@ -203,7 +201,7 @@ class BuscaRepositoryImpl implements IBuscaRepository {
       }
 
       final pragasIds = diagnosticos
-          .where((d) => d.cultura.toLowerCase() == cultura.nome.toLowerCase())
+          .where((d) => d.cultura.toLowerCase() == cultura.cultura.toLowerCase())
           .map((d) => d.praga)
           .toSet();
 
@@ -295,7 +293,7 @@ class BuscaRepositoryImpl implements IBuscaRepository {
             .map((d) => BuscaMapper.defensivoToDropdownItem(d))
             .toList()
             ..sort((a, b) => a.nome.compareTo(b.nome)),
-        tipos: ['diagnostico', 'praga', 'defensivo', 'cultura'],
+        tipos: const ['diagnostico', 'praga', 'defensivo', 'cultura'],
       );
 
       // Atualizar cache

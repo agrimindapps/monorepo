@@ -300,9 +300,9 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTabBar(),
-          SizedBox(height: ReceitaAgroSpacing.sm),
+          const SizedBox(height: ReceitaAgroSpacing.sm),
           _buildSearchField(),
-          SizedBox(height: ReceitaAgroSpacing.sm),
+          const SizedBox(height: ReceitaAgroSpacing.sm),
           Expanded(
             child: _buildScrollableContent(),
           ),
@@ -420,9 +420,9 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   Widget _buildListView(List<PragaCulturaItemModel> pragas) {
     return Column(
       children: [
-        SizedBox(height: ReceitaAgroSpacing.sm),
+        const SizedBox(height: ReceitaAgroSpacing.sm),
         ...pragas.map((praga) => Padding(
-          padding: EdgeInsets.only(bottom: ReceitaAgroSpacing.xs),
+          padding: const EdgeInsets.only(bottom: ReceitaAgroSpacing.xs),
           child: PragaCulturaItemWidget(
             praga: praga,
             viewMode: _state.viewMode,
@@ -430,7 +430,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
             onTap: () => _handleItemTap(praga),
           ),
         )),
-        SizedBox(height: ReceitaAgroSpacing.sm),
+        const SizedBox(height: ReceitaAgroSpacing.sm),
       ],
     );
   }

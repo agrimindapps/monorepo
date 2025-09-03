@@ -164,7 +164,7 @@ class _VaccineSchedulingFormState extends State<VaccineSchedulingForm> {
                             : null,
                         icon: const Icon(Icons.remove),
                         style: IconButton.styleFrom(
-                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -181,7 +181,7 @@ class _VaccineSchedulingFormState extends State<VaccineSchedulingForm> {
                             : null,
                         icon: const Icon(Icons.add),
                         style: IconButton.styleFrom(
-                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
                         ),
                       ),
                     ],

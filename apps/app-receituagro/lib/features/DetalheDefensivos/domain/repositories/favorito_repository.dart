@@ -1,5 +1,3 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedef.dart';
 import '../entities/favorito_entity.dart';
 

@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../../../../core/utils/typedef.dart';
 import '../entities/comentario_entity.dart';
 import '../repositories/comentario_repository.dart';

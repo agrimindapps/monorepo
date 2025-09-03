@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/modern_header_widget.dart';
 
 /// **COMENTARIOS HEADER WIDGET**
 /// 

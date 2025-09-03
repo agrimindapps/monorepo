@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'praga_card_main.dart';
+import 'praga_card_action_section.dart';
+import 'praga_card_content_section.dart';
 import 'praga_card_helpers.dart';
 import 'praga_card_image_section.dart';
-import 'praga_card_content_section.dart';
-import 'praga_card_action_section.dart';
+import 'praga_card_main.dart';
 
 /// Widget específico para modo grid vertical
 /// 

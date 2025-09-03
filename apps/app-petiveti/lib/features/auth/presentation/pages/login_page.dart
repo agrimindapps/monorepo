@@ -494,7 +494,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               if (mounted) {
                 setState(() => _isLoading = false);
                 
-                if (success) {
+                if (success && mounted) {
                   HapticFeedback.lightImpact();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

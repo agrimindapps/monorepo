@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
+import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/forgot_password_dialog.dart';
@@ -173,16 +175,54 @@ class _AuthPageState extends State<AuthPage>
       
       final authProvider = context.read<AuthProvider>();
       final router = GoRouter.of(context);
-      await authProvider.login(_loginEmailController.text, _loginPasswordController.text);
+      
+      // Usar novo método loginAndSync em vez do login tradicional
+      await authProvider.loginAndSync(_loginEmailController.text, _loginPasswordController.text);
 
       if (!mounted) return;
       
       hideLoading();
       
       if (authProvider.isAuthenticated) {
-        router.go('/plants');
+        // Mostrar loading simples se sync estiver ativo
+        if (authProvider.isSyncInProgress) {
+          _showSimpleSyncLoading(authProvider, router);
+        } else {
+          // Navegar imediatamente se não há sync em progresso
+          router.go('/plants');
+        }
       }
     }
+  }
+
+  /// Mostra loading simples de sincronização que navega automaticamente
+  void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
+    SimpleSyncLoading.show(
+      context,
+      message: authProvider.syncMessage,
+    );
+    
+    // Navegar quando sync terminar
+    _navigateAfterSync(authProvider, router);
+  }
+  
+  /// Navega para plantas quando sync terminar
+  void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
+    late StreamSubscription subscription;
+    
+    subscription = Stream.periodic(const Duration(milliseconds: 500))
+        .listen((_) {
+      if (!authProvider.isSyncInProgress) {
+        subscription.cancel();
+        
+        // Pequeno delay para garantir que o loading foi fechado
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            router.go('/plants');
+          }
+        });
+      }
+    });
   }
 
   Future<void> _handleRegister() async {

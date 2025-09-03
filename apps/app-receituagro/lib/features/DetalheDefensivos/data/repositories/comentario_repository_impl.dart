@@ -1,11 +1,11 @@
-import 'package:core/core.dart' hide Failure, ServerFailure, CacheFailure;
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/errors/failures.dart';
+import '../../../../core/errors/failures.dart' as local_failures;
 import '../../../../core/utils/typedef.dart';
+import '../../../comentarios/services/comentarios_service.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/comentario_repository.dart';
-import '../../../comentarios/services/comentarios_service.dart';
 import '../models/comentario_model.dart';
 
 /// Implementação do repositório de comentários
@@ -30,7 +30,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       
       return Right(models);
     } catch (e) {
-      return Left(ServerFailure('Erro ao buscar comentários: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao buscar comentários: ${e.toString()}'));
     }
   }
 
@@ -51,7 +51,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       
       return Right(models);
     } catch (e) {
-      return Left(ServerFailure('Erro ao buscar comentários por ferramenta: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao buscar comentários por ferramenta: ${e.toString()}'));
     }
   }
 
@@ -69,13 +69,13 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
           .firstOrNull;
       
       if (comentario == null) {
-        return Left(CacheFailure('Comentário não encontrado com ID: $id'));
+        return Left(local_failures.CacheFailure('Comentário não encontrado com ID: $id'));
       }
       
       final model = ComentarioModel.fromLegacyModel(comentario);
       return Right(model);
     } catch (e) {
-      return Left(ServerFailure('Erro ao buscar comentário por ID: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao buscar comentário por ID: ${e.toString()}'));
     }
   }
 
@@ -86,7 +86,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       await _comentariosService.addComentario(legacyModel);
       return Right(comentario.id);
     } catch (e) {
-      return Left(ServerFailure('Erro ao adicionar comentário: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao adicionar comentário: ${e.toString()}'));
     }
   }
 
@@ -106,7 +106,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao atualizar comentário: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao atualizar comentário: ${e.toString()}'));
     }
   }
 
@@ -116,7 +116,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       await _comentariosService.deleteComentario(id);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao deletar comentário: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao deletar comentário: ${e.toString()}'));
     }
   }
 
@@ -137,7 +137,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       
       return Right(models);
     } catch (e) {
-      return Left(ServerFailure('Erro ao buscar comentários ativos: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao buscar comentários ativos: ${e.toString()}'));
     }
   }
 
@@ -161,7 +161,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
         }
         
         // Aguarda 5 segundos antes do próximo refresh
-        await Future.delayed(const Duration(seconds: 5));
+        await Future<void>.delayed(const Duration(seconds: 5));
       }
     } catch (e) {
       yield [];
@@ -181,7 +181,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
       
       return Right(count);
     } catch (e) {
-      return Left(ServerFailure('Erro ao contar comentários: ${e.toString()}'));
+      return Left(local_failures.ServerFailure('Erro ao contar comentários: ${e.toString()}'));
     }
   }
 }

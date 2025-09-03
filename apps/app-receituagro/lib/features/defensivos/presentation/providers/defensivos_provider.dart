@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivos_usecase.dart';
@@ -81,7 +81,7 @@ class DefensivosProvider extends ChangeNotifier {
   Future<void> loadDefensivos() async {
     _updateState(_state.copyWith(isLoading: true, error: null));
 
-    final result = await _getDefensivosUseCase.call(NoParams());
+    final result = await _getDefensivosUseCase.call(const NoParams());
     
     result.fold(
       (failure) => _updateState(_state.copyWith(
@@ -103,14 +103,14 @@ class DefensivosProvider extends ChangeNotifier {
   /// Carrega metadados (classes e fabricantes)
   Future<void> _loadMetadata() async {
     // Carrega classes
-    final classesResult = await _getClassesAgronomicasUseCase.call(NoParams());
+    final classesResult = await _getClassesAgronomicasUseCase.call(const NoParams());
     classesResult.fold(
       (failure) => debugPrint('Erro ao carregar classes: ${failure.toString()}'),
       (classes) => _updateState(_state.copyWith(classes: classes)),
     );
 
     // Carrega fabricantes
-    final fabricantesResult = await _getFabricantesUseCase.call(NoParams());
+    final fabricantesResult = await _getFabricantesUseCase.call(const NoParams());
     fabricantesResult.fold(
       (failure) => debugPrint('Erro ao carregar fabricantes: ${failure.toString()}'),
       (fabricantes) => _updateState(_state.copyWith(fabricantes: fabricantes)),

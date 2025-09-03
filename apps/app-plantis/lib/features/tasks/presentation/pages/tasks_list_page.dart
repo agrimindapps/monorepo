@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/accessibility_tokens.dart';
+import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../shared/widgets/feedback/feedback.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
@@ -175,8 +176,6 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return UnifiedFeedbackProvider(
       child: ContextualLoadingListener(
@@ -188,11 +187,11 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
           provider.loadTasks();
         },
         child: Scaffold(
-        backgroundColor:
-            isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+        backgroundColor: PlantisColors.getPageBackgroundColor(context),
         appBar: const TasksAppBar(),
         body: ResponsiveLayout(
-          child: Selector<TasksProvider, TasksListState>(
+          child: SafeArea(
+            child: Selector<TasksProvider, TasksListState>(
           selector: (_, provider) => TasksListState(
             isLoading: provider.isLoading,
             hasError: provider.hasError,
@@ -236,6 +235,7 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
             );
           },
           ),
+            ),
         ),
         // FAB removido - tarefas são geradas automaticamente quando concluídas
         // floatingActionButton: const TasksFab(),

@@ -1,12 +1,11 @@
+import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
-
-// Domain
-import '../domain/repositories/i_subscription_repository.dart';
-import '../domain/usecases/subscription_usecase.dart';
 
 // Data  
 import '../data/repositories/subscription_repository_impl.dart';
-
+// Domain
+import '../domain/repositories/i_subscription_repository.dart';
+import '../domain/usecases/subscription_usecase.dart';
 // Presentation
 import '../presentation/providers/subscription_provider.dart';
 
@@ -16,39 +15,30 @@ import '../presentation/providers/subscription_provider.dart';
 void configureSubscriptionDependencies() {
   final getIt = GetIt.instance;
 
-  // Repository
-  getIt.registerLazySingleton<ISubscriptionRepository>(
+  // Repository específico do app (implementa funcionalidades locais)
+  getIt.registerLazySingleton<IAppSubscriptionRepository>(
     () => SubscriptionRepositoryImpl(
-      getIt(), // RevenueCatService do core
-      getIt(), // HiveService para cache local
+      getIt<ISubscriptionRepository>(), // Core subscription repository
+      getIt<ILocalStorageRepository>(), // Local storage para cache
     ),
   );
 
   // Use Cases
-  getIt.registerLazySingleton(() => GetUserPremiumStatusUseCase(getIt()));
-  getIt.registerLazySingleton(() => GetAvailableProductsUseCase(getIt()));
-  getIt.registerLazySingleton(() => PurchaseProductUseCase(getIt()));
-  getIt.registerLazySingleton(() => CheckFeatureAccessUseCase(getIt()));
-  getIt.registerLazySingleton(() => RestorePurchasesUseCase(getIt()));
-  getIt.registerLazySingleton(() => RefreshSubscriptionStatusUseCase(getIt()));
-  getIt.registerLazySingleton(() => CheckActiveTrialUseCase(getIt()));
-  getIt.registerLazySingleton(() => GetTrialInfoUseCase(getIt()));
-  getIt.registerLazySingleton(() => ManageSubscriptionUseCase(getIt()));
-  getIt.registerLazySingleton(() => CancelSubscriptionUseCase(getIt()));
-  getIt.registerLazySingleton(() => GetPurchaseHistoryUseCase(getIt()));
-
-  // Provider
-  getIt.registerFactory(() => SubscriptionProvider(
-    getUserPremiumStatusUseCase: getIt(),
-    getAvailableProductsUseCase: getIt(),
-    purchaseProductUseCase: getIt(),
-    checkFeatureAccessUseCase: getIt(),
-    restorePurchasesUseCase: getIt(),
-    refreshSubscriptionStatusUseCase: getIt(),
-    checkActiveTrialUseCase: getIt(),
-    getTrialInfoUseCase: getIt(),
-    manageSubscriptionUseCase: getIt(),
-    cancelSubscriptionUseCase: getIt(),
-    getPurchaseHistoryUseCase: getIt(),
+  getIt.registerLazySingleton(() => GetUserPremiumStatusUseCase(getIt<IAppSubscriptionRepository>()));
+  getIt.registerLazySingleton(() => GetAvailableProductsUseCase(getIt<IAppSubscriptionRepository>()));
+  getIt.registerLazySingleton(() => PurchaseProductUseCase(getIt<ISubscriptionRepository>()));
+  getIt.registerLazySingleton(() => CheckFeatureAccessUseCase(getIt<IAppSubscriptionRepository>()));
+  getIt.registerLazySingleton(() => RestorePurchasesUseCase(
+    getIt<ISubscriptionRepository>(),
+    getIt<IAppSubscriptionRepository>(),
   ));
+  getIt.registerLazySingleton(() => RefreshSubscriptionStatusUseCase(getIt<IAppSubscriptionRepository>()));
+  getIt.registerLazySingleton(() => CheckActiveTrialUseCase(getIt<IAppSubscriptionRepository>()));
+  getIt.registerLazySingleton(() => GetTrialInfoUseCase(getIt<ISubscriptionRepository>()));
+  getIt.registerLazySingleton(() => ManageSubscriptionUseCase(getIt<ISubscriptionRepository>()));
+  getIt.registerLazySingleton(() => CancelSubscriptionUseCase(getIt<ISubscriptionRepository>()));
+  getIt.registerLazySingleton(() => GetPurchaseHistoryUseCase(getIt<ISubscriptionRepository>()));
+
+  // Provider - Será atualizado para usar os use cases corretos
+  getIt.registerFactory(() => SubscriptionProvider());
 }

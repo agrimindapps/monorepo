@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../../domain/entities/favorito_entity.dart';
 import '../../data/repositories/favoritos_repository_simplified.dart';
+import '../../domain/entities/favorito_entity.dart';
 
 /// Provider Simplificado para gerenciar estado dos favoritos
 /// Princípio: Usar repository diretamente, eliminando use cases desnecessários

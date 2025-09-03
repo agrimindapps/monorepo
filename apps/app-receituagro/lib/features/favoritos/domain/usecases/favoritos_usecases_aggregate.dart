@@ -1,5 +1,4 @@
 import '../entities/favorito_entity.dart';
-import '../repositories/i_favoritos_repository.dart';
 import 'favoritos_usecases.dart';
 
 /// Classe agregadora que unifica todos os use cases de favoritos

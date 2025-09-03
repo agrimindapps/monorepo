@@ -19,20 +19,6 @@ class DesktopKeyboardShortcuts extends StatefulWidget {
 }
 
 class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
-  bool _shouldAutofocus = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Defer autofocus until after the first frame to avoid layout issues
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          _shouldAutofocus = true;
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +81,9 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
       child: Actions(
         actions: actions,
         child: Focus(
-          autofocus: _shouldAutofocus,
+          autofocus: false, // Desabilitar autofocus para evitar problemas de inicialização
+          skipTraversal: false,
+          canRequestFocus: true,
           child: widget.child,
         ),
       ),

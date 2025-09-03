@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_riverpod_provider.dart';
-import 'favoritos_item_widget.dart';
 import 'favoritos_empty_state_widget.dart';
 import 'favoritos_error_state_widget.dart';
+import 'favoritos_item_widget.dart';
 
 /// Widget responsável pelo conteúdo de cada tab
 /// 
@@ -16,7 +15,7 @@ import 'favoritos_error_state_widget.dart';
 /// - Remoção de itens
 /// - Suporte a diferentes tipos de favoritos
 class FavoritosTabContentWidget extends StatelessWidget {
-  final TipoFavorito tipo;
+  final String tipo;
   final List<FavoritoEntity> items;
   final FavoritosViewState viewState;
   final String emptyMessage;
@@ -115,6 +114,8 @@ class FavoritosTabContentWidget extends StatelessWidget {
         return Colors.red;
       case TipoFavorito.diagnostico:
         return Colors.green;
+      default:
+        return Colors.grey;
     }
   }
 }

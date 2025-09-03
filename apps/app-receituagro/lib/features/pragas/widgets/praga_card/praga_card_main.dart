@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/praga_entity.dart';
-import 'praga_card_list_mode.dart';
-import 'praga_card_grid_mode.dart';
 import 'praga_card_compact_mode.dart';
 import 'praga_card_featured_mode.dart';
+import 'praga_card_grid_mode.dart';
+import 'praga_card_list_mode.dart';
 
 /// Widget principal otimizado para exibir cards de pragas
 /// Performance máxima para listas com 1000+ itens

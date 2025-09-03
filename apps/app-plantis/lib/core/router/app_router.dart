@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,7 @@ import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
+import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
 import '../di/injection_container.dart';
 import '../utils/navigation_service.dart';
 
@@ -51,17 +53,25 @@ class AppRouter {
 
   static GoRouter router(BuildContext context) {
     final authProvider = context.read<AuthProvider>();
+    
+    // Web mostra promotional first, mobile vai direto para login
+    final initialLocation = kIsWeb ? promotional : login;
 
     return GoRouter(
       navigatorKey: NavigationService.instance.navigatorKey,
-      initialLocation: promotional,
+      initialLocation: initialLocation,
       refreshListenable: authProvider,
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
+        final isAnonymous = authProvider.isAnonymous;
         final isInitialized = authProvider.isInitialized;
         final isLoggingIn = state.matchedLocation == login;
         final isRegistering = state.matchedLocation == register;
         final isOnLanding = state.matchedLocation == landing;
+        final isOnPromotional = state.matchedLocation == promotional;
+        
+        // Para fins de navegação, usuário anônimo é tratado como não autenticado
+        final isReallyAuthenticated = isAuthenticated && !isAnonymous;
 
         // Lista de rotas protegidas que requerem autenticação
         final protectedRoutes = [
@@ -89,21 +99,23 @@ class AppRouter {
           return null;
         }
 
-        // Se autenticado e não está no app, redireciona para plantas
-        if (isAuthenticated && (isLoggingIn || isRegistering || isOnLanding)) {
+        // Se realmente autenticado e não está no app, redireciona para plantas
+        if (isReallyAuthenticated && (isLoggingIn || isRegistering || isOnLanding || isOnPromotional)) {
           return plants;
         }
 
-        // Se não autenticado e tentando acessar rota protegida
-        if (!isAuthenticated && isAccessingProtectedRoute) {
+        // Se não realmente autenticado e tentando acessar rota protegida
+        if (!isReallyAuthenticated && isAccessingProtectedRoute) {
           return login;
         }
 
-        // Se não autenticado e tentando acessar outras rotas não protegidas, vai para landing
-        if (!isAuthenticated &&
+        // Se não realmente autenticado e tentando acessar outras rotas não protegidas, vai para landing
+        // Mas permite acesso direto à página promocional
+        if (!isReallyAuthenticated &&
             !isLoggingIn &&
             !isRegistering &&
-            !isOnLanding) {
+            !isOnLanding &&
+            !isOnPromotional) {
           return landing;
         }
 
@@ -115,6 +127,13 @@ class AppRouter {
           path: landing,
           name: 'landing',
           builder: (context, state) => const LandingPage(),
+        ),
+
+        // Promotional Page Route (outside of shell for web landing)
+        GoRoute(
+          path: promotional,
+          name: 'promotional',
+          builder: (context, state) => const PromotionalPage(),
         ),
 
         // Auth Routes - Unified Auth Page
@@ -133,7 +152,9 @@ class AppRouter {
 
         // Main Shell Route with Web Optimized Navigation
         ShellRoute(
-          builder: (context, state, child) => WebOptimizedNavigation(child: child),
+          builder: (context, state, child) => WebOptimizedNavigationShell(
+            child: child,
+          ).withKeyboardShortcuts(),
           routes: [
             // Plants Routes
             GoRoute(
@@ -229,11 +250,6 @@ class AppRouter {
               path: privacyPolicy,
               name: 'privacy-policy',
               builder: (context, state) => const PrivacyPolicyPage(),
-            ),
-            GoRoute(
-              path: promotional,
-              name: 'promotional',
-              builder: (context, state) => const PromotionalPage(),
             ),
 
             // Settings Routes

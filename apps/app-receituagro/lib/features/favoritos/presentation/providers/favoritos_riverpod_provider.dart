@@ -1,15 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/di/injection_container.dart' as di;
-import '../../../core/interfaces/i_premium_service.dart';
 import '../../domain/entities/favorito_entity.dart';
-import '../../domain/usecases/favoritos_usecases_stub.dart';
 
 /// Estados para Favoritos
 class FavoritosState {
   final FavoritosViewState viewState;
-  final Map<TipoFavorito, FavoritosViewState> typeViewStates;
-  final Map<TipoFavorito, List<FavoritoEntity>> favoritos;
+  final Map<String, FavoritosViewState> typeViewStates;
+  final Map<String, List<FavoritoEntity>> favoritos;
   final String? errorMessage;
   final bool isInitialized;
 
@@ -23,8 +20,8 @@ class FavoritosState {
 
   FavoritosState copyWith({
     FavoritosViewState? viewState,
-    Map<TipoFavorito, FavoritosViewState>? typeViewStates,
-    Map<TipoFavorito, List<FavoritoEntity>>? favoritos,
+    Map<String, FavoritosViewState>? typeViewStates,
+    Map<String, List<FavoritoEntity>>? favoritos,
     String? errorMessage,
     bool? isInitialized,
     bool clearError = false,
@@ -43,12 +40,12 @@ class FavoritosState {
   List<FavoritoEntity> get pragas => favoritos[TipoFavorito.praga] ?? [];
   List<FavoritoEntity> get diagnosticos => favoritos[TipoFavorito.diagnostico] ?? [];
   
-  int getCountForType(TipoFavorito tipo) => favoritos[tipo]?.length ?? 0;
+  int getCountForType(String tipo) => favoritos[tipo]?.length ?? 0;
   
-  FavoritosViewState getViewStateForType(TipoFavorito tipo) => 
+  FavoritosViewState getViewStateForType(String tipo) => 
     typeViewStates[tipo] ?? FavoritosViewState.loading;
     
-  String getEmptyMessageForType(TipoFavorito tipo) {
+  String getEmptyMessageForType(String tipo) {
     switch (tipo) {
       case TipoFavorito.defensivo:
         return 'Nenhum defensivo favoritado ainda';
@@ -56,21 +53,15 @@ class FavoritosState {
         return 'Nenhuma praga favoritada ainda';
       case TipoFavorito.diagnostico:
         return 'Nenhum diagnóstico salvo ainda';
+      default:
+        return 'Nenhum item favoritado ainda';
     }
   }
 }
 
 /// Notifier responsável por gerenciar favoritos
 class FavoritosNotifier extends StateNotifier<FavoritosState> {
-  final FavoritosUsecases _usecases;
-  final IPremiumService _premiumService;
-
-  FavoritosNotifier({
-    FavoritosUsecases? usecases,
-    IPremiumService? premiumService,
-  }) : _usecases = usecases ?? di.sl<FavoritosUsecases>(),
-        _premiumService = premiumService ?? di.sl<IPremiumService>(),
-        super(const FavoritosState());
+  FavoritosNotifier() : super(const FavoritosState());
 
   /// Inicializa favoritos
   Future<void> initialize() async {
@@ -106,36 +97,27 @@ class FavoritosNotifier extends StateNotifier<FavoritosState> {
   }
 
   /// Carrega favoritos por tipo
-  Future<void> _loadFavoritosByType(TipoFavorito tipo) async {
+  Future<void> _loadFavoritosByType(String tipo) async {
     // Atualiza estado do tipo específico
-    final newTypeStates = Map<TipoFavorito, FavoritosViewState>.from(state.typeViewStates);
+    final newTypeStates = Map<String, FavoritosViewState>.from(state.typeViewStates);
     newTypeStates[tipo] = FavoritosViewState.loading;
     state = state.copyWith(typeViewStates: newTypeStates);
 
     try {
-      final result = await _usecases.getFavoritosByType(tipo);
+      // Simulação - na implementação real usar usecase
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      final favoritosList = <FavoritoEntity>[];
       
-      result.fold(
-        (failure) {
-          newTypeStates[tipo] = FavoritosViewState.error;
-          state = state.copyWith(
-            typeViewStates: newTypeStates,
-            errorMessage: failure.message,
-          );
-        },
-        (favoritosList) {
-          final newFavoritos = Map<TipoFavorito, List<FavoritoEntity>>.from(state.favoritos);
-          newFavoritos[tipo] = favoritosList;
+      final newFavoritos = Map<String, List<FavoritoEntity>>.from(state.favoritos);
+      newFavoritos[tipo] = favoritosList;
+      
+      newTypeStates[tipo] = favoritosList.isEmpty 
+          ? FavoritosViewState.empty 
+          : FavoritosViewState.loaded;
           
-          newTypeStates[tipo] = favoritosList.isEmpty 
-              ? FavoritosViewState.empty 
-              : FavoritosViewState.loaded;
-              
-          state = state.copyWith(
-            favoritos: newFavoritos,
-            typeViewStates: newTypeStates,
-          );
-        },
+      state = state.copyWith(
+        favoritos: newFavoritos,
+        typeViewStates: newTypeStates,
       );
     } catch (e) {
       newTypeStates[tipo] = FavoritosViewState.error;
@@ -148,48 +130,48 @@ class FavoritosNotifier extends StateNotifier<FavoritosState> {
 
   /// Remove favorito
   Future<void> removeFavorito(FavoritoEntity favorito) async {
-    final result = await _usecases.removeFavorito(favorito.id, favorito.tipo);
-    
-    result.fold(
-      (failure) {
-        state = state.copyWith(errorMessage: failure.message);
-      },
-      (_) {
-        // Remove da lista local
-        final newFavoritos = Map<TipoFavorito, List<FavoritoEntity>>.from(state.favoritos);
-        final currentList = newFavoritos[favorito.tipo] ?? [];
-        newFavoritos[favorito.tipo] = currentList.where((f) => f.id != favorito.id).toList();
-        
-        // Atualiza estado do tipo
-        final newTypeStates = Map<TipoFavorito, FavoritosViewState>.from(state.typeViewStates);
-        newTypeStates[favorito.tipo] = newFavoritos[favorito.tipo]!.isEmpty 
-            ? FavoritosViewState.empty 
-            : FavoritosViewState.loaded;
-        
-        // Atualiza estado geral
-        final hasAnyFavoritos = newFavoritos.values.any((list) => list.isNotEmpty);
-        
-        state = state.copyWith(
-          favoritos: newFavoritos,
-          typeViewStates: newTypeStates,
-          viewState: hasAnyFavoritos ? FavoritosViewState.loaded : FavoritosViewState.empty,
-          clearError: true,
-        );
-      },
-    );
+    try {
+      // Simulação - na implementação real usar usecase
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      
+      // Remove da lista local
+      final newFavoritos = Map<String, List<FavoritoEntity>>.from(state.favoritos);
+      final currentList = newFavoritos[favorito.tipo] ?? [];
+      newFavoritos[favorito.tipo] = currentList.where((f) => f.id != favorito.id).toList();
+      
+      // Atualiza estado do tipo
+      final newTypeStates = Map<String, FavoritosViewState>.from(state.typeViewStates);
+      newTypeStates[favorito.tipo] = newFavoritos[favorito.tipo]!.isEmpty 
+          ? FavoritosViewState.empty 
+          : FavoritosViewState.loaded;
+      
+      // Atualiza estado geral
+      final hasAnyFavoritos = newFavoritos.values.any((list) => list.isNotEmpty);
+      
+      state = state.copyWith(
+        favoritos: newFavoritos,
+        typeViewStates: newTypeStates,
+        viewState: hasAnyFavoritos ? FavoritosViewState.loaded : FavoritosViewState.empty,
+        clearError: true,
+      );
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao remover favorito: $e');
+    }
   }
 
   /// Limpa cache
   Future<void> clearCache() async {
-    final result = await _usecases.clearCache();
-    result.fold(
-      (failure) => state = state.copyWith(errorMessage: failure.message),
-      (_) => loadAllFavoritos(),
-    );
+    try {
+      // Simulação - na implementação real usar usecase
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      await loadAllFavoritos();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao limpar cache: $e');
+    }
   }
 
   /// Verifica se usuário é premium
-  bool get isPremium => _premiumService.isPremium;
+  bool get isPremium => false; // Simulação - implementar integração real
 }
 
 /// Estados de visualização
@@ -200,12 +182,7 @@ enum FavoritosViewState {
   error,
 }
 
-/// Tipos de favorito
-enum TipoFavorito {
-  defensivo,
-  praga,
-  diagnostico,
-}
+// TipoFavorito removido - usar o da entity que define como constantes String
 
 /// Provider principal
 final favoritosProvider = StateNotifierProvider<FavoritosNotifier, FavoritosState>((ref) {

@@ -45,7 +45,7 @@ class CalorieCalculationService {
   /// Calculate Resting Energy Requirement using standard formula
   double _calculateRestingEnergyRequirement(double weight) {
     if (weight <= 2) {
-      return 70 * math.pow(weight, 0.75);
+      return (70 * math.pow(weight, 0.75)).toDouble();
     } else {
       return 30 * weight + 70;
     }

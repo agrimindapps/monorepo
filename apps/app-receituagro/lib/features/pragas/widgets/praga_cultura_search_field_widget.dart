@@ -92,7 +92,7 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
             Expanded(
               child: _buildSearchField(),
             ),
-            SizedBox(width: ReceitaAgroSpacing.md),
+            const SizedBox(width: ReceitaAgroSpacing.md),
             _buildViewToggleButtons(),
           ],
         ),

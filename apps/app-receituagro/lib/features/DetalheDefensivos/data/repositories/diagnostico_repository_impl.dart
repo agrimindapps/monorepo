@@ -1,9 +1,10 @@
 import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedef.dart';
+import '../../../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/diagnostico_repository.dart';
-import '../../../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../models/diagnostico_model.dart';
 
 /// Implementação do repositório de diagnósticos
@@ -230,7 +231,7 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
         }
         
         // Aguarda 10 segundos antes do próximo refresh
-        await Future.delayed(const Duration(seconds: 10));
+        await Future<void>.delayed(const Duration(seconds: 10));
       }
     } catch (e) {
       yield [];

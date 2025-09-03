@@ -164,7 +164,7 @@ class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget>
                 end: const Alignment(1.0, 0.3),
                 colors: [
                   Colors.grey.shade200,
-                  Colors.white.withOpacity(0.8),
+                  Colors.white.withValues(alpha: 0.8),
                   Colors.grey.shade200,
                 ],
               ),
@@ -281,7 +281,7 @@ class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         decoration: BoxDecoration(
-          color: Colors.green.shade600.withOpacity(0.8),
+          color: Colors.green.shade600.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Row(

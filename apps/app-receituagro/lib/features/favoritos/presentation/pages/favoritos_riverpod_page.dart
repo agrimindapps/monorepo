@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_riverpod_provider.dart';
 import '../widgets/favoritos_header_widget.dart';
-import '../widgets/favoritos_tab_content_widget.dart';
 import '../widgets/favoritos_premium_required_widget.dart';
+import '../widgets/favoritos_tab_content_widget.dart';
 
 /// Favoritos Page refatorada com Riverpod e Clean Architecture
 /// 

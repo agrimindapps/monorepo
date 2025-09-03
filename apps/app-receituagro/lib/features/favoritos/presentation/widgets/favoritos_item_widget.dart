@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/favorito_entity.dart';
-import '../providers/favoritos_riverpod_provider.dart';
 
 /// Widget responsável por renderizar um item de favorito
 /// 
@@ -15,7 +14,7 @@ import '../providers/favoritos_riverpod_provider.dart';
 /// - Suporte a diferentes tipos
 class FavoritosItemWidget extends StatelessWidget {
   final FavoritoEntity favorito;
-  final TipoFavorito tipo;
+  final String tipo;
   final bool isDark;
   final VoidCallback onRemove;
 
@@ -48,7 +47,7 @@ class FavoritosItemWidget extends StatelessWidget {
   }
 
   /// Constrói o leading (imagem ou ícone)
-  Widget _buildLeading() {
+  Widget? _buildLeading() {
     switch (tipo) {
       case TipoFavorito.defensivo:
         return Container(
@@ -72,11 +71,11 @@ class FavoritosItemWidget extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: PragaImageWidget(
-              nomeCientifico: favorito.nomeCientifico ?? '',
+              nomeCientifico: _getNomeCientifico(),
               width: 48,
               height: 48,
               fit: BoxFit.cover,
-              errorWidget: Container(
+              errorWidget: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -105,13 +104,28 @@ class FavoritosItemWidget extends StatelessWidget {
             size: 24,
           ),
         );
+        
+      default:
+        return Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: Colors.grey.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.favorite,
+            color: Colors.grey,
+            size: 24,
+          ),
+        );
     }
   }
 
   /// Constrói o título
   Widget _buildTitle() {
     return Text(
-      favorito.nome,
+      favorito.nomeDisplay,
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
@@ -131,12 +145,15 @@ class FavoritosItemWidget extends StatelessWidget {
         subtitle = 'Defensivo agrícola';
         break;
       case TipoFavorito.praga:
-        subtitle = favorito.nomeCientifico?.isNotEmpty == true
-            ? favorito.nomeCientifico
+        subtitle = _getNomeCientifico().isNotEmpty
+            ? _getNomeCientifico()
             : 'Praga agrícola';
         break;
       case TipoFavorito.diagnostico:
         subtitle = 'Diagnóstico salvo';
+        break;
+      default:
+        subtitle = 'Item favoritado';
         break;
     }
     
@@ -190,5 +207,13 @@ class FavoritosItemWidget extends StatelessWidget {
     // TODO: Implementar diálogo de confirmação
     // Por ora, chama diretamente a remoção
     onRemove();
+  }
+
+  /// Obtém o nome científico se disponível, baseado no tipo específico
+  String _getNomeCientifico() {
+    if (favorito is FavoritoPragaEntity) {
+      return (favorito as FavoritoPragaEntity).nomeCientifico;
+    }
+    return '';
   }
 }

@@ -35,7 +35,7 @@ class SearchCommentsWidget extends StatelessWidget {
               ? IconButton(
                   icon: const Icon(ComentariosDesignTokens.clearIcon),
                   onPressed: onClear,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 )
               : null,
           border: InputBorder.none,
@@ -44,7 +44,7 @@ class SearchCommentsWidget extends StatelessWidget {
             vertical: 14.0,
           ),
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
         style: theme.textTheme.bodyMedium,

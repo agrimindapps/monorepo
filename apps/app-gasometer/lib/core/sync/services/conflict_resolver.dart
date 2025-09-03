@@ -7,7 +7,7 @@ import '../models/conflict_data.dart';
 import '../strategies/conflict_resolution_strategy.dart';
 
 // Classe base que pode ser registrada
-@injectable
+@LazySingleton(as: ConflictResolver<BaseSyncModel>)
 class BaseSyncModelConflictResolver extends ConflictResolver<BaseSyncModel> {}
 
 class ConflictResolver<T extends BaseSyncModel> implements IConflictResolver<T> {

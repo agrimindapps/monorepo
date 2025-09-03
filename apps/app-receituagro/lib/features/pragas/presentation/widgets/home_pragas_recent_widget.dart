@@ -94,13 +94,13 @@ class HomePragasRecentWidget extends StatelessWidget {
   _EmojiAndType _getEmojiAndType(String tipoPraga) {
     switch (tipoPraga) {
       case '1':
-        return _EmojiAndType('🐛', 'Inseto');
+        return const _EmojiAndType('🐛', 'Inseto');
       case '2':
-        return _EmojiAndType('🦠', 'Doença');
+        return const _EmojiAndType('🦠', 'Doença');
       case '3':
-        return _EmojiAndType('🌿', 'Planta');
+        return const _EmojiAndType('🌿', 'Planta');
       default:
-        return _EmojiAndType('🐛', 'Inseto');
+        return const _EmojiAndType('🐛', 'Inseto');
     }
   }
 

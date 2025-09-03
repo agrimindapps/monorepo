@@ -16,19 +16,19 @@ class FavoritosUsecases {
   }
 
   /// Obtém favoritos por tipo específico
-  Future<List<FavoritoEntity>> getFavoritosByTipo(TipoFavorito tipo) async {
+  Future<List<FavoritoEntity>> getFavoritosByTipo(String tipo) async {
     // Implementação stub - retorna lista vazia
     return [];
   }
 
   /// Verifica se item é favorito
-  Future<bool> isFavorito(TipoFavorito tipo, String id) async {
+  Future<bool> isFavorito(String tipo, String id) async {
     // Implementação stub - retorna false
     return false;
   }
 
   /// Alterna favorito (toggle)
-  Future<bool> toggleFavorito(TipoFavorito tipo, String id) async {
+  Future<bool> toggleFavorito(String tipo, String id) async {
     // Implementação stub - retorna true (sucesso simulado)
     return true;
   }
@@ -94,19 +94,19 @@ class FavoritosUsecases {
   }
 
   /// Obtém contagem de favoritos por tipo
-  Future<int> getCountByTipo(TipoFavorito tipo) async {
+  Future<int> getCountByTipo(String tipo) async {
     final favoritos = await getFavoritosByTipo(tipo);
     return favoritos.length;
   }
 
   /// Verifica se há favoritos de um tipo específico
-  Future<bool> hasFavoritosByTipo(TipoFavorito tipo) async {
+  Future<bool> hasFavoritosByTipo(String tipo) async {
     final count = await getCountByTipo(tipo);
     return count > 0;
   }
 
   /// Limpa favoritos por tipo
-  Future<void> clearFavoritosByTipo(TipoFavorito tipo) async {
+  Future<void> clearFavoritosByTipo(String tipo) async {
     // Implementação stub - não faz nada
   }
 

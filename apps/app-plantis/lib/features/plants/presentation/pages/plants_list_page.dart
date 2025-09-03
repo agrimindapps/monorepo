@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/theme/plantis_colors.dart';
+
 import '../../../../shared/widgets/responsive_layout.dart';
+import '../../../../shared/widgets/sync/simple_sync_loading.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
 import '../providers/plant_form_provider.dart';
@@ -64,6 +69,37 @@ class _PlantsListPageState extends State<PlantsListPage> {
     // Load data after a small delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _plantsProvider.loadInitialData();
+      
+      // Iniciar sincronização automática se usuário não anônimo
+      _tryStartAutoSync();
+    });
+  }
+  
+  /// Tenta iniciar sincronização automática para usuários não anônimos
+  void _tryStartAutoSync() {
+    final authProvider = context.read<AuthProvider>();
+    
+    // Iniciar sincronização automática se necessário
+    authProvider.startAutoSyncIfNeeded();
+    
+    // Mostrar loading simples se sincronização iniciou
+    if (authProvider.isSyncInProgress) {
+      _showSimpleSyncLoading(authProvider);
+    }
+  }
+  
+  /// Mostra loading simples de sincronização que se fecha automaticamente
+  void _showSimpleSyncLoading(AuthProvider authProvider) {
+    if (!mounted) return;
+    
+    // Delay para evitar conflitos de focus durante navegação
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      
+      SimpleSyncLoading.show(
+        context,
+        message: authProvider.syncMessage,
+      );
     });
   }
 
@@ -133,7 +169,6 @@ class _PlantsListPageState extends State<PlantsListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     // ARCHITECTURE: Provide the injected provider to the widget tree
     // All state management flows through PlantsProvider
@@ -143,10 +178,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
         // ChangeNotifierProvider.value(value: _spacesProvider),
       ],
       child: Scaffold(
-        backgroundColor:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF1C1C1E)
-                : theme.colorScheme.surface,
+        backgroundColor: PlantisColors.getPageBackgroundColor(context),
         body: ResponsiveLayout(
           child: SafeArea(
             child: Column(

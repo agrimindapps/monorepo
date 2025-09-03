@@ -35,6 +35,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
       child: ChangeNotifierProvider<SettingsProvider>.value(
         value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
         child: Scaffold(
+          backgroundColor: PlantisColors.getPageBackgroundColor(context),
           body: ResponsiveLayout(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),

@@ -210,7 +210,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reminders',
         name: 'reminders',
-        builder: (context, state) => const RemindersPage(userId: 'user1'),
+        builder: (context, state) => const RemindersPage(userId: 'temp_user_id'), // TODO: Get from auth service
         routes: [
           GoRoute(
             path: '/add',
@@ -226,7 +226,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/expenses',
         name: 'expenses',
-        builder: (context, state) => const ExpensesPage(userId: 'user1'),
+        builder: (context, state) => const ExpensesPage(userId: 'temp_user_id'), // TODO: Get from auth service
         routes: [
           GoRoute(
             path: '/add',
@@ -307,7 +307,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/subscription',
         name: 'subscription',
-        builder: (context, state) => const SubscriptionPage(userId: 'user1'),
+        builder: (context, state) => const SubscriptionPage(userId: 'temp_user_id'), // TODO: Get from auth service
       ),
         ],
       ),

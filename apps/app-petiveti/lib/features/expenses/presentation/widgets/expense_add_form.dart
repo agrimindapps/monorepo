@@ -559,7 +559,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
       final expense = Expense(
         id: widget.expense?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         animalId: _selectedAnimalId ?? 'default_animal',
-        userId: widget.expense?.userId ?? 'default_user',
+        userId: widget.expense?.userId ?? 'temp_user_id', // TODO: Get from auth service
         title: _descriptionController.text.trim(),
         category: _selectedCategory!,
         paymentMethod: PaymentMethod.cash,

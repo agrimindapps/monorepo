@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../navigation/bottom_nav_wrapper.dart';
 import '../../widgets/estatisticas_busca_widget.dart';
 import '../providers/busca_avancada_provider.dart';
 import '../widgets/filtros_avancados_widget.dart';
@@ -30,16 +31,18 @@ class _BuscaAvancadaDiagnosticosCleanPageState extends State<BuscaAvancadaDiagno
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: Column(
-              children: [
-                _buildHeader(isDark),
-                Expanded(
+    return BottomNavWrapper(
+      selectedIndex: 0, // Busca avançada relacionada a defensivos
+      child: Container(
+        color: theme.scaffoldBackgroundColor,
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildHeader(isDark),
+                  Expanded(
                   child: Consumer<BuscaAvancadaProvider>(
                     builder: (context, provider, child) {
                       return CustomScrollView(
@@ -74,8 +77,9 @@ class _BuscaAvancadaDiagnosticosCleanPageState extends State<BuscaAvancadaDiagno
                       );
                     },
                   ),
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

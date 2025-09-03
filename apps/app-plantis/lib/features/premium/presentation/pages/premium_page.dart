@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_config.dart';
+import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/providers/analytics_provider.dart';
@@ -227,7 +228,7 @@ class _PremiumPageState extends State<PremiumPage> with LoadingPageMixin {
     return ContextualLoadingListener(
       context: LoadingContexts.premium,
       child: Scaffold(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: PlantisColors.getPageBackgroundColor(context),
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,

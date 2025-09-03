@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/repositories/fitossanitario_core_repository.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/repositories/i_defensivos_repository.dart';
-import '../../../../core/repositories/fitossanitario_core_repository.dart';
 import '../mappers/defensivo_mapper.dart';
 
 /// Implementação do repositório de defensivos
@@ -16,8 +16,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getAllDefensivos() async {
     try {
-      final defensivosModels = await _coreRepository.getAllItems();
-      final defensivosEntities = DefensivoMapper.toEntityList(defensivosModels);
+      final defensivosHive = _coreRepository.getAllItems();
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosHive);
       
       return Right(defensivosEntities);
     } catch (e) {
@@ -28,13 +28,13 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosByClasse(String classe) async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final defensivosFiltrados = allDefensivos
           .where((defensivo) => 
               defensivo.classeAgronomica?.toLowerCase().contains(classe.toLowerCase()) == true)
           .toList();
       
-      final defensivosEntities = DefensivoMapper.toEntityList(defensivosFiltrados);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosFiltrados);
       return Right(defensivosEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar defensivos por classe: ${e.toString()}'));
@@ -44,13 +44,13 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, DefensivoEntity?>> getDefensivoById(String id) async {
     try {
-      final defensivo = await _coreRepository.getItemById(id);
+      final defensivo = _coreRepository.getById(id);
       
       if (defensivo == null) {
         return const Right(null);
       }
       
-      final defensivoEntity = DefensivoMapper.toEntity(defensivo);
+      final defensivoEntity = DefensivoMapper.fromHiveToEntity(defensivo);
       return Right(defensivoEntity);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar defensivo por ID: ${e.toString()}'));
@@ -64,17 +64,16 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return await getAllDefensivos();
       }
 
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final defensivosFiltrados = allDefensivos.where((defensivo) {
-        final nomeMatch = defensivo.line1.toLowerCase().contains(query.toLowerCase());
-        final nomeComumMatch = defensivo.nomeComum?.toLowerCase().contains(query.toLowerCase()) == true;
-        final ingredienteMatch = defensivo.line2.toLowerCase().contains(query.toLowerCase());
+        final nomeComumMatch = defensivo.nomeComum.toLowerCase().contains(query.toLowerCase());
+        final nomeTecnicoMatch = defensivo.nomeTecnico.toLowerCase().contains(query.toLowerCase());
         final ingredienteAtivoMatch = defensivo.ingredienteAtivo?.toLowerCase().contains(query.toLowerCase()) == true;
         
-        return nomeMatch || nomeComumMatch || ingredienteMatch || ingredienteAtivoMatch;
+        return nomeComumMatch || nomeTecnicoMatch || ingredienteAtivoMatch;
       }).toList();
       
-      final defensivosEntities = DefensivoMapper.toEntityList(defensivosFiltrados);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosFiltrados);
       return Right(defensivosEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao pesquisar defensivos: ${e.toString()}'));
@@ -84,13 +83,13 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosByFabricante(String fabricante) async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final defensivosFiltrados = allDefensivos
           .where((defensivo) => 
               defensivo.fabricante?.toLowerCase().contains(fabricante.toLowerCase()) == true)
           .toList();
       
-      final defensivosEntities = DefensivoMapper.toEntityList(defensivosFiltrados);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosFiltrados);
       return Right(defensivosEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar defensivos por fabricante: ${e.toString()}'));
@@ -100,13 +99,13 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosByModoAcao(String modoAcao) async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final defensivosFiltrados = allDefensivos
           .where((defensivo) => 
               defensivo.modoAcao?.toLowerCase().contains(modoAcao.toLowerCase()) == true)
           .toList();
       
-      final defensivosEntities = DefensivoMapper.toEntityList(defensivosFiltrados);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosFiltrados);
       return Right(defensivosEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar defensivos por modo de ação: ${e.toString()}'));
@@ -116,7 +115,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<String>>> getClassesAgronomicas() async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final classes = allDefensivos
           .map((defensivo) => defensivo.classeAgronomica)
           .where((classe) => classe != null && classe.isNotEmpty)
@@ -134,7 +133,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<String>>> getFabricantes() async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final fabricantes = allDefensivos
           .map((defensivo) => defensivo.fabricante)
           .where((fabricante) => fabricante != null && fabricante.isNotEmpty)
@@ -152,7 +151,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<String>>> getModosAcao() async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       final modosAcao = allDefensivos
           .map((defensivo) => defensivo.modoAcao)
           .where((modo) => modo != null && modo.isNotEmpty)
@@ -170,11 +169,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosRecentes({int limit = 10}) async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       
       // Como não temos timestamp real, vamos pegar os primeiros N
       final defensivosRecentes = allDefensivos.take(limit).toList();
-      final defensivosEntities = DefensivoMapper.toEntityList(defensivosRecentes);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosRecentes);
       
       return Right(defensivosEntities);
     } catch (e) {
@@ -185,7 +184,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, Map<String, int>>> getDefensivosStats() async {
     try {
-      final allDefensivos = await _coreRepository.getAllItems();
+      final allDefensivos = _coreRepository.getAllItems();
       
       final stats = <String, int>{
         'total': allDefensivos.length,

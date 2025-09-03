@@ -83,6 +83,15 @@ class PlantisColors {
   );
 
   // Helper methods
+  
+  /// Cor de fundo padrão que suporta tema claro e escuro
+  static Color getPageBackgroundColor(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.brightness == Brightness.dark
+        ? const Color(0xFF1C1C1E) // Cor escura personalizada
+        : theme.colorScheme.surface; // Cor clara do tema
+  }
+  
   static Color getPrimaryShade(int shade) {
     switch (shade) {
       case 50:

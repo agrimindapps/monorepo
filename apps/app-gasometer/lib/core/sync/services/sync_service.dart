@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../../features/auth/domain/repositories/auth_repository.dart';
 import '../../data/models/base_sync_model.dart';
 import '../../services/analytics_service.dart';
+import '../../interfaces/i_sync_service.dart' as sync_interface;
 import '../models/sync_queue_item.dart';
 import '../strategies/conflict_resolution_strategy.dart';
 import 'conflict_resolver.dart';
@@ -23,7 +24,8 @@ import 'sync_status_manager.dart';
 
 /// Serviço principal de sincronização que orquestra todas as operações
 @singleton
-class SyncService {
+@LazySingleton(as: sync_interface.ISyncService)
+class SyncService implements sync_interface.ISyncService {
   final SyncQueue _syncQueue;
   final SyncOperations _syncOperations;
   final ConflictResolver<BaseSyncModel> _conflictResolver;
@@ -730,6 +732,66 @@ class SyncService {
     
     _isInitialized = false;
     debugPrint('✅ SyncService disposed');
+  }
+
+  // Implementação da interface ISyncService
+  @override
+  Future<void> startSync() async => await initialize();
+
+  @override
+  Future<void> stopSync() async => await dispose();
+
+  @override
+  Future<bool> syncCollection(String collectionName) async {
+    try {
+      await forceSyncNow();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Stream<sync_interface.SyncStatus> get syncStatusStream => 
+      statusStream.map((status) => _convertToInterfaceStatus(status));
+
+  @override
+  Future<int> getPendingSyncCount() async {
+    try {
+      final pendingItems = _syncQueue.getPendingItems();
+      return pendingItems.length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  @override
+  Future<void> forceSyncAll() async => await forceSyncNow();
+
+  @override
+  bool get isSyncing => currentStatus == SyncStatus.syncing;
+
+  @override
+  DateTime? get lastSyncTime => null; // TODO: Implementar timestamp do último sync
+
+  @override
+  Future<bool> get isConnected async => _syncOperations.isOnline;
+
+  sync_interface.SyncStatus _convertToInterfaceStatus(SyncStatus status) {
+    switch (status) {
+      case SyncStatus.idle:
+        return sync_interface.SyncStatus.idle;
+      case SyncStatus.syncing:
+        return sync_interface.SyncStatus.syncing;
+      case SyncStatus.success:
+        return sync_interface.SyncStatus.completed;
+      case SyncStatus.error:
+        return sync_interface.SyncStatus.error;
+      case SyncStatus.conflict:
+        return sync_interface.SyncStatus.error;
+      case SyncStatus.offline:
+        return sync_interface.SyncStatus.offline;
+    }
   }
 }
 

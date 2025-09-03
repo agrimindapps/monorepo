@@ -239,7 +239,7 @@ class ReceitaAgroValidationService {
     final errors = <String>[];
 
     if (areaSize == null) {
-      return ReceitaAgroValidationResult(isValid: true, errors: []); // Area is optional
+      return const ReceitaAgroValidationResult(isValid: true, errors: []); // Area is optional
     }
 
     double? area;

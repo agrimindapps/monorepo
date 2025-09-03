@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../../core/di/injection_container.dart';
+import '../../data/repositories/diagnostico_repository_impl.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_by_defensivo_usecase.dart';
-import '../../data/repositories/diagnostico_repository_impl.dart';
 
 /// Provider legado para compatibilidade com Provider pattern
 /// Mantém compatibilidade com código existente que usa ChangeNotifier

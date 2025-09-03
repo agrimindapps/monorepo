@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/services/navigation_service.dart';
+import '../../domain/usecases/subscription_usecase.dart';
 
 /// Provider responsável por gerenciar o estado e lógica de negócio de subscription
 /// 
@@ -14,9 +14,14 @@ import '../../../../core/services/navigation_service.dart';
 /// - Gerenciamento de URLs de subscription
 /// - Estados de loading e erro
 class SubscriptionProvider with ChangeNotifier {
-  // Dependencies
-  final ISubscriptionRepository _subscriptionRepository = di.sl<ISubscriptionRepository>();
-  final INavigationService _navigationService = di.sl<INavigationService>();
+  // Dependencies - carregados via GetIt
+  late final GetUserPremiumStatusUseCase _getUserPremiumStatusUseCase;
+  late final GetAvailableProductsUseCase _getAvailableProductsUseCase;
+  late final PurchaseProductUseCase _purchaseProductUseCase;
+  late final RestorePurchasesUseCase _restorePurchasesUseCase;
+  late final CheckFeatureAccessUseCase _checkFeatureAccessUseCase;
+  late final RefreshSubscriptionStatusUseCase _refreshSubscriptionStatusUseCase;
+  late final ManageSubscriptionUseCase _manageSubscriptionUseCase;
   
   // State management
   bool _isLoading = false;
@@ -27,6 +32,21 @@ class SubscriptionProvider with ChangeNotifier {
   String? _errorMessage;
   String? _successMessage;
   String? _infoMessage;
+  
+  SubscriptionProvider() {
+    _initializeDependencies();
+  }
+  
+  void _initializeDependencies() {
+    final getIt = GetIt.instance;
+    _getUserPremiumStatusUseCase = getIt<GetUserPremiumStatusUseCase>();
+    _getAvailableProductsUseCase = getIt<GetAvailableProductsUseCase>();
+    _purchaseProductUseCase = getIt<PurchaseProductUseCase>();
+    _restorePurchasesUseCase = getIt<RestorePurchasesUseCase>();
+    _checkFeatureAccessUseCase = getIt<CheckFeatureAccessUseCase>();
+    _refreshSubscriptionStatusUseCase = getIt<RefreshSubscriptionStatusUseCase>();
+    _manageSubscriptionUseCase = getIt<ManageSubscriptionUseCase>();
+  }
 
   // Getters
   bool get isLoading => _isLoading;
@@ -49,11 +69,6 @@ class SubscriptionProvider with ChangeNotifier {
 
       // Carregar produtos disponíveis
       await _loadAvailableProducts();
-
-      // Se tem assinatura ativa, carregar detalhes
-      if (_hasActiveSubscription) {
-        await _loadCurrentSubscriptionDetails();
-      }
     } catch (e) {
       _setErrorMessage('Erro inesperado ao carregar dados: $e');
     } finally {
@@ -63,7 +78,7 @@ class SubscriptionProvider with ChangeNotifier {
 
   /// Verifica se o usuário possui uma assinatura ativa
   Future<void> _checkActiveSubscription() async {
-    final result = await _subscriptionRepository.hasActiveSubscription();
+    final result = await _getUserPremiumStatusUseCase(const NoParams());
     result.fold(
       (failure) => _setErrorMessage('Erro ao verificar assinatura: ${failure.message}'),
       (hasActive) => _hasActiveSubscription = hasActive,
@@ -72,12 +87,7 @@ class SubscriptionProvider with ChangeNotifier {
 
   /// Carrega os produtos disponíveis para compra
   Future<void> _loadAvailableProducts() async {
-    final result = await _subscriptionRepository.getAvailableProducts(
-      productIds: [
-        EnvironmentConfig.receitaAgroMonthlyProduct,
-        EnvironmentConfig.receitaAgroYearlyProduct,
-      ],
-    );
+    final result = await _getAvailableProductsUseCase(const NoParams());
     
     result.fold(
       (failure) => _setErrorMessage('Erro ao carregar produtos: ${failure.message}'),
@@ -85,14 +95,6 @@ class SubscriptionProvider with ChangeNotifier {
     );
   }
 
-  /// Carrega os detalhes da assinatura atual se existir
-  Future<void> _loadCurrentSubscriptionDetails() async {
-    final result = await _subscriptionRepository.getCurrentSubscription();
-    result.fold(
-      (failure) => _setErrorMessage('Erro ao carregar assinatura: ${failure.message}'),
-      (subscription) => _currentSubscription = subscription,
-    );
-  }
 
   /// Processa a compra de um produto específico
   Future<void> purchaseProduct(String productId) async {
@@ -100,7 +102,7 @@ class SubscriptionProvider with ChangeNotifier {
     _clearMessages();
 
     try {
-      final result = await _subscriptionRepository.purchaseProduct(productId: productId);
+      final result = await _purchaseProductUseCase(productId);
       
       result.fold(
         (failure) => _setErrorMessage('Erro na compra: ${failure.message}'),
@@ -119,11 +121,16 @@ class SubscriptionProvider with ChangeNotifier {
 
   /// Compra baseada no plano selecionado atualmente
   Future<void> purchaseSelectedPlan() async {
-    final productId = _selectedPlan == 'yearly' 
-        ? EnvironmentConfig.receitaAgroYearlyProduct
-        : EnvironmentConfig.receitaAgroMonthlyProduct;
+    // Encontra o produto baseado no plano selecionado
+    final selectedProduct = _availableProducts.firstWhere(
+      (product) => _selectedPlan == 'yearly' 
+          ? product.subscriptionPeriod?.contains('year') == true
+          : product.subscriptionPeriod?.contains('month') == true,
+      orElse: () => _availableProducts.isNotEmpty ? _availableProducts.first : 
+          throw Exception('Nenhum produto disponível'),
+    );
     
-    await purchaseProduct(productId);
+    await purchaseProduct(selectedProduct.productId);
   }
 
   /// Restaura compras anteriores do usuário
@@ -132,7 +139,7 @@ class SubscriptionProvider with ChangeNotifier {
     _clearMessages();
 
     try {
-      final result = await _subscriptionRepository.restorePurchases();
+      final result = await _restorePurchasesUseCase(const NoParams());
       
       result.fold(
         (failure) => _setErrorMessage('Erro ao restaurar compras: ${failure.message}'),
@@ -154,7 +161,7 @@ class SubscriptionProvider with ChangeNotifier {
 
   /// Abre a URL de gerenciamento de subscription
   Future<void> openManagementUrl() async {
-    final result = await _subscriptionRepository.getManagementUrl();
+    final result = await _manageSubscriptionUseCase(const NoParams());
     result.fold(
       (failure) => _setErrorMessage('Erro ao abrir gerenciamento'),
       (url) {
@@ -169,12 +176,14 @@ class SubscriptionProvider with ChangeNotifier {
 
   /// Abre Termos de Uso
   Future<void> openTermsOfUse() async {
-    await _navigationService.openUrl('https://agrimind.com.br/termos-de-uso');
+    // TODO: Implementar navegação para termos de uso
+    _setInfoMessage('Redirecionando para Termos de Uso...');
   }
 
   /// Abre Política de Privacidade  
   Future<void> openPrivacyPolicy() async {
-    await _navigationService.openUrl('https://agrimind.com.br/politica-de-privacidade');
+    // TODO: Implementar navegação para política de privacidade
+    _setInfoMessage('Redirecionando para Política de Privacidade...');
   }
 
   /// Altera o plano selecionado

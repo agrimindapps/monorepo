@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/di/injection_container.dart' as di;
-import '../../../core/interfaces/i_premium_service.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/interfaces/i_premium_service.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../dialogs/dialogs.dart';
 import '../riverpod_providers/comentarios_providers.dart';

@@ -141,7 +141,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -157,8 +157,8 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF4CAF50).withOpacity(0.8),
-                  const Color(0xFF4CAF50).withOpacity(0.9),
+                  const Color(0xFF4CAF50).withValues(alpha: 0.8),
+                  const Color(0xFF4CAF50).withValues(alpha: 0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -173,7 +173,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -223,7 +223,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
             color: theme.colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: accentColor.withOpacity(0.2),
+              color: accentColor.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -235,8 +235,8 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      accentColor.withOpacity(0.15),
-                      accentColor.withOpacity(0.05),
+                      accentColor.withValues(alpha: 0.15),
+                      accentColor.withValues(alpha: 0.05),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,

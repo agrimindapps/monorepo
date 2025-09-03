@@ -148,7 +148,7 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
                       ? Colors.grey.shade400 
                       : Colors.grey.shade600),
             ),
-            SizedBox(height: ReceitaAgroSpacing.xs + 2),
+            const SizedBox(height: ReceitaAgroSpacing.xs + 2),
             Text(
               label,
               style: ReceitaAgroTypography.itemCategory.copyWith(

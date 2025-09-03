@@ -708,9 +708,10 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
       lastDate: DateTime(2030),
     );
     
-    if (date != null) {
+    if (date != null && mounted) {
+      final localContext = context;
       final time = await showTimePicker(
-        context: context,
+        context: localContext,
         initialTime: TimeOfDay.fromDateTime(_reminderDate ?? DateTime.now()),
       );
       

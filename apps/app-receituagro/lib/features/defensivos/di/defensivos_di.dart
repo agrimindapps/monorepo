@@ -1,12 +1,10 @@
 import 'package:get_it/get_it.dart';
 
+// Data
+import '../data/repositories/defensivos_repository_impl.dart';
 // Domain
 import '../domain/repositories/i_defensivos_repository.dart';
 import '../domain/usecases/get_defensivos_usecase.dart';
-
-// Data
-import '../data/repositories/defensivos_repository_impl.dart';
-
 // Presentation
 import '../presentation/providers/defensivos_provider.dart';
 import '../presentation/providers/home_defensivos_provider.dart';
@@ -40,8 +38,6 @@ void configureDefensivosDependencies() {
   ));
 
   getIt.registerFactory(() => HomeDefensivosProvider(
-    getDefensivosRecentesUseCase: getIt(),
-    getDefensivosStatsUseCase: getIt(),
-    searchDefensivosUseCase: getIt(),
+    repository: getIt(),
   ));
 }

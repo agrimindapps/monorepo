@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../providers/favoritos_riverpod_provider.dart';
+import '../../domain/entities/favorito_entity.dart';
 
 /// Widget para estado vazio de favoritos
 /// 
@@ -12,7 +12,7 @@ import '../providers/favoritos_riverpod_provider.dart';
 /// - Design adaptado ao tema
 class FavoritosEmptyStateWidget extends StatelessWidget {
   final String message;
-  final TipoFavorito tipo;
+  final String tipo;
   final bool isDark;
 
   const FavoritosEmptyStateWidget({
@@ -89,6 +89,8 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
         return Colors.red;
       case TipoFavorito.diagnostico:
         return Colors.green;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -101,6 +103,8 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
         return FontAwesomeIcons.bug;
       case TipoFavorito.diagnostico:
         return FontAwesomeIcons.stethoscope;
+      default:
+        return FontAwesomeIcons.heart;
     }
   }
 
@@ -113,6 +117,8 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
         return 'Identifique pragas e salve as mais comuns na sua região';
       case TipoFavorito.diagnostico:
         return 'Realize diagnósticos e salve os resultados importantes';
+      default:
+        return 'Explore o conteúdo e salve seus favoritos';
     }
   }
 
@@ -142,6 +148,8 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
         return Icons.camera_alt;
       case TipoFavorito.diagnostico:
         return Icons.quiz;
+      default:
+        return Icons.explore;
     }
   }
 
@@ -154,6 +162,8 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
         return 'Identificar Pragas';
       case TipoFavorito.diagnostico:
         return 'Fazer Diagnóstico';
+      default:
+        return 'Explorar';
     }
   }
 

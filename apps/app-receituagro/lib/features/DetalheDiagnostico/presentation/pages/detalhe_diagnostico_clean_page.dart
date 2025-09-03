@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../navigation/bottom_nav_wrapper.dart';
 import '../providers/detalhe_diagnostico_provider.dart';
 import '../widgets/aplicacao_instrucoes_widget.dart';
 import '../widgets/diagnostico_detalhes_widget.dart';
@@ -45,25 +46,28 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
     
     return Consumer<DetalheDiagnosticoProvider>(
       builder: (context, provider, child) {
-        return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          body: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1120),
-                child: Column(
-                  children: [
-                    _buildModernHeader(provider, isDark),
-                    Expanded(
-                      child: provider.isLoading
-                          ? _buildLoadingState()
-                          : provider.hasError
-                              ? _buildErrorState(provider)
-                              : provider.isPremium
-                                  ? _buildContent(provider)
-                                  : _buildPremiumGate(),
-                    ),
-                  ],
+        return BottomNavWrapper(
+          selectedIndex: 0, // Assumindo que diagnóstico está relacionado a defensivos
+          child: Container(
+            color: theme.scaffoldBackgroundColor,
+            child: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1120),
+                  child: Column(
+                    children: [
+                      _buildModernHeader(provider, isDark),
+                      Expanded(
+                        child: provider.isLoading
+                            ? _buildLoadingState()
+                            : provider.hasError
+                                ? _buildErrorState(provider)
+                                : provider.isPremium
+                                    ? _buildContent(provider)
+                                    : _buildPremiumGate(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

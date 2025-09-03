@@ -53,7 +53,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
               Text(
                 ComentariosStrings.fieldInstructionContent,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 12),
@@ -88,7 +88,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
                 child: Text(
                   ComentariosStrings.requirementMinLength(ComentariosDesignTokens.minCommentLength),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),

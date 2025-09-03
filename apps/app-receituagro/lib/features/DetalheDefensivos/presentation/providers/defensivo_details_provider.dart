@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/di/injection_container.dart';
+import '../../data/repositories/defensivo_repository_impl.dart';
+import '../../data/repositories/favorito_repository_impl.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivo_details_usecase.dart';
 import '../../domain/usecases/manage_favorito_usecase.dart';
-import '../../data/repositories/defensivo_repository_impl.dart';
-import '../../data/repositories/favorito_repository_impl.dart';
 
 /// Provider para o repositório de defensivos
 final defensivoRepositoryProvider = Provider((ref) {

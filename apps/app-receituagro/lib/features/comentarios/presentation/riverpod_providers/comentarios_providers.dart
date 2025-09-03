@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/di/injection_container.dart' as di;
+import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
 import '../../domain/usecases/add_comentario_usecase.dart';

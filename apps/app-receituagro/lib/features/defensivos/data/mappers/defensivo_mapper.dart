@@ -1,7 +1,8 @@
+import '../../../../core/models/fitossanitario_hive.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../models/defensivo_model.dart';
 
-/// Mapper para conversão entre DefensivoModel e DefensivoEntity
+/// Mapper para conversão entre DefensivoModel/FitossanitarioHive e DefensivoEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas
 class DefensivoMapper {
   /// Converte Model para Entity
@@ -41,5 +42,25 @@ class DefensivoMapper {
   /// Converte lista de Entities para Models
   static List<DefensivoModel> toModelList(List<DefensivoEntity> entities) {
     return entities.map((entity) => toModel(entity)).toList();
+  }
+
+  /// Converte FitossanitarioHive para Entity
+  static DefensivoEntity fromHiveToEntity(FitossanitarioHive hive) {
+    return DefensivoEntity(
+      id: hive.idReg,
+      nome: hive.nomeComum,
+      ingredienteAtivo: hive.ingredienteAtivo ?? '',
+      nomeComum: hive.nomeComum,
+      classeAgronomica: hive.classeAgronomica,
+      fabricante: hive.fabricante,
+      modoAcao: null, // FitossanitarioHive não tem modo de ação
+      isActive: hive.status,
+      lastUpdated: DateTime.now(),
+    );
+  }
+
+  /// Converte lista de FitossanitarioHive para Entities
+  static List<DefensivoEntity> fromHiveToEntityList(List<FitossanitarioHive> hives) {
+    return hives.map((hive) => fromHiveToEntity(hive)).toList();
   }
 }

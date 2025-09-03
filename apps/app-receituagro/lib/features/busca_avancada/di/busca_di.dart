@@ -1,12 +1,10 @@
 import 'package:get_it/get_it.dart';
 
+// Data
+import '../data/repositories/busca_repository_impl.dart';
 // Domain
 import '../domain/repositories/i_busca_repository.dart';
 import '../domain/usecases/busca_usecase.dart';
-
-// Data
-import '../data/repositories/busca_repository_impl.dart';
-
 // Presentation
 import '../presentation/providers/busca_avancada_provider.dart';
 
@@ -35,13 +33,6 @@ void configureBuscaDependencies() {
   getIt.registerLazySingleton(() => GetHistoricoBuscaUseCase(getIt()));
   getIt.registerLazySingleton(() => LimparCacheUseCase(getIt()));
 
-  // Provider (mantém o existente mas com nova arquitetura)
-  getIt.registerFactory(() => BuscaAvancadaProvider(
-    buscarComFiltrosUseCase: getIt(),
-    buscarPorTextoUseCase: getIt(),
-    getMetadosUseCase: getIt(),
-    getSugestoesUseCase: getIt(),
-    getHistoricoUseCase: getIt(),
-    limparCacheUseCase: getIt(),
-  ));
+  // Provider (usando o construtor atual sem parâmetros)
+  getIt.registerFactory(() => BuscaAvancadaProvider());
 }

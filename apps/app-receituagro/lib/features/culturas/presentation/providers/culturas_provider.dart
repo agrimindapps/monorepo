@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_culturas_usecase.dart';
@@ -70,7 +70,7 @@ class CulturasProvider extends ChangeNotifier {
   Future<void> loadCulturas() async {
     _updateState(_state.copyWith(isLoading: true, error: null));
 
-    final result = await _getCulturasUseCase.call(NoParams());
+    final result = await _getCulturasUseCase.call(const NoParams());
     
     result.fold(
       (failure) => _updateState(_state.copyWith(
@@ -91,7 +91,7 @@ class CulturasProvider extends ChangeNotifier {
 
   /// Carrega grupos de culturas
   Future<void> _loadGrupos() async {
-    final result = await _getGruposCulturasUseCase.call(NoParams());
+    final result = await _getGruposCulturasUseCase.call(const NoParams());
     
     result.fold(
       (failure) => debugPrint('Erro ao carregar grupos: ${failure.toString()}'),

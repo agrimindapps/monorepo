@@ -1,12 +1,10 @@
 import 'package:get_it/get_it.dart';
 
+// Data
+import '../data/repositories/culturas_repository_impl.dart';
 // Domain
 import '../domain/repositories/i_culturas_repository.dart';
 import '../domain/usecases/get_culturas_usecase.dart';
-
-// Data
-import '../data/repositories/culturas_repository_impl.dart';
-
 // Presentation
 import '../presentation/providers/culturas_provider.dart';
 

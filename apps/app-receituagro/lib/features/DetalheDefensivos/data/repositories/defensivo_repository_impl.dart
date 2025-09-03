@@ -187,7 +187,7 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
         yield models;
         
         // Aguarda 5 segundos antes do próximo refresh
-        await Future.delayed(const Duration(seconds: 5));
+        await Future<void>.delayed(const Duration(seconds: 5));
       }
     } catch (e) {
       yield [];

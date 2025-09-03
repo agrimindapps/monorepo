@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/theme/plantis_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -50,9 +52,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
     final isEditing = widget.plantId != null;
 
     return Scaffold(
-      backgroundColor: theme.brightness == Brightness.light
-          ? const Color(0xFFF5F5F5)
-          : theme.scaffoldBackgroundColor,
+      backgroundColor: PlantisColors.getPageBackgroundColor(context),
       appBar: AppBar(
         title: Text(
           isEditing ? 'Editar Planta' : 'Nova Planta',
@@ -61,9 +61,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: theme.brightness == Brightness.light
-            ? const Color(0xFFF5F5F5)
-            : theme.appBarTheme.backgroundColor,
+        backgroundColor: PlantisColors.getPageBackgroundColor(context),
         elevation: 0,
         iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
         leading: IconButton(

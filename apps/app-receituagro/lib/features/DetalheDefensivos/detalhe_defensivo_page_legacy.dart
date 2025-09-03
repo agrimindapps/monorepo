@@ -8,9 +8,9 @@ import '../../core/repositories/favoritos_hive_repository.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../core/services/app_data_manager.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/models/comentario_model.dart';
 import '../comentarios/services/comentarios_service.dart';
-import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../favoritos/favoritos_page.dart';
 import '../navigation/bottom_nav_wrapper.dart';
@@ -1982,7 +1982,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   void _showAddCommentDialog() {
     final TextEditingController controller = TextEditingController();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -2086,11 +2086,11 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   void _showDiagnosticDialog(String nome, String principio, String dosagem) {
     final theme = Theme.of(context);
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => Dialog(
-            backgroundColor: theme.dialogBackgroundColor,
+            backgroundColor: theme.dialogTheme.backgroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -2218,7 +2218,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
                               Navigator.of(context).pop();
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
+                                MaterialPageRoute<void>(
                                   builder:
                                       (context) => DetalheDiagnosticoPage(
                                         diagnosticoId: '1',

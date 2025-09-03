@@ -5,14 +5,14 @@ import 'package:equatable/equatable.dart';
 class CulturaEntity extends Equatable {
   final String id;
   final String nome;
-  final String grupo;
+  final String? grupo;
   final String? descricao;
   final bool isActive;
 
   const CulturaEntity({
     required this.id,
     required this.nome,
-    required this.grupo,
+    this.grupo,
     this.descricao,
     this.isActive = true,
   });

@@ -44,11 +44,11 @@ class PragaCulturaItemWidget extends StatelessWidget {
           child: Row(
             children: [
               _buildIcon(ReceitaAgroDimensions.itemImageSize),
-              SizedBox(width: ReceitaAgroSpacing.lg),
+              const SizedBox(width: ReceitaAgroSpacing.lg),
               Expanded(
                 child: _buildListContent(),
               ),
-              SizedBox(width: ReceitaAgroSpacing.md),
+              const SizedBox(width: ReceitaAgroSpacing.md),
               _buildTrailingIcon(),
             ],
           ),
@@ -139,7 +139,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         if (praga.displaySecondaryName.isNotEmpty) ...[
-          SizedBox(height: ReceitaAgroSpacing.xs),
+          const SizedBox(height: ReceitaAgroSpacing.xs),
           Text(
             praga.displaySecondaryName,
             style: ReceitaAgroTypography.itemSubtitle.copyWith(
@@ -151,7 +151,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
           ),
         ],
         if (praga.categoria?.isNotEmpty == true) ...[
-          SizedBox(height: ReceitaAgroSpacing.sm),
+          const SizedBox(height: ReceitaAgroSpacing.sm),
           Text(
             praga.categoria!,
             style: ReceitaAgroTypography.itemCategory.copyWith(
@@ -277,7 +277,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           if (praga.displaySecondaryName.isNotEmpty) ...[
-            SizedBox(height: ReceitaAgroSpacing.xs / 2),
+            const SizedBox(height: ReceitaAgroSpacing.xs / 2),
             Text(
               praga.displaySecondaryName,
               style: ReceitaAgroTypography.itemCategory.copyWith(

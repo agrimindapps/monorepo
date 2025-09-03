@@ -13,6 +13,13 @@ import '../logging/data/datasources/log_remote_data_source.dart';
 import '../logging/data/repositories/log_repository_impl.dart';
 import '../logging/repositories/log_repository.dart';
 import '../logging/services/logging_service.dart';
+import '../interfaces/i_sync_service.dart';
+import '../sync/services/sync_service.dart';
+import '../sync/services/sync_queue.dart';
+import '../sync/services/sync_operations.dart';
+import '../sync/services/conflict_resolver.dart';
+import '../services/analytics_service.dart';
+import '../data/models/base_sync_model.dart';
 
 // Auth imports
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
@@ -411,6 +418,7 @@ Future<void> initializeDependencies() async {
       analytics: sl(),
       platformService: sl(),
       rateLimiter: sl(),
+      syncService: sl(),
     ),
   );
 

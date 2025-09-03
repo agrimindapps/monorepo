@@ -31,7 +31,7 @@ class OptimizedTabBarWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.shade200.withOpacity(0.5),
+                color: Colors.green.shade200.withValues(alpha: 0.5),
                 blurRadius: 5,
                 offset: const Offset(0, 2),
               ),
@@ -50,7 +50,7 @@ class OptimizedTabBarWidget extends StatelessWidget {
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
             dividerColor: Colors.transparent,
             indicatorSize: TabBarIndicatorSize.tab,
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
           ),
         );
       },
@@ -72,7 +72,7 @@ class OptimizedTabBarWidget extends StatelessWidget {
       final isActive = selectedIndex == index;
 
       return Tab(
-        child: Container(
+        child: SizedBox(
           width: isActive ? null : 40,
           child: Row(
             mainAxisSize: isActive ? MainAxisSize.min : MainAxisSize.max,

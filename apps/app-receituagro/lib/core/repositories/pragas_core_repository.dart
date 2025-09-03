@@ -78,4 +78,14 @@ class PragasCoreRepository extends CoreBaseHiveRepository<PragasHive> {
     familias.sort();
     return familias;
   }
+
+  /// Buscar por chave (compatibilidade com código existente)
+  Future<PragasHive?> getByKey(String key) async {
+    return getById(key);
+  }
+
+  /// Obter item por ID (alias para compatibilidade)
+  Future<PragasHive?> getItemById(String id) async {
+    return getById(id);
+  }
 }

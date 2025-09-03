@@ -27,8 +27,10 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
   }
 
   /// Busca cultura por nome de forma síncrona (para compatibilidade)
-  Future<CulturaHive?> findByNameSync(String cultura) async {
-    return await findByName(cultura);
+  CulturaHive? findByNameSync(String cultura) {
+    final results = findBy((item) => 
+        item.cultura.toLowerCase() == cultura.toLowerCase());
+    return results.isNotEmpty ? results.first : null;
   }
 
   /// Lista todas as culturas ativas de forma assíncrona
@@ -102,5 +104,15 @@ class CulturaCoreRepository extends CoreBaseHiveRepository<CulturaHive> {
   /// Buscar cultura por ID
   Future<CulturaHive?> findByIdReg(String idReg) async {
     return getById(idReg);
+  }
+
+  /// Buscar por chave (compatibilidade com código existente)
+  Future<CulturaHive?> getByKey(String key) async {
+    return getById(key);
+  }
+
+  /// Obter item por ID (alias para compatibilidade)
+  Future<CulturaHive?> getItemById(String id) async {
+    return getById(id);
   }
 }

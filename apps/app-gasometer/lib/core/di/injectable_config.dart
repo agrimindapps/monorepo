@@ -3,6 +3,8 @@ import 'package:injectable/injectable.dart';
 
 // Import do arquivo gerado (será criado pelo build_runner)
 import 'injectable_config.config.dart';
+import '../interfaces/i_sync_service.dart';
+import '../sync/services/sync_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -15,11 +17,15 @@ final getIt = GetIt.instance;
   preferRelativeImports: true,
   asExtension: true,
 )
-void configureDependencies() => getIt.init();
+void configureDependencies() {
+  getIt.init();
+  registerExternalDependencies();
+}
 
 /// Inicializa dependências com suporte a environment
 void configureDependenciesForEnvironment(String environment) {
   getIt.init(environment: environment);
+  registerExternalDependencies();
 }
 
 /// Reset do container para testes
@@ -29,6 +35,8 @@ void resetDependencies() {
 
 /// Registra dependências externas que não podem ser anotadas
 void registerExternalDependencies() {
-  // Registrar dependências externas aqui se necessário
-  // Ex: Firebase, SharedPreferences, etc.
+  // Registrar ISyncService manualmente usando SyncService
+  if (!getIt.isRegistered<ISyncService>()) {
+    getIt.registerLazySingleton<ISyncService>(() => getIt<SyncService>());
+  }
 }

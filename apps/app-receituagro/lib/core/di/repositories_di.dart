@@ -1,14 +1,11 @@
 import 'package:get_it/get_it.dart';
 
-// Culturas
-import '../../features/culturas/di/culturas_di.dart';
-
-// Defensivos
-import '../../features/defensivos/di/defensivos_di.dart';
-
 // Busca Avançada
 import '../../features/busca_avancada/di/busca_di.dart';
-
+// Culturas
+import '../../features/culturas/di/culturas_di.dart';
+// Defensivos
+import '../../features/defensivos/di/defensivos_di.dart';
 // Subscription (será criado)
 import '../../features/subscription/di/subscription_di.dart';
 

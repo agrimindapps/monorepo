@@ -1,37 +1,33 @@
-import 'package:core/core.dart' hide ISubscriptionRepository, SubscriptionEntity;
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import '../entities/subscription_entity.dart';
 import '../repositories/i_subscription_repository.dart';
 
-/// Use case para verificar status premium do usuário
-class GetUserPremiumStatusUseCase implements UseCase<PremiumUserEntity, NoParams> {
-  final ISubscriptionRepository repository;
+/// Use case para verificar status premium do usuário ReceitaAgro
+class GetUserPremiumStatusUseCase implements UseCase<bool, NoParams> {
+  final IAppSubscriptionRepository repository;
 
   GetUserPremiumStatusUseCase(this.repository);
 
   @override
-  Future<Either<Failure, PremiumUserEntity>> call(NoParams params) async {
+  Future<Either<Failure, bool>> call(NoParams params) async {
     // Primeiro tenta cache local para resposta rápida
     final cachedResult = await repository.getCachedPremiumStatus();
     
     return cachedResult.fold(
-      (failure) => repository.getCurrentUserStatus(),
+      (failure) => repository.hasReceitaAgroSubscription(),
       (cachedStatus) async {
-        // Se tem cache válido (menos de 5 minutos), usa cache
-        if (cachedStatus != null && 
-            cachedStatus.lastSubscriptionCheck != null &&
-            DateTime.now().difference(cachedStatus.lastSubscriptionCheck!) < 
-            const Duration(minutes: 5)) {
+        // Se tem cache, usa cache
+        if (cachedStatus != null) {
           return Right(cachedStatus);
         }
         
         // Senão, busca status atualizado
-        final freshResult = await repository.getCurrentUserStatus();
+        final freshResult = await repository.hasReceitaAgroSubscription();
         
         // Salva no cache se bem-sucedido
-        freshResult.fold(
-          (failure) => null,
-          (freshStatus) => repository.cachePremiumStatus(freshStatus),
+        await freshResult.fold(
+          (failure) => Future<void>.value(),
+          (isPremium) => repository.cachePremiumStatus(isPremium),
         );
         
         return freshResult;
@@ -40,23 +36,23 @@ class GetUserPremiumStatusUseCase implements UseCase<PremiumUserEntity, NoParams
   }
 }
 
-/// Use case para buscar produtos disponíveis
-class GetAvailableProductsUseCase implements UseCase<List<SubscriptionProductEntity>, NoParams> {
-  final ISubscriptionRepository repository;
+/// Use case para buscar produtos disponíveis do ReceitaAgro
+class GetAvailableProductsUseCase implements UseCase<List<ProductInfo>, NoParams> {
+  final IAppSubscriptionRepository repository;
 
   GetAvailableProductsUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<SubscriptionProductEntity>>> call(NoParams params) async {
-    return await repository.getAvailableProducts();
+  Future<Either<Failure, List<ProductInfo>>> call(NoParams params) async {
+    return await repository.getReceitaAgroProducts();
   }
 }
 
-/// Use case para comprar produto
+/// Use case para comprar produto (usa core repository diretamente)
 class PurchaseProductUseCase implements UseCase<SubscriptionEntity, String> {
-  final ISubscriptionRepository repository;
+  final ISubscriptionRepository coreRepository;
 
-  PurchaseProductUseCase(this.repository);
+  PurchaseProductUseCase(this.coreRepository);
 
   @override
   Future<Either<Failure, SubscriptionEntity>> call(String productId) async {
@@ -64,13 +60,13 @@ class PurchaseProductUseCase implements UseCase<SubscriptionEntity, String> {
       return const Left(ValidationFailure('ID do produto não pode ser vazio'));
     }
 
-    return await repository.purchaseProduct(productId);
+    return await coreRepository.purchaseProduct(productId: productId);
   }
 }
 
 /// Use case para verificar acesso a feature
 class CheckFeatureAccessUseCase implements UseCase<bool, String> {
-  final ISubscriptionRepository repository;
+  final IAppSubscriptionRepository repository;
 
   CheckFeatureAccessUseCase(this.repository);
 
@@ -84,20 +80,24 @@ class CheckFeatureAccessUseCase implements UseCase<bool, String> {
   }
 }
 
-/// Use case para restaurar compras
-class RestorePurchasesUseCase implements UseCase<PremiumUserEntity, NoParams> {
-  final ISubscriptionRepository repository;
+/// Use case para restaurar compras (usa core repository)
+class RestorePurchasesUseCase implements UseCase<List<SubscriptionEntity>, NoParams> {
+  final ISubscriptionRepository coreRepository;
+  final IAppSubscriptionRepository appRepository;
 
-  RestorePurchasesUseCase(this.repository);
+  RestorePurchasesUseCase(this.coreRepository, this.appRepository);
 
   @override
-  Future<Either<Failure, PremiumUserEntity>> call(NoParams params) async {
-    final result = await repository.restorePurchases();
+  Future<Either<Failure, List<SubscriptionEntity>>> call(NoParams params) async {
+    final result = await coreRepository.restorePurchases();
     
-    // Atualiza cache após restaurar
-    result.fold(
-      (failure) => null,
-      (user) => repository.cachePremiumStatus(user),
+    // Atualiza cache local após restaurar
+    await result.fold(
+      (failure) => Future.value(),
+      (subscriptions) async {
+        final hasReceitaAgro = subscriptions.any((s) => s.isReceitaAgroSubscription && s.isActive);
+        await appRepository.cachePremiumStatus(hasReceitaAgro);
+      },
     );
     
     return result;
@@ -105,19 +105,21 @@ class RestorePurchasesUseCase implements UseCase<PremiumUserEntity, NoParams> {
 }
 
 /// Use case para atualizar status da assinatura
-class RefreshSubscriptionStatusUseCase implements UseCase<PremiumUserEntity, NoParams> {
-  final ISubscriptionRepository repository;
+class RefreshSubscriptionStatusUseCase implements UseCase<bool, NoParams> {
+  final IAppSubscriptionRepository repository;
 
   RefreshSubscriptionStatusUseCase(this.repository);
 
   @override
-  Future<Either<Failure, PremiumUserEntity>> call(NoParams params) async {
-    final result = await repository.refreshSubscriptionStatus();
+  Future<Either<Failure, bool>> call(NoParams params) async {
+    // Limpa cache e busca status atualizado
+    await repository.clearCache();
+    final result = await repository.hasReceitaAgroSubscription();
     
     // Atualiza cache após refresh
-    result.fold(
-      (failure) => null,
-      (user) => repository.cachePremiumStatus(user),
+    await result.fold(
+      (failure) => Future.value(),
+      (isPremium) => repository.cachePremiumStatus(isPremium),
     );
     
     return result;
@@ -126,7 +128,7 @@ class RefreshSubscriptionStatusUseCase implements UseCase<PremiumUserEntity, NoP
 
 /// Use case para verificar trial ativo
 class CheckActiveTrialUseCase implements UseCase<bool, NoParams> {
-  final ISubscriptionRepository repository;
+  final IAppSubscriptionRepository repository;
 
   CheckActiveTrialUseCase(this.repository);
 
@@ -136,54 +138,53 @@ class CheckActiveTrialUseCase implements UseCase<bool, NoParams> {
   }
 }
 
-/// Use case para buscar informações de trial
+/// Use case para buscar informações de trial (usa core repository)
 class GetTrialInfoUseCase implements UseCase<SubscriptionEntity?, NoParams> {
-  final ISubscriptionRepository repository;
+  final ISubscriptionRepository coreRepository;
 
-  GetTrialInfoUseCase(this.repository);
+  GetTrialInfoUseCase(this.coreRepository);
 
   @override
   Future<Either<Failure, SubscriptionEntity?>> call(NoParams params) async {
-    return await repository.getTrialInfo();
+    final result = await coreRepository.getCurrentSubscription();
+    return result.map((subscription) => 
+      subscription?.isInTrial == true ? subscription : null
+    );
   }
 }
 
-/// Use case para gerenciar assinatura
-class ManageSubscriptionUseCase implements UseCase<void, NoParams> {
-  final ISubscriptionRepository repository;
+/// Use case para gerenciar assinatura (usa core repository)
+class ManageSubscriptionUseCase implements UseCase<String?, NoParams> {
+  final ISubscriptionRepository coreRepository;
 
-  ManageSubscriptionUseCase(this.repository);
+  ManageSubscriptionUseCase(this.coreRepository);
 
   @override
-  Future<Either<Failure, void>> call(NoParams params) async {
-    return await repository.manageSubscription();
+  Future<Either<Failure, String?>> call(NoParams params) async {
+    return await coreRepository.getManagementUrl();
   }
 }
 
-/// Use case para cancelar assinatura
-class CancelSubscriptionUseCase implements UseCase<void, String> {
-  final ISubscriptionRepository repository;
+/// Use case para cancelar assinatura (usa core repository)
+class CancelSubscriptionUseCase implements UseCase<void, String?> {
+  final ISubscriptionRepository coreRepository;
 
-  CancelSubscriptionUseCase(this.repository);
+  CancelSubscriptionUseCase(this.coreRepository);
 
   @override
-  Future<Either<Failure, void>> call(String subscriptionId) async {
-    if (subscriptionId.trim().isEmpty) {
-      return const Left(ValidationFailure('ID da assinatura não pode ser vazio'));
-    }
-
-    return await repository.cancelSubscription(subscriptionId);
+  Future<Either<Failure, void>> call(String? reason) async {
+    return await coreRepository.cancelSubscription(reason: reason);
   }
 }
 
-/// Use case para buscar histórico de compras
+/// Use case para buscar histórico de compras (usa core repository)
 class GetPurchaseHistoryUseCase implements UseCase<List<SubscriptionEntity>, NoParams> {
-  final ISubscriptionRepository repository;
+  final ISubscriptionRepository coreRepository;
 
-  GetPurchaseHistoryUseCase(this.repository);
+  GetPurchaseHistoryUseCase(this.coreRepository);
 
   @override
   Future<Either<Failure, List<SubscriptionEntity>>> call(NoParams params) async {
-    return await repository.getPurchaseHistory();
+    return await coreRepository.getUserSubscriptions();
   }
 }

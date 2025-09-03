@@ -290,4 +290,19 @@ class FitossanitarioCoreRepository extends CoreBaseHiveRepository<Fitossanitario
       'byFabricante': byFabricante,
     };
   }
+
+  /// Buscar todos os items (alias para compatibilidade)
+  List<FitossanitarioHive> getAllItems() {
+    return getAll();
+  }
+
+  /// Buscar por chave (compatibilidade com código existente)
+  Future<FitossanitarioHive?> getByKey(String key) async {
+    return getById(key);
+  }
+
+  /// Obter item por ID (alias para compatibilidade)
+  Future<FitossanitarioHive?> getItemById(String id) async {
+    return getById(id);
+  }
 }

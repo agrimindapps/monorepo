@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import '../navigation/bottom_nav_wrapper.dart';
-import 'presentation/providers/detalhe_defensivo_provider.dart';
 import '../diagnosticos/presentation/providers/diagnosticos_provider.dart';
-import 'presentation/widgets/defensivo_info_cards_widget.dart';
-import 'presentation/widgets/diagnosticos_tab_widget.dart';
-import 'presentation/widgets/tecnologia_tab_widget.dart';
+import 'domain/entities/defensivo_details_entity.dart';
+import 'presentation/providers/detalhe_defensivo_provider.dart';
 import 'presentation/widgets/comentarios_tab_widget.dart';
 import 'presentation/widgets/custom_tab_bar_widget.dart';
+import 'presentation/widgets/defensivo_info_cards_widget.dart';
+import 'presentation/widgets/diagnosticos_tab_widget.dart';
 import 'presentation/widgets/loading_error_widgets.dart';
-import 'domain/entities/defensivo_details_entity.dart';
+import 'presentation/widgets/tecnologia_tab_widget.dart';
 
 /// Página refatorada de detalhes do defensivo
 /// REFATORAÇÃO COMPLETA: De 2.379 linhas para menos de 300
@@ -68,11 +68,16 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Future<void> _loadData() async {
+    debugPrint('Loading data for defensivo: ${widget.defensivoName}');
     await _defensivoProvider.initializeData(widget.defensivoName, widget.fabricante);
     
     // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
     if (_defensivoProvider.defensivoData != null) {
+      debugPrint('Loading diagnósticos for ID: ${_defensivoProvider.defensivoData!.idReg}');
       await _diagnosticosProvider.getDiagnosticosByDefensivo(_defensivoProvider.defensivoData!.idReg);
+      debugPrint('Loaded ${_diagnosticosProvider.diagnosticos.length} diagnósticos');
+    } else {
+      debugPrint('No defensivo data found');
     }
   }
 
@@ -89,24 +94,20 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         ChangeNotifierProvider.value(value: _defensivoProvider),
         ChangeNotifierProvider.value(value: _diagnosticosProvider),
       ],
-      child: BottomNavWrapper(
-        selectedIndex: 0, // Defensivos é o índice 0
-        child: Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1120),
-                child: Column(
-                  children: [
-                    _buildHeader(),
-                    Expanded(child: _buildBody()),
-                  ],
-                ),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(child: _buildBody()),
+                ],
               ),
             ),
           ),
-          floatingActionButton: _buildFloatingActionButton(),
         ),
       ),
     );
@@ -232,21 +233,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     );
   }
 
-  Widget? _buildFloatingActionButton() {
-    // Só mostra o FAB se estiver na aba de comentários (quarta aba, índice 3)
-    if (_tabController.index != 3) {
-      return null;
-    }
-
-    return FloatingActionButton(
-      onPressed: () => _showCommentDialog(),
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-      tooltip: 'Adicionar comentário',
-      child: const Icon(Icons.add),
-    );
-  }
-
   Future<void> _handleFavoriteToggle(DetalheDefensivoProvider provider) async {
     final success = await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
     
@@ -260,10 +246,5 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         ),
       );
     }
-  }
-
-  void _showCommentDialog() {
-    // Implementar dialog de comentário se necessário
-    // Por ora, a funcionalidade está no próprio widget de comentários
   }
 }

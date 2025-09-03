@@ -1,8 +1,8 @@
-import '../../domain/entities/busca_entity.dart';
-import '../../../../core/models/diagnostico_hive.dart';
-import '../../../../core/models/pragas_hive.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
 import '../../../../core/models/cultura_hive.dart';
+import '../../../../core/models/diagnostico_hive.dart';
+import '../../../../core/models/fitossanitario_hive.dart';
+import '../../../../core/models/pragas_hive.dart';
+import '../../domain/entities/busca_entity.dart';
 
 /// Mapper para conversão entre diferentes modelos e BuscaResultEntity
 /// TEMPORARIAMENTE SIMPLIFICADO para resolver build blockers
@@ -28,7 +28,7 @@ class BuscaMapper {
 
   /// Converte PragasHive para BuscaResultEntity  
   static BuscaResultEntity pragaToEntity(PragasHive praga) {
-    final nomeExibicao = (praga.nomeComum?.isNotEmpty == true) ? praga.nomeComum! : praga.nomeCientifico;
+    final nomeExibicao = (praga.nomeComum.isNotEmpty == true) ? praga.nomeComum : praga.nomeCientifico;
     
     return BuscaResultEntity(
       id: praga.objectId,
@@ -80,7 +80,7 @@ class BuscaMapper {
       tipo: 'cultura',
       titulo: 'Cultura', // TODO: usar propriedade correta
       subtitulo: null,
-      metadata: {},
+      metadata: const {},
       relevancia: 1.0,
     );
   }
@@ -117,7 +117,7 @@ class BuscaMapper {
 
   /// Converte PragasHive para DropdownItemEntity
   static DropdownItemEntity pragaToDropdownItem(PragasHive praga) {
-    final nomeExibicao = (praga.nomeComum?.isNotEmpty == true) ? praga.nomeComum! : praga.nomeCientifico;
+    final nomeExibicao = (praga.nomeComum.isNotEmpty == true) ? praga.nomeComum : praga.nomeCientifico;
     
     return DropdownItemEntity(
       id: praga.objectId,

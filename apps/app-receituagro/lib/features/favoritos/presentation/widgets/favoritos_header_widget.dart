@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_riverpod_provider.dart';
 
 /// Widget especializado para o header da página de favoritos
@@ -30,11 +31,11 @@ class FavoritosHeaderWidget extends StatelessWidget {
       subtitle: totalFavoritos > 0 
           ? '$totalFavoritos ${totalFavoritos == 1 ? 'item salvo' : 'itens salvos'}'
           : 'Nenhum item salvo ainda',
-      icon: FontAwesomeIcons.heart,
-      actions: [
-        if (totalFavoritos > 0)
-          _buildStatsChip(),
-      ],
+      leftIcon: FontAwesomeIcons.heart,
+      isDark: isDark,
+      showBackButton: false,
+      showActions: totalFavoritos > 0,
+      additionalActions: totalFavoritos > 0 ? [_buildStatsChip()] : null,
     );
   }
 

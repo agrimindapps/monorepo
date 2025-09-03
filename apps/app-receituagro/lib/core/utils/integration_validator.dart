@@ -138,13 +138,13 @@ class IntegrationValidator {
       if (_sl.isRegistered<EnhancedErrorHandler>()) {
         final errorHandler = _sl<EnhancedErrorHandler>();
         // Simple test without requiring initialization
-        tests['enhanced_error_handler'] = ValidationTest(
+        tests['enhanced_error_handler'] = const ValidationTest(
           'EnhancedErrorHandler Registration',
           true,
           'EnhancedErrorHandler successfully registered',
         );
       } else {
-        tests['enhanced_error_handler'] = ValidationTest(
+        tests['enhanced_error_handler'] = const ValidationTest(
           'EnhancedErrorHandler Registration',
           false,
           'EnhancedErrorHandler not registered',
@@ -163,13 +163,13 @@ class IntegrationValidator {
       if (_sl.isRegistered<ReceitaAgroValidationService>()) {
         final validationService = _sl<ReceitaAgroValidationService>();
         // Simple registration test without requiring initialization
-        tests['receituagro_validation'] = ValidationTest(
+        tests['receituagro_validation'] = const ValidationTest(
           'ReceitaAgroValidationService Registration',
           true,
           'ReceitaAgroValidationService successfully registered',
         );
       } else {
-        tests['receituagro_validation'] = ValidationTest(
+        tests['receituagro_validation'] = const ValidationTest(
           'ReceitaAgroValidationService Registration',
           false,
           'ReceitaAgroValidationService not registered',
@@ -217,14 +217,14 @@ class IntegrationValidator {
     
     // Test Firebase services integration (interfaces may not exist in core package)
     try {
-      tests['firebase_analytics_integration'] = ValidationTest(
+      tests['firebase_analytics_integration'] = const ValidationTest(
         'Firebase Analytics Integration',
         false, // Commented out as interface may not exist
         'Firebase Analytics interface check disabled - may not be available in core package',
       );
       // _sl.isRegistered<IAnalyticsRepository>()
       
-      tests['firebase_crashlytics_integration'] = ValidationTest(
+      tests['firebase_crashlytics_integration'] = const ValidationTest(
         'Firebase Crashlytics Integration',
         false, // Commented out as interface may not exist  
         'Firebase Crashlytics interface check disabled - may not be available in core package',
@@ -240,7 +240,7 @@ class IntegrationValidator {
     
     // Test RevenueCat integration (interface may not exist in core package)
     try {
-      tests['revenue_cat_integration'] = ValidationTest(
+      tests['revenue_cat_integration'] = const ValidationTest(
         'RevenueCat Integration',
         false, // Commented out as interface may not exist
         'RevenueCat interface check disabled - may not be available in core package',

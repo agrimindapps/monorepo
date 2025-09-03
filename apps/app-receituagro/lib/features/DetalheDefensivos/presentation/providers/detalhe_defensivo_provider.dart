@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../../core/interfaces/i_premium_service.dart';
+import '../../../../core/models/fitossanitario_hive.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
-import '../../../comentarios/services/comentarios_service.dart';
 import '../../../comentarios/models/comentario_model.dart';
+import '../../../comentarios/services/comentarios_service.dart';
 
 /// Provider principal para gerenciamento de estado da página detalhe defensivo
 /// Responsabilidade: coordenar estado da página, favoritos, premium, comentários
@@ -89,13 +90,17 @@ class DetalheDefensivoProvider extends ChangeNotifier {
 
     try {
       final pkIdentificador = _defensivoData?.idReg ?? '';
+      debugPrint('Loading comentários for ID: $pkIdentificador');
+      
       final comentarios = await _comentariosService.getAllComentarios(
         pkIdentificador: pkIdentificador,
       );
 
+      debugPrint('Loaded ${comentarios.length} comentários');
       _comentarios = comentarios;
       _setLoadingComments(false);
     } catch (e) {
+      debugPrint('Error loading comentários: $e');
       _setLoadingComments(false);
       debugPrint('Erro ao carregar comentários: $e');
     }

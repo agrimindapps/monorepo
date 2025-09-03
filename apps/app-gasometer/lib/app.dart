@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/di/injection_container.dart';
+import 'core/di/injectable_config.dart' as local_di;
 import 'core/presentation/widgets/global_error_boundary.dart';
 import 'core/router/app_router.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';
@@ -58,8 +58,8 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // LEVEL 1: Base providers (no dependencies)
         // Auth Provider - deve ser o primeiro (base dependency)
         ChangeNotifierProvider(
-          create: (_) => sl<local.AuthProvider>(),
-          lazy: true, // Changed to lazy to prevent startup deadlock
+          create: (_) => local_di.getIt<local.AuthProvider>(),
+          lazy: false, // Force immediate creation for proper initialization
         ),
         
         // Theme Provider - independent
@@ -69,24 +69,24 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         
         // Settings Provider - independent
         ChangeNotifierProvider(
-          create: (_) => sl<SettingsProvider>(),
+          create: (_) => local_di.getIt<SettingsProvider>(),
         ),
         
         // Sync Status Provider - independent
         ChangeNotifierProvider(
-          create: (_) => sl<SyncStatusProvider>(),
+          create: (_) => local_di.getIt<SyncStatusProvider>(),
         ),
         
         // Premium Provider - independent 
         ChangeNotifierProvider(
-          create: (_) => sl<PremiumProvider>(),
+          create: (_) => local_di.getIt<PremiumProvider>(),
         ),
         
         // LEVEL 2: Domain providers (depend on Auth)
         // Vehicles Provider - depends on Auth for user context
         ChangeNotifierProvider(
           create: (_) {
-            final vehiclesProvider = sl<VehiclesProvider>();
+            final vehiclesProvider = local_di.getIt<VehiclesProvider>();
             // Initialize after the provider is fully created
             Future.microtask(() => vehiclesProvider.initialize());
             return vehiclesProvider;
@@ -97,59 +97,90 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // LEVEL 3: Feature providers (depend on domain providers)
         // Fuel Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => sl<FuelProvider>(),
+          create: (_) => local_di.getIt<FuelProvider>(),
           lazy: true,
         ),
         
         // Maintenance Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => sl<MaintenanceProvider>(),
+          create: (_) => local_di.getIt<MaintenanceProvider>(),
           lazy: true,
         ),
         
         // Odometer Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => sl<OdometerProvider>(),
+          create: (_) => local_di.getIt<OdometerProvider>(),
           lazy: true,
         ),
         
         // LEVEL 4: Analytics providers (depend on multiple feature providers)
         // Reports Provider - depends on multiple providers for comprehensive reporting
         ChangeNotifierProvider(
-          create: (_) => sl<ReportsProvider>(),
+          create: (_) => local_di.getIt<ReportsProvider>(),
           lazy: true,
         ),
       ],
         builder: (context, child) {
-          final router = AppRouter.router(context);
-          
-          final app = Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
-              return MaterialApp.router(
-                title: 'GasOMeter - Controle de Veículos',
-                theme: GasometerTheme.lightTheme,
-                darkTheme: GasometerTheme.darkTheme,
-                themeMode: themeProvider.themeMode,
-                routerConfig: router,
-                debugShowCheckedModeBanner: false,
+          return Consumer<local.AuthProvider>(
+            builder: (context, authProvider, _) {
+              // Wait for auth initialization before showing app
+              if (!authProvider.isInitialized) {
+                return MaterialApp(
+                  title: 'GasOMeter - Controle de Veículos',
+                  theme: GasometerTheme.lightTheme,
+                  home: Scaffold(
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Carregando seu controle de veículos...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  debugShowCheckedModeBanner: false,
+                );
+              }
+              
+              final router = AppRouter.router(context);
+              
+              final app = Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) {
+                  return MaterialApp.router(
+                    title: 'GasOMeter - Controle de Veículos',
+                    theme: GasometerTheme.lightTheme,
+                    darkTheme: GasometerTheme.darkTheme,
+                    themeMode: themeProvider.themeMode,
+                    routerConfig: router,
+                    debugShowCheckedModeBanner: false,
+                  );
+                },
               );
+              
+              // Enquanto carrega as preferências, usar configuração padrão
+              if (_isLoading) {
+                return app; // Temporariamente sem ErrorBoundary durante loading
+              }
+              
+              // 🚨 DEBUG: GlobalErrorBoundary pode ser desabilitado via configurações
+              if (!_globalErrorBoundaryEnabled) {
+                if (kDebugMode) {
+                  debugPrint('🚨 GlobalErrorBoundary DESABILITADO via configurações');
+                }
+                return app;
+              }
+              
+              return GlobalErrorBoundary(child: app);
             },
           );
-          
-          // Enquanto carrega as preferências, usar configuração padrão
-          if (_isLoading) {
-            return app; // Temporariamente sem ErrorBoundary durante loading
-          }
-          
-          // 🚨 DEBUG: GlobalErrorBoundary pode ser desabilitado via configurações
-          if (!_globalErrorBoundaryEnabled) {
-            if (kDebugMode) {
-              debugPrint('🚨 GlobalErrorBoundary DESABILITADO via configurações');
-            }
-            return app;
-          }
-          
-          return GlobalErrorBoundary(child: app);
         },
       );
   }

@@ -8,6 +8,11 @@ import '../../data/models/task_model.dart';
 import '../../data/models/user_model.dart';
 
 class HiveConfig {
+  // Type IDs para novos adapters
+  static const int syncQueueItemTypeId = 6;
+  static const int syncQueueTypeTypeId = 7;
+  static const int syncOperationTypeTypeId = 8;
+
   static Future<void> initialize() async {
     // Inicializar Hive
     if (kIsWeb) {

@@ -13,7 +13,10 @@ import '../../features/calculators/presentation/pages/animal_age_page.dart';
 import '../../features/calculators/presentation/pages/body_condition_page.dart';
 import '../../features/calculators/presentation/pages/calculators_main_page.dart';
 import '../../features/calculators/presentation/pages/calorie_page.dart';
+import '../../features/calculators/presentation/pages/ideal_weight_page.dart';
 import '../../features/calculators/presentation/pages/medication_dosage_page.dart';
+import '../../features/calculators/presentation/pages/pregnancy_page.dart';
+import '../../features/calculators/presentation/pages/exercise_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
@@ -276,10 +279,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/ideal-weight',
             name: 'ideal-weight-calculator',
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Calculadora de Peso Ideal')),
-              body: const Center(child: Text('Calculadora de Peso Ideal - Em desenvolvimento')),
-            ),
+            builder: (context, state) => const IdealWeightPage(),
           ),
           GoRoute(
             path: '/fluid-therapy',
@@ -296,6 +296,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               appBar: AppBar(title: const Text('Calculadora de Hidratação')),
               body: const Center(child: Text('Calculadora de Hidratação - Em desenvolvimento')),
             ),
+          ),
+          GoRoute(
+            path: '/pregnancy',
+            name: 'pregnancy-calculator',
+            builder: (context, state) => const PregnancyPage(),
+          ),
+          GoRoute(
+            path: '/exercise',
+            name: 'exercise-calculator',
+            builder: (context, state) => const ExercisePage(),
           ),
         ],
       ),

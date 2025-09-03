@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 import 'app.dart';
 import 'core/data/models/category_model.dart';
-import 'core/di/injection_container.dart';
+import 'core/di/injectable_config.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/database_inspector_service.dart';
 import 'core/services/gasometer_firebase_service.dart';
@@ -91,12 +91,12 @@ void main() async {
 
   // Initialize Dependencies
   print('🔄 Initializing dependency injection...');
-  await initializeDependencies();
+  configureDependencies();
   print('✅ Dependencies initialized successfully');
 
   // Initialize Analytics Service
   print('📊 Initializing Analytics...');
-  final analyticsService = sl<AnalyticsService>();
+  final analyticsService = getIt<AnalyticsService>();
   analyticsService.initialize();
   print('✅ Analytics initialized successfully');
 
@@ -108,13 +108,13 @@ void main() async {
 
   // Initialize notifications
   print('🔔 Initializing notifications...');
-  final notificationService = sl<GasOMeterNotificationService>();
+  final notificationService = getIt<GasOMeterNotificationService>();
   await notificationService.initialize();
   print('✅ Notifications initialized successfully');
 
   // Initialize Sync Service
   print('🔄 Initializing Sync Service...');
-  final syncService = sl<SyncService>();
+  final syncService = getIt<SyncService>();
   await syncService.initialize();
   print('✅ Sync Service initialized successfully');
 
@@ -140,14 +140,18 @@ void main() async {
   await analyticsService.logAppOpen();
   print('✅ App open event logged successfully');
 
-  // Test Firebase connectivity (only in debug mode)
+  // Test Firebase connectivity (only in debug mode) - run async to not block app startup
   if (kDebugMode) {
-    print('🔍 Testing Firebase connectivity...');
-    final connectivityResult = await GasometerFirebaseService.checkFirebaseConnectivity();
-    print('🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}');
-    if ((connectivityResult['errors'] as List).isNotEmpty) {
-      print('⚠️ Firebase connectivity errors: ${connectivityResult['errors']}');
-    }
+    print('🔍 Starting Firebase connectivity test (async)...');
+    // Run connectivity test without blocking app startup
+    GasometerFirebaseService.checkFirebaseConnectivity().then((connectivityResult) {
+      print('🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}');
+      if ((connectivityResult['errors'] as List).isNotEmpty) {
+        print('⚠️ Firebase connectivity errors: ${connectivityResult['errors']}');
+      }
+    }).catchError((Object e) {
+      print('⚠️ Firebase connectivity test failed: $e');
+    });
   }
 
   // Run app with error handling

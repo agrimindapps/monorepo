@@ -480,6 +480,294 @@ class AppDialogs {
     );
   }
 
+  /// **Delete Confirmation Dialog**
+  /// 
+  /// Enhanced confirmation dialog for delete operations with clear warnings
+  /// and better user experience to prevent accidental deletions.
+  /// 
+  /// **Parameters:**
+  /// - [context]: BuildContext for dialog display
+  /// - [itemName]: Name of the item being deleted (e.g., "pet Max", "consulta")
+  /// - [itemType]: Type of item for contextual messaging
+  /// - [warningMessage]: Optional additional warning message
+  /// - [onConfirm]: Callback executed when deletion is confirmed
+  /// 
+  /// **Returns:** Future<bool> - true if deletion confirmed
+  static Future<bool> showDeleteConfirmation(
+    BuildContext context, {
+    required String itemName,
+    required String itemType,
+    String? warningMessage,
+    VoidCallback? onConfirm,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.delete_forever,
+              color: Theme.of(context).colorScheme.error,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            const Text('Confirmar Exclusão'),
+          ],
+        ),
+        content: Semantics(
+          label: 'Diálogo de confirmação de exclusão',
+          hint: 'Confirme se deseja excluir permanentemente',
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: TextSpan(
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  children: [
+                    const TextSpan(text: 'Deseja realmente excluir '),
+                    TextSpan(
+                      text: '"$itemName"',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const TextSpan(text: '?'),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ação irreversível',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            warningMessage ?? 
+                            'Esta ação não pode ser desfeita. Todos os dados relacionados a este $itemType serão perdidos permanentemente.',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onConfirm?.call();
+              Navigator.of(context).pop(true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Excluir'),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    ) ?? false;
+  }
+
+  /// **Save Changes Confirmation Dialog**
+  /// 
+  /// Confirmation dialog for unsaved changes when navigating away from forms.
+  /// 
+  /// **Parameters:**
+  /// - [context]: BuildContext for dialog display
+  /// - [onSave]: Callback to save changes
+  /// - [onDiscard]: Callback to discard changes
+  /// - [onCancel]: Callback to cancel navigation
+  /// 
+  /// **Returns:** Future<SaveAction?> - action chosen by user
+  static Future<SaveAction?> showUnsavedChangesDialog(
+    BuildContext context, {
+    VoidCallback? onSave,
+    VoidCallback? onDiscard,
+    VoidCallback? onCancel,
+  }) {
+    return showDialog<SaveAction>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.edit_note,
+              color: Theme.of(context).colorScheme.primary,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            const Text('Alterações não salvas'),
+          ],
+        ),
+        content: const Text(
+          'Você possui alterações não salvas. O que deseja fazer?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              onCancel?.call();
+              Navigator.of(context).pop(SaveAction.cancel);
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              onDiscard?.call();
+              Navigator.of(context).pop(SaveAction.discard);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Descartar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onSave?.call();
+              Navigator.of(context).pop(SaveAction.save);
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+
+  /// **Permission Request Dialog**
+  /// 
+  /// Explains why permission is needed and guides user to grant it.
+  /// 
+  /// **Parameters:**
+  /// - [context]: BuildContext for dialog display
+  /// - [permissionName]: Name of the permission being requested
+  /// - [explanation]: Why the permission is needed
+  /// - [onGrantPermission]: Callback to request permission
+  /// - [onSkip]: Optional callback to skip permission
+  /// 
+  /// **Returns:** Future<PermissionAction?> - action chosen by user
+  static Future<PermissionAction?> showPermissionRequestDialog(
+    BuildContext context, {
+    required String permissionName,
+    required String explanation,
+    VoidCallback? onGrantPermission,
+    VoidCallback? onSkip,
+  }) {
+    return showDialog<PermissionAction>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.security,
+              color: Theme.of(context).colorScheme.primary,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text('Permissão: $permissionName'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(explanation),
+            
+            const SizedBox(height: 16),
+            
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Você pode alterar esta permissão a qualquer momento nas configurações do dispositivo.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          if (onSkip != null)
+            TextButton(
+              onPressed: () {
+                onSkip.call();
+                Navigator.of(context).pop(PermissionAction.skip);
+              },
+              child: const Text('Pular'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(PermissionAction.cancel),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onGrantPermission?.call();
+              Navigator.of(context).pop(PermissionAction.grant);
+            },
+            child: const Text('Conceder Permissão'),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+
   // Helper Methods
 
   static Widget _buildContactItem(
@@ -602,4 +890,32 @@ class AppDialogs {
       ],
     );
   }
+}
+
+/// **Save Action Enumeration**
+/// 
+/// Represents possible actions when user has unsaved changes.
+enum SaveAction {
+  /// Save the changes
+  save,
+  
+  /// Discard the changes
+  discard,
+  
+  /// Cancel the navigation/action
+  cancel,
+}
+
+/// **Permission Action Enumeration**
+/// 
+/// Represents possible actions for permission request dialogs.
+enum PermissionAction {
+  /// Grant the requested permission
+  grant,
+  
+  /// Skip the permission (if optional)
+  skip,
+  
+  /// Cancel the permission request
+  cancel,
 }

@@ -39,7 +39,8 @@ class PlatformService {
   }
 
   /// Determina se deve usar modo anônimo por padrão
-  bool get shouldUseAnonymousByDefault => isMobile;
+  /// Web NÃO deve usar modo anônimo automaticamente
+  bool get shouldUseAnonymousByDefault => isMobile && !isWeb;
 
   /// Determina se deve mostrar página de promoção por padrão
   bool get shouldShowPromoByDefault => isWeb;

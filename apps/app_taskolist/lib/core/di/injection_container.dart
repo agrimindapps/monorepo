@@ -31,6 +31,8 @@ import '../../infrastructure/services/crashlytics_service.dart';
 import '../../infrastructure/services/notification_service.dart';
 import '../../infrastructure/services/performance_service.dart';
 import '../../infrastructure/services/subscription_service.dart';
+import '../../infrastructure/services/sync_service.dart';
+import '../../infrastructure/services/sync_queue_service.dart';
 
 final sl = GetIt.instance;
 
@@ -88,6 +90,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => TaskManagerSubscriptionService(sl(), sl(), sl()));
   sl.registerLazySingleton(() => TaskManagerNotificationService(sl(), sl(), sl()));
   sl.registerLazySingleton(() => TaskManagerAuthService(authRepository: sl()));
+  sl.registerLazySingleton(() => TaskManagerSyncService());
+  sl.registerLazySingleton(() => TaskManagerSyncQueueService());
   
   // TODO: Implementar TaskRemoteDataSourceImpl quando Firebase estiver configurado
   // sl.registerLazySingleton<TaskRemoteDataSource>(() => TaskRemoteDataSourceImpl());

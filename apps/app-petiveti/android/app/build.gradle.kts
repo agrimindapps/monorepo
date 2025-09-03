@@ -6,13 +6,14 @@ plugins {
 }
 
 android {
-    namespace = "br.com.agrimind.racasdecachorros"
+    namespace = "br.com.agrimind.racasdecachorros"  
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.0.13004108" // Use specific working NDK version
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -24,7 +25,7 @@ android {
         applicationId = "br.com.agrimind.racasdecachorros"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23 // Increased for Firebase Analytics support
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -41,4 +42,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Core library desugaring for newer Java APIs on older Android versions
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

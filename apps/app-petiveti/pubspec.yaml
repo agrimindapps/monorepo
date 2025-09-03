@@ -37,34 +37,37 @@ dependencies:
   package_info_plus: ^8.1.2
   url_launcher: ^6.2.1
   
-  # Social Authentication
-  google_sign_in: ^6.2.1
-  sign_in_with_apple: ^6.1.2
-  flutter_facebook_auth: ^6.0.4
+  # Social Authentication (will be integrated with core auth services)
   
   # JSON Serialization
   json_annotation: ^4.9.0
   
-  # TEMPORARY: Direct dependencies during migration phase
-  cloud_firestore: ^6.0.0
-  firebase_auth: ^6.0.1
+  # MIGRATING TO CORE PACKAGE: Phase 1 - Keep essential direct deps for compatibility
+  # Core package provides: Firebase*, Hive*, SharedPreferences, Notifications, RevenueCat
+  firebase_core: ^4.0.0  # Still needed for app-level Firebase initialization
+  
+  # MINIMAL DIRECT DEPENDENCIES: Only what's not fully abstracted yet
+  cloud_firestore: ^6.0.0    # Used directly in some repositories (Phase 2 migration)
+  connectivity_plus: ^6.1.5  # Used for offline/online detection
+  
+  # UI/Auth specific - to be migrated in subsequent phases  
+  firebase_auth: ^6.0.1      # Auth flows (migrating to core IAuthRepository)
+  google_sign_in: ^6.2.1     # Social auth integration
+  sign_in_with_apple: ^6.1.2
+  flutter_facebook_auth: ^6.0.4
+  
+  # TEMPORARY: Remove after core service integration complete
   firebase_analytics: ^12.0.0
   firebase_crashlytics: ^5.0.0
-  firebase_performance: ^0.11.0
   firebase_storage: ^13.0.0
-  connectivity_plus: ^6.1.5
-  shared_preferences: ^2.5.3
   hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  shared_preferences: ^2.5.3
   
-  # Nota: Eventual goal is that Firebase, Hive, SharedPreferences, Notifications, 
-  # Image Picker e RevenueCat vêm do core package
-
+  # Core services will provide these (keeping for compatibility during migration)
   flutter_local_notifications: any
   timezone: any
   purchases_flutter: any
-  provider: any
-  firebase_core: any
+  provider: any  # For local provider usage alongside Riverpod
 dev_dependencies:
   flutter_test:
     sdk: flutter

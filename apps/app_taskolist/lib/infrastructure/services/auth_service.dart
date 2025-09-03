@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../domain/entities/user_entity.dart' as local_entities;
@@ -9,6 +10,8 @@ import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/update_profile.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
+import 'subscription_service.dart';
+import 'sync_service.dart';
 
 /// Wrapper para o serviço de autenticação Firebase Auth do core
 /// Adiciona funcionalidades específicas do Task Manager
@@ -16,6 +19,8 @@ class TaskManagerAuthService {
   final IAuthRepository _authRepository;
   late final TaskManagerAnalyticsService _analyticsService;
   late final TaskManagerCrashlyticsService _crashlyticsService;
+  late final TaskManagerSubscriptionService _subscriptionService;
+  late final TaskManagerSyncService _syncService;
   late final UpdateProfile _updateProfile;
   late final DeleteAccount _deleteAccount;
 
@@ -24,6 +29,8 @@ class TaskManagerAuthService {
   }) : _authRepository = authRepository {
     _analyticsService = di.sl<TaskManagerAnalyticsService>();
     _crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
+    _subscriptionService = di.sl<TaskManagerSubscriptionService>();
+    _syncService = di.sl<TaskManagerSyncService>();
     _updateProfile = di.sl<UpdateProfile>();
     _deleteAccount = di.sl<DeleteAccount>();
   }
@@ -34,7 +41,13 @@ class TaskManagerAuthService {
   /// Verifica se o usuário está logado
   Future<bool> get isLoggedIn => _authRepository.isLoggedIn;
 
-  /// Login com email e senha
+  /// Verifica se o usuário tem assinatura Premium ativa
+  Future<bool> get hasPremiumSubscription => _subscriptionService.hasPremiumSubscription();
+
+  /// Stream do status da assinatura
+  Stream<SubscriptionEntity?> get subscriptionStatus => _subscriptionService.subscriptionStatus;
+
+  /// Login com email e senha (sem sincronização automática)
   Future<Either<Failure, UserEntity>> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -80,6 +93,50 @@ class TaskManagerAuthService {
         return Right(user);
       },
     );
+  }
+
+  /// Login com email e senha + sincronização automática
+  Future<Either<Failure, UserEntity>> loginAndSync({
+    required String email,
+    required String password,
+  }) async {
+    // 1. Realizar login
+    final loginResult = await signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    return loginResult.fold(
+      (failure) => Left(failure),
+      (user) async {
+        // 2. Iniciar sincronização automática pós-login
+        await _startPostLoginSync(user);
+        return Right(user);
+      },
+    );
+  }
+
+  /// Inicia sincronização após login (não-bloqueante)
+  Future<void> _startPostLoginSync(UserEntity user) async {
+    try {
+      // Verificar se usuário é Premium via RevenueCat
+      final bool isUserPremium = await _subscriptionService.hasPremiumSubscription();
+      
+      // Iniciar sync em background (não bloqueia o login)
+      unawaited(_syncService.syncAll(
+        userId: user.id,
+        isUserPremium: isUserPremium,
+      ));
+
+      if (kDebugMode) {
+        debugPrint('🔄 TaskManagerAuthService: Sync pós-login iniciado');
+      }
+    } catch (e) {
+      // Falha silenciosa - não deve interromper o login
+      if (kDebugMode) {
+        debugPrint('❌ TaskManagerAuthService: Erro ao iniciar sync pós-login: $e');
+      }
+    }
   }
 
   /// Registro com email, senha e nome

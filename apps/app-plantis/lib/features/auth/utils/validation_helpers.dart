@@ -225,7 +225,7 @@ class ValidationHelpers {
   }
   
   /// Sanitizes text input to prevent injection attacks
-  /// Removes or escapes potentially dangerous characters
+  /// Removes or escapes potentially dangerous characters while preserving spaces
   static String sanitizeTextInput(String input) {
     if (input.isEmpty) return input;
     
@@ -233,25 +233,31 @@ class ValidationHelpers {
     String sanitized = input
         .replaceAll(RegExp(r'[<>"\\]'), '') // Remove HTML/script injection chars
         .replaceAll(RegExp(r'[\n\r\t]'), ' ') // Replace line breaks with spaces
-        .trim();
+        .replaceAll(RegExp(r' +'), ' '); // Clean up multiple spaces
     
     // Limit length to prevent buffer overflow attacks
     if (sanitized.length > 500) {
       sanitized = sanitized.substring(0, 500);
     }
     
-    return sanitized;
+    return sanitized.trim();
   }
   
   /// Sanitizes plant name input with specific rules
   static String sanitizePlantName(String input) {
     if (input.isEmpty) return input;
     
-    String sanitized = sanitizeTextInput(input);
+    // First, remove only dangerous injection characters while preserving spaces
+    String sanitized = input
+        .replaceAll(RegExp(r'[<>"\\]'), '') // Remove dangerous HTML/script chars
+        .replaceAll(RegExp(r'[\r\t]'), ' '); // Replace tabs/returns with spaces
     
-    // Additional plant name specific sanitization
-    // Allow only safe characters for plant names
-    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z\u00C0-\u00FF0-9\s\-.,()]'), '');
+    // Allow letters, numbers, spaces, accents, and safe punctuation for plant names
+    // Explicitly preserve spaces by using explicit space character in regex
+    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z\u00C0-\u00FF0-9 \-.,()]'), '');
+    
+    // Clean up multiple consecutive spaces
+    sanitized = sanitized.replaceAll(RegExp(r' +'), ' ');
     
     // Limit to reasonable plant name length
     if (sanitized.length > 100) {

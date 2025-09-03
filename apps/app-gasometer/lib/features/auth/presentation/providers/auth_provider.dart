@@ -97,24 +97,47 @@ class AuthProvider extends ChangeNotifier {
   Future<void> resetRateLimit() => _rateLimiter.resetRateLimit();
   
   Future<void> _initializeAuthState() async {
+    if (kDebugMode) {
+      debugPrint('🔐 Iniciando inicialização do AuthState...');
+    }
+    
     try {
       // Get current user first
+      if (kDebugMode) {
+        debugPrint('🔐 Obtendo usuário atual...');
+      }
+      
       final result = await _getCurrentUser();
       result.fold(
         (failure) {
+          if (kDebugMode) {
+            debugPrint('🔐 Falha ao obter usuário: ${failure.message}');
+          }
           _errorMessage = _mapFailureToMessage(failure);
           _isInitialized = true;
           notifyListeners();
         },
         (user) async {
+          if (kDebugMode) {
+            debugPrint('🔐 Usuário obtido: ${user?.id ?? 'null'}');
+          }
+          
           _currentUser = user;
           _isInitialized = true;
           
           if (user != null) {
+            if (kDebugMode) {
+              debugPrint('🔐 Configurando sessão para usuário existente');
+            }
             await _setupUserSession(user);
           } else {
             // If no user and should use anonymous mode, initialize anonymously
-            if (await shouldUseAnonymousMode()) {
+            final shouldUseAnonymous = await shouldUseAnonymousMode();
+            if (kDebugMode) {
+              debugPrint('🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile})');
+            }
+            
+            if (shouldUseAnonymous) {
               if (kDebugMode) {
                 debugPrint('🔐 Iniciando modo anônimo automaticamente');
               }
@@ -123,6 +146,9 @@ class AuthProvider extends ChangeNotifier {
             }
           }
           
+          if (kDebugMode) {
+            debugPrint('🔐 AuthState inicializado com sucesso. Usuário autenticado: $isAuthenticated');
+          }
           notifyListeners();
         },
       );

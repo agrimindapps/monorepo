@@ -332,6 +332,12 @@ class _CalculatorCard extends StatelessWidget {
       case 'hydration':
         route = '/calculators/hydration';
         break;
+      case 'pregnancy_gestacao':
+        route = '/calculators/pregnancy';
+        break;
+      case 'exercise':
+        route = '/calculators/exercise';
+        break;
       default:
         // Para calculadoras sem página específica, mostrar em breve
         _showComingSoonDialog(context);

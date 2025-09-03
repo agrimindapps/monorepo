@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/animal.dart';
 import '../providers/animals_provider.dart';
 import '../providers/animals_ui_state_provider.dart';
+import '../../../../shared/widgets/ui_components.dart';
 import 'animal_card.dart';
 import 'empty_animals_state.dart';
 
@@ -74,13 +75,9 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
     final filteredAnimals = ref.watch(filteredAnimalsProvider);
     
     if (animalsState.isLoading && animalsState.animals.isEmpty) {
-      return Semantics(
-        label: 'Carregando lista de pets',
-        hint: 'Aguarde enquanto carregamos seus pets',
-        liveRegion: true,
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
+      return UIComponents.centeredLoading(
+        message: 'Carregando seus pets...',
+        size: 32,
       );
     }
     
@@ -90,7 +87,11 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
 
     // Show filtered empty state if filters are applied but no results
     if (animalsState.filter.hasActiveFilters && filteredAnimals.isEmpty) {
-      return _buildEmptyFilteredState(animalsState);
+      return UIComponents.searchEmptyState(
+        onClearFilters: () {
+          ref.read(animalsProvider.notifier).clearFilters();
+        },
+      );
     }
 
     return Semantics(
@@ -135,69 +136,10 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
   }
 
   Widget _buildLoadingIndicator() {
-    return Semantics(
-      label: 'Carregando mais pets',
-      hint: 'Aguarde enquanto carregamos mais pets',
-      liveRegion: true,
-      child: const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(
-          child: SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
+    return UIComponents.loadingListItem(
+      semanticLabel: 'Carregando mais pets',
+      size: 20,
     );
   }
 
-  Widget _buildEmptyFilteredState(AnimalsState animalsState) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Semantics(
-              label: 'Ícone de busca vazia',
-              child: Icon(
-                Icons.search_off,
-                size: 64,
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhum pet encontrado',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tente ajustar os filtros de busca',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Semantics(
-              label: 'Limpar todos os filtros',
-              hint: 'Toque para remover todos os filtros e mostrar todos os pets',
-              button: true,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  ref.read(animalsProvider.notifier).clearFilters();
-                },
-                icon: const Icon(Icons.clear_all),
-                label: const Text('Limpar Filtros'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

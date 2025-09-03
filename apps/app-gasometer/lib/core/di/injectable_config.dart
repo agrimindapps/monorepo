@@ -37,6 +37,6 @@ void resetDependencies() {
 void registerExternalDependencies() {
   // Registrar ISyncService manualmente usando SyncService
   if (!getIt.isRegistered<ISyncService>()) {
-    getIt.registerLazySingleton<ISyncService>(() => getIt<SyncService>());
+    getIt.registerFactory<ISyncService>(() => getIt<SyncService>());
   }
 }

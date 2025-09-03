@@ -6,6 +6,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:core/core.dart' as core;
 
 import '../../cache/cache_service.dart';
 import '../../logging/datasources/log_local_datasource.dart';
@@ -31,35 +32,57 @@ class CoreModule implements DIModule {
   }
 
   Future<void> _registerExternalServices(GetIt getIt) async {
-    // Firebase services (skip in web debug)
-    if (!kIsWeb || !kDebugMode) {
-      // Firebase Core services
-      getIt.registerLazySingleton<FirebaseAnalytics>(
-        () => FirebaseAnalytics.instance,
+    // PHASE 1 MIGRATION: Register both direct Firebase services AND core repositories
+    // This allows gradual migration without breaking existing code
+    
+    // Direct Firebase services (existing code compatibility)
+    getIt.registerLazySingleton<FirebaseAnalytics>(
+      () => FirebaseAnalytics.instance,
+    );
+
+    getIt.registerLazySingleton<FirebaseCrashlytics>(
+      () => FirebaseCrashlytics.instance,
+    );
+
+    getIt.registerLazySingleton<FirebaseFirestore>(
+      () => FirebaseFirestore.instance,
+    );
+
+    getIt.registerLazySingleton<firebase_auth.FirebaseAuth>(
+      () => firebase_auth.FirebaseAuth.instance,
+    );
+
+    // Core package repositories (new migration path) 
+    // These will be used by new code and gradual migration
+    try {
+      getIt.registerLazySingleton<core.IAuthRepository>(
+        () => core.FirebaseAuthService(),
+      );
+      
+      getIt.registerLazySingleton<core.IAnalyticsRepository>(
+        () => kDebugMode 
+          ? core.MockAnalyticsService()
+          : core.FirebaseAnalyticsService(),
+      );
+      
+      getIt.registerLazySingleton<core.ICrashlyticsRepository>(
+        () => core.FirebaseCrashlyticsService(),
       );
 
-      getIt.registerLazySingleton<FirebaseCrashlytics>(
-        () => FirebaseCrashlytics.instance,
-      );
-
-      getIt.registerLazySingleton<FirebaseFirestore>(
-        () => FirebaseFirestore.instance,
-      );
-
-      getIt.registerLazySingleton<firebase_auth.FirebaseAuth>(
-        () => firebase_auth.FirebaseAuth.instance,
-      );
-
-      // Google Sign In
-      getIt.registerLazySingleton<GoogleSignIn>(
-        () => GoogleSignIn(
-          scopes: ['email'],
-          clientId: kIsWeb 
-            ? '877618226732-7v4qhq8g97v05c7fmqd9mql3c5jfh55s.apps.googleusercontent.com'
-            : null,
-        ),
-      );
+      debugPrint('✅ Core package repositories registered successfully');
+    } catch (e) {
+      debugPrint('⚠️ Warning: Could not register core repositories: $e');
     }
+
+    // Google Sign In
+    getIt.registerLazySingleton<GoogleSignIn>(
+      () => GoogleSignIn(
+        scopes: ['email'],
+        clientId: kIsWeb 
+          ? '877618226732-7v4qhq8g97v05c7fmqd9mql3c5jfh55s.apps.googleusercontent.com'
+          : null,
+      ),
+    );
 
     // Connectivity (always available)
     getIt.registerLazySingleton<Connectivity>(() => Connectivity());
@@ -74,8 +97,8 @@ class CoreModule implements DIModule {
       () => CacheService(),
     );
 
-    // Notification Service (skip in web debug)
-    if (!kIsWeb || !kDebugMode) {
+    // Notification Service - register always except for web 
+    if (!kIsWeb) {
       getIt.registerLazySingleton<NotificationService>(
         () => NotificationService(),
       );
@@ -107,20 +130,12 @@ class CoreModule implements DIModule {
   /// Initialize logging service after all dependencies are registered
   static Future<void> initializeLoggingService(GetIt getIt) async {
     try {
-      // Skip Firebase services in web debug mode
-      if (kIsWeb && kDebugMode) {
-        await LoggingService.instance.initialize(
-          logRepository: getIt<LogRepository>(),
-          analytics: null,
-          crashlytics: null,
-        );
-      } else {
-        await LoggingService.instance.initialize(
-          logRepository: getIt<LogRepository>(),
-          analytics: getIt<FirebaseAnalytics>(),
-          crashlytics: getIt<FirebaseCrashlytics>(),
-        );
-      }
+      // Initialize with Firebase services now that they're properly configured
+      await LoggingService.instance.initialize(
+        logRepository: getIt<LogRepository>(),
+        analytics: getIt<FirebaseAnalytics>(),
+        crashlytics: getIt<FirebaseCrashlytics>(),
+      );
     } catch (e) {
       // If logging service fails to initialize, continue without it
       debugPrint('Warning: Failed to initialize LoggingService: $e');

@@ -4,12 +4,14 @@ import '../../domain/calculators/animal_age_calculator.dart';
 import '../../domain/calculators/body_condition_calculator.dart';
 import '../../domain/calculators/caloric_needs_calculator.dart';
 import '../../domain/calculators/diabetes_insulin_calculator.dart';
+import '../../domain/calculators/exercise_calculator.dart';
 import '../../domain/calculators/fluid_therapy_calculator.dart';
 import '../../domain/calculators/hydration_calculator.dart';
 import '../../domain/calculators/ideal_weight_calculator.dart';
 import '../../domain/calculators/medication_dosage_calculator.dart';
 import '../../domain/calculators/pregnancy_birth_calculator.dart';
 import '../../domain/calculators/pregnancy_calculator.dart';
+import '../../domain/calculators/pregnancy_gestacao_calculator.dart';
 import '../../domain/calculators/unit_conversion_calculator.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculator.dart';
@@ -36,6 +38,8 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     const IdealWeightCalculator(),
     const PregnancyCalculator(),
     const PregnancyBirthCalculator(),
+    const PregnancyGestacaoCalculator(),
+    const ExerciseCalculator(),
     UnitConversionCalculator(),
     AdvancedDietCalculator(),
   ];

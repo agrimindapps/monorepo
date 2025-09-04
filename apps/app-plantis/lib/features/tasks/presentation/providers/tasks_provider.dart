@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/offline_sync_queue_service.dart';
-import '../../../../core/services/sync_coordinator_service.dart';
+import '../../../../core/services/sync_coordinator_service.dart' hide SyncPriority;
 import '../../../../core/services/task_notification_service.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -394,7 +394,7 @@ class TasksProvider extends ChangeNotifier {
     try {
       await _syncCoordinator.executeSyncOperation(
         operationType: TaskSyncOperations.loadTasks,
-        priority: SyncPriority.high,
+        priority: SyncPriority.high.index,
         minimumInterval: TasksConstants.syncMinimumInterval, // Throttle rapid calls
         operation: () => _loadTasksOperation(),
       );
@@ -538,7 +538,7 @@ class TasksProvider extends ChangeNotifier {
     try {
       return await _syncCoordinator.executeSyncOperation<bool>(
         operationType: TaskSyncOperations.addTask,
-        priority: SyncPriority.critical, // User-initiated operation
+        priority: SyncPriority.critical.index, // User-initiated operation
         operation: () => _addTaskOperation(task),
       );
     } catch (e) {
@@ -688,7 +688,7 @@ class TasksProvider extends ChangeNotifier {
     try {
       return await _syncCoordinator.executeSyncOperation<bool>(
         operationType: TaskSyncOperations.completeTask,
-        priority: SyncPriority.critical, // User-initiated operation
+        priority: SyncPriority.critical.index, // User-initiated operation
         operation: () => _completeTaskOperation(taskId, notes),
       );
     } catch (e) {

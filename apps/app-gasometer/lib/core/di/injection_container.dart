@@ -184,6 +184,9 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<SyncOperations>(() => SyncOperations(sl(), sl(), sl()));
   sl.registerLazySingleton<SyncService>(() => SyncService(sl(), sl(), sl(), sl(), sl()));
   
+  // Register ISyncService interface mapped to SyncService
+  sl.registerLazySingleton<ISyncService>(() => sl<SyncService>());
+  
   // Initialize LocalDataService
   final localDataService = sl<LocalDataService>();
   if (!localDataService.isInitialized) {

@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/maintenance_entity.dart';
+import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
+import 'add_maintenance_page.dart';
 
 class MaintenancePage extends StatefulWidget {
   const MaintenancePage({super.key});
@@ -417,7 +419,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
 
   Widget _buildEmptyState() {
     return EnhancedEmptyState.maintenances(
-      onAddMaintenance: () => context.go('/maintenance/add'),
+      onAddMaintenance: _showAddMaintenanceDialog,
       onViewGuides: () {
         // Check if widget is still mounted before using context
         if (mounted) {
@@ -434,14 +436,25 @@ class _MaintenancePageState extends State<MaintenancePage> {
 
   Widget _buildFloatingActionButton(BuildContext context) {
     final vehiclesProvider = context.watch<VehiclesProvider>();
-    final hasSelectedVehicle = vehiclesProvider.vehicles.isNotEmpty;
+    final hasVehicles = vehiclesProvider.vehicles.isNotEmpty;
+    final hasSelectedVehicle = _selectedVehicleId != null;
     
     return SemanticButton.fab(
-      semanticLabel: hasSelectedVehicle ? 'Registrar nova manutenção' : 'Cadastrar veículo primeiro',
+      semanticLabel: hasSelectedVehicle 
+          ? 'Registrar nova manutenção' 
+          : hasVehicles 
+              ? 'Selecione um veículo primeiro'
+              : 'Cadastrar veículo primeiro',
       semanticHint: hasSelectedVehicle 
           ? 'Abre formulário para cadastrar uma nova manutenção'
-          : 'É necessário ter pelo menos um veículo cadastrado para registrar manutenções',
-      onPressed: hasSelectedVehicle ? () => context.go('/maintenance/add') : _showSelectVehicleMessage,
+          : hasVehicles
+              ? 'É necessário selecionar um veículo para registrar manutenções'
+              : 'É necessário ter pelo menos um veículo cadastrado para registrar manutenções',
+      onPressed: hasSelectedVehicle 
+          ? _showAddMaintenanceDialog 
+          : hasVehicles 
+              ? _showSelectVehicleMessage 
+              : () => _showAddVehicleDialog(context),
       child: Icon(hasSelectedVehicle ? Icons.add : Icons.warning),
     );
   }
@@ -449,9 +462,13 @@ class _MaintenancePageState extends State<MaintenancePage> {
   void _showSelectVehicleMessage() {
     if (!mounted) return;
     
+    final hasVehicles = _vehiclesProvider.vehicles.isNotEmpty;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Cadastre um veículo primeiro para registrar manutenções'),
+        content: Text(hasVehicles 
+            ? 'Selecione um veículo primeiro para registrar manutenções'
+            : 'Cadastre um veículo primeiro para registrar manutenções'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -459,15 +476,17 @@ class _MaintenancePageState extends State<MaintenancePage> {
             GasometerDesignTokens.radiusInput,
           ),
         ),
-        action: SnackBarAction(
-          label: 'Cadastrar',
-          onPressed: () {
-            // Check if widget is still mounted before using context
-            if (mounted) {
-              _showAddVehicleDialog(context);
-            }
-          },
-        ),
+        action: hasVehicles 
+            ? null
+            : SnackBarAction(
+                label: 'Cadastrar',
+                onPressed: () {
+                  // Check if widget is still mounted before using context
+                  if (mounted) {
+                    _showAddVehicleDialog(context);
+                  }
+                },
+              ),
       ),
     );
   }
@@ -481,6 +500,57 @@ class _MaintenancePageState extends State<MaintenancePage> {
     // Se resultado for true, recarregar veículos
     if (result == true && context.mounted) {
       await _vehiclesProvider.initialize();
+    }
+  }
+
+  Future<void> _showAddMaintenanceDialog() async {
+    // Get providers before opening dialog to avoid context issues
+    final authProvider = context.read<AuthProvider>();
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
+          ChangeNotifierProvider.value(value: _vehiclesProvider),
+          ChangeNotifierProvider.value(value: authProvider),
+        ],
+        builder: (context, child) => AddMaintenancePage(vehicleId: _selectedVehicleId),
+      ),
+    );
+    
+    if (result == true && mounted) {
+      // Recarregar dados após adicionar manutenção
+      setState(() {
+        // Force reload by clearing cache
+      });
+    }
+  }
+
+  Future<void> _showEditMaintenanceDialog(MaintenanceEntity maintenance) async {
+    // Get providers before opening dialog to avoid context issues
+    final authProvider = context.read<AuthProvider>();
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
+          ChangeNotifierProvider.value(value: _vehiclesProvider),
+          ChangeNotifierProvider.value(value: authProvider),
+        ],
+        builder: (context, child) => AddMaintenancePage(
+          maintenanceToEdit: maintenance,
+          vehicleId: _selectedVehicleId,
+        ),
+      ),
+    );
+    
+    if (result == true && mounted) {
+      // Recarregar dados após editar manutenção
+      setState(() {
+        // Force reload by clearing cache
+      });
     }
   }
 
@@ -559,6 +629,13 @@ class _MaintenancePageState extends State<MaintenancePage> {
         ),
         actions: [
           SemanticButton(
+            semanticLabel: 'Editar manutenção',
+            semanticHint: 'Abre o formulário para editar esta manutenção',
+            type: ButtonType.text,
+            onPressed: () => _editMaintenance(record),
+            child: const Text('Editar'),
+          ),
+          SemanticButton(
             semanticLabel: 'Fechar detalhes da manutenção',
             semanticHint: 'Fecha a janela de detalhes da manutenção',
             type: ButtonType.text,
@@ -568,6 +645,14 @@ class _MaintenancePageState extends State<MaintenancePage> {
         ],
       ),
     );
+  }
+
+  Future<void> _editMaintenance(MaintenanceEntity maintenance) async {
+    // Fechar o dialog de detalhes primeiro
+    Navigator.of(context).pop();
+    
+    // Usar função padronizada para editar manutenção
+    await _showEditMaintenanceDialog(maintenance);
   }
 
   Widget _buildDetailRow(String label, String value) {

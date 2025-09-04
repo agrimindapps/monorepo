@@ -16,7 +16,14 @@ import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
 
 class AddMaintenancePage extends BaseFormPage<MaintenanceFormProvider> {
-  const AddMaintenancePage({super.key});
+  final MaintenanceEntity? maintenanceToEdit;
+  final String? vehicleId;
+
+  const AddMaintenancePage({
+    super.key,
+    this.maintenanceToEdit,
+    this.vehicleId,
+  });
 
   @override
   BaseFormPageState<MaintenanceFormProvider> createState() => _AddMaintenancePageState();
@@ -26,26 +33,34 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
   final Map<String, ValidationResult> _validationResults = {};
   
   @override
-  String get pageTitle => 'Manutenção';
+  String get pageTitle => (widget as AddMaintenancePage).maintenanceToEdit != null ? 'Editar Manutenção' : 'Nova Manutenção';
   
   @override
   MaintenanceFormProvider createFormProvider() {
     final authProvider = context.read<AuthProvider>();
     return MaintenanceFormProvider(
       userId: authProvider.userId,
+      initialVehicleId: (widget as AddMaintenancePage).vehicleId,
     );
   }
   
   @override
   Future<void> initializeFormProvider(MaintenanceFormProvider provider) async {
     final authProvider = context.read<AuthProvider>();
+    final maintenanceToEdit = (widget as AddMaintenancePage).maintenanceToEdit;
     
     // Set context for dependency injection access
     provider.setContext(context);
 
     await provider.initialize(
+      vehicleId: (widget as AddMaintenancePage).vehicleId,
       userId: authProvider.userId,
     );
+    
+    // If editing, populate form with existing data
+    if (maintenanceToEdit != null) {
+      await provider.initializeWithMaintenance(maintenanceToEdit);
+    }
   }
 
   @override
@@ -59,7 +74,8 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
             children: [
               _buildHeader(),
               FormSpacing.section(),
-              _buildVehicleSelection(),
+              _buildVehicleInfoCard(),
+              FormSpacing.section(),
               _buildBasicInfo(),
               _buildCostAndOdometer(),
               _buildDescription(),
@@ -77,10 +93,10 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
     return Container(
       padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXl),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -88,7 +104,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
           Container(
             padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
               borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
             ),
             child: Icon(
@@ -114,7 +130,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                   'Adicione informações sobre a manutenção realizada',
                   style: TextStyle(
                     fontSize: GasometerDesignTokens.fontSizeMd,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -125,40 +141,6 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
     );
   }
 
-  /// ✅ UX ENHANCEMENT: Enhanced vehicle selection with search and validation
-  Widget _buildVehicleSelection() {
-    final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
-    
-    return FormSectionWidget.withTitle(
-      title: 'Veículo',
-      icon: Icons.directions_car,
-      content: VehicleDropdown(
-        selectedVehicleId: formProvider.formModel.vehicleId.isEmpty ? null : formProvider.formModel.vehicleId,
-        vehicles: vehiclesProvider.vehicles.map((vehicle) => VehicleDropdownData(
-          id: vehicle.id,
-          brand: vehicle.brand,
-          model: vehicle.model,
-          year: vehicle.year,
-          licensePlate: vehicle.licensePlate,
-        )).toList(),
-        required: true,
-        errorText: _validationResults['vehicleId']?.isValid == false 
-            ? _validationResults['vehicleId']!.message 
-            : null,
-        onChanged: (vehicleId) {
-          if (vehicleId != null) {
-            // Update form model with selected vehicle ID
-            formProvider.initialize(vehicleId: vehicleId, userId: formProvider.formModel.userId);
-            
-            // Validate selection
-            setState(() {
-              _validationResults['vehicleId'] = ValidationResult.success();
-            });
-          }
-        },
-      ),
-    );
-  }
 
   Widget _buildBasicInfo() {
     return FormSectionWidget.withTitle(
@@ -250,7 +232,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                       Icon(
                         Icons.calendar_today,
                         size: 18,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                       SizedBox(width: GasometerDesignTokens.spacingSm),
                       Text(
@@ -380,7 +362,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                     Icon(
                       Icons.calendar_today,
                       size: 18,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     SizedBox(width: GasometerDesignTokens.spacingSm),
                     Text(
@@ -390,7 +372,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                       style: TextStyle(
                         color: formProvider.formModel.nextServiceDate != null
                             ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -472,14 +454,26 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
 
     try {
       final maintenanceProvider = context.read<MaintenanceProvider>();
+      final maintenanceToEdit = (widget as AddMaintenancePage).maintenanceToEdit;
       
       // Criar entidade usando o FormProvider
       final maintenanceEntity = provider.formModel.toMaintenanceEntity();
       
-      final success = await maintenanceProvider.addMaintenanceRecord(maintenanceEntity);
+      bool success;
+      if (maintenanceToEdit != null) {
+        // Modo edição - preservar ID da entidade original
+        final updatedEntity = maintenanceEntity.copyWith(id: maintenanceToEdit.id);
+        success = await maintenanceProvider.updateMaintenanceRecord(updatedEntity);
+      } else {
+        // Modo criação
+        success = await maintenanceProvider.addMaintenanceRecord(maintenanceEntity);
+      }
 
       if (success) {
-        showSuccessSnackbar('Manutenção salva com sucesso!');
+        final message = maintenanceToEdit != null 
+            ? 'Manutenção atualizada com sucesso!' 
+            : 'Manutenção salva com sucesso!';
+        showSuccessSnackbar(message);
       } else {
         onFormSubmitFailure('Erro ao salvar: ${maintenanceProvider.errorMessage ?? "Erro desconhecido"}');
       }
@@ -489,6 +483,94 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
       onFormSubmitFailure('Erro ao salvar manutenção: ${e.toString()}');
       return false;
     }
+  }
+
+  /// Card informativo do veículo selecionado
+  Widget _buildVehicleInfoCard() {
+    final vehicle = formProvider.formModel.vehicle;
+    
+    if (vehicle == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.error,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.warning,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Veículo não foi informado',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.directions_car,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${vehicle.brand} ${vehicle.model}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${vehicle.color} • ${vehicle.licensePlate}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// ✅ REMOVED: Old dropdown method no longer needed with EnhancedDropdown

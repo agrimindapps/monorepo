@@ -67,6 +67,15 @@ export 'src/infrastructure/services/selective_sync_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
+
+// ========== UNIFIED SYNC SYSTEM ==========
+// Unified Sync Manager and Components
+export 'src/sync/app_sync_config.dart';
+export 'src/sync/conflict_resolution/conflict_resolver_factory.dart' hide SyncFailure;
+export 'src/sync/entity_sync_registration.dart' hide IConflictResolver;
+export 'src/sync/providers/unified_sync_provider.dart';
+export 'src/sync/unified_sync_manager.dart';
+
 // Hive Storage Infrastructure
 export 'src/infrastructure/storage/hive/hive_storage.dart';
 export 'src/presentation/theme/base/base_colors.dart';

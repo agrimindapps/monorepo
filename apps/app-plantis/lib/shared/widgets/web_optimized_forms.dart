@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'responsive_layout.dart';
 import 'web_hover_extensions.dart';
-import 'web_safe_focus_scope.dart';
 
 /// Layout otimizado para formulários web
 class WebOptimizedFormLayout extends StatelessWidget {
@@ -179,7 +178,7 @@ class WebOptimizedTextField extends StatefulWidget {
   State<WebOptimizedTextField> createState() => _WebOptimizedTextFieldState();
 }
 
-class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> with WebSafeFocusMixin {
+class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
   late FocusNode _focusNode;
   bool _isFocused = false;
   bool _isWebEnvironment = false;
@@ -188,11 +187,7 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> with WebS
   void initState() {
     super.initState();
     _isWebEnvironment = kIsWeb;
-    _focusNode = widget.focusNode ?? (
-      _isWebEnvironment 
-        ? getWebSafeFocusNode('main_field')
-        : FocusNode()
-    );
+    _focusNode = widget.focusNode ?? FocusNode();
     
     // Add listener with enhanced safety for web
     if (mounted) {
@@ -286,14 +281,6 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> with WebS
         ),
       ),
     );
-
-    // Web: Wrap with WebSafeFocusScope for enhanced protection
-    if (_isWebEnvironment) {
-      return textField.withWebSafeFocus(
-        focusNode: _focusNode,
-        onFocusChange: _onFocusChange,
-      );
-    }
 
     return textField;
   }

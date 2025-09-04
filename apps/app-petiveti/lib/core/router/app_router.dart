@@ -24,9 +24,13 @@ import '../../features/calculators/presentation/pages/exercise_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
+import '../../features/medications/presentation/widgets/add_medication_form.dart';
+import '../../features/medications/domain/entities/medication.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
+import '../../features/reminders/presentation/widgets/add_reminder_form.dart';
+import '../../features/reminders/domain/entities/reminder.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
@@ -152,11 +156,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/add',
             name: 'add-medication',
-            builder: (context, state) => const Scaffold(
-              body: Center(
-                child: Text('Add Medication Page - Coming Soon'),
-              ),
-            ),
+            builder: (context, state) {
+              final args = state.extra as Map<String, dynamic>? ?? {};
+              return AddMedicationForm(
+                initialAnimalId: args['animalId'] as String?,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/edit',
+            name: 'edit-medication',
+            builder: (context, state) {
+              final args = state.extra as Map<String, dynamic>? ?? {};
+              return AddMedicationForm(
+                medication: args['medication'] as Medication?,
+              );
+            },
           ),
           GoRoute(
             path: '/:id',
@@ -222,11 +237,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/add',
             name: 'add-reminder',
-            builder: (context, state) => const Scaffold(
-              body: Center(
-                child: Text('Add Reminder Page - Coming Soon'),
-              ),
-            ),
+            builder: (context, state) {
+              final args = state.extra as Map<String, dynamic>? ?? {};
+              return AddReminderForm(
+                initialAnimalId: args['animalId'] as String?,
+                userId: 'temp_user_id', // TODO: Get from auth service
+              );
+            },
+          ),
+          GoRoute(
+            path: '/edit',
+            name: 'edit-reminder',
+            builder: (context, state) {
+              final args = state.extra as Map<String, dynamic>? ?? {};
+              return AddReminderForm(
+                reminder: args['reminder'] as Reminder?,
+                userId: 'temp_user_id', // TODO: Get from auth service
+              );
+            },
           ),
         ],
       ),

@@ -191,7 +191,9 @@ class VehicleRepositoryImpl implements VehicleRepository {
         final userId = await _getCurrentUserId();
         if (userId != null) {
           try {
-            await remoteDataSource.saveVehicle(userId, vehicleModel);
+            // Add timeout to prevent hanging on Firebase operations
+            await remoteDataSource.saveVehicle(userId, vehicleModel)
+                .timeout(const Duration(seconds: 15));
             
             await loggingService.logInfo(
               category: LogCategory.vehicles,
@@ -199,6 +201,18 @@ class VehicleRepositoryImpl implements VehicleRepository {
               metadata: {
                 'vehicle_id': vehicle.id,
                 'user_id': userId,
+              },
+            );
+          } on TimeoutException {
+            // Timeout on remote sync - vehicle is saved locally
+            await loggingService.logOperationWarning(
+              category: LogCategory.vehicles,
+              operation: LogOperation.sync,
+              message: 'Remote sync timed out - vehicle saved locally',
+              metadata: {
+                'vehicle_id': vehicle.id,
+                'user_id': userId,
+                'timeout': '15 seconds',
               },
             );
           } catch (e) {

@@ -14,8 +14,9 @@ import '../services/odometer_validation_service.dart';
 
 class AddOdometerPage extends StatefulWidget {
   final OdometerEntity? odometer;
+  final String? vehicleId;
 
-  const AddOdometerPage({super.key, this.odometer});
+  const AddOdometerPage({super.key, this.odometer, this.vehicleId});
 
   @override
   State<AddOdometerPage> createState() => _AddOdometerPageState();
@@ -58,14 +59,13 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     if (widget.odometer != null) {
       _formProvider.initializeFromOdometer(widget.odometer!);
     } else {
-      // Get selected vehicle ID from vehicles provider
-      // Selected vehicle from provider pending
-      // final selectedVehicle = vehiclesProvider.selectedVehicle;
-      // For now, initialize with empty vehicle ID
-      const selectedVehicleId = '';
+      // Use vehicleId passed from parent page
+      final selectedVehicleId = widget.vehicleId ?? '';
       if (selectedVehicleId.isNotEmpty) {
         _formProvider.initializeForNew(selectedVehicleId);
-        // Vehicle data loading implementation pending
+      } else {
+        // If no vehicle selected, show error or get from vehicles provider
+        debugPrint('Warning: No vehicle selected for new odometer record');
       }
     }
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/error_boundary.dart';
@@ -7,9 +6,12 @@ import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/fuel_record_entity.dart';
+import '../pages/add_fuel_page.dart';
+import '../providers/fuel_form_provider.dart';
 import '../providers/fuel_provider.dart';
 import '../widgets/fuel_empty_state.dart';
 import '../widgets/fuel_error_state.dart';
@@ -501,20 +503,31 @@ class _FuelPageState extends State<FuelPage> {
 
   Widget _buildEmptyState() {
     return FuelEmptyState(
-      onAddRecord: () => context.go('/fuel/add'),
+      onAddRecord: _showAddFuelDialog,
     );
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
     final vehiclesProvider = context.watch<VehiclesProvider>();
-    final hasSelectedVehicle = vehiclesProvider.vehicles.isNotEmpty;
+    final hasVehicles = vehiclesProvider.vehicles.isNotEmpty;
+    final hasSelectedVehicle = _selectedVehicleId != null;
     
     return SemanticButton.fab(
-      semanticLabel: hasSelectedVehicle ? 'Registrar novo abastecimento' : 'Cadastrar veículo primeiro',
+      semanticLabel: hasSelectedVehicle 
+          ? 'Registrar novo abastecimento' 
+          : hasVehicles 
+              ? 'Selecione um veículo primeiro'
+              : 'Cadastrar veículo primeiro',
       semanticHint: hasSelectedVehicle 
           ? 'Abre formulário para cadastrar um novo abastecimento'
-          : 'É necessário ter pelo menos um veículo cadastrado para registrar abastecimentos',
-      onPressed: hasSelectedVehicle ? () => context.go('/fuel/add') : _showSelectVehicleMessage,
+          : hasVehicles
+              ? 'É necessário selecionar um veículo para registrar abastecimentos'
+              : 'É necessário ter pelo menos um veículo cadastrado para registrar abastecimentos',
+      onPressed: hasSelectedVehicle 
+          ? _showAddFuelDialog 
+          : hasVehicles 
+              ? _showSelectVehicleMessage 
+              : () => _showAddVehicleDialog(context),
       enabled: true,
       child: Icon(
         hasSelectedVehicle ? Icons.add : Icons.warning,
@@ -524,9 +537,13 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _showSelectVehicleMessage() {
+    final hasVehicles = _vehiclesProvider.vehicles.isNotEmpty;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Cadastre um veículo primeiro para registrar abastecimentos'),
+        content: Text(hasVehicles 
+            ? 'Selecione um veículo primeiro para registrar abastecimentos'
+            : 'Cadastre um veículo primeiro para registrar abastecimentos'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -534,10 +551,12 @@ class _FuelPageState extends State<FuelPage> {
             GasometerDesignTokens.radiusInput,
           ),
         ),
-        action: SnackBarAction(
-          label: 'Cadastrar',
-          onPressed: () => _showAddVehicleDialog(context),
-        ),
+        action: hasVehicles 
+            ? null
+            : SnackBarAction(
+                label: 'Cadastrar',
+                onPressed: () => _showAddVehicleDialog(context),
+              ),
       ),
     );
   }
@@ -550,6 +569,62 @@ class _FuelPageState extends State<FuelPage> {
     
     if (result == true && context.mounted) {
       await _vehiclesProvider.initialize();
+    }
+  }
+
+  Future<void> _showAddFuelDialog() async {
+    try {
+      // Get providers before opening dialog to avoid context issues
+      final authProvider = context.read<AuthProvider>();
+      
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => FuelFormProvider()),
+            ChangeNotifierProvider.value(value: _vehiclesProvider),
+            ChangeNotifierProvider.value(value: authProvider),
+          ],
+          builder: (context, child) => AddFuelPage(vehicleId: _selectedVehicleId),
+        ),
+      );
+      
+      if (result == true && mounted) {
+        // Recarregar dados após adicionar combustível
+        _loadData();
+      }
+    } catch (e) {
+      debugPrint('Error opening add fuel dialog: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao abrir formulário de combustível')),
+        );
+      }
+    }
+  }
+
+  Future<void> _showEditFuelDialog(String fuelRecordId, String vehicleId) async {
+    // Get providers before opening dialog to avoid context issues
+    final authProvider = context.read<AuthProvider>();
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => FuelFormProvider()),
+          ChangeNotifierProvider.value(value: _vehiclesProvider),
+          ChangeNotifierProvider.value(value: authProvider),
+        ],
+        builder: (context, child) => AddFuelPage(
+          vehicleId: vehicleId,
+          editFuelRecordId: fuelRecordId,
+        ),
+      ),
+    );
+    
+    if (result == true && mounted) {
+      // Recarregar dados após editar combustível
+      _loadData();
     }
   }
 
@@ -621,20 +696,14 @@ class _FuelPageState extends State<FuelPage> {
                 button: true,
                 onTap: () {
                   Navigator.pop(context);
-                  context.go('/fuel/add', extra: {
-                    'editFuelRecordId': record.id,
-                    'vehicleId': record.veiculoId,
-                  });
+                  _showEditFuelDialog(record.id, record.veiculoId);
                 },
                 child: ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Editar'),
                   onTap: () {
                     Navigator.pop(context);
-                    context.go('/fuel/add', extra: {
-                      'editFuelRecordId': record.id,
-                      'vehicleId': record.veiculoId,
-                    });
+                    _showEditFuelDialog(record.id, record.veiculoId);
                   },
                 ),
               ),

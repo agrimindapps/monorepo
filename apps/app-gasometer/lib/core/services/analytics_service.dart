@@ -1,10 +1,8 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Serviço centralizado para Analytics e Crashlytics do Gasometer
-@lazySingleton
 class AnalyticsService {
   AnalyticsService();
 

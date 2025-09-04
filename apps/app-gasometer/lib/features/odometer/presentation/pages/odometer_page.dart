@@ -5,7 +5,9 @@ import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/odometer_entity.dart';
+import '../providers/odometer_form_provider.dart';
 import '../providers/odometer_provider.dart';
 import 'add_odometer_page.dart';
 
@@ -429,7 +431,13 @@ class _OdometerPageState extends State<OdometerPage> {
   void _addOdometer() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => const AddOdometerPage(),
+      builder: (dialogContext) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
+          ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+        ],
+        builder: (context, child) => AddOdometerPage(vehicleId: _selectedVehicleId),
+      ),
     );
     
     if (result != null && mounted) {
@@ -456,7 +464,13 @@ class _OdometerPageState extends State<OdometerPage> {
     try {
       result = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (context) => AddOdometerPage(odometer: odometer),
+        builder: (dialogContext) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
+            ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+          ],
+          builder: (context, child) => AddOdometerPage(odometer: odometer),
+        ),
       );
     } catch (e) {
       // Tratamento de erro adequado

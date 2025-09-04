@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
@@ -104,22 +106,38 @@ class VehiclesProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     
-    final result = await _addVehicle(AddVehicleParams(vehicle: vehicle));
-    
-    return result.fold(
-      (failure) {
-        _errorMessage = _mapFailureToMessage(failure);
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      },
-      (addedVehicle) {
-        _vehicles.add(addedVehicle);
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      },
-    );
+    try {
+      // Add timeout to prevent UI freeze from hanging operations
+      final result = await _addVehicle(AddVehicleParams(vehicle: vehicle))
+          .timeout(const Duration(seconds: 30));
+      
+      return result.fold(
+        (failure) {
+          _errorMessage = _mapFailureToMessage(failure);
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        },
+        (addedVehicle) {
+          _vehicles.add(addedVehicle);
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        },
+      );
+    } on TimeoutException {
+      _errorMessage = 'Operação expirou. Veículo pode ter sido salvo localmente.';
+      _isLoading = false;
+      notifyListeners();
+      // Refresh vehicles list to check if it was actually saved
+      await loadVehicles();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Erro inesperado: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
   
   Future<bool> updateVehicle(VehicleEntity vehicle) async {

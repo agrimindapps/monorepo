@@ -42,7 +42,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   StackTrace? _stackTrace;
   bool _hasError = false;
 
-  Function(FlutterErrorDetails)? _previousErrorHandler;
+  void Function(FlutterErrorDetails)? _previousErrorHandler;
 
   @override
   void initState() {
@@ -169,16 +169,23 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   }
 
   Widget _buildDefaultErrorUI() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: AppTheme.colors.errorContainer.withOpacity(0.1),
-        border: Border.all(
-          color: AppTheme.colors.error.withOpacity(0.3),
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(8.0),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 200,
+        minHeight: 100,
+        maxWidth: double.infinity,
       ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.1),
+          border: Border.all(
+            color: Colors.red.withValues(alpha: 0.3),
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -186,7 +193,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
             textDirection: TextDirection.ltr,
             child: Row(
               children: [
-                Icon(Icons.error_outline, color: AppTheme.colors.error, size: 24),
+                Icon(Icons.error_outline, color: Colors.red, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Directionality(
@@ -194,7 +201,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                     child: Text(
                       widget.title ?? 'Erro inesperado',
                       style: AppTheme.textStyles.titleSmall?.copyWith(
-                        color: AppTheme.colors.error,
+                        color: Colors.red,
                       ),
                     ),
                   ),
@@ -212,7 +219,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                 child: Text(
                   widget.message!,
                   style: AppTheme.textStyles.bodySmall?.copyWith(
-                    color: AppTheme.colors.onErrorContainer,
+                    color: Colors.red[800],
                   ),
                 ),
               ),
@@ -222,23 +229,27 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
           // Informações de debug em desenvolvimento
           if (widget.showDebugInfo && _error != null) ...[
             const SizedBox(height: 12),
-            ExpansionTile(
-              title: const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Text(
-                  'Detalhes técnicos',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(4.0),
+            Material(
+              color: Colors.transparent,
+              child: ExpansionTile(
+                title: const Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    'Detalhes técnicos',
+                    style: TextStyle(fontSize: 12),
                   ),
-                  child: Directionality(
+                ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Directionality(
                     textDirection: TextDirection.ltr,
                     child: Text(
                       'Erro: ${_error.toString()}\n'
@@ -249,8 +260,10 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                       ),
                     ),
                   ),
+                  ),
                 ),
               ],
+              ),
             ),
           ],
 
@@ -265,6 +278,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
@@ -380,7 +394,7 @@ class FormErrorBoundary extends StatelessWidget {
   Widget _buildFormErrorUI(BuildContext context, Object error) {
     return Card(
       margin: const EdgeInsets.all(16.0),
-      color: AppTheme.colors.errorContainer,
+      color: Colors.red.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -390,7 +404,7 @@ class FormErrorBoundary extends StatelessWidget {
               textDirection: TextDirection.ltr,
               child: Icon(
                 Icons.edit_note_outlined,
-                color: AppTheme.colors.onErrorContainer,
+                color: Colors.red[800],
                 size: 48,
               ),
             ),
@@ -400,7 +414,7 @@ class FormErrorBoundary extends StatelessWidget {
               child: Text(
                 'Erro no Formulário',
                 style: AppTheme.textStyles.titleMedium?.copyWith(
-                  color: AppTheme.colors.onErrorContainer,
+                  color: Colors.red[800],
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -412,7 +426,7 @@ class FormErrorBoundary extends StatelessWidget {
                 'O formulário encontrou um erro inesperado. '
                 'Todos os dados inseridos podem ter sido perdidos.',
                 style: AppTheme.textStyles.bodySmall?.copyWith(
-                  color: AppTheme.colors.onErrorContainer,
+                  color: Colors.red[800],
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -425,7 +439,7 @@ class FormErrorBoundary extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
                 child: Directionality(

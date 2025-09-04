@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_provider.dart';
@@ -448,17 +449,11 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   }
 
   void _showAddReminderDialog(BuildContext context) {
-    // TODO: Implementar dialog de adicionar lembrete
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade de adicionar lembrete em desenvolvimento')),
-    );
+    context.push('/reminders/add');
   }
 
   void _showEditReminderDialog(Reminder reminder) {
-    // TODO: Implementar dialog de editar lembrete
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade de editar lembrete em desenvolvimento')),
-    );
+    context.push('/reminders/edit', extra: {'reminder': reminder});
   }
 
   void _showSnoozeDialog(Reminder reminder) {

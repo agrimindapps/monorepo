@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -274,8 +275,12 @@ class LoginFormWidget extends StatelessWidget {
   }
 
   void _handleLogin(BuildContext context) async {
+    if (kDebugMode) {
+      print('🎯 LoginFormWidget: Chamando login com sincronização automática');
+    }
+    
     final controller = context.read<LoginController>();
-    await controller.signInWithEmail();
+    await controller.signInWithEmailAndSync(showSyncOverlay: true);
     
     if (controller.isAuthenticated && onLoginSuccess != null) {
       onLoginSuccess!();

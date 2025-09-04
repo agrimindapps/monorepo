@@ -6,11 +6,12 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
 import 'core/data/models/category_model.dart';
-import 'core/di/injectable_config.dart';
+import 'core/di/injection_container.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/database_inspector_service.dart';
 import 'core/services/gasometer_firebase_service.dart';
@@ -29,6 +30,11 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   print('🚀 GasOMeter startup initiated...');
+
+  // Initialize Brazilian Portuguese locale for date formatting
+  print('🌍 Initializing locale data...');
+  await initializeDateFormatting('pt_BR', null);
+  print('✅ Locale data initialized successfully');
 
   // Disable Provider debug check for complex dependency management
   Provider.debugCheckInvalidValueType = null;
@@ -60,16 +66,18 @@ void main() async {
   print('✅ Firebase initialized successfully');
 
   // Configure Firestore settings
-  if (kDebugMode) {
-    try {
-      FirebaseFirestore.instance.settings = const Settings(
-        persistenceEnabled: true,
-        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-      );
-      print('🔧 Firestore configurado para desenvolvimento');
-    } catch (e) {
-      print('⚠️ Falha na configuração do Firestore: $e');
+  try {
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+    
+    // Reduce Firebase logging in debug mode to prevent console spam
+    if (kDebugMode) {
+      print('🔧 Firestore configurado para desenvolvimento com logging otimizado');
     }
+  } catch (e) {
+    print('⚠️ Falha na configuração do Firestore: $e');
   }
 
   // Initialize Firebase Crashlytics (only in production)
@@ -91,12 +99,12 @@ void main() async {
 
   // Initialize Dependencies
   print('🔄 Initializing dependency injection...');
-  configureDependencies();
+  await initializeDependencies();
   print('✅ Dependencies initialized successfully');
 
   // Initialize Analytics Service
   print('📊 Initializing Analytics...');
-  final analyticsService = getIt<AnalyticsService>();
+  final analyticsService = sl<AnalyticsService>();
   analyticsService.initialize();
   print('✅ Analytics initialized successfully');
 
@@ -108,13 +116,13 @@ void main() async {
 
   // Initialize notifications
   print('🔔 Initializing notifications...');
-  final notificationService = getIt<GasOMeterNotificationService>();
+  final notificationService = sl<GasOMeterNotificationService>();
   await notificationService.initialize();
   print('✅ Notifications initialized successfully');
 
   // Initialize Sync Service
   print('🔄 Initializing Sync Service...');
-  final syncService = getIt<SyncService>();
+  final syncService = sl<SyncService>();
   await syncService.initialize();
   print('✅ Sync Service initialized successfully');
 

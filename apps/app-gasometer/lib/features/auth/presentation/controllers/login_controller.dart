@@ -199,6 +199,10 @@ class LoginController extends ChangeNotifier {
 
   /// Login com email e senha com sincronização automática (novo método)
   Future<bool> signInWithEmailAndSync({bool showSyncOverlay = true}) async {
+    if (kDebugMode) {
+      print('🔄 LoginController: Iniciando login com sincronização automática (showSyncOverlay: $showSyncOverlay)');
+    }
+    
     if (!_validateLoginForm()) return false;
 
     _setLoading(true);

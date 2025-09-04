@@ -320,26 +320,31 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
 
             // Error details in debug mode
             if (kDebugMode && appError.technicalDetails != null) ...[
-              ExpansionTile(
-                title: const Text('Detalhes Técnicos'),
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      appError.technicalDetails ??
-                          'Nenhum detalhe técnico disponível',
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
+              Material(
+                color: Colors.transparent,
+                child: ExpansionTile(
+                  title: const Text('Detalhes Técnicos'),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          appError.technicalDetails ??
+                              'Nenhum detalhe técnico disponível',
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 32),
             ],
@@ -361,9 +366,7 @@ class _GlobalErrorBoundaryState extends State<GlobalErrorBoundary> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(

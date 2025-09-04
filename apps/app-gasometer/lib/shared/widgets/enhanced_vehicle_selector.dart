@@ -210,7 +210,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
       child: DropdownButtonFormField<String>(
         value: _currentSelectedVehicleId,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: AppSpacing.large),
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: 20), // Aumentado de AppSpacing.large para 20
           border: InputBorder.none,
           hintText: widget.hintText,
           hintStyle: TextStyle(
@@ -223,6 +223,46 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
                 : Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.subtle),
           ),
         ),
+        selectedItemBuilder: (BuildContext context) {
+          return vehiclesProvider.vehicles.map<Widget>((VehicleEntity vehicle) {
+            final isSelected = vehicle.id == _currentSelectedVehicleId;
+            if (!isSelected) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: const SizedBox.shrink(),
+              );
+            }
+            return Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${vehicle.brand} ${vehicle.model}',
+                    style: TextStyle(
+                      fontWeight: AppFontWeights.medium,
+                      fontSize: AppFontSizes.medium,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
+                    style: TextStyle(
+                      fontSize: AppFontSizes.small,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            );
+          }).toList();
+        },
         items: vehiclesProvider.vehicles.map<DropdownMenuItem<String>>((VehicleEntity vehicle) {
           return DropdownMenuItem<String>(
             value: vehicle.id,
@@ -233,19 +273,25 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        '${vehicle.brand} ${vehicle.model}',
-                        style: const TextStyle(
-                          fontWeight: AppFontWeights.medium,
-                          fontSize: AppFontSizes.medium,
+                      Flexible(
+                        child: Text(
+                          '${vehicle.brand} ${vehicle.model}',
+                          style: const TextStyle(
+                            fontWeight: AppFontWeights.medium,
+                            fontSize: AppFontSizes.medium,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.spacingXS),
-                      Text(
-                        'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
-                        style: TextStyle(
-                          fontSize: AppFontSizes.small,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
+                      const SizedBox(height: 2), // Reduced spacing from AppSpacing.spacingXS
+                      Flexible(
+                        child: Text(
+                          'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
+                          style: TextStyle(
+                            fontSize: AppFontSizes.small,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

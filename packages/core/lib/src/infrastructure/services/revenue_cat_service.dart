@@ -16,6 +16,7 @@ class RevenueCatService implements ISubscriptionRepository {
       StreamController<core_entities.SubscriptionEntity?>.broadcast();
 
   bool _isInitialized = false;
+  bool _isDisabled = false; // For web/dev environments
 
   RevenueCatService() {
     _initialize();
@@ -30,14 +31,23 @@ class RevenueCatService implements ISubscriptionRepository {
     if (_isInitialized) return;
 
     try {
+      final apiKey = EnvironmentConfig.revenueCatApiKey;
+      
+      // Skip RevenueCat initialization in web/dev with dummy key
+      if (kIsWeb || apiKey == 'rcat_dev_dummy_key') {
+        if (kDebugMode) {
+          print('⚠️ RevenueCat skipped - Web environment or dummy key detected');
+        }
+        _isDisabled = true;
+        _isInitialized = true; // Mark as initialized to avoid retries
+        return;
+      }
+
       await Purchases.setLogLevel(
         EnvironmentConfig.isDebugMode ? LogLevel.debug : LogLevel.info,
       );
 
-      final configuration = PurchasesConfiguration(
-        EnvironmentConfig.revenueCatApiKey,
-      );
-
+      final configuration = PurchasesConfiguration(apiKey);
       await Purchases.configure(configuration);
 
       // Escutar mudanças nas compras
@@ -48,6 +58,7 @@ class RevenueCatService implements ISubscriptionRepository {
       if (kDebugMode) {
         print('Erro ao inicializar RevenueCat: $e');
       }
+      // Don't set _isInitialized = true on error
     }
   }
 
@@ -382,6 +393,22 @@ class RevenueCatService implements ISubscriptionRepository {
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
       await _initialize();
+    }
+    
+    // If disabled (web/dummy key), throw an exception
+    if (_isDisabled) {
+      throw PlatformException(
+        code: 'NOT_AVAILABLE', 
+        message: 'RevenueCat não disponível nesta plataforma',
+      );
+    }
+    
+    // If still not initialized, throw an exception
+    if (!_isInitialized) {
+      throw PlatformException(
+        code: 'INITIALIZATION_ERROR',
+        message: 'Falha ao inicializar RevenueCat',
+      );
     }
   }
 

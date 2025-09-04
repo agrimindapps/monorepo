@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
@@ -17,7 +18,7 @@ import '../models/fuel_form_model.dart';
 /// ARCHITECTURAL NOTE: This provider now uses dependency injection pattern
 /// instead of direct provider coupling to avoid circular dependencies.
 /// VehiclesProvider is accessed via BuildContext when needed.
-class FuelFormProvider extends ChangeNotifier {
+class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FuelFormatterService _formatter = FuelFormatterService();
   final FuelValidatorService _validator = FuelValidatorService();
@@ -45,6 +46,8 @@ class FuelFormProvider extends ChangeNotifier {
   FuelFormModel _formModel;
   bool _isInitialized = false;
   bool _isCalculating = false;
+  bool _isLoading = false;
+  String? _lastError;
 
   FuelFormProvider({String? initialVehicleId, String? userId}) 
       : _formModel = FuelFormModel.initial(initialVehicleId ?? '', userId ?? '') {
@@ -52,11 +55,26 @@ class FuelFormProvider extends ChangeNotifier {
   }
 
   // Getters
-  GlobalKey<FormState> get formKey => _formKey;
+  @override
+  GlobalKey<FormState>? get formKey => _formKey;
   FuelFormModel get formModel => _formModel;
   bool get isInitialized => _isInitialized;
   bool get isCalculating => _isCalculating;
   double? get lastOdometerReading => _lastOdometerReading;
+  
+  // IFormProvider implementation
+  @override
+  bool get isLoading => _isLoading;
+  
+  @override
+  String? get lastError => _lastError;
+  
+  @override
+  bool get canSubmit => 
+      !_isLoading && 
+      litersController.text.isNotEmpty && 
+      pricePerLiterController.text.isNotEmpty &&
+      odometerController.text.isNotEmpty;
 
   /// Sets the BuildContext for dependency injection access.
   /// This should be called when the provider is used in a widget.
@@ -394,6 +412,7 @@ class FuelFormProvider extends ChangeNotifier {
   }
 
   /// Valida todo o formulário
+  @override
   bool validateForm() {
     final errors = _validator.validateCompleteForm(
       liters: litersController.text,

@@ -214,15 +214,18 @@ class _TasksAppBarState extends State<TasksAppBar> {
         preferredSize: const Size.fromHeight(140),
         child: ColoredBox(
           color: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
-          child: Column(
-            children: [
-              // Active filter chips
-              if (_totalActiveFilters > 0) _buildActiveFilterChips(theme),
-              // Quick filters
-              Container(
-                padding: const EdgeInsets.only(left: 20, bottom: 16, top: 8),
-                child: Row(
-                  children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  // Active filter chips
+                  if (_totalActiveFilters > 0) _buildActiveFilterChips(theme),
+                  // Quick filters
+                  Container(
+                    padding: const EdgeInsets.only(left: 20, bottom: 16, top: 8),
+                    child: Row(
+                      children: [
                     Consumer<TasksProvider>(
                       builder: (context, provider, child) {
                         return Row(
@@ -258,7 +261,9 @@ class _TasksAppBarState extends State<TasksAppBar> {
                   ],
                 ),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/unified_tab_bar_widget.dart';
 import '../../../favoritos/favoritos_page.dart';
 import '../providers/detalhe_praga_provider.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 import '../widgets/comentarios_praga_widget.dart';
-import '../widgets/custom_tab_bar_widget.dart';
 import '../widgets/diagnosticos_praga_widget.dart';
 import '../widgets/praga_info_widget.dart';
 
@@ -81,37 +82,42 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: Consumer<DetalhePragaProvider>(
-                      builder: (context, provider, child) {
-                        return Column(
-                          children: [
-                            const SizedBox(height: 20),
-                            CustomTabBarWidget(tabController: _tabController),
-                            Expanded(
-                              child: TabBarView(
-                                controller: _tabController,
-                                children: [
-                                  PragaInfoWidget(
-                                    pragaName: widget.pragaName,
-                                    pragaScientificName: widget.pragaScientificName,
-                                  ),
-                                  DiagnosticosPragaWidget(
-                                    pragaName: widget.pragaName,
-                                  ),
-                                  const ComentariosPragaWidget(),
-                                ],
+              child: Padding(
+                padding: SpacingTokens.externalPadding, // Padding externo de 8px
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(
+                      child: Consumer<DetalhePragaProvider>(
+                        builder: (context, provider, child) {
+                          return Column(
+                            children: [
+                              SpacingTokens.gapSM,
+                              UnifiedTabBarWidget.forPragas(
+                                tabController: _tabController,
                               ),
-                            ),
-                          ],
-                        );
-                      },
+                              Expanded(
+                                child: TabBarView(
+                                  controller: _tabController,
+                                  children: [
+                                    PragaInfoWidget(
+                                      pragaName: widget.pragaName,
+                                      pragaScientificName: widget.pragaScientificName,
+                                    ),
+                                    DiagnosticosPragaWidget(
+                                      pragaName: widget.pragaName,
+                                    ),
+                                    const ComentariosPragaWidget(),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

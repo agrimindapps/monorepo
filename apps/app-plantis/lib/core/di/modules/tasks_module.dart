@@ -58,6 +58,7 @@ class TasksModule {
         remoteDataSource: sl(),
         localDataSource: sl(),
         networkInfo: sl(),
+        authService: sl(),
       ),
     );
 

@@ -88,6 +88,16 @@ class PlantDetailsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears the loading state
+  /// 
+  /// This method ensures that any pending loading state is cleared,
+  /// particularly useful when operations are cancelled or interrupted.
+  void clearLoadingState() {
+    _isLoading = false;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> toggleFavorite(String plantId) async {
     if (_plant == null || _plant!.id != plantId) return;
 

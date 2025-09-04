@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design/spacing_tokens.dart';
 
 /// Widget wrapper que centraliza o conteúdo e aplica largura máxima de 1120px
 /// para melhorar a experiência em telas maiores
@@ -30,17 +31,18 @@ class ResponsiveContentWrapper extends StatelessWidget {
       return child;
     }
 
+    // Usa padding externo padrão se não especificado
+    final effectivePadding = padding ?? SpacingTokens.externalPadding;
+
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: maxWidth,
         ),
-        child: padding != null
-            ? Padding(
-                padding: padding!,
-                child: child,
-              )
-            : child,
+        child: Padding(
+          padding: effectivePadding,
+          child: child,
+        ),
       ),
     );
   }

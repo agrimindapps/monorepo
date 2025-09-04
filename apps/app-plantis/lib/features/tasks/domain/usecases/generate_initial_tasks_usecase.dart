@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/data/models/planta_config_model.dart';
 import '../../../../core/services/task_generation_service.dart';
@@ -28,13 +29,28 @@ class GenerateInitialTasksUseCase
     GenerateInitialTasksParams params,
   ) async {
     try {
+      if (kDebugMode) {
+        print('🔧 GenerateInitialTasksUseCase.call() - Iniciando geração de tarefas');
+        print('🔧 plantaId: ${params.plantaId}');
+        print('🔧 activeCareTypes: ${params.config.activeCareTypes}');
+        print('🔧 plantingDate: ${params.plantingDate}');
+        print('🔧 userId: ${params.userId}');
+      }
+
       // Validação dos parâmetros
       final validationResult = _validateParams(params);
       if (validationResult != null) {
+        if (kDebugMode) {
+          print('❌ GenerateInitialTasksUseCase.call() - Validação falhou: ${validationResult.message}');
+        }
         return Left(validationResult);
       }
 
       // Gerar tarefas usando o service
+      if (kDebugMode) {
+        print('🔧 GenerateInitialTasksUseCase.call() - Chamando taskGenerationService.generateInitialTasks');
+      }
+
       final generationResult = taskGenerationService.generateInitialTasks(
         plantaId: params.plantaId,
         config: params.config,
@@ -43,9 +59,11 @@ class GenerateInitialTasksUseCase
       );
 
       if (generationResult.isLeft()) {
-        return Left(
-          generationResult.fold((failure) => failure, (_) => throw Exception()),
-        );
+        final failure = generationResult.fold((failure) => failure, (_) => throw Exception());
+        if (kDebugMode) {
+          print('❌ GenerateInitialTasksUseCase.call() - TaskGenerationService falhou: ${failure.message}');
+        }
+        return Left(failure);
       }
 
       final tarefaModels = generationResult.fold(
@@ -53,11 +71,34 @@ class GenerateInitialTasksUseCase
         (tasks) => tasks,
       );
 
+      if (kDebugMode) {
+        print('🔧 GenerateInitialTasksUseCase.call() - ${tarefaModels.length} modelos de tarefa gerados');
+      }
+
       // Converter models para entities
-      final taskEntities =
-          tarefaModels
-              .map((model) => task_entity.Task.fromModel(model))
-              .toList();
+      if (kDebugMode) {
+        print('🔧 GenerateInitialTasksUseCase.call() - Convertendo models para entities');
+      }
+
+      final taskEntities = <task_entity.Task>[];
+      for (int i = 0; i < tarefaModels.length; i++) {
+        try {
+          final entity = task_entity.Task.fromModel(tarefaModels[i]);
+          taskEntities.add(entity);
+          if (kDebugMode) {
+            print('🔧 Tarefa ${i + 1} convertida: ${entity.title} (${entity.type.key})');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('❌ Erro convertendo tarefa ${i + 1}: $e');
+          }
+          return Left(ServerFailure('Erro na conversão da tarefa ${i + 1}: ${e.toString()}'));
+        }
+      }
+
+      if (kDebugMode) {
+        print('🔧 GenerateInitialTasksUseCase.call() - Salvando ${taskEntities.length} tarefas');
+      }
 
       // Salvar todas as tarefas de forma atômica
       final saveResults = await Future.wait(
@@ -67,10 +108,12 @@ class GenerateInitialTasksUseCase
       // Verificar se alguma falhou
       final failures = saveResults.where((result) => result.isLeft()).toList();
       if (failures.isNotEmpty) {
-        // Se alguma tarefa falhou, retornar primeira falha encontrada
-        return Left(
-          failures.first.fold((failure) => failure, (_) => throw Exception()),
-        );
+        final firstFailure = failures.first.fold((failure) => failure, (_) => throw Exception());
+        if (kDebugMode) {
+          print('❌ GenerateInitialTasksUseCase.call() - Falha ao salvar tarefas: ${firstFailure.message}');
+          print('❌ Total de falhas: ${failures.length}/${saveResults.length}');
+        }
+        return Left(firstFailure);
       }
 
       // Todas as tarefas foram salvas com sucesso
@@ -79,6 +122,10 @@ class GenerateInitialTasksUseCase
               .map((result) => result.fold((_) => null, (task) => task))
               .whereType<task_entity.Task>()
               .toList();
+
+      if (kDebugMode) {
+        print('✅ GenerateInitialTasksUseCase.call() - ${savedTasks.length} tarefas salvas com sucesso');
+      }
 
       return Right(savedTasks);
     } catch (e) {

@@ -90,7 +90,7 @@ class FavoritosTabContentWidget extends StatelessWidget {
       color: _getTypeColor(),
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];

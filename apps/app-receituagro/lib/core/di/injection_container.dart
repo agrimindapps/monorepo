@@ -37,6 +37,8 @@ import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/pragas_core_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
+import '../repositories/pragas_inf_hive_repository.dart';
+import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
 import '../services/device_identity_service.dart';
@@ -194,6 +196,14 @@ Future<void> init() async {
   
   sl.registerLazySingleton<FitossanitarioInfoHiveRepository>(
     () => FitossanitarioInfoHiveRepository(),
+  );
+  
+  sl.registerLazySingleton<PragasInfHiveRepository>(
+    () => PragasInfHiveRepository(),
+  );
+  
+  sl.registerLazySingleton<PlantasInfHiveRepository>(
+    () => PlantasInfHiveRepository(),
   );
   
   // Integration Services - Serviços que integram múltiplas boxes

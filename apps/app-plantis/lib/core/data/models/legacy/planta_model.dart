@@ -74,25 +74,22 @@ class PlantaModel extends BaseSyncModel {
     this.dataCadastro,
     this.fotoBase64,
   }) : super(
-         id: id,
-         createdAt:
-             createdAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-                 : null,
-         updatedAt:
-             updatedAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
-                 : null,
-         lastSyncAt:
-             lastSyncAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
-                 : null,
-         isDirty: isDirty,
-         isDeleted: isDeleted,
-         version: version,
-         userId: userId,
-         moduleName: moduleName,
-       ) {
+          id: id,
+          createdAt: createdAtMs != null
+              ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+              : null,
+          updatedAt: updatedAtMs != null
+              ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+              : null,
+          lastSyncAt: lastSyncAtMs != null
+              ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+              : null,
+          isDirty: isDirty,
+          isDeleted: isDeleted,
+          version: version,
+          userId: userId,
+          moduleName: moduleName,
+        ) {
     // Assertions para validar invariants críticos
     assert(id.isNotEmpty, 'PlantaModel ID não pode ser vazio');
     assert(
@@ -158,21 +155,19 @@ class PlantaModel extends BaseSyncModel {
       nome: map['nome']?.toString(),
       especie: map['especie']?.toString(),
       espacoId: map['espacoId']?.toString(),
-      imagePaths:
-          map['imagePaths'] != null
-              ? List<String>.from(map['imagePaths'] as Iterable<dynamic>)
-              : null,
+      imagePaths: map['imagePaths'] != null
+          ? List<String>.from(map['imagePaths'] as Iterable<dynamic>)
+          : null,
       observacoes: map['observacoes']?.toString(),
-      comentarios:
-          map['comentarios'] != null
-              ? (map['comentarios'] as List)
-                  .map((c) => ComentarioModel.fromHiveMap(c as Map<String, dynamic>))
-                  .toList()
-              : null,
-      dataCadastro:
-          map['dataCadastro'] != null
-              ? DateTime.parse(map['dataCadastro'] as String)
-              : null,
+      comentarios: map['comentarios'] != null
+          ? (map['comentarios'] as List)
+              .map(
+                  (c) => ComentarioModel.fromHiveMap(c as Map<String, dynamic>))
+              .toList()
+          : null,
+      dataCadastro: map['dataCadastro'] != null
+          ? DateTime.parse(map['dataCadastro'] as String)
+          : null,
       fotoBase64: map['fotoBase64']?.toString(),
     );
   }
@@ -180,16 +175,17 @@ class PlantaModel extends BaseSyncModel {
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
-      'nome': nome,
-      'especie': especie,
-      'espacoId': espacoId,
-      'imagePaths': imagePaths,
-      'observacoes': observacoes,
-      'comentarios': comentarios?.map((c) => c.toHiveMap()).toList(),
-      'dataCadastro': dataCadastro?.toIso8601String(),
-      'fotoBase64': fotoBase64,
-    });
+    return super.toHiveMap()
+      ..addAll({
+        'nome': nome,
+        'especie': especie,
+        'espacoId': espacoId,
+        'imagePaths': imagePaths,
+        'observacoes': observacoes,
+        'comentarios': comentarios?.map((c) => c.toHiveMap()).toList(),
+        'dataCadastro': dataCadastro?.toIso8601String(),
+        'fotoBase64': fotoBase64,
+      });
   }
 
   /// Convert to Firebase map
@@ -227,21 +223,19 @@ class PlantaModel extends BaseSyncModel {
       nome: map['nome']?.toString(),
       especie: map['especie']?.toString(),
       espacoId: map['espaco_id']?.toString(),
-      imagePaths:
-          map['image_paths'] != null
-              ? List<String>.from(map['image_paths'] as Iterable<dynamic>)
-              : null,
+      imagePaths: map['image_paths'] != null
+          ? List<String>.from(map['image_paths'] as Iterable<dynamic>)
+          : null,
       observacoes: map['observacoes']?.toString(),
-      comentarios:
-          map['comentarios'] != null
-              ? (map['comentarios'] as List)
-                  .map((c) => ComentarioModel.fromFirebaseMap(c as Map<String, dynamic>))
-                  .toList()
-              : null,
-      dataCadastro:
-          map['data_cadastro'] != null
-              ? DateTime.parse(map['data_cadastro'] as String)
-              : null,
+      comentarios: map['comentarios'] != null
+          ? (map['comentarios'] as List)
+              .map((c) =>
+                  ComentarioModel.fromFirebaseMap(c as Map<String, dynamic>))
+              .toList()
+          : null,
+      dataCadastro: map['data_cadastro'] != null
+          ? DateTime.parse(map['data_cadastro'] as String)
+          : null,
       fotoBase64: map['foto_base64']?.toString(),
     );
   }

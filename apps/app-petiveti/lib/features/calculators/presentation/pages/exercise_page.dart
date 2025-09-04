@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/exercise_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../providers/exercise_provider.dart';
@@ -571,6 +570,10 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
+    
+    // Separar alertas de segurança das recomendações normais
+    final safetyAlerts = recommendations.where((r) => r.title.contains('Segurança')).toList();
+    final normalRecs = recommendations.where((r) => !r.title.contains('Segurança')).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,12 +586,8 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
         ),
         const SizedBox(height: 8),
         
-        // Separar alertas de segurança das recomendações normais
-        final safetyAlerts = recommendations.where((r) => r.title.contains('Segurança')).toList();
-        final normalRecs = recommendations.where((r) => !r.title.contains('Segurança')).toList();
-        
         // Mostrar alertas primeiro
-        if (safetyAlerts.isNotEmpty) {
+        if (safetyAlerts.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.only(bottom: 12),
@@ -624,7 +623,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ],
             ),
           ),
-        }
+        ],
         
         // Recomendações normais
         ...normalRecs.map((rec) => Padding(

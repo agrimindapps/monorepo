@@ -29,7 +29,7 @@ class ModernHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+      margin: const EdgeInsets.fromLTRB(0, 6, 0, 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(

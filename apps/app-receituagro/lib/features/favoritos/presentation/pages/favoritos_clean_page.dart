@@ -77,7 +77,7 @@ class _FavoritosCleanPageState extends State<FavoritosCleanPage>
             child: Column(
               children: [
                 _buildModernHeader(context, isDark),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
                 Expanded(
                   child: FavoritosTabsWidget(
                     tabController: _tabController,

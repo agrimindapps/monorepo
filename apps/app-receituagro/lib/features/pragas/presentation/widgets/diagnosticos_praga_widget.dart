@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/design/spacing_tokens.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 import 'diagnostico_dialog_widget.dart';
 import 'diagnostico_filter_widget.dart';
@@ -44,7 +45,10 @@ class DiagnosticosPragaWidget extends StatelessWidget {
           // Lista de diagnósticos com gerenciamento de estados
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(
+                top: SpacingTokens.xs,
+                bottom: SpacingTokens.bottomNavSpace, // Espaço para bottom nav
+              ),
               child: DiagnosticoStateManager(
                 builder: _buildDiagnosticsList,
                 onRetry: () => _retryLoadDiagnostics(context),
@@ -102,7 +106,7 @@ class DiagnosticosPragaWidget extends StatelessWidget {
           diagnosticCount: diagnostics.length,
         ),
       );
-      widgets.add(const SizedBox(height: 16));
+      widgets.add(SpacingTokens.gapLG);
 
       // Itens de diagnósticos
       for (int i = 0; i < diagnostics.length; i++) {
@@ -116,13 +120,13 @@ class DiagnosticosPragaWidget extends StatelessWidget {
           ),
         );
         if (i < diagnostics.length - 1) {
-          widgets.add(const SizedBox(height: 12));
+          widgets.add(SpacingTokens.gapMD);
         }
       }
-      widgets.add(const SizedBox(height: 24));
+      widgets.add(SpacingTokens.gapXL);
     });
 
-    widgets.add(const SizedBox(height: 80));
+    // Espaço já incluído no scrollPadding
     return widgets;
   }
 

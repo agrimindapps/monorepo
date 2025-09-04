@@ -155,11 +155,11 @@ class FavoritosService {
       final defensivo = ReceitaAgroHiveService.getFitossanitarioById(id);
       if (defensivo != null) {
         return {
-          'nomeComum': defensivo['nomeComum'] ?? 'Defensivo $id',
-          'ingredienteAtivo': defensivo['ingredienteAtivo'] ?? '',
-          'fabricante': defensivo['fabricante'] ?? '',
-          'classeAgron': defensivo['classeAgron'] ?? '',
-          'modoAcao': defensivo['modoAcao'] ?? '',
+          'nomeComum': defensivo.nomeComum,
+          'ingredienteAtivo': defensivo.ingredienteAtivo ?? '',
+          'fabricante': defensivo.fabricante ?? '',
+          'classeAgron': defensivo.classeAgronomica ?? '',
+          'modoAcao': defensivo.modoAcao ?? '',
         };
       }
       
@@ -178,12 +178,12 @@ class FavoritosService {
       final praga = ReceitaAgroHiveService.getPragaById(id);
       if (praga != null) {
         return {
-          'nomeComum': praga['nomeComum'] ?? 'Praga $id',
-          'nomeCientifico': praga['nomeCientifico'] ?? '',
-          'tipoPraga': praga['tipoPraga']?.toString() ?? '1',
-          'dominio': praga['dominio'] ?? '',
-          'reino': praga['reino'] ?? '',
-          'familia': praga['familia'] ?? '',
+          'nomeComum': praga.nomeComum,
+          'nomeCientifico': praga.nomeCientifico,
+          'tipoPraga': praga.tipoPraga,
+          'dominio': praga.dominio ?? '',
+          'reino': praga.reino ?? '',
+          'familia': praga.familia ?? '',
         };
       }
       
@@ -202,12 +202,12 @@ class FavoritosService {
       final diagnostico = ReceitaAgroHiveService.getDiagnosticoById(id);
       if (diagnostico != null) {
         return {
-          'nomePraga': diagnostico['nomePraga'] ?? 'Praga não encontrada',
-          'nomeDefensivo': diagnostico['nomeDefensivo'] ?? 'Defensivo não encontrado',
-          'cultura': diagnostico['cultura'] ?? 'Cultura não encontrada',
-          'dosagem': diagnostico['dosagem'] ?? 'Dosagem não especificada',
-          'fabricante': diagnostico['fabricante'] ?? '',
-          'modoAcao': diagnostico['modoAcao'] ?? '',
+          'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
+          'nomeDefensivo': diagnostico.nomeDefensivo ?? 'Defensivo não encontrado',
+          'cultura': diagnostico.nomeCultura ?? 'Cultura não encontrada',
+          'dosagem': '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
+          'fabricante': '', // Campo não disponível no DiagnosticoHive
+          'modoAcao': '', // Campo não disponível no DiagnosticoHive
         };
       }
       
@@ -227,9 +227,9 @@ class FavoritosService {
       final cultura = ReceitaAgroHiveService.getCulturaById(id);
       if (cultura != null) {
         return {
-          'nomeCultura': cultura['nomeCultura'] ?? 'Cultura $id',
-          'descricao': cultura['descricao'] ?? '',
-          'nomeComum': cultura['nomeComum'] ?? cultura['nomeCultura'] ?? 'Cultura $id',
+          'nomeCultura': cultura.cultura,
+          'descricao': cultura.cultura, // Não há campo descricao separado
+          'nomeComum': cultura.nomeComum,
         };
       }
       

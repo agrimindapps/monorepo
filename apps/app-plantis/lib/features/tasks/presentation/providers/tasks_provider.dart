@@ -238,10 +238,19 @@ class TasksProvider extends ChangeNotifier {
   /// directly depended on AuthProvider, while maintaining the same functionality.
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      debugPrint('🔐 TasksProvider: Auth state changed - user: ${user?.id}');
-      // Reload tasks when auth state changes to ensure data consistency
-      if (_authStateNotifier.isInitialized) {
+      debugPrint('🔐 TasksProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      // CRITICAL FIX: Only load tasks if auth is fully initialized AND stable
+      if (_authStateNotifier.isInitialized && user != null) {
+        debugPrint('✅ TasksProvider: Auth is stable, loading tasks...');
         loadTasks();
+      } else if (_authStateNotifier.isInitialized && user == null) {
+        debugPrint('🔄 TasksProvider: No user but auth initialized - clearing tasks');
+        // Clear tasks when user logs out
+        _updateState(_state.copyWith(
+          allTasks: <task_entity.Task>[],
+          filteredTasks: <task_entity.Task>[],
+          clearError: true,
+        ));
       }
     });
   }
@@ -355,6 +364,7 @@ class TasksProvider extends ChangeNotifier {
   /// Loads tasks from the remote data source with sync coordination
   ///
   /// This method orchestrates the complete task loading process including:
+  /// - CRITICAL: Waits for authentication to be fully initialized
   /// - Sync throttling to prevent excessive API calls
   /// - Error handling with user-friendly messages
   /// - Loading state management
@@ -372,6 +382,15 @@ class TasksProvider extends ChangeNotifier {
   /// await loadTasks(); // Will update state with loaded tasks
   /// ```
   Future<void> loadTasks() async {
+    // CRITICAL FIX: Wait for authentication before loading tasks
+    if (!await _waitForAuthenticationWithTimeout()) {
+      _updateState(_state.copyWith(
+        isLoading: false,
+        errorMessage: 'Aguardando autenticação...',
+      ));
+      return;
+    }
+
     try {
       await _syncCoordinator.executeSyncOperation(
         operationType: TaskSyncOperations.loadTasks,
@@ -387,6 +406,42 @@ class TasksProvider extends ChangeNotifier {
         isLoading: false,
         errorMessage: AppStrings.errorSyncingTasks,
       ));
+    }
+  }
+
+  /// CRITICAL FIX: Wait for authentication initialization with timeout
+  /// 
+  /// This method ensures that we don't attempt to load tasks before the
+  /// authentication system is fully initialized. This prevents race conditions
+  /// that cause data not to load properly.
+  ///
+  /// Returns:
+  /// - `true` if authentication is initialized within timeout
+  /// - `false` if timeout is reached
+  Future<bool> _waitForAuthenticationWithTimeout({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    if (_authStateNotifier.isInitialized) {
+      return true;
+    }
+
+    debugPrint('⏳ TasksProvider: Waiting for auth initialization...');
+    
+    // Wait for initialization with timeout
+    try {
+      await _authStateNotifier.initializedStream
+          .where((isInitialized) => isInitialized)
+          .timeout(timeout)
+          .first;
+      
+      debugPrint('✅ TasksProvider: Auth initialization complete');
+      return true;
+    } on TimeoutException {
+      debugPrint('⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      return false;
+    } catch (e) {
+      debugPrint('❌ TasksProvider: Auth initialization error: $e');
+      return false;
     }
   }
 

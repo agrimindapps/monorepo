@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../../../../core/design/spacing_tokens.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 
 /// Widget para cards de informações do defensivo
@@ -17,7 +19,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
     return Column(
       children: [
         _buildInfoCard(context),
-        const SizedBox(height: 16),
+        SpacingTokens.gapLG,
         _buildClassificacaoCard(context),
       ],
     );
@@ -43,28 +45,28 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
           FontAwesomeIcons.flask,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Nome Técnico',
           caracteristicas['nomeTecnico']!,
           FontAwesomeIcons.tag,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Toxicologia',
           caracteristicas['toxico']!,
           FontAwesomeIcons.skull,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Inflamável',
           caracteristicas['inflamavel']!,
           FontAwesomeIcons.fire,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Corrosivo',
           caracteristicas['corrosivo']!,
@@ -95,28 +97,28 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
           FontAwesomeIcons.gear,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Classe Agronômica',
           caracteristicas['classeAgronomica']!,
           FontAwesomeIcons.seedling,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Classe Ambiental',
           caracteristicas['classAmbiental']!,
           FontAwesomeIcons.leaf,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Formulação',
           caracteristicas['formulacao']!,
           FontAwesomeIcons.flask,
           const Color(0xFF4CAF50),
         ),
-        const SizedBox(height: 12),
+        SpacingTokens.gapMD,
         _buildInfoItem(
           'Registro MAPA',
           caracteristicas['mapa']!,
@@ -153,7 +155,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
         children: [
           // Header do card
           Container(
-            padding: const EdgeInsets.all(8.0),
+            padding: SpacingTokens.paddingSM,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [

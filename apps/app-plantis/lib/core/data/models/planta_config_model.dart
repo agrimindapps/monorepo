@@ -376,6 +376,120 @@ class PlantaConfigModel extends BaseSyncModel {
     return active;
   }
 
+  /// Converte PlantConfig entity para PlantaConfigModel
+  /// Implementa lógica robusta de conversão e validação
+  factory PlantaConfigModel.fromPlantConfig({
+    required String plantaId,
+    required dynamic plantConfig, // PlantConfig from entities
+    String? userId,
+    String? configId,
+  }) {
+    final now = DateTime.now();
+    final id = configId ?? '${plantaId}_config_${now.millisecondsSinceEpoch}';
+
+    // Safe conversion with null checks and proper logic
+    bool aguaAtiva = false;
+    int intervaloRegaDias = 3; // default
+    
+    bool aduboAtivo = false;
+    int intervaloAdubacaoDias = 14; // default
+    
+    bool banhoSolAtivo = false;
+    int intervaloBanhoSolDias = 7; // default
+    
+    bool inspecaoPragasAtiva = false;
+    int intervaloInspecaoPragasDias = 14; // default
+    
+    bool podaAtiva = false;
+    int intervaloPodaDias = 90; // default
+    
+    bool replantarAtivo = false;
+    int intervaloReplantarDias = 365; // default
+
+    try {
+      // Handle water care - prioritize enableWateringCare flag
+      final enableWateringCare = plantConfig.enableWateringCare;
+      if (enableWateringCare is bool) {
+        aguaAtiva = enableWateringCare;
+      } else {
+        final wateringInterval = plantConfig.wateringIntervalDays;
+        if (wateringInterval is int && wateringInterval > 0) {
+          aguaAtiva = true;
+        }
+      }
+      
+      final wateringInterval = plantConfig.wateringIntervalDays;
+      if (wateringInterval is int && wateringInterval > 0) {
+        intervaloRegaDias = wateringInterval;
+      }
+
+      // Handle fertilizer care - prioritize enableFertilizerCare flag
+      final enableFertilizerCare = plantConfig.enableFertilizerCare;
+      if (enableFertilizerCare is bool) {
+        aduboAtivo = enableFertilizerCare;
+      } else {
+        final fertilizingInterval = plantConfig.fertilizingIntervalDays;
+        if (fertilizingInterval is int && fertilizingInterval > 0) {
+          aduboAtivo = true;
+        }
+      }
+      
+      final fertilizingInterval = plantConfig.fertilizingIntervalDays;
+      if (fertilizingInterval is int && fertilizingInterval > 0) {
+        intervaloAdubacaoDias = fertilizingInterval;
+      }
+
+      // Handle sunlight care - only active if interval is explicitly set
+      final sunlightInterval = plantConfig.sunlightCheckIntervalDays;
+      if (sunlightInterval is int && sunlightInterval > 0) {
+        banhoSolAtivo = true;
+        intervaloBanhoSolDias = sunlightInterval;
+      }
+
+      // Handle pest inspection - only active if interval is explicitly set
+      final pestInterval = plantConfig.pestInspectionIntervalDays;
+      if (pestInterval is int && pestInterval > 0) {
+        inspecaoPragasAtiva = true;
+        intervaloInspecaoPragasDias = pestInterval;
+      }
+
+      // Handle pruning - only active if interval is explicitly set
+      final pruningInterval = plantConfig.pruningIntervalDays;
+      if (pruningInterval is int && pruningInterval > 0) {
+        podaAtiva = true;
+        intervaloPodaDias = pruningInterval;
+      }
+
+      // Handle replanting - only active if interval is explicitly set
+      final replantingInterval = plantConfig.replantingIntervalDays;
+      if (replantingInterval is int && replantingInterval > 0) {
+        replantarAtivo = true;
+        intervaloReplantarDias = replantingInterval;
+      }
+    } catch (e) {
+      // Log conversion error but don't fail - use defaults
+      print('Warning: Error converting PlantConfig to PlantaConfigModel: $e');
+    }
+
+    return PlantaConfigModel.create(
+      id: id,
+      userId: userId,
+      plantaId: plantaId,
+      aguaAtiva: aguaAtiva,
+      intervaloRegaDias: intervaloRegaDias,
+      aduboAtivo: aduboAtivo,
+      intervaloAdubacaoDias: intervaloAdubacaoDias,
+      banhoSolAtivo: banhoSolAtivo,
+      intervaloBanhoSolDias: intervaloBanhoSolDias,
+      inspecaoPragasAtiva: inspecaoPragasAtiva,
+      intervaloInspecaoPragasDias: intervaloInspecaoPragasDias,
+      podaAtiva: podaAtiva,
+      intervaloPodaDias: intervaloPodaDias,
+      replantarAtivo: replantarAtivo,
+      intervaloReplantarDias: intervaloReplantarDias,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

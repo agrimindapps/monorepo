@@ -226,10 +226,18 @@ class PlantFormProvider extends ChangeNotifier {
   Map<String, String> get fieldErrors {
     final errors = <String, String>{};
 
+    // Basic field validation
     if (_name.trim().isEmpty) {
       errors['name'] = 'Nome é obrigatório';
     }
 
+    // Config validation using the robust validation method
+    final configError = _validateConfigData();
+    if (configError != null) {
+      errors['config'] = configError;
+    }
+
+    // Individual field validations for UI feedback
     if (_wateringIntervalDays != null && _wateringIntervalDays! <= 0) {
       errors['wateringInterval'] = 'Intervalo deve ser maior que 0';
     }
@@ -240,6 +248,18 @@ class PlantFormProvider extends ChangeNotifier {
 
     if (_pruningIntervalDays != null && _pruningIntervalDays! <= 0) {
       errors['pruningInterval'] = 'Intervalo deve ser maior que 0';
+    }
+
+    if (_enableSunlightCare == true && (_sunlightIntervalDays == null || _sunlightIntervalDays! <= 0)) {
+      errors['sunlightInterval'] = 'Intervalo deve ser maior que 0 quando ativado';
+    }
+
+    if (_enablePestInspection == true && (_pestInspectionIntervalDays == null || _pestInspectionIntervalDays! <= 0)) {
+      errors['pestInspectionInterval'] = 'Intervalo deve ser maior que 0 quando ativado';
+    }
+
+    if (_enableReplanting == true && (_replantingIntervalDays == null || _replantingIntervalDays! <= 0)) {
+      errors['replantingInterval'] = 'Intervalo deve ser maior que 0 quando ativado';
     }
 
     return errors;
@@ -517,6 +537,17 @@ class PlantFormProvider extends ChangeNotifier {
     }
     
     if (!isValid) return false;
+    
+    // Validate plant config data
+    final configValidationError = _validateConfigData();
+    if (configValidationError != null) {
+      if (kDebugMode) {
+        print('❌ PlantFormProvider.savePlant() - Config validation failed: $configValidationError');
+      }
+      _errorMessage = configValidationError;
+      notifyListeners();
+      return false;
+    }
 
     _isSaving = true;
     _errorMessage = null;
@@ -746,17 +777,97 @@ class PlantFormProvider extends ChangeNotifier {
     );
   }
 
+  /// Verifica se há dados de configuração válidos para salvar
+  /// Implementa validação robusta para garantir configurações consistentes
   bool _hasConfigData() {
-    return _wateringIntervalDays != null ||
-        _fertilizingIntervalDays != null ||
-        (_enablePruning == true && _pruningIntervalDays != null) ||
-        (_enableSunlightCare == true && _sunlightIntervalDays != null) ||
-        (_enablePestInspection == true &&
-            _pestInspectionIntervalDays != null) ||
-        (_enableReplanting == true && _replantingIntervalDays != null) ||
-        _waterAmount != null ||
-        (_enableWateringCare == true && _lastWateringDate != null) ||
-        (_enableFertilizerCare == true && _lastFertilizerDate != null);
+    // Basic care intervals - valid if > 0
+    bool hasBasicCare = false;
+    
+    if (_wateringIntervalDays != null && _wateringIntervalDays! > 0) {
+      hasBasicCare = true;
+    }
+    
+    if (_fertilizingIntervalDays != null && _fertilizingIntervalDays! > 0) {
+      hasBasicCare = true;
+    }
+    
+    // Extended care - only valid if enabled AND has valid interval
+    bool hasExtendedCare = false;
+    
+    if (_enablePruning == true && _pruningIntervalDays != null && _pruningIntervalDays! > 0) {
+      hasExtendedCare = true;
+    }
+    
+    if (_enableSunlightCare == true && _sunlightIntervalDays != null && _sunlightIntervalDays! > 0) {
+      hasExtendedCare = true;
+    }
+    
+    if (_enablePestInspection == true && _pestInspectionIntervalDays != null && _pestInspectionIntervalDays! > 0) {
+      hasExtendedCare = true;
+    }
+    
+    if (_enableReplanting == true && _replantingIntervalDays != null && _replantingIntervalDays! > 0) {
+      hasExtendedCare = true;
+    }
+    
+    // Care flags - valid if enabled
+    bool hasCareFlags = false;
+    
+    if (_enableWateringCare == true) {
+      hasCareFlags = true;
+    }
+    
+    if (_enableFertilizerCare == true) {
+      hasCareFlags = true;
+    }
+    
+    // Water amount is meaningful config
+    bool hasWaterAmount = _waterAmount?.trim().isNotEmpty == true;
+    
+    return hasBasicCare || hasExtendedCare || hasCareFlags || hasWaterAmount;
+  }
+
+  /// Valida se a configuração atual é válida para salvar
+  /// Retorna null se válida, ou string com erro se inválida
+  String? _validateConfigData() {
+    if (!_hasConfigData()) {
+      return null; // No config is valid (optional)
+    }
+    
+    // If has config data, validate required fields
+    List<String> errors = [];
+    
+    // Validate watering interval if set
+    if (_wateringIntervalDays != null && _wateringIntervalDays! <= 0) {
+      errors.add('Intervalo de rega deve ser maior que 0');
+    }
+    
+    // Validate fertilizing interval if set  
+    if (_fertilizingIntervalDays != null && _fertilizingIntervalDays! <= 0) {
+      errors.add('Intervalo de adubação deve ser maior que 0');
+    }
+    
+    // Validate pruning if enabled
+    if (_enablePruning == true && (_pruningIntervalDays == null || _pruningIntervalDays! <= 0)) {
+      errors.add('Intervalo de poda deve ser maior que 0 quando ativado');
+    }
+    
+    // Validate sunlight if enabled
+    if (_enableSunlightCare == true && (_sunlightIntervalDays == null || _sunlightIntervalDays! <= 0)) {
+      errors.add('Intervalo de banho de sol deve ser maior que 0 quando ativado');
+    }
+    
+    // Validate pest inspection if enabled
+    if (_enablePestInspection == true && (_pestInspectionIntervalDays == null || _pestInspectionIntervalDays! <= 0)) {
+      errors.add('Intervalo de inspeção de pragas deve ser maior que 0 quando ativado');
+    }
+    
+    // Validate replanting if enabled
+    if (_enableReplanting == true && (_replantingIntervalDays == null || _replantingIntervalDays! <= 0)) {
+      errors.add('Intervalo de replantio deve ser maior que 0 quando ativado');
+    }
+    
+    return errors.isEmpty ? null : errors.first;
   }
 
   String _getErrorMessage(Failure failure) {

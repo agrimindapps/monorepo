@@ -3,8 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/pragas_hive.dart';
+import '../../../../core/models/pragas_inf_hive.dart';
+import '../../../../core/models/plantas_inf_hive.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
+import '../../../../core/repositories/pragas_inf_hive_repository.dart';
+import '../../../../core/repositories/plantas_inf_hive_repository.dart';
 import '../../../comentarios/models/comentario_model.dart';
 import '../../../comentarios/services/comentarios_service.dart';
 
@@ -14,6 +18,8 @@ class DetalhePragaProvider extends ChangeNotifier {
   // Services e Repositories
   final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
   final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  final PragasInfHiveRepository _pragasInfRepository = sl<PragasInfHiveRepository>();
+  final PlantasInfHiveRepository _plantasInfRepository = sl<PlantasInfHiveRepository>();
   final IPremiumService _premiumService = sl<IPremiumService>();
   final ComentariosService _comentariosService = sl<ComentariosService>();
 
@@ -32,6 +38,8 @@ class DetalhePragaProvider extends ChangeNotifier {
   // Dados relacionados
   List<ComentarioModel> _comentarios = [];
   Map<String, dynamic>? _defensivoData;
+  PragasInfHive? _pragaInfo;
+  PlantasInfHive? _plantaInfo;
   
   // Listener para premium status
   VoidCallback? _premiumStatusListener;
@@ -47,6 +55,8 @@ class DetalhePragaProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   List<ComentarioModel> get comentarios => _comentarios;
   Map<String, dynamic>? get defensivoData => _defensivoData;
+  PragasInfHive? get pragaInfo => _pragaInfo;
+  PlantasInfHive? get plantaInfo => _plantaInfo;
 
   /// Inicializa o provider com dados da praga
   void initialize(String pragaName, String pragaScientificName) {
@@ -64,6 +74,7 @@ class DetalhePragaProvider extends ChangeNotifier {
     _pragaScientificName = pragaScientificName;
     
     await _loadFavoritoStateAsync();
+    await _loadPragaSpecificInfo();
     _loadPremiumStatus();
     await _loadComentarios();
   }
@@ -110,6 +121,38 @@ class DetalhePragaProvider extends ChangeNotifier {
       debugPrint('❌ Praga não encontrada: $_pragaName');
       // Fallback para nome se não encontrar no repositório
       _isFavorited = _favoritosRepository.isFavorito('praga', _pragaName);
+    }
+    
+    notifyListeners();
+  }
+
+  /// Carrega informações específicas baseado no tipo da praga
+  Future<void> _loadPragaSpecificInfo() async {
+    if (_pragaData == null) return;
+    
+    debugPrint('🔍 Carregando informações específicas para praga tipo: ${_pragaData!.tipoPraga}');
+    
+    try {
+      // Para pragas do tipo "inseto" (tipoPraga = "1"), usa PragasInfHive
+      if (_pragaData!.tipoPraga == '1') {
+        _pragaInfo = _pragasInfRepository.findByIdReg(_pragaData!.idReg);
+        debugPrint('📋 PragaInfo carregada: ${_pragaInfo != null ? 'Sim' : 'Não'}');
+      }
+      
+      // Para pragas do tipo "planta" (tipoPraga = "3"), usa PlantasInfHive  
+      else if (_pragaData!.tipoPraga == '3') {
+        _plantaInfo = _plantasInfRepository.findByIdReg(_pragaData!.idReg);
+        debugPrint('🌿 PlantaInfo carregada: ${_plantaInfo != null ? 'Sim' : 'Não'}');
+      }
+      
+      // Para doenças (tipoPraga = "2"), também pode usar PragasInfHive
+      else if (_pragaData!.tipoPraga == '2') {
+        _pragaInfo = _pragasInfRepository.findByIdReg(_pragaData!.idReg);
+        debugPrint('🦠 DoençaInfo carregada: ${_pragaInfo != null ? 'Sim' : 'Não'}');
+      }
+      
+    } catch (e) {
+      debugPrint('❌ Erro ao carregar informações específicas: $e');
     }
     
     notifyListeners();

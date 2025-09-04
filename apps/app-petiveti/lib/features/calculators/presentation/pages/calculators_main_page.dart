@@ -323,6 +323,12 @@ class _CalculatorCard extends StatelessWidget {
       case 'animal_age':
         route = '/calculators/animal-age';
         break;
+      case 'anesthesia':
+        route = '/calculators/anesthesia';
+        break;
+      case 'diabetes_insulin':
+        route = '/calculators/diabetes-insulin';
+        break;
       case 'ideal_weight':
         route = '/calculators/ideal-weight';
         break;

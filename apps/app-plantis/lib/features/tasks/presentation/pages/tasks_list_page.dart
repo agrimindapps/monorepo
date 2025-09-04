@@ -191,7 +191,12 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         appBar: const TasksAppBar(),
         body: ResponsiveLayout(
           child: SafeArea(
-            child: Selector<TasksProvider, TasksListState>(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Selector<TasksProvider, TasksListState>(
           selector: (_, provider) => TasksListState(
             isLoading: provider.isLoading,
             hasError: provider.hasError,
@@ -234,8 +239,11 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
               ),
             );
           },
-          ),
+                  ),
+                ),
+              ),
             ),
+          ),
         ),
         // FAB removido - tarefas são geradas automaticamente quando concluídas
         // floatingActionButton: const TasksFab(),

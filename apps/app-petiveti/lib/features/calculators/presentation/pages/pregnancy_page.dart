@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/pregnancy_gestacao_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../providers/pregnancy_provider.dart';
@@ -442,6 +441,10 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
+    
+    // Separar alertas de recomendações normais
+    final alerts = recommendations.where((r) => r.title.contains('Alerta')).toList();
+    final normalRecs = recommendations.where((r) => !r.title.contains('Alerta')).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,12 +457,8 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
         ),
         const SizedBox(height: 8),
         
-        // Separar alertas de recomendações normais
-        final alerts = recommendations.where((r) => r.title.contains('Alerta')).toList();
-        final normalRecs = recommendations.where((r) => !r.title.contains('Alerta')).toList();
-        
         // Mostrar alertas primeiro
-        if (alerts.isNotEmpty) {
+        if (alerts.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.only(bottom: 12),
@@ -495,7 +494,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               ],
             ),
           ),
-        }
+        ],
         
         // Recomendações normais
         ...normalRecs.map((rec) => Padding(

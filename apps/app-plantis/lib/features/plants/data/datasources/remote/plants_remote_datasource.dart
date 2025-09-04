@@ -27,13 +27,13 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<List<PlantModel>> getPlants(String userId) async {
     try {
+      // Using simple query to avoid composite index requirement
       final snapshot =
           await _getPlantsCollection(userId)
               .where('isDeleted', isEqualTo: false)
-              .orderBy('createdAt', descending: true)
               .get();
 
-      return snapshot.docs
+      final plants = snapshot.docs
           .map(
             (doc) => PlantModel.fromJson({
               ...doc.data() as Map<String, dynamic>,
@@ -41,6 +41,15 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
             }),
           )
           .toList();
+
+      // Apply sorting on client-side to avoid composite index
+      plants.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime(1970);
+        final bDate = b.createdAt ?? DateTime(1970);
+        return bDate.compareTo(aDate); // descending order
+      });
+
+      return plants;
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao buscar plantas: ${e.message}');
     } catch (e) {
@@ -156,14 +165,14 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     String userId,
   ) async {
     try {
+      // Using simple query to avoid composite index requirement
       final snapshot =
           await _getPlantsCollection(userId)
               .where('isDeleted', isEqualTo: false)
               .where('spaceId', isEqualTo: spaceId)
-              .orderBy('createdAt', descending: true)
               .get();
 
-      return snapshot.docs
+      final plants = snapshot.docs
           .map(
             (doc) => PlantModel.fromJson({
               ...doc.data() as Map<String, dynamic>,
@@ -171,6 +180,15 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
             }),
           )
           .toList();
+
+      // Apply sorting on client-side to avoid composite index
+      plants.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime(1970);
+        final bDate = b.createdAt ?? DateTime(1970);
+        return bDate.compareTo(aDate); // descending order
+      });
+
+      return plants;
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao buscar plantas por espaço: ${e.message}');
     } catch (e) {

@@ -11,6 +11,7 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDiagnostico/detalhe_diagnostico_page.dart';
 import '../comentarios/models/comentario_model.dart';
 import '../comentarios/services/comentarios_service.dart';
+import '../comentarios/views/widgets/premium_upgrade_widget.dart';
 import '../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../favoritos/favoritos_page.dart';
 import '../navigation/bottom_nav_wrapper.dart';
@@ -1618,71 +1619,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     final isPremium = _premiumService.isPremium;
 
     if (!isPremium) {
-      return Container(
-        width: 280,
-        margin: const EdgeInsets.all(8.0),
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFF3E0),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFFFB74D), width: 1),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.diamond, size: 48, color: Color(0xFFFF9800)),
-            const SizedBox(height: 16),
-            const Text(
-              'Comentários não disponíveis',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFE65100),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Este recurso está disponível apenas para assinantes do app.',
-              style: TextStyle(fontSize: 16, color: Color(0xFFBF360C)),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  _premiumService.navigateToPremium();
-                },
-                icon: const Icon(
-                  Icons.rocket_launch,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                label: const Text(
-                  'Desbloquear Agora',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF9800),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 24,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
-                ),
-              ),
-            ),
-          ],
-        ),
+      return PremiumUpgradeWidget.noPermission(
+        onUpgrade: () => _premiumService.navigateToPremium(),
       );
     }
 

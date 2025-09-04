@@ -42,9 +42,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image section
@@ -55,7 +53,6 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           // Basic information form
           _buildBasicInfoForm(context),
         ],
-      ),
     );
   }
 
@@ -375,13 +372,6 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 // Sanitize input before processing
                 final sanitizedValue = ValidationHelpers.sanitizePlantName(value);
                 provider.setName(sanitizedValue);
-                // Update controller if sanitization changed the value
-                if (sanitizedValue != value) {
-                  _nameController.text = sanitizedValue;
-                  _nameController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: sanitizedValue.length),
-                  );
-                }
               },
               validator: (value) => _validatePlantName(value),
               icon: Icons.local_florist,
@@ -395,16 +385,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               label: 'Espécie',
               hint: 'Ex: Rosa gallica',
               onChanged: (value) {
-                // Sanitize input before processing
+                // Sanitize input before processing  
                 final sanitizedValue = ValidationHelpers.sanitizePlantName(value);
                 provider.setSpecies(sanitizedValue);
-                // Update controller if sanitization changed the value
-                if (sanitizedValue != value) {
-                  _speciesController.text = sanitizedValue;
-                  _speciesController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: sanitizedValue.length),
-                  );
-                }
               },
               validator: (value) => _validateSpecies(value),
               icon: Icons.science,
@@ -445,13 +428,6 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 // Sanitize input before processing
                 final sanitizedValue = ValidationHelpers.sanitizeNotes(value);
                 provider.setNotes(sanitizedValue);
-                // Update controller if sanitization changed the value
-                if (sanitizedValue != value) {
-                  _notesController.text = sanitizedValue;
-                  _notesController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: sanitizedValue.length),
-                  );
-                }
               },
               validator: (value) => _validateNotes(value),
               icon: Icons.note,
@@ -583,6 +559,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               initialDate: value ?? DateTime.now(),
               firstDate: DateTime(2000),
               lastDate: DateTime.now(),
+              locale: const Locale('pt', 'BR'),
               builder: (context, child) {
                 return Theme(
                   data: theme.copyWith(

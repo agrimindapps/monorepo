@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
@@ -14,6 +17,10 @@ class PlantsProvider extends ChangeNotifier {
   final AddPlantUseCase _addPlantUseCase;
   final UpdatePlantUseCase _updatePlantUseCase;
   final DeletePlantUseCase _deletePlantUseCase;
+  final AuthStateNotifier _authStateNotifier;
+
+  // Stream subscription for auth state changes
+  StreamSubscription<UserEntity?>? _authSubscription;
 
   PlantsProvider({
     required GetPlantsUseCase getPlantsUseCase,
@@ -22,12 +29,17 @@ class PlantsProvider extends ChangeNotifier {
     required AddPlantUseCase addPlantUseCase,
     required UpdatePlantUseCase updatePlantUseCase,
     required DeletePlantUseCase deletePlantUseCase,
+    AuthStateNotifier? authStateNotifier,
   }) : _getPlantsUseCase = getPlantsUseCase,
        _getPlantByIdUseCase = getPlantByIdUseCase,
        _searchPlantsUseCase = searchPlantsUseCase,
        _addPlantUseCase = addPlantUseCase,
        _updatePlantUseCase = updatePlantUseCase,
-       _deletePlantUseCase = deletePlantUseCase;
+       _deletePlantUseCase = deletePlantUseCase,
+       _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance {
+    // Initialize auth state listener
+    _initializeAuthListener();
+  }
 
   List<Plant> _plants = [];
   List<Plant> get plants => _plants;
@@ -59,10 +71,75 @@ class PlantsProvider extends ChangeNotifier {
   String? _filterBySpace;
   String? get filterBySpace => _filterBySpace;
 
+  /// Initializes the authentication state listener
+  ///
+  /// This method sets up a subscription to the AuthStateNotifier to listen
+  /// for authentication state changes. When the user logs in/out, it
+  /// automatically reloads plants to ensure data consistency.
+  void _initializeAuthListener() {
+    _authSubscription = _authStateNotifier.userStream.listen((user) {
+      debugPrint('🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      // CRITICAL FIX: Only load plants if auth is fully initialized AND stable
+      if (_authStateNotifier.isInitialized && user != null) {
+        debugPrint('✅ PlantsProvider: Auth is stable, loading plants...');
+        loadInitialData();
+      } else if (_authStateNotifier.isInitialized && user == null) {
+        debugPrint('🔄 PlantsProvider: No user but auth initialized - clearing plants');
+        // Clear plants when user logs out
+        _plants = [];
+        _selectedPlant = null;
+        _clearError();
+        notifyListeners();
+      }
+    });
+  }
+
+  /// CRITICAL FIX: Wait for authentication initialization with timeout
+  /// 
+  /// This method ensures that we don't attempt to load plants before the
+  /// authentication system is fully initialized. This prevents race conditions
+  /// that cause data not to load properly.
+  ///
+  /// Returns:
+  /// - `true` if authentication is initialized within timeout
+  /// - `false` if timeout is reached
+  Future<bool> _waitForAuthenticationWithTimeout({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    if (_authStateNotifier.isInitialized) {
+      return true;
+    }
+
+    debugPrint('⏳ PlantsProvider: Waiting for auth initialization...');
+    
+    // Wait for initialization with timeout
+    try {
+      await _authStateNotifier.initializedStream
+          .where((isInitialized) => isInitialized)
+          .timeout(timeout)
+          .first;
+      
+      debugPrint('✅ PlantsProvider: Auth initialization complete');
+      return true;
+    } on TimeoutException {
+      debugPrint('⚠️ PlantsProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      return false;
+    } catch (e) {
+      debugPrint('❌ PlantsProvider: Auth initialization error: $e');
+      return false;
+    }
+  }
+
   // Load all plants
   Future<void> loadPlants() async {
     if (kDebugMode) {
       print('📋 PlantsProvider.loadPlants() - Iniciando carregamento');
+    }
+
+    // CRITICAL FIX: Wait for authentication before loading plants
+    if (!await _waitForAuthenticationWithTimeout()) {
+      _setError('Aguardando autenticação...');
+      return;
     }
 
     // Only show loading if no plants exist yet (first load)
@@ -646,6 +723,13 @@ class PlantsProvider extends ChangeNotifier {
             : '';
         return 'Ops! Algo deu errado$errorContext';
     }
+  }
+
+  @override
+  void dispose() {
+    // Cancel auth state subscription to prevent memory leaks
+    _authSubscription?.cancel();
+    super.dispose();
   }
 }
 

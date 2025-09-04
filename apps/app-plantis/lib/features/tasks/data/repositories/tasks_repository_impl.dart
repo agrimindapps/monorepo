@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart' hide Task;
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -16,16 +17,66 @@ class TasksRepositoryImpl implements TasksRepository {
   final TasksRemoteDataSource remoteDataSource;
   final TasksLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
+  final IAuthRepository authService;
 
   TasksRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
+    required this.authService,
   });
+
+  Future<String?> get _currentUserId async {
+    return await _getCurrentUserIdWithRetry();
+  }
+
+  /// Get current user ID with retry logic to handle auth race conditions
+  Future<String?> _getCurrentUserIdWithRetry({int maxRetries = 3}) async {
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Wait for user with increasing timeout per attempt
+        final timeoutDuration = Duration(seconds: 2 * attempt);
+        final user = await authService.currentUser
+            .timeout(timeoutDuration)
+            .first;
+        
+        if (user != null && user.id.isNotEmpty) {
+          return user.id;
+        }
+        
+        // If user is null or has empty ID, wait and retry (except on last attempt)
+        if (attempt < maxRetries) {
+          await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
+          continue;
+        }
+        
+        return null;
+      } catch (e) {
+        // Log error for debugging with attempt number
+        print('Auth attempt $attempt/$maxRetries failed: $e');
+        
+        // If it's the last attempt, return null
+        if (attempt >= maxRetries) {
+          return null;
+        }
+        
+        // Wait before retrying, with exponential backoff
+        await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
+      }
+    }
+    
+    return null;
+  }
 
   @override
   Future<Either<Failure, List<Task>>> getTasks() async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        // CRITICAL FIX: Return proper error instead of empty list for unauthenticated users
+        return Left(AuthFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
+      }
+
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTasks();
 
@@ -33,7 +84,7 @@ class TasksRepositoryImpl implements TasksRepository {
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
         if (await networkInfo.isConnected) {
-          _syncTasksInBackground();
+          _syncTasksInBackground(userId);
         }
         return Right(localTasks.cast<Task>());
       }
@@ -41,13 +92,15 @@ class TasksRepositoryImpl implements TasksRepository {
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
-          final remoteTasks = await remoteDataSource.getTasks();
+          final remoteTasks = await remoteDataSource.getTasks(userId);
           await localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks.cast<Task>());
         } catch (e) {
-          return Right(
-            localTasks.cast<Task>(),
-          ); // Return empty list if both fail
+          // CRITICAL FIX: Provide proper error reporting instead of silent failure
+          if (kDebugMode) {
+            print('❌ TasksRepository: Remote fetch failed: $e');
+          }
+          return Left(NetworkFailure('Falha ao sincronizar tarefas: ${e.toString()}'));
         }
       } else {
         return Right(
@@ -61,9 +114,9 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   // Background sync method (fire and forget)
-  void _syncTasksInBackground() {
+  void _syncTasksInBackground(String userId) {
     remoteDataSource
-        .getTasks()
+        .getTasks(userId)
         .then((remoteTasks) {
           // Update local cache with remote data
           localDataSource.cacheTasks(remoteTasks);
@@ -76,6 +129,11 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getTasksByPlantId(String plantId) async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTasksByPlantId(plantId);
 
@@ -83,7 +141,7 @@ class TasksRepositoryImpl implements TasksRepository {
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
         if (await networkInfo.isConnected) {
-          _syncTasksByPlantInBackground(plantId);
+          _syncTasksByPlantInBackground(plantId, userId);
         }
         return Right(localTasks.cast<Task>());
       }
@@ -91,7 +149,7 @@ class TasksRepositoryImpl implements TasksRepository {
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
-          final remoteTasks = await remoteDataSource.getTasksByPlantId(plantId);
+          final remoteTasks = await remoteDataSource.getTasksByPlantId(plantId, userId);
           for (final task in remoteTasks) {
             await localDataSource.cacheTask(task);
           }
@@ -108,9 +166,9 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  void _syncTasksByPlantInBackground(String plantId) {
+  void _syncTasksByPlantInBackground(String plantId, String userId) {
     remoteDataSource
-        .getTasksByPlantId(plantId)
+        .getTasksByPlantId(plantId, userId)
         .then((remoteTasks) {
           for (final task in remoteTasks) {
             localDataSource.cacheTask(task);
@@ -126,12 +184,17 @@ class TasksRepositoryImpl implements TasksRepository {
     TaskStatus status,
   ) async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTasksByStatus(status);
 
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        _syncTasksByStatusInBackground(status);
+        _syncTasksByStatusInBackground(status, userId);
       }
 
       // Return local data immediately (empty list is fine)
@@ -142,9 +205,9 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  void _syncTasksByStatusInBackground(TaskStatus status) {
+  void _syncTasksByStatusInBackground(TaskStatus status, String userId) {
     remoteDataSource
-        .getTasksByStatus(status)
+        .getTasksByStatus(status, userId)
         .then((remoteTasks) {
           for (final task in remoteTasks) {
             localDataSource.cacheTask(task);
@@ -158,6 +221,11 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getOverdueTasks() async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getOverdueTasks();
 
@@ -165,7 +233,7 @@ class TasksRepositoryImpl implements TasksRepository {
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
         if (await networkInfo.isConnected) {
-          _syncOverdueTasksInBackground();
+          _syncOverdueTasksInBackground(userId);
         }
         return Right(localTasks.cast<Task>());
       }
@@ -173,7 +241,7 @@ class TasksRepositoryImpl implements TasksRepository {
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
-          final remoteTasks = await remoteDataSource.getOverdueTasks();
+          final remoteTasks = await remoteDataSource.getOverdueTasks(userId);
           for (final task in remoteTasks) {
             await localDataSource.cacheTask(task);
           }
@@ -190,9 +258,9 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  void _syncOverdueTasksInBackground() {
+  void _syncOverdueTasksInBackground(String userId) {
     remoteDataSource
-        .getOverdueTasks()
+        .getOverdueTasks(userId)
         .then((remoteTasks) {
           for (final task in remoteTasks) {
             localDataSource.cacheTask(task);
@@ -206,6 +274,11 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getTodayTasks() async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getTodayTasks();
 
@@ -213,7 +286,7 @@ class TasksRepositoryImpl implements TasksRepository {
       if (localTasks.isNotEmpty) {
         // Sync in background if connected (fire and forget)
         if (await networkInfo.isConnected) {
-          _syncTodayTasksInBackground();
+          _syncTodayTasksInBackground(userId);
         }
         return Right(localTasks.cast<Task>());
       }
@@ -221,7 +294,7 @@ class TasksRepositoryImpl implements TasksRepository {
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
-          final remoteTasks = await remoteDataSource.getTodayTasks();
+          final remoteTasks = await remoteDataSource.getTodayTasks(userId);
           for (final task in remoteTasks) {
             await localDataSource.cacheTask(task);
           }
@@ -238,9 +311,9 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  void _syncTodayTasksInBackground() {
+  void _syncTodayTasksInBackground(String userId) {
     remoteDataSource
-        .getTodayTasks()
+        .getTodayTasks(userId)
         .then((remoteTasks) {
           for (final task in remoteTasks) {
             localDataSource.cacheTask(task);
@@ -254,12 +327,17 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getUpcomingTasks() async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
       // Always get from local first for instant UI response
       final localTasks = await localDataSource.getUpcomingTasks();
 
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        _syncUpcomingTasksInBackground();
+        _syncUpcomingTasksInBackground(userId);
       }
 
       // Return local data immediately (empty list is fine)
@@ -270,9 +348,9 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  void _syncUpcomingTasksInBackground() {
+  void _syncUpcomingTasksInBackground(String userId) {
     remoteDataSource
-        .getUpcomingTasks()
+        .getUpcomingTasks(userId)
         .then((remoteTasks) {
           for (final task in remoteTasks) {
             localDataSource.cacheTask(task);
@@ -286,12 +364,17 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, Task>> getTaskById(String id) async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Left(ServerFailure('Usuário não autenticado'));
+      }
+
       // Always get from local first for instant response
       final localTask = await localDataSource.getTaskById(id);
 
       // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
-        _syncTaskByIdInBackground(id);
+        _syncTaskByIdInBackground(id, userId);
       }
 
       // Return local data immediately (or error if not found)
@@ -309,9 +392,9 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  void _syncTaskByIdInBackground(String id) {
+  void _syncTaskByIdInBackground(String id, String userId) {
     remoteDataSource
-        .getTaskById(id)
+        .getTaskById(id, userId)
         .then((remoteTask) {
           if (remoteTask != null) {
             localDataSource.cacheTask(remoteTask);
@@ -325,10 +408,15 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, Task>> addTask(Task task) async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Left(ServerFailure('Usuário não autenticado'));
+      }
+
       final taskModel = TaskModel.fromEntity(task);
 
       if (await networkInfo.isConnected) {
-        final remoteTask = await remoteDataSource.addTask(taskModel);
+        final remoteTask = await remoteDataSource.addTask(taskModel, userId);
         await localDataSource.cacheTask(remoteTask);
         return Right(remoteTask);
       } else {
@@ -345,10 +433,15 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, Task>> updateTask(Task task) async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Left(ServerFailure('Usuário não autenticado'));
+      }
+
       final taskModel = TaskModel.fromEntity(task);
 
       if (await networkInfo.isConnected) {
-        final remoteTask = await remoteDataSource.updateTask(taskModel);
+        final remoteTask = await remoteDataSource.updateTask(taskModel, userId);
         await localDataSource.updateTask(remoteTask);
         return Right(remoteTask);
       } else {
@@ -365,8 +458,13 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, void>> deleteTask(String id) async {
     try {
+      final userId = await _currentUserId;
+      if (userId == null) {
+        return const Left(ServerFailure('Usuário não autenticado'));
+      }
+
       if (await networkInfo.isConnected) {
-        await remoteDataSource.deleteTask(id);
+        await remoteDataSource.deleteTask(id, userId);
         await localDataSource.deleteTask(id);
       } else {
         // Offline: marca como deletado localmente

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../../core/di/injection_container.dart' as di;
 import '../../../../../core/localization/app_strings.dart';
 import '../../../domain/entities/plant.dart';
+import '../../pages/plant_form_page.dart';
 import '../../providers/plant_details_provider.dart';
+import '../../providers/plant_form_provider.dart';
 
 /// Controller responsible for business logic of the plant details screen
 /// 
@@ -30,13 +34,13 @@ class PlantDetailsController {
   
   // Callbacks para ações que precisam de context
   final VoidCallback? onBack;
-  final Function(String)? onNavigateToEdit;
-  final Function(String)? onNavigateToImages;
-  final Function(String)? onNavigateToSchedule;
-  final Function(String, String)? onShowSnackBar;
-  final Function(String, String, {Color? backgroundColor})? onShowSnackBarWithColor;
-  final Function(Widget)? onShowDialog;
-  final Function(Widget)? onShowBottomSheet;
+  final void Function(String)? onNavigateToEdit;
+  final void Function(String)? onNavigateToImages;
+  final void Function(String)? onNavigateToSchedule;
+  final void Function(String, String)? onShowSnackBar;
+  final void Function(String, String, {Color? backgroundColor})? onShowSnackBarWithColor;
+  final void Function(Widget)? onShowDialog;
+  final void Function(Widget)? onShowBottomSheet;
   final void Function(String)? onPlantDeleted;
 
   PlantDetailsController({
@@ -97,10 +101,11 @@ class PlantDetailsController {
     onBack?.call();
   }
 
-  /// Navigates to the plant editing screen
+  /// Shows the plant editing dialog
   /// 
-  /// This method triggers navigation to the plant form page in edit mode,
-  /// allowing users to modify the plant's information.
+  /// This method displays a modal dialog with the plant form in edit mode,
+  /// allowing users to modify the plant's information. Using a dialog ensures
+  /// consistent UX with the plant creation flow and prevents navigation issues.
   /// 
   /// Parameters:
   /// - [plant]: The plant entity containing the current plant data
@@ -110,7 +115,33 @@ class PlantDetailsController {
   /// controller.editPlant(selectedPlant);
   /// ```
   void editPlant(Plant plant) {
-    onNavigateToEdit?.call(plant.id);
+    // Use dialog for editing instead of navigation to prevent loading issues
+    onShowDialog?.call(_buildEditPlantDialog(plant));
+  }
+  
+  /// Builds the edit plant dialog widget
+  /// 
+  /// This method creates a modal dialog containing the plant form in edit mode.
+  /// It reuses the existing PlantFormPage to maintain consistency and avoid duplication.
+  /// 
+  /// Parameters:
+  /// - [plant]: The plant entity to be edited
+  /// 
+  /// Returns:
+  /// - A [Widget] containing the edit plant dialog
+  Widget _buildEditPlantDialog(Plant plant) {
+    return Dialog.fullscreen(
+      child: ChangeNotifierProvider(
+        create: (context) => di.sl<PlantFormProvider>(),
+        child: PlantFormPage(
+          plantId: plant.id,
+          onSaved: () {
+            // Refresh plant data after successful save
+            refresh(plant.id);
+          },
+        ),
+      ),
+    );
   }
 
   /// Navigates to the plant image management screen
@@ -323,3 +354,4 @@ class PlantDetailsController {
     onShowSnackBarWithColor?.call(message, '', backgroundColor: Colors.green);
   }
 }
+

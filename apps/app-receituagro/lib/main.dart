@@ -17,6 +17,7 @@ import 'core/services/receituagro_notification_service.dart';
 import 'core/services/receituagro_storage_service.dart';
 import 'core/services/revenuecat_service.dart' as local_rc;
 import 'core/services/startup_optimization_service.dart';
+import 'core/setup/receituagro_data_setup.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
@@ -84,6 +85,21 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // Initialize ReceitaAgro data (Hive boxes)
+  try {
+    await ReceitaAgroDataSetup.initialize();
+  } catch (e) {
+    // Log error but don't block app startup
+    if (EnvironmentConfig.enableAnalytics) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        StackTrace.current,
+        reason: 'Failed to initialize ReceitaAgro data',
+        fatal: false,
+      );
+    }
+  }
 
   // 🚀 PERFORMANCE CRITICAL: Initialize startup optimization
   // This reduces image loading from 1181+ images (143MB) to lazy loading

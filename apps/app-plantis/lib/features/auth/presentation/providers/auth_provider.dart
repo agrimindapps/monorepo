@@ -79,35 +79,16 @@ class AuthProvider extends ChangeNotifier {
 
         // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
         if (user == null && await shouldUseAnonymousMode()) {
-          // Marca como inicializado ANTES de fazer login anônimo para evitar redirecionamentos
-          _isInitialized = true;
-          _authStateNotifier.updateInitializationStatus(true);
-          notifyListeners();
+          // NÃO marcar como inicializado ainda - esperar o signInAnonymously completar
+          if (kDebugMode) {
+            debugPrint('🔄 AuthProvider: Iniciando modo anônimo, aguardando login...');
+          }
           await signInAnonymously();
           return; // O signInAnonymously vai disparar este listener novamente
         }
 
-        _isInitialized = true;
-        
-        // Update AuthStateNotifier with user changes
-        _authStateNotifier.updateUser(user);
-        _authStateNotifier.updateInitializationStatus(true);
-
-        // Sincroniza com RevenueCat quando o usuário faz login (não anônimo)
-        if (user != null && !isAnonymous && _subscriptionRepository != null) {
-          await _syncUserWithRevenueCat(user.id);
-          await _checkPremiumStatus();
-          
-          // Realizar sincronização inicial apenas uma vez para usuários não anônimos
-          if (!_hasPerformedInitialSync) {
-            _performInitialDataSync();
-          }
-        } else {
-          _isPremium = false;
-          _authStateNotifier.updatePremiumStatus(false);
-        }
-
-        notifyListeners();
+        // CRITICAL FIX: Only set initialized AFTER auth is fully stable
+        await _completeAuthInitialization(user);
       },
       onError: (Object error) {
         _errorMessage = error.toString();
@@ -129,6 +110,46 @@ class AuthProvider extends ChangeNotifier {
         _authStateNotifier.updatePremiumStatus(_isPremium);
         notifyListeners();
       });
+    }
+  }
+
+  /// CRITICAL FIX: Complete auth initialization only after all operations are stable
+  Future<void> _completeAuthInitialization(UserEntity? user) async {
+    try {
+      // Update AuthStateNotifier with user changes
+      _authStateNotifier.updateUser(user);
+
+      // Sincroniza com RevenueCat quando o usuário faz login (não anônimo)
+      if (user != null && !isAnonymous && _subscriptionRepository != null) {
+        await _syncUserWithRevenueCat(user.id);
+        await _checkPremiumStatus();
+        
+        // Realizar sincronização inicial apenas uma vez para usuários não anônimos
+        if (!_hasPerformedInitialSync) {
+          _performInitialDataSync();
+        }
+      } else {
+        _isPremium = false;
+        _authStateNotifier.updatePremiumStatus(false);
+      }
+
+      // CRITICAL: Only mark as initialized AFTER everything is stable
+      if (kDebugMode) {
+        debugPrint('✅ AuthProvider: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: $_isPremium');
+      }
+      
+      _isInitialized = true;
+      _authStateNotifier.updateInitializationStatus(true);
+      notifyListeners();
+      
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ AuthProvider: Error during initialization: $e');
+      }
+      _errorMessage = 'Erro na inicialização da autenticação: $e';
+      _isInitialized = true; // Still set to true to avoid infinite loading
+      _authStateNotifier.updateInitializationStatus(true);
+      notifyListeners();
     }
   }
 

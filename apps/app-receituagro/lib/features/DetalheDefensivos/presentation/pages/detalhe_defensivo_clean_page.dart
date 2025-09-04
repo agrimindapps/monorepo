@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/unified_tab_bar_widget.dart';
 import '../../../navigation/bottom_nav_wrapper.dart';
-import '../widgets/custom_tab_bar_widget.dart';
 
 /// Página de detalhes do defensivo refatorada com Clean Architecture
 /// 
@@ -52,13 +53,16 @@ class _DetalheDefensivoCleanPageState
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: _buildBody(),
-                  ),
-                ],
+              child: Padding(
+                padding: SpacingTokens.externalPadding, // Padding externo de 8px
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(
+                      child: _buildBody(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -86,10 +90,12 @@ class _DetalheDefensivoCleanPageState
   Widget _buildBody() {
     return Column(
       children: [
-        CustomTabBarWidget(tabController: _tabController),
+        UnifiedTabBarWidget.forDefensivos(
+          tabController: _tabController,
+        ),
         Expanded(
           child: Container(
-            margin: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
+            margin: SpacingTokens.cardMargin,
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),

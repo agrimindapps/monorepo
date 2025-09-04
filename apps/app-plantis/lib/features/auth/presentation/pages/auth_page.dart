@@ -81,15 +81,15 @@ class _AuthPageState extends State<AuthPage>
   bool _obscureRegisterPassword = true;
   bool _obscureRegisterConfirmPassword = true;
   
-  // Focus nodes para navegação por teclado
-  late final FocusNode _emailFocusNode;
-  late final FocusNode _passwordFocusNode;
-  late final FocusNode _loginButtonFocusNode;
-  late final FocusNode _registerNameFocusNode;
-  late final FocusNode _registerEmailFocusNode;
-  late final FocusNode _registerPasswordFocusNode;
-  late final FocusNode _registerConfirmPasswordFocusNode;
-  late final FocusNode _registerButtonFocusNode;
+  // Focus nodes para navegação por teclado - inicialização segura
+  FocusNode? _emailFocusNode;
+  FocusNode? _passwordFocusNode;
+  FocusNode? _loginButtonFocusNode;
+  FocusNode? _registerNameFocusNode;
+  FocusNode? _registerEmailFocusNode;
+  FocusNode? _registerPasswordFocusNode;
+  FocusNode? _registerConfirmPasswordFocusNode;
+  FocusNode? _registerButtonFocusNode;
 
   @override
   void initState() {
@@ -102,7 +102,7 @@ class _AuthPageState extends State<AuthPage>
       initialIndex: widget.initialTab,
     );
     
-    // Inicializar focus nodes
+    // Inicializar focus nodes de forma imediata mas segura
     _emailFocusNode = getFocusNode('email');
     _passwordFocusNode = getFocusNode('password');
     _loginButtonFocusNode = getFocusNode('login_button');
@@ -152,7 +152,12 @@ class _AuthPageState extends State<AuthPage>
       ),
     );
 
-    _animationController.forward();
+    // Delay animation start slightly to ensure proper layout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
   }
 
   @override
@@ -343,8 +348,11 @@ class _AuthPageState extends State<AuthPage>
       child: Scaffold(
         body: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
-          child: _buildModernBackground(
-            child: _buildResponsiveLayout(context, size, isDesktop, isTablet, isMobile),
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: _buildModernBackground(
+              child: _buildResponsiveLayout(context, size, isDesktop, isTablet, isMobile),
+            ),
           ),
         ),
       ),
@@ -382,25 +390,33 @@ class _AuthPageState extends State<AuthPage>
   Widget _buildResponsiveLayout(BuildContext context, Size size, bool isDesktop, bool isTablet, bool isMobile) {
     return Center(
       child: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: isMobile
-                ? size.width * 0.9
-                : (isTablet ? 500 : 1000),
-            maxHeight: isMobile
-                ? double.infinity
-                : (isTablet ? 650 : 650),
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.of(context).viewInsets.bottom > 0 ? 20 : 40,
           ),
-          child: Card(
-            elevation: 20,
-            shadowColor: Colors.black.withValues(alpha: 0.2),
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isMobile
+                  ? size.width * 0.9
+                  : (isTablet ? 500 : 1000),
+              maxHeight: isMobile
+                  ? double.infinity
+                  : (isTablet ? 650 : 650),
             ),
-            child: isDesktop
-                ? _buildDesktopLayout()
-                : _buildMobileLayout(),
+            child: RepaintBoundary(
+              child: Card(
+                elevation: 20,
+                shadowColor: Colors.black.withValues(alpha: 0.2),
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: isDesktop
+                    ? _buildDesktopLayout()
+                    : _buildMobileLayout(),
+              ),
+            ),
           ),
         ),
       ),
@@ -852,7 +868,7 @@ class _AuthPageState extends State<AuthPage>
               ),
             ),
             onSubmitted: (value) {
-              _loginButtonFocusNode.requestFocus();
+              _loginButtonFocusNode?.requestFocus();
             },
           ),
           const SizedBox(height: 20),
@@ -1367,7 +1383,7 @@ class _AuthPageState extends State<AuthPage>
               ),
             ),
             onSubmitted: (value) {
-              _registerButtonFocusNode.requestFocus();
+              _registerButtonFocusNode?.requestFocus();
             },
           ),
           const SizedBox(height: 28),

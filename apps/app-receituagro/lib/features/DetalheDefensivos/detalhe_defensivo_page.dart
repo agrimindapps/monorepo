@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/design/spacing_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/unified_tab_bar_widget.dart';
 import '../diagnosticos/presentation/providers/diagnosticos_provider.dart';
 import 'domain/entities/defensivo_details_entity.dart';
 import 'presentation/providers/detalhe_defensivo_provider.dart';
 import 'presentation/widgets/comentarios_tab_widget.dart';
-import 'presentation/widgets/custom_tab_bar_widget.dart';
 import 'presentation/widgets/defensivo_info_cards_widget.dart';
 import 'presentation/widgets/diagnosticos_tab_widget.dart';
 import 'presentation/widgets/loading_error_widgets.dart';
@@ -156,10 +157,12 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Widget _buildContent() {
     return Column(
       children: [
-        CustomTabBarWidget(tabController: _tabController),
+        UnifiedTabBarWidget.forDefensivos(
+          tabController: _tabController,
+        ),
         Expanded(
           child: Container(
-            margin: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
+            margin: SpacingTokens.cardMargin,
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
@@ -220,12 +223,12 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         final entity = DefensivoDetailsEntity.fromHive(provider.defensivoData!);
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(8.0),
+          padding: SpacingTokens.scrollPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DefensivoInfoCardsWidget(defensivo: entity),
-              const SizedBox(height: 80), // Espaço para bottom navigation
+              // Espaço já incluído no scrollPadding
             ],
           ),
         );

@@ -283,7 +283,10 @@ class SettingsProvider extends ChangeNotifier {
       
       if (canShow) {
         // Show the rate my app dialog
-        await _appRatingRepository.showRatingDialog(context: context);
+        // Check if context is still valid before using
+        if (context.mounted) {
+          await _appRatingRepository.showRatingDialog(context: context);
+        }
         return true;
       } else {
         // Fallback: directly open the app store

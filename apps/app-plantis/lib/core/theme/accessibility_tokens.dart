@@ -237,25 +237,71 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
   final Map<String, FocusNode> _focusNodes = {};
 
   FocusNode getFocusNode(String key) {
-    return _focusNodes.putIfAbsent(key, () => FocusNode());
+    return _focusNodes.putIfAbsent(key, () => FocusNode(
+      debugLabel: key,
+      canRequestFocus: true,
+      descendantsAreFocusable: true,
+      descendantsAreTraversable: true,
+    ));
   }
 
   void requestFocus(String key) {
-    getFocusNode(key).requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Critical: Multiple mounted checks to prevent race conditions
+      if (mounted) {
+        final node = _focusNodes[key];
+        if (node != null && mounted && node.canRequestFocus) {
+          try {
+            node.requestFocus();
+          } catch (e) {
+            // Silently handle focus errors in web environment
+          }
+        }
+      }
+    });
   }
 
   void unfocus(String key) {
-    getFocusNode(key).unfocus();
+    if (mounted) {
+      final node = _focusNodes[key];
+      if (node != null && mounted && node.hasFocus) {
+        try {
+          node.unfocus();
+        } catch (e) {
+          // Silently handle unfocus errors in web environment
+        }
+      }
+    }
   }
 
   void nextFocus(String currentKey, String nextKey) {
-    getFocusNode(nextKey).requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Critical: Enhanced mounted checks for focus traversal
+      if (mounted) {
+        final nextNode = _focusNodes[nextKey];
+        if (nextNode != null && mounted && nextNode.canRequestFocus) {
+          try {
+            nextNode.requestFocus();
+          } catch (e) {
+            // Silently handle focus traversal errors in web environment
+          }
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
+    // Critical: Safe disposal of focus nodes to prevent race conditions
     for (final node in _focusNodes.values) {
-      node.dispose();
+      try {
+        if (node.hasFocus) {
+          node.unfocus();
+        }
+        node.dispose();
+      } catch (e) {
+        // Silently handle disposal errors
+      }
     }
     _focusNodes.clear();
     super.dispose();
@@ -362,41 +408,47 @@ class AccessibleTextField extends StatelessWidget {
     final effectiveLabel = semanticLabel ?? 
         '$labelText${isRequired ? ', campo obrigatório' : ', campo opcional'}';
 
-    return Semantics(
-      label: effectiveLabel,
-      textField: true,
-      child: TextFormField(
-        controller: controller,
-        focusNode: focusNode,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction ?? 
-            (nextFocusNode != null ? TextInputAction.next : TextInputAction.done),
-        validator: validator,
-        onChanged: onChanged,
-        onFieldSubmitted: (value) {
-          if (nextFocusNode != null) {
-            nextFocusNode!.requestFocus();
-          } else {
-            focusNode?.unfocus();
-          }
-          onSubmitted?.call(value);
-        },
-        style: TextStyle(
-          fontSize: AccessibilityTokens.getAccessibleFontSize(context, 16),
-        ),
-        decoration: InputDecoration(
-          labelText: labelText,
-          hintText: hintText,
-          prefixIcon: prefixIcon,
-          suffixIcon: suffixIcon,
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Semantics(
+          label: effectiveLabel,
+          textField: true,
+          child: TextFormField(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction ?? 
+                (nextFocusNode != null ? TextInputAction.next : TextInputAction.done),
+            validator: validator,
+            onChanged: onChanged,
+            onFieldSubmitted: (value) {
+              if (nextFocusNode != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  nextFocusNode!.requestFocus();
+                });
+              } else {
+                focusNode?.unfocus();
+              }
+              onSubmitted?.call(value);
+            },
+            style: TextStyle(
+              fontSize: AccessibilityTokens.getAccessibleFontSize(context, 16),
+            ),
+            decoration: InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+              prefixIcon: prefixIcon,
+              suffixIcon: suffixIcon,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

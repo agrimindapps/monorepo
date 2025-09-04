@@ -499,8 +499,8 @@ class AppDialogs {
     required String itemType,
     String? warningMessage,
     VoidCallback? onConfirm,
-  }) {
-    return showDialog<bool>(
+  }) async {
+    final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -605,6 +605,8 @@ class AppDialogs {
         ),
       ),
     ) ?? false;
+    
+    return result;
   }
 
   /// **Save Changes Confirmation Dialog**

@@ -36,21 +36,13 @@ class _SettingsPageState extends State<SettingsPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return ChangeNotifierProvider(
-      create: (_) => di.sl<SettingsProvider>(),
+      create: (_) {
+        final provider = di.sl<SettingsProvider>();
+        // Initialize asynchronously but safely
+        _initializeProvider(provider);
+        return provider;
+      },
       builder: (context, child) {
-        // Initialize the provider here where we have access to context
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          final provider = context.read<SettingsProvider>();
-          try {
-            final deviceService = di.sl<DeviceIdentityService>();
-            final deviceId = await deviceService.getDeviceUuid();
-            await provider.initialize(deviceId);
-          } catch (e) {
-            debugPrint('Error initializing settings: $e');
-            // Fallback to anonymous user
-            await provider.initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
-          }
-        });
         return child!;
       },
       child: Scaffold(
@@ -191,6 +183,18 @@ class _SettingsPageState extends State<SettingsPage> {
       await themeProvider.setThemeMode(ThemeMode.dark);
     } else {
       await themeProvider.setThemeMode(ThemeMode.system);
+    }
+  }
+
+  Future<void> _initializeProvider(SettingsProvider provider) async {
+    try {
+      final deviceService = di.sl<DeviceIdentityService>();
+      final deviceId = await deviceService.getDeviceUuid();
+      await provider.initialize(deviceId);
+    } catch (e) {
+      debugPrint('Error initializing settings: $e');
+      // Fallback to anonymous user
+      await provider.initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
     }
   }
 }

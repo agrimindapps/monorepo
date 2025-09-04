@@ -69,9 +69,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        // For anonymous users still initializing, return empty list instead of error
-        // This prevents showing error page during auth initialization
-        return const Right([]);
+        // CRITICAL FIX: Return proper error instead of empty list for unauthenticated users
+        return Left(AuthFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
       }
 
       // ALWAYS return local data first for instant UI response
@@ -83,11 +82,17 @@ class PlantsRepositoryImpl implements PlantsRepository {
         _syncPlantsInBackground(userId);
       }
 
-      // Return local data immediately (empty list is fine)
+      // Return local data immediately (empty list is fine for authenticated users)
       return Right(localPlants);
     } on CacheFailure catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsRepository: Cache failure: ${e.message}');
+      }
       return Left(e);
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsRepository: Unexpected error: $e');
+      }
       return Left(
         UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'),
       );
@@ -99,13 +104,19 @@ class PlantsRepositoryImpl implements PlantsRepository {
     remoteDatasource
         .getPlants(userId)
         .then((remotePlants) {
+          if (kDebugMode) {
+            print('✅ PlantsRepository: Background sync completed - ${remotePlants.length} plants');
+          }
           // Update local cache with remote data
           for (final plant in remotePlants) {
             localDatasource.updatePlant(plant);
           }
         })
         .catchError((e) {
-          // Ignore sync errors in background
+          // CRITICAL FIX: Log background sync errors for debugging
+          if (kDebugMode) {
+            print('⚠️ PlantsRepository: Background sync failed: $e');
+          }
         });
   }
 

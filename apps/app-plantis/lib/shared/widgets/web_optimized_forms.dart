@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'responsive_layout.dart';
 import 'web_hover_extensions.dart';
+import 'web_safe_focus_scope.dart';
 
 /// Layout otimizado para formulários web
 class WebOptimizedFormLayout extends StatelessWidget {
@@ -132,7 +134,7 @@ class WebOptimizedFormRow extends StatelessWidget {
   }
 }
 
-/// TextField otimizado para web
+/// TextField otimizado para web com proteção contra race conditions de focus
 class WebOptimizedTextField extends StatefulWidget {
   final String? labelText;
   final String? hintText;
@@ -177,34 +179,68 @@ class WebOptimizedTextField extends StatefulWidget {
   State<WebOptimizedTextField> createState() => _WebOptimizedTextFieldState();
 }
 
-class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
+class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> with WebSafeFocusMixin {
   late FocusNode _focusNode;
   bool _isFocused = false;
+  bool _isWebEnvironment = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = widget.focusNode ?? FocusNode();
-    _focusNode.addListener(_onFocusChange);
+    _isWebEnvironment = kIsWeb;
+    _focusNode = widget.focusNode ?? (
+      _isWebEnvironment 
+        ? getWebSafeFocusNode('main_field')
+        : FocusNode()
+    );
+    
+    // Add listener with enhanced safety for web
+    if (mounted) {
+      _focusNode.addListener(_onFocusChange);
+    }
   }
 
   @override
   void dispose() {
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
+    // Enhanced disposal with web safety
+    try {
+      _focusNode.removeListener(_onFocusChange);
+      if (widget.focusNode == null && !_isWebEnvironment) {
+        if (_focusNode.hasFocus) {
+          _focusNode.unfocus();
+        }
+        _focusNode.dispose();
+      }
+    } catch (e) {
+      // Silently handle disposal errors in web environment
     }
     super.dispose();
   }
 
   void _onFocusChange() {
-    setState(() {
-      _isFocused = _focusNode.hasFocus;
-    });
+    // Critical: Enhanced mounted check with web considerations
+    if (!mounted) return;
+    
+    if (_isWebEnvironment) {
+      // Web: Add micro-delay to prevent race conditions
+      Future.delayed(const Duration(milliseconds: 1), () {
+        if (mounted) {
+          setState(() {
+            _isFocused = _focusNode.hasFocus;
+          });
+        }
+      });
+    } else {
+      // Mobile: Direct state update
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
+    Widget textField = AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -250,6 +286,16 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
         ),
       ),
     );
+
+    // Web: Wrap with WebSafeFocusScope for enhanced protection
+    if (_isWebEnvironment) {
+      return textField.withWebSafeFocus(
+        focusNode: _focusNode,
+        onFocusChange: _onFocusChange,
+      );
+    }
+
+    return textField;
   }
 }
 

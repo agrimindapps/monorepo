@@ -55,40 +55,75 @@ class FavoritosTabsWidget extends StatelessWidget {
 
   Widget _buildTabBar(BuildContext context, ThemeData theme) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: TabBar(
         controller: tabController,
-        tabs: const [
-          Tab(
-            icon: Icon(FontAwesomeIcons.shield),
-            text: 'Defensivos',
-          ),
-          Tab(
-            icon: Icon(FontAwesomeIcons.bug),
-            text: 'Pragas',
-          ),
-          Tab(
-            icon: Icon(FontAwesomeIcons.magnifyingGlass),
-            text: 'Diagnósticos',
-          ),
-        ],
-        labelColor: const Color(0xFF4CAF50),
+        tabs: _buildCompactTabs(),
+        labelColor: Colors.white,
         unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-        indicatorColor: const Color(0xFF4CAF50),
-        indicatorWeight: 3.0,
+        indicator: BoxDecoration(
+          color: const Color(0xFF4CAF50),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
         labelStyle: const TextStyle(
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: const TextStyle(
-          fontSize: 12,
+          fontSize: 0, // Hide text in inactive tabs
           fontWeight: FontWeight.w400,
         ),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 6.0),
+        indicatorPadding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        dividerColor: Colors.transparent,
       ),
     );
+  }
+
+  List<Widget> _buildCompactTabs() {
+    final tabData = [
+      {'icon': FontAwesomeIcons.shield, 'text': 'Defensivos'},
+      {'icon': FontAwesomeIcons.bug, 'text': 'Pragas'},
+      {'icon': FontAwesomeIcons.magnifyingGlass, 'text': 'Diagnósticos'},
+    ];
+
+    return tabData.map((data) => Tab(
+      child: AnimatedBuilder(
+        animation: tabController,
+        builder: (context, child) {
+          final isActive = tabController.index == tabData.indexOf(data);
+          
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                data['icon'] as IconData,
+                size: 16,
+                color: isActive 
+                    ? Colors.white 
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              if (isActive) ...[
+                const SizedBox(width: 6),
+                Text(
+                  data['text'] as String,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    )).toList();
   }
 }

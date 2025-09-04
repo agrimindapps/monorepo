@@ -452,7 +452,26 @@ class _NavigationItemState extends State<_NavigationItem>
 
   bool get _isActive {
     final currentRoute = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
-    return currentRoute.startsWith(widget.route);
+    
+    // Exact match for root route
+    if (widget.route == '/') {
+      return currentRoute == '/';
+    }
+    
+    // For other routes, check if current route starts with the widget route
+    // and ensure it's either an exact match or followed by a '/' or query parameter
+    if (currentRoute == widget.route) {
+      return true;
+    }
+    
+    if (currentRoute.startsWith(widget.route)) {
+      final nextChar = currentRoute.length > widget.route.length 
+          ? currentRoute[widget.route.length] 
+          : '';
+      return nextChar == '/' || nextChar == '?' || nextChar == '#';
+    }
+    
+    return false;
   }
 
   @override
@@ -910,6 +929,7 @@ class _SidebarFooter extends StatelessWidget {
 );
   }
 }
+
 
 /// Botão de toggle com estados hover mais visíveis
 class _ToggleButton extends StatefulWidget {

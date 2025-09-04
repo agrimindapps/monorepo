@@ -7,6 +7,65 @@ import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../entities/plant.dart';
 import '../repositories/plants_repository.dart';
 
+/// Resultado detalhado da geração de tarefas para logging e feedback
+class TaskGenerationResult {
+  final bool isSuccess;
+  final bool isFailure;
+  final bool isSkipped;
+  final String message;
+  final int taskCount;
+  final dynamic tasks;
+  final Failure? failure;
+  final dynamic exception;
+  final StackTrace? stackTrace;
+
+  TaskGenerationResult._({
+    required this.isSuccess,
+    required this.isFailure,
+    required this.isSkipped,
+    required this.message,
+    required this.taskCount,
+    this.tasks,
+    this.failure,
+    this.exception,
+    this.stackTrace,
+  });
+
+  factory TaskGenerationResult.success(int count, dynamic tasks) {
+    return TaskGenerationResult._(
+      isSuccess: true,
+      isFailure: false,
+      isSkipped: false,
+      message: '$count tarefas geradas com sucesso',
+      taskCount: count,
+      tasks: tasks,
+    );
+  }
+
+  factory TaskGenerationResult.failure(String message, Failure? failure, [dynamic exception, StackTrace? stackTrace]) {
+    return TaskGenerationResult._(
+      isSuccess: false,
+      isFailure: true,
+      isSkipped: false,
+      message: message,
+      taskCount: 0,
+      failure: failure,
+      exception: exception,
+      stackTrace: stackTrace,
+    );
+  }
+
+  factory TaskGenerationResult.skipped(String reason) {
+    return TaskGenerationResult._(
+      isSuccess: false,
+      isFailure: false,
+      isSkipped: true,
+      message: 'Geração pulada: $reason',
+      taskCount: 0,
+    );
+  }
+}
+
 class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
   final PlantsRepository repository;
   final GenerateInitialTasksUseCase? generateInitialTasksUseCase;
@@ -77,8 +136,16 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       if (generateInitialTasksUseCase != null && savedPlant.config != null) {
         if (kDebugMode) {
           print('🌱 AddPlantUseCase.call() - Gerando tarefas iniciais');
+          print('🌱 AddPlantUseCase.call() - Config ativa para: ${PlantaConfigModel.fromPlantConfig(plantaId: savedPlant.id, plantConfig: savedPlant.config).activeCareTypes}');
         }
-        await _generateInitialTasks(savedPlant);
+        
+        final taskGenerationResult = await _generateInitialTasksWithErrorHandling(savedPlant);
+        
+        if (taskGenerationResult.isFailure && kDebugMode) {
+          print('⚠️ AddPlantUseCase.call() - Tarefas não foram geradas, mas planta foi salva com sucesso');
+        } else if (taskGenerationResult.isSuccess && kDebugMode) {
+          print('✅ AddPlantUseCase.call() - ${taskGenerationResult.taskCount} tarefas geradas com sucesso');
+        }
       }
 
       if (kDebugMode) {
@@ -120,15 +187,38 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
-  /// Gera tarefas iniciais para a planta recém-cadastrada
-  Future<void> _generateInitialTasks(Plant plant) async {
+  /// Gera tarefas iniciais com tratamento robusto de erros
+  /// Retorna resultado detalhado para logging e feedback
+  Future<TaskGenerationResult> _generateInitialTasksWithErrorHandling(Plant plant) async {
     if (generateInitialTasksUseCase == null || plant.config == null) {
-      return;
+      if (kDebugMode) {
+        print('⚠️ _generateInitialTasksWithErrorHandling - Skipping: useCase=${generateInitialTasksUseCase != null}, config=${plant.config != null}');
+      }
+      return TaskGenerationResult.skipped('Use case não disponível ou sem configuração');
     }
 
     try {
-      // Converter PlantConfig para PlantaConfigModel
+      if (kDebugMode) {
+        print('🌱 _generateInitialTasksWithErrorHandling - Iniciando conversão de config');
+      }
+
+      // Converter PlantConfig para PlantaConfigModel com validação
       final configModel = _convertToPlantaConfigModel(plant);
+      
+      if (configModel.activeCareTypes.isEmpty) {
+        if (kDebugMode) {
+          print('⚠️ _generateInitialTasksWithErrorHandling - Nenhum cuidado ativo, pulando geração');
+        }
+        return TaskGenerationResult.skipped('Nenhum tipo de cuidado ativo');
+      }
+
+      if (kDebugMode) {
+        print('🌱 _generateInitialTasksWithErrorHandling - Criando parâmetros');
+        print('   - plantaId: ${plant.id}');
+        print('   - activeCareTypes: ${configModel.activeCareTypes}');
+        print('   - plantingDate: ${plant.plantingDate}');
+        print('   - userId: ${plant.userId}');
+      }
 
       final params = GenerateInitialTasksParams.create(
         plantaId: plant.id,
@@ -137,50 +227,53 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
         userId: plant.userId,
       );
 
+      if (kDebugMode) {
+        print('🌱 _generateInitialTasksWithErrorHandling - Executando generateInitialTasksUseCase');
+      }
+
       final result = await generateInitialTasksUseCase!(params);
 
-      // Log do resultado (não bloqueia o fluxo principal)
-      result.fold(
-        (failure) => debugPrint(
-          'Warning: Falha ao gerar tarefas iniciais: ${failure.message}',
-        ),
-        (tasks) => debugPrint(
-          'Info: ${tasks.length} tarefas iniciais geradas para planta ${plant.name}',
-        ),
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('❌ _generateInitialTasksWithErrorHandling - FALHA: ${failure.message}');
+            print('   - Tipo: ${failure.runtimeType}');
+          }
+          return TaskGenerationResult.failure(failure.message, failure);
+        },
+        (tasks) {
+          if (kDebugMode) {
+            print('✅ _generateInitialTasksWithErrorHandling - SUCESSO: ${tasks.length} tarefas geradas');
+            for (int i = 0; i < tasks.length; i++) {
+              print('   - Tarefa ${i + 1}: ${tasks[i].title} (${tasks[i].type.key})');
+            }
+          }
+          return TaskGenerationResult.success(tasks.length, tasks);
+        },
       );
-    } catch (e) {
-      // Log do erro (não bloqueia o fluxo principal)
-      debugPrint('Warning: Erro inesperado ao gerar tarefas iniciais: $e');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('❌ _generateInitialTasksWithErrorHandling - EXCEPTION: $e');
+        print('   - Stack trace: $stackTrace');
+      }
+      return TaskGenerationResult.failure(
+        'Erro inesperado ao gerar tarefas: ${e.toString()}',
+        null,
+        e,
+        stackTrace,
+      );
     }
   }
 
-  /// Converte PlantConfig entity para PlantaConfigModel
+
+  /// Converte PlantConfig entity para PlantaConfigModel usando o método robusto
   PlantaConfigModel _convertToPlantaConfigModel(Plant plant) {
     final config = plant.config!;
 
-    return PlantaConfigModel.create(
+    return PlantaConfigModel.fromPlantConfig(
       plantaId: plant.id,
+      plantConfig: config,
       userId: plant.userId,
-      // Fix watering - use enable flag when available, otherwise check interval
-      aguaAtiva: config.enableWateringCare ?? 
-          (config.wateringIntervalDays != null && config.wateringIntervalDays! > 0),
-      intervaloRegaDias: config.wateringIntervalDays ?? 3,
-      // Fix fertilizer - use enable flag when available, otherwise check interval
-      aduboAtivo: config.enableFertilizerCare ?? 
-          (config.fertilizingIntervalDays != null && config.fertilizingIntervalDays! > 0),
-      intervaloAdubacaoDias: config.fertilizingIntervalDays ?? 14,
-      // Fix pruning - only active if interval is set (respects enable logic)
-      podaAtiva: config.pruningIntervalDays != null && config.pruningIntervalDays! > 0,
-      intervaloPodaDias: config.pruningIntervalDays ?? 90,
-      // Fix sunlight - only active if interval is set (not hardcoded true)
-      banhoSolAtivo: config.sunlightCheckIntervalDays != null && config.sunlightCheckIntervalDays! > 0,
-      intervaloBanhoSolDias: config.sunlightCheckIntervalDays ?? 7,
-      // Fix pest inspection - only active if interval is set (not hardcoded true)
-      inspecaoPragasAtiva: config.pestInspectionIntervalDays != null && config.pestInspectionIntervalDays! > 0,
-      intervaloInspecaoPragasDias: config.pestInspectionIntervalDays ?? 14,
-      // Fix replanting - only active if interval is set (not hardcoded true)
-      replantarAtivo: config.replantingIntervalDays != null && config.replantingIntervalDays! > 0,
-      intervaloReplantarDias: config.replantingIntervalDays ?? 365,
     );
   }
 }

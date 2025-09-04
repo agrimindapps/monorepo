@@ -55,6 +55,7 @@ class _UnifiedDataInspectorPageState extends State<UnifiedDataInspectorPage>
   late DatabaseInspectorService _inspector;
   
   bool _isLoading = true;
+  bool _isInitialized = false;
   String? _error;
   Map<String, dynamic> _stats = {};
   List<String> _hiveBoxes = [];
@@ -63,9 +64,22 @@ class _UnifiedDataInspectorPageState extends State<UnifiedDataInspectorPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _setupTheme();
     _setupInspector();
-    _initializeInspector();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _setupTheme();
+      _initializeInspector().catchError((Object error) {
+        setState(() {
+          _error = error.toString();
+          _isLoading = false;
+        });
+      });
+      _isInitialized = true;
+    }
   }
 
   @override
@@ -418,7 +432,7 @@ class _UnifiedDataInspectorPageState extends State<UnifiedDataInspectorPage>
   }
 
   Future<void> _showSettings() async {
-    showDialog<void>(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: _theme.cardColor,

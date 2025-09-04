@@ -14,8 +14,9 @@ import '../widgets/plant_form_care_config.dart';
 
 class PlantFormPage extends StatefulWidget {
   final String? plantId;
+  final VoidCallback? onSaved;
 
-  const PlantFormPage({super.key, this.plantId});
+  const PlantFormPage({super.key, this.plantId, this.onSaved});
 
   @override
   State<PlantFormPage> createState() => _PlantFormPageState();
@@ -222,6 +223,10 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
               behavior: SnackBarBehavior.floating,
             ),
           );
+          
+          // Call the onSaved callback if provided
+          widget.onSaved?.call();
+          
           context.pop();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

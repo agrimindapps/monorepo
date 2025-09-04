@@ -10,6 +10,10 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/calculators/presentation/pages/animal_age_page.dart';
+import '../../features/calculators/presentation/pages/anesthesia_page.dart';
+import '../../features/calculators/presentation/pages/diabetes_insulin_page.dart';
+import '../../features/calculators/presentation/pages/fluid_therapy_page.dart';
+import '../../features/calculators/presentation/pages/hydration_page.dart';
 import '../../features/calculators/presentation/pages/body_condition_page.dart';
 import '../../features/calculators/presentation/pages/calculators_main_page.dart';
 import '../../features/calculators/presentation/pages/calorie_page.dart';
@@ -277,6 +281,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const AnimalAgePage(),
           ),
           GoRoute(
+            path: '/anesthesia',
+            name: 'anesthesia-calculator',
+            builder: (context, state) => const AnesthesiaPage(),
+          ),
+          GoRoute(
             path: '/ideal-weight',
             name: 'ideal-weight-calculator',
             builder: (context, state) => const IdealWeightPage(),
@@ -284,18 +293,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/fluid-therapy',
             name: 'fluid-therapy-calculator',
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Calculadora de Fluidoterapia')),
-              body: const Center(child: Text('Calculadora de Fluidoterapia - Em desenvolvimento')),
-            ),
+            builder: (context, state) => const FluidTherapyPage(),
           ),
           GoRoute(
             path: '/hydration',
             name: 'hydration-calculator', 
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Calculadora de Hidratação')),
-              body: const Center(child: Text('Calculadora de Hidratação - Em desenvolvimento')),
-            ),
+            builder: (context, state) => const HydrationPage(),
           ),
           GoRoute(
             path: '/pregnancy',
@@ -306,6 +309,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/exercise',
             name: 'exercise-calculator',
             builder: (context, state) => const ExercisePage(),
+          ),
+          GoRoute(
+            path: '/diabetes-insulin',
+            name: 'diabetes-insulin-calculator',
+            builder: (context, state) => const DiabetesInsulinPage(),
           ),
         ],
       ),

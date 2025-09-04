@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/plantis_colors.dart';
 import '../providers/plant_form_provider.dart';
 
 class PlantFormCareConfig extends StatefulWidget {
@@ -92,7 +92,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
             _buildCareSection(
               title: 'Água',
               icon: Icons.water_drop,
-              iconColor: Colors.blue,
+              iconColor: PlantisColors.water,
               isEnabled: provider.enableWateringCare ?? false,
               onToggle: (value) => provider.setEnableWateringCare(value),
               interval: _getIntervalText(provider.wateringIntervalDays),
@@ -110,7 +110,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
             _buildCareSection(
               title: 'Adubo',
               icon: Icons.eco,
-              iconColor: Colors.green,
+              iconColor: PlantisColors.leaf,
               isEnabled: provider.enableFertilizerCare ?? false,
               onToggle: (value) => provider.setEnableFertilizerCare(value),
               interval: _getIntervalText(provider.fertilizingIntervalDays),
@@ -128,7 +128,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
             _buildCareSection(
               title: 'Luz solar',
               icon: Icons.wb_sunny,
-              iconColor: Colors.orange,
+              iconColor: PlantisColors.sun,
               isEnabled: provider.enableSunlightCare ?? false,
               onToggle: (value) => provider.setEnableSunlightCare(value),
               interval: _getIntervalText(provider.sunlightIntervalDays),
@@ -145,7 +145,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
             _buildCareSection(
               title: 'Verificação de pragas',
               icon: Icons.bug_report,
-              iconColor: Colors.red,
+              iconColor: PlantisColors.flower,
               isEnabled: provider.enablePestInspection ?? false,
               onToggle: (value) => provider.setEnablePestInspection(value),
               interval: _getIntervalText(provider.pestInspectionIntervalDays),
@@ -162,7 +162,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
             _buildCareSection(
               title: 'Poda',
               icon: Icons.content_cut,
-              iconColor: Colors.brown,
+              iconColor: PlantisColors.soil,
               isEnabled: provider.enablePruning ?? false,
               onToggle: (value) => provider.setEnablePruning(value),
               interval: _getIntervalText(provider.pruningIntervalDays),

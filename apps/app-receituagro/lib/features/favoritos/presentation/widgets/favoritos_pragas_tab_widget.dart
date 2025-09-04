@@ -56,7 +56,7 @@ class FavoritosPragasTabWidget extends StatelessWidget {
             await provider.loadAllFavoritos();
           },
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             itemCount: items.length + 1,
             itemBuilder: (context, index) {
               if (index == items.length) {

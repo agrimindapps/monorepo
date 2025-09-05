@@ -6,10 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/crashlytics_service.dart';
+import '../../infrastructure/services/sync_service.dart';
 
 // Provider para o TaskManagerAuthService
 final taskManagerAuthServiceProvider = Provider<TaskManagerAuthService>((ref) {
   return di.sl<TaskManagerAuthService>();
+});
+
+// Provider para o TaskManagerSyncService
+final taskManagerSyncServiceProvider = Provider<TaskManagerSyncService>((ref) {
+  return di.sl<TaskManagerSyncService>();
 });
 
 // Provider para o estado de autenticação usando o TaskManagerAuthService
@@ -64,23 +70,23 @@ final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((re
     return result.fold(
       (failure) {
         // Log erro de autenticação
-        crashlyticsService.recordAuthError(
+        unawaited(crashlyticsService.recordAuthError(
           authMethod: 'email_password',
           errorCode: 'login_failed',
           errorMessage: failure.message,
-        );
-        throw failure;
+        ));
+        throw Exception(failure.message);
       },
       (user) {
         return user;
       },
     );
   } catch (e) {
-    crashlyticsService.recordError(
+    unawaited(crashlyticsService.recordError(
       exception: e,
       stackTrace: StackTrace.current,
       reason: 'Login error in provider',
-    );
+    ));
     rethrow;
   }
 });
@@ -99,23 +105,23 @@ final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((re
     
     return result.fold(
       (failure) {
-        crashlyticsService.recordAuthError(
+        unawaited(crashlyticsService.recordAuthError(
           authMethod: 'email_password',
           errorCode: 'registration_failed',
           errorMessage: failure.message,
-        );
-        throw failure;
+        ));
+        throw Exception(failure.message);
       },
       (user) {
         return user;
       },
     );
   } catch (e) {
-    crashlyticsService.recordError(
+    unawaited(crashlyticsService.recordError(
       exception: e,
       stackTrace: StackTrace.current,
       reason: 'Registration error in provider',
-    );
+    ));
     rethrow;
   }
 });
@@ -126,24 +132,35 @@ final signOutProvider = FutureProvider<void>((ref) async {
   
   final result = await authService.signOut();
   return result.fold(
-    (failure) => throw failure,
+    (failure) => throw Exception(failure.message),
     (_) => null,
   );
 });
 
 // Auth notifier para gerenciar estado global de autenticação
 class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
-  AuthNotifier(this._authService) : super(const AsyncValue.loading()) {
+  AuthNotifier(this._authService, this._syncService) : super(const AsyncValue.loading()) {
     _init();
   }
 
   final TaskManagerAuthService _authService;
+  final TaskManagerSyncService _syncService;
   StreamSubscription<core.UserEntity?>? _subscription;
+  
+  // Sync related properties
+  bool _isSyncInProgress = false;
+  bool _hasPerformedInitialSync = false;
+  String _syncMessage = 'Sincronizando dados...';
+  
+  // Sync related getters
+  bool get isSyncInProgress => _isSyncInProgress;
+  bool get hasPerformedInitialSync => _hasPerformedInitialSync;
+  String get syncMessage => _syncMessage;
 
   void _init() {
     _subscription = _authService.currentUser.listen(
       (user) => state = AsyncValue.data(user),
-      onError: (error, stackTrace) => state = AsyncValue.error(error as Object? ?? 'Unknown error', stackTrace as StackTrace? ?? StackTrace.empty),
+      onError: (Object error, StackTrace stackTrace) => state = AsyncValue.error(error, stackTrace),
     );
   }
 
@@ -210,7 +227,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
       (failure) {
         print('❌ AuthNotifier: Erro no login anônimo: $failure');
         state = AsyncValue.error(failure, StackTrace.current);
-        throw failure; // Propagar o erro para quem chamou
+        throw Exception(failure.message); // Propagar o erro para quem chamou
       },
       (user) {
         print('✅ AuthNotifier: Login anônimo bem-sucedido: ${user.id}');
@@ -230,11 +247,79 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
     );
   }
 
+  /// Novo método que combina login + sincronização automática
+  Future<void> loginAndSync(String email, String password) async {
+    try {
+      // Primeiro fazer login normal
+      await signInWithEmailAndPassword(email, password);
+
+      // Verificar se login foi bem-sucedido
+      final currentState = state;
+      if (currentState is AsyncError || 
+          (currentState is AsyncData && currentState.value == null)) {
+        return;
+      }
+
+      final user = (currentState as AsyncData<core.UserEntity?>).value!;
+      
+      // Iniciar sincronização automática apenas se não foi feita ainda
+      if (!_hasPerformedInitialSync && !isAnonymous(user)) {
+        await _startPostLoginSync(user);
+      }
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  /// Inicia processo de sincronização pós-login (apenas para usuários não anônimos)
+  Future<void> _startPostLoginSync(core.UserEntity user) async {
+    if (_isSyncInProgress) return;
+    
+    // ⚠️ IMPORTANTE: Sincronizar apenas usuários não anônimos
+    if (isAnonymous(user)) {
+      return;
+    }
+    
+    _isSyncInProgress = true;
+    _syncMessage = 'Sincronizando dados...';
+    
+    try {
+      // TODO: Verificar status Premium quando RevenueCat estiver configurado
+      const isUserPremium = false;
+      
+      // Executar sincronização usando o SyncService
+      final result = await _syncService.syncAll(
+        userId: user.id,
+        isUserPremium: isUserPremium,
+      );
+      
+      result.fold(
+        (failure) {
+          // Log do erro, mas não bloquear o usuário
+          print('❌ Erro na sincronização pós-login: ${failure.message}');
+        },
+        (_) {
+          // Marcar sincronização inicial como realizada
+          _hasPerformedInitialSync = true;
+        },
+      );
+    } catch (e) {
+      print('❌ Erro durante sincronização: $e');
+    } finally {
+      _isSyncInProgress = false;
+    }
+  }
+
+  /// Verifica se é usuário anônimo
+  bool isAnonymous(core.UserEntity user) {
+    return user.provider.name == 'anonymous';
+  }
+
   Future<void> sendPasswordResetEmail(String email) async {
     final result = await _authService.sendPasswordResetEmail(email: email);
     
     result.fold(
-      (failure) => throw failure,
+      (failure) => throw Exception(failure.message),
       (_) => null,
     );
   }
@@ -249,7 +334,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
 // Provider para o AuthNotifier
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<core.UserEntity?>>((ref) {
   final authService = ref.watch(taskManagerAuthServiceProvider);
-  return AuthNotifier(authService);
+  final syncService = ref.watch(taskManagerSyncServiceProvider);
+  return AuthNotifier(authService, syncService);
 });
 
 // Convenience providers

@@ -33,7 +33,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   Future<List<FuelRecordEntity>> getAllFuelRecords(String userId) async {
     try {
       final querySnapshot = await _getUserFuelCollection(userId)
-          .orderBy('data', descending: true)
+          .orderBy('date', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {
@@ -50,8 +50,8 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   Future<List<FuelRecordEntity>> getFuelRecordsByVehicle(String userId, String vehicleId) async {
     try {
       final querySnapshot = await _getUserFuelCollection(userId)
-          .where('veiculo_id', isEqualTo: vehicleId)
-          .orderBy('data', descending: true)
+          .where('vehicle_id', isEqualTo: vehicleId)
+          .orderBy('date', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {
@@ -96,7 +96,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   Future<FuelRecordEntity> updateFuelRecord(String userId, FuelRecordEntity fuelRecord) async {
     try {
       final updatedRecord = fuelRecord.copyWith(
-        atualizadoEm: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
       final model = _mapToModel(updatedRecord, userId);
@@ -123,7 +123,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
     try {
       // Firebase doesn't have full-text search, so we'll implement basic search
       final querySnapshot = await _getUserFuelCollection(userId)
-          .orderBy('data', descending: true)
+          .orderBy('date', descending: true)
           .get();
 
       final allRecords = querySnapshot.docs.map((doc) {
@@ -148,7 +148,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   Stream<List<FuelRecordEntity>> watchFuelRecords(String userId) {
     try {
       return _getUserFuelCollection(userId)
-          .orderBy('data', descending: true)
+          .orderBy('date', descending: true)
           .snapshots()
           .map((querySnapshot) {
         return querySnapshot.docs.map((doc) {
@@ -166,8 +166,8 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   Stream<List<FuelRecordEntity>> watchFuelRecordsByVehicle(String userId, String vehicleId) {
     try {
       return _getUserFuelCollection(userId)
-          .where('veiculo_id', isEqualTo: vehicleId)
-          .orderBy('data', descending: true)
+          .where('vehicle_id', isEqualTo: vehicleId)
+          .orderBy('date', descending: true)
           .snapshots()
           .map((querySnapshot) {
         return querySnapshot.docs.map((doc) {
@@ -185,25 +185,25 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   FuelRecordEntity _mapToEntity(FuelSupplyModel model) {
     return FuelRecordEntity(
       id: model.id,
-      idUsuario: model.userId ?? '',
-      veiculoId: model.veiculoId,
-      tipoCombustivel: _mapIntToFuelType(model.tipoCombustivel),
-      litros: model.litros,
-      precoPorLitro: model.precoPorLitro,
-      valorTotal: model.valorTotal,
-      odometro: model.odometro,
-      data: DateTime.fromMillisecondsSinceEpoch(model.data),
-      nomePosto: model.posto,
-      marcaPosto: null, // Not available in current model
-      tanqueCheio: model.tanqueCheio ?? true,
-      observacoes: model.observacao,
-      criadoEm: model.createdAt ?? DateTime.now(),
-      atualizadoEm: model.updatedAt ?? DateTime.now(),
+      userId: model.userId ?? '',
+      vehicleId: model.vehicleId,
+      fuelType: _mapIntToFuelType(model.fuelType),
+      liters: model.liters,
+      pricePerLiter: model.pricePerLiter,
+      totalPrice: model.totalPrice,
+      odometer: model.odometer,
+      date: DateTime.fromMillisecondsSinceEpoch(model.date),
+      gasStationName: model.gasStationName,
+      gasStationBrand: null, // Not available in current model
+      fullTank: model.fullTank ?? true,
+      notes: model.notes,
+      createdAt: model.createdAt ?? DateTime.now(),
+      updatedAt: model.updatedAt ?? DateTime.now(),
       latitude: null,
       longitude: null,
-      odometroAnterior: null,
-      distanciaPercorrida: null,
-      consumo: null,
+      previousOdometer: null,
+      distanceTraveled: null,
+      consumption: null,
     );
   }
 
@@ -211,16 +211,16 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
     return FuelSupplyModel.create(
       id: entity.id,
       userId: userId,
-      veiculoId: entity.vehicleId,
-      data: entity.date.millisecondsSinceEpoch,
-      odometro: entity.odometer,
-      litros: entity.liters,
-      valorTotal: entity.totalPrice,
-      tanqueCheio: entity.fullTank,
-      precoPorLitro: entity.pricePerLiter,
-      posto: entity.gasStationName,
-      observacao: entity.notes,
-      tipoCombustivel: _mapFuelTypeToInt(entity.fuelType),
+      vehicleId: entity.vehicleId,
+      date: entity.date.millisecondsSinceEpoch,
+      odometer: entity.odometer,
+      liters: entity.liters,
+      totalPrice: entity.totalPrice,
+      fullTank: entity.fullTank,
+      pricePerLiter: entity.pricePerLiter,
+      gasStationName: entity.gasStationName,
+      notes: entity.notes,
+      fuelType: _mapFuelTypeToInt(entity.fuelType),
     );
   }
 

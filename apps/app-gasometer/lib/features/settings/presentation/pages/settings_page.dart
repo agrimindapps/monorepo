@@ -51,85 +51,98 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: GasometerDesignTokens.colorHeaderBackground,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+            blurRadius: 9,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Semantics(
+              label: 'Seção de configurações',
+              hint: 'Página principal para gerenciar preferências',
+              child: const Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 19,
               ),
-              child: Semantics(
-                label: 'Seção de configurações',
-                hint: 'Página principal para gerenciar preferências',
-                child: const Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                  size: 28,
+            ),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Configurações',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
+                const SizedBox(height: 3),
+                Text(
+                  'Gerencie suas preferências',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Configurações',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+          ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Semantics(
+                  label: 'Alterar tema',
+                  hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                  button: true,
+                  onTap: () => _showThemeDialog(context, themeProvider),
+                  child: IconButton(
+                    onPressed: () => _showThemeDialog(context, themeProvider),
+                    icon: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                        ? Icons.brightness_2
+                        : themeProvider.themeMode == ThemeMode.light
+                          ? Icons.brightness_high
+                          : Icons.brightness_auto,
                       color: Colors.white,
+                      size: 19,
                     ),
                   ),
-                  Text(
-                    'Gerencie suas preferências',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Consumer<ThemeProvider>(
-              builder: (context, themeProvider, _) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Semantics(
-                    label: 'Alterar tema',
-                    hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
-                    button: true,
-                    onTap: () => _showThemeDialog(context, themeProvider),
-                    child: IconButton(
-                      onPressed: () => _showThemeDialog(context, themeProvider),
-                      icon: Icon(
-                        themeProvider.themeMode == ThemeMode.dark
-                          ? Icons.brightness_2
-                          : themeProvider.themeMode == ThemeMode.light
-                            ? Icons.brightness_high
-                            : Icons.brightness_auto,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -148,8 +161,6 @@ class _SettingsPageState extends State<SettingsPage> {
         _buildSupportSection(context),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildInformationSection(context),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildLogoutButton(context),
       ],
     );
   }
@@ -560,40 +571,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingXl),
-      child: ElevatedButton(
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          _showLogoutDialog(context);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.error,
-          foregroundColor: Theme.of(context).colorScheme.onError,
-          padding: GasometerDesignTokens.paddingVertical(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusLg),
-          ),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout, size: GasometerDesignTokens.iconSizeButton),
-            SizedBox(width: 8),
-            Text(
-              'Sair do Módulo',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSection(
     BuildContext context, {
@@ -820,34 +797,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair do Módulo'),
-        content: const Text(
-          'Tem certeza que deseja sair? Você pode perder dados não sincronizados.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Logout functionality implementation pending
-              _showSnackBar(context, 'Logout realizado com sucesso');
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showGenerateDataDialog(BuildContext context) {
     showDialog(

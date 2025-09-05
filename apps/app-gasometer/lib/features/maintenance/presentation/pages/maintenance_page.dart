@@ -108,51 +108,64 @@ class _MaintenancePageState extends State<MaintenancePage> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
-          borderRadius: BorderRadius.circular(20),
-        ),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: GasometerDesignTokens.colorHeaderBackground,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+            blurRadius: 9,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Semantics(
+        label: 'Seção de manutenções',
+        hint: 'Página principal para gerenciar manutenções',
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(9),
               ),
-              child: Semantics(
-                label: 'Seção de manutenções',
-                hint: 'Página principal para gerenciar manutenções',
-                child: const Icon(
-                  Icons.build,
-                  color: Colors.white,
-                  size: 28,
-                ),
+              child: const Icon(
+                Icons.build,
+                color: Colors.white,
+                size: 19,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 13),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SemanticText.heading(
+                  Text(
                     'Manutenções',
                     style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  SemanticText.subtitle(
+                  const SizedBox(height: 3),
+                  Text(
                     'Histórico de manutenções dos seus veículos',
                     style: const TextStyle(
-                      fontSize: 14,
                       color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

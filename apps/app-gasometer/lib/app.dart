@@ -10,6 +10,7 @@ import 'core/router/app_router.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';
 import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
+import 'features/expenses/presentation/providers/expenses_provider.dart';
 import 'features/fuel/presentation/providers/fuel_provider.dart';
 import 'features/maintenance/presentation/providers/maintenance_provider.dart';
 import 'features/odometer/presentation/providers/odometer_provider.dart';
@@ -110,6 +111,12 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // Odometer Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
           create: (_) => local_di.getIt<OdometerProvider>(),
+          lazy: true,
+        ),
+        
+        // Expenses Provider - depends on Vehicles for vehicle context
+        ChangeNotifierProvider(
+          create: (_) => local_di.getIt<ExpensesProvider>(),
           lazy: true,
         ),
         

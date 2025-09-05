@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/services/analytics_service.dart';
+import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../controllers/login_controller.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_tabs_widget.dart';
@@ -229,7 +232,7 @@ class _LoginPageState extends State<LoginPage>
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -254,7 +257,7 @@ class _LoginPageState extends State<LoginPage>
                     'Área restrita - Acesso seguro',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -372,10 +375,46 @@ class _LoginPageState extends State<LoginPage>
   }
 
   void _handleAuthSuccess() {
-    // Navegar para a tela principal do app
-    if (mounted) {
-      // Usando go_router para navegação
+    if (!mounted) return;
+    
+    final authProvider = context.read<AuthProvider>();
+    
+    // Se há sincronização em progresso, mostrar SimpleSyncLoading
+    if (authProvider.isSyncing) {
+      _showSimpleSyncLoading(authProvider);
+    } else {
+      // Navegar imediatamente se não há sync em progresso
       context.go('/');
     }
+  }
+  
+  /// Mostra loading simples de sincronização que navega automaticamente
+  void _showSimpleSyncLoading(AuthProvider authProvider) {
+    SimpleSyncLoading.show(
+      context,
+      message: authProvider.syncProgressController?.currentMessage ?? 'Sincronizando dados automotivos...',
+    );
+    
+    // Navegar quando sync terminar
+    _navigateAfterSync(authProvider);
+  }
+  
+  /// Navega para home quando sync terminar
+  void _navigateAfterSync(AuthProvider authProvider) {
+    late StreamSubscription<void> subscription;
+    
+    subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
+        .listen((_) {
+      if (!authProvider.isSyncing) {
+        subscription.cancel();
+        
+        // Pequeno delay para garantir que o loading foi fechado
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            context.go('/');
+          }
+        });
+      }
+    });
   }
 }

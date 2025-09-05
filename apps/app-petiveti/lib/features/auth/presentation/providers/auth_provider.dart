@@ -182,6 +182,83 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  /// Login com sincronização automática de dados dos pets
+  /// Adaptado do padrão usado no gasometer e plantis para o contexto do PetiVeti
+  Future<bool> loginAndSync(String email, String password, {bool showSyncOverlay = true}) async {
+    // Check rate limiting
+    if (!_canAttemptLogin()) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        error: _getRateLimitMessage(_loginAttempts),
+      );
+      return false;
+    }
+
+    // Record attempt
+    _lastLoginAttempt = DateTime.now();
+    _loginAttempts++;
+
+    state = state.copyWith(status: AuthStatus.loading, error: null);
+
+    try {
+      // 1. Fazer login primeiro
+      final params = SignInWithEmailParams(email: email, password: password);
+      final loginResult = await _signInWithEmail(params);
+      
+      bool loginSuccess = false;
+      await loginResult.fold(
+        (failure) async {
+          state = state.copyWith(
+            status: AuthStatus.error,
+            error: failure.message,
+          );
+        },
+        (user) async {
+          // Reset attempts on successful login
+          _loginAttempts = 0;
+          _lastLoginAttempt = null;
+          
+          state = state.copyWith(
+            status: AuthStatus.authenticated,
+            user: user,
+          );
+          loginSuccess = true;
+        },
+      );
+      
+      if (!loginSuccess) {
+        return false;
+      }
+      
+      // 2. Para o PetiVeti, a "sincronização" é mais simples inicialmente
+      // Podemos simular um carregamento de dados iniciais dos pets
+      await _performPetDataSync();
+      
+      return true;
+      
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        error: 'Erro interno no login com sincronização. Tente novamente.',
+      );
+      return false;
+    }
+  }
+
+  /// Simula sincronização de dados dos pets
+  /// No futuro, aqui seria onde carregaríamos dados do Firebase, cache local, etc.
+  Future<void> _performPetDataSync() async {
+    // Simular carregamento de dados iniciais
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    
+    // Aqui no futuro poderíamos:
+    // - Carregar lista de pets do usuário
+    // - Sincronizar lembretes pendentes
+    // - Atualizar dados de medicações
+    // - Verificar consultas próximas
+    // - etc.
+  }
+
   Future<bool> signUpWithEmail(String email, String password, String? name) async {
     // Check rate limiting
     if (!_canAttemptRegister()) {

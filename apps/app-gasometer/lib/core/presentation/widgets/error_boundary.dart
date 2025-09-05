@@ -229,27 +229,25 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
           // Informações de debug em desenvolvimento
           if (widget.showDebugInfo && _error != null) ...[
             const SizedBox(height: 12),
-            Material(
-              color: Colors.transparent,
-              child: ExpansionTile(
-                title: const Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Text(
-                    'Detalhes técnicos',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(4.0),
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(4.0),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      'Detalhes técnicos:',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
-                    child: Directionality(
+                  ),
+                  const SizedBox(height: 8),
+                  Directionality(
                     textDirection: TextDirection.ltr,
                     child: Text(
                       'Erro: ${_error.toString()}\n'
@@ -260,9 +258,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                       ),
                     ),
                   ),
-                  ),
-                ),
-              ],
+                ],
               ),
             ),
           ],

@@ -90,7 +90,7 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
       }
       
       final updatedRecord = fuelRecord.copyWith(
-        atualizadoEm: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
       
       final model = _mapToModel(updatedRecord).copyWith(
@@ -164,25 +164,25 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
   FuelRecordEntity _mapToEntity(FuelSupplyModel model) {
     return FuelRecordEntity(
       id: model.id,
-      idUsuario: model.userId ?? '',
-      veiculoId: model.veiculoId,
-      tipoCombustivel: _mapIntToFuelType(model.tipoCombustivel),
-      litros: model.litros,
-      precoPorLitro: model.precoPorLitro,
-      valorTotal: model.valorTotal,
-      odometro: model.odometro,
-      data: DateTime.fromMillisecondsSinceEpoch(model.data),
-      nomePosto: model.posto,
-      marcaPosto: null, // Not available in current model
-      tanqueCheio: model.tanqueCheio ?? true,
-      observacoes: model.observacao,
-      criadoEm: model.createdAt ?? DateTime.now(),
-      atualizadoEm: model.updatedAt ?? DateTime.now(),
+      userId: model.userId ?? '',
+      vehicleId: model.vehicleId,
+      fuelType: _mapIntToFuelType(model.fuelType),
+      liters: model.liters,
+      pricePerLiter: model.pricePerLiter,
+      totalPrice: model.totalPrice,
+      odometer: model.odometer,
+      date: DateTime.fromMillisecondsSinceEpoch(model.date),
+      gasStationName: model.gasStationName,
+      gasStationBrand: null, // Not available in current model
+      fullTank: model.fullTank ?? true,
+      notes: model.notes,
+      createdAt: model.createdAt ?? DateTime.now(),
+      updatedAt: model.updatedAt ?? DateTime.now(),
       latitude: null,
       longitude: null,
-      odometroAnterior: null,
-      distanciaPercorrida: null,
-      consumo: null,
+      previousOdometer: null,
+      distanceTraveled: null,
+      consumption: null,
     );
   }
 
@@ -190,16 +190,16 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
     return FuelSupplyModel.create(
       id: entity.id,
       userId: entity.userId.isEmpty ? null : entity.userId,
-      veiculoId: entity.vehicleId,
-      data: entity.date.millisecondsSinceEpoch,
-      odometro: entity.odometer,
-      litros: entity.liters,
-      valorTotal: entity.totalPrice,
-      tanqueCheio: entity.fullTank,
-      precoPorLitro: entity.pricePerLiter,
-      posto: entity.gasStationName,
-      observacao: entity.notes,
-      tipoCombustivel: _mapFuelTypeToInt(entity.fuelType),
+      vehicleId: entity.vehicleId,
+      date: entity.date.millisecondsSinceEpoch,
+      odometer: entity.odometer,
+      liters: entity.liters,
+      totalPrice: entity.totalPrice,
+      fullTank: entity.fullTank,
+      pricePerLiter: entity.pricePerLiter,
+      gasStationName: entity.gasStationName,
+      notes: entity.notes,
+      fuelType: _mapFuelTypeToInt(entity.fuelType),
     );
   }
 

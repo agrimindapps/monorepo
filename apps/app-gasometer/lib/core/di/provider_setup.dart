@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
 import '../../features/fuel/presentation/providers/fuel_provider.dart';
+import '../../features/expenses/presentation/providers/expenses_provider.dart';
 import '../../features/maintenance/presentation/providers/maintenance_provider.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../../features/reports/presentation/providers/reports_provider.dart';
@@ -40,6 +41,14 @@ class ProviderSetup {
       ChangeNotifierProvider<FuelProvider>(
         create: (context) => _getOrCreateProvider<FuelProvider>(
           () => sl<FuelProvider>(),
+        ),
+        lazy: true,
+      ),
+      
+      // Expenses Provider - Lazy loading
+      ChangeNotifierProvider<ExpensesProvider>(
+        create: (context) => _getOrCreateProvider<ExpensesProvider>(
+          () => sl<ExpensesProvider>(),
         ),
         lazy: true,
       ),

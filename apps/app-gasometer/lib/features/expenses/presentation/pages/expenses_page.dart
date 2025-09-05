@@ -9,33 +9,33 @@ import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
-import '../../domain/entities/fuel_record_entity.dart';
-import '../pages/add_fuel_page.dart';
-import '../providers/fuel_form_provider.dart';
-import '../providers/fuel_provider.dart';
-import '../widgets/fuel_empty_state.dart';
-import '../widgets/fuel_error_state.dart';
-import '../widgets/fuel_statistics_row.dart';
+import '../../domain/entities/expense_entity.dart';
+import '../pages/add_expense_page.dart';
+import '../providers/expense_form_provider.dart';
+import '../providers/expenses_provider.dart';
+import '../widgets/expenses_empty_state.dart';
+import '../widgets/expenses_error_state.dart';
+import '../widgets/expenses_statistics_row.dart';
 
-class FuelPage extends StatefulWidget {
-  const FuelPage({super.key});
+class ExpensesPage extends StatefulWidget {
+  const ExpensesPage({super.key});
 
   @override
-  State<FuelPage> createState() => _FuelPageState();
+  State<ExpensesPage> createState() => _ExpensesPageState();
 }
 
-class _FuelPageState extends State<FuelPage> {
+class _ExpensesPageState extends State<ExpensesPage> {
   String? _selectedVehicleId;
   
-  // ✅ PERFORMANCE FIX: Cached providers
-  late final FuelProvider _fuelProvider;
+  // Performance fix: Cached providers
+  late final ExpensesProvider _expensesProvider;
   late final VehiclesProvider _vehiclesProvider;
 
   @override
   void initState() {
     super.initState();
-    // ✅ PERFORMANCE FIX: Cache providers once in initState
-    _fuelProvider = context.read<FuelProvider>();
+    // Performance fix: Cache providers once in initState
+    _expensesProvider = context.read<ExpensesProvider>();
     _vehiclesProvider = context.read<VehiclesProvider>();
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,23 +47,18 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _loadData() {
-    // ✅ PERFORMANCE FIX: Use cached providers
-    
+    // Performance fix: Use cached providers
     _vehiclesProvider.initialize().then((_) {
       if (_selectedVehicleId?.isNotEmpty == true) {
-        _fuelProvider.loadFuelRecordsByVehicle(_selectedVehicleId!);
+        _expensesProvider.loadExpensesByVehicle(_selectedVehicleId!);
       } else {
-        _fuelProvider.loadAllFuelRecords();
+        _expensesProvider.loadExpenses();
       }
     });
   }
 
-  // ✅ PERFORMANCE FIX: Use cached provider instead of context.read()
-  List<FuelRecordEntity> get _filteredRecords {
-    return _fuelProvider.fuelRecords;
-  }
 
-  // ✅ PERFORMANCE FIX: Use cached provider instead of context.read()
+  // Performance fix: Use cached provider instead of context.read()
   String _getVehicleName(String vehicleId) {
     final vehicle = _vehiclesProvider.vehicles.where((v) => v.id == vehicleId).firstOrNull;
     return vehicle?.displayName ?? 'Veículo desconhecido';
@@ -71,20 +66,20 @@ class _FuelPageState extends State<FuelPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ PERFORMANCE FIX: Use Selector2 instead of Consumer2 to prevent unnecessary rebuilds
-    return Selector2<FuelProvider, VehiclesProvider, Map<String, dynamic>>(
-      selector: (context, fuelProvider, vehiclesProvider) => {
-        'isLoading': fuelProvider.isLoading,
-        'hasError': fuelProvider.hasError,
-        'fuelRecords': fuelProvider.fuelRecords,
-        'fuelError': fuelProvider.errorMessage,
+    // Performance fix: Use Selector2 instead of Consumer2 to prevent unnecessary rebuilds
+    return Selector2<ExpensesProvider, VehiclesProvider, Map<String, dynamic>>(
+      selector: (context, expensesProvider, vehiclesProvider) => {
+        'isLoading': expensesProvider.isLoading,
+        'hasError': expensesProvider.hasError,
+        'expenses': expensesProvider.expenses,
+        'expensesError': expensesProvider.error?.displayMessage,
         'vehiclesError': vehiclesProvider.errorMessage,
       },
       builder: (context, data, child) {
         final isLoading = data['isLoading'] as bool;
         final hasError = data['hasError'] as bool;
-        final fuelRecords = data['fuelRecords'] as List<FuelRecordEntity>;
-        final fuelError = data['fuelError'] as String?;
+        final expenses = data['expenses'] as List<ExpenseEntity>;
+        final expensesError = data['expensesError'] as String?;
         final vehiclesError = data['vehiclesError'] as String?;
         
         return Scaffold(
@@ -100,8 +95,8 @@ class _FuelPageState extends State<FuelPage> {
                         constraints: const BoxConstraints(maxWidth: 1200),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildContentOptimized(context, isLoading, hasError, fuelRecords, fuelError)
-                            .withPageErrorBoundary(pageName: 'Abastecimentos'),
+                          child: _buildContentOptimized(context, isLoading, hasError, expenses, expensesError)
+                            .withPageErrorBoundary(pageName: 'Despesas'),
                         ),
                       ),
                     ),
@@ -135,8 +130,8 @@ class _FuelPageState extends State<FuelPage> {
       child: Row(
         children: [
           Semantics(
-            label: 'Seção de abastecimentos',
-            hint: 'Página principal para gerenciar abastecimentos',
+            label: 'Seção de despesas',
+            hint: 'Página principal para gerenciar despesas do veículo',
             child: Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
@@ -144,7 +139,7 @@ class _FuelPageState extends State<FuelPage> {
                 borderRadius: BorderRadius.circular(9),
               ),
               child: const Icon(
-                Icons.local_gas_station,
+                Icons.attach_money,
                 color: Colors.white,
                 size: 19,
               ),
@@ -157,7 +152,7 @@ class _FuelPageState extends State<FuelPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SemanticText.heading(
-                  'Abastecimentos',
+                  'Despesas',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17,
@@ -167,7 +162,7 @@ class _FuelPageState extends State<FuelPage> {
                 ),
                 const SizedBox(height: 3),
                 SemanticText.subtitle(
-                  'Histórico de abastecimentos dos seus veículos',
+                  'Histórico de despesas dos seus veículos',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
@@ -184,9 +179,8 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-
-  // ✅ PERFORMANCE FIX: Optimized content builder with selective data consumption
-  Widget _buildContentOptimized(BuildContext context, bool isLoading, bool hasError, List<FuelRecordEntity> fuelRecords, String? errorMessage) {
+  // Performance fix: Optimized content builder with selective data consumption
+  Widget _buildContentOptimized(BuildContext context, bool isLoading, bool hasError, List<ExpenseEntity> expenses, String? errorMessage) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -200,14 +194,14 @@ class _FuelPageState extends State<FuelPage> {
                   _selectedVehicleId = vehicleId;
                 });
                 
-                if (_fuelProvider.searchQuery.isNotEmpty) {
-                  _fuelProvider.clearSearch();
+                if (_expensesProvider.searchQuery.isNotEmpty) {
+                  _expensesProvider.search('');
                 }
                 
                 if (vehicleId?.isNotEmpty == true) {
-                  _fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
+                  _expensesProvider.loadExpensesByVehicle(vehicleId!);
                 } else {
-                  _fuelProvider.loadAllFuelRecords();
+                  _expensesProvider.loadExpenses();
                 }
               },
             );
@@ -216,20 +210,20 @@ class _FuelPageState extends State<FuelPage> {
         const SizedBox(height: 16),
         
         // Campo de busca com Consumer específico
-        Consumer<FuelProvider>(
-          builder: (context, fuelProvider, child) {
+        Consumer<ExpensesProvider>(
+          builder: (context, expensesProvider, child) {
             return SemanticFormField(
               label: 'Campo de busca',
-              hint: 'Digite para buscar abastecimentos por posto, marca ou observação',
+              hint: 'Digite para buscar despesas por descrição, tipo ou local',
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Buscar por posto, marca ou observação...',
+                  hintText: 'Buscar por descrição, tipo ou local...',
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: fuelProvider.searchQuery.isNotEmpty
+                  suffixIcon: expensesProvider.searchQuery.isNotEmpty
                       ? SemanticButton.icon(
                           semanticLabel: 'Limpar busca',
-                          semanticHint: 'Remove o texto da busca e mostra todos os abastecimentos',
-                          onPressed: () => _fuelProvider.clearSearch(),
+                          semanticHint: 'Remove o texto da busca e mostra todas as despesas',
+                          onPressed: () => _expensesProvider.search(''),
                           child: const Icon(Icons.clear),
                         )
                       : null,
@@ -239,7 +233,7 @@ class _FuelPageState extends State<FuelPage> {
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surface,
                 ),
-                onChanged: (value) => _fuelProvider.searchFuelRecords(value),
+                onChanged: (value) => _expensesProvider.search(value),
               ),
             );
           }
@@ -251,159 +245,36 @@ class _FuelPageState extends State<FuelPage> {
           _buildErrorState(errorMessage, () => _loadData())
         else if (isLoading)
           StandardLoadingView.initial(
-            message: 'Carregando abastecimentos...',
+            message: 'Carregando despesas...',
             height: 400,
           )
-        else if (fuelRecords.isEmpty)
+        else if (expenses.isEmpty)
           _buildEmptyState()
         else ...[
           // Statistics with Consumer for live updates
-          Consumer<FuelProvider>(
-            builder: (context, fuelProvider, child) => _buildStatistics(fuelProvider),
+          Consumer<ExpensesProvider>(
+            builder: (context, expensesProvider, child) => _buildStatistics(expensesProvider),
           ),
           const SizedBox(height: 24),
-          _buildVirtualizedRecordsList(fuelRecords),
+          _buildVirtualizedRecordsList(expenses),
         ],
       ],
     );
   }
 
-  Widget _buildContent(BuildContext context, FuelProvider fuelProvider, VehiclesProvider vehiclesProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        EnhancedVehicleSelector(
-          selectedVehicleId: _selectedVehicleId,
-          onVehicleChanged: (String? vehicleId) {
-            setState(() {
-              _selectedVehicleId = vehicleId;
-            });
-            
-            if (_fuelProvider.searchQuery.isNotEmpty) {
-              _fuelProvider.clearSearch();
-            }
-            
-            if (vehicleId?.isNotEmpty == true) {
-              _fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
-            } else {
-              _fuelProvider.loadAllFuelRecords();
-            }
-          },
-        ).withProviderErrorBoundary(providerName: 'Vehicles'),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
-        
-        // Campo de busca com acessibilidade aprimorada
-        SemanticFormField(
-          label: 'Campo de busca',
-          hint: 'Digite para buscar abastecimentos por posto, marca ou observação',
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Buscar por posto, marca ou observação...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: fuelProvider.searchQuery.isNotEmpty
-                  ? SemanticButton.icon(
-                      semanticLabel: 'Limpar busca',
-                      semanticHint: 'Remove o texto da busca e mostra todos os abastecimentos',
-                      onPressed: () => _fuelProvider.clearSearch(),
-                      child: const Icon(Icons.clear),
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-            ),
-            onChanged: (value) => _fuelProvider.searchFuelRecords(value),
-          ),
-        ),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        
-        if (fuelProvider.hasActiveFilters) ...[
-          _buildFilterStatus(fuelProvider),
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        ],
-        
-        if (fuelProvider.isLoading)
-          StandardLoadingView.initial(
-            message: 'Carregando abastecimentos...',
-            height: 400,
-          )
-        else if (fuelProvider.hasError)
-          _buildErrorState(fuelProvider.errorMessage!, () => _loadData())
-        else if (_filteredRecords.isEmpty)
-          _buildEmptyState()
-        else ...[
-          _buildStatistics(fuelProvider),
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          _buildRecordsList(_filteredRecords, vehiclesProvider),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStatistics(FuelProvider fuelProvider) {
+  Widget _buildStatistics(ExpensesProvider expensesProvider) {
     // Use cached statistics from provider instead of calculating in build method
-    final statistics = fuelProvider.statistics;
-    return FuelStatisticsRow(statistics: statistics);
+    final statistics = expensesProvider.stats;
+    return ExpensesStatisticsRow(statistics: statistics);
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return SemanticCard(
-      semanticLabel: 'Estatística de $title: $value',
-      semanticHint: 'Informação sobre $title dos abastecimentos',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: GasometerDesignTokens.paddingAll(
-                  GasometerDesignTokens.spacingSm,
-                ),
-                decoration: BoxDecoration(
-                  color: GasometerDesignTokens.withOpacity(color, 0.1),
-                  borderRadius: GasometerDesignTokens.borderRadius(
-                    GasometerDesignTokens.radiusMd,
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: GasometerDesignTokens.iconSizeButton,
-                ),
-              ),
-              SizedBox(width: GasometerDesignTokens.spacingMd),
-              SemanticText.label(
-                title,
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
-          SemanticText(
-            value,
-            style: TextStyle(
-              fontSize: GasometerDesignTokens.fontSizeXxxl,
-              fontWeight: GasometerDesignTokens.fontWeightBold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ✅ PERFORMANCE FIX: Virtualized list that can handle 1000+ records efficiently
-  Widget _buildVirtualizedRecordsList(List<FuelRecordEntity> records) {
+  // Performance fix: Virtualized list that can handle 1000+ records efficiently
+  Widget _buildVirtualizedRecordsList(List<ExpenseEntity> records) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SemanticText.heading(
-          'Histórico de Abastecimentos',
+          'Histórico de Despesas',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -411,17 +282,17 @@ class _FuelPageState extends State<FuelPage> {
           ),
         ),
         const SizedBox(height: 16),
-        // ✅ PERFORMANCE FIX: Properly virtualized list with fixed height
+        // Performance fix: Properly virtualized list with fixed height
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.6, // Dynamic height based on screen
           child: ListView.builder(
-            // ✅ Remove shrinkWrap and NeverScrollableScrollPhysics for proper virtualization
+            // Remove shrinkWrap and NeverScrollableScrollPhysics for proper virtualization
             itemCount: records.length,
             itemExtent: 120.0, // Fixed item height for better performance
             itemBuilder: (context, index) {
               return Consumer<VehiclesProvider>(
                 builder: (context, vehiclesProvider, child) {
-                  return _OptimizedFuelRecordCard(
+                  return _OptimizedExpenseRecordCard(
                     key: ValueKey(records[index].id),
                     record: records[index],
                     vehiclesProvider: vehiclesProvider,
@@ -438,83 +309,9 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-  Widget _buildRecordsList(List<FuelRecordEntity> records, VehiclesProvider vehiclesProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SemanticText.heading(
-          'Histórico de Abastecimentos',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: records.length,
-          itemBuilder: (context, index) {
-            return _OptimizedFuelRecordCard(
-              key: ValueKey(records[index].id),
-              record: records[index],
-              vehiclesProvider: vehiclesProvider,
-              onLongPress: () => _showRecordMenu(records[index]),
-              onTap: () => _showRecordDetails(records[index], vehiclesProvider),
-              getVehicleName: _getVehicleName,
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-
-
-  Widget _buildFullTankBadge(BuildContext context) {
-    return Semantics(
-      label: 'Abastecimento com tanque cheio',
-      child: Container(
-        padding: GasometerDesignTokens.paddingOnly(
-          left: GasometerDesignTokens.spacingSm,
-          right: GasometerDesignTokens.spacingSm,
-          top: GasometerDesignTokens.spacingXs,
-          bottom: GasometerDesignTokens.spacingXs,
-        ),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusSm,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.check_circle,
-              size: GasometerDesignTokens.fontSizeMd,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            SizedBox(width: GasometerDesignTokens.spacingXs),
-            Text(
-              'Tanque cheio',
-              style: TextStyle(
-                fontSize: GasometerDesignTokens.fontSizeSm,
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: GasometerDesignTokens.fontWeightMedium,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
   Widget _buildEmptyState() {
-    return FuelEmptyState(
-      onAddRecord: _showAddFuelDialog,
+    return ExpensesEmptyState(
+      onAddRecord: _showAddExpenseDialog,
     );
   }
 
@@ -525,17 +322,17 @@ class _FuelPageState extends State<FuelPage> {
     
     return SemanticButton.fab(
       semanticLabel: hasSelectedVehicle 
-          ? 'Registrar novo abastecimento' 
+          ? 'Registrar nova despesa' 
           : hasVehicles 
               ? 'Selecione um veículo primeiro'
               : 'Cadastrar veículo primeiro',
       semanticHint: hasSelectedVehicle 
-          ? 'Abre formulário para cadastrar um novo abastecimento'
+          ? 'Abre formulário para cadastrar uma nova despesa'
           : hasVehicles
-              ? 'É necessário selecionar um veículo para registrar abastecimentos'
-              : 'É necessário ter pelo menos um veículo cadastrado para registrar abastecimentos',
+              ? 'É necessário selecionar um veículo para registrar despesas'
+              : 'É necessário ter pelo menos um veículo cadastrado para registrar despesas',
       onPressed: hasSelectedVehicle 
-          ? _showAddFuelDialog 
+          ? _showAddExpenseDialog 
           : hasVehicles 
               ? _showSelectVehicleMessage 
               : () => _showAddVehicleDialog(context),
@@ -553,8 +350,8 @@ class _FuelPageState extends State<FuelPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(hasVehicles 
-            ? 'Selecione um veículo primeiro para registrar abastecimentos'
-            : 'Cadastre um veículo primeiro para registrar abastecimentos'),
+            ? 'Selecione um veículo primeiro para registrar despesas'
+            : 'Cadastre um veículo primeiro para registrar despesas'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -583,65 +380,94 @@ class _FuelPageState extends State<FuelPage> {
     }
   }
 
-  Future<void> _showAddFuelDialog() async {
+  Future<void> _showAddExpenseDialog() async {
     try {
       // Get providers before opening dialog to avoid context issues
       final authProvider = context.read<AuthProvider>();
+      final userId = authProvider.currentUser?.uid;
+      
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuário não autenticado')),
+        );
+        return;
+      }
       
       final result = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => FuelFormProvider()),
+            ChangeNotifierProvider(create: (_) => ExpenseFormProvider()),
             ChangeNotifierProvider.value(value: _vehiclesProvider),
             ChangeNotifierProvider.value(value: authProvider),
           ],
-          builder: (context, child) => AddFuelPage(vehicleId: _selectedVehicleId),
+          builder: (context, child) => AddExpensePage(
+            vehicleId: _selectedVehicleId,
+            userId: userId,
+          ),
         ),
       );
       
       if (result == true && mounted) {
-        // Recarregar dados após adicionar combustível
+        // Recarregar dados após adicionar despesa
         _loadData();
       }
     } catch (e) {
-      debugPrint('Error opening add fuel dialog: $e');
+      debugPrint('Error opening add expense dialog: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao abrir formulário de combustível')),
+          const SnackBar(content: Text('Erro ao abrir formulário de despesa')),
         );
       }
     }
   }
 
-  Future<void> _showEditFuelDialog(String fuelRecordId, String vehicleId) async {
+  Future<void> _showEditExpenseDialog(String expenseId, String vehicleId) async {
     // Get providers before opening dialog to avoid context issues
     final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.currentUser?.uid;
+    
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário não autenticado')),
+      );
+      return;
+    }
+    
+    // Get the expense to edit
+    final expenseToEdit = _expensesProvider.getExpenseById(expenseId);
+    if (expenseToEdit == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Despesa não encontrada')),
+      );
+      return;
+    }
     
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => FuelFormProvider()),
+          ChangeNotifierProvider(create: (_) => ExpenseFormProvider()),
           ChangeNotifierProvider.value(value: _vehiclesProvider),
           ChangeNotifierProvider.value(value: authProvider),
         ],
-        builder: (context, child) => AddFuelPage(
+        builder: (context, child) => AddExpensePage(
           vehicleId: vehicleId,
-          editFuelRecordId: fuelRecordId,
+          userId: userId,
+          expenseToEdit: expenseToEdit,
         ),
       ),
     );
     
     if (result == true && mounted) {
-      // Recarregar dados após editar combustível
+      // Recarregar dados após editar despesa
       _loadData();
     }
   }
 
-  void _showRecordDetails(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {
-    final vehicleName = _getVehicleName(record.veiculoId);
-    final formattedDate = '${record.data.day}/${record.data.month}/${record.data.year}';
+  void _showRecordDetails(ExpenseEntity record, VehiclesProvider vehiclesProvider) {
+    final vehicleName = _getVehicleName(record.vehicleId);
+    final formattedDate = '${record.date.day}/${record.date.month}/${record.date.year}';
     
     showDialog<void>(
       context: context,
@@ -649,8 +475,8 @@ class _FuelPageState extends State<FuelPage> {
         title: Row(
           children: [
             Semantics(
-              label: 'Ícone de posto de combustível',
-              child: Icon(Icons.local_gas_station, color: Theme.of(context).colorScheme.primary),
+              label: 'Ícone de despesa',
+              child: Icon(record.type.icon, color: record.type.color),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -659,27 +485,27 @@ class _FuelPageState extends State<FuelPage> {
           ],
         ),
         content: Semantics(
-          label: 'Detalhes do abastecimento de $vehicleName em $formattedDate',
+          label: 'Detalhes da despesa de $vehicleName em $formattedDate',
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow('Posto', record.nomePosto ?? 'Não informado'),
-              _buildDetailRow('Combustível', record.tipoCombustivel.displayName),
-              _buildDetailRow('Litros', record.litrosFormatados),
-              _buildDetailRow('Preço/L', record.precoPorLitroFormatado),
-              _buildDetailRow('Total', record.valorTotalFormatado),
-              _buildDetailRow('Odômetro', record.odometroFormatado),
-              _buildDetailRow('Tanque cheio', record.tanqueCheio ? 'Sim' : 'Não'),
-              if (record.temObservacoes)
-                _buildDetailRow('Observações', record.observacoes!),
+              _buildDetailRow('Tipo', record.type.displayName),
+              _buildDetailRow('Descrição', record.description),
+              _buildDetailRow('Valor', record.formattedAmount),
+              _buildDetailRow('Odômetro', record.formattedOdometer),
+              _buildDetailRow('Data', formattedDate),
+              if (record.hasLocation)
+                _buildDetailRow('Local', record.location!),
+              if (record.hasNotes)
+                _buildDetailRow('Observações', record.notes!),
             ],
           ),
         ),
         actions: [
           SemanticButton(
             semanticLabel: 'Fechar detalhes',
-            semanticHint: 'Fecha a janela de detalhes do abastecimento',
+            semanticHint: 'Fecha a janela de detalhes da despesa',
             type: ButtonType.text,
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Fechar'),
@@ -689,10 +515,10 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-  void _showRecordMenu(FuelRecordEntity record) {
-    final vehicleName = _getVehicleName(record.veiculoId);
-    final formattedDate = '${record.data.day}/${record.data.month}/${record.data.year}';
-    final recordDescription = 'abastecimento de $vehicleName em $formattedDate';
+  void _showRecordMenu(ExpenseEntity record) {
+    final vehicleName = _getVehicleName(record.vehicleId);
+    final formattedDate = '${record.date.day}/${record.date.month}/${record.date.year}';
+    final recordDescription = 'despesa de $vehicleName em $formattedDate';
     
     showModalBottomSheet<void>(
       context: context,
@@ -703,24 +529,24 @@ class _FuelPageState extends State<FuelPage> {
             children: [
               Semantics(
                 label: 'Editar $recordDescription',
-                hint: 'Abre formulário de edição para modificar os dados deste abastecimento',
+                hint: 'Abre formulário de edição para modificar os dados desta despesa',
                 button: true,
                 onTap: () {
                   Navigator.pop(context);
-                  _showEditFuelDialog(record.id, record.veiculoId);
+                  _showEditExpenseDialog(record.id, record.vehicleId);
                 },
                 child: ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Editar'),
                   onTap: () {
                     Navigator.pop(context);
-                    _showEditFuelDialog(record.id, record.veiculoId);
+                    _showEditExpenseDialog(record.id, record.vehicleId);
                   },
                 ),
               ),
               Semantics(
                 label: 'Excluir $recordDescription',
-                hint: 'Remove permanentemente este registro de abastecimento',
+                hint: 'Remove permanentemente este registro de despesa',
                 button: true,
                 onTap: () {
                   Navigator.pop(context);
@@ -742,28 +568,28 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-  void _confirmDeleteRecord(FuelRecordEntity record) {
-    final vehicleName = _getVehicleName(record.veiculoId);
-    final recordDescription = 'abastecimento de $vehicleName realizado em ${record.data.day}/${record.data.month}/${record.data.year}';
+  void _confirmDeleteRecord(ExpenseEntity record) {
+    final vehicleName = _getVehicleName(record.vehicleId);
+    final recordDescription = 'despesa de $vehicleName realizada em ${record.date.day}/${record.date.month}/${record.date.year}';
     
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: SemanticText.heading('Confirmar exclusão'),
         content: SemanticText(
-          'Tem certeza que deseja excluir este registro de abastecimento?\n\nEsta ação não pode ser desfeita.',
+          'Tem certeza que deseja excluir este registro de despesa?\n\nEsta ação não pode ser desfeita.',
         ),
         actions: [
           SemanticButton(
             semanticLabel: 'Cancelar exclusão',
-            semanticHint: 'Fecha a confirmação sem excluir o registro de abastecimento',
+            semanticHint: 'Fecha a confirmação sem excluir o registro de despesa',
             type: ButtonType.text,
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
           SemanticButton(
             semanticLabel: 'Confirmar exclusão do registro',
-            semanticHint: 'Remove permanentemente este $recordDescription',
+            semanticHint: 'Remove permanentemente esta $recordDescription',
             type: ButtonType.elevated,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -772,13 +598,13 @@ class _FuelPageState extends State<FuelPage> {
             onPressed: () async {
               Navigator.pop(context);
               
-              final success = await _fuelProvider.deleteFuelRecord(record.id);
+              final success = await _expensesProvider.removeExpense(record.id);
               
               if (mounted) {
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 final message = success 
                   ? 'Registro excluído com sucesso!'
-                  : _fuelProvider.errorMessage ?? 'Erro ao excluir registro';
+                  : _expensesProvider.error?.displayMessage ?? 'Erro ao excluir registro';
                 final backgroundColor = success ? Colors.green : Colors.red;
                 
                 scaffoldMessenger.showSnackBar(
@@ -796,59 +622,10 @@ class _FuelPageState extends State<FuelPage> {
     );
   }
 
-
   Widget _buildErrorState(String error, VoidCallback onRetry) {
-    return FuelErrorState(
+    return ExpensesErrorState(
       error: error,
       onRetry: onRetry,
-    );
-  }
-
-  Widget _buildFilterStatus(FuelProvider fuelProvider) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.filter_alt,
-            color: Theme.of(context).colorScheme.primary,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              fuelProvider.activeFiltersDescription,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          if (fuelProvider.hasActiveFilters)
-            TextButton(
-              onPressed: () => _fuelProvider.clearAllFilters(),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(60, 30),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              child: Text(
-                'Limpar',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 
@@ -861,7 +638,7 @@ class _FuelPageState extends State<FuelPage> {
           Text(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 14,
             ),
           ),
@@ -878,15 +655,15 @@ class _FuelPageState extends State<FuelPage> {
   }
 }
 
-/// Widget otimizado para card de abastecimento
-class _OptimizedFuelRecordCard extends StatelessWidget {
-  final FuelRecordEntity record;
+/// Widget otimizado para card de despesa
+class _OptimizedExpenseRecordCard extends StatelessWidget {
+  final ExpenseEntity record;
   final VehiclesProvider vehiclesProvider;
   final VoidCallback onLongPress;
   final VoidCallback onTap;
   final String Function(String) getVehicleName;
 
-  const _OptimizedFuelRecordCard({
+  const _OptimizedExpenseRecordCard({
     super.key,
     required this.record,
     required this.vehiclesProvider,
@@ -897,10 +674,10 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = record.data;
+    final date = record.date;
     final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    final vehicleName = getVehicleName(record.veiculoId);
-    final semanticLabel = 'Abastecimento $vehicleName em $formattedDate, ${record.litros.toStringAsFixed(1)} litros, R\$ ${record.valorTotal.toStringAsFixed(2)}${record.tanqueCheio ? ', tanque cheio' : ''}';
+    final vehicleName = getVehicleName(record.vehicleId);
+    final semanticLabel = 'Despesa $vehicleName em $formattedDate, ${record.type.displayName}, ${record.formattedAmount}${record.hasLocation ? ', ${record.location}' : ''}';
 
     return SemanticCard(
       semanticLabel: semanticLabel,
@@ -949,7 +726,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
               ),
               SizedBox(height: GasometerDesignTokens.spacingXs),
               SemanticText.subtitle(
-                record.nomePosto ?? 'Posto não informado',
+                record.description,
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeMd,
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
@@ -968,14 +745,14 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
         GasometerDesignTokens.spacingMd - 2,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
+        color: record.type.color.withOpacity(GasometerDesignTokens.opacityOverlay),
         borderRadius: GasometerDesignTokens.borderRadius(
           GasometerDesignTokens.radiusMd + 2,
         ),
       ),
       child: Icon(
-        Icons.local_gas_station,
-        color: Theme.of(context).colorScheme.primary,
+        record.type.icon,
+        color: record.type.color,
         size: GasometerDesignTokens.iconSizeListItem,
       ),
     );
@@ -1000,23 +777,23 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
       children: [
         _buildInfoItem(
           context,
-          Icons.water_drop_outlined,
-          '${record.litros.toStringAsFixed(1)} L',
-          'Litros',
+          record.type.icon,
+          record.type.displayName,
+          'Tipo',
         ),
         _buildInfoItem(
           context,
           Icons.speed,
-          '${record.odometro.toStringAsFixed(0)} km',
+          '${record.odometer.toStringAsFixed(0)} km',
           'Odômetro',
         ),
         _buildInfoItem(
           context,
           Icons.attach_money,
-          'R\$ ${record.valorTotal.toStringAsFixed(2)}',
-          'Total',
+          record.formattedAmount,
+          'Valor',
         ),
-        if (record.tanqueCheio) _buildFullTankBadge(context),
+        if (record.hasReceipt) _buildReceiptBadge(context),
       ],
     );
   }
@@ -1029,7 +806,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: Theme.of(context).colorScheme.primary,
+            color: record.type.color,
           ),
           const SizedBox(height: 4),
           SemanticText(
@@ -1042,7 +819,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           SemanticText.label(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -1051,10 +828,10 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFullTankBadge(BuildContext context) {
+  Widget _buildReceiptBadge(BuildContext context) {
     return SemanticStatusIndicator(
-      status: 'Tanque cheio',
-      description: 'Abastecimento realizado com o tanque completamente cheio',
+      status: 'Comprovante anexado',
+      description: 'Esta despesa possui comprovante/foto anexada',
       child: Container(
         padding: GasometerDesignTokens.paddingOnly(
           left: GasometerDesignTokens.spacingSm,
@@ -1063,15 +840,15 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           bottom: GasometerDesignTokens.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
+          color: Colors.green.withOpacity(GasometerDesignTokens.opacityOverlay),
           borderRadius: GasometerDesignTokens.borderRadius(
             GasometerDesignTokens.radiusSm,
           ),
         ),
         child: SemanticText.label(
-          'Cheio',
+          'Recibo',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
+            color: Colors.green,
             fontSize: GasometerDesignTokens.fontSizeSm,
             fontWeight: GasometerDesignTokens.fontWeightMedium,
           ),

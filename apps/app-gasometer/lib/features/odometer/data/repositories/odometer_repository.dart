@@ -169,11 +169,11 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       }
       
       final models = _box.values
-          .where((model) => model.idVeiculo == vehicleId && !model.isDeleted)
+          .where((model) => model.vehicleId == vehicleId && !model.isDeleted)
           .toList();
       
       // Ordenar por data decrescente (mais recente primeiro)
-      models.sort((a, b) => b.data.compareTo(a.data));
+      models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
       
       final entities = models.map((model) => _modelToEntity(model)).toList();
       
@@ -191,11 +191,11 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
     try {
       final typeString = _typeToString(type);
       final models = _box.values
-          .where((model) => model.tipoRegistro == typeString && !model.isDeleted)
+          .where((model) => model.type == typeString && !model.isDeleted)
           .toList();
       
       // Ordenar por data decrescente
-      models.sort((a, b) => b.data.compareTo(a.data));
+      models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
       
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
@@ -210,13 +210,13 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       final endMs = end.millisecondsSinceEpoch;
       
       final models = _box.values.where((model) {
-        return model.data >= startMs && 
-               model.data <= endMs && 
+        return model.registrationDate >= startMs && 
+               model.registrationDate <= endMs && 
                !model.isDeleted;
       }).toList();
       
       // Ordenar por data decrescente
-      models.sort((a, b) => b.data.compareTo(a.data));
+      models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
       
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
@@ -228,14 +228,14 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   Future<OdometerEntity?> getLastOdometerReading(String vehicleId) async {
     try {
       final models = _box.values
-          .where((model) => model.idVeiculo == vehicleId && !model.isDeleted)
+          .where((model) => model.vehicleId == vehicleId && !model.isDeleted)
           .toList();
       
       if (models.isEmpty) return null;
       
       // Encontrar o modelo com a maior data
       final latestModel = models.reduce((a, b) => 
-          a.data > b.data ? a : b);
+          a.registrationDate > b.registrationDate ? a : b);
       
       return _modelToEntity(latestModel);
     } catch (e) {
@@ -249,11 +249,11 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       final lowerQuery = query.toLowerCase();
       final models = _box.values.where((model) {
         return !model.isDeleted && 
-               model.descricao.toLowerCase().contains(lowerQuery);
+               model.description.toLowerCase().contains(lowerQuery);
       }).toList();
       
       // Ordenar por data decrescente
-      models.sort((a, b) => b.data.compareTo(a.data));
+      models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
       
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
@@ -283,7 +283,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   Future<Map<String, dynamic>> getVehicleStats(String vehicleId) async {
     try {
       final models = _box.values
-          .where((model) => model.idVeiculo == vehicleId && !model.isDeleted)
+          .where((model) => model.vehicleId == vehicleId && !model.isDeleted)
           .toList();
       
       if (models.isEmpty) {
@@ -297,15 +297,15 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       }
 
       // Ordenar por data
-      models.sort((a, b) => a.data.compareTo(b.data));
+      models.sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
       
       final firstModel = models.first;
       final lastModel = models.last;
-      final totalDistance = lastModel.odometro - firstModel.odometro;
+      final totalDistance = lastModel.value - firstModel.value;
       
       return {
         'totalRecords': models.length,
-        'currentOdometer': lastModel.odometro,
+        'currentOdometer': lastModel.value,
         'firstReading': _modelToEntity(firstModel),
         'lastReading': _modelToEntity(lastModel),
         'totalDistance': totalDistance.abs(),
@@ -342,12 +342,12 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           final model2 = models[j];
           
           // Considera duplicata se mesmo veículo, valor próximo e data próxima
-          final date1 = DateTime.fromMillisecondsSinceEpoch(model1.data);
-          final date2 = DateTime.fromMillisecondsSinceEpoch(model2.data);
+          final date1 = DateTime.fromMillisecondsSinceEpoch(model1.registrationDate);
+          final date2 = DateTime.fromMillisecondsSinceEpoch(model2.registrationDate);
           final daysDiff = date1.difference(date2).inDays.abs();
           
-          if (model1.idVeiculo == model2.idVeiculo &&
-              (model1.odometro - model2.odometro).abs() < 1.0 &&
+          if (model1.vehicleId == model2.vehicleId &&
+              (model1.value - model2.value).abs() < 1.0 &&
               daysDiff <= 1) {
             duplicates.add(model2);
           }
@@ -374,11 +374,11 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
     return OdometerModel.create(
       id: entity.id,
       userId: entity.userId,
-      idVeiculo: entity.vehicleId,
-      data: entity.registrationDate.millisecondsSinceEpoch,
-      odometro: entity.value,
-      descricao: entity.description,
-      tipoRegistro: _typeToString(entity.type),
+      vehicleId: entity.vehicleId,
+      registrationDate: entity.registrationDate.millisecondsSinceEpoch,
+      value: entity.value,
+      description: entity.description,
+      type: _typeToString(entity.type),
     );
   }
 
@@ -386,12 +386,12 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   OdometerEntity _modelToEntity(OdometerModel model) {
     return OdometerEntity(
       id: model.id,
-      vehicleId: model.idVeiculo,
+      vehicleId: model.vehicleId,
       userId: model.userId ?? '',
-      value: model.odometro,
-      registrationDate: DateTime.fromMillisecondsSinceEpoch(model.data),
-      description: model.descricao,
-      type: _stringToType(model.tipoRegistro ?? 'other'),
+      value: model.value,
+      registrationDate: DateTime.fromMillisecondsSinceEpoch(model.registrationDate),
+      description: model.description,
+      type: _stringToType(model.type ?? 'other'),
       createdAt: model.createdAt ?? DateTime.now(),
       updatedAt: model.updatedAt ?? DateTime.now(),
       metadata: {

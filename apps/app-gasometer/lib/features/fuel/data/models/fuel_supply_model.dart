@@ -21,17 +21,17 @@ class FuelSupplyModel extends BaseSyncModel {
   @HiveField(7) @override final String? userId;
   @HiveField(8) @override final String? moduleName;
 
-  // Fuel supply specific fields
-  @HiveField(10) final String veiculoId;
-  @HiveField(11) final int data;
-  @HiveField(12) final double odometro;
-  @HiveField(13) final double litros;
-  @HiveField(14) final double valorTotal;
-  @HiveField(15) final bool? tanqueCheio;
-  @HiveField(16) final double precoPorLitro;
-  @HiveField(17) final String? posto;
-  @HiveField(18) final String? observacao;
-  @HiveField(19) final int tipoCombustivel;
+  // Fuel supply specific fields - using English names aligned with Entity
+  @HiveField(10) final String vehicleId;
+  @HiveField(11) final int date;
+  @HiveField(12) final double odometer;
+  @HiveField(13) final double liters;
+  @HiveField(14) final double totalPrice;
+  @HiveField(15) final bool? fullTank;
+  @HiveField(16) final double pricePerLiter;
+  @HiveField(17) final String? gasStationName;
+  @HiveField(18) final String? notes;
+  @HiveField(19) final int fuelType;
 
   FuelSupplyModel({
     required this.id,
@@ -43,16 +43,16 @@ class FuelSupplyModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    this.veiculoId = '',
-    this.data = 0,
-    this.odometro = 0.0,
-    this.litros = 0.0,
-    this.valorTotal = 0.0,
-    this.tanqueCheio,
-    this.precoPorLitro = 0.0,
-    this.posto,
-    this.observacao,
-    this.tipoCombustivel = 0,
+    this.vehicleId = '',
+    this.date = 0,
+    this.odometer = 0.0,
+    this.liters = 0.0,
+    this.totalPrice = 0.0,
+    this.fullTank,
+    this.pricePerLiter = 0.0,
+    this.gasStationName,
+    this.notes,
+    this.fuelType = 0,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -72,16 +72,27 @@ class FuelSupplyModel extends BaseSyncModel {
   factory FuelSupplyModel.create({
     String? id,
     String? userId,
-    required String veiculoId,
-    required int data,
-    required double odometro,
-    required double litros,
-    required double valorTotal,
+    required String vehicleId,
+    required int date,
+    required double odometer,
+    required double liters,
+    required double totalPrice,
+    bool? fullTank,
+    required double pricePerLiter,
+    String? gasStationName,
+    String? notes,
+    required int fuelType,
+    // Legacy parameters for backward compatibility
+    String? veiculoId,
+    int? data,
+    double? odometro,
+    double? litros,
+    double? valorTotal,
     bool? tanqueCheio,
-    required double precoPorLitro,
+    double? precoPorLitro,
     String? posto,
     String? observacao,
-    required int tipoCombustivel,
+    int? tipoCombustivel,
   }) {
     final now = DateTime.now();
     final supplyId = id ?? now.millisecondsSinceEpoch.toString();
@@ -92,16 +103,16 @@ class FuelSupplyModel extends BaseSyncModel {
       updatedAtMs: now.millisecondsSinceEpoch,
       isDirty: true,
       userId: userId,
-      veiculoId: veiculoId,
-      data: data,
-      odometro: odometro,
-      litros: litros,
-      valorTotal: valorTotal,
-      tanqueCheio: tanqueCheio,
-      precoPorLitro: precoPorLitro,
-      posto: posto,
-      observacao: observacao,
-      tipoCombustivel: tipoCombustivel,
+      vehicleId: vehicleId ?? veiculoId ?? '',
+      date: date ?? data ?? 0,
+      odometer: odometer ?? odometro ?? 0.0,
+      liters: liters ?? litros ?? 0.0,
+      totalPrice: totalPrice ?? valorTotal ?? 0.0,
+      fullTank: fullTank ?? tanqueCheio,
+      pricePerLiter: pricePerLiter ?? precoPorLitro ?? 0.0,
+      gasStationName: gasStationName ?? posto,
+      notes: notes ?? observacao,
+      fuelType: fuelType ?? tipoCombustivel ?? 0,
     );
   }
 
@@ -119,16 +130,16 @@ class FuelSupplyModel extends BaseSyncModel {
       version: baseFields['version'] as int,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-      veiculoId: map['veiculoId']?.toString() ?? '',
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
-      litros: (map['litros'] as num? ?? 0.0).toDouble(),
-      valorTotal: (map['valorTotal'] as num? ?? 0.0).toDouble(),
-      tanqueCheio: map['tanqueCheio'] as bool?,
-      precoPorLitro: (map['precoPorLitro'] as num? ?? 0.0).toDouble(),
-      posto: map['posto']?.toString(),
-      observacao: map['observacao']?.toString(),
-      tipoCombustivel: (map['tipoCombustivel'] as num?)?.toInt() ?? 0,
+      vehicleId: map['vehicleId']?.toString() ?? map['veiculoId']?.toString() ?? '',
+      date: (map['date'] as num?)?.toInt() ?? (map['data'] as num?)?.toInt() ?? 0,
+      odometer: (map['odometer'] as num? ?? map['odometro'] as num? ?? 0.0).toDouble(),
+      liters: (map['liters'] as num? ?? map['litros'] as num? ?? 0.0).toDouble(),
+      totalPrice: (map['totalPrice'] as num? ?? map['valorTotal'] as num? ?? 0.0).toDouble(),
+      fullTank: map['fullTank'] as bool? ?? map['tanqueCheio'] as bool?,
+      pricePerLiter: (map['pricePerLiter'] as num? ?? map['precoPorLitro'] as num? ?? 0.0).toDouble(),
+      gasStationName: map['gasStationName']?.toString() ?? map['posto']?.toString(),
+      notes: map['notes']?.toString() ?? map['observacao']?.toString(),
+      fuelType: (map['fuelType'] as num?)?.toInt() ?? (map['tipoCombustivel'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -137,16 +148,27 @@ class FuelSupplyModel extends BaseSyncModel {
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
-        'veiculoId': veiculoId,
-        'data': data,
-        'odometro': odometro,
-        'litros': litros,
-        'valorTotal': valorTotal,
-        'tanqueCheio': tanqueCheio,
-        'precoPorLitro': precoPorLitro,
-        'posto': posto,
-        'observacao': observacao,
-        'tipoCombustivel': tipoCombustivel,
+        'vehicleId': vehicleId,
+        'date': date,
+        'odometer': odometer,
+        'liters': liters,
+        'totalPrice': totalPrice,
+        'fullTank': fullTank,
+        'pricePerLiter': pricePerLiter,
+        'gasStationName': gasStationName,
+        'notes': notes,
+        'fuelType': fuelType,
+        // Legacy support
+        'veiculoId': vehicleId,
+        'data': date,
+        'odometro': odometer,
+        'litros': liters,
+        'valorTotal': totalPrice,
+        'tanqueCheio': fullTank,
+        'precoPorLitro': pricePerLiter,
+        'posto': gasStationName,
+        'observacao': notes,
+        'tipoCombustivel': fuelType,
       });
   }
 
@@ -156,16 +178,27 @@ class FuelSupplyModel extends BaseSyncModel {
     return {
       ...baseFirebaseFields,
       ...firebaseTimestampFields,
-      'veiculo_id': veiculoId,
-      'data': data,
-      'odometro': odometro,
-      'litros': litros,
-      'valor_total': valorTotal,
-      'tanque_cheio': tanqueCheio,
-      'preco_por_litro': precoPorLitro,
-      'posto': posto,
-      'observacao': observacao,
-      'tipo_combustivel': tipoCombustivel,
+      'vehicle_id': vehicleId,
+      'date': date,
+      'odometer': odometer,
+      'liters': liters,
+      'total_price': totalPrice,
+      'full_tank': fullTank,
+      'price_per_liter': pricePerLiter,
+      'gas_station_name': gasStationName,
+      'notes': notes,
+      'fuel_type': fuelType,
+      // Legacy Firebase fields for backward compatibility
+      'veiculo_id': vehicleId,
+      'data': date,
+      'odometro': odometer,
+      'litros': liters,
+      'valor_total': totalPrice,
+      'tanque_cheio': fullTank,
+      'preco_por_litro': pricePerLiter,
+      'posto': gasStationName,
+      'observacao': notes,
+      'tipo_combustivel': fuelType,
     };
   }
 
@@ -184,16 +217,16 @@ class FuelSupplyModel extends BaseSyncModel {
       version: baseFields['version'] as int,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-      veiculoId: map['veiculo_id']?.toString() ?? '',
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
-      litros: (map['litros'] as num? ?? 0.0).toDouble(),
-      valorTotal: (map['valor_total'] as num? ?? 0.0).toDouble(),
-      tanqueCheio: map['tanque_cheio'] as bool?,
-      precoPorLitro: (map['preco_por_litro'] as num? ?? 0.0).toDouble(),
-      posto: map['posto']?.toString(),
-      observacao: map['observacao']?.toString(),
-      tipoCombustivel: (map['tipo_combustivel'] as num?)?.toInt() ?? 0,
+      vehicleId: map['vehicle_id']?.toString() ?? map['veiculo_id']?.toString() ?? '',
+      date: (map['date'] as num?)?.toInt() ?? (map['data'] as num?)?.toInt() ?? 0,
+      odometer: (map['odometer'] as num? ?? map['odometro'] as num? ?? 0.0).toDouble(),
+      liters: (map['liters'] as num? ?? map['litros'] as num? ?? 0.0).toDouble(),
+      totalPrice: (map['total_price'] as num? ?? map['valor_total'] as num? ?? 0.0).toDouble(),
+      fullTank: map['full_tank'] as bool? ?? map['tanque_cheio'] as bool?,
+      pricePerLiter: (map['price_per_liter'] as num? ?? map['preco_por_litro'] as num? ?? 0.0).toDouble(),
+      gasStationName: map['gas_station_name']?.toString() ?? map['posto']?.toString(),
+      notes: map['notes']?.toString() ?? map['observacao']?.toString(),
+      fuelType: (map['fuel_type'] as num?)?.toInt() ?? (map['tipo_combustivel'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -209,6 +242,17 @@ class FuelSupplyModel extends BaseSyncModel {
     int? version,
     String? userId,
     String? moduleName,
+    String? vehicleId,
+    int? date,
+    double? odometer,
+    double? liters,
+    double? totalPrice,
+    bool? fullTank,
+    double? pricePerLiter,
+    String? gasStationName,
+    String? notes,
+    int? fuelType,
+    // Legacy support
     String? veiculoId,
     int? data,
     double? odometro,
@@ -230,16 +274,16 @@ class FuelSupplyModel extends BaseSyncModel {
       version: version ?? this.version,
       userId: userId ?? this.userId,
       moduleName: moduleName ?? this.moduleName,
-      veiculoId: veiculoId ?? this.veiculoId,
-      data: data ?? this.data,
-      odometro: odometro ?? this.odometro,
-      litros: litros ?? this.litros,
-      valorTotal: valorTotal ?? this.valorTotal,
-      tanqueCheio: tanqueCheio ?? this.tanqueCheio,
-      precoPorLitro: precoPorLitro ?? this.precoPorLitro,
-      posto: posto ?? this.posto,
-      observacao: observacao ?? this.observacao,
-      tipoCombustivel: tipoCombustivel ?? this.tipoCombustivel,
+      vehicleId: vehicleId ?? veiculoId ?? this.vehicleId,
+      date: date ?? data ?? this.date,
+      odometer: odometer ?? odometro ?? this.odometer,
+      liters: liters ?? litros ?? this.liters,
+      totalPrice: totalPrice ?? valorTotal ?? this.totalPrice,
+      fullTank: fullTank ?? tanqueCheio ?? this.fullTank,
+      pricePerLiter: pricePerLiter ?? precoPorLitro ?? this.pricePerLiter,
+      gasStationName: gasStationName ?? posto ?? this.gasStationName,
+      notes: notes ?? observacao ?? this.notes,
+      fuelType: fuelType ?? tipoCombustivel ?? this.fuelType,
     );
   }
 
@@ -249,11 +293,23 @@ class FuelSupplyModel extends BaseSyncModel {
   factory FuelSupplyModel.fromMap(Map<String, dynamic> map) => FuelSupplyModel.fromHiveMap(map);
   factory FuelSupplyModel.fromJson(Map<String, dynamic> json) => FuelSupplyModel.fromHiveMap(json);
 
+  // Legacy Portuguese getters for backward compatibility
+  String get veiculoId => vehicleId;
+  int get data => date;
+  double get odometro => odometer;
+  double get litros => liters;
+  double get valorTotal => totalPrice;
+  bool? get tanqueCheio => fullTank;
+  double get precoPorLitro => pricePerLiter;
+  String? get posto => gasStationName;
+  String? get observacao => notes;
+  int get tipoCombustivel => fuelType;
+  
   /// Get the fuel supply date as DateTime object
-  DateTime get supplyDate => DateTime.fromMillisecondsSinceEpoch(data);
+  DateTime get supplyDate => DateTime.fromMillisecondsSinceEpoch(date);
 
   /// Get calculated price per liter (for display purposes)
-  double get calculatedPricePerLiter => litros > 0 ? valorTotal / litros : 0.0;
+  double get calculatedPricePerLiter => liters > 0 ? totalPrice / liters : 0.0;
 
   /// Clone the object - returns copy with same data
   FuelSupplyModel clone() {
@@ -271,6 +327,6 @@ class FuelSupplyModel extends BaseSyncModel {
 
   @override
   String toString() {
-    return 'FuelSupplyModel(id: $id, veiculoId: $veiculoId, data: $data, litros: $litros, valorTotal: $valorTotal)';
+    return 'FuelSupplyModel(id: $id, vehicleId: $vehicleId, date: $date, liters: $liters, totalPrice: $totalPrice)';
   }
 }

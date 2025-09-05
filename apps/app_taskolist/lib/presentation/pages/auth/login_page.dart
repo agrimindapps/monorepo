@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/failures.dart';
 import '../../providers/auth_providers.dart';
+import '../../widgets/sync/task_sync_loading.dart';
 import '../home_page.dart';
 import 'register_page.dart';
 
@@ -134,7 +136,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
     HapticFeedback.lightImpact();
 
     try {
-      await ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
+      // Usar novo método loginAndSync em vez do login tradicional
+      await ref.read(authNotifierProvider.notifier).loginAndSync(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -574,6 +577,67 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
+  /// Mostra loading simples de sincronização que navega automaticamente
+  void _showSimpleSyncLoading() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (context) => SimpleTaskSyncLoading(
+        message: 'Sincronizando suas tarefas...',
+        primaryColor: Theme.of(context).primaryColor,
+      ),
+    );
+    
+    // Navegar quando sync terminar
+    _navigateAfterSync();
+  }
+  
+  /// Navega para HomePage quando sync terminar ou imediatamente
+  void _navigateAfterSync() {
+    late StreamSubscription subscription;
+    
+    subscription = Stream.periodic(const Duration(milliseconds: 500))
+        .listen((_) {
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      if (!authNotifier.isSyncInProgress) {
+        subscription.cancel();
+        
+        // Pequeno delay para garantir que o loading foi fechado
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            // Fechar dialog de loading se estiver visível
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
+            _navigateToHomePage();
+          }
+        });
+      }
+    });
+  }
+
+  /// Navega para a HomePage principal
+  void _navigateToHomePage() {
+    print('🚀 Navegando para HomePage...');
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const HomePage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: animation,
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Setup auth listener inside build method
@@ -588,23 +652,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
               _isLoading = false;
               _isAnonymousLoading = false;
             });
-            print('🚀 Navegando para HomePage...');
-            Navigator.of(context).pushReplacement(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const HomePage(),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(
-                      scale: animation,
-                      child: child,
-                    ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 500),
-              ),
-            );
+            
+            // Verificar se há sincronização em progresso
+            final authNotifier = ref.read(authNotifierProvider.notifier);
+            if (authNotifier.isSyncInProgress) {
+              _showSimpleSyncLoading();
+            } else {
+              _navigateToHomePage();
+            }
           }
         },
         loading: () {

@@ -71,10 +71,11 @@ void main() async {
       persistenceEnabled: true,
       cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
-    
+
     // Reduce Firebase logging in debug mode to prevent console spam
     if (kDebugMode) {
-      print('🔧 Firestore configurado para desenvolvimento com logging otimizado');
+      print(
+          '🔧 Firestore configurado para desenvolvimento com logging otimizado');
     }
   } catch (e) {
     print('⚠️ Falha na configuração do Firestore: $e');
@@ -152,10 +153,13 @@ void main() async {
   if (kDebugMode) {
     print('🔍 Starting Firebase connectivity test (async)...');
     // Run connectivity test without blocking app startup
-    GasometerFirebaseService.checkFirebaseConnectivity().then((connectivityResult) {
-      print('🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}');
+    GasometerFirebaseService.checkFirebaseConnectivity()
+        .then((connectivityResult) {
+      print(
+          '🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}');
       if ((connectivityResult['errors'] as List).isNotEmpty) {
-        print('⚠️ Firebase connectivity errors: ${connectivityResult['errors']}');
+        print(
+            '⚠️ Firebase connectivity errors: ${connectivityResult['errors']}');
       }
     }).catchError((Object e) {
       print('⚠️ Firebase connectivity test failed: $e');

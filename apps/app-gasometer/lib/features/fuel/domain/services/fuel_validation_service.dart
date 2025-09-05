@@ -4,9 +4,10 @@ import '../entities/fuel_record_entity.dart';
 
 /// Serviço avançado para validação contextual de registros de abastecimento
 class FuelValidationService {
-  static final FuelValidationService _instance = FuelValidationService._internal();
   factory FuelValidationService() => _instance;
   FuelValidationService._internal();
+  
+  static final FuelValidationService _instance = FuelValidationService._internal();
 
   /// Valida consistência entre registros de abastecimento
   ValidationResult validateFuelRecord(
@@ -258,15 +259,15 @@ class FuelValidationService {
 
 /// Resultado de validação
 class ValidationResult {
-  final bool isValid;
-  final Map<String, String> errors;
-  final Map<String, String> warnings;
-
   ValidationResult({
     required this.isValid,
     required this.errors,
     required this.warnings,
   });
+
+  final bool isValid;
+  final Map<String, String> errors;
+  final Map<String, String> warnings;
 
   bool get hasWarnings => warnings.isNotEmpty;
   bool get hasErrors => errors.isNotEmpty;
@@ -274,16 +275,6 @@ class ValidationResult {
 
 /// Análise de padrões de abastecimento
 class FuelPatternAnalysis {
-  final int totalRecords;
-  final double totalLiters;
-  final double totalCost;
-  final double averageLiters;
-  final double averagePricePerLiter;
-  final double? averageConsumption;
-  final List<FuelAnomaly> anomalies;
-  final FuelRecordEntity lastRecord;
-  final FuelRecordEntity firstRecord;
-
   FuelPatternAnalysis({
     required this.totalRecords,
     required this.totalLiters,
@@ -304,35 +295,45 @@ class FuelPatternAnalysis {
       averageLiters: 0,
       averagePricePerLiter: 0,
       averageConsumption: null,
-      anomalies: [],
+      anomalies: <FuelAnomaly>[],
       lastRecord: FuelRecordEntity(
         id: '', 
-        idUsuario: '', 
-        veiculoId: '', 
-        tipoCombustivel: FuelType.gasoline,
-        litros: 0, 
-        precoPorLitro: 0, 
-        valorTotal: 0, 
-        odometro: 0,
-        data: DateTime.now(), 
-        criadoEm: DateTime.now(), 
-        atualizadoEm: DateTime.now(),
+        userId: '', 
+        vehicleId: '', 
+        fuelType: FuelType.gasoline,
+        liters: 0, 
+        pricePerLiter: 0, 
+        totalPrice: 0, 
+        odometer: 0,
+        date: DateTime.now(), 
+        createdAt: DateTime.now(), 
+        updatedAt: DateTime.now(),
       ),
       firstRecord: FuelRecordEntity(
         id: '', 
-        idUsuario: '', 
-        veiculoId: '', 
-        tipoCombustivel: FuelType.gasoline,
-        litros: 0, 
-        precoPorLitro: 0, 
-        valorTotal: 0, 
-        odometro: 0,
-        data: DateTime.now(), 
-        criadoEm: DateTime.now(), 
-        atualizadoEm: DateTime.now(),
+        userId: '', 
+        vehicleId: '', 
+        fuelType: FuelType.gasoline,
+        liters: 0, 
+        pricePerLiter: 0, 
+        totalPrice: 0, 
+        odometer: 0,
+        date: DateTime.now(), 
+        createdAt: DateTime.now(), 
+        updatedAt: DateTime.now(),
       ),
     );
   }
+
+  final int totalRecords;
+  final double totalLiters;
+  final double totalCost;
+  final double averageLiters;
+  final double averagePricePerLiter;
+  final double? averageConsumption;
+  final List<FuelAnomaly> anomalies;
+  final FuelRecordEntity lastRecord;
+  final FuelRecordEntity firstRecord;
 
   bool get hasAnomalies => anomalies.isNotEmpty;
   
@@ -344,17 +345,17 @@ class FuelPatternAnalysis {
 
 /// Anomalia detectada
 class FuelAnomaly {
-  final String recordId;
-  final AnomalyType type;
-  final String description;
-  final AnomalySeverity severity;
-
   FuelAnomaly({
     required this.recordId,
     required this.type,
     required this.description,
     required this.severity,
   });
+
+  final String recordId;
+  final AnomalyType type;
+  final String description;
+  final AnomalySeverity severity;
 }
 
 enum AnomalyType {

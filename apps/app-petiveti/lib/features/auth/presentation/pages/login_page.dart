@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
+import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/background_pattern_painter.dart';
 import '../widgets/desktop_branding_widget.dart';
@@ -187,7 +191,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.isAuthenticated) {
-        context.go('/');
+        // Mostrar SimpleSyncLoading e depois navegar
+        _handleAuthSuccess();
       }
       if (next.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,6 +202,30 @@ class _LoginPageState extends ConsumerState<LoginPage>
           ),
         );
         ref.read(authProvider.notifier).clearError();
+      }
+    });
+  }
+
+  /// Manipula o sucesso da autenticação mostrando loading de sincronização
+  void _handleAuthSuccess() {
+    if (!mounted) return;
+    
+    // Mostrar SimpleSyncLoading que navega automaticamente quando termina
+    SimpleSyncLoading.show(
+      context,
+      message: 'Carregando seus pets...',
+    );
+    
+    // Navegar para home após o SimpleSyncLoading fechar automaticamente
+    _navigateAfterSync();
+  }
+  
+  /// Navega para home quando sync terminar
+  void _navigateAfterSync() {
+    // Use Timer instead of unawaited for better readability
+    Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        context.go('/');
       }
     });
   }
@@ -372,13 +401,15 @@ class _LoginPageState extends ConsumerState<LoginPage>
     setState(() => _isLoading = true);
     
     try {
-      final success = await ref.read(authProvider.notifier).signInWithEmail(
+      // Usar loginAndSync ao invés de signInWithEmail simples
+      final success = await ref.read(authProvider.notifier).loginAndSync(
         _emailController.text.trim(),
         _passwordController.text,
+        showSyncOverlay: true,
       );
       
       if (success && mounted) {
-        HapticFeedback.lightImpact();
+        HapticFeedback.lightImpact(); // Fire-and-forget
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Login realizado com sucesso!'),
@@ -388,7 +419,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       }
     } catch (e) {
       if (mounted) {
-        HapticFeedback.vibrate();
+        HapticFeedback.vibrate(); // Fire-and-forget
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro no login: $e'),

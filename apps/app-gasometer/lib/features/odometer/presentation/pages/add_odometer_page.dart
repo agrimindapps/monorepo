@@ -39,6 +39,11 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
   
+  // Listener control flags to ensure proper cleanup
+  bool _formProviderListenerAdded = false;
+  bool _odometerControllerListenerAdded = false;
+  bool _descriptionControllerListenerAdded = false;
+  
   // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
@@ -82,52 +87,135 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   
   void _setupFormControllers() {
     try {
-      // Setup listeners for reactive updates
+      // Setup listeners for reactive updates with proper error handling
       _formProvider.addListener(_updateControllersFromProvider);
+      _formProviderListenerAdded = true;
       
       // Setup controllers with initial values
       _updateControllersFromProvider();
       
-      // Add listeners for user input
+      // Add listeners for user input with proper tracking
       _odometerController.addListener(_onOdometerChanged);
+      _odometerControllerListenerAdded = true;
+      
       _descriptionController.addListener(_onDescriptionChanged);
+      _descriptionControllerListenerAdded = true;
+      
     } catch (e) {
-      // Em caso de erro, limpar listeners já adicionados
-      _formProvider.removeListener(_updateControllersFromProvider);
-      _odometerController.removeListener(_onOdometerChanged);
-      _descriptionController.removeListener(_onDescriptionChanged);
+      // Robust cleanup: only remove listeners that were actually added
       debugPrint('Error setting up form controllers: $e');
+      _cleanupListeners();
       rethrow;
     }
   }
   
+  /// Safely removes all listeners based on their actual state
+  void _cleanupListeners() {
+    // Clean up form provider listener if it was added
+    if (_formProviderListenerAdded) {
+      try {
+        _formProvider.removeListener(_updateControllersFromProvider);
+      } catch (e) {
+        debugPrint('Error removing form provider listener: $e');
+      } finally {
+        _formProviderListenerAdded = false;
+      }
+    }
+    
+    // Clean up odometer controller listener if it was added
+    if (_odometerControllerListenerAdded) {
+      try {
+        _odometerController.removeListener(_onOdometerChanged);
+      } catch (e) {
+        debugPrint('Error removing odometer controller listener: $e');
+      } finally {
+        _odometerControllerListenerAdded = false;
+      }
+    }
+    
+    // Clean up description controller listener if it was added
+    if (_descriptionControllerListenerAdded) {
+      try {
+        _descriptionController.removeListener(_onDescriptionChanged);
+      } catch (e) {
+        debugPrint('Error removing description controller listener: $e');
+      } finally {
+        _descriptionControllerListenerAdded = false;
+      }
+    }
+  }
+  
   void _updateControllersFromProvider() {
-    // Update odometer controller
-    final formattedOdometer = _formProvider.formattedOdometer;
-    if (_odometerController.text != formattedOdometer) {
-      _odometerController.text = formattedOdometer;
-    }
+    // Safety check: only update if the page is still mounted and initialized
+    if (!mounted || !_isInitialized) return;
     
-    // Update description controller
-    if (_descriptionController.text != _formProvider.description) {
-      _descriptionController.text = _formProvider.description;
+    try {
+      // Update odometer controller if it's still valid
+      final formattedOdometer = _formProvider.formattedOdometer;
+      if (_odometerController.text != formattedOdometer) {
+        _odometerController.text = formattedOdometer;
+      }
+      
+      // Update description controller if it's still valid
+      if (_descriptionController.text != _formProvider.description) {
+        _descriptionController.text = _formProvider.description;
+      }
+      
+      // Trigger UI update safely
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('Error updating controllers from provider: $e');
+      // If there's an error, it might mean the controllers are disposed
+      // Remove the listener to prevent further errors
+      if (_formProviderListenerAdded) {
+        _cleanupListeners();
+      }
     }
-    
-    // Trigger UI update
-    if (mounted) setState(() {});
   }
   
   void _onOdometerChanged() {
-    final text = _odometerController.text;
-    if (text != _formProvider.formattedOdometer) {
-      _formProvider.setOdometerFromString(text);
+    // Safety check: only process if mounted and initialized
+    if (!mounted || !_isInitialized) return;
+    
+    try {
+      final text = _odometerController.text;
+      if (text != _formProvider.formattedOdometer) {
+        _formProvider.setOdometerFromString(text);
+      }
+    } catch (e) {
+      debugPrint('Error in odometer changed listener: $e');
+      // If there's an error, remove the listener to prevent further issues
+      if (_odometerControllerListenerAdded) {
+        try {
+          _odometerController.removeListener(_onOdometerChanged);
+          _odometerControllerListenerAdded = false;
+        } catch (removeError) {
+          debugPrint('Error removing odometer listener: $removeError');
+        }
+      }
     }
   }
   
   void _onDescriptionChanged() {
-    final text = _descriptionController.text;
-    if (text != _formProvider.description) {
-      _formProvider.setDescription(text);
+    // Safety check: only process if mounted and initialized
+    if (!mounted || !_isInitialized) return;
+    
+    try {
+      final text = _descriptionController.text;
+      if (text != _formProvider.description) {
+        _formProvider.setDescription(text);
+      }
+    } catch (e) {
+      debugPrint('Error in description changed listener: $e');
+      // If there's an error, remove the listener to prevent further issues
+      if (_descriptionControllerListenerAdded) {
+        try {
+          _descriptionController.removeListener(_onDescriptionChanged);
+          _descriptionControllerListenerAdded = false;
+        } catch (removeError) {
+          debugPrint('Error removing description listener: $removeError');
+        }
+      }
     }
   }
 
@@ -143,12 +231,22 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
     
-    // Clean up existing listeners and controllers
-    _formProvider.removeListener(_updateControllersFromProvider);
-    _odometerController.removeListener(_onOdometerChanged);
-    _descriptionController.removeListener(_onDescriptionChanged);
-    _odometerController.dispose();
-    _descriptionController.dispose();
+    // Use the robust cleanup method to ensure proper listener removal
+    _cleanupListeners();
+    
+    // Safely dispose controllers
+    try {
+      _odometerController.dispose();
+    } catch (e) {
+      debugPrint('Error disposing odometer controller: $e');
+    }
+    
+    try {
+      _descriptionController.dispose();
+    } catch (e) {
+      debugPrint('Error disposing description controller: $e');
+    }
+    
     super.dispose();
   }
 
@@ -330,9 +428,11 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   Widget _buildDateTimeField() {
     return Consumer<OdometerFormProvider>(
       builder: (context, formProvider, child) {
-        return InkWell(
-          onTap: () => _selectDateTime(formProvider),
-          child: InputDecorator(
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _selectDateTime(formProvider),
+            child: InputDecorator(
             decoration: InputDecoration(
               labelText: OdometerConstants.fieldLabels['dataHora'],
               suffixIcon: Icon(
@@ -371,7 +471,8 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
               ],
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

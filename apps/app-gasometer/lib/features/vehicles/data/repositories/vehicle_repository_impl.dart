@@ -139,6 +139,65 @@ class VehicleRepositoryImpl implements VehicleRepository {
     }
   }
 
+  /// Sync de novo veículo para remoto em background sem bloquear UI
+  Future<void> _syncVehicleToRemoteInBackground(VehicleModel vehicleModel) async {
+    try {
+      final isConnected = await _isConnected;
+      if (!isConnected) {
+        await loggingService.logInfo(
+          category: LogCategory.vehicles,
+          message: 'No connection available for background sync, vehicle will sync later',
+          metadata: {'vehicle_id': vehicleModel.id},
+        );
+        return;
+      }
+
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        await loggingService.logOperationWarning(
+          category: LogCategory.vehicles,
+          operation: LogOperation.sync,
+          message: 'No authenticated user for background sync',
+          metadata: {'vehicle_id': vehicleModel.id},
+        );
+        return;
+      }
+
+      // Fire-and-forget remote sync
+      unawaited(remoteDataSource.saveVehicle(userId, vehicleModel).then((_) async {
+        await loggingService.logInfo(
+          category: LogCategory.vehicles,
+          message: 'Background sync to remote completed successfully',
+          metadata: {
+            'vehicle_id': vehicleModel.id,
+            'user_id': userId,
+          },
+        );
+      }).catchError((Object error) async {
+        await loggingService.logOperationWarning(
+          category: LogCategory.vehicles,
+          operation: LogOperation.sync,
+          message: 'Background sync to remote failed - will retry later',
+          metadata: {
+            'vehicle_id': vehicleModel.id,
+            'user_id': userId,
+            'error': error.toString(),
+          },
+        );
+      }));
+    } catch (e) {
+      await loggingService.logOperationWarning(
+        category: LogCategory.vehicles,
+        operation: LogOperation.sync,
+        message: 'Background sync setup failed',
+        metadata: {
+          'vehicle_id': vehicleModel.id,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
   @override
   Future<Either<Failure, VehicleEntity>> addVehicle(VehicleEntity vehicle) async {
     await loggingService.logOperationStart(
@@ -179,70 +238,14 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': vehicle.id},
       );
       
-      // Remote sync attempt
-      final isConnected = await _isConnected;
-      if (isConnected) {
-        await loggingService.logInfo(
-          category: LogCategory.vehicles,
-          message: 'Connection available, attempting remote sync',
-          metadata: {'vehicle_id': vehicle.id},
-        );
-
-        final userId = await _getCurrentUserId();
-        if (userId != null) {
-          try {
-            // Add timeout to prevent hanging on Firebase operations
-            await remoteDataSource.saveVehicle(userId, vehicleModel)
-                .timeout(const Duration(seconds: 15));
-            
-            await loggingService.logInfo(
-              category: LogCategory.vehicles,
-              message: 'Vehicle synced to remote storage successfully',
-              metadata: {
-                'vehicle_id': vehicle.id,
-                'user_id': userId,
-              },
-            );
-          } on TimeoutException {
-            // Timeout on remote sync - vehicle is saved locally
-            await loggingService.logOperationWarning(
-              category: LogCategory.vehicles,
-              operation: LogOperation.sync,
-              message: 'Remote sync timed out - vehicle saved locally',
-              metadata: {
-                'vehicle_id': vehicle.id,
-                'user_id': userId,
-                'timeout': '15 seconds',
-              },
-            );
-          } catch (e) {
-            // Vehicle saved locally but failed to sync - that's ok
-            await loggingService.logOperationWarning(
-              category: LogCategory.vehicles,
-              operation: LogOperation.sync,
-              message: 'Failed to sync vehicle to remote storage',
-              metadata: {
-                'vehicle_id': vehicle.id,
-                'user_id': userId,
-                'error': e.toString(),
-              },
-            );
-          }
-        } else {
-          await loggingService.logOperationWarning(
-            category: LogCategory.vehicles,
-            operation: LogOperation.sync,
-            message: 'No authenticated user, skipping remote sync',
-            metadata: {'vehicle_id': vehicle.id},
-          );
-        }
-      } else {
-        await loggingService.logInfo(
-          category: LogCategory.vehicles,
-          message: 'No connection available, vehicle saved offline',
-          metadata: {'vehicle_id': vehicle.id},
-        );
-      }
+      // Remote sync in background (fire-and-forget)
+      unawaited(_syncVehicleToRemoteInBackground(vehicleModel));
+      
+      await loggingService.logInfo(
+        category: LogCategory.vehicles,
+        message: 'Vehicle saved locally, remote sync initiated in background',
+        metadata: {'vehicle_id': vehicle.id},
+      );
       
       await loggingService.logOperationSuccess(
         category: LogCategory.vehicles,
@@ -251,7 +254,8 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {
           'vehicle_id': vehicle.id,
           'vehicle_name': vehicle.name,
-          'synced': isConnected && await _getCurrentUserId() != null,
+          'saved_locally': true,
+          'remote_sync': 'background',
         },
       );
 

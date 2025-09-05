@@ -22,11 +22,11 @@ class OdometerModel extends BaseSyncModel {
   @HiveField(8) @override final String? moduleName;
 
   // Odometer specific fields
-  @HiveField(10) final String idVeiculo;
-  @HiveField(11) final int data;
-  @HiveField(12) final double odometro;
-  @HiveField(13) final String descricao;
-  @HiveField(14) final String? tipoRegistro;
+  @HiveField(10) final String vehicleId;
+  @HiveField(11) final int registrationDate;
+  @HiveField(12) final double value;
+  @HiveField(13) final String description;
+  @HiveField(14) final String? type;
 
   OdometerModel({
     required this.id,
@@ -38,11 +38,11 @@ class OdometerModel extends BaseSyncModel {
     this.version = 1,
     this.userId,
     this.moduleName = 'gasometer',
-    this.idVeiculo = '',
-    this.data = 0,
-    this.odometro = 0.0,
-    this.descricao = '',
-    this.tipoRegistro,
+    this.vehicleId = '',
+    this.registrationDate = 0,
+    this.value = 0.0,
+    this.description = '',
+    this.type,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -62,11 +62,11 @@ class OdometerModel extends BaseSyncModel {
   factory OdometerModel.create({
     String? id,
     String? userId,
-    required String idVeiculo,
-    required int data,
-    required double odometro,
-    required String descricao,
-    String? tipoRegistro,
+    required String vehicleId,
+    required int registrationDate,
+    required double value,
+    required String description,
+    String? type,
   }) {
     final now = DateTime.now();
     final readingId = id ?? now.millisecondsSinceEpoch.toString();
@@ -77,11 +77,11 @@ class OdometerModel extends BaseSyncModel {
       updatedAtMs: now.millisecondsSinceEpoch,
       isDirty: true,
       userId: userId,
-      idVeiculo: idVeiculo,
-      data: data,
-      odometro: odometro,
-      descricao: descricao,
-      tipoRegistro: tipoRegistro,
+      vehicleId: vehicleId,
+      registrationDate: registrationDate,
+      value: value,
+      description: description,
+      type: type,
     );
   }
 
@@ -99,11 +99,11 @@ class OdometerModel extends BaseSyncModel {
       version: baseFields['version'] as int,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-      idVeiculo: map['idVeiculo']?.toString() ?? '',
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
-      descricao: map['descricao']?.toString() ?? '',
-      tipoRegistro: map['tipoRegistro']?.toString(),
+      vehicleId: map['vehicleId']?.toString() ?? '',
+      registrationDate: (map['registrationDate'] as num?)?.toInt() ?? 0,
+      value: (map['value'] as num? ?? 0.0).toDouble(),
+      description: map['description']?.toString() ?? '',
+      type: map['type']?.toString(),
     );
   }
 
@@ -112,11 +112,11 @@ class OdometerModel extends BaseSyncModel {
   Map<String, dynamic> toHiveMap() {
     return super.toHiveMap()
       ..addAll({
-        'idVeiculo': idVeiculo,
-        'data': data,
-        'odometro': odometro,
-        'descricao': descricao,
-        'tipoRegistro': tipoRegistro,
+        'vehicleId': vehicleId,
+        'registrationDate': registrationDate,
+        'value': value,
+        'description': description,
+        'type': type,
       });
   }
 
@@ -126,11 +126,11 @@ class OdometerModel extends BaseSyncModel {
     return {
       ...baseFirebaseFields,
       ...firebaseTimestampFields,
-      'id_veiculo': idVeiculo,
-      'data': data,
-      'odometro': odometro,
-      'descricao': descricao,
-      'tipo_registro': tipoRegistro,
+      'vehicle_id': vehicleId,
+      'registration_date': registrationDate,
+      'value': value,
+      'description': description,
+      'type': type,
     };
   }
 
@@ -149,11 +149,11 @@ class OdometerModel extends BaseSyncModel {
       version: baseFields['version'] as int,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-      idVeiculo: map['id_veiculo']?.toString() ?? '',
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
-      descricao: map['descricao']?.toString() ?? '',
-      tipoRegistro: map['tipo_registro']?.toString(),
+      vehicleId: map['vehicle_id']?.toString() ?? '',
+      registrationDate: (map['registration_date'] as num?)?.toInt() ?? 0,
+      value: (map['value'] as num? ?? 0.0).toDouble(),
+      description: map['description']?.toString() ?? '',
+      type: map['type']?.toString(),
     );
   }
 
@@ -169,11 +169,11 @@ class OdometerModel extends BaseSyncModel {
     int? version,
     String? userId,
     String? moduleName,
-    String? idVeiculo,
-    int? data,
-    double? odometro,
-    String? descricao,
-    String? tipoRegistro,
+    String? vehicleId,
+    int? registrationDate,
+    double? value,
+    String? description,
+    String? type,
   }) {
     return OdometerModel(
       id: id ?? this.id,
@@ -185,11 +185,11 @@ class OdometerModel extends BaseSyncModel {
       version: version ?? this.version,
       userId: userId ?? this.userId,
       moduleName: moduleName ?? this.moduleName,
-      idVeiculo: idVeiculo ?? this.idVeiculo,
-      data: data ?? this.data,
-      odometro: odometro ?? this.odometro,
-      descricao: descricao ?? this.descricao,
-      tipoRegistro: tipoRegistro ?? this.tipoRegistro,
+      vehicleId: vehicleId ?? this.vehicleId,
+      registrationDate: registrationDate ?? this.registrationDate,
+      value: value ?? this.value,
+      description: description ?? this.description,
+      type: type ?? this.type,
     );
   }
 
@@ -210,6 +210,6 @@ class OdometerModel extends BaseSyncModel {
 
   @override
   String toString() {
-    return 'OdometerModel(id: $id, idVeiculo: $idVeiculo, data: $data, odometro: $odometro, descricao: $descricao)';
+    return 'OdometerModel(id: $id, vehicleId: $vehicleId, registrationDate: $registrationDate, value: $value, description: $description)';
   }
 }

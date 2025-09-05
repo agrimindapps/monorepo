@@ -91,47 +91,61 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
 
   Widget _buildHeader() {
     return Container(
-      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXl),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-        ),
+        color: GasometerDesignTokens.colorHeaderBackground,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+            blurRadius: 9,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
+            padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(9),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.build,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
+              color: Colors.white,
+              size: 19,
             ),
           ),
-          SizedBox(width: GasometerDesignTokens.spacingLg),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Registrar Manutenção',
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeXl,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 3),
                 Text(
                   'Adicione informações sobre a manutenção realizada',
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeMd,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.3,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

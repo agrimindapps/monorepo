@@ -8,6 +8,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
+import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/maintenance/presentation/pages/maintenance_page.dart';
 import '../../features/odometer/presentation/pages/odometer_page.dart';
 import '../../features/promo/presentation/pages/privacy_policy_page.dart';
@@ -90,6 +91,13 @@ class AppRouter {
               path: '/fuel',
               name: 'fuel',
               builder: (context, state) => const FuelPage(),
+            ),
+
+            // Expenses
+            GoRoute(
+              path: '/expenses',
+              name: 'expenses',
+              builder: (context, state) => const ExpensesPage(),
             ),
 
             // Maintenance

@@ -117,9 +117,10 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
     if (location == '/' || location.startsWith('/vehicle')) return 0;
     if (location.startsWith('/odometer')) return 1;
     if (location.startsWith('/fuel')) return 2;
-    if (location.startsWith('/maintenance')) return 3;
-    if (location.startsWith('/reports')) return 4;
-    if (location.startsWith('/settings')) return 5;
+    if (location.startsWith('/expenses')) return 3;
+    if (location.startsWith('/maintenance')) return 4;
+    if (location.startsWith('/reports')) return 5;
+    if (location.startsWith('/settings')) return 6;
     
     return 0; // Default to vehicles
   }
@@ -137,12 +138,15 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         context.go('/fuel');
         break;
       case 3:
-        context.go('/maintenance');
+        context.go('/expenses');
         break;
       case 4:
-        context.go('/reports');
+        context.go('/maintenance');
         break;
       case 5:
+        context.go('/reports');
+        break;
+      case 6:
         context.go('/settings');
         break;
     }
@@ -165,6 +169,11 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         icon: Icon(Icons.local_gas_station_outlined),
         selectedIcon: Icon(Icons.local_gas_station),
         label: Text('Combustível'),
+      ),
+      NavigationRailDestination(
+        icon: Icon(Icons.attach_money_outlined),
+        selectedIcon: Icon(Icons.attach_money),
+        label: Text('Despesas'),
       ),
       NavigationRailDestination(
         icon: Icon(Icons.build_outlined),
@@ -201,6 +210,11 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         icon: Icon(Icons.local_gas_station_outlined),
         activeIcon: Icon(Icons.local_gas_station),
         label: 'Combustível',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.attach_money_outlined),
+        activeIcon: Icon(Icons.attach_money),
+        label: 'Despesas',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.build_outlined),
@@ -260,6 +274,8 @@ class NavigationUtils {
         return 'Odômetro';
       case '/fuel':
         return 'Combustível';
+      case '/expenses':
+        return 'Despesas';
       case '/maintenance':
         return 'Manutenção';
       case '/reports':
@@ -282,6 +298,8 @@ class NavigationUtils {
         return selected ? Icons.speed : Icons.speed_outlined;
       case '/fuel':
         return selected ? Icons.local_gas_station : Icons.local_gas_station_outlined;
+      case '/expenses':
+        return selected ? Icons.attach_money : Icons.attach_money_outlined;
       case '/maintenance':
         return selected ? Icons.build : Icons.build_outlined;
       case '/reports':

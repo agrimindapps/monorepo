@@ -44,6 +44,68 @@ class FuelRepositoryImpl implements FuelRepository {
     );
   }
 
+  /// Sync de novo fuel record para remoto em background sem bloquear UI
+  Future<void> _syncFuelRecordToRemoteInBackground(FuelRecordEntity fuelRecord) async {
+    try {
+      final isConnected = await _isConnected();
+      if (!isConnected) {
+        await loggingService.logInfo(
+          category: LogCategory.fuel,
+          message: 'No connection available for background sync, fuel record will sync later',
+          metadata: {'fuel_id': fuelRecord.id, 'vehicle_id': fuelRecord.vehicleId},
+        );
+        return;
+      }
+
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        await loggingService.logOperationWarning(
+          category: LogCategory.fuel,
+          operation: LogOperation.sync,
+          message: 'No authenticated user for background sync',
+          metadata: {'fuel_id': fuelRecord.id, 'vehicle_id': fuelRecord.vehicleId},
+        );
+        return;
+      }
+
+      // Fire-and-forget remote sync
+      unawaited(remoteDataSource.addFuelRecord(userId, fuelRecord).then((_) async {
+        await loggingService.logInfo(
+          category: LogCategory.fuel,
+          message: 'Background sync to remote completed successfully',
+          metadata: {
+            'fuel_id': fuelRecord.id,
+            'vehicle_id': fuelRecord.vehicleId,
+            'user_id': userId,
+          },
+        );
+      }).catchError((Object error) async {
+        await loggingService.logOperationWarning(
+          category: LogCategory.fuel,
+          operation: LogOperation.sync,
+          message: 'Background sync to remote failed - will retry later',
+          metadata: {
+            'fuel_id': fuelRecord.id,
+            'vehicle_id': fuelRecord.vehicleId,
+            'user_id': userId,
+            'error': error.toString(),
+          },
+        );
+      }));
+    } catch (e) {
+      await loggingService.logOperationWarning(
+        category: LogCategory.fuel,
+        operation: LogOperation.sync,
+        message: 'Background sync setup failed',
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> getAllFuelRecords() async {
     try {
@@ -198,76 +260,31 @@ class FuelRepositoryImpl implements FuelRepository {
         },
       );
       
-      if (await _isConnected() && userId != null) {
-        await loggingService.logInfo(
-          category: LogCategory.fuel,
-          message: 'Connection available, attempting remote sync',
-          metadata: {
-            'fuel_id': fuelRecord.id,
-            'vehicle_id': fuelRecord.vehicleId,
-            'user_id': userId,
-          },
-        );
+      // Remote sync in background (fire-and-forget)
+      unawaited(_syncFuelRecordToRemoteInBackground(fuelRecord));
+      
+      await loggingService.logInfo(
+        category: LogCategory.fuel,
+        message: 'Fuel record saved locally, remote sync initiated in background',
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+        },
+      );
 
-        try {
-          // Then sync to remote
-          final remoteRecord = await remoteDataSource.addFuelRecord(userId, fuelRecord);
-          
-          await loggingService.logOperationSuccess(
-            category: LogCategory.fuel,
-            operation: LogOperation.create,
-            message: 'Fuel record created and synced successfully',
-            metadata: {
-              'fuel_id': fuelRecord.id,
-              'vehicle_id': fuelRecord.vehicleId,
-              'user_id': userId,
-              'synced': true,
-            },
-          );
+      await loggingService.logOperationSuccess(
+        category: LogCategory.fuel,
+        operation: LogOperation.create,
+        message: 'Fuel record creation completed successfully',
+        metadata: {
+          'fuel_id': fuelRecord.id,
+          'vehicle_id': fuelRecord.vehicleId,
+          'saved_locally': true,
+          'remote_sync': 'background',
+        },
+      );
 
-          return Right(remoteRecord);
-        } catch (e) {
-          // If remote fails, still return local success
-          await loggingService.logOperationWarning(
-            category: LogCategory.fuel,
-            operation: LogOperation.sync,
-            message: 'Failed to sync fuel record to remote, saved locally',
-            metadata: {
-              'fuel_id': fuelRecord.id,
-              'vehicle_id': fuelRecord.vehicleId,
-              'user_id': userId,
-              'error': e.toString(),
-            },
-          );
-
-          await loggingService.logOperationSuccess(
-            category: LogCategory.fuel,
-            operation: LogOperation.create,
-            message: 'Fuel record created locally (remote sync failed)',
-            metadata: {
-              'fuel_id': fuelRecord.id,
-              'vehicle_id': fuelRecord.vehicleId,
-              'synced': false,
-            },
-          );
-
-          return Right(localRecord);
-        }
-      } else {
-        await loggingService.logOperationSuccess(
-          category: LogCategory.fuel,
-          operation: LogOperation.create,
-          message: 'Fuel record created offline',
-          metadata: {
-            'fuel_id': fuelRecord.id,
-            'vehicle_id': fuelRecord.vehicleId,
-            'offline': true,
-            'reason': userId == null ? 'no_user' : 'no_connection',
-          },
-        );
-
-        return Right(localRecord);
-      }
+      return Right(localRecord);
     } on ServerException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.fuel,

@@ -207,10 +207,12 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
         borderRadius: BorderRadius.circular(AppRadius.large),
         color: Theme.of(context).colorScheme.surface,
       ),
-      child: DropdownButtonFormField<String>(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 60.0),
+        child: DropdownButtonFormField<String>(
         value: _currentSelectedVehicleId,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: 20), // Aumentado de AppSpacing.large para 20
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: 16.0),
           border: InputBorder.none,
           hintText: widget.hintText,
           hintStyle: TextStyle(
@@ -228,35 +230,40 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
             final isSelected = vehicle.id == _currentSelectedVehicleId;
             if (!isSelected) {
               return Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                alignment: Alignment.centerLeft,
                 child: const SizedBox.shrink(),
               );
             }
             return Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              alignment: Alignment.centerLeft,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '${vehicle.brand} ${vehicle.model}',
-                    style: TextStyle(
-                      fontWeight: AppFontWeights.medium,
-                      fontSize: AppFontSizes.medium,
-                      color: Theme.of(context).colorScheme.onSurface,
+                  Flexible(
+                    child: Text(
+                      '${vehicle.brand} ${vehicle.model}',
+                      style: TextStyle(
+                        fontWeight: AppFontWeights.medium,
+                        fontSize: AppFontSizes.medium,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
-                    style: TextStyle(
-                      fontSize: AppFontSizes.small,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
+                  Flexible(
+                    child: Text(
+                      'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
+                      style: TextStyle(
+                        fontSize: AppFontSizes.small,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
                   ),
                 ],
               ),
@@ -266,38 +273,39 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
         items: vehiclesProvider.vehicles.map<DropdownMenuItem<String>>((VehicleEntity vehicle) {
           return DropdownMenuItem<String>(
             value: vehicle.id,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
                           '${vehicle.brand} ${vehicle.model}',
                           style: const TextStyle(
                             fontWeight: AppFontWeights.medium,
                             fontSize: AppFontSizes.medium,
                           ),
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                      const SizedBox(height: 2), // Reduced spacing from AppSpacing.spacingXS
-                      Flexible(
-                        child: Text(
+                        const SizedBox(height: 2),
+                        Text(
                           'Placa: ${vehicle.licensePlate} • ${vehicle.currentOdometer.toStringAsFixed(0)} km',
                           style: TextStyle(
                             fontSize: AppFontSizes.small,
                             color: Theme.of(context).colorScheme.onSurface.withOpacity(AppOpacity.medium),
                           ),
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }).toList(),
@@ -314,6 +322,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
           fontSize: AppFontSizes.medium,
         ),
         dropdownColor: Theme.of(context).colorScheme.surface,
+        ),
       ),
     );
   }

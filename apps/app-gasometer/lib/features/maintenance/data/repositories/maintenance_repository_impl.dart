@@ -151,6 +151,55 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     }
   }
 
+  /// Sync de novo maintenance record para remoto em background sem bloquear UI
+  Future<void> _syncMaintenanceRecordToRemoteInBackground(MaintenanceEntity maintenance) async {
+    try {
+      final isConnected = await _isConnected;
+      if (!isConnected) {
+        await loggingService.logInfo(
+          category: LogCategory.maintenance,
+          message: 'No connection available for background sync, maintenance record will sync later',
+          metadata: {'maintenance_id': maintenance.id, 'vehicle_id': maintenance.vehicleId},
+        );
+        return;
+      }
+
+      // Fire-and-forget remote sync
+      unawaited(remoteDataSource.addMaintenanceRecord(maintenance).then((_) async {
+        await loggingService.logInfo(
+          category: LogCategory.maintenance,
+          message: 'Background sync to remote completed successfully',
+          metadata: {
+            'maintenance_id': maintenance.id,
+            'vehicle_id': maintenance.vehicleId,
+          },
+        );
+      }).catchError((Object error) async {
+        await loggingService.logOperationWarning(
+          category: LogCategory.maintenance,
+          operation: LogOperation.sync,
+          message: 'Background sync to remote failed - will retry later',
+          metadata: {
+            'maintenance_id': maintenance.id,
+            'vehicle_id': maintenance.vehicleId,
+            'error': error.toString(),
+          },
+        );
+      }));
+    } catch (e) {
+      await loggingService.logOperationWarning(
+        category: LogCategory.maintenance,
+        operation: LogOperation.sync,
+        message: 'Background sync setup failed',
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
   @override
   Future<Either<Failure, MaintenanceEntity?>> getMaintenanceRecordById(String id) async {
     try {
@@ -217,49 +266,17 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         },
       );
       
-      if (await _isConnected) {
-        await loggingService.logInfo(
-          category: LogCategory.maintenance,
-          message: 'Connection available, attempting remote sync',
-          metadata: {
-            'maintenance_id': maintenance.id,
-            'vehicle_id': maintenance.vehicleId,
-          },
-        );
-
-        try {
-          await remoteDataSource.addMaintenanceRecord(maintenance);
-          
-          await loggingService.logInfo(
-            category: LogCategory.maintenance,
-            message: 'Maintenance record synced to remote storage',
-            metadata: {
-              'maintenance_id': maintenance.id,
-              'vehicle_id': maintenance.vehicleId,
-            },
-          );
-        } catch (e) {
-          await loggingService.logOperationWarning(
-            category: LogCategory.maintenance,
-            operation: LogOperation.sync,
-            message: 'Failed to sync maintenance record to remote',
-            metadata: {
-              'maintenance_id': maintenance.id,
-              'vehicle_id': maintenance.vehicleId,
-              'error': e.toString(),
-            },
-          );
-        }
-      } else {
-        await loggingService.logInfo(
-          category: LogCategory.maintenance,
-          message: 'No connection available, maintenance saved offline',
-          metadata: {
-            'maintenance_id': maintenance.id,
-            'vehicle_id': maintenance.vehicleId,
-          },
-        );
-      }
+      // Remote sync in background (fire-and-forget)
+      unawaited(_syncMaintenanceRecordToRemoteInBackground(maintenance));
+      
+      await loggingService.logInfo(
+        category: LogCategory.maintenance,
+        message: 'Maintenance record saved locally, remote sync initiated in background',
+        metadata: {
+          'maintenance_id': maintenance.id,
+          'vehicle_id': maintenance.vehicleId,
+        },
+      );
       
       await loggingService.logOperationSuccess(
         category: LogCategory.maintenance,
@@ -268,7 +285,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         metadata: {
           'maintenance_id': maintenance.id,
           'vehicle_id': maintenance.vehicleId,
-          'synced': await _isConnected,
+          'saved_locally': true,
+          'remote_sync': 'background',
         },
       );
 

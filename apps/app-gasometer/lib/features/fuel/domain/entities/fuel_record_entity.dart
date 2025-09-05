@@ -3,100 +3,122 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
 class FuelRecordEntity extends Equatable {
   final String id;
-  final String idUsuario;
-  final String veiculoId;
-  final FuelType tipoCombustivel;
-  final double litros;
-  final double precoPorLitro;
-  final double valorTotal;
-  final double odometro;
-  final DateTime data;
-  final String? nomePosto;
-  final String? marcaPosto;
+  final String userId;
+  final String vehicleId;
+  final FuelType fuelType;
+  final double liters;
+  final double pricePerLiter;
+  final double totalPrice;
+  final double odometer;
+  final DateTime date;
+  final String? gasStationName;
+  final String? gasStationBrand;
   final double? latitude;
   final double? longitude;
-  final bool tanqueCheio;
-  final String? observacoes;
-  final double? odometroAnterior;
-  final double? distanciaPercorrida;
-  final double? consumo; // km/l
-  final DateTime criadoEm;
-  final DateTime atualizadoEm;
+  final bool fullTank;
+  final String? notes;
+  final double? previousOdometer;
+  final double? distanceTraveled;
+  final double? consumption; // km/l
+  final DateTime createdAt;
+  final DateTime updatedAt;
   
   const FuelRecordEntity({
     required this.id,
-    required this.idUsuario,
-    required this.veiculoId,
-    required this.tipoCombustivel,
-    required this.litros,
-    required this.precoPorLitro,
-    required this.valorTotal,
-    required this.odometro,
-    required this.data,
-    this.nomePosto,
-    this.marcaPosto,
+    required this.userId,
+    required this.vehicleId,
+    required this.fuelType,
+    required this.liters,
+    required this.pricePerLiter,
+    required this.totalPrice,
+    required this.odometer,
+    required this.date,
+    this.gasStationName,
+    this.gasStationBrand,
     this.latitude,
     this.longitude,
-    this.tanqueCheio = true,
-    this.observacoes,
-    this.odometroAnterior,
-    this.distanciaPercorrida,
-    this.consumo,
-    required this.criadoEm,
-    required this.atualizadoEm,
+    this.fullTank = true,
+    this.notes,
+    this.previousOdometer,
+    this.distanceTraveled,
+    this.consumption,
+    required this.createdAt,
+    required this.updatedAt,
   });
   
   @override
   List<Object?> get props => [
     id,
-    idUsuario,
-    veiculoId,
-    tipoCombustivel,
-    litros,
-    precoPorLitro,
-    valorTotal,
-    odometro,
-    data,
-    nomePosto,
-    marcaPosto,
+    userId,
+    vehicleId,
+    fuelType,
+    liters,
+    pricePerLiter,
+    totalPrice,
+    odometer,
+    date,
+    gasStationName,
+    gasStationBrand,
     latitude,
     longitude,
-    tanqueCheio,
-    observacoes,
-    odometroAnterior,
-    distanciaPercorrida,
-    consumo,
-    criadoEm,
-    atualizadoEm,
+    fullTank,
+    notes,
+    previousOdometer,
+    distanceTraveled,
+    consumption,
+    createdAt,
+    updatedAt,
   ];
   
-  // English getters for compatibility
-  String get userId => idUsuario;
-  String get vehicleId => veiculoId;
-  FuelType get fuelType => tipoCombustivel;
-  double get liters => litros;
-  double get pricePerLiter => precoPorLitro;
-  double get totalPrice => valorTotal;
-  double get odometer => odometro;
-  DateTime get date => data;
-  String? get gasStationName => nomePosto;
-  String? get gasStationBrand => marcaPosto;
-  bool get fullTank => tanqueCheio;
-  String? get notes => observacoes;
-  double? get previousOdometer => odometroAnterior;
-  double? get distanceTraveled => distanciaPercorrida;
-  double? get consumption => consumo;
-  DateTime get createdAt => criadoEm;
-  DateTime get updatedAt => atualizadoEm;
+  // Legacy Portuguese getters for backward compatibility
+  String get idUsuario => userId;
+  String get veiculoId => vehicleId;
+  FuelType get tipoCombustivel => fuelType;
+  double get litros => liters;
+  double get precoPorLitro => pricePerLiter;
+  double get valorTotal => totalPrice;
+  double get odometro => odometer;
+  DateTime get data => date;
+  String? get nomePosto => gasStationName;
+  String? get marcaPosto => gasStationBrand;
+  bool get tanqueCheio => fullTank;
+  String? get observacoes => notes;
+  double? get odometroAnterior => previousOdometer;
+  double? get distanciaPercorrida => distanceTraveled;
+  double? get consumo => consumption;
+  DateTime get criadoEm => createdAt;
+  DateTime get atualizadoEm => updatedAt;
+  
+  // Additional properties not in model
   String? get address => null; // Not available in current entity
   List<String>? get photos => null; // Not available in current entity
   Map<String, dynamic>? get metadata => null; // Not available in current entity
   
   // Formatted getters
-  String get formattedPricePerLiter => 'R\$ ${precoPorLitro.toStringAsFixed(3)}';
+  String get formattedPricePerLiter => 'R\$ ${pricePerLiter.toStringAsFixed(3)}';
   
   FuelRecordEntity copyWith({
     String? id,
+    String? userId,
+    String? vehicleId,
+    FuelType? fuelType,
+    double? liters,
+    double? pricePerLiter,
+    double? totalPrice,
+    double? odometer,
+    DateTime? date,
+    String? gasStationName,
+    String? gasStationBrand,
+    double? latitude,
+    double? longitude,
+    bool? fullTank,
+    String? notes,
+    double? previousOdometer,
+    double? distanceTraveled,
+    double? consumption,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    // Legacy support
     String? idUsuario,
     String? veiculoId,
     FuelType? tipoCombustivel,
@@ -107,8 +129,6 @@ class FuelRecordEntity extends Equatable {
     DateTime? data,
     String? nomePosto,
     String? marcaPosto,
-    double? latitude,
-    double? longitude,
     bool? tanqueCheio,
     String? observacoes,
     double? odometroAnterior,
@@ -119,48 +139,48 @@ class FuelRecordEntity extends Equatable {
   }) {
     return FuelRecordEntity(
       id: id ?? this.id,
-      idUsuario: idUsuario ?? this.idUsuario,
-      veiculoId: veiculoId ?? this.veiculoId,
-      tipoCombustivel: tipoCombustivel ?? this.tipoCombustivel,
-      litros: litros ?? this.litros,
-      precoPorLitro: precoPorLitro ?? this.precoPorLitro,
-      valorTotal: valorTotal ?? this.valorTotal,
-      odometro: odometro ?? this.odometro,
-      data: data ?? this.data,
-      nomePosto: nomePosto ?? this.nomePosto,
-      marcaPosto: marcaPosto ?? this.marcaPosto,
+      userId: userId ?? idUsuario ?? this.userId,
+      vehicleId: vehicleId ?? veiculoId ?? this.vehicleId,
+      fuelType: fuelType ?? tipoCombustivel ?? this.fuelType,
+      liters: liters ?? litros ?? this.liters,
+      pricePerLiter: pricePerLiter ?? precoPorLitro ?? this.pricePerLiter,
+      totalPrice: totalPrice ?? valorTotal ?? this.totalPrice,
+      odometer: odometer ?? odometro ?? this.odometer,
+      date: date ?? data ?? this.date,
+      gasStationName: gasStationName ?? nomePosto ?? this.gasStationName,
+      gasStationBrand: gasStationBrand ?? marcaPosto ?? this.gasStationBrand,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
-      tanqueCheio: tanqueCheio ?? this.tanqueCheio,
-      observacoes: observacoes ?? this.observacoes,
-      odometroAnterior: odometroAnterior ?? this.odometroAnterior,
-      distanciaPercorrida: distanciaPercorrida ?? this.distanciaPercorrida,
-      consumo: consumo ?? this.consumo,
-      criadoEm: criadoEm ?? this.criadoEm,
-      atualizadoEm: atualizadoEm ?? this.atualizadoEm,
+      fullTank: fullTank ?? tanqueCheio ?? this.fullTank,
+      notes: notes ?? observacoes ?? this.notes,
+      previousOdometer: previousOdometer ?? odometroAnterior ?? this.previousOdometer,
+      distanceTraveled: distanceTraveled ?? distanciaPercorrida ?? this.distanceTraveled,
+      consumption: consumption ?? consumo ?? this.consumption,
+      createdAt: createdAt ?? criadoEm ?? this.createdAt,
+      updatedAt: updatedAt ?? atualizadoEm ?? this.updatedAt,
     );
   }
   
   bool get temLocalizacao => latitude != null && longitude != null;
   
-  bool get temObservacoes => observacoes != null && observacoes!.isNotEmpty;
+  bool get temObservacoes => notes != null && notes!.isNotEmpty;
   
   bool get podeCalcularConsumo => 
-      odometroAnterior != null && distanciaPercorrida != null && distanciaPercorrida! > 0;
+      previousOdometer != null && distanceTraveled != null && distanceTraveled! > 0;
   
   double get consumoCalculado {
     if (!podeCalcularConsumo) return 0.0;
-    return distanciaPercorrida! / litros;
+    return distanceTraveled! / liters;
   }
   
   double get precoPorKm {
     if (!podeCalcularConsumo) return 0.0;
-    return valorTotal / distanciaPercorrida!;
+    return totalPrice / distanceTraveled!;
   }
   
   String get dataFormatada {
     final now = DateTime.now();
-    final difference = now.difference(data);
+    final difference = now.difference(date);
     
     if (difference.inDays == 0) {
       return 'Hoje';
@@ -180,17 +200,17 @@ class FuelRecordEntity extends Equatable {
     }
   }
   
-  String get valorTotalFormatado => 'R\$ ${valorTotal.toStringAsFixed(2)}';
+  String get valorTotalFormatado => 'R\$ ${totalPrice.toStringAsFixed(2)}';
   
-  String get precoPorLitroFormatado => 'R\$ ${precoPorLitro.toStringAsFixed(3)}';
+  String get precoPorLitroFormatado => 'R\$ ${pricePerLiter.toStringAsFixed(3)}';
   
-  String get litrosFormatados => '${litros.toStringAsFixed(2)} L';
+  String get litrosFormatados => '${liters.toStringAsFixed(2)} L';
   
-  String get odometroFormatado => '${odometro.toStringAsFixed(0)} km';
+  String get odometroFormatado => '${odometer.toStringAsFixed(0)} km';
   
   String get consumoFormatado {
-    if (consumo != null && consumo! > 0) {
-      return '${consumo!.toStringAsFixed(1)} km/l';
+    if (consumption != null && consumption! > 0) {
+      return '${consumption!.toStringAsFixed(1)} km/l';
     }
     return 'N/A';
   }

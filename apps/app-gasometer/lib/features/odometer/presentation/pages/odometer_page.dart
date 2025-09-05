@@ -83,53 +83,66 @@ class _OdometerPageState extends State<OdometerPage> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
-          borderRadius: BorderRadius.circular(GasometerDesignTokens.radiusXl),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.speed,
-                color: Colors.white,
-                size: 28,
-              ),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: GasometerDesignTokens.colorHeaderBackground,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+            blurRadius: 9,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(9),
             ),
-            const SizedBox(width: 16),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Odômetro',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'Controle da quilometragem dos seus veículos',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
+            child: const Icon(
+              Icons.speed,
+              color: Colors.white,
+              size: 19,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 13),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Odômetro',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'Controle da quilometragem dos seus veículos',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -431,12 +444,16 @@ class _OdometerPageState extends State<OdometerPage> {
   void _addOdometer() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (dialogContext) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
-          ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
-        ],
-        builder: (context, child) => AddOdometerPage(vehicleId: _selectedVehicleId),
+      builder: (dialogContext) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: Theme.of(context),
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
+            ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+          ],
+          builder: (context, child) => AddOdometerPage(vehicleId: _selectedVehicleId),
+        ),
       ),
     );
     
@@ -464,12 +481,16 @@ class _OdometerPageState extends State<OdometerPage> {
     try {
       result = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (dialogContext) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
-            ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
-          ],
-          builder: (context, child) => AddOdometerPage(odometer: odometer),
+        builder: (dialogContext) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: Theme.of(context),
+          home: MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
+              ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+            ],
+            builder: (context, child) => AddOdometerPage(odometer: odometer),
+          ),
         ),
       );
     } catch (e) {

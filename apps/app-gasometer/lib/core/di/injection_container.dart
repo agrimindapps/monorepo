@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -68,6 +69,7 @@ import '../../features/odometer/data/repositories/odometer_repository.dart';
 import '../../features/odometer/presentation/providers/odometer_provider.dart';
 // Expenses imports
 import '../../features/expenses/data/repositories/expenses_repository.dart';
+import '../../features/expenses/presentation/providers/expenses_provider.dart';
 // Premium imports
 import '../../features/premium/data/datasources/premium_local_data_source.dart';
 import '../../features/premium/data/datasources/premium_remote_data_source.dart';
@@ -106,22 +108,15 @@ import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import '../../features/vehicles/domain/usecases/search_vehicles.dart';
 import '../../features/vehicles/domain/usecases/update_vehicle.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
-// Sync imports
-import '../data/models/base_sync_model.dart';
+// Additional imports (removing duplicates)
 import '../error/error_handler.dart';
-// Error handling imports
 import '../error/error_logger.dart';
 import '../error/error_reporter.dart';
-import '../services/analytics_service.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
 import '../services/local_data_service.dart';
 import '../services/platform_service.dart';
 import '../sync/presentation/providers/sync_status_provider.dart';
-import '../sync/services/conflict_resolver.dart';
-import '../sync/services/sync_operations.dart';
-import '../sync/services/sync_queue.dart';
-import '../sync/services/sync_service.dart';
 
 final sl = GetIt.instance;
 
@@ -310,14 +305,20 @@ Future<void> initializeDependencies() async {
   // Odometer Repository
   sl.registerLazySingleton<OdometerRepository>(() {
     final repository = OdometerRepository(sl<LoggingService>());
-    // Initialize will be called when needed, avoiding blocking registration
+    // Initialize asynchronously (not blocking registration)
+    repository.initialize().catchError((Object e) {
+      debugPrint('⚠️ OdometerRepository initialization failed: $e');
+    });
     return repository;
   });
 
   // Expenses Repository
   sl.registerLazySingleton<ExpensesRepository>(() {
     final repository = ExpensesRepository(sl<LoggingService>());
-    // Initialize will be called when needed, avoiding blocking registration
+    // Initialize asynchronously (not blocking registration)
+    repository.initialize().catchError((Object e) {
+      debugPrint('⚠️ ExpensesRepository initialization failed: $e');
+    });
     return repository;
   });
 
@@ -396,7 +397,7 @@ Future<void> initializeDependencies() async {
   // ===== Providers =====
   
   // Vehicle Provider
-  sl.registerFactory<VehiclesProvider>(
+  sl.registerLazySingleton<VehiclesProvider>(
     () => VehiclesProvider(
       getAllVehicles: sl(),
       getVehicleById: sl(),
@@ -426,7 +427,7 @@ Future<void> initializeDependencies() async {
   );
 
   // Fuel Provider
-  sl.registerFactory<FuelProvider>(
+  sl.registerLazySingleton<FuelProvider>(
     () => FuelProvider(
       getAllFuelRecords: sl(),
       getFuelRecordsByVehicle: sl(),
@@ -442,6 +443,14 @@ Future<void> initializeDependencies() async {
     ),
   );
 
+  // Expenses Provider
+  sl.registerLazySingleton<ExpensesProvider>(
+    () => ExpensesProvider(
+      sl<ExpensesRepository>(),
+      sl<VehiclesProvider>(),
+    ),
+  );
+
   // Settings Provider
   sl.registerFactory<SettingsProvider>(
     () => SettingsProvider(
@@ -451,7 +460,7 @@ Future<void> initializeDependencies() async {
   );
 
   // Reports Provider
-  sl.registerFactory<ReportsProvider>(
+  sl.registerLazySingleton<ReportsProvider>(
     () => ReportsProvider(
       generateMonthlyReport: sl(),
       generateYearlyReport: sl(),
@@ -466,7 +475,7 @@ Future<void> initializeDependencies() async {
   );
 
   // Maintenance Provider
-  sl.registerFactory<MaintenanceProvider>(
+  sl.registerLazySingleton<MaintenanceProvider>(
     () => MaintenanceProvider(
       sl(),
       sl(),
@@ -479,7 +488,7 @@ Future<void> initializeDependencies() async {
   );
 
   // Odometer Provider
-  sl.registerFactory<OdometerProvider>(
+  sl.registerLazySingleton<OdometerProvider>(
     () => OdometerProvider(
       sl<OdometerRepository>(),
       sl<VehiclesProvider>(),

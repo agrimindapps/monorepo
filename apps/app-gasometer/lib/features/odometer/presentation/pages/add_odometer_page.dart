@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -13,10 +15,10 @@ import '../providers/odometer_provider.dart';
 import '../services/odometer_validation_service.dart';
 
 class AddOdometerPage extends StatefulWidget {
+  const AddOdometerPage({super.key, this.odometer, this.vehicleId});
+
   final OdometerEntity? odometer;
   final String? vehicleId;
-
-  const AddOdometerPage({super.key, this.odometer, this.vehicleId});
 
   @override
   State<AddOdometerPage> createState() => _AddOdometerPageState();
@@ -31,7 +33,15 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   final _odometerController = TextEditingController();
   final _descriptionController = TextEditingController();
   
+  // Rate limiting and loading state
   bool _isInitialized = false;
+  bool _isSubmitting = false;
+  Timer? _debounceTimer;
+  Timer? _timeoutTimer;
+  
+  // Rate limiting constants
+  static const Duration _debounceDuration = Duration(milliseconds: 500);
+  static const Duration _submitTimeout = Duration(seconds: 30);
 
   @override
   void initState() {
@@ -129,6 +139,11 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
   @override
   void dispose() {
+    // Clean up timers to prevent memory leaks
+    _debounceTimer?.cancel();
+    _timeoutTimer?.cancel();
+    
+    // Clean up existing listeners and controllers
     _formProvider.removeListener(_updateControllersFromProvider);
     _odometerController.removeListener(_onOdometerChanged);
     _descriptionController.removeListener(_onDescriptionChanged);
@@ -144,10 +159,10 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       title: 'Odômetro',
       subtitle: 'Gerencie seus registros de quilometr...',
       headerIcon: Icons.speed,
-      isLoading: context.watch<OdometerFormProvider>().isLoading,
+      isLoading: context.watch<OdometerFormProvider>().isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
       onCancel: () => Navigator.of(context).pop(),
-      onConfirm: _submitForm,
+      onConfirm: _submitFormWithRateLimit,
       content: Form(
         key: _formKey,
         child: Column(
@@ -429,38 +444,86 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     }
   }
 
+  /// Rate-limited submit method that implements debouncing and prevents rapid clicks
+  void _submitFormWithRateLimit() {
+    // Prevent multiple rapid clicks
+    if (_isSubmitting) {
+      debugPrint('Submit already in progress, ignoring duplicate request');
+      return;
+    }
+
+    // Cancel any existing debounce timer
+    _debounceTimer?.cancel();
+    
+    // Set debounce timer to prevent rapid consecutive submissions
+    _debounceTimer = Timer(_debounceDuration, () {
+      if (mounted && !_isSubmitting) {
+        _submitForm();
+      }
+    });
+  }
+
+  /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
+    // Double-check form validation
     if (!_formKey.currentState!.validate()) return;
+
+    // Prevent concurrent submissions
+    if (_isSubmitting) {
+      debugPrint('Submit already in progress, aborting duplicate submission');
+      return;
+    }
+
+    // Set submitting state
+    setState(() {
+      _isSubmitting = true;
+    });
 
     final formProvider = _formProvider;
     final odometerProvider = Provider.of<OdometerProvider>(context, listen: false);
 
-    // Validate form with context
-    final validationResult = await _validationService.validateFormWithContext(
-      vehicleId: formProvider.vehicleId,
-      odometerValue: formProvider.odometerValue,
-      registrationDate: formProvider.registrationDate,
-      description: formProvider.description,
-      type: formProvider.registrationType,
-      currentOdometerId: formProvider.isEditing ? formProvider.currentOdometer?.id : null,
-    );
-
-    if (!validationResult.isValid) {
-      // Show first validation error
-      final firstError = validationResult.errors.values.first;
-      _showError(OdometerConstants.dialogMessages['erro']!, firstError);
-      return;
-    }
-
-    // Show warnings if any (but allow to continue)
-    if (validationResult.hasWarnings) {
-      final shouldContinue = await _showWarningDialog(validationResult.warnings);
-      if (!shouldContinue) return;
-    }
-
-    formProvider.setIsLoading(true);
-
     try {
+      // Setup timeout protection
+      _timeoutTimer = Timer(_submitTimeout, () {
+        if (mounted && _isSubmitting) {
+          debugPrint('Submit timeout reached, resetting state');
+          setState(() {
+            _isSubmitting = false;
+          });
+          formProvider.setIsLoading(false);
+          _showError(
+            'Timeout',
+            'A operação demorou muito para ser concluída. Tente novamente.',
+          );
+        }
+      });
+
+      // Validate form with context
+      final validationResult = await _validationService.validateFormWithContext(
+        vehicleId: formProvider.vehicleId,
+        odometerValue: formProvider.odometerValue,
+        registrationDate: formProvider.registrationDate,
+        description: formProvider.description,
+        type: formProvider.registrationType,
+        currentOdometerId: formProvider.isEditing ? formProvider.currentOdometer?.id : null,
+      );
+
+      if (!validationResult.isValid) {
+        // Show first validation error
+        final firstError = validationResult.errors.values.first;
+        _showError(OdometerConstants.dialogMessages['erro']!, firstError);
+        return;
+      }
+
+      // Show warnings if any (but allow to continue)
+      if (validationResult.hasWarnings) {
+        final shouldContinue = await _showWarningDialog(validationResult.warnings);
+        if (!shouldContinue) return;
+      }
+
+      // Set provider loading state
+      formProvider.setIsLoading(true);
+
       bool success;
       if (formProvider.isEditing) {
         // Update existing odometer
@@ -477,10 +540,10 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
       if (success) {
         if (mounted) {
-          // Fechar o dialog imediatamente após sucesso local
+          // Close dialog immediately after local success
           Navigator.of(context).pop(true);
           
-          // Mostrar confirmação após fechar o dialog
+          // Show confirmation after closing dialog
           final successMessage = formProvider.isEditing 
               ? OdometerConstants.successMessages['edicaoSucesso']!
               : OdometerConstants.successMessages['cadastroSucesso']!;
@@ -506,7 +569,16 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         );
       }
     } finally {
+      // Clean up timeout timer
+      _timeoutTimer?.cancel();
+      
+      // Reset all loading states
       formProvider.setIsLoading(false);
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
   

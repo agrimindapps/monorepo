@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
@@ -20,6 +21,7 @@ class VehiclesPage extends StatefulWidget {
 class _VehiclesPageState extends State<VehiclesPage> {
   // ✅ PERFORMANCE FIX: Cached provider
   late final VehiclesProvider _vehiclesProvider;
+  bool _isFirstAccess = false;
   
   @override
   void initState() {
@@ -27,11 +29,53 @@ class _VehiclesPageState extends State<VehiclesPage> {
     // ✅ PERFORMANCE FIX: Cache provider once in initState
     _vehiclesProvider = context.read<VehiclesProvider>();
     
+    // Verificar se é primeiro acesso
+    _checkFirstAccess();
+    
     // Inicializar provider de forma lazy
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Verificar se o widget ainda está montado antes de inicializar
       if (mounted) {
         _vehiclesProvider.initialize();
+        
+        // Mostrar mensagem de boas-vindas se for primeiro acesso
+        if (_isFirstAccess) {
+          _showWelcomeMessage();
+        }
+      }
+    });
+  }
+
+  void _checkFirstAccess() {
+    final routerState = GoRouterState.of(context);
+    _isFirstAccess = routerState.uri.queryParameters['first_access'] == 'true';
+  }
+
+  void _showWelcomeMessage() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.celebration, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Bem-vindo ao GasOMeter! Adicione seu primeiro veículo para começar.',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
       }
     });
   }

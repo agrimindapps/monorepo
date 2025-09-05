@@ -378,29 +378,30 @@ class _LoginPageState extends State<LoginPage>
     if (!mounted) return;
     
     final authProvider = context.read<AuthProvider>();
+    final controller = context.read<LoginController>();
     
     // Se há sincronização em progresso, mostrar SimpleSyncLoading
     if (authProvider.isSyncing) {
-      _showSimpleSyncLoading(authProvider);
+      _showSimpleSyncLoading(authProvider, controller.isSignUpMode);
     } else {
-      // Navegar imediatamente se não há sync em progresso
-      context.go('/');
+      // Navegar para destino apropriado baseado no tipo de autenticação
+      _navigateBasedOnAuthType(controller.isSignUpMode);
     }
   }
   
   /// Mostra loading simples de sincronização que navega automaticamente
-  void _showSimpleSyncLoading(AuthProvider authProvider) {
+  void _showSimpleSyncLoading(AuthProvider authProvider, bool isSignUpMode) {
     SimpleSyncLoading.show(
       context,
       message: authProvider.syncProgressController?.currentMessage ?? 'Sincronizando dados automotivos...',
     );
     
     // Navegar quando sync terminar
-    _navigateAfterSync(authProvider);
+    _navigateAfterSync(authProvider, isSignUpMode);
   }
   
   /// Navega para home quando sync terminar
-  void _navigateAfterSync(AuthProvider authProvider) {
+  void _navigateAfterSync(AuthProvider authProvider, bool isSignUpMode) {
     late StreamSubscription<void> subscription;
     
     subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
@@ -411,10 +412,22 @@ class _LoginPageState extends State<LoginPage>
         // Pequeno delay para garantir que o loading foi fechado
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
-            context.go('/');
+            _navigateBasedOnAuthType(isSignUpMode);
           }
         });
       }
     });
+  }
+
+  /// Navega para destino apropriado baseado no tipo de autenticação
+  void _navigateBasedOnAuthType(bool isSignUpMode) {
+    if (isSignUpMode) {
+      // Novo usuário - primeiro acesso
+      // Navegar para tela de boas-vindas ou setup inicial
+      context.go('/vehicles?first_access=true');
+    } else {
+      // Login normal - voltar para home
+      context.go('/');
+    }
   }
 }

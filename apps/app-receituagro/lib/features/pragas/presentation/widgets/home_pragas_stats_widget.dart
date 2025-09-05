@@ -24,7 +24,7 @@ class HomePragasStatsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: ReceitaAgroSpacing.horizontalPadding,
+        horizontal: 0,
       ),
       child: Card(
         elevation: ReceitaAgroElevation.card,

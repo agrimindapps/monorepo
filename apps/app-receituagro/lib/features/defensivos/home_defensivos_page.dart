@@ -6,8 +6,6 @@ import '../../core/di/injection_container.dart';
 import '../../core/models/fitossanitario_hive.dart';
 import '../../core/navigation/app_navigation_provider.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../core/widgets/responsive_content_wrapper.dart';
-import 'lista_defensivos_agrupados_page.dart';
 import 'presentation/providers/home_defensivos_provider.dart';
 import 'presentation/widgets/defensivos_error_state.dart';
 import 'presentation/widgets/defensivos_new_items_section.dart';
@@ -64,7 +62,8 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: ResponsiveContentWrapper(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               // Header section with provider-based subtitle
@@ -147,19 +146,27 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
   }
 
   void _navigateToCategory(BuildContext context, String category) {
-    if (category == 'defensivos') {
-      context.read<AppNavigationProvider>().navigateToListaDefensivos();
-    } else {
-      // Para defensivos agrupados, ainda usamos Navigator por enquanto
-      Navigator.push<void>(
-        context,
-        MaterialPageRoute<void>(
-          builder: (context) => ListaDefensivosAgrupadosPage(
-            tipoAgrupamento: category,
-          ),
-        ),
-      );
+    // Navigate based on category type
+    final navigationProvider = context.read<AppNavigationProvider>();
+    
+    switch (category.toLowerCase()) {
+      case 'defensivos':
+        navigationProvider.navigateToListaDefensivos();
+        break;
+      case 'fabricantes':
+        navigationProvider.navigateToListaDefensivos();
+        break;
+      case 'modoacao':
+        navigationProvider.navigateToListaDefensivos();
+        break;
+      case 'ingredienteativo':
+        navigationProvider.navigateToListaDefensivos();
+        break;
+      case 'classeagronomica':
+        navigationProvider.navigateToListaDefensivos();
+        break;
+      default:
+        navigationProvider.navigateToListaDefensivos();
     }
   }
-
 }

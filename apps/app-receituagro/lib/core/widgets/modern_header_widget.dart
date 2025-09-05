@@ -29,7 +29,7 @@ class ModernHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(0, 6, 0, 4),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -86,9 +86,7 @@ class ModernHeaderWidget extends StatelessWidget {
                 size: 19,
               ),
             ),
-
           const SizedBox(width: 13),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,10 +117,8 @@ class ModernHeaderWidget extends StatelessWidget {
               ],
             ),
           ),
-
           if (showActions) ...[
             const SizedBox(width: 13),
-
             if (additionalActions != null) ...[
               ...additionalActions!.map((action) => Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -135,7 +131,6 @@ class ModernHeaderWidget extends StatelessWidget {
                     ),
                   )),
             ],
-
             if (rightIcon != null || onRightIconPressed != null)
               GestureDetector(
                 onTap: onRightIconPressed,

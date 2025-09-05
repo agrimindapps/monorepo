@@ -35,6 +35,7 @@ class SettingsProvider extends ChangeNotifier {
   String? _error;
   String _currentUserId = '';
   bool _isPremiumUser = false;
+  bool _disposed = false;
 
   // Getters
   UserSettingsEntity? get settings => _settings;
@@ -103,7 +104,9 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> _loadPremiumStatus() async {
     try {
       _isPremiumUser = await _premiumService.isPremiumUser();
-      notifyListeners();
+      if (!_disposed) {
+        notifyListeners();
+      }
     } catch (e) {
       debugPrint('Error loading premium status: $e');
     }
@@ -315,7 +318,9 @@ class SettingsProvider extends ChangeNotifier {
         key,
         value,
       );
-      notifyListeners();
+      if (!_disposed) {
+        notifyListeners();
+      }
       
       return true;
     } catch (e) {
@@ -327,7 +332,7 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Set loading state
   void _setLoading(bool loading) {
-    if (_isLoading != loading) {
+    if (_isLoading != loading && !_disposed) {
       _isLoading = loading;
       notifyListeners();
     }
@@ -335,7 +340,7 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Set error state
   void _setError(String? error) {
-    if (_error != error) {
+    if (_error != error && !_disposed) {
       _error = error;
       notifyListeners();
     }
@@ -356,6 +361,8 @@ class SettingsProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    
     // Cleanup notification service
     _notificationService.cancelAllNotifications().catchError((Object e) {
       debugPrint('Error cleaning notification resources: $e');

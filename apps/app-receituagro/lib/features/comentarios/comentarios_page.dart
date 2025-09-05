@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../core/interfaces/i_premium_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/responsive_content_wrapper.dart';
 import 'constants/comentarios_design_tokens.dart';
 import 'domain/entities/comentario_entity.dart';
 import 'presentation/providers/comentarios_provider.dart';
@@ -80,43 +81,45 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
     
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildModernHeader(context, isDark),
-            Expanded(
-              child: Consumer<ComentariosProvider>(
-                builder: (context, provider, child) {
-                  // Verificar se o usuário é premium usando o service real
-                  final premiumService = di.sl<IPremiumService>();
-                  final isPremium = premiumService.isPremium;
-                  
-                  if (!isPremium) {
-                    return PremiumUpgradeWidget.noPermission(
-                      onUpgrade: () => premiumService.navigateToPremium(),
-                    );
-                  }
-                  
-                  if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  
-                  if (provider.error != null) {
-                    return Center(
-                      child: Text('Erro: ${provider.error}'),
-                    );
-                  }
-                  
-                  final comentariosParaMostrar = provider.comentarios;
-                  
-                  if (comentariosParaMostrar.isEmpty) {
-                    return _buildEmptyState();
-                  }
-                  
-                  return _buildComentariosList(comentariosParaMostrar);
-                },
+        child: ResponsiveContentWrapper(
+          child: Column(
+            children: [
+              _buildModernHeader(context, isDark),
+              Expanded(
+                child: Consumer<ComentariosProvider>(
+                  builder: (context, provider, child) {
+                    // Verificar se o usuário é premium usando o service real
+                    final premiumService = di.sl<IPremiumService>();
+                    final isPremium = premiumService.isPremium;
+                    
+                    if (!isPremium) {
+                      return PremiumUpgradeWidget.noPermission(
+                        onUpgrade: () => premiumService.navigateToPremium(),
+                      );
+                    }
+                    
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    if (provider.error != null) {
+                      return Center(
+                        child: Text('Erro: ${provider.error}'),
+                      );
+                    }
+                    
+                    final comentariosParaMostrar = provider.comentarios;
+                    
+                    if (comentariosParaMostrar.isEmpty) {
+                      return _buildEmptyState();
+                    }
+                    
+                    return _buildComentariosList(comentariosParaMostrar);
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: Consumer<ComentariosProvider>(

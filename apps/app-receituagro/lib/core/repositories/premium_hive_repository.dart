@@ -7,7 +7,7 @@ import '../repositories/base_hive_repository.dart';
 /// Repository para gerenciar dados premium com cache local Hive
 class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   static const String _boxName = 'receituagro_premium_status';
-  
+
   PremiumHiveRepository() : super(_boxName);
 
   @override
@@ -44,7 +44,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
     try {
       final userId = _getCurrentUserId();
       final box = Hive.box<PremiumStatusHive>(_boxName);
-      
+
       return box.values.firstWhere(
         (status) => status.userId == userId,
         orElse: () => _createDefaultStatus(userId),
@@ -61,10 +61,10 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
       final userId = _getCurrentUserId();
       status.userId = userId;
       status.updatedAt = DateTime.now().millisecondsSinceEpoch;
-      
+
       final box = Hive.box<PremiumStatusHive>(_boxName);
       await box.put(userId, status);
-      
+
       debugPrint('Premium status saved for user: $userId');
     } catch (e) {
       debugPrint('Error saving premium status: $e');
@@ -109,7 +109,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   }) async {
     final userId = _getCurrentUserId();
     final expiryDate = DateTime.now().add(duration);
-    
+
     final testStatus = PremiumStatusHive(
       userId: userId,
       isActive: true,
@@ -120,7 +120,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
       updatedAt: DateTime.now().millisecondsSinceEpoch,
       needsOnlineSync: false,
     );
-    
+
     await saveCurrentUserPremiumStatus(testStatus);
     debugPrint('Test premium activated for user: $userId until $expiryDate');
   }
@@ -142,7 +142,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   /// Obtém informações detalhadas do status premium
   Map<String, dynamic> getCurrentUserPremiumInfo() {
     final status = getCurrentUserPremiumStatus();
-    
+
     return {
       'isPremium': status?.isValidPremium ?? false,
       'isActive': status?.isActive ?? false,
@@ -184,11 +184,12 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
     try {
       final box = Hive.box<PremiumStatusHive>(_boxName);
       final allStatuses = box.values.toList();
-      
+
       return {
         'totalUsers': allStatuses.length,
         'premiumUsers': allStatuses.where((s) => s.isValidPremium).length,
-        'testSubscriptions': allStatuses.where((s) => s.isTestSubscription).length,
+        'testSubscriptions':
+            allStatuses.where((s) => s.isTestSubscription).length,
         'needingSync': allStatuses.where((s) => s.shouldSyncOnline).length,
         'currentUserId': _getCurrentUserId(),
         'currentUserStatus': getCurrentUserPremiumInfo(),

@@ -3,11 +3,11 @@ import '../design/spacing_tokens.dart';
 
 /// Widget wrapper que centraliza o conteúdo e aplica largura máxima de 1120px
 /// para melhorar a experiência em telas maiores
-/// 
+///
 /// PÁGINAS INCLUÍDAS (com limitação de largura):
 /// - Todas as páginas principais (Defensivos, Pragas, Favoritos, Comentários, Settings)
 /// - Páginas de detalhes (Detalhe Defensivos, Detalhe Pragas, etc.)
-/// 
+///
 /// PÁGINAS EXCLUÍDAS (sem limitação de largura):
 /// - Páginas de subscription/promocionais (mantém largura total para conversão)
 /// - Páginas de login (não existentes no app atual)

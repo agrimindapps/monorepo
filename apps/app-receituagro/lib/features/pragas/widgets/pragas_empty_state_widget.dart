@@ -69,7 +69,6 @@ class PragasEmptyStateWidget extends StatelessWidget {
                 ),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.info_outline_rounded,
@@ -77,12 +76,16 @@ class PragasEmptyStateWidget extends StatelessWidget {
                     color: _getTypeColor(),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    _getEmptyStateTip(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: _getTypeColor(),
+                  Expanded(
+                    child: Text(
+                      _getEmptyStateTip(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: _getTypeColor(),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                   ),
                 ],

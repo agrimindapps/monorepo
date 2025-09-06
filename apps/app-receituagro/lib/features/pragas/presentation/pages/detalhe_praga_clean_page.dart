@@ -36,14 +36,14 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
   @override
   void initState() {
     super.initState();
-    
+
     // Inicializar tab controller
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Inicializar providers
     _pragaProvider = DetalhePragaProvider();
     _diagnosticosProvider = DiagnosticosPragaProvider();
-    
+
     // Inicializar dados
     _loadInitialData();
   }
@@ -58,11 +58,13 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
   /// Carrega dados iniciais
   Future<void> _loadInitialData() async {
     // Inicializar provider da praga de forma assíncrona
-    await _pragaProvider.initializeAsync(widget.pragaName, widget.pragaScientificName);
-    
+    await _pragaProvider.initializeAsync(
+        widget.pragaName, widget.pragaScientificName);
+
     // Se praga carregada com sucesso, carregar diagnósticos
     if (_pragaProvider.pragaData != null) {
-      await _diagnosticosProvider.loadDiagnosticos(_pragaProvider.pragaData!.idReg);
+      await _diagnosticosProvider
+          .loadDiagnosticos(_pragaProvider.pragaData!.idReg);
     } else {
       // Fallback: tentar carregar usando o nome da praga diretamente
       await _diagnosticosProvider.loadDiagnosticos(widget.pragaName);
@@ -79,11 +81,11 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1120),
-              child: Padding(
-                padding: SpacingTokens.externalPadding, // Padding externo de 8px
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
                 child: Column(
                   children: [
                     _buildHeader(),
@@ -92,7 +94,6 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
                         builder: (context, provider, child) {
                           return Column(
                             children: [
-                              SpacingTokens.gapSM,
                               UnifiedTabBarWidget.forPragas(
                                 tabController: _tabController,
                               ),
@@ -102,7 +103,8 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
                                   children: [
                                     PragaInfoWidget(
                                       pragaName: widget.pragaName,
-                                      pragaScientificName: widget.pragaScientificName,
+                                      pragaScientificName:
+                                          widget.pragaScientificName,
                                     ),
                                     DiagnosticosPragaWidget(
                                       pragaName: widget.pragaName,
@@ -131,12 +133,13 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
     return Consumer<DetalhePragaProvider>(
       builder: (context, provider, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        
+
         return ModernHeaderWidget(
           title: widget.pragaName,
           subtitle: widget.pragaScientificName,
           leftIcon: Icons.bug_report_outlined,
-          rightIcon: provider.isFavorited ? Icons.favorite : Icons.favorite_border,
+          rightIcon:
+              provider.isFavorited ? Icons.favorite : Icons.favorite_border,
           isDark: isDark,
           showBackButton: true,
           showActions: true,
@@ -150,19 +153,17 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
   /// Alterna estado de favorito
   Future<void> _toggleFavorito(DetalhePragaProvider provider) async {
     final success = await provider.toggleFavorito();
-    
+
     if (mounted) {
       if (success) {
         // Notifica a página de favoritos sobre a mudança
         FavoritosPage.reloadIfActive();
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              provider.isFavorited 
+            content: Text(provider.isFavorited
                 ? 'Adicionado aos favoritos'
-                : 'Removido dos favoritos'
-            ),
+                : 'Removido dos favoritos'),
             backgroundColor: Colors.green,
           ),
         );

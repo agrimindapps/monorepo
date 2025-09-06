@@ -170,19 +170,107 @@ class ReceitaAgroHiveService {
       // Dados de teste para pragas
       final pragasBoxName = HiveAdapterRegistry.boxNames['pragas']!;
       final pragasBox = Hive.box<PragasHive>(pragasBoxName);
-      final pragaTest = PragasHive(
-        objectId: '1',
-        createdAt: now,
-        updatedAt: now,
-        idReg: '1',
-        nomeComum: 'Lagarta-da-soja',
-        nomeCientifico: 'Anticarsia gemmatalis',
-        tipoPraga: '1',
-        dominio: 'Eukaryota',
-        reino: 'Animalia',
-        familia: 'Erebidae',
-      );
-      await pragasBox.put('1', pragaTest);
+      
+      // Pragas tipo 1 (Insetos)
+      final pragasInsetos = [
+        PragasHive(
+          objectId: '1',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '1',
+          nomeComum: 'Lagarta-da-soja',
+          nomeCientifico: 'Anticarsia gemmatalis',
+          tipoPraga: '1',
+          dominio: 'Eukaryota',
+          reino: 'Animalia',
+          familia: 'Erebidae',
+        ),
+        PragasHive(
+          objectId: '2',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '2',
+          nomeComum: 'Percevejo-marrom',
+          nomeCientifico: 'Euschistus heros',
+          tipoPraga: '1',
+          dominio: 'Eukaryota',
+          reino: 'Animalia',
+          familia: 'Pentatomidae',
+        ),
+        PragasHive(
+          objectId: '3',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '3',
+          nomeComum: 'Broca-do-colmo',
+          nomeCientifico: 'Diatraea saccharalis',
+          tipoPraga: '1',
+          dominio: 'Eukaryota',
+          reino: 'Animalia',
+          familia: 'Crambidae',
+        ),
+      ];
+
+      // Pragas tipo 2 (Doenças)
+      final pragasDoencas = [
+        PragasHive(
+          objectId: '4',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '4',
+          nomeComum: 'Ferrugem-asiática',
+          nomeCientifico: 'Phakopsora pachyrhizi',
+          tipoPraga: '2',
+          dominio: 'Eukaryota',
+          reino: 'Fungi',
+          familia: 'Phakopsoraceae',
+        ),
+        PragasHive(
+          objectId: '5',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '5',
+          nomeComum: 'Mancha-branca',
+          nomeCientifico: 'Phoma glycinicola',
+          tipoPraga: '2',
+          dominio: 'Eukaryota',
+          reino: 'Fungi',
+          familia: 'Didymellaceae',
+        ),
+      ];
+
+      // Pragas tipo 3 (Plantas daninhas)
+      final pragasPlantas = [
+        PragasHive(
+          objectId: '6',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '6',
+          nomeComum: 'Buva',
+          nomeCientifico: 'Conyza bonariensis',
+          tipoPraga: '3',
+          dominio: 'Eukaryota',
+          reino: 'Plantae',
+          familia: 'Asteraceae',
+        ),
+        PragasHive(
+          objectId: '7',
+          createdAt: now,
+          updatedAt: now,
+          idReg: '7',
+          nomeComum: 'Capim-amargoso',
+          nomeCientifico: 'Digitaria insularis',
+          tipoPraga: '3',
+          dominio: 'Eukaryota',
+          reino: 'Plantae',
+          familia: 'Poaceae',
+        ),
+      ];
+
+      // Salva todos os dados de teste
+      for (var praga in [...pragasInsetos, ...pragasDoencas, ...pragasPlantas]) {
+        await pragasBox.put(praga.idReg, praga);
+      }
       
       // Dados de teste para culturas
       final culturasBoxName = HiveAdapterRegistry.boxNames['culturas']!;

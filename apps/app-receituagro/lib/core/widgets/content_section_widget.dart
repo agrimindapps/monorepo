@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../design/design_tokens.dart';
 
 /// Widget padronizado para seções de conteúdo nas páginas home
-/// 
+///
 /// Garante consistência visual entre diferentes páginas da aplicação,
 /// com header de seção padronizado e card wrapper opcional.
 class ContentSectionWidget extends StatelessWidget {
@@ -32,19 +32,16 @@ class ContentSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header da seção
         _buildSectionHeader(theme),
         const SizedBox(height: ReceitaAgroSpacing.sm),
-        
+
         // Conteúdo da seção
-        if (showCard)
-          _buildCardContent(theme)
-        else
-          _buildDirectContent(),
+        if (showCard) _buildCardContent(theme) else _buildDirectContent(),
       ],
     );
   }
@@ -66,7 +63,7 @@ class ContentSectionWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // Título da seção
           Expanded(
             child: Text(
@@ -78,7 +75,7 @@ class ContentSectionWidget extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Ícone de ação
           if (actionIcon != null)
             IconButton(
@@ -100,17 +97,15 @@ class ContentSectionWidget extends StatelessWidget {
   }
 
   Widget _buildCardContent(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0), // Padding externo de 8px
-      child: Card(
-        elevation: ReceitaAgroElevation.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-        ),
-        color: theme.cardColor,
-        clipBehavior: Clip.antiAlias, // Para que os dividers fiquem dentro do card
-        child: _buildContent(),
+    return Card(
+      elevation: ReceitaAgroElevation.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
       ),
+      color: theme.cardColor,
+      clipBehavior:
+          Clip.antiAlias, // Para que os dividers fiquem dentro do card
+      child: _buildContent(),
     );
   }
 
@@ -176,7 +171,7 @@ class ContentListItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -186,11 +181,12 @@ class ContentListItemWidget extends StatelessWidget {
             // Leading widget ou ícone padrão
             leading ?? _buildDefaultIcon(theme),
             const SizedBox(width: 12),
-            
+
             // Conteúdo principal
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
@@ -199,7 +195,7 @@ class ContentListItemWidget extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
@@ -209,17 +205,17 @@ class ContentListItemWidget extends StatelessWidget {
                       fontSize: 13,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (category != null) ...[
+                  if (category != null && category!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     _buildCategoryTag(theme),
                   ],
                 ],
               ),
             ),
-            
+
             // Seta de navegação
             Icon(
               Icons.chevron_right,
@@ -257,11 +253,15 @@ class ContentListItemWidget extends StatelessWidget {
           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 4),
-        Text(
-          category!,
-          style: TextStyle(
-            fontSize: 12,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+        Flexible(
+          child: Text(
+            category!,
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

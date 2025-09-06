@@ -487,8 +487,11 @@ class AuthProvider extends ChangeNotifier {
   }
   
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    // Só notificar se realmente há uma mensagem de erro para limpar
+    if (_errorMessage != null) {
+      _errorMessage = null;
+      notifyListeners();
+    }
   }
   
   /// Login com sincronização automática específica do Gasometer

@@ -431,57 +431,39 @@ class _MaintenancePageState extends State<MaintenancePage> {
 
 
   Widget _buildEmptyState() {
-    return EnhancedEmptyState.maintenances(
-      onAddMaintenance: _showAddMaintenanceDialog,
-      onViewGuides: () {
-        // Check if widget is still mounted before using context
-        if (mounted) {
-          // Navigation to guides implementation pending
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Guias de manutenção em breve!'),
-            ),
-          );
-        }
-      },
+    return Center(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: EnhancedEmptyState.maintenances(),
+      ),
     );
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesProvider = context.watch<VehiclesProvider>();
-    final hasVehicles = vehiclesProvider.vehicles.isNotEmpty;
     final hasSelectedVehicle = _selectedVehicleId != null;
     
-    return SemanticButton.fab(
-      semanticLabel: hasSelectedVehicle 
-          ? 'Registrar nova manutenção' 
-          : hasVehicles 
-              ? 'Selecione um veículo primeiro'
-              : 'Cadastrar veículo primeiro',
-      semanticHint: hasSelectedVehicle 
-          ? 'Abre formulário para cadastrar uma nova manutenção'
-          : hasVehicles
-              ? 'É necessário selecionar um veículo para registrar manutenções'
-              : 'É necessário ter pelo menos um veículo cadastrado para registrar manutenções',
-      onPressed: hasSelectedVehicle 
-          ? _showAddMaintenanceDialog 
-          : hasVehicles 
-              ? _showSelectVehicleMessage 
-              : () => _showAddVehicleDialog(context),
-      child: Icon(hasSelectedVehicle ? Icons.add : Icons.warning),
+    return FloatingActionButton(
+      onPressed: hasSelectedVehicle ? _showAddMaintenanceDialog : _showSelectVehicleMessage,
+      backgroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).disabledColor,
+      foregroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.onPrimary
+          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: hasSelectedVehicle 
+          ? 'Adicionar registro de manutenção' 
+          : 'Selecione um veículo primeiro',
+      child: const Icon(Icons.add),
     );
   }
 
   void _showSelectVehicleMessage() {
-    if (!mounted) return;
-    
-    final hasVehicles = _vehiclesProvider.vehicles.isNotEmpty;
-    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(hasVehicles 
-            ? 'Selecione um veículo primeiro para registrar manutenções'
-            : 'Cadastre um veículo primeiro para registrar manutenções'),
+        content: const Text('Selecione um veículo primeiro'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -489,17 +471,6 @@ class _MaintenancePageState extends State<MaintenancePage> {
             GasometerDesignTokens.radiusInput,
           ),
         ),
-        action: hasVehicles 
-            ? null
-            : SnackBarAction(
-                label: 'Cadastrar',
-                onPressed: () {
-                  // Check if widget is still mounted before using context
-                  if (mounted) {
-                    _showAddVehicleDialog(context);
-                  }
-                },
-              ),
       ),
     );
   }

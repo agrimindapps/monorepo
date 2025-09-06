@@ -149,46 +149,49 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Column(
-            children: [
-              ModernHeaderWidget(
-                title: 'Culturas',
-                subtitle: _getHeaderSubtitle(),
-                leftIcon: Icons.agriculture_outlined,
-                rightIcon: _isAscending
-                    ? Icons.arrow_upward_outlined
-                    : Icons.arrow_downward_outlined,
-                isDark: isDark,
-                showBackButton: true,
-                showActions: true,
-                onBackPressed: () => Navigator.of(context).pop(),
-                onRightIconPressed: _toggleSort,
-              ),
-              CulturaSearchField(
-                controller: _searchController,
-                isDark: isDark,
-                viewMode: _viewMode,
-                onViewModeChanged: _toggleViewMode,
-                isSearching: _isLoading,
-                onClear: _clearSearch,
-                onSubmitted: () => _performSearch(_searchController.text),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                  child: Card(
-                    elevation: 2,
-                    color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Column(
+              children: [
+                ModernHeaderWidget(
+                  title: 'Culturas',
+                  subtitle: _getHeaderSubtitle(),
+                  leftIcon: Icons.agriculture_outlined,
+                  rightIcon: _isAscending
+                      ? Icons.arrow_upward_outlined
+                      : Icons.arrow_downward_outlined,
+                  isDark: isDark,
+                  showBackButton: true,
+                  showActions: true,
+                  onBackPressed: () => Navigator.of(context).pop(),
+                  onRightIconPressed: _toggleSort,
+                ),
+                CulturaSearchField(
+                  controller: _searchController,
+                  isDark: isDark,
+                  viewMode: _viewMode,
+                  onViewModeChanged: _toggleViewMode,
+                  isSearching: _isLoading,
+                  onClear: _clearSearch,
+                  onSubmitted: () => _performSearch(_searchController.text),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    child: Card(
+                      elevation: 2,
+                      color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _buildContent(isDark),
                     ),
-                    child: _buildContent(isDark),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

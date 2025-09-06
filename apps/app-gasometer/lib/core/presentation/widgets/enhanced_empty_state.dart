@@ -63,11 +63,7 @@ class EnhancedEmptyState extends StatelessWidget {
     return EnhancedEmptyState(
       icon: Icons.build_outlined,
       title: 'Nenhuma manutenção registrada',
-      description: 'Comece registrando a primeira manutenção do seu veículo para acompanhar o histórico',
-      actionLabel: 'Registrar Manutenção',
-      onAction: onAddMaintenance,
-      secondaryActionLabel: 'Ver Guias',
-      onSecondaryAction: onViewGuides,
+      description: 'Use o botão + para registrar a primeira manutenção do seu veículo e acompanhar o histórico',
       height: 400,
     );
   }

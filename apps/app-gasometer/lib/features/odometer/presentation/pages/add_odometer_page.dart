@@ -83,6 +83,15 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         debugPrint('Warning: No vehicle selected for new odometer record');
       }
     }
+    
+    // Notificar mudanças após o build atual completar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          // Força rebuild após inicialização
+        });
+      }
+    });
   }
   
   void _setupFormControllers() {
@@ -480,15 +489,37 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   // Formatadores de entrada
   List<TextInputFormatter> _getOdometroFormatters() {
     return [
-      FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+      // Permitir apenas números e vírgula para decimal
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9,]')),
+      // Limitar a 999999,9 (máximo 6 dígitos inteiros + 1 decimal)
+      LengthLimitingTextInputFormatter(8), // 999999,9
+      // Formatter personalizado para controlar vírgula decimal
       TextInputFormatter.withFunction((oldValue, newValue) {
-        var text = newValue.text.replaceAll('.', ',');
+        var text = newValue.text;
+        
+        // Não permitir vírgula no início
+        if (text.startsWith(',')) {
+          return oldValue;
+        }
+        
+        // Permitir apenas uma vírgula
+        final commaCount = ','.allMatches(text).length;
+        if (commaCount > 1) {
+          return oldValue;
+        }
+        
+        // Se tem vírgula, limitar a apenas 1 dígito após a vírgula
         if (text.contains(',')) {
           final parts = text.split(',');
-          if (parts.length == 2 && parts[1].length > 2) {
-            text = '${parts[0]},${parts[1].substring(0, 2)}';
+          if (parts.length == 2 && parts[1].length > 1) {
+            text = '${parts[0]},${parts[1].substring(0, 1)}';
+          }
+          // Não permitir vírgula no final se não há dígitos após
+          if (parts.length == 2 && parts[1].isEmpty && text.endsWith(',')) {
+            // Permitir vírgula temporariamente para que o usuário possa digitar decimal
           }
         }
+        
         return TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: text.length),
@@ -592,7 +623,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
             _isSubmitting = false;
           });
           formProvider.setIsLoading(false);
-          _showError(
+          _showErrorDialog(
             'Timeout',
             'A operação demorou muito para ser concluída. Tente novamente.',
           );
@@ -612,7 +643,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       if (!validationResult.isValid) {
         // Show first validation error
         final firstError = validationResult.errors.values.first;
-        _showError(OdometerConstants.dialogMessages['erro']!, firstError);
+        _showErrorDialog(OdometerConstants.dialogMessages['erro']!, firstError);
         return;
       }
 
@@ -641,30 +672,28 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
       if (success) {
         if (mounted) {
-          // Close dialog immediately after local success
-          Navigator.of(context).pop(true);
-          
-          // Show confirmation after closing dialog
-          final successMessage = formProvider.isEditing 
-              ? OdometerConstants.successMessages['edicaoSucesso']!
-              : OdometerConstants.successMessages['cadastroSucesso']!;
-              
-          _showSuccess(successMessage);
+          // Close dialog with success result for parent context to handle
+          Navigator.of(context).pop({
+            'success': true,
+            'action': formProvider.isEditing ? 'edit' : 'create',
+            'message': formProvider.isEditing 
+                ? OdometerConstants.successMessages['edicaoSucesso']!
+                : OdometerConstants.successMessages['cadastroSucesso']!,
+          });
         }
       } else {
         if (mounted) {
-          _showError(
-            OdometerConstants.dialogMessages['erro']!,
-            odometerProvider.error.isNotEmpty 
-                ? odometerProvider.error 
-                : OdometerConstants.validationMessages['erroGenerico']!,
-          );
+          // Show error in dialog context (before closing)
+          final errorMessage = odometerProvider.error.isNotEmpty 
+              ? odometerProvider.error 
+              : OdometerConstants.validationMessages['erroGenerico']!;
+          _showErrorDialog(OdometerConstants.dialogMessages['erro']!, errorMessage);
         }
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');
       if (mounted) {
-        _showError(
+        _showErrorDialog(
           OdometerConstants.dialogMessages['erro']!,
           'Erro inesperado: $e',
         );
@@ -683,22 +712,18 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     }
   }
   
-  void _showError(String title, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+  void _showErrorDialog(String title, String message) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
         content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-        duration: const Duration(seconds: 4),
-      ),
-    );
-  }
-  
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        duration: const Duration(seconds: 3),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

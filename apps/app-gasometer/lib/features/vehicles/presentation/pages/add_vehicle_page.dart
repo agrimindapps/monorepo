@@ -33,6 +33,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   VehicleFormProvider? formProvider;
   final Map<String, ValidationResult> _validationResults = {};
   final ImagePicker _picker = ImagePicker();
+  final TextEditingController _observacoesController = TextEditingController();
 
   void _initializeFormProvider(AuthProvider authProvider) {
     if (formProvider != null) return; // Já inicializado
@@ -41,6 +42,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     
     if (widget.vehicle != null) {
       formProvider!.initializeForEdit(widget.vehicle!);
+      // Inicializar observações se editando
+      _observacoesController.text = widget.vehicle!.metadata['observacoes'] as String? ?? '';
     }
     
     // Add listeners para atualizar contadores
@@ -55,6 +58,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
 
   @override
   void dispose() {
+    _observacoesController.dispose();
     if (formProvider != null) {
       formProvider!.placaController.removeListener(_updateUI);
       formProvider!.chassiController.removeListener(_updateUI);
@@ -110,8 +114,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFormTitle(isEditing),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildIdentificationSection(provider),
             SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildTechnicalSection(provider),
@@ -129,25 +131,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     );
   }
 
-  Widget _buildFormTitle(bool isEditing) {
-    return Center(
-      child: Text(
-        isEditing ? 'Editar Veículo' : 'Cadastrar Veículo',
-        style: TextStyle(
-          fontSize: GasometerDesignTokens.fontSizeXxl,
-          fontWeight: GasometerDesignTokens.fontWeightBold,
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-      ),
-    );
-  }
-
-
   Widget _buildIdentificationSection(VehicleFormProvider provider) {
     return FormSectionWidget(
       title: 'Identificação do Veículo',
       icon: Icons.directions_car,
       children: [
+        _buildPhotoUploadSection(provider),
+        SizedBox(height: GasometerDesignTokens.spacingLg),
         ValidatedFormField(
           controller: provider.marcaController,
           label: 'Marca',
@@ -157,7 +147,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           minLength: 2,
           maxLengthValidation: 50,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-          validateOnChange: true,
           onValidationChanged: (result) => _validationResults['marca'] = result,
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -170,7 +159,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           minLength: 2,
           maxLengthValidation: 50,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
-          validateOnChange: true,
           onValidationChanged: (result) => _validationResults['modelo'] = result,
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -190,8 +178,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
               minLength: 3,
               maxLengthValidation: 30,
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-              validateOnChange: true,
-              onValidationChanged: (result) => _validationResults['cor'] = result,
+                  onValidationChanged: (result) => _validationResults['cor'] = result,
               ),
             ),
           ],
@@ -230,7 +217,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           decoration: const InputDecoration(
             suffixText: 'km',
           ),
-          validateOnChange: true,
           onValidationChanged: (result) => _validationResults['odometro'] = result,
           onChanged: (value) {
             setState(() {});
@@ -244,12 +230,11 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           required: true,
           validationType: ValidationType.licensePlate,
           maxLength: 7,
-          showCharacterCount: true,
           inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+            UpperCaseTextFormatter(),
             LengthLimitingTextInputFormatter(7),
           ],
-          validateOnChange: true,
           onValidationChanged: (result) => _validationResults['placa'] = result,
           onChanged: (value) {
             setState(() {});
@@ -263,13 +248,11 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           required: false,
           validationType: ValidationType.chassis,
           maxLength: 17,
-          showCharacterCount: true,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
             LengthLimitingTextInputFormatter(17),
             UpperCaseTextFormatter(),
           ],
-          validateOnChange: true,
           onValidationChanged: (result) => _validationResults['chassi'] = result,
           onChanged: (value) {
             setState(() {});
@@ -284,12 +267,10 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           validationType: ValidationType.renavam,
           keyboardType: TextInputType.number,
           maxLength: 11,
-          showCharacterCount: true,
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(11),
           ],
-          validateOnChange: true,
           onValidationChanged: (result) => _validationResults['renavam'] = result,
           onChanged: (value) {
             setState(() {});
@@ -304,7 +285,23 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       title: 'Informações Adicionais',
       icon: Icons.more_horiz,
       children: [
-        _buildPhotoUploadSection(provider),
+        ValidatedFormField(
+          controller: _observacoesController,
+          label: 'Observações (opcional)',
+          hint: 'Adicione observações sobre o veículo...',
+          required: false,
+          validationType: ValidationType.length,
+          minLength: 0,
+          maxLengthValidation: 1000,
+          maxLines: 4,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(1000),
+          ],
+          onValidationChanged: (result) => _validationResults['observacoes'] = result,
+          onChanged: (value) {
+            setState(() {});
+          },
+        ),
       ],
     );
   }
@@ -763,12 +760,33 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       // Criar entidade do veículo usando o FormProvider
       final vehicleEntity = formProvider!.createVehicleEntity();
       
+      // Adicionar observações aos metadados
+      final updatedMetadata = Map<String, dynamic>.from(vehicleEntity.metadata);
+      updatedMetadata['observacoes'] = _observacoesController.text.trim();
+      
+      final updatedVehicleEntity = VehicleEntity(
+        id: vehicleEntity.id,
+        userId: vehicleEntity.userId,
+        name: vehicleEntity.name,
+        brand: vehicleEntity.brand,
+        model: vehicleEntity.model,
+        year: vehicleEntity.year,
+        color: vehicleEntity.color,
+        licensePlate: vehicleEntity.licensePlate,
+        type: vehicleEntity.type,
+        supportedFuels: vehicleEntity.supportedFuels,
+        currentOdometer: vehicleEntity.currentOdometer,
+        createdAt: vehicleEntity.createdAt,
+        updatedAt: vehicleEntity.updatedAt,
+        metadata: updatedMetadata,
+      );
+      
       // Salvar via provider
       bool success;
       if (widget.vehicle != null) {
-        success = await vehiclesProvider.updateVehicle(vehicleEntity);
+        success = await vehiclesProvider.updateVehicle(updatedVehicleEntity);
       } else {
-        success = await vehiclesProvider.addVehicle(vehicleEntity);
+        success = await vehiclesProvider.addVehicle(updatedVehicleEntity);
       }
       
       if (mounted) {

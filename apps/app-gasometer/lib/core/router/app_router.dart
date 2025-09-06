@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../constants/ui_constants.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
@@ -36,9 +35,19 @@ class AppRouter {
     final routeGuard = RouteGuard(authProvider, platformService);
 
     return GoRouter(
-      initialLocation: routeGuard.getInitialLocation(),
-      redirect: (context, state) =>
-          routeGuard.handleRedirect(state.matchedLocation),
+      initialLocation: '/', // Always start with home - let redirect handle the logic
+      redirect: (context, state) {
+        // Update authProvider on each redirect check
+        AuthProvider? currentAuthProvider;
+        try {
+          currentAuthProvider = Provider.of<AuthProvider>(context, listen: false);
+        } catch (e) {
+          currentAuthProvider = null;
+        }
+        
+        final updatedRouteGuard = RouteGuard(currentAuthProvider, platformService);
+        return updatedRouteGuard.handleRedirect(state.matchedLocation);
+      },
       routes: [
         // Promo Routes (Landing Page and Policies)
         GoRoute(
@@ -119,13 +128,6 @@ class AppRouter {
               path: '/settings',
               name: 'settings',
               builder: (context, state) => const SettingsPage(),
-            ),
-
-            // Profile
-            GoRoute(
-              path: '/profile',
-              name: 'profile',
-              builder: (context, state) => const ProfilePage(),
             ),
           ],
         ),

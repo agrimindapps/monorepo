@@ -58,6 +58,7 @@ class ValidatedFormField extends StatefulWidget {
   final ValidationType validationType;
   final String? Function(String?)? customValidator;
   final bool validateOnChange;
+  final bool validateOnFocusOut;
   final bool showValidationIcon;
   final bool showCharacterCount;
   final Duration debounceDuration;
@@ -102,7 +103,8 @@ class ValidatedFormField extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.validationType = ValidationType.none,
     this.customValidator,
-    this.validateOnChange = true,
+    this.validateOnChange = false,
+    this.validateOnFocusOut = true,
     this.showValidationIcon = true,
     this.showCharacterCount = false,
     this.debounceDuration = const Duration(milliseconds: 300),
@@ -179,15 +181,25 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
   }
 
   void _onTextChanged() {
-    if (!widget.validateOnChange) return;
-    
     final text = _controller.text;
-    
-    // Cancelar timer anterior se existir
-    _debounceTimer?.cancel();
     
     // Chamar callback imediatamente
     widget.onChanged?.call(text);
+    
+    // Se validação onChange estiver desabilitada, apenas limpar estado se campo vazio
+    if (!widget.validateOnChange) {
+      if (text.isEmpty) {
+        setState(() {
+          _validationState = ValidationState.initial;
+          _lastValidationResult = ValidationResult.success();
+        });
+        widget.onValidationChanged?.call(_lastValidationResult);
+      }
+      return;
+    }
+    
+    // Cancelar timer anterior se existir
+    _debounceTimer?.cancel();
     
     // Validação com debounce
     if (text.isEmpty && !widget.required) {
@@ -469,10 +481,28 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           style: widget.textStyle,
           onEditingComplete: widget.onEditingComplete,
           onFieldSubmitted: widget.onSubmitted,
+          onTap: () {
+            // Reset validation state quando campo ganha foco se não está validando em tempo real
+            if (!widget.validateOnChange && _validationState == ValidationState.invalid) {
+              setState(() {
+                _validationState = ValidationState.initial;
+                _lastValidationResult = ValidationResult.success();
+              });
+            }
+          },
+          onTapOutside: (_) {
+            // Validar quando campo perde foco
+            if (widget.validateOnFocusOut) {
+              final text = _controller.text;
+              _performValidation(text);
+            }
+          },
           // Validação no FormField é delegada ao nosso sistema
           validator: (_) => _lastValidationResult.isValid ? null : _lastValidationResult.message,
           decoration: widget.decoration?.copyWith(
-            labelText: widget.label,
+            labelText: widget.required && widget.label != null 
+                ? '${widget.label} *' 
+                : widget.label,
             hintText: widget.hint,
             prefixIcon: widget.prefixIcon != null 
                 ? Icon(widget.prefixIcon) 
@@ -506,7 +536,9 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                 ? null 
                 : '', // Esconder contador padrão se não queremos
           ) ?? InputDecoration(
-            labelText: widget.label,
+            labelText: widget.required && widget.label != null 
+                ? '${widget.label} *' 
+                : widget.label,
             hintText: widget.hint,
             prefixIcon: widget.prefixIcon != null 
                 ? Icon(widget.prefixIcon) 

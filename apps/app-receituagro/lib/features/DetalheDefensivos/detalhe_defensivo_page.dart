@@ -69,16 +69,11 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Future<void> _loadData() async {
-    debugPrint('Loading data for defensivo: ${widget.defensivoName}');
     await _defensivoProvider.initializeData(widget.defensivoName, widget.fabricante);
     
     // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
     if (_defensivoProvider.defensivoData != null) {
-      debugPrint('Loading diagnósticos for ID: ${_defensivoProvider.defensivoData!.idReg}');
       await _diagnosticosProvider.getDiagnosticosByDefensivo(_defensivoProvider.defensivoData!.idReg);
-      debugPrint('Loaded ${_diagnosticosProvider.diagnosticos.length} diagnósticos');
-    } else {
-      debugPrint('No defensivo data found');
     }
   }
 
@@ -98,14 +93,17 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1120),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(child: _buildBody()),
-                ],
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(child: _buildBody()),
+                  ],
+                ),
               ),
             ),
           ),
@@ -237,17 +235,42 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Future<void> _handleFavoriteToggle(DetalheDefensivoProvider provider) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final wasAlreadyFavorited = provider.isFavorited;
+    
+    // Mostra feedback imediato
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          wasAlreadyFavorited 
+            ? '\u2764\ufe0f Removendo dos favoritos...' 
+            : '\u2764\ufe0f Adicionando aos favoritos...',
+        ),
+        duration: const Duration(milliseconds: 1500),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+    
     final success = await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
     
     if (!mounted) return;
 
-    if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erro ao alterar favorito'),
-          backgroundColor: Colors.red,
+    // Feedback final baseado no resultado
+    scaffoldMessenger.hideCurrentSnackBar();
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          success 
+            ? (wasAlreadyFavorited 
+                ? '\u2713 ${widget.defensivoName} removido dos favoritos' 
+                : '\u2713 ${widget.defensivoName} adicionado aos favoritos')
+            : '\u274c Erro ao alterar favorito',
         ),
-      );
-    }
+        duration: const Duration(seconds: 2),
+        backgroundColor: success 
+          ? Theme.of(context).colorScheme.primary 
+          : Colors.red,
+      ),
+    );
   }
 }

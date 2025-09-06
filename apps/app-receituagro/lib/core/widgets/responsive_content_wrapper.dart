@@ -39,10 +39,7 @@ class ResponsiveContentWrapper extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: maxWidth,
         ),
-        child: Padding(
-          padding: effectivePadding,
-          child: child,
-        ),
+        child: child,
       ),
     );
   }

@@ -48,57 +48,60 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Scaffold(
         backgroundColor: theme.cardColor,
         body: SafeArea(
-          child: ResponsiveContentWrapper(
-            child: Column(
-              children: [
-                _buildModernHeader(context, isDark),
-              Expanded(
-                child: Consumer<SettingsProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: ResponsiveContentWrapper(
+              child: Column(
+                children: [
+                  _buildModernHeader(context, isDark),
+                Expanded(
+                  child: Consumer<SettingsProvider>(
+                    builder: (context, provider, child) {
+                      if (provider.isLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                    if (provider.error != null) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: theme.colorScheme.error,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Erro ao carregar configurações',
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              provider.error!,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                      if (provider.error != null) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: theme.colorScheme.error,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: () => provider.refresh(),
-                              child: const Text('Tentar Novamente'),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                              const SizedBox(height: 16),
+                              Text(
+                                'Erro ao carregar configurações',
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                provider.error!,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () => provider.refresh(),
+                                child: const Text('Tentar Novamente'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
 
-                    return _buildSettingsContent();
-                  },
+                      return _buildSettingsContent();
+                    },
+                  ),
                 ),
+                ],
               ),
-              ],
             ),
           ),
         ),

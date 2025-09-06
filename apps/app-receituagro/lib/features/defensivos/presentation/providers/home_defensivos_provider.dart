@@ -118,8 +118,8 @@ class HomeDefensivosProvider extends ChangeNotifier {
         return;
       }
       
-      // Performance optimization: Move heavy statistical calculations to background isolate
-      final statistics = await compute(_calculateDefensivosStatistics, defensivos);
+      // Calcular estatísticas diretamente (objetos Hive não são serializáveis para compute)
+      final statistics = _calculateDefensivosStatistics(defensivos);
       
       // Aplica resultados consolidadamente
       await _applyStatistics(statistics);
@@ -138,7 +138,7 @@ class HomeDefensivosProvider extends ChangeNotifier {
       _clearError();
       
       final defensivos = _repository.getActiveDefensivos();
-      final statistics = await compute(_calculateDefensivosStatistics, defensivos);
+      final statistics = _calculateDefensivosStatistics(defensivos);
       
       await _applyStatistics(statistics);
       

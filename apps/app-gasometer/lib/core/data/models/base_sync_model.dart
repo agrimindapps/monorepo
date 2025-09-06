@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:hive/hive.dart';
 
@@ -139,19 +140,37 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
     'last_sync_at': lastSyncAt?.toIso8601String(),
   };
 
-  /// Parse timestamps from Firebase (ISO8601 strings)
+  /// Parse timestamps from Firebase (Timestamp or ISO8601 strings)
   static Map<String, DateTime?> parseFirebaseTimestamps(Map<String, dynamic> map) {
     return {
-      'createdAt': map['created_at'] != null 
-          ? DateTime.parse(map['created_at'] as String)
-          : null,
-      'updatedAt': map['updated_at'] != null 
-          ? DateTime.parse(map['updated_at'] as String)
-          : null,
-      'lastSyncAt': map['last_sync_at'] != null 
-          ? DateTime.parse(map['last_sync_at'] as String)
-          : null,
+      'createdAt': _parseTimestamp(map['created_at']),
+      'updatedAt': _parseTimestamp(map['updated_at']),
+      'lastSyncAt': _parseTimestamp(map['last_sync_at']),
     };
+  }
+
+  /// Helper method to parse timestamp from various formats
+  static DateTime? _parseTimestamp(dynamic value) {
+    if (value == null) return null;
+    
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    } else if (value is int) {
+      // Handle milliseconds since epoch
+      try {
+        return DateTime.fromMillisecondsSinceEpoch(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    
+    return null;
   }
 
   /// Parse base fields from Firebase map (delegate to BaseSyncEntity)

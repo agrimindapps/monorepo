@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/error_boundary.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -95,8 +94,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                         constraints: const BoxConstraints(maxWidth: 1200),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildContentOptimized(context, isLoading, hasError, expenses, expensesError)
-                            .withPageErrorBoundary(pageName: 'Despesas'),
+                          child: _buildContentOptimized(context, isLoading, hasError, expenses, expensesError),
                         ),
                       ),
                     ),
@@ -206,39 +204,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
               },
             );
           }
-        ).withProviderErrorBoundary(providerName: 'Vehicles'),
+        ),
         const SizedBox(height: 16),
         
-        // Campo de busca com Consumer específico
-        Consumer<ExpensesProvider>(
-          builder: (context, expensesProvider, child) {
-            return SemanticFormField(
-              label: 'Campo de busca',
-              hint: 'Digite para buscar despesas por descrição, tipo ou local',
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Buscar por descrição, tipo ou local...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: expensesProvider.searchQuery.isNotEmpty
-                      ? SemanticButton.icon(
-                          semanticLabel: 'Limpar busca',
-                          semanticHint: 'Remove o texto da busca e mostra todas as despesas',
-                          onPressed: () => _expensesProvider.search(''),
-                          child: const Icon(Icons.clear),
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surface,
-                ),
-                onChanged: (value) => _expensesProvider.search(value),
-              ),
-            );
-          }
-        ),
-        const SizedBox(height: 24),
         
         // Show error state
         if (hasError && errorMessage != null)
@@ -310,48 +278,39 @@ class _ExpensesPageState extends State<ExpensesPage> {
   }
 
   Widget _buildEmptyState() {
-    return ExpensesEmptyState(
-      onAddRecord: _showAddExpenseDialog,
-    );
-  }
-
-  Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesProvider = context.watch<VehiclesProvider>();
-    final hasVehicles = vehiclesProvider.vehicles.isNotEmpty;
-    final hasSelectedVehicle = _selectedVehicleId != null;
-    
-    return SemanticButton.fab(
-      semanticLabel: hasSelectedVehicle 
-          ? 'Registrar nova despesa' 
-          : hasVehicles 
-              ? 'Selecione um veículo primeiro'
-              : 'Cadastrar veículo primeiro',
-      semanticHint: hasSelectedVehicle 
-          ? 'Abre formulário para cadastrar uma nova despesa'
-          : hasVehicles
-              ? 'É necessário selecionar um veículo para registrar despesas'
-              : 'É necessário ter pelo menos um veículo cadastrado para registrar despesas',
-      onPressed: hasSelectedVehicle 
-          ? _showAddExpenseDialog 
-          : hasVehicles 
-              ? _showSelectVehicleMessage 
-              : () => _showAddVehicleDialog(context),
-      enabled: true,
-      child: Icon(
-        hasSelectedVehicle ? Icons.add : Icons.warning,
-        size: GasometerDesignTokens.iconSizeLg,
+    return Center(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: ExpensesEmptyState(),
       ),
     );
   }
 
-  void _showSelectVehicleMessage() {
-    final hasVehicles = _vehiclesProvider.vehicles.isNotEmpty;
+  Widget _buildFloatingActionButton(BuildContext context) {
+    final hasSelectedVehicle = _selectedVehicleId != null;
     
+    return FloatingActionButton(
+      onPressed: hasSelectedVehicle ? _showAddExpenseDialog : _showSelectVehicleMessage,
+      backgroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).disabledColor,
+      foregroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.onPrimary
+          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: hasSelectedVehicle 
+          ? 'Adicionar registro de despesa' 
+          : 'Selecione um veículo primeiro',
+      child: const Icon(Icons.add),
+    );
+  }
+
+  void _showSelectVehicleMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(hasVehicles 
-            ? 'Selecione um veículo primeiro para registrar despesas'
-            : 'Cadastre um veículo primeiro para registrar despesas'),
+        content: const Text('Selecione um veículo primeiro'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -359,12 +318,6 @@ class _ExpensesPageState extends State<ExpensesPage> {
             GasometerDesignTokens.radiusInput,
           ),
         ),
-        action: hasVehicles 
-            ? null
-            : SnackBarAction(
-                label: 'Cadastrar',
-                onPressed: () => _showAddVehicleDialog(context),
-              ),
       ),
     );
   }

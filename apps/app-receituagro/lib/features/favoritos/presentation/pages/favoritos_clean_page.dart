@@ -73,8 +73,10 @@ class _FavoritosCleanPageState extends State<FavoritosCleanPage>
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
-          child: ResponsiveContentWrapper(
-            child: Column(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: ResponsiveContentWrapper(
+              child: Column(
               children: [
                 _buildModernHeader(context, isDark),
                 const SizedBox(height: 8),
@@ -86,6 +88,7 @@ class _FavoritosCleanPageState extends State<FavoritosCleanPage>
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

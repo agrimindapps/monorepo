@@ -72,18 +72,21 @@ class _ConfigPageState extends State<ConfigPage> {
           
           return Scaffold(
             body: SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: SettingsDesignTokens.maxPageWidth,
-                  ),
-                  child: Column(
-                    children: [
-                      _buildModernHeader(context, themeService),
-                      Expanded(
-                        child: _buildSettingsContent(context, deviceService),
-                      ),
-                    ],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: SettingsDesignTokens.maxPageWidth,
+                    ),
+                    child: Column(
+                      children: [
+                        _buildModernHeader(context, themeService),
+                        Expanded(
+                          child: _buildSettingsContent(context, deviceService),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

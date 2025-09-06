@@ -332,43 +332,45 @@ class _LoginPageState extends State<LoginPage>
           return const RecoveryFormWidget();
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AuthTabsWidget(),
-            const SizedBox(height: 30),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.0, 0.1),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
-                    child: child,
-                  ),
-                );
-              },
-              child: controller.isSignUpMode
-                  ? Container(
-                      key: const ValueKey('signup'),
-                      child: SignupFormWidget(
-                        onSignupSuccess: _handleAuthSuccess,
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey('login'),
-                      child: LoginFormWidget(
-                        onLoginSuccess: _handleAuthSuccess,
-                      ),
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AuthTabsWidget(),
+              const SizedBox(height: 30),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.0, 0.1),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: child,
                     ),
-            ),
-          ],
+                  );
+                },
+                child: controller.isSignUpMode
+                    ? Container(
+                        key: const ValueKey('signup'),
+                        child: SignupFormWidget(
+                          onSignupSuccess: _handleAuthSuccess,
+                        ),
+                      )
+                    : Container(
+                        key: const ValueKey('login'),
+                        child: LoginFormWidget(
+                          onLoginSuccess: _handleAuthSuccess,
+                        ),
+                      ),
+              ),
+            ],
+          ),
         );
       },
     );

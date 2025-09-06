@@ -154,13 +154,44 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.delete_outline,
-                color: Colors.red,
+                color: Colors.red.shade600,
                 size: 20,
               ),
               onPressed: () async {
-                await provider.toggleFavorito(TipoFavorito.defensivo, defensivo.id);
+                // Mostrar indicador de loading
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                
+                try {
+                  final success = await provider.toggleFavorito(TipoFavorito.defensivo, defensivo.id);
+                  
+                  if (success) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('🗑️ ${defensivo.nomeComum} removido dos favoritos'),
+                        duration: const Duration(seconds: 2),
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
+                    );
+                  } else {
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('❌ Erro ao remover dos favoritos'),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('❌ Erro inesperado ao remover favorito'),
+                      duration: Duration(seconds: 2),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
             ),
           ],

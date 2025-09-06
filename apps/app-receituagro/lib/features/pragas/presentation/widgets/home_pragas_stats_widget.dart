@@ -154,7 +154,7 @@ class HomePragasStatsWidget extends StatelessWidget {
 
   Widget _buildGridLayout(BuildContext context, double availableWidth) {
     final buttonWidth = (availableWidth - 32) / 3; // Três botões por linha
-    final cultureButtonWidth = (availableWidth - 16) / 2; // Botão cultura ocupa metade
+    final cultureButtonWidth = availableWidth - 16; // Botão cultura ocupa linha inteira
 
     return Column(
       children: [
@@ -191,16 +191,14 @@ class HomePragasStatsWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        // Segunda row: Culturas centralizado
-        Center(
-          child: _buildCategoryButton(
-            context: context,
-            count: '${provider.totalCulturas}',
-            title: 'Culturas',
-            width: cultureButtonWidth,
-            onTap: () => _navigateToCategory(context, 'culturas'),
-            icon: Icons.agriculture,
-          ),
+        // Segunda row: Culturas
+        _buildCategoryButton(
+          context: context,
+          count: '${provider.totalCulturas}',
+          title: 'Culturas',
+          width: cultureButtonWidth,
+          onTap: () => _navigateToCategory(context, 'culturas'),
+          icon: Icons.agriculture,
         ),
       ],
     );

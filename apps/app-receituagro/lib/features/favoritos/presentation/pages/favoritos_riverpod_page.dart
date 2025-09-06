@@ -91,67 +91,70 @@ class _FavoritosRiverpodPageState extends ConsumerState<FavoritosRiverpodPage>
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header moderno
-            FavoritosHeaderWidget(
-              favoritosState: favoritosState,
-              isDark: isDark,
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // Tabs
-            _buildTabs(isDark),
-            
-            const SizedBox(height: 16),
-            
-            // Conteúdo das tabs
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Tab Defensivos
-                  FavoritosTabContentWidget(
-                    tipo: TipoFavorito.defensivo,
-                    items: favoritosState.defensivos,
-                    viewState: favoritosState.getViewStateForType(TipoFavorito.defensivo),
-                    emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.defensivo),
-                    errorMessage: favoritosState.errorMessage,
-                    isDark: isDark,
-                    onRefresh: _reloadFavoritos,
-                    onRemove: (item) => ref.read(favoritosProvider.notifier).removeFavorito(item),
-                  ),
-                  
-                  // Tab Pragas
-                  FavoritosTabContentWidget(
-                    tipo: TipoFavorito.praga,
-                    items: favoritosState.pragas,
-                    viewState: favoritosState.getViewStateForType(TipoFavorito.praga),
-                    emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.praga),
-                    errorMessage: favoritosState.errorMessage,
-                    isDark: isDark,
-                    onRefresh: _reloadFavoritos,
-                    onRemove: (item) => ref.read(favoritosProvider.notifier).removeFavorito(item),
-                  ),
-                  
-                  // Tab Diagnósticos (com verificação premium)
-                  isPremium 
-                      ? FavoritosTabContentWidget(
-                          tipo: TipoFavorito.diagnostico,
-                          items: favoritosState.diagnosticos,
-                          viewState: favoritosState.getViewStateForType(TipoFavorito.diagnostico),
-                          emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.diagnostico),
-                          errorMessage: favoritosState.errorMessage,
-                          isDark: isDark,
-                          onRefresh: _reloadFavoritos,
-                          onRemove: (item) => ref.read(favoritosProvider.notifier).removeFavorito(item),
-                        )
-                      : const FavoritosPremiumRequiredWidget(),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Column(
+            children: [
+              // Header moderno
+              FavoritosHeaderWidget(
+                favoritosState: favoritosState,
+                isDark: isDark,
               ),
-            ),
-          ],
+              
+              const SizedBox(height: 20),
+              
+              // Tabs
+              _buildTabs(isDark),
+              
+              const SizedBox(height: 16),
+              
+              // Conteúdo das tabs
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Tab Defensivos
+                    FavoritosTabContentWidget(
+                      tipo: TipoFavorito.defensivo,
+                      items: favoritosState.defensivos,
+                      viewState: favoritosState.getViewStateForType(TipoFavorito.defensivo),
+                      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.defensivo),
+                      errorMessage: favoritosState.errorMessage,
+                      isDark: isDark,
+                      onRefresh: _reloadFavoritos,
+                      onRemove: (item) => ref.read(favoritosProvider.notifier).removeFavorito(item),
+                    ),
+                    
+                    // Tab Pragas
+                    FavoritosTabContentWidget(
+                      tipo: TipoFavorito.praga,
+                      items: favoritosState.pragas,
+                      viewState: favoritosState.getViewStateForType(TipoFavorito.praga),
+                      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.praga),
+                      errorMessage: favoritosState.errorMessage,
+                      isDark: isDark,
+                      onRefresh: _reloadFavoritos,
+                      onRemove: (item) => ref.read(favoritosProvider.notifier).removeFavorito(item),
+                    ),
+                    
+                    // Tab Diagnósticos (com verificação premium)
+                    isPremium 
+                        ? FavoritosTabContentWidget(
+                            tipo: TipoFavorito.diagnostico,
+                            items: favoritosState.diagnosticos,
+                            viewState: favoritosState.getViewStateForType(TipoFavorito.diagnostico),
+                            emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.diagnostico),
+                            errorMessage: favoritosState.errorMessage,
+                            isDark: isDark,
+                            onRefresh: _reloadFavoritos,
+                            onRemove: (item) => ref.read(favoritosProvider.notifier).removeFavorito(item),
+                          )
+                        : const FavoritosPremiumRequiredWidget(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

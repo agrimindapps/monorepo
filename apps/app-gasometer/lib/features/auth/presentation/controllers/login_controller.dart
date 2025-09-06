@@ -25,6 +25,7 @@ class LoginController extends ChangeNotifier {
   bool _rememberMe = false;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _mounted = true; // Controle de lifecycle
   
   // Step control para signup
   int _currentSignUpStep = 0;
@@ -57,6 +58,7 @@ class LoginController extends ChangeNotifier {
   bool get canGoToPreviousStep => _currentSignUpStep > 0;
 
   // Estado do auth provider
+  bool get mounted => _mounted;
   bool get isAuthenticated => _authProvider.isAuthenticated;
   bool get isAuthLoading => _authProvider.isLoading;
   String? get authError => _authProvider.errorMessage;
@@ -67,6 +69,7 @@ class LoginController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _mounted = false; // Marcar como disposed
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -129,6 +132,15 @@ class LoginController extends ChangeNotifier {
     _authProvider.clearError();
   }
 
+  /// Limpar mensagem de erro (método público)
+  void clearError() {
+    // Só notificar se realmente há uma mensagem de erro para limpar
+    if (_errorMessage != null) {
+      _clearError();
+      _safeNotifyListeners();
+    }
+  }
+
   /// Ir para próximo step do signup
   void nextSignUpStep() {
     if (canGoToNextStep) {
@@ -136,7 +148,7 @@ class LoginController extends ChangeNotifier {
       _analytics.logUserAction('signup_step_next', parameters: {
         'step': _currentSignUpStep.toString(),
       });
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -147,14 +159,14 @@ class LoginController extends ChangeNotifier {
       _analytics.logUserAction('signup_step_previous', parameters: {
         'step': _currentSignUpStep.toString(),
       });
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
   /// Resetar steps do signup
   void resetSignUpSteps() {
     _currentSignUpStep = 0;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   // ===== AUTH ACTIONS =====
@@ -475,7 +487,14 @@ class LoginController extends ChangeNotifier {
 
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  /// Chama notifyListeners() apenas se o controller não foi disposed
+  void _safeNotifyListeners() {
+    if (_mounted) {
+      notifyListeners();
+    }
   }
 
   /// Carregar dados salvos

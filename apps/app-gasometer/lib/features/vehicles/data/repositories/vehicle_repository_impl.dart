@@ -576,4 +576,40 @@ class VehicleRepositoryImpl implements VehicleRepository {
       return Left(UnexpectedFailure(e.toString()));
     }
   }
+
+  @override
+  Stream<Either<Failure, List<VehicleEntity>>> watchVehicles() async* {
+    try {
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        yield const Left(AuthenticationFailure('User not authenticated'));
+        return;
+      }
+
+      final isConnected = await _isConnected;
+      if (!isConnected) {
+        // Se offline, emitir dados locais uma vez
+        final localVehicles = await localDataSource.getAllVehicles();
+        final localEntities = localVehicles.map((model) => model.toEntity()).toList();
+        yield Right<Failure, List<VehicleEntity>>(localEntities);
+        return;
+      }
+
+      // Se online, observar stream do Firestore
+      await for (final vehicles in remoteDataSource.watchVehicles(userId)) {
+        final entities = vehicles.map((model) => model.toEntity()).toList();
+        yield Right<Failure, List<VehicleEntity>>(entities);
+      }
+
+    } catch (e) {
+      // Em caso de erro, tentar fallback para dados locais
+      try {
+        final localVehicles = await localDataSource.getAllVehicles();
+        final localEntities = localVehicles.map((model) => model.toEntity()).toList();
+        yield Right<Failure, List<VehicleEntity>>(localEntities);
+      } catch (_) {
+        yield Left<Failure, List<VehicleEntity>>(UnexpectedFailure(e.toString()));
+      }
+    }
+  }
 }

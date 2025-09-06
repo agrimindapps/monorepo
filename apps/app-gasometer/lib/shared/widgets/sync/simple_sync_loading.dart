@@ -93,74 +93,77 @@ class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                spreadRadius: 2,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Ícone automotivo do Gasometer
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: GasometerColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 4),
                 ),
-                child: const Icon(
-                  Icons.sync,
-                  color: GasometerColors.primary,
-                  size: 32,
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Ícone automotivo do Gasometer
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: GasometerColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.sync,
+                    color: GasometerColors.primary,
+                    size: 32,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              
-              // Loading indicator circular
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(GasometerColors.primary),
-                  strokeWidth: 3,
+                const SizedBox(height: 20),
+                
+                // Loading indicator circular
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(GasometerColors.primary),
+                    strokeWidth: 3,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              // Mensagem dinâmica
-              Text(
-                _currentMessage,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 16),
+                
+                // Mensagem dinâmica
+                Text(
+                  _currentMessage,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              
-              // Submensagem contextual
-              Text(
-                'Seus dados estarão atualizados em instantes',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
+                const SizedBox(height: 8),
+                
+                // Submensagem contextual
+                Text(
+                  'Seus dados estarão atualizados em instantes',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

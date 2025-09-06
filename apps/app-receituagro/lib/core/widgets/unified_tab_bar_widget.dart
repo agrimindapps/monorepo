@@ -1,9 +1,9 @@
 /// Widget TabBar Unificado - ReceitUagro
-/// 
+///
 /// Substitui as implementações inconsistentes de CustomTabBarWidget
 /// nas páginas de pragas e defensivos, criando uma interface unificada
 /// e consistente com os design tokens padronizados.
-/// 
+///
 /// **Características:**
 /// - Design baseado em Material Design 3
 /// - Suporte a ícones e texto
@@ -21,7 +21,7 @@ class TabData {
   final IconData icon;
   final String text;
   final String? tooltip;
-  
+
   const TabData({
     required this.icon,
     required this.text,
@@ -30,7 +30,7 @@ class TabData {
 }
 
 /// Widget TabBar unificado para uso em páginas de detalhes
-/// 
+///
 /// **Features:**
 /// - Design consistente baseado em tokens
 /// - Suporte a diferentes contextos (pragas, defensivos, etc.)
@@ -118,14 +118,15 @@ class UnifiedTabBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Cores com fallback para tema
     final effectivePrimaryColor = primaryColor ?? colorScheme.primary;
-    final effectiveBackgroundColor = backgroundColor ?? colorScheme.primaryContainer;
+    final effectiveBackgroundColor =
+        backgroundColor ?? colorScheme.primaryContainer;
 
     return Container(
       height: height ?? ComponentSpacing.tabBarHeight,
-      margin: margin ?? SpacingTokens.tabBarMargin,
+      margin: margin ?? SpacingTokens.tabBarMarginNoHorizontal,
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
         borderRadius: BorderRadius.circular(ComponentSpacing.cardBorderRadius),
@@ -201,7 +202,7 @@ class _TabContent extends StatelessWidget {
       builder: (context, _) {
         final isActive = _isTabActive();
         final animationValue = _getAnimationValue();
-        
+
         return Tooltip(
           message: tabData.tooltip ?? tabData.text,
           child: AnimatedContainer(
@@ -223,13 +224,15 @@ class _TabContent extends StatelessWidget {
     if (!tabController.indexIsChanging) {
       return tabController.index == tabIndex ? 1.0 : 0.0;
     }
-    
-    final animationValue = tabController.animation?.value ?? tabController.index.toDouble();
+
+    final animationValue =
+        tabController.animation?.value ?? tabController.index.toDouble();
     final distance = (animationValue - tabIndex).abs();
     return (1.0 - distance).clamp(0.0, 1.0);
   }
 
-  Widget _buildTabLayout(BuildContext context, bool isActive, double animationValue) {
+  Widget _buildTabLayout(
+      BuildContext context, bool isActive, double animationValue) {
     if (showIconOnly) {
       return _buildIconOnlyLayout(isActive, animationValue);
     }
@@ -256,7 +259,7 @@ class _TabContent extends StatelessWidget {
 
   Widget _buildIcon(bool isActive, double animationValue) {
     final iconSize = 16.0 + (2.0 * animationValue);
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       child: Icon(
@@ -267,9 +270,10 @@ class _TabContent extends StatelessWidget {
     );
   }
 
-  Widget _buildText(bool isActive, double animationValue, BuildContext context) {
+  Widget _buildText(
+      bool isActive, double animationValue, BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Texto adaptável baseado no tamanho da tela
     String displayText = tabData.text;
     if (screenWidth < 600 && tabData.text.length > 8) {
@@ -281,7 +285,7 @@ class _TabContent extends StatelessWidget {
         displayText = '${tabData.text.substring(0, 6)}...';
       }
     }
-    
+
     return Flexible(
       child: AnimatedOpacity(
         opacity: 0.7 + (0.3 * animationValue),
@@ -289,8 +293,8 @@ class _TabContent extends StatelessWidget {
         child: Text(
           displayText,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-          ),
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         ),
@@ -302,7 +306,7 @@ class _TabContent extends StatelessWidget {
 /// Utilitários para criar variantes de TabBar para contextos específicos
 mixin TabBarVariants {
   static const _defaultTabHeight = ComponentSpacing.tabBarHeight;
-  
+
   /// TabBar compacto para telas pequenas
   static UnifiedTabBarWidget compact({
     required TabController tabController,
@@ -319,7 +323,7 @@ mixin TabBarVariants {
       ),
     );
   }
-  
+
   /// TabBar para tablet/desktop com mais espaço
   static UnifiedTabBarWidget expanded({
     required TabController tabController,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/error_boundary.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -100,8 +99,7 @@ class _FuelPageState extends State<FuelPage> {
                         constraints: const BoxConstraints(maxWidth: 1200),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildContentOptimized(context, isLoading, hasError, fuelRecords, fuelError)
-                            .withPageErrorBoundary(pageName: 'Abastecimentos'),
+                          child: _buildContentOptimized(context, isLoading, hasError, fuelRecords, fuelError),
                         ),
                       ),
                     ),
@@ -212,39 +210,9 @@ class _FuelPageState extends State<FuelPage> {
               },
             );
           }
-        ).withProviderErrorBoundary(providerName: 'Vehicles'),
+        ),
         const SizedBox(height: 16),
         
-        // Campo de busca com Consumer específico
-        Consumer<FuelProvider>(
-          builder: (context, fuelProvider, child) {
-            return SemanticFormField(
-              label: 'Campo de busca',
-              hint: 'Digite para buscar abastecimentos por posto, marca ou observação',
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Buscar por posto, marca ou observação...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: fuelProvider.searchQuery.isNotEmpty
-                      ? SemanticButton.icon(
-                          semanticLabel: 'Limpar busca',
-                          semanticHint: 'Remove o texto da busca e mostra todos os abastecimentos',
-                          onPressed: () => _fuelProvider.clearSearch(),
-                          child: const Icon(Icons.clear),
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surface,
-                ),
-                onChanged: (value) => _fuelProvider.searchFuelRecords(value),
-              ),
-            );
-          }
-        ),
-        const SizedBox(height: 24),
         
         // Show error state
         if (hasError && errorMessage != null)
@@ -289,35 +257,9 @@ class _FuelPageState extends State<FuelPage> {
               _fuelProvider.loadAllFuelRecords();
             }
           },
-        ).withProviderErrorBoundary(providerName: 'Vehicles'),
+        ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         
-        // Campo de busca com acessibilidade aprimorada
-        SemanticFormField(
-          label: 'Campo de busca',
-          hint: 'Digite para buscar abastecimentos por posto, marca ou observação',
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Buscar por posto, marca ou observação...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: fuelProvider.searchQuery.isNotEmpty
-                  ? SemanticButton.icon(
-                      semanticLabel: 'Limpar busca',
-                      semanticHint: 'Remove o texto da busca e mostra todos os abastecimentos',
-                      onPressed: () => _fuelProvider.clearSearch(),
-                      child: const Icon(Icons.clear),
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-            ),
-            onChanged: (value) => _fuelProvider.searchFuelRecords(value),
-          ),
-        ),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         
         if (fuelProvider.hasActiveFilters) ...[
           _buildFilterStatus(fuelProvider),
@@ -513,48 +455,39 @@ class _FuelPageState extends State<FuelPage> {
 
 
   Widget _buildEmptyState() {
-    return FuelEmptyState(
-      onAddRecord: _showAddFuelDialog,
-    );
-  }
-
-  Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesProvider = context.watch<VehiclesProvider>();
-    final hasVehicles = vehiclesProvider.vehicles.isNotEmpty;
-    final hasSelectedVehicle = _selectedVehicleId != null;
-    
-    return SemanticButton.fab(
-      semanticLabel: hasSelectedVehicle 
-          ? 'Registrar novo abastecimento' 
-          : hasVehicles 
-              ? 'Selecione um veículo primeiro'
-              : 'Cadastrar veículo primeiro',
-      semanticHint: hasSelectedVehicle 
-          ? 'Abre formulário para cadastrar um novo abastecimento'
-          : hasVehicles
-              ? 'É necessário selecionar um veículo para registrar abastecimentos'
-              : 'É necessário ter pelo menos um veículo cadastrado para registrar abastecimentos',
-      onPressed: hasSelectedVehicle 
-          ? _showAddFuelDialog 
-          : hasVehicles 
-              ? _showSelectVehicleMessage 
-              : () => _showAddVehicleDialog(context),
-      enabled: true,
-      child: Icon(
-        hasSelectedVehicle ? Icons.add : Icons.warning,
-        size: GasometerDesignTokens.iconSizeLg,
+    return Center(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: FuelEmptyState(),
       ),
     );
   }
 
-  void _showSelectVehicleMessage() {
-    final hasVehicles = _vehiclesProvider.vehicles.isNotEmpty;
+  Widget _buildFloatingActionButton(BuildContext context) {
+    final hasSelectedVehicle = _selectedVehicleId != null;
     
+    return FloatingActionButton(
+      onPressed: hasSelectedVehicle ? _showAddFuelDialog : _showSelectVehicleMessage,
+      backgroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).disabledColor,
+      foregroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.onPrimary
+          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: hasSelectedVehicle 
+          ? 'Adicionar registro de abastecimento' 
+          : 'Selecione um veículo primeiro',
+      child: const Icon(Icons.add),
+    );
+  }
+
+  void _showSelectVehicleMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(hasVehicles 
-            ? 'Selecione um veículo primeiro para registrar abastecimentos'
-            : 'Cadastre um veículo primeiro para registrar abastecimentos'),
+        content: const Text('Selecione um veículo primeiro'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -562,12 +495,6 @@ class _FuelPageState extends State<FuelPage> {
             GasometerDesignTokens.radiusInput,
           ),
         ),
-        action: hasVehicles 
-            ? null
-            : SnackBarAction(
-                label: 'Cadastrar',
-                onPressed: () => _showAddVehicleDialog(context),
-              ),
       ),
     );
   }

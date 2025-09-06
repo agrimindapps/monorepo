@@ -6,6 +6,8 @@ import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../comentarios/models/comentario_model.dart';
 import '../../../comentarios/services/comentarios_service.dart';
+import '../../../favoritos/favoritos_di.dart';
+import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 
 /// Provider principal para gerenciamento de estado da página detalhe defensivo
 /// Responsabilidade: coordenar estado da página, favoritos, premium, comentários
@@ -14,6 +16,7 @@ class DetalheDefensivoProvider extends ChangeNotifier {
   final FitossanitarioHiveRepository _fitossanitarioRepository;
   final ComentariosService _comentariosService;
   final IPremiumService _premiumService;
+  late final FavoritosProviderSimplified _favoritosProvider;
 
   DetalheDefensivoProvider({
     required FavoritosHiveRepository favoritosRepository,
@@ -23,7 +26,9 @@ class DetalheDefensivoProvider extends ChangeNotifier {
   })  : _favoritosRepository = favoritosRepository,
         _fitossanitarioRepository = fitossanitarioRepository,
         _comentariosService = comentariosService,
-        _premiumService = premiumService;
+        _premiumService = premiumService {
+    _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
+  }
 
   // Estados da página
   bool _isLoading = false;
@@ -46,27 +51,40 @@ class DetalheDefensivoProvider extends ChangeNotifier {
   List<ComentarioModel> get comentarios => _comentarios;
   bool get isLoadingComments => _isLoadingComments;
 
-  /// Inicializa os dados do defensivo
+  /// Inicializa os dados do defensivo com carregamento otimizado
   Future<void> initializeData(String defensivoName, String fabricante) async {
     _setLoading(true);
 
     try {
+      // Carrega dados essenciais primeiro
       await _loadDefensivoData(defensivoName);
-      await _loadFavoritoState(defensivoName);
-      await loadComentarios();
-      _listenToPremiumChanges();
       
+      // Carrega dados secundários em paralelo para otimizar performance
+      await Future.wait([
+        _loadFavoritoState(defensivoName),
+        loadComentarios(),
+      ]);
+      
+      _listenToPremiumChanges();
       _setLoading(false);
     } catch (e) {
       _setError('Erro ao carregar dados: $e');
     }
   }
 
-  /// Carrega dados reais do defensivo
+  /// Carrega dados reais do defensivo com cache otimizado
   Future<void> _loadDefensivoData(String defensivoName) async {
-    final defensivos = _fitossanitarioRepository.getAll().where(
-      (d) => d.nomeComum == defensivoName || d.nomeTecnico == defensivoName,
+    // Busca por nome comum primeiro (mais comum)
+    var defensivos = _fitossanitarioRepository.getAll().where(
+      (d) => d.nomeComum == defensivoName,
     );
+    
+    // Se não encontrar, busca por nome técnico
+    if (defensivos.isEmpty) {
+      defensivos = _fitossanitarioRepository.getAll().where(
+        (d) => d.nomeTecnico == defensivoName,
+      );
+    }
     
     _defensivoData = defensivos.isNotEmpty ? defensivos.first : null;
     
@@ -80,7 +98,12 @@ class DetalheDefensivoProvider extends ChangeNotifier {
   /// Carrega estado de favorito
   Future<void> _loadFavoritoState(String defensivoName) async {
     final itemId = _defensivoData?.idReg ?? defensivoName;
-    _isFavorited = _favoritosRepository.isFavorito('defensivo', itemId);
+    try {
+      _isFavorited = await _favoritosRepository.isFavoritoAsync('defensivos', itemId);
+    } catch (e) {
+      // Fallback to synchronous method
+      _isFavorited = _favoritosRepository.isFavorito('defensivos', itemId);
+    }
     notifyListeners();
   }
 
@@ -90,19 +113,13 @@ class DetalheDefensivoProvider extends ChangeNotifier {
 
     try {
       final pkIdentificador = _defensivoData?.idReg ?? '';
-      debugPrint('Loading comentários for ID: $pkIdentificador');
-      
       final comentarios = await _comentariosService.getAllComentarios(
         pkIdentificador: pkIdentificador,
       );
-
-      debugPrint('Loaded ${comentarios.length} comentários');
       _comentarios = comentarios;
       _setLoadingComments(false);
     } catch (e) {
-      debugPrint('Error loading comentários: $e');
       _setLoadingComments(false);
-      debugPrint('Erro ao carregar comentários: $e');
     }
   }
 
@@ -134,7 +151,6 @@ class DetalheDefensivoProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      debugPrint('Erro ao adicionar comentário: $e');
       return false;
     }
   }
@@ -147,29 +163,22 @@ class DetalheDefensivoProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      debugPrint('Erro ao excluir comentário: $e');
       return false;
     }
   }
 
-  /// Toggle favorito
+  /// Toggle favorito usando sistema simplificado
   Future<bool> toggleFavorito(String defensivoName, String fabricante) async {
     final wasAlreadyFavorited = _isFavorited;
     final itemId = _defensivoData?.idReg ?? defensivoName;
-    final itemData = {
-      'nome': _defensivoData?.nomeComum ?? defensivoName,
-      'fabricante': _defensivoData?.fabricante ?? fabricante,
-      'idReg': itemId,
-    };
 
     // Otimistic update
     _isFavorited = !wasAlreadyFavorited;
     notifyListeners();
 
     try {
-      final success = wasAlreadyFavorited
-          ? await _favoritosRepository.removeFavorito('defensivo', itemId)
-          : await _favoritosRepository.addFavorito('defensivo', itemId, itemData);
+      // Usa o sistema simplificado de favoritos
+      final success = await _favoritosProvider.toggleFavorito('defensivo', itemId);
 
       if (!success) {
         // Revert on failure
@@ -180,11 +189,32 @@ class DetalheDefensivoProvider extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      // Revert on error
-      _isFavorited = wasAlreadyFavorited;
-      notifyListeners();
-      debugPrint('Erro ao toggle favorito: $e');
-      return false;
+      // Fallback para sistema antigo em caso de erro
+      try {
+        final itemData = {
+          'nome': _defensivoData?.nomeComum ?? defensivoName,
+          'fabricante': _defensivoData?.fabricante ?? fabricante,
+          'idReg': itemId,
+        };
+
+        final success = wasAlreadyFavorited
+            ? await _favoritosRepository.removeFavorito('defensivos', itemId)
+            : await _favoritosRepository.addFavorito('defensivos', itemId, itemData);
+
+        if (!success) {
+          _isFavorited = wasAlreadyFavorited;
+          notifyListeners();
+          return false;
+        }
+
+        return true;
+      } catch (fallbackError) {
+        // Revert on error
+        _isFavorited = wasAlreadyFavorited;
+        notifyListeners();
+        // Erro silencioso para não poluir logs em produção
+        return false;
+      }
     }
   }
 

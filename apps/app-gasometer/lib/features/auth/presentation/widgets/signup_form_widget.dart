@@ -19,9 +19,10 @@ class SignupFormWidget extends StatelessWidget {
     return Consumer<LoginController>(
       builder: (context, controller, child) {
         return Form(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text(
                 'Crie sua conta para começar',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -116,6 +117,7 @@ class SignupFormWidget extends StatelessWidget {
                 ),
               ),
             ],
+            ),
           ),
         );
       },
@@ -144,6 +146,21 @@ class SignupFormWidget extends StatelessWidget {
               style: TextStyle(
                 color: Colors.red.shade700,
                 fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              final controller = context.read<LoginController>();
+              controller.clearError();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.close,
+                color: Colors.red.shade700,
+                size: 16,
               ),
             ),
           ),

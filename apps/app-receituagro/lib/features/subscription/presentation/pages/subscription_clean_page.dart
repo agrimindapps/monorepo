@@ -55,20 +55,23 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
                 ),
               ),
               child: SafeArea(
-                child: Column(
-                  children: [
-                    // Header com título e botão de fechar
-                    _buildHeader(context),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: Column(
+                    children: [
+                      // Header com título e botão de fechar
+                      _buildHeader(context),
 
-                    // Conteúdo principal
-                    Expanded(
-                      child: provider.isLoading
-                          ? _buildLoadingView()
-                          : provider.hasActiveSubscription
-                              ? _buildActiveSubscriptionView(provider)
-                              : _buildPlansView(provider),
-                    ),
-                  ],
+                      // Conteúdo principal
+                      Expanded(
+                        child: provider.isLoading
+                            ? _buildLoadingView()
+                            : provider.hasActiveSubscription
+                                ? _buildActiveSubscriptionView(provider)
+                                : _buildPlansView(provider),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

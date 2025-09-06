@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/usecases/add_vehicle.dart';
 import '../../domain/usecases/delete_vehicle.dart';
 import '../../domain/usecases/get_all_vehicles.dart';
@@ -20,12 +22,15 @@ class VehiclesProvider extends ChangeNotifier {
   final UpdateVehicle _updateVehicle;
   final DeleteVehicle _deleteVehicle;
   final SearchVehicles _searchVehicles;
-  
+  final VehicleRepository _repository;
+
   List<VehicleEntity> _vehicles = [];
   bool _isLoading = false;
   String? _errorMessage;
   bool _isInitialized = false;
-  
+  StreamSubscription<Either<Failure, List<VehicleEntity>>>?
+      _vehicleSubscription;
+
   VehiclesProvider({
     required GetAllVehicles getAllVehicles,
     required GetVehicleById getVehicleById,
@@ -33,32 +38,36 @@ class VehiclesProvider extends ChangeNotifier {
     required UpdateVehicle updateVehicle,
     required DeleteVehicle deleteVehicle,
     required SearchVehicles searchVehicles,
+    required VehicleRepository repository,
   })  : _getAllVehicles = getAllVehicles,
         _getVehicleById = getVehicleById,
         _addVehicle = addVehicle,
         _updateVehicle = updateVehicle,
         _deleteVehicle = deleteVehicle,
-        _searchVehicles = searchVehicles;
-  
+        _searchVehicles = searchVehicles,
+        _repository = repository;
+
   List<VehicleEntity> get vehicles => _vehicles;
-  List<VehicleEntity> get activeVehicles => _vehicles.where((v) => v.isActive).toList();
+  List<VehicleEntity> get activeVehicles =>
+      _vehicles.where((v) => v.isActive).toList();
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isInitialized => _isInitialized;
   bool get hasVehicles => _vehicles.isNotEmpty;
   int get vehicleCount => _vehicles.length;
   int get activeVehicleCount => activeVehicles.length;
-  
+
   /// Inicializa o provider carregando os veículos.
   /// Deve ser chamado explicitamente após a criação do provider.
   Future<void> initialize() async {
     if (_isInitialized) return;
     await _initialize();
   }
-  
+
   Future<void> _initialize() async {
     try {
       await loadVehicles();
+      _startWatchingVehicles();
     } catch (e) {
       _errorMessage = 'Erro ao inicializar: ${e.toString()}';
     } finally {
@@ -66,12 +75,41 @@ class VehiclesProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
+  void _startWatchingVehicles() {
+    _vehicleSubscription?.cancel();
+    _vehicleSubscription = _repository.watchVehicles().listen(
+      (result) {
+        result.fold(
+          (failure) {
+            if (!_isInitialized) {
+              _errorMessage = _mapFailureToMessage(failure);
+              notifyListeners();
+            }
+          },
+          (vehicles) {
+            _vehicles = vehicles;
+            _isLoading = false;
+            _errorMessage = null;
+            notifyListeners();
+          },
+        );
+      },
+      onError: (Object error) {
+        if (!_isInitialized) {
+          _errorMessage = 'Erro na sincronização: ${error.toString()}';
+          _isLoading = false;
+          notifyListeners();
+        }
+      },
+    );
+  }
+
   Future<void> loadVehicles() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-    
+
     final result = await _getAllVehicles();
     result.fold(
       (failure) {
@@ -86,7 +124,7 @@ class VehiclesProvider extends ChangeNotifier {
       },
     );
   }
-  
+
   String _mapFailureToMessage(Failure failure) {
     if (failure is ServerFailure) {
       return 'Erro do servidor. Tente novamente mais tarde.';
@@ -100,17 +138,17 @@ class VehiclesProvider extends ChangeNotifier {
       return 'Erro inesperado. Tente novamente.';
     }
   }
-  
+
   Future<bool> addVehicle(VehicleEntity vehicle) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-    
+
     try {
       // Add timeout to prevent UI freeze from hanging operations
       final result = await _addVehicle(AddVehicleParams(vehicle: vehicle))
           .timeout(const Duration(seconds: 30));
-      
+
       return result.fold(
         (failure) {
           _errorMessage = _mapFailureToMessage(failure);
@@ -126,7 +164,8 @@ class VehiclesProvider extends ChangeNotifier {
         },
       );
     } on TimeoutException {
-      _errorMessage = 'Operação expirou. Veículo pode ter sido salvo localmente.';
+      _errorMessage =
+          'Operação expirou. Veículo pode ter sido salvo localmente.';
       _isLoading = false;
       notifyListeners();
       // Refresh vehicles list to check if it was actually saved
@@ -139,14 +178,14 @@ class VehiclesProvider extends ChangeNotifier {
       return false;
     }
   }
-  
+
   Future<bool> updateVehicle(VehicleEntity vehicle) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-    
+
     final result = await _updateVehicle(UpdateVehicleParams(vehicle: vehicle));
-    
+
     return result.fold(
       (failure) {
         _errorMessage = _mapFailureToMessage(failure);
@@ -165,14 +204,15 @@ class VehiclesProvider extends ChangeNotifier {
       },
     );
   }
-  
+
   Future<bool> deleteVehicle(String vehicleId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-    
-    final result = await _deleteVehicle(DeleteVehicleParams(vehicleId: vehicleId));
-    
+
+    final result =
+        await _deleteVehicle(DeleteVehicleParams(vehicleId: vehicleId));
+
     return result.fold(
       (failure) {
         _errorMessage = _mapFailureToMessage(failure);
@@ -188,10 +228,11 @@ class VehiclesProvider extends ChangeNotifier {
       },
     );
   }
-  
+
   Future<VehicleEntity?> getVehicleById(String vehicleId) async {
-    final result = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
-    
+    final result =
+        await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
+
     return result.fold(
       (failure) {
         _errorMessage = _mapFailureToMessage(failure);
@@ -201,10 +242,10 @@ class VehiclesProvider extends ChangeNotifier {
       (vehicle) => vehicle,
     );
   }
-  
+
   Future<List<VehicleEntity>> searchVehicles(String query) async {
     final result = await _searchVehicles(SearchVehiclesParams(query: query));
-    
+
     return result.fold(
       (failure) {
         _errorMessage = _mapFailureToMessage(failure);
@@ -214,18 +255,25 @@ class VehiclesProvider extends ChangeNotifier {
       (vehicles) => vehicles,
     );
   }
-  
+
   List<VehicleEntity> getVehiclesByType(VehicleType type) {
     return _vehicles.where((v) => v.type == type && v.isActive).toList();
   }
-  
+
   List<VehicleEntity> getVehiclesByFuelType(FuelType fuelType) {
-    return _vehicles.where((v) => 
-        v.supportedFuels.contains(fuelType) && v.isActive).toList();
+    return _vehicles
+        .where((v) => v.supportedFuels.contains(fuelType) && v.isActive)
+        .toList();
   }
-  
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _vehicleSubscription?.cancel();
+    super.dispose();
   }
 }

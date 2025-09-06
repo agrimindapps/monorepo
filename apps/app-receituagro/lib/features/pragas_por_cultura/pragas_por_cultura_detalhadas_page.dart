@@ -162,71 +162,74 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: Column(
-              children: [
-                _buildModernHeader(isDark),
-                Expanded(
-                  child: CustomScrollView(
-                    slivers: [
-                      // Seletor de cultura
-                      SliverToBoxAdapter(
-                        child: Container(
-                          margin: const EdgeInsets.all(8.0),
-                          child: CulturaSelectorWidget(
-                            culturas: _culturas,
-                            culturaIdSelecionada: _culturaIdSelecionada,
-                            onCulturaChanged: _selecionarCultura,
-                          ),
-                        ),
-                      ),
-                      
-                      // Conteúdo principal
-                      if (_culturaIdSelecionada == null || _currentState != PragasCulturaState.initial)
-                        SliverToBoxAdapter(
-                          child: PragasCulturaStateHandler(
-                            state: _culturaIdSelecionada == null 
-                                ? PragasCulturaState.initial 
-                                : _currentState,
-                            errorMessage: _errorMessage,
-                            onRetry: _carregarPragasDaCultura,
-                          ),
-                        )
-                      else ...[
-                        // Estatísticas da cultura
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildModernHeader(isDark),
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        // Seletor de cultura
                         SliverToBoxAdapter(
                           child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: EstatisticasCulturaWidget(
-                              nomeCultura: _nomeCulturaSelecionada!,
-                              pragasPorCultura: _pragasPorCultura,
-                              ordenacao: _ordenacao,
-                              filtroTipo: _filtroTipo,
-                              onOrdenacaoChanged: (valor) => setState(() {
-                                _ordenacao = valor;
-                                _aplicarFiltros();
-                              }),
-                              onFiltroTipoChanged: (valor) => setState(() {
-                                _filtroTipo = valor;
-                                _aplicarFiltros();
-                              }),
+                            margin: const EdgeInsets.all(8.0),
+                            child: CulturaSelectorWidget(
+                              culturas: _culturas,
+                              culturaIdSelecionada: _culturaIdSelecionada,
+                              onCulturaChanged: _selecionarCultura,
                             ),
                           ),
                         ),
                         
-                        // Lista de pragas
-                        PragasListView(
-                          pragasPorCultura: _pragasPorCultura,
-                          onPragaTap: _navegarParaDetalhes,
-                          onVerDefensivos: _verDefensivosDaPraga,
-                        ),
+                        // Conteúdo principal
+                        if (_culturaIdSelecionada == null || _currentState != PragasCulturaState.initial)
+                          SliverToBoxAdapter(
+                            child: PragasCulturaStateHandler(
+                              state: _culturaIdSelecionada == null 
+                                  ? PragasCulturaState.initial 
+                                  : _currentState,
+                              errorMessage: _errorMessage,
+                              onRetry: _carregarPragasDaCultura,
+                            ),
+                          )
+                        else ...[
+                          // Estatísticas da cultura
+                          SliverToBoxAdapter(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              child: EstatisticasCulturaWidget(
+                                nomeCultura: _nomeCulturaSelecionada!,
+                                pragasPorCultura: _pragasPorCultura,
+                                ordenacao: _ordenacao,
+                                filtroTipo: _filtroTipo,
+                                onOrdenacaoChanged: (valor) => setState(() {
+                                  _ordenacao = valor;
+                                  _aplicarFiltros();
+                                }),
+                                onFiltroTipoChanged: (valor) => setState(() {
+                                  _filtroTipo = valor;
+                                  _aplicarFiltros();
+                                }),
+                              ),
+                            ),
+                          ),
+                          
+                          // Lista de pragas
+                          PragasListView(
+                            pragasPorCultura: _pragasPorCultura,
+                            onPragaTap: _navegarParaDetalhes,
+                            onVerDefensivos: _verDefensivosDaPraga,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

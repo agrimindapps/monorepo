@@ -24,7 +24,8 @@ class ListaDefensivosPage extends StatefulWidget {
 class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final FitossanitarioHiveRepository _repository = sl<FitossanitarioHiveRepository>();
+  final FitossanitarioHiveRepository _repository =
+      sl<FitossanitarioHiveRepository>();
   final List<FitossanitarioHive> _allDefensivos = [];
   List<FitossanitarioHive> _filteredDefensivos = [];
   List<FitossanitarioHive> _displayedDefensivos = []; // Para lazy loading
@@ -35,7 +36,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
   bool _isLoadingMore = false; // Para controlar carregamento paginado
   Timer? _debounceTimer;
   String? _errorMessage;
-  
+
   // Configurações de paginação
   static const int _itemsPerPage = 50;
   int _currentPage = 0;
@@ -62,10 +63,10 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
         _isLoading = true;
         _errorMessage = null;
       });
-      
+
       // Carrega defensivos ativos e elegíveis do repositório Hive
       final defensivos = _repository.getActiveDefensivos();
-      
+
       if (mounted) {
         setState(() {
           _allDefensivos.clear();
@@ -90,9 +91,9 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
 
   void _onSearchChanged() {
     _debounceTimer?.cancel();
-    
+
     final searchText = _searchController.text;
-    
+
     if (searchText.isEmpty) {
       setState(() {
         _isSearching = false;
@@ -114,7 +115,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
 
   void _performSearch(String searchText) {
     final searchLower = searchText.toLowerCase();
-    
+
     final filtered = _allDefensivos.where((defensivo) {
       return defensivo.displayName.toLowerCase().contains(searchLower) ||
           defensivo.displayIngredient.toLowerCase().contains(searchLower) ||
@@ -125,7 +126,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     if (mounted) {
       // Ordena resultados fora do setState para otimizar performance
       filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
-      
+
       setState(() {
         _filteredDefensivos = filtered;
         _isSearching = false;
@@ -145,14 +146,14 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
 
   void _toggleSort() {
     final wasAscending = _isAscending;
-    
+
     // Operação custosa fora do setState
     _filteredDefensivos.sort((a, b) {
       return !wasAscending
           ? a.displayName.compareTo(b.displayName)
           : b.displayName.compareTo(a.displayName);
     });
-    
+
     setState(() {
       _isAscending = !wasAscending;
       _currentPage = 0;
@@ -182,35 +183,36 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     // Lazy loading: carrega mais itens quando próximo do fim
     if (_scrollController.hasClients) {
       final threshold = _scrollController.position.maxScrollExtent * 0.8;
-      if (_scrollController.position.pixels >= threshold && 
-          !_isLoadingMore && 
+      if (_scrollController.position.pixels >= threshold &&
+          !_isLoadingMore &&
           _displayedDefensivos.length < _filteredDefensivos.length) {
         _loadMoreItems();
       }
     }
   }
-  
+
   void _loadPage() {
     const startIndex = 0;
     final endIndex = (_itemsPerPage).clamp(0, _filteredDefensivos.length);
     _displayedDefensivos = _filteredDefensivos.sublist(startIndex, endIndex);
     _currentPage = 0;
   }
-  
+
   void _loadMoreItems() async {
     if (_isLoadingMore) return;
-    
+
     setState(() {
       _isLoadingMore = true;
     });
-    
+
     // Simula delay para UX suave
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    
+
     final nextPage = _currentPage + 1;
     final startIndex = nextPage * _itemsPerPage;
-    final endIndex = ((nextPage + 1) * _itemsPerPage).clamp(0, _filteredDefensivos.length);
-    
+    final endIndex =
+        ((nextPage + 1) * _itemsPerPage).clamp(0, _filteredDefensivos.length);
+
     if (startIndex < _filteredDefensivos.length) {
       final newItems = _filteredDefensivos.sublist(startIndex, endIndex);
       setState(() {
@@ -232,7 +234,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     if (_isLoading && total == 0) {
       return 'Carregando defensivos...';
     }
-    
+
     if (_errorMessage != null) {
       return 'Erro no carregamento';
     }
@@ -244,7 +246,6 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     return '$total defensivos disponíveis';
   }
 
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -253,8 +254,10 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Column(
+            children: [
             _buildModernHeader(context, isDark),
             DefensivoSearchField(
               controller: _searchController,
@@ -269,6 +272,7 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
               child: _buildContent(isDark),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -363,7 +367,8 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
       return ListView.separated(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        itemCount: _displayedDefensivos.length + (_isLoadingMore ? 2 : 1), // +1 para espaço, +1 para loading
+        itemCount: _displayedDefensivos.length +
+            (_isLoadingMore ? 2 : 1), // +1 para espaço, +1 para loading
         separatorBuilder: (context, index) => const SizedBox(height: 1),
         itemBuilder: (context, index) {
           // Loading indicator no meio da lista
@@ -373,12 +378,12 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
               child: Center(child: CircularProgressIndicator()),
             );
           }
-          
+
           // Último item: espaço para bottom navigation
           if (index == _displayedDefensivos.length + (_isLoadingMore ? 1 : 0)) {
             return const SizedBox(height: 80);
           }
-          
+
           // Items da lista virtualizados
           final defensivo = _displayedDefensivos[index];
           return DefensivoItemWidget(
@@ -400,7 +405,8 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
       showBackButton: true,
       showActions: true,
       isDark: isDark,
-      rightIcon: _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha_outlined,
+      rightIcon:
+          _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha_outlined,
       onRightIconPressed: _toggleSort,
       onBackPressed: () => Navigator.of(context).pop(),
     );

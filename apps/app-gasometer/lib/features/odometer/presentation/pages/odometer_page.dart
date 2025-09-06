@@ -217,6 +217,11 @@ class _OdometerPageState extends State<OdometerPage> {
       return _buildNoVehicleSelected();
     }
 
+    // Se não há registros de odômetro, mostrar empty state
+    if (_odometers.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
@@ -227,7 +232,7 @@ class _OdometerPageState extends State<OdometerPage> {
             ),
             child: Column(
               children: [
-                if (_showStatistics) ...[
+                if (_showStatistics && _odometers.isNotEmpty) ...[
                   _buildStatisticsCard(),
                   SizedBox(height: GasometerDesignTokens.spacingLg),
                 ],
@@ -241,15 +246,20 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildNoVehicleSelected() {
-    return EnhancedEmptyState.generic(
-      icon: Icons.directions_car_outlined,
-      title: 'Selecione um veículo',
-      description: 'Escolha um veículo para visualizar os registros de odômetro',
-      height: 350,
+    return Center(
+      child: EnhancedEmptyState.generic(
+        icon: Icons.directions_car_outlined,
+        title: 'Selecione um veículo',
+        description: 'Escolha um veículo para visualizar os registros de odômetro',
+        height: MediaQuery.of(context).size.height * 0.6,
+      ),
     );
   }
 
   Widget _buildStatisticsCard() {
+    // Calcular estatísticas reais baseadas nos registros
+    final statistics = _calculateStatistics();
+    
     return StandardCard.standard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,15 +271,58 @@ class _OdometerPageState extends State<OdometerPage> {
           SizedBox(height: GasometerDesignTokens.spacingXl),
           Row(
             children: [
-              Expanded(child: _buildStatisticItem('Km Inicial', '25.169,4', Icons.trip_origin)),
-              Expanded(child: _buildStatisticItem('Km Final', '25.420,5', Icons.flag)),
-              Expanded(child: _buildStatisticItem('Total Rodado', '251,1', Icons.trending_up)),
-              Expanded(child: _buildStatisticItem('Média/Dia', '16,7', Icons.timeline)),
+              Expanded(child: _buildStatisticItem('Km Inicial', statistics['kmInicial'] ?? '-', Icons.trip_origin)),
+              Expanded(child: _buildStatisticItem('Km Final', statistics['kmFinal'] ?? '-', Icons.flag)),
+              Expanded(child: _buildStatisticItem('Total Rodado', statistics['totalRodado'] ?? '-', Icons.trending_up)),
+              Expanded(child: _buildStatisticItem('Média/Dia', statistics['mediaDia'] ?? '-', Icons.timeline)),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Map<String, String> _calculateStatistics() {
+    if (_odometers.isEmpty) {
+      return {
+        'kmInicial': '-',
+        'kmFinal': '-', 
+        'totalRodado': '-',
+        'mediaDia': '-',
+      };
+    }
+
+    // Ordenar por data para calcular estatísticas do mês atual
+    final sortedOdometers = List<OdometerEntity>.from(_odometers);
+    sortedOdometers.sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
+
+    // Filtrar registros do mês atual
+    final now = DateTime.now();
+    final currentMonthOdometers = sortedOdometers.where((o) => 
+      o.registrationDate.year == now.year && o.registrationDate.month == now.month
+    ).toList();
+
+    if (currentMonthOdometers.isEmpty) {
+      return {
+        'kmInicial': '-',
+        'kmFinal': '-', 
+        'totalRodado': '-',
+        'mediaDia': '-',
+      };
+    }
+
+    final kmInicial = currentMonthOdometers.first.value;
+    final kmFinal = currentMonthOdometers.last.value;
+    final totalRodado = kmFinal - kmInicial;
+    final diasNoMes = currentMonthOdometers.last.registrationDate.difference(currentMonthOdometers.first.registrationDate).inDays;
+    final mediaDia = diasNoMes > 0 ? totalRodado / diasNoMes : 0.0;
+
+    return {
+      'kmInicial': kmInicial.toStringAsFixed(1).replaceAll('.', ','),
+      'kmFinal': kmFinal.toStringAsFixed(1).replaceAll('.', ','),
+      'totalRodado': totalRodado.toStringAsFixed(1).replaceAll('.', ','),
+      'mediaDia': mediaDia.toStringAsFixed(1).replaceAll('.', ','),
+    };
   }
 
   Widget _buildStatisticItem(String label, String value, IconData icon) {
@@ -323,11 +376,13 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildEmptyState() {
-    return EnhancedEmptyState.generic(
-      icon: Icons.speed_outlined,
-      title: 'Nenhum registro encontrado',
-      description: 'Não há registros de odômetro para este período',
-      height: 300,
+    return Center(
+      child: EnhancedEmptyState.generic(
+        icon: Icons.speed_outlined,
+        title: 'Nenhum registro encontrado',
+        description: 'Não há registros de odômetro para este período',
+        height: MediaQuery.of(context).size.height * 0.4,
+      ),
     );
   }
 
@@ -409,8 +464,12 @@ class _OdometerPageState extends State<OdometerPage> {
     
     return FloatingActionButton(
       onPressed: hasSelectedVehicle ? _addOdometer : _showSelectVehicleMessage,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).disabledColor,
+      foregroundColor: hasSelectedVehicle 
+          ? Theme.of(context).colorScheme.onPrimary
+          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

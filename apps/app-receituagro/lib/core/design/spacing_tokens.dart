@@ -94,7 +94,7 @@ class SpacingTokens {
 
   /// Padding para elementos externos (bordas da tela, containers principais)
   /// Valor otimizado de 8px para dar mais espaço ao conteúdo
-  static const EdgeInsets externalPadding = EdgeInsets.all(xs);
+  static const EdgeInsets externalPadding = EdgeInsets.all(sm);
 
   /// Padding para páginas principais e containers externos
   static const EdgeInsets pagePadding = EdgeInsets.symmetric(
@@ -121,6 +121,12 @@ class SpacingTokens {
   /// Margin para TabBar containers (ajustado para elementos externos)
   static const EdgeInsets tabBarMargin = EdgeInsets.symmetric(
     horizontal: sm, // 8px horizontal para consistência externa
+    vertical: sm, // 8px vertical
+  );
+
+  /// Margin para TabBar sem padding horizontal
+  static const EdgeInsets tabBarMarginNoHorizontal = EdgeInsets.symmetric(
+    horizontal: 0, // 0px horizontal
     vertical: sm, // 8px vertical
   );
 

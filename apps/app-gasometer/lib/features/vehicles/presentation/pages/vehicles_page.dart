@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -22,28 +23,39 @@ class _VehiclesPageState extends State<VehiclesPage> {
   // ✅ PERFORMANCE FIX: Cached provider
   late final VehiclesProvider _vehiclesProvider;
   bool _isFirstAccess = false;
+  bool _hasInitialized = false;
   
   @override
   void initState() {
     super.initState();
     // ✅ PERFORMANCE FIX: Cache provider once in initState
     _vehiclesProvider = context.read<VehiclesProvider>();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     
-    // Verificar se é primeiro acesso
-    _checkFirstAccess();
-    
-    // Inicializar provider de forma lazy
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Verificar se o widget ainda está montado antes de inicializar
-      if (mounted) {
-        _vehiclesProvider.initialize();
-        
-        // Mostrar mensagem de boas-vindas se for primeiro acesso
-        if (_isFirstAccess) {
-          _showWelcomeMessage();
+    // Executar apenas uma vez para evitar inicializações múltiplas
+    if (!_hasInitialized) {
+      _hasInitialized = true;
+      
+      // Verificar se é primeiro acesso (usando inherited widget)
+      _checkFirstAccess();
+      
+      // Inicializar provider de forma lazy
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Verificar se o widget ainda está montado antes de inicializar
+        if (mounted) {
+          _vehiclesProvider.initialize();
+          
+          // Mostrar mensagem de boas-vindas se for primeiro acesso
+          if (_isFirstAccess) {
+            _showWelcomeMessage();
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   void _checkFirstAccess() {
@@ -241,17 +253,6 @@ class _OptimizedVehiclesContent extends StatelessWidget {
     required this.onDeleteVehicle,
   });
   
-  Future<void> _navigateToAddVehicle(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => const AddVehiclePage(),
-    );
-    
-    // Se resultado for true, atualizar lista
-    if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -302,9 +303,7 @@ class _OptimizedVehiclesContent extends StatelessWidget {
           return EnhancedEmptyState.generic(
             icon: Icons.directions_car_outlined,
             title: 'Nenhum veículo cadastrado',
-            description: 'Cadastre seu primeiro veículo para começar a controlar seus gastos com combustível e manutenção',
-            actionLabel: 'Cadastrar Veículo',
-            onAction: () => _navigateToAddVehicle(context),
+            description: 'Use o botão + para cadastrar seu primeiro veículo e começar a controlar seus gastos com combustível e manutenção',
             height: MediaQuery.of(context).size.height - 200,
           );
         }
@@ -398,26 +397,29 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determinar número de colunas baseado na largura disponível
+        int crossAxisCount = 1;
+        double cardWidth = 300;
+        
+        if (constraints.maxWidth > 1200) {
+          crossAxisCount = (constraints.maxWidth / cardWidth).floor().clamp(2, 4);
+        } else if (constraints.maxWidth > 800) {
+          crossAxisCount = 2;
+        }
+        
+        return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          sliver: SliverLayoutBuilder(
-            builder: (context, constraints) {
-              int crossAxisCount = 1;
-              if (constraints.crossAxisExtent > 1200) {
-                crossAxisCount = 3;
-              } else if (constraints.crossAxisExtent > 800) {
-                crossAxisCount = 2;
-              }
-              
-              return SliverGrid.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16.0,
-                  crossAxisSpacing: 16.0,
-                  childAspectRatio: 1.2, // Ajustar conforme necessário
-                ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: crossAxisCount * cardWidth + (crossAxisCount - 1) * 16),
+              child: AlignedGridView.count(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 16.0,
+                crossAxisSpacing: 16.0,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: vehicles.length,
                 itemBuilder: (context, index) {
                   return VehicleCard(
@@ -427,11 +429,11 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
                     onDelete: () => onDeleteVehicle(context, vehicles[index]),
                   );
                 },
-              );
-            },
+              ),
+            ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -441,10 +443,14 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
 class _OptimizedFloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SemanticButton.fab(
-      semanticLabel: 'Cadastrar novo veículo',
-      semanticHint: 'Abre formulário para adicionar um novo veículo à sua frota',
+    return FloatingActionButton(
       onPressed: () => _addVehicle(context),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      tooltip: 'Cadastrar novo veículo',
       child: const Icon(Icons.add),
     );
   }

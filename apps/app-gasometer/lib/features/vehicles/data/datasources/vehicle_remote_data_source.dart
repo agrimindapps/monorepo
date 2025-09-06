@@ -10,6 +10,7 @@ abstract class VehicleRemoteDataSource {
   Future<void> updateVehicle(String userId, VehicleModel vehicle);
   Future<void> deleteVehicle(String userId, String vehicleId);
   Future<void> syncVehicles(String userId, List<VehicleModel> vehicles);
+  Stream<List<VehicleModel>> watchVehicles(String userId);
 }
 
 @LazySingleton(as: VehicleRemoteDataSource)
@@ -119,6 +120,26 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
       await batch.commit();
     } catch (e) {
       throw RemoteDataSourceException('Failed to sync vehicles: $e');
+    }
+  }
+
+  @override
+  Stream<List<VehicleModel>> watchVehicles(String userId) {
+    try {
+      return _getVehiclesCollection(userId)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((querySnapshot) {
+        return querySnapshot.docs
+            .map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              data['id'] = doc.id;
+              return VehicleModel.fromJson(data);
+            })
+            .toList();
+      });
+    } catch (e) {
+      throw RemoteDataSourceException('Failed to watch vehicles: $e');
     }
   }
 }

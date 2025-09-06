@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/presentation/errors/unified_error_handler.dart';
 import '../../../../core/presentation/theme/app_theme.dart';
 import '../../../../core/presentation/widgets/common_app_bar.dart';
-import '../../../../core/presentation/widgets/error_boundary.dart';
 import '../../../../core/presentation/widgets/loading_overlay.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -451,17 +450,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
             const SizedBox(height: 16),
           ],
 
-          // Formulário principal com error boundary
-          FormErrorBoundary(
-            formName: widget.expenseToEdit != null ? 'Edição de Despesa' : 'Nova Despesa',
-            onFormError: (error, stackTrace) {
-              debugPrint('🚨 Erro capturado no formulário: $error');
-              // TODO: Enviar erro para analytics se necessário
-            },
-            child: ExpenseFormView(
-              formProvider: formProvider,
-              showTitle: false, // Título já está na AppBar
-            ),
+          // Formulário principal
+          ExpenseFormView(
+            formProvider: formProvider,
+            showTitle: false, // Título já está na AppBar
           ),
 
           const SizedBox(height: 24),

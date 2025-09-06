@@ -22,7 +22,7 @@ class FavoritosTabsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       children: [
         _buildTabBar(context, theme),
@@ -55,7 +55,7 @@ class FavoritosTabsWidget extends StatelessWidget {
 
   Widget _buildTabBar(BuildContext context, ThemeData theme) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 0.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
@@ -64,7 +64,8 @@ class FavoritosTabsWidget extends StatelessWidget {
         controller: tabController,
         tabs: _buildCompactTabs(),
         labelColor: Colors.white,
-        unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        unselectedLabelColor:
+            theme.colorScheme.onSurface.withValues(alpha: 0.6),
         indicator: BoxDecoration(
           color: const Color(0xFF4CAF50),
           borderRadius: BorderRadius.circular(16),
@@ -79,7 +80,8 @@ class FavoritosTabsWidget extends StatelessWidget {
           fontWeight: FontWeight.w400,
         ),
         labelPadding: const EdgeInsets.symmetric(horizontal: 6.0),
-        indicatorPadding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        indicatorPadding:
+            const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
         dividerColor: Colors.transparent,
       ),
     );
@@ -92,38 +94,43 @@ class FavoritosTabsWidget extends StatelessWidget {
       {'icon': FontAwesomeIcons.magnifyingGlass, 'text': 'Diagnósticos'},
     ];
 
-    return tabData.map((data) => Tab(
-      child: AnimatedBuilder(
-        animation: tabController,
-        builder: (context, child) {
-          final isActive = tabController.index == tabData.indexOf(data);
-          
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                data['icon'] as IconData,
-                size: 16,
-                color: isActive 
-                    ? Colors.white 
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+    return tabData
+        .map((data) => Tab(
+              child: AnimatedBuilder(
+                animation: tabController,
+                builder: (context, child) {
+                  final isActive = tabController.index == tabData.indexOf(data);
+
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        data['icon'] as IconData,
+                        size: 16,
+                        color: isActive
+                            ? Colors.white
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                      ),
+                      if (isActive) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          data['text'] as String,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
+                },
               ),
-              if (isActive) ...[
-                const SizedBox(width: 6),
-                Text(
-                  data['text'] as String,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ],
-          );
-        },
-      ),
-    )).toList();
+            ))
+        .toList();
   }
 }

@@ -10,4 +10,5 @@ abstract class VehicleRepository {
   Future<Either<Failure, Unit>> deleteVehicle(String id);
   Future<Either<Failure, Unit>> syncVehicles();
   Future<Either<Failure, List<VehicleEntity>>> searchVehicles(String query);
+  Stream<Either<Failure, List<VehicleEntity>>> watchVehicles();
 }

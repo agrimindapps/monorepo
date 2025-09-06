@@ -31,10 +31,10 @@ class ReceitaAgroTheme {
     ),
     
     // Bottom navigation personalizado
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: ReceitaAgroColors.primary,
-      unselectedItemColor: ReceitaAgroColors.primaryDark,
+      unselectedItemColor: Colors.grey.shade600,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       elevation: 8,

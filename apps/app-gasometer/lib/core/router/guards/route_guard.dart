@@ -39,24 +39,22 @@ class RouteGuard {
 
   /// Determina a localização inicial baseada no estado de autenticação e plataforma
   String getInitialLocation() {
-    // Se já está autenticado (incluindo anônimo), vai direto para o app
-    // If AuthProvider is not available yet, default to unauthenticated behavior
-    if (_authProvider?.isAuthenticated ?? false) {
-      return '/';
-    }
-    
-    // Se é web e não está autenticado, vai para promo
-    if (_platformService.isWeb) {
-      return '/promo';
-    }
-    
-    // Para mobile, vai direto para o app (será criado login anônimo automaticamente)
+    // Always start with home route - redirect logic will handle proper routing
     return '/';
   }
 
   /// Classifica o tipo de rota baseado no path
   RouteType _getRouteType(String location) {
-    const publicRoutes = ['/privacy', '/terms'];
+    // Páginas sempre públicas - não requerem autenticação
+    const publicRoutes = [
+      '/privacy',
+      '/terms', 
+      '/about',
+      '/contact',
+      '/help',
+      '/faq',
+      '/support',
+    ];
     const authOnlyRoutes = ['/promo', '/login'];
     const appRoutes = ['/', '/odometer', '/fuel', '/maintenance', '/reports', '/settings', '/profile'];
 

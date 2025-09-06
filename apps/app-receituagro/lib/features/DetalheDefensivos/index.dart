@@ -1,10 +1,12 @@
 // Export clean architecture components
 
+// Data Layer
 export 'data/mappers/diagnostico_mapper.dart';
-// Data Layer  
 export 'data/repositories/defensivo_details_repository_impl.dart';
+
 // DI
 export 'di/defensivo_details_di.dart';
+
 // Domain Layer
 export 'domain/entities/defensivo_details_entity.dart';
 export 'domain/entities/diagnostico_entity.dart';
@@ -12,8 +14,9 @@ export 'domain/repositories/i_defensivo_details_repository.dart';
 export 'domain/usecases/get_defensivo_details_usecase.dart';
 export 'domain/usecases/get_diagnosticos_usecase.dart';
 export 'domain/usecases/toggle_favorite_usecase.dart';
+
 // Presentation Layer
-export 'presentation/pages/detalhe_defensivo_clean_page.dart';
+export 'detalhe_defensivo_page.dart';
 export 'presentation/providers/defensivo_details_provider.dart';
 export 'presentation/providers/diagnosticos_provider.dart';
 export 'presentation/providers/tab_controller_provider.dart';

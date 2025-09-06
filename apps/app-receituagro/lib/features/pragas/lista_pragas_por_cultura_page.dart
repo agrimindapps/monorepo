@@ -256,16 +256,19 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: Column(
-              children: [
-                _buildModernHeader(),
-                Expanded(
-                  child: _buildBody(),
-                ),
-              ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildModernHeader(),
+                  Expanded(
+                    child: _buildBody(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -282,8 +282,6 @@ class NavigationUtils {
         return 'Relatórios';
       case '/settings':
         return 'Configurações';
-      case '/profile':
-        return 'Perfil';
       default:
         return 'Página';
     }
@@ -306,8 +304,6 @@ class NavigationUtils {
         return selected ? Icons.bar_chart : Icons.bar_chart_outlined;
       case '/settings':
         return selected ? Icons.settings : Icons.settings_outlined;
-      case '/profile':
-        return selected ? Icons.person : Icons.person_outlined;
       default:
         return selected ? Icons.pageview : Icons.pageview_outlined;
     }

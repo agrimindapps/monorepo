@@ -97,7 +97,7 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
         return ScaleTransition(
           scale: _scaleAnimation,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
             child: AnimatedBuilder(
               animation: _focusController,
               builder: (context, child) {
@@ -105,7 +105,8 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
-                    color: widget.isDark ? const Color(0xFF1E1E22) : Colors.white,
+                    color:
+                        widget.isDark ? const Color(0xFF1E1E22) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -118,7 +119,7 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
                     child: Row(
                       children: [
                         AnimatedSwitcher(
@@ -163,7 +164,6 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                                   ),
                                 ),
                         ),
-                        const SizedBox(width: 12),
                         Expanded(
                           child: TextField(
                             controller: widget.controller,
@@ -223,7 +223,7 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
 
   Widget _buildViewToggleButtons() {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
+      margin: const EdgeInsets.only(right: 0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: widget.isDark
@@ -243,7 +243,7 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
   Widget _buildToggleButton(ViewMode mode, IconData icon) {
     final bool isSelected = widget.selectedViewMode == mode;
     final bool isFirstButton = mode == ViewMode.grid;
-    
+
     return InkWell(
       onTap: () => widget.onToggleViewMode(mode),
       borderRadius: BorderRadius.horizontal(

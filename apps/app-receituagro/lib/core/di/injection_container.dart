@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
 
+import '../navigation/app_navigation_provider.dart';
+
 // DetalheDefensivos DI
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
@@ -53,6 +55,12 @@ import 'core_package_integration.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // ===== NAVEGAÇÃO =====
+  // Registra AppNavigationProvider como singleton para navegação global
+  sl.registerLazySingleton<AppNavigationProvider>(
+    () => AppNavigationProvider(),
+  );
+  
   // ===== CORE PACKAGE INTEGRATION (FASE 2.6 FINAL) =====
   // Initialize all Core Package services first
   await CorePackageIntegration.initializeCoreServices();

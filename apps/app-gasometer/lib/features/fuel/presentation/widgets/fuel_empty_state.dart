@@ -19,9 +19,7 @@ class FuelEmptyState extends StatelessWidget {
     return EnhancedEmptyState(
       icon: Icons.local_gas_station_outlined,
       title: 'Nenhum abastecimento registrado',
-      description: 'Registre seu primeiro abastecimento para começar a acompanhar seus gastos com combustível',
-      actionLabel: 'Adicionar Abastecimento',
-      onAction: onAddRecord,
+      description: 'Use o botão + para registrar seu primeiro abastecimento e acompanhar seus gastos com combustível',
     );
   }
 }

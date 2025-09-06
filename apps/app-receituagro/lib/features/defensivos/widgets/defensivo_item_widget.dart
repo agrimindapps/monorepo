@@ -24,12 +24,12 @@ class DefensivoItemWidget extends StatelessWidget {
 
   Color get _getClassColor {
     final classe = defensivo.displayClass.toLowerCase();
-    
+
     // Verifica cache primeiro
     if (_colorCache.containsKey(classe)) {
       return _colorCache[classe]!;
     }
-    
+
     // Computa cor e adiciona ao cache
     Color color;
     if (classe.contains('herbicida') || classe.contains('herbic')) {
@@ -45,19 +45,19 @@ class DefensivoItemWidget extends StatelessWidget {
     } else {
       color = const Color(0xFF2E7D32);
     }
-    
+
     _colorCache[classe] = color;
     return color;
   }
 
   IconData get _getClassIcon {
     final classe = defensivo.displayClass.toLowerCase();
-    
+
     // Verifica cache primeiro
     if (_iconCache.containsKey(classe)) {
       return _iconCache[classe]!;
     }
-    
+
     // Computa ícone e adiciona ao cache
     IconData icon;
     if (classe.contains('herbicida') || classe.contains('herbic')) {
@@ -73,7 +73,7 @@ class DefensivoItemWidget extends StatelessWidget {
     } else {
       icon = FontAwesomeIcons.sprayCan;
     }
-    
+
     _iconCache[classe] = icon;
     return icon;
   }
@@ -89,9 +89,9 @@ class DefensivoItemWidget extends StatelessWidget {
 
   Widget _buildListItem() {
     const color = Color(0xFF4CAF50); // Verde padrão como no mockup
-    
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
@@ -158,7 +158,8 @@ class DefensivoItemWidget extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
@@ -191,7 +192,7 @@ class DefensivoItemWidget extends StatelessWidget {
 
   Widget _buildGridItem() {
     final color = _getClassColor;
-    
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(4),
@@ -233,9 +234,10 @@ class DefensivoItemWidget extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: isDark 
+                      color: isDark
                           ? Colors.grey.shade700.withValues(alpha: 0.5)
                           : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(6),
@@ -244,7 +246,9 @@ class DefensivoItemWidget extends StatelessWidget {
                       defensivo.idReg,
                       style: TextStyle(
                         fontSize: 9,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -261,7 +265,9 @@ class DefensivoItemWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                        color: isDark
+                            ? Colors.grey.shade200
+                            : Colors.grey.shade800,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -271,7 +277,9 @@ class DefensivoItemWidget extends StatelessWidget {
                       defensivo.displayIngredient,
                       style: TextStyle(
                         fontSize: 11,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -279,7 +287,8 @@ class DefensivoItemWidget extends StatelessWidget {
                     const Spacer(),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(6),

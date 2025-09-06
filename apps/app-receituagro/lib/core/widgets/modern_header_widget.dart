@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
+
+import '../navigation/app_navigation_provider.dart';
 
 class ModernHeaderWidget extends StatelessWidget {
   final String title;
@@ -59,7 +63,7 @@ class ModernHeaderWidget extends StatelessWidget {
         children: [
           if (showBackButton)
             GestureDetector(
-              onTap: onBackPressed,
+              onTap: () => _handleBackPress(context),
               child: Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
@@ -151,5 +155,63 @@ class ModernHeaderWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Manipula o clique do botão voltar com detecção automática do sistema de navegação
+  void _handleBackPress(BuildContext context) {
+    // Se há callback customizado fornecido, usa ele primeiro
+    if (onBackPressed != null) {
+      onBackPressed!();
+      return;
+    }
+
+    // Detecta automaticamente qual sistema de navegação usar
+    _intelligentNavigationBack(context);
+  }
+
+  /// Sistema inteligente de navegação que detecta automaticamente a melhor abordagem
+  void _intelligentNavigationBack(BuildContext context) {
+    try {
+      // Tenta usar AppNavigationProvider primeiro (sistema preferido)
+      final appNavProvider = context.read<AppNavigationProvider>();
+      
+      // Se tem páginas na pilha do AppNavigationProvider, use ele
+      if (appNavProvider.pageStack.length > 1) {
+        final success = appNavProvider.goBack();
+        if (success) {
+          return; // Sucesso com AppNavigationProvider
+        }
+      }
+    } catch (e) {
+      // AppNavigationProvider não disponível no contexto, continua para fallback
+    }
+
+    // Fallback 1: Tenta usar AppNavigationProvider via GetIt
+    try {
+      final appNavProvider = GetIt.instance<AppNavigationProvider>();
+      if (appNavProvider.pageStack.length > 1) {
+        final success = appNavProvider.goBack();
+        if (success) {
+          return; // Sucesso com GetIt
+        }
+      }
+    } catch (e) {
+      // GetIt não tem AppNavigationProvider configurado, continua
+    }
+
+    // Fallback 2: Verifica se pode fazer pop na pilha tradicional do Navigator
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+
+    // Fallback 3: Se nada funcionar, tenta voltar para a página principal
+    try {
+      final appNavProvider = GetIt.instance<AppNavigationProvider>();
+      appNavProvider.goBackToMain();
+    } catch (e) {
+      // Último recurso: não faz nada para evitar crash
+      debugPrint('⚠️ ModernHeaderWidget: Não foi possível navegar de volta - $e');
+    }
   }
 }

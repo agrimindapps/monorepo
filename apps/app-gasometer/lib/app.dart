@@ -1,11 +1,8 @@
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/di/injectable_config.dart' as local_di;
-import 'core/presentation/widgets/global_error_boundary.dart';
 import 'core/router/app_router.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';
 import 'core/theme/gasometer_theme.dart';
@@ -27,29 +24,10 @@ class GasOMeterApp extends StatefulWidget {
 }
 
 class _GasOMeterAppState extends State<GasOMeterApp> {
-  bool _globalErrorBoundaryEnabled = true;
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadErrorBoundaryPreference();
-  }
-
-  Future<void> _loadErrorBoundaryPreference() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _globalErrorBoundaryEnabled = prefs.getBool('global_error_boundary_enabled') ?? true;
-        _isLoading = false;
-      });
-    } catch (e) {
-      // Se falhar, manter como ativo por segurança
-      setState(() {
-        _globalErrorBoundaryEnabled = true;
-        _isLoading = false;
-      });
-    }
+    // Inicialização simplificada
   }
   
   @override
@@ -172,20 +150,8 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
                 },
               );
               
-              // Enquanto carrega as preferências, usar configuração padrão
-              if (_isLoading) {
-                return app; // Temporariamente sem ErrorBoundary durante loading
-              }
-              
-              // 🚨 DEBUG: GlobalErrorBoundary pode ser desabilitado via configurações
-              if (!_globalErrorBoundaryEnabled) {
-                if (kDebugMode) {
-                  debugPrint('🚨 GlobalErrorBoundary DESABILITADO via configurações');
-                }
-                return app;
-              }
-              
-              return GlobalErrorBoundary(child: app);
+              // ErrorBoundary removido completamente
+              return app;
             },
           );
         },

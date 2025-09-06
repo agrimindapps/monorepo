@@ -26,6 +26,13 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   @override
   String get repositoryCategory => LogCategory.expenses;
 
+  /// Garante que o box está inicializado antes do uso
+  Future<void> _ensureInitialized() async {
+    if (!Hive.isBoxOpen(_boxName)) {
+      await initialize();
+    }
+  }
+
   /// Inicializa o repositório
   @override
   Future<void> initialize() async {
@@ -200,6 +207,8 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   @override
   Future<ExpenseEntity?> getExpenseById(String expenseId) async {
     try {
+      await _ensureInitialized();
+      
       // Verificar cache primeiro
       final cacheKey = entityCacheKey(expenseId);
       final cached = getCachedEntity(cacheKey);
@@ -225,6 +234,8 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   @override
   Future<List<ExpenseEntity>> getAllExpenses() async {
     try {
+      await _ensureInitialized();
+      
       // Verificar cache primeiro
       const cacheKey = 'all_expenses';
       final cached = getCachedList(cacheKey);
@@ -248,6 +259,8 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   @override
   Future<List<ExpenseEntity>> getExpensesByVehicle(String vehicleId) async {
     try {
+      await _ensureInitialized();
+      
       // Verificar cache primeiro
       final cacheKey = vehicleCacheKey(vehicleId, 'expenses');
       final cached = getCachedList(cacheKey);
@@ -357,6 +370,8 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   @override
   Future<Map<String, dynamic>> getStats() async {
     try {
+      await _ensureInitialized();
+      
       final models = _box.values.where((model) => !model.isDeleted).toList();
       
       if (models.isEmpty) {

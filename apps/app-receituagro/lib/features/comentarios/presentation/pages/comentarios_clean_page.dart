@@ -113,13 +113,16 @@ class _ComentariosCleanPageState extends ConsumerState<ComentariosCleanPage> {
     
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(isDark),
-            Expanded(
-              child: _buildBody(),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Column(
+            children: [
+              _buildHeader(isDark),
+              Expanded(
+                child: _buildBody(),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: _buildFloatingActionButton(),

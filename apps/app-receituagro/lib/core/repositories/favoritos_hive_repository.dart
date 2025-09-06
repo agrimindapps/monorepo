@@ -55,6 +55,18 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
     return getById(key) != null;
   }
 
+  /// Verifica se um item é favorito (versão assíncrona)
+  Future<bool> isFavoritoAsync(String tipo, String itemId) async {
+    try {
+      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
+      final key = '${tipo}_$itemId';
+      return box.containsKey(key);
+    } catch (e) {
+      print('❌ [isFavoritoAsync] Erro: $e');
+      return false;
+    }
+  }
+
   /// Adiciona um item aos favoritos
   Future<bool> addFavorito(String tipo, String itemId, Map<String, dynamic> itemData) async {
     try {
@@ -101,6 +113,28 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
     }
     
     return null;
+  }
+
+  /// Busca dados de um favorito específico (versão assíncrona)
+  Future<Map<String, dynamic>?> getFavoritoDataAsync(String tipo, String itemId) async {
+    try {
+      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
+      final key = '${tipo}_$itemId';
+      final favorito = box.get(key);
+      
+      if (favorito != null && favorito.itemData.isNotEmpty) {
+        try {
+          return jsonDecode(favorito.itemData) as Map<String, dynamic>;
+        } catch (e) {
+          return null;
+        }
+      }
+      
+      return null;
+    } catch (e) {
+      print('❌ [getFavoritoDataAsync] Erro: $e');
+      return null;
+    }
   }
 
   /// Limpa todos os favoritos de um tipo

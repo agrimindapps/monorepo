@@ -40,10 +40,16 @@ class FavoritosService {
   Future<bool> addFavoriteId(String tipo, String id) async {
     try {
       final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) return false;
+      if (tipoKey == null) {
+        developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        return false;
+      }
 
       // Valida antes de adicionar
-      if (!await canAddToFavorites(tipo, id)) return false;
+      if (!await canAddToFavorites(tipo, id)) {
+        developer.log('Não é possível adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+        return false;
+      }
 
       // Adiciona com dados básicos para cache
       final itemData = {
@@ -55,10 +61,16 @@ class FavoritosService {
       final result = await _repository.addFavorito(tipoKey, id, itemData);
       
       // Limpa cache após mudança
-      if (result) await _clearCacheForTipo(tipo);
+      if (result) {
+        await _clearCacheForTipo(tipo);
+        developer.log('Favorito adicionado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+      } else {
+        developer.log('Falha ao adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+      }
       
       return result;
     } catch (e) {
+      developer.log('Erro ao adicionar favorito: $e', name: 'FavoritosService', error: e);
       throw FavoritosException('Erro ao adicionar favorito: $e', tipo: tipo, id: id);
     }
   }
@@ -66,15 +78,24 @@ class FavoritosService {
   Future<bool> removeFavoriteId(String tipo, String id) async {
     try {
       final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) return false;
+      if (tipoKey == null) {
+        developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        return false;
+      }
 
       final result = await _repository.removeFavorito(tipoKey, id);
       
       // Limpa cache após mudança
-      if (result) await _clearCacheForTipo(tipo);
+      if (result) {
+        await _clearCacheForTipo(tipo);
+        developer.log('Favorito removido com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+      } else {
+        developer.log('Falha ao remover favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+      }
       
       return result;
     } catch (e) {
+      developer.log('Erro ao remover favorito: $e', name: 'FavoritosService', error: e);
       throw FavoritosException('Erro ao remover favorito: $e', tipo: tipo, id: id);
     }
   }

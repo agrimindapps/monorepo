@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'praga_card_action_section.dart';
 import 'praga_card_content_section.dart';
 import 'praga_card_helpers.dart';
 import 'praga_card_image_section.dart';
@@ -24,49 +23,38 @@ class PragaCardGridMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: properties.isDarkMode ? 6 : 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      color: PragaCardHelpers.getCardColor(properties.isDarkMode),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: properties.onTap,
-        child: SizedBox(
-          width: properties.customWidth ?? 180,
-          height: properties.customHeight ?? 220,
-          child: Stack(
+    return SizedBox(
+      height: 220, // Define altura fixa maior para o card
+      child: Card(
+        margin: EdgeInsets.zero,
+        elevation: properties.isDarkMode ? 4 : 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: PragaCardHelpers.getCardColor(properties.isDarkMode),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: properties.onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Seção de imagem (topo)
-                  Expanded(
-                    flex: 3,
-                    child: PragaCardImageSection(
-                      properties: properties,
-                      mode: PragaCardImageMode.grid,
-                      height: 120,
-                    ),
-                  ),
-                  
-                  // Conteúdo (parte inferior)
-                  Expanded(
-                    flex: 2,
-                    child: PragaCardContentSection(
-                      properties: properties,
-                      mode: PragaCardContentMode.grid,
-                    ),
-                  ),
-                ],
+              // Seção de imagem (topo) - mais espaço para a imagem
+              Expanded(
+                flex: 7,
+                child: PragaCardImageSection(
+                  properties: properties,
+                  mode: PragaCardImageMode.grid,
+                  height: 140,
+                ),
               ),
               
-              // Botão de favorito flutuante
-              PragaCardActionSection(
-                properties: properties,
-                mode: PragaCardActionMode.grid,
+              // Conteúdo (parte inferior) - menos espaço para texto
+              Expanded(
+                flex: 3,
+                child: PragaCardContentSection(
+                  properties: properties,
+                  mode: PragaCardContentMode.grid,
+                ),
               ),
             ],
           ),

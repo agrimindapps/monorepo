@@ -72,7 +72,7 @@ class PragaCardContentSection extends StatelessWidget {
     );
   }
 
-  /// Conteúdo para modo grid (texto sobre imagem)
+  /// Conteúdo para modo grid (texto embaixo da imagem)
   Widget _buildGridContent() {
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -92,15 +92,20 @@ class PragaCardContentSection extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           
-          // Row com chip de tipo
-          Row(
-            children: [
-              _buildTypeChip(isCompact: true),
-              const Spacer(),
-            ],
-          ),
+          // Nome científico (igual ao mockup)
+          if (properties.praga.nomeCientifico.isNotEmpty)
+            Text(
+              properties.praga.nomeCientifico,
+              style: TextStyle(
+                fontSize: 12,
+                color: PragaCardHelpers.getTextColor(properties.isDarkMode, isSecondary: true),
+                fontStyle: FontStyle.italic,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
         ],
       ),
     );

@@ -209,6 +209,21 @@ class LoginFormWidget extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              final controller = context.read<LoginController>();
+              controller.clearError();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.close,
+                color: Colors.red.shade700,
+                size: 16,
+              ),
+            ),
+          ),
         ],
       ),
     );

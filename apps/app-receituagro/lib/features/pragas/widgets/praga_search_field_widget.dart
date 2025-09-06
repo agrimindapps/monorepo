@@ -38,7 +38,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -46,7 +46,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, -0.5),
       end: Offset.zero,
@@ -54,7 +54,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -70,39 +70,9 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       position: _slideAnimation,
       child: FadeTransition(
         opacity: _fadeAnimation,
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(8, 8, 8, 12),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: widget.isDark ? const Color(0xFF222228) : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: widget.isDark 
-                  ? Colors.grey.shade800 
-                  : Colors.green.shade200,
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSearchField(),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildViewToggle(),
-                ],
-              ),
-            ],
-          ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 8.0),
+          child: _buildSearchField(),
         ),
       ),
     );
@@ -112,14 +82,12 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: widget.isDark 
-            ? Colors.grey.shade900.withValues(alpha: 0.3)
-            : Colors.grey.shade50,
+        color: widget.isDark
+            ? Colors.grey.shade800.withValues(alpha: 0.6)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: widget.isDark 
-              ? Colors.grey.shade700 
-              : Colors.grey.shade300,
+          color: widget.isDark ? Colors.grey.shade700 : Colors.grey.shade300,
           width: 1,
         ),
       ),
@@ -133,30 +101,15 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
         decoration: InputDecoration(
           hintText: _getSearchHint(),
           hintStyle: TextStyle(
-            color: widget.isDark 
-                ? Colors.grey.shade400 
-                : Colors.grey.shade600,
+            color: widget.isDark ? Colors.grey.shade400 : Colors.grey.shade500,
             fontSize: 16,
           ),
           prefixIcon: Icon(
             Icons.search_rounded,
-            color: widget.isDark 
-                ? Colors.green.shade300 
-                : Colors.green.shade700,
-            size: 22,
+            color: Colors.green.shade600,
+            size: 24,
           ),
-          suffixIcon: widget.controller.text.isNotEmpty
-              ? IconButton(
-                  onPressed: widget.onClear,
-                  icon: Icon(
-                    Icons.clear_rounded,
-                    color: widget.isDark 
-                        ? Colors.grey.shade400 
-                        : Colors.grey.shade600,
-                    size: 20,
-                  ),
-                )
-              : null,
+          suffixIcon: _buildViewToggleCompact(),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -167,65 +120,70 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
     );
   }
 
-  Widget _buildViewToggle() {
+  Widget _buildViewToggleCompact() {
     return Container(
-      height: 48,
+      margin: const EdgeInsets.only(right: 4),
       decoration: BoxDecoration(
-        color: widget.isDark 
-            ? Colors.grey.shade900.withValues(alpha: 0.3)
-            : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: widget.isDark 
-              ? Colors.grey.shade700 
-              : Colors.grey.shade300,
+          color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300,
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildToggleButton(PragaViewMode.list),
+          _buildCompactToggleButton(PragaViewMode.grid, isFirst: true),
           Container(
             width: 1,
-            height: 24,
-            color: widget.isDark 
-                ? Colors.grey.shade700 
-                : Colors.grey.shade300,
+            height: 32,
+            color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300,
           ),
-          _buildToggleButton(PragaViewMode.grid),
+          _buildCompactToggleButton(PragaViewMode.list, isLast: true),
         ],
       ),
     );
   }
 
-  Widget _buildToggleButton(PragaViewMode mode) {
+  Widget _buildCompactToggleButton(PragaViewMode mode,
+      {bool isFirst = false, bool isLast = false}) {
     final isSelected = widget.viewMode == mode;
-    final color = widget.isDark 
-        ? Colors.green.shade300 
-        : Colors.green.shade700;
+    final activeColor = Colors.green.shade600;
+    final inactiveColor =
+        widget.isDark ? Colors.grey.shade400 : Colors.grey.shade500;
+
+    BorderRadius borderRadius;
+    if (isFirst) {
+      borderRadius = const BorderRadius.only(
+        topLeft: Radius.circular(7),
+        bottomLeft: Radius.circular(7),
+      );
+    } else if (isLast) {
+      borderRadius = const BorderRadius.only(
+        topRight: Radius.circular(7),
+        bottomRight: Radius.circular(7),
+      );
+    } else {
+      borderRadius = BorderRadius.zero;
+    }
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: borderRadius,
         onTap: () => widget.onViewModeChanged(mode),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected 
-                ? color.withValues(alpha: 0.15)
+            color: isSelected
+                ? activeColor.withValues(alpha: 0.1)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: borderRadius,
           ),
           child: Icon(
             mode.icon,
-            size: 20,
-            color: isSelected 
-                ? color 
-                : (widget.isDark 
-                    ? Colors.grey.shade400 
-                    : Colors.grey.shade600),
+            size: 18,
+            color: isSelected ? activeColor : inactiveColor,
           ),
         ),
       ),

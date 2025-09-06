@@ -153,7 +153,7 @@ class OdometerFormProvider extends ChangeNotifier {
     _isLoading = false;
     _error = '';
     _currentOdometer = null;
-    notifyListeners();
+    // Não chama notifyListeners() durante inicialização para evitar setState durante build
   }
 
   /// Initializes form from existing odometer record
@@ -167,7 +167,7 @@ class OdometerFormProvider extends ChangeNotifier {
     _registrationType = odometer.type;
     _isLoading = false;
     _error = '';
-    notifyListeners();
+    // Não chama notifyListeners() durante inicialização para evitar setState durante build
   }
 
   /// Resets form to initial state

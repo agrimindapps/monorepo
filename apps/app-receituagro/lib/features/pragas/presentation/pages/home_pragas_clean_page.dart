@@ -40,18 +40,21 @@ class _HomePragasContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: ResponsiveContentWrapper(
-          child: Consumer<HomePragasProvider>(
-            builder: (context, provider, child) {
-              return Column(
-                children: [
-                  _buildHeader(context, isDark, provider),
-                  Expanded(
-                    child: _buildBody(context, provider),
-                  ),
-                ],
-              );
-            },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: ResponsiveContentWrapper(
+            child: Consumer<HomePragasProvider>(
+              builder: (context, provider, child) {
+                return Column(
+                  children: [
+                    _buildHeader(context, isDark, provider),
+                    Expanded(
+                      child: _buildBody(context, provider),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

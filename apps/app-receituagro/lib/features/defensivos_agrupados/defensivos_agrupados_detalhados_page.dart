@@ -164,23 +164,26 @@ class _DefensivosAgrupadosDetalhadosPageState extends State<DefensivosAgrupadosD
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: Column(
-              children: [
-                _buildModernHeader(isDark),
-                Expanded(
-                  child: isLoading
-                      ? const DefensivosLoadingStateWidget()
-                      : hasError
-                          ? DefensivosErrorStateWidget(
-                              errorMessage: _errorMessage,
-                              onRetry: _carregarDefensivos,
-                            )
-                          : _buildContent(),
-                ),
-              ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildModernHeader(isDark),
+                  Expanded(
+                    child: isLoading
+                        ? const DefensivosLoadingStateWidget()
+                        : hasError
+                            ? DefensivosErrorStateWidget(
+                                errorMessage: _errorMessage,
+                                onRetry: _carregarDefensivos,
+                              )
+                            : _buildContent(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

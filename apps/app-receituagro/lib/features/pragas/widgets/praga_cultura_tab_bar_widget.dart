@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PragaCulturaTabBarWidget extends StatefulWidget {
   final TabController tabController;
@@ -90,9 +89,9 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
 
   List<Widget> _buildFavoritesStyleTabs() {
     final tabData = [
-      {'icon': FontAwesomeIcons.seedling, 'text': 'Plantas'},
-      {'icon': FontAwesomeIcons.virus, 'text': 'Doenças'},
-      {'icon': FontAwesomeIcons.bug, 'text': 'Insetos'},
+      {'icon': Icons.grass_outlined, 'text': 'Plantas Daninhas'},
+      {'icon': Icons.coronavirus_outlined, 'text': 'Doenças'},
+      {'icon': Icons.bug_report_outlined, 'text': 'Insetos'},
     ];
 
     return tabData.map((data) => Tab(
@@ -105,7 +104,7 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FaIcon(
+              Icon(
                 data['icon'] as IconData,
                 size: 16,
                 color: isActive

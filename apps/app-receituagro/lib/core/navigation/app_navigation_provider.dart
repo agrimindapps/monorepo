@@ -73,6 +73,11 @@ class AppNavigationProvider extends ChangeNotifier {
   // Estado para controle de loading durante navegação
   bool _isNavigating = false;
 
+  /// Constructor que inicializa com a página principal
+  AppNavigationProvider() {
+    _initMainPage();
+  }
+
   List<AppPageData> get pageStack => List.unmodifiable(_pageStack);
   List<AppPageData> get navigationHistory => List.unmodifiable(_navigationHistory);
   int get currentBottomNavIndex => _currentBottomNavIndex;

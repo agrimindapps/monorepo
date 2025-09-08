@@ -8,6 +8,7 @@ import 'core/router/app_router.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';
 import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
+import 'features/data_export/presentation/providers/data_export_provider.dart';
 import 'features/expenses/presentation/providers/expenses_provider.dart';
 import 'features/fuel/presentation/providers/fuel_provider.dart';
 import 'features/maintenance/presentation/providers/maintenance_provider.dart';
@@ -103,6 +104,12 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // Reports Provider - depends on multiple providers for comprehensive reporting
         ChangeNotifierProvider(
           create: (_) => local_di.getIt<ReportsProvider>(),
+          lazy: true,
+        ),
+        
+        // Data Export Provider - depends on Auth for user context
+        ChangeNotifierProvider(
+          create: (_) => local_di.getIt<DataExportProvider>(),
           lazy: true,
         ),
       ],

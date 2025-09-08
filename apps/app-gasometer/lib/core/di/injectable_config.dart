@@ -5,6 +5,9 @@ import 'package:injectable/injectable.dart';
 import 'injectable_config.config.dart';
 import '../interfaces/i_sync_service.dart';
 import '../sync/services/sync_service.dart';
+import '../../features/data_export/domain/repositories/data_export_repository.dart';
+import '../../features/data_export/data/repositories/data_export_repository_impl.dart';
+import '../../features/data_export/domain/services/platform_export_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -38,5 +41,15 @@ void registerExternalDependencies() {
   // Registrar ISyncService manualmente usando SyncService
   if (!getIt.isRegistered<ISyncService>()) {
     getIt.registerLazySingleton<ISyncService>(() => getIt<SyncService>());
+  }
+  
+  // Registrar DataExportRepository manualmente
+  if (!getIt.isRegistered<DataExportRepository>()) {
+    getIt.registerLazySingleton<DataExportRepository>(() => DataExportRepositoryImpl());
+  }
+  
+  // Registrar PlatformExportService manualmente 
+  if (!getIt.isRegistered<PlatformExportService>()) {
+    getIt.registerLazySingleton<PlatformExportService>(() => PlatformExportServiceFactory.create());
   }
 }

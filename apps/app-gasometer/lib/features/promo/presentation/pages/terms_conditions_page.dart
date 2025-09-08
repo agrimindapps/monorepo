@@ -463,6 +463,9 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
               _buildParagraph(
                   'O aplicativo usa serviços de terceiros que declaram seus próprios Termos e Condições.'),
               const SizedBox(height: 16),
+              _buildParagraph(
+                  'Para processamento de assinaturas premium e compras in-app, utilizamos RevenueCat, sujeito aos termos do RevenueCat.'),
+              const SizedBox(height: 16),
               const Text(
                 'Link para os Termos e Condições de provedores de serviços terceirizados usados pelo aplicativo:',
                 style: TextStyle(
@@ -479,6 +482,8 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   'https://firebase.google.com/terms/analytics'),
               _buildServiceLink(
                   'Firebase', 'https://firebase.google.com/terms/'),
+              _buildServiceLink('RevenueCat', 
+                  'https://www.revenuecat.com/terms'),
               const SizedBox(height: 16),
               _buildParagraph(
                   'Observe que a Agrimind Apps não assume responsabilidade pelas práticas de privacidade ou conteúdo desses serviços de terceiros.'),
@@ -674,6 +679,9 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   decoration: TextDecoration.underline,
                 ),
               ),
+              const SizedBox(height: 20),
+              _buildParagraph(
+                  'Para encerrar sua conta e solicitar exclusão de dados, acesse nossa página de Exclusão de Conta.'),
             ],
           ),
         ),
@@ -693,7 +701,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
               children: [
                 Icon(
                   Icons.local_gas_station,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -702,7 +710,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -712,7 +720,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
               '© ${DateTime.now().year} Agrimind Apps. Todos os direitos reservados.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -725,9 +733,16 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
                   width: 1,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                 ),
                 _footerLink('Termos de Uso', () {}),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  height: 12,
+                  width: 1,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+                _footerLink('Exclusão de Conta', () => context.go('/account-deletion')),
               ],
             ),
           ],
@@ -743,7 +758,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
         title,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
         ),
       ),
     );

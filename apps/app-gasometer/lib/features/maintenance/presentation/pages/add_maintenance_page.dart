@@ -145,6 +145,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     return FormSectionWidget.withTitle(
       title: 'Informações Básicas',
       icon: Icons.info_outline,
+      showBorder: false,
       content: Column(
         children: [
           ValidatedFormField(
@@ -261,6 +262,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     return FormSectionWidget.withTitle(
       title: 'Valores e Medições',
       icon: Icons.monetization_on_outlined,
+      showBorder: false,
       content: FormFieldRow.standard(
         children: [
           ValidatedFormField(
@@ -303,6 +305,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     return FormSectionWidget.withTitle(
       title: 'Descrição',
       icon: Icons.description_outlined,
+      showBorder: false,
       content: ValidatedFormField(
         controller: _formProvider.descriptionController,
         label: 'Detalhes da manutenção',
@@ -323,37 +326,14 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
 
   Widget _buildNextServiceDate() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: Padding(
-        padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingCardPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.notification_important,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
-                ),
-                SizedBox(width: GasometerDesignTokens.spacingSm),
-                Text(
-                  'Próxima Manutenção (Opcional)',
-                  style: TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeLg,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
-            InkWell(
+    return FormSectionWidget.withTitle(
+      title: 'Próxima Manutenção (Opcional)',
+      icon: Icons.notification_important,
+      showBorder: false,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
               onTap: () => _selectNextServiceDate(context),
               child: Container(
                 padding: GasometerDesignTokens.paddingOnly(
@@ -402,8 +382,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                   ),
                 ),
               ),
-          ],
-        ),
+        ],
       ),
     );
   }

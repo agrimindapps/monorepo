@@ -23,7 +23,9 @@ import 'package:app_agrihurbi/features/calculators/domain/services/calculator_en
 import 'package:app_agrihurbi/features/calculators/domain/services/calculator_favorites_service.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/execute_calculation.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/get_calculators.dart';
+import 'package:app_agrihurbi/features/calculators/domain/usecases/manage_favorites.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/manage_calculation_history.dart';
+import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_favorites_provider.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
 // Livestock Dependencies
 import 'package:app_agrihurbi/features/livestock/data/datasources/livestock_local_datasource.dart';
@@ -217,6 +219,18 @@ void configureDependencies() {
     GetCalculationHistory(getIt<CalculatorRepository>()),
   );
   
+  getIt.registerSingleton<ManageFavorites>(
+    ManageFavorites(getIt<CalculatorRepository>()),
+  );
+  
+  getIt.registerSingleton<GetCalculatorsByCategory>(
+    GetCalculatorsByCategory(getIt<CalculatorRepository>()),
+  );
+  
+  getIt.registerSingleton<SearchCalculators>(
+    SearchCalculators(getIt<CalculatorRepository>()),
+  );
+  
   // Calculator System Services
   getIt.registerSingleton<CalculatorRegistry>(
     CalculatorRegistry(),
@@ -237,6 +251,13 @@ void configureDependencies() {
       getCalculatorById: getIt<GetCalculatorById>(),
       executeCalculation: getIt<ExecuteCalculation>(),
       getCalculationHistory: getIt<GetCalculationHistory>(),
+    ),
+  );
+  
+  // Calculator Favorites Provider
+  getIt.registerSingleton<CalculatorFavoritesProvider>(
+    CalculatorFavoritesProvider(
+      manageFavorites: getIt<ManageFavorites>(),
     ),
   );
   

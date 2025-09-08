@@ -129,6 +129,8 @@ class AuthLoadingOverlay extends StatelessWidget {
         return 'Saindo...';
       case AuthOperation.passwordReset:
         return 'Enviando email...';
+      case AuthOperation.deleteAccount:
+        return 'Excluindo conta...';
       default:
         return 'Processando...';
     }
@@ -148,6 +150,8 @@ class AuthLoadingOverlay extends StatelessWidget {
         return 'Fazendo logout da conta';
       case AuthOperation.passwordReset:
         return 'Enviando email de recuperação de senha';
+      case AuthOperation.deleteAccount:
+        return 'Excluindo conta permanentemente';
       default:
         return 'Processando operação de autenticação';
     }
@@ -215,6 +219,7 @@ enum AuthOperation {
   anonymous,
   logout,
   passwordReset,
+  deleteAccount,
 }
 
 /// Purchase operations enum

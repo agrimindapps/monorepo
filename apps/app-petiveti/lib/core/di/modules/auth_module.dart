@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
 
-import '../../auth/auth_service.dart';
+// import '../../auth/auth_service.dart'; // TODO: Uncomment when implementing Phase 2
 import '../di_module.dart';
 
 /// Authentication module following SOLID principles

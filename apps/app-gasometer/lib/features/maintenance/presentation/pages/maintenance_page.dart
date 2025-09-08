@@ -92,7 +92,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Padding(
-                      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
+                      padding: const EdgeInsets.all(8.0),
                       child: _buildContent(context),
                     ),
                   ),

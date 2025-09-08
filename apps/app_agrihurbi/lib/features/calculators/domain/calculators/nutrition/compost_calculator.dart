@@ -469,8 +469,10 @@ class CompostCalculator extends CalculatorEntity {
     double targetCN,
     double desiredFinalAmount,
   ) {
-    final double brownCN = brownData['cn_ratio'] as double;
-    final double greenCN = greenData['cn_ratio'] as double;
+    // ignore: unused_local_variable
+    final double brownCN = brownData['cn_ratio'] as double; // TODO: Use in detailed nutrient analysis
+    // ignore: unused_local_variable
+    final double greenCN = greenData['cn_ratio'] as double; // TODO: Use in composting optimization
     
     // Calcular proporção ideal usando álgebra para C/N
     // x = quantidade de material marrom, y = quantidade de material verde

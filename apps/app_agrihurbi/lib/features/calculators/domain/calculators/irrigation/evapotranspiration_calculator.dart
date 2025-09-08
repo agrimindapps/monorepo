@@ -110,7 +110,8 @@ class EvapotranspirationCalculator extends CalculatorEntity {
       final double windSpeed = double.parse(inputs['wind_speed'].toString());
       final double solarRadiation = double.parse(inputs['solar_radiation'].toString());
       final double altitude = double.parse(inputs['altitude'].toString());
-      final double latitude = double.parse(inputs['latitude'].toString());
+      // ignore: unused_local_variable
+      final double latitude = double.parse(inputs['latitude'].toString()); // TODO: Use in solar angle calculations
 
       // Validação básica
       if (tempMax <= tempMin) {
@@ -123,7 +124,8 @@ class EvapotranspirationCalculator extends CalculatorEntity {
 
       // Cálculos intermediários
       final double tempMean = (tempMax + tempMin) / 2;
-      final double deltaTemp = tempMax - tempMin;
+      // ignore: unused_local_variable
+      final double deltaTemp = tempMax - tempMin; // TODO: Use in temperature range calculations
       
       // Pressão atmosférica baseada na altitude
       final double atmPressure = 101.3 * math.pow((293 - 0.0065 * altitude) / 293, 5.26);

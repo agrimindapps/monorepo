@@ -279,7 +279,8 @@ class CalculatorEngine {
 
       // Aplicar unidades preferidas se especificadas
       if (preferredUnits != null && preferredUnits.containsKey(resultValue.label)) {
-        final targetUnit = preferredUnits[resultValue.label]!;
+        // ignore: unused_local_variable
+        final targetUnit = preferredUnits[resultValue.label]!; // TODO: Implement unit conversion
         // Lógica de conversão e formatação com unidade preferida
         formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);
         // displayUnit seria atualizado após conversão

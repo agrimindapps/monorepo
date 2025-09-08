@@ -20,6 +20,7 @@ import '../sync/services/sync_queue.dart';
 import '../sync/services/sync_operations.dart';
 import '../sync/services/conflict_resolver.dart';
 import '../services/analytics_service.dart';
+import '../services/avatar_service.dart';
 import '../data/models/base_sync_model.dart';
 
 // Auth imports
@@ -29,6 +30,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
 import '../../features/auth/domain/usecases/send_password_reset.dart';
+import '../../features/auth/domain/usecases/delete_account.dart';
 import '../../features/auth/domain/usecases/sign_in_anonymously.dart';
 import '../../features/auth/domain/usecases/sign_in_with_email.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
@@ -145,6 +147,7 @@ Future<void> initializeDependencies() async {
   // Core Services
   sl.registerLazySingleton<LocalDataService>(() => LocalDataService());
   sl.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
+  sl.registerLazySingleton<AvatarService>(() => AvatarService());
   
   // Logging Service - requires AnalyticsService and LogRepository
   sl.registerLazySingleton<LoggingService>(() => LoggingService(sl(), sl()));
@@ -349,6 +352,7 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<SignOut>(() => SignOut(sl()));
   sl.registerLazySingleton<UpdateProfile>(() => UpdateProfile(sl()));
   sl.registerLazySingleton<SendPasswordReset>(() => SendPasswordReset(sl()));
+  sl.registerLazySingleton<DeleteAccount>(() => DeleteAccount(sl()));
 
   // Fuel Use Cases
   sl.registerLazySingleton<GetAllFuelRecords>(() => GetAllFuelRecords(sl()));
@@ -418,12 +422,14 @@ Future<void> initializeDependencies() async {
       signUpWithEmail: sl(),
       signInAnonymously: sl(),
       signOut: sl(),
+      deleteAccount: sl(),
       updateProfile: sl(),
       sendPasswordReset: sl(),
       analytics: sl(),
       platformService: sl(),
       rateLimiter: sl(),
       syncService: sl(),
+      authLocalDataSource: sl(),
     ),
   );
 

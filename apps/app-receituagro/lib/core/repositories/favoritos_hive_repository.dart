@@ -162,4 +162,21 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
     
     return stats;
   }
+
+  /// Busca favoritos por lista de IDs
+  List<FavoritoItemHive> findByIds(List<String> ids) {
+    final results = <FavoritoItemHive>[];
+    
+    for (final id in ids) {
+      // Tenta encontrar por itemId em todos os favoritos
+      for (final favorito in getAll()) {
+        if (favorito.itemId == id) {
+          results.add(favorito);
+          break;
+        }
+      }
+    }
+    
+    return results;
+  }
 }

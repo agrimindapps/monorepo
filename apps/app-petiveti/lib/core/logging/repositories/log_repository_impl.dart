@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart'; // TODO: Use for direct Hive operations if needed
 import '../../error/failures.dart';
 import '../datasources/log_local_datasource.dart';
 import '../entities/log_entry.dart';

@@ -275,8 +275,6 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFormTitle(),
-            const SizedBox(height: 24),
             _buildBasicInfoSection(),
             const SizedBox(height: 24),
             _buildAdditionalInfoSection(),
@@ -286,26 +284,6 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     );
   }
 
-  Widget _buildFormTitle() {
-    return Consumer<OdometerFormProvider>(
-      builder: (context, formProvider, child) {
-        final title = formProvider.isEditing 
-            ? OdometerConstants.dialogMessages['tituloEdicao']!
-            : OdometerConstants.dialogMessages['tituloNovo']!;
-            
-        return Center(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildBasicInfoSection() {
     return FormSectionWidget(

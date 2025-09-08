@@ -90,6 +90,7 @@ class FuelFormView extends StatelessWidget {
     return FormSectionWidget.withTitle(
       title: FuelConstants.fuelInfoSection,
       icon: Icons.local_gas_station,
+      showBorder: false,
       content: Column(
         children: [
           _buildFuelTypeDropdown(context, provider),
@@ -106,6 +107,7 @@ class FuelFormView extends StatelessWidget {
     return FormSectionWidget.withTitle(
       title: FuelConstants.valuesSection,
       icon: Icons.attach_money,
+      showBorder: false,
       content: Column(
         children: [
           FormFieldRow.standard(
@@ -127,6 +129,7 @@ class FuelFormView extends StatelessWidget {
     return FormSectionWidget.withTitle(
       title: FuelConstants.locationSection,
       icon: Icons.location_on,
+      showBorder: false,
       content: Column(
         children: [
           _buildGasStationField(context, provider),
@@ -141,6 +144,7 @@ class FuelFormView extends StatelessWidget {
     return FormSectionWidget.withTitle(
       title: FuelConstants.notesSection,
       icon: Icons.note_add,
+      showBorder: false,
       content: _buildNotesField(context, provider),
     );
   }

@@ -60,7 +60,7 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
   Future<List<CalculatorEntity>> getCalculatorsByCategory(
     CalculatorCategory category,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     
     return _availableCalculators
         .where((calculator) => calculator.category == category)
@@ -69,7 +69,7 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
 
   @override
   Future<CalculatorEntity?> getCalculatorById(String id) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
     try {
       return _availableCalculators.firstWhere((calc) => calc.id == id);
@@ -80,7 +80,7 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
 
   @override
   Future<List<CalculatorEntity>> searchCalculators(String searchTerm) async {
-    await Future.delayed(const Duration(milliseconds: 250));
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     
     if (searchTerm.isEmpty) {
       return getAllCalculators();
@@ -98,7 +98,7 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
 
   @override
   Future<List<CalculationHistory>> getCalculationHistory() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     
     // Retorna histórico ordenado por data (mais recente primeiro)
     final history = List<CalculationHistory>.from(_historyCache);
@@ -109,7 +109,7 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
 
   @override
   Future<void> saveCalculationToHistory(CalculationHistory historyItem) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
     // Remove itens duplicados do mesmo cálculo
     _historyCache.removeWhere((item) => 
@@ -129,14 +129,14 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
 
   @override
   Future<void> removeFromHistory(String historyId) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
     _historyCache.removeWhere((item) => item.id == historyId);
   }
 
   @override
   Future<void> clearHistory() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
     _historyCache.clear();
   }
@@ -145,21 +145,21 @@ class CalculatorLocalDataSourceImpl implements CalculatorLocalDataSource {
 
   @override
   Future<List<String>> getFavoriteCalculators() async {
-    await Future.delayed(const Duration(milliseconds: 150));
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     
     return _favoritesCache.toList();
   }
 
   @override
   Future<void> addToFavorites(String calculatorId) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
     _favoritesCache.add(calculatorId);
   }
 
   @override
   Future<void> removeFromFavorites(String calculatorId) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     
     _favoritesCache.remove(calculatorId);
   }

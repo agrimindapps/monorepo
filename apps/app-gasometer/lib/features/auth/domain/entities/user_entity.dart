@@ -7,6 +7,7 @@ class UserEntity extends Equatable {
   final String? email;
   final String? displayName;
   final String? photoUrl;
+  final String? avatarBase64; // Local avatar as base64 string
   final UserType type;
   final bool isEmailVerified;
   final DateTime createdAt;
@@ -18,6 +19,7 @@ class UserEntity extends Equatable {
     this.email,
     this.displayName,
     this.photoUrl,
+    this.avatarBase64,
     required this.type,
     required this.isEmailVerified,
     required this.createdAt,
@@ -33,12 +35,17 @@ class UserEntity extends Equatable {
   String get uid => id;
   bool get hasDisplayName => displayName != null && displayName!.isNotEmpty;
   bool get hasProfilePhoto => photoUrl != null && photoUrl!.isNotEmpty;
+  bool get hasLocalAvatar => avatarBase64 != null && avatarBase64!.isNotEmpty;
+  
+  // Priority: local avatar over remote photoUrl
+  String? get effectiveAvatar => hasLocalAvatar ? avatarBase64 : photoUrl;
 
   UserEntity copyWith({
     String? id,
     String? email,
     String? displayName,
     String? photoUrl,
+    String? avatarBase64,
     UserType? type,
     bool? isEmailVerified,
     DateTime? createdAt,
@@ -50,6 +57,7 @@ class UserEntity extends Equatable {
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       photoUrl: photoUrl ?? this.photoUrl,
+      avatarBase64: avatarBase64 ?? this.avatarBase64,
       type: type ?? this.type,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       createdAt: createdAt ?? this.createdAt,
@@ -64,6 +72,7 @@ class UserEntity extends Equatable {
         email,
         displayName,
         photoUrl,
+        avatarBase64,
         type,
         isEmailVerified,
         createdAt,

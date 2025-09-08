@@ -1,8 +1,10 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 /// Serviço centralizado para Analytics e Crashlytics do Gasometer
+@singleton
 class AnalyticsService {
   AnalyticsService();
 
@@ -218,6 +220,92 @@ class AnalyticsService {
         value: entry.value,
       );
     }
+  }
+
+  // ===== LGPD DATA EXPORT ANALYTICS =====
+
+  /// Analytics para início de exportação de dados LGPD
+  Future<void> logDataExportStarted({
+    required String userId,
+    required List<String> categories,
+    int? estimatedSizeMb,
+    bool? includeAttachments,
+  }) async {
+    await logEvent('data_export_started', {
+      'user_id_hash': _hashUserId(userId),
+      'categories_count': categories.length,
+      'categories': categories.join(','),
+      'estimated_size_mb': estimatedSizeMb ?? 0,
+      'include_attachments': includeAttachments ?? true,
+      'timestamp': DateTime.now().toIso8601String(),
+      'compliance_type': 'LGPD',
+    });
+  }
+
+  /// Analytics para conclusão de exportação de dados LGPD
+  Future<void> logDataExportCompleted({
+    required String userId,
+    required bool success,
+    int? fileSizeMb,
+    int? processingTimeMs,
+    String? errorReason,
+  }) async {
+    await logEvent('data_export_completed', {
+      'user_id_hash': _hashUserId(userId),
+      'success': success,
+      'file_size_mb': fileSizeMb ?? 0,
+      'processing_time_ms': processingTimeMs ?? 0,
+      'error_reason': errorReason ?? '',
+      'timestamp': DateTime.now().toIso8601String(),
+      'compliance_type': 'LGPD',
+    });
+  }
+
+  /// Analytics para verificação de rate limit
+  Future<void> logDataExportRateLimited({
+    required String userId,
+  }) async {
+    await logEvent('data_export_rate_limited', {
+      'user_id_hash': _hashUserId(userId),
+      'timestamp': DateTime.now().toIso8601String(),
+      'compliance_type': 'LGPD',
+    });
+  }
+
+  /// Analytics para compartilhamento de arquivo exportado
+  Future<void> logDataExportShared({
+    required String userId,
+    required String platform,
+  }) async {
+    await logEvent('data_export_shared', {
+      'user_id_hash': _hashUserId(userId),
+      'platform': platform,
+      'timestamp': DateTime.now().toIso8601String(),
+      'compliance_type': 'LGPD',
+    });
+  }
+
+  /// Analytics para estimativa de tamanho da exportação
+  Future<void> logDataExportSizeEstimated({
+    required String userId,
+    required int estimatedSizeMb,
+    required int totalRecords,
+    required int totalCategories,
+  }) async {
+    await logEvent('data_export_size_estimated', {
+      'user_id_hash': _hashUserId(userId),
+      'estimated_size_mb': estimatedSizeMb,
+      'total_records': totalRecords,
+      'total_categories': totalCategories,
+      'timestamp': DateTime.now().toIso8601String(),
+      'compliance_type': 'LGPD',
+    });
+  }
+
+  /// Hash do user ID para compliance (não armazenar ID real)
+  String _hashUserId(String userId) {
+    // Simples hash para não armazenar o ID real do usuário
+    return userId.hashCode.abs().toString();
   }
 
   // ===== CRASHLYTICS METHODS =====

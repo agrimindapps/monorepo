@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/data_cleaner_service.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
@@ -289,8 +291,15 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> deleteAccount() async {
     try {
+      // 1. Delete account from remote (Firebase)
       await remoteDataSource.deleteAccount();
+      
+      // 2. Clear cached user data
       await localDataSource.clearCachedUser();
+      
+      // 3. Clear all local gasometer data (vehicles, fuel records, etc.)
+      await _clearGasometerLocalData();
+      
       return const Right(unit);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
@@ -300,6 +309,41 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+  
+  /// Clears all local gasometer-specific data after account deletion
+  Future<void> _clearGasometerLocalData() async {
+    try {
+      // Get DataCleanerService instance
+      final dataCleanerService = DataCleanerService.instance;
+      
+      // Clear all local data including Hive boxes and SharedPreferences
+      final clearResult = await dataCleanerService.clearAllData();
+      
+      if (clearResult['success'] == true) {
+        final clearedBoxes = clearResult['totalClearedBoxes'] ?? 0;
+        final clearedPrefs = clearResult['totalClearedPreferences'] ?? 0;
+        
+        if (kDebugMode) {
+          debugPrint('✅ Gasometer local data cleared successfully:');
+          debugPrint('   - Hive boxes: $clearedBoxes');
+          debugPrint('   - SharedPreferences: $clearedPrefs');
+        }
+      } else {
+        final errors = clearResult['errors'] as List? ?? [];
+        if (errors.isNotEmpty && kDebugMode) {
+          debugPrint('⚠️ Some errors occurred during data clearing:');
+          for (final error in errors) {
+            debugPrint('   - $error');
+          }
+        }
+      }
+    } catch (e) {
+      // Don't throw error here - account deletion should succeed even if local cleanup fails
+      if (kDebugMode) {
+        debugPrint('⚠️ Error during local data cleanup: $e');
+      }
     }
   }
 

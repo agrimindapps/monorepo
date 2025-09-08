@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/di/injection_container.dart';
+import '../../../../core/di/injectable_config.dart' as gasometer_di;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../providers/premium_provider.dart';
@@ -17,7 +17,7 @@ class PremiumPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<PremiumProvider>(
-      create: (_) => sl<PremiumProvider>(),
+      create: (_) => gasometer_di.getIt<PremiumProvider>(),
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(

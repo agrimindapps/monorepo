@@ -93,7 +93,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1200),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: _buildContentOptimized(context, isLoading, hasError, expenses, expensesError),
                         ),
                       ),
@@ -671,7 +671,7 @@ class _OptimizedExpenseRecordCard extends StatelessWidget {
       semanticHint: 'Toque para ver detalhes completos, mantenha pressionado para editar ou excluir',
       onTap: onTap,
       onLongPress: onLongPress,
-      margin: EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
+      margin: const EdgeInsets.only(bottom: 4.0),
       child: Column(
         children: [
           _buildRecordHeader(context, vehicleName, formattedDate),

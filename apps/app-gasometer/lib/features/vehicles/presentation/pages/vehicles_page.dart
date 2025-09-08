@@ -410,7 +410,7 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
         }
         
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: crossAxisCount * cardWidth + (crossAxisCount - 1) * 16),

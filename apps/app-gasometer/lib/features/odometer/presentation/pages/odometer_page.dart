@@ -150,9 +150,7 @@ class _OdometerPageState extends State<OdometerPage> {
   Widget _buildControls() {
     return Container(
       width: double.infinity,
-      padding: GasometerDesignTokens.paddingAll(
-        GasometerDesignTokens.spacingPagePadding,
-      ),
+      padding: const EdgeInsets.all(8.0),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
@@ -227,9 +225,7 @@ class _OdometerPageState extends State<OdometerPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
           child: Padding(
-            padding: GasometerDesignTokens.paddingAll(
-              GasometerDesignTokens.spacingPagePadding,
-            ),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 if (_showStatistics && _odometers.isNotEmpty) ...[
@@ -392,7 +388,7 @@ class _OdometerPageState extends State<OdometerPage> {
     final weekday = _getWeekdayName(date.weekday);
 
     return StandardCard.standard(
-      margin: EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
+      margin: const EdgeInsets.only(bottom: 4.0),
       onTap: () => _editOdometer(odometer),
       child: Row(
         children: [

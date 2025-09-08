@@ -10,6 +10,7 @@ import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
 import '../../../../shared/widgets/sync/sync_progress_overlay.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
 import '../../domain/usecases/sign_in_anonymously.dart';
@@ -18,6 +19,8 @@ import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/update_profile.dart';
 import '../../domain/usecases/watch_auth_state.dart';
+import '../../data/datasources/auth_local_data_source.dart';
+import '../../data/models/user_model.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {
@@ -27,12 +30,14 @@ class AuthProvider extends ChangeNotifier {
   final SignUpWithEmail _signUpWithEmail;
   final SignInAnonymously _signInAnonymously;
   final SignOut _signOut;
+  final DeleteAccount _deleteAccount;
   final UpdateProfile _updateProfile;
   final SendPasswordReset _sendPasswordReset;
   final AnalyticsService _analytics;
   final PlatformService _platformService;
   final AuthRateLimiter _rateLimiter;
   final ISyncService _syncService;
+  final AuthLocalDataSource _authLocalDataSource;
   
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -51,24 +56,28 @@ class AuthProvider extends ChangeNotifier {
     required SignUpWithEmail signUpWithEmail,
     required SignInAnonymously signInAnonymously,
     required SignOut signOut,
+    required DeleteAccount deleteAccount,
     required UpdateProfile updateProfile,
     required SendPasswordReset sendPasswordReset,
     required AnalyticsService analytics,
     required PlatformService platformService,
     required AuthRateLimiter rateLimiter,
     required ISyncService syncService,
+    required AuthLocalDataSource authLocalDataSource,
   })  : _getCurrentUser = getCurrentUser,
         _watchAuthState = watchAuthState,
         _signInWithEmail = signInWithEmail,
         _signUpWithEmail = signUpWithEmail,
         _signInAnonymously = signInAnonymously,
         _signOut = signOut,
+        _deleteAccount = deleteAccount,
         _updateProfile = updateProfile,
         _sendPasswordReset = sendPasswordReset,
         _analytics = analytics,
         _platformService = platformService,
         _rateLimiter = rateLimiter,
-        _syncService = syncService {
+        _syncService = syncService,
+        _authLocalDataSource = authLocalDataSource {
     _initializeAuthState();
   }
   
@@ -459,6 +468,178 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       },
     );
+  }
+
+  /// Update user's local avatar (base64 format)
+  Future<bool> updateAvatar(String avatarBase64) async {
+    try {
+      if (_currentUser == null) return false;
+
+      // Update user with new avatar
+      final updatedUser = _currentUser!.copyWith(avatarBase64: avatarBase64);
+      _currentUser = updatedUser;
+      
+      // Persist the avatar locally through the auth data source
+      // This will be handled by the local data source implementation
+      await _saveUserLocallyWithAvatar(updatedUser);
+      
+      // Log avatar update
+      await _analytics.logUserAction('avatar_updated', parameters: {
+        'avatar_size_kb': (avatarBase64.length * 3 ~/ 4 / 1024).toString(),
+        'user_type': _currentUser!.type.toString(),
+      });
+      
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao salvar avatar: ${e.toString()}';
+      
+      await _analytics.recordError(
+        e,
+        StackTrace.current,
+        reason: 'avatar_update_error',
+      );
+      
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Remove user's local avatar
+  Future<bool> removeAvatar() async {
+    try {
+      if (_currentUser == null) return false;
+
+      // Update user removing avatar
+      final updatedUser = _currentUser!.copyWith(avatarBase64: null);
+      _currentUser = updatedUser;
+      
+      // Persist the changes locally
+      await _saveUserLocallyWithAvatar(updatedUser);
+      
+      // Log avatar removal
+      await _analytics.logUserAction('avatar_removed', parameters: {
+        'user_type': _currentUser!.type.toString(),
+      });
+      
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Erro ao remover avatar: ${e.toString()}';
+      
+      await _analytics.recordError(
+        e,
+        StackTrace.current,
+        reason: 'avatar_remove_error',
+      );
+      
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Helper method to save user data locally including avatar
+  Future<void> _saveUserLocallyWithAvatar(UserEntity user) async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔐 Salvando dados do usuário localmente com avatar');
+      }
+      
+      // Convert entity to model and save through local data source
+      final userModel = UserModel.fromEntity(user);
+      await _authLocalDataSource.cacheUser(userModel);
+      
+    } catch (e) {
+      throw Exception('Falha ao salvar dados do usuário localmente: $e');
+    }
+  }
+
+  Future<void> deleteAccount({String? currentPassword}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      // Log deletion attempt for analytics
+      await _analytics.logUserAction('account_deletion_attempted');
+      
+      // For non-anonymous users, require password verification
+      if (_currentUser != null && !_currentUser!.isAnonymous) {
+        if (currentPassword == null || currentPassword.isEmpty) {
+          _errorMessage = 'Senha atual é obrigatória para exclusão de conta.';
+          _isLoading = false;
+          notifyListeners();
+          return;
+        }
+        
+        // Re-authenticate with current credentials
+        final reAuthResult = await _signInWithEmail(SignInWithEmailParams(
+          email: _currentUser!.email!,
+          password: currentPassword,
+        ));
+        
+        // Check if re-authentication failed
+        final reAuthSuccess = reAuthResult.fold(
+          (failure) {
+            _errorMessage = 'Senha atual incorreta. Verifique e tente novamente.';
+            return false;
+          },
+          (_) => true,
+        );
+        
+        if (!reAuthSuccess) {
+          _isLoading = false;
+          notifyListeners();
+          
+          await _analytics.logUserAction('account_deletion_reauthentication_failed');
+          return;
+        }
+        
+        await _analytics.logUserAction('account_deletion_reauthentication_success');
+      }
+      
+      // Proceed with account deletion
+      final result = await _deleteAccount();
+      
+      result.fold(
+        (failure) {
+          _errorMessage = _mapFailureToMessage(failure);
+          _isLoading = false;
+          notifyListeners();
+          
+          // Log deletion error
+          _analytics.logUserAction('account_deletion_error', parameters: {
+            'error': failure.message,
+          });
+        },
+        (_) async {
+          // Log successful deletion
+          await _analytics.logUserAction('account_deletion_success');
+          
+          // Clear user state
+          _currentUser = null;
+          _isPremium = false;
+          _isLoading = false;
+          
+          if (kDebugMode) {
+            debugPrint('🔐 Conta deletada com sucesso');
+          }
+          
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      _errorMessage = 'Erro ao deletar conta: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      
+      // Log unexpected error
+      await _analytics.recordError(
+        e,
+        StackTrace.current,
+        reason: 'delete_account_error',
+      );
+    }
   }
   
   Future<void> _saveAnonymousPreference() async {

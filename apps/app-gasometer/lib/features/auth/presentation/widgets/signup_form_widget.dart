@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/login_controller.dart';
@@ -107,13 +109,38 @@ class SignupFormWidget extends StatelessWidget {
 
               // Termos e condições
               Center(
-                child: Text(
-                  'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                child: RichText(
                   textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    children: [
+                      const TextSpan(
+                        text: 'Ao criar uma conta, você concorda com nossos\n',
+                      ),
+                      TextSpan(
+                        text: 'Termos de Serviço',
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => context.go('/terms'),
+                      ),
+                      const TextSpan(text: ' e '),
+                      TextSpan(
+                        text: 'Política de Privacidade',
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => context.go('/privacy'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

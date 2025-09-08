@@ -410,127 +410,209 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   }
 
   void _showFinalDeleteConfirmation(BuildContext context, auth_providers.AuthProvider authProvider) {
+    final TextEditingController passwordController = TextEditingController();
+    bool obscurePassword = true;
+
     showDialog(
       context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber,
+                color: Theme.of(context).colorScheme.error,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Excluir Conta Permanentemente',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Esta ação é IRREVERSÍVEL. Todos os seus dados serão excluídos permanentemente.',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Para confirmar, digite sua senha atual:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: passwordController,
+                obscureText: obscurePassword,
+                decoration: InputDecoration(
+                  hintText: 'Senha atual',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        obscurePassword = !obscurePassword;
+                      });
+                    },
+                    icon: Icon(
+                      obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 12,
+                  ),
+                  children: [
+                    const TextSpan(
+                      text: 'Ao confirmar, você concorda com nossa ',
+                    ),
+                    TextSpan(
+                      text: 'Política de Exclusão de Contas',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                passwordController.dispose();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: passwordController.text.isEmpty
+                  ? null
+                  : () async {
+                      final success = await authProvider.deleteAccount(
+                        password: passwordController.text,
+                        downloadData: false,
+                      );
+
+                      passwordController.dispose();
+                      Navigator.of(context).pop();
+
+                      if (success) {
+                        if (context.mounted) {
+                          _showDeletionSuccessDialog(context);
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                authProvider.errorMessage ??
+                                    'Erro ao excluir conta. Tente novamente.',
+                              ),
+                              backgroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                          );
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
+              ),
+              child: const Text('Excluir Conta'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeletionSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
             Icon(
-              Icons.construction_outlined,
+              Icons.check_circle_outline,
               color: Theme.of(context).colorScheme.primary,
               size: 24,
             ),
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Recurso em Desenvolvimento',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 20,
-                ),
+            const Text(
+              'Conta Excluída com Sucesso',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'A exclusão permanente de conta ainda não está disponível.',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Estamos trabalhando para implementar esta funcionalidade de forma segura e confiável.',
+            Text(
+              'Sua conta foi excluída permanentemente. Todos os seus dados foram removidos de nossos servidores.',
               style: TextStyle(fontSize: 14),
             ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.orange.withValues(alpha: 0.3),
-                ),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.lightbulb_outline, color: Colors.orange, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Alternativas disponíveis agora:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Text('• Fazer logout para sair da conta'),
-                  Text('• Contatar o suporte para assistência'),
-                  Text('• Aguardar a próxima atualização do app'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.schedule, color: Colors.blue, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Previsão: próxima atualização do aplicativo',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SizedBox(height: 16),
+            Text(
+              'Obrigado por ter usado o Plantis. Se precisar de ajuda, entre em contato conosco.',
+              style: TextStyle(fontSize: 14),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendi'),
-          ),
-          FilledButton.tonal(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _showContactSupportDialog(context);
+              // Navegar para tela de login ou inicial
             },
-            style: FilledButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.primary,
-            ),
-            child: const Text('Contatar Suporte'),
-          ),
-          OutlinedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showLogoutDialog(context, authProvider);
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Fazer Logout'),
+            child: const Text('Entendido'),
           ),
         ],
       ),

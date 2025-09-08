@@ -10,6 +10,8 @@ import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/maintenance/presentation/pages/maintenance_page.dart';
 import '../../features/odometer/presentation/pages/odometer_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/promo/presentation/pages/account_deletion_page.dart';
 import '../../features/promo/presentation/pages/privacy_policy_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/promo/presentation/pages/terms_conditions_page.dart';
@@ -68,6 +70,20 @@ class AppRouter {
           path: '/terms',
           name: 'terms',
           builder: (context, state) => const TermsConditionsPage(),
+        ),
+
+        // Account Deletion Route
+        GoRoute(
+          path: '/account-deletion',
+          name: 'account_deletion',
+          builder: (context, state) => const AccountDeletionPage(),
+        ),
+
+        // Profile Route
+        GoRoute(
+          path: '/profile',
+          name: 'profile',
+          builder: (context, state) => const ProfilePage(),
         ),
 
         // Auth Routes

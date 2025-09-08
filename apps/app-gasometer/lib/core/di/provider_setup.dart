@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
+import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../features/fuel/presentation/providers/fuel_provider.dart';
 import '../../features/expenses/presentation/providers/expenses_provider.dart';
 import '../../features/maintenance/presentation/providers/maintenance_provider.dart';
@@ -10,7 +11,7 @@ import '../../features/reports/presentation/providers/reports_provider.dart';
 // Providers
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 import '../sync/presentation/providers/sync_status_provider.dart';
-import 'injection_container.dart';
+import 'injectable_config.dart';
 
 /// Configuração otimizada de providers com lazy loading e reutilização de instâncias
 class ProviderSetup {
@@ -24,7 +25,7 @@ class ProviderSetup {
       // Auth Provider - Carregado imediatamente (essencial)
       ChangeNotifierProvider<auth_provider.AuthProvider>(
         create: (context) => _getOrCreateProvider<auth_provider.AuthProvider>(
-          () => sl<auth_provider.AuthProvider>(),
+          () => getIt<auth_provider.AuthProvider>(),
         ),
         lazy: false, // Não lazy - necessário para autenticação
       ),
@@ -32,7 +33,7 @@ class ProviderSetup {
       // Vehicles Provider - Lazy loading com cache
       ChangeNotifierProvider<VehiclesProvider>(
         create: (context) => _getOrCreateProvider<VehiclesProvider>(
-          () => sl<VehiclesProvider>(),
+          () => getIt<VehiclesProvider>(),
         ),
         lazy: true, // Lazy - só carrega quando necessário
       ),
@@ -40,7 +41,7 @@ class ProviderSetup {
       // Fuel Provider - Lazy loading
       ChangeNotifierProvider<FuelProvider>(
         create: (context) => _getOrCreateProvider<FuelProvider>(
-          () => sl<FuelProvider>(),
+          () => getIt<FuelProvider>(),
         ),
         lazy: true,
       ),
@@ -48,7 +49,7 @@ class ProviderSetup {
       // Expenses Provider - Lazy loading
       ChangeNotifierProvider<ExpensesProvider>(
         create: (context) => _getOrCreateProvider<ExpensesProvider>(
-          () => sl<ExpensesProvider>(),
+          () => getIt<ExpensesProvider>(),
         ),
         lazy: true,
       ),
@@ -56,7 +57,7 @@ class ProviderSetup {
       // Reports Provider - Lazy loading
       ChangeNotifierProvider<ReportsProvider>(
         create: (context) => _getOrCreateProvider<ReportsProvider>(
-          () => sl<ReportsProvider>(),
+          () => getIt<ReportsProvider>(),
         ),
         lazy: true,
       ),
@@ -64,7 +65,7 @@ class ProviderSetup {
       // Maintenance Provider - Lazy loading
       ChangeNotifierProvider<MaintenanceProvider>(
         create: (context) => _getOrCreateProvider<MaintenanceProvider>(
-          () => sl<MaintenanceProvider>(),
+          () => getIt<MaintenanceProvider>(),
         ),
         lazy: true,
       ),
@@ -72,7 +73,7 @@ class ProviderSetup {
       // Premium Provider - Lazy loading
       ChangeNotifierProvider<PremiumProvider>(
         create: (context) => _getOrCreateProvider<PremiumProvider>(
-          () => sl<PremiumProvider>(),
+          () => getIt<PremiumProvider>(),
         ),
         lazy: true,
       ),
@@ -80,9 +81,17 @@ class ProviderSetup {
       // Sync Status Provider - Não lazy (importante para status de sync)
       ChangeNotifierProvider<SyncStatusProvider>(
         create: (context) => _getOrCreateProvider<SyncStatusProvider>(
-          () => sl<SyncStatusProvider>(),
+          () => getIt<SyncStatusProvider>(),
         ),
         lazy: false,
+      ),
+      
+      // Data Export Provider - Lazy loading (usado apenas no perfil)
+      ChangeNotifierProvider<DataExportProvider>(
+        create: (context) => _getOrCreateProvider<DataExportProvider>(
+          () => getIt<DataExportProvider>(),
+        ),
+        lazy: true,
       ),
     ];
   }
@@ -162,11 +171,11 @@ class ProviderSetup {
   static Future<void> preloadCriticalProviders() async {
     // Pré-carrega providers essenciais
     _getOrCreateProvider<auth_provider.AuthProvider>(
-      () => sl<auth_provider.AuthProvider>(),
+      () => getIt<auth_provider.AuthProvider>(),
     );
     
     _getOrCreateProvider<SyncStatusProvider>(
-      () => sl<SyncStatusProvider>(),
+      () => getIt<SyncStatusProvider>(),
     );
     
     // Inicializa providers críticos se necessário
@@ -247,7 +256,7 @@ class OptimizedProviderFactory {
     
     return ChangeNotifierProvider<VehiclesProvider>(
       create: (context) => ProviderSetup._getOrCreateProvider<VehiclesProvider>(
-        () => sl<VehiclesProvider>(),
+        () => getIt<VehiclesProvider>(),
       ),
       lazy: lazy,
     );
@@ -266,7 +275,7 @@ class OptimizedProviderFactory {
     
     return ChangeNotifierProvider<FuelProvider>(
       create: (context) => ProviderSetup._getOrCreateProvider<FuelProvider>(
-        () => sl<FuelProvider>(),
+        () => getIt<FuelProvider>(),
       ),
       lazy: lazy,
     );

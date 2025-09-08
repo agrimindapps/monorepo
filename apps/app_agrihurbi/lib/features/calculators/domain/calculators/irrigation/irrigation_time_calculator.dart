@@ -119,7 +119,8 @@ class IrrigationTimeCalculator extends CalculatorEntity {
 
       // Cálculo do tempo básico
       final double basicTimeHours = realVolumeNeeded / flowRate;
-      final double basicTimeMinutes = basicTimeHours * 60;
+      // ignore: unused_local_variable
+      final double basicTimeMinutes = basicTimeHours * 60; // TODO: Use in time breakdown analysis
 
       // Fator de correção para vento (afeta principalmente aspersão)
       final double windFactor = _calculateWindFactor(systemType, windSpeed);
@@ -140,9 +141,11 @@ class IrrigationTimeCalculator extends CalculatorEntity {
       final double sectorTime = correctedTimeHours / numberOfSectors;
 
       // Tempo para diferentes frações da lâmina
-      final double time25 = correctedTimeMinutes * 0.25;
+      // ignore: unused_local_variable
+      final double time25 = correctedTimeMinutes * 0.25; // TODO: Use in partial irrigation scenarios
       final double time50 = correctedTimeMinutes * 0.50;
-      final double time75 = correctedTimeMinutes * 0.75;
+      // ignore: unused_local_variable
+      final double time75 = correctedTimeMinutes * 0.75; // TODO: Use in stress management
 
       // Consumo energético estimado
       final double powerEstimated = _estimatePower(flowRate, systemType);

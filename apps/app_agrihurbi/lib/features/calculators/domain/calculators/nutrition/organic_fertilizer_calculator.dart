@@ -153,7 +153,9 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
 
       // Equivalente em fertilizantes minerais
       final double ureaEquivalent = totalNitrogen / 0.45; // Uréia 45% N
+      // ignore: unused_local_variable
       final double superphosphateEquivalent = totalPhosphorus / 0.18; // Super simples 18% P2O5
+      // ignore: unused_local_variable
       final double kclEquivalent = totalPotassium / 0.60; // KCl 60% K2O
 
       // Cronograma de aplicação

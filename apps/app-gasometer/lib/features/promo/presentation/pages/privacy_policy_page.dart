@@ -457,6 +457,8 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   'https://firebase.google.com/support/privacy'),
               _buildServiceLink('Firebase Cloud Storage',
                   'https://firebase.google.com/support/privacy'),
+              _buildServiceLink('RevenueCat', 
+                  'https://www.revenuecat.com/privacy'),
             ],
           ),
         ),
@@ -588,6 +590,11 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   'Executar serviços relacionados ao Serviço; ou'),
               _buildBulletPoint(
                   'Para nos ajudar a analisar como nosso Serviço é usado.'),
+              const SizedBox(height: 16),
+              _buildParagraph(
+                  'Utilizamos especificamente os seguintes provedores de serviço:'),
+              const SizedBox(height: 12),
+              _buildBulletPoint('RevenueCat: Utilizado para gerenciamento de assinaturas premium e compras dentro do aplicativo. A RevenueCat pode coletar e processar informações sobre suas transações e uso de funcionalidades premium.'),
               const SizedBox(height: 16),
               _buildParagraph(
                   'Queremos informar aos usuários deste Serviço que esses terceiros têm acesso às suas Informações Pessoais. O motivo é realizar as tarefas atribuídas a eles em nosso nome. No entanto, eles são obrigados a não divulgar ou usar as informações para qualquer outra finalidade.'),
@@ -795,6 +802,9 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   decoration: TextDecoration.underline,
                 ),
               ),
+              const SizedBox(height: 20),
+              _buildParagraph(
+                  'Para solicitar a exclusão completa de sua conta e dados pessoais, acesse nossa página de Exclusão de Conta ou entre em contato conosco.'),
             ],
           ),
         ),
@@ -814,7 +824,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
               children: [
                 Icon(
                   Icons.local_gas_station,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -823,7 +833,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -833,7 +843,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
               '© ${DateTime.now().year} Agrimind Apps. Todos os direitos reservados.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -846,9 +856,16 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
                   width: 1,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                 ),
                 _footerLink('Termos de Uso', () => context.go('/terms')),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  height: 12,
+                  width: 1,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+                _footerLink('Exclusão de Conta', () => context.go('/account-deletion')),
               ],
             ),
           ],
@@ -864,7 +881,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
         title,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
         ),
       ),
     );

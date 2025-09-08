@@ -82,6 +82,12 @@ class PlantisColors {
     colors: [flower, flowerLight],
   );
 
+  static const LinearGradient errorGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [error, errorLight],
+  );
+
   // Helper methods
   
   /// Cor de fundo padrão que suporta tema claro e escuro

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/legal/presentation/pages/account_deletion_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
 import '../../features/legal/presentation/pages/terms_of_service_page.dart';
@@ -44,6 +45,7 @@ class AppRouter {
   static const String accountProfile = '/account-profile';
   static const String termsOfService = '/terms-of-service';
   static const String privacyPolicy = '/privacy-policy';
+  static const String accountDeletionPolicy = '/account-deletion-policy';
   static const String promotional = '/promotional';
   static const String notificationsSettings = '/notifications-settings';
   static const String backupSettings = '/backup-settings';
@@ -250,6 +252,11 @@ class AppRouter {
               path: privacyPolicy,
               name: 'privacy-policy',
               builder: (context, state) => const PrivacyPolicyPage(),
+            ),
+            GoRoute(
+              path: accountDeletionPolicy,
+              name: 'account-deletion-policy',
+              builder: (context, state) => const AccountDeletionPage(),
             ),
 
             // Settings Routes

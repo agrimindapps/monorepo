@@ -1,6 +1,7 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -8,8 +9,10 @@ import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
+import '../widgets/account_section_widget.dart';
 import '../providers/settings_provider.dart';
 import 'database_inspector_page.dart';
 
@@ -150,7 +153,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildContent(BuildContext context) {
     return Column(
       children: [
-        _buildAccountSection(context),
+        const AccountSectionWidget(),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildAppearanceSection(context),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),

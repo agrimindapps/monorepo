@@ -32,7 +32,8 @@ abstract class CalculatorRemoteDataSource {
 
 @LazySingleton(as: CalculatorRemoteDataSource)
 class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
-  final DioClient _dioClient;
+  // ignore: unused_field
+  final DioClient _dioClient; // TODO: Will be used when implementing real API calls
 
   CalculatorRemoteDataSourceImpl(this._dioClient);
 
@@ -44,7 +45,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(_parseCalculators(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       return const Right([]);
     } catch (e) {
       return Left(ServerFailure('Erro ao carregar calculadoras: ${e.toString()}'));
@@ -59,7 +60,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(_parseCalculator(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       return const Left(NotFoundFailure('Calculadora não encontrada'));
     } catch (e) {
       return Left(ServerFailure('Erro ao carregar calculadora: ${e.toString()}'));
@@ -76,7 +77,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(_parseCalculators(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 400));
+      await Future<void>.delayed(const Duration(milliseconds: 400));
       return const Right([]);
     } catch (e) {
       return Left(ServerFailure('Erro ao buscar calculadoras por categoria: ${e.toString()}'));
@@ -91,7 +92,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(_parseCalculators(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future<void>.delayed(const Duration(milliseconds: 600));
       return const Right([]);
     } catch (e) {
       return Left(ServerFailure('Erro ao buscar calculadoras: ${e.toString()}'));
@@ -112,7 +113,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(_parseCalculationResult(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 1000));
+      await Future<void>.delayed(const Duration(milliseconds: 1000));
       return const Left(ServerFailure('Serviço de cálculo temporariamente indisponível'));
     } catch (e) {
       return Left(ServerFailure('Erro ao executar cálculo: ${e.toString()}'));
@@ -140,7 +141,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(_parseCalculationHistory(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       return const Right([]);
     } catch (e) {
       return Left(ServerFailure('Erro ao carregar histórico: ${e.toString()}'));
@@ -157,7 +158,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // );
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Erro ao salvar histórico: ${e.toString()}'));
@@ -171,7 +172,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // await _dioClient.delete('/calculations/history/$historyId');
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Erro ao deletar histórico: ${e.toString()}'));
@@ -186,7 +187,7 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       // return Right(Map<String, int>.from(response.data));
       
       // Mock temporário para testes
-      await Future.delayed(const Duration(milliseconds: 400));
+      await Future<void>.delayed(const Duration(milliseconds: 400));
       return const Right({});
     } catch (e) {
       return Left(ServerFailure('Erro ao carregar estatísticas: ${e.toString()}'));

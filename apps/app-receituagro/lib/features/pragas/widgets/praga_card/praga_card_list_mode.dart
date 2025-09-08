@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/design_tokens.dart';
 import 'praga_card_action_section.dart';
 import 'praga_card_content_section.dart';
 import 'praga_card_helpers.dart';
@@ -24,45 +25,78 @@ class PragaCardListMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      elevation: properties.isDarkMode ? 4 : 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    return Container(
+      margin: EdgeInsets.zero,
+      decoration: BoxDecoration(
+        color: PragaCardHelpers.getCardColor(properties.isDarkMode),
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        boxShadow: [
+          BoxShadow(
+            color: properties.isDarkMode 
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.2),
+            blurRadius: ReceitaAgroElevation.card,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      color: PragaCardHelpers.getCardColor(properties.isDarkMode),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: properties.onTap,
-        child: Container(
-          height: properties.customHeight ?? 120,
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              // Seção de imagem
-              PragaCardImageSection(
-                properties: properties,
-                mode: PragaCardImageMode.list,
-                width: 80,
-                height: 80,
-              ),
-              
-              const SizedBox(width: 16),
-              
-              // Conteúdo principal expandido
-              Expanded(
-                child: PragaCardContentSection(
-                  properties: properties,
-                  mode: PragaCardContentMode.list,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+          onTap: properties.onTap,
+          child: Container(
+            height: properties.customHeight ?? 80,
+            padding: const EdgeInsets.symmetric(
+              horizontal: ReceitaAgroSpacing.sm,
+              vertical: ReceitaAgroSpacing.xs,
+            ),
+            child: Row(
+              children: [
+                // Seção de imagem compacta
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
+                    boxShadow: [
+                      BoxShadow(
+                        color: properties.isDarkMode 
+                            ? Colors.black.withValues(alpha: 0.3)
+                            : Colors.grey.withValues(alpha: 0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: PragaCardImageSection(
+                    properties: properties,
+                    mode: PragaCardImageMode.list,
+                    width: 64,
+                    height: 64,
+                  ),
                 ),
-              ),
-              
-              // Seção de ações
-              PragaCardActionSection(
-                properties: properties,
-                mode: PragaCardActionMode.list,
-              ),
-            ],
+                
+                const SizedBox(width: ReceitaAgroSpacing.sm),
+                
+                // Conteúdo principal expandido
+                Expanded(
+                  child: PragaCardContentSection(
+                    properties: properties,
+                    mode: PragaCardContentMode.list,
+                  ),
+                ),
+                
+                const SizedBox(width: ReceitaAgroSpacing.sm),
+                
+                // Seção de ações
+                PragaCardActionSection(
+                  properties: properties,
+                  mode: PragaCardActionMode.list,
+                ),
+              ],
+            ),
           ),
         ),
       ),

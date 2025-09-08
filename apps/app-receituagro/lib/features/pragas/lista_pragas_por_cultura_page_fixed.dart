@@ -15,27 +15,26 @@ import 'widgets/praga_cultura_loading_skeleton_widget.dart';
 import 'widgets/praga_cultura_search_field_widget.dart';
 import 'widgets/praga_cultura_tab_bar_widget.dart';
 
-class ListaPragasPorCulturaPage extends StatefulWidget {
+class ListaPragasPorCulturaPageFixed extends StatefulWidget {
   final String? culturaId;
   final String? culturaNome;
 
-  const ListaPragasPorCulturaPage({
+  const ListaPragasPorCulturaPageFixed({
     super.key,
     this.culturaId,
     this.culturaNome,
   });
 
   @override
-  State<ListaPragasPorCulturaPage> createState() =>
-      _ListaPragasPorCulturaPageState();
+  State<ListaPragasPorCulturaPageFixed> createState() => _ListaPragasPorCulturaPageFixedState();
 }
 
-class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
+class _ListaPragasPorCulturaPageFixedState extends State<ListaPragasPorCulturaPageFixed>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounceTimer;
-
+  
   bool _isAscending = true;
   PragaViewMode _viewMode = PragaViewMode.grid;
   String _searchText = '';
@@ -52,7 +51,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabChanged);
     _searchController.addListener(_onSearchChanged);
-
+    
     // Initialize provider
     _pragasProvider = GetIt.instance<PragasProvider>();
   }
@@ -69,19 +68,19 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
 
   void _onTabChanged() {
     if (_tabController.indexIsChanging) return;
-
+    
     setState(() {
       _tabIndex = _tabController.index;
     });
-
+    
     _loadPragasForCurrentTab();
   }
 
   void _onSearchChanged() {
     _searchDebounceTimer?.cancel();
-
+    
     final searchText = _searchController.text;
-
+    
     setState(() {
       _searchText = searchText;
     });
@@ -101,7 +100,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
 
   void _loadPragasForCurrentTab() {
     final currentTipo = tipoPragaValues[_tabIndex];
-
+    
     if (widget.culturaId != null && widget.culturaId!.isNotEmpty) {
       // Se houver culturaId, carregue por cultura (quando implementado)
       // Por enquanto, carrega por tipo e filtra depois
@@ -114,11 +113,11 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   void _clearSearch() {
     _searchDebounceTimer?.cancel();
     _searchController.clear();
-
+    
     setState(() {
       _searchText = '';
     });
-
+    
     _loadPragasForCurrentTab();
   }
 
@@ -132,7 +131,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     setState(() {
       _isAscending = !_isAscending;
     });
-
+    
     // Recarrega dados com nova ordenação
     _loadPragasForCurrentTab();
   }
@@ -163,9 +162,7 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
 
   List<PragaEntity> _getFilteredPragasForCurrentTab() {
     final currentTipo = tipoPragaValues[_tabIndex];
-    return _pragasProvider.pragas
-        .where((praga) => praga.tipoPraga == currentTipo)
-        .toList();
+    return _pragasProvider.pragas.where((praga) => praga.tipoPraga == currentTipo).toList();
   }
 
   @override
@@ -216,8 +213,8 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
           : 'Pragas por Cultura',
       subtitle: _getHeaderSubtitle(provider),
       leftIcon: Icons.agriculture_outlined,
-      rightIcon: _isAscending
-          ? Icons.arrow_upward_outlined
+      rightIcon: _isAscending 
+          ? Icons.arrow_upward_outlined 
           : Icons.arrow_downward_outlined,
       isDark: isDark,
       showBackButton: true,
@@ -228,18 +225,22 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   }
 
   Widget _buildBody(bool isDark, PragasProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: ReceitaAgroSpacing.sm),
-        _buildTabBar(isDark),
-        const SizedBox(height: ReceitaAgroSpacing.xs),
-        _buildSearchField(isDark),
-        const SizedBox(height: ReceitaAgroSpacing.xs),
-        Expanded(
-          child: _buildScrollableContent(isDark, provider),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTabBar(isDark),
+          const SizedBox(height: ReceitaAgroSpacing.sm),
+          _buildSearchField(isDark),
+          const SizedBox(height: ReceitaAgroSpacing.sm),
+          Expanded(
+            child: _buildScrollableContent(isDark, provider),
+          ),
+        ],
+      ),
     );
   }
 
@@ -330,8 +331,8 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
       );
     }
 
-    final pragasForCurrentTab = _getFilteredPragasForCurrentTab();
     final currentTypeFilter = tipoPragaValues[_tabIndex];
+    final pragasForCurrentTab = _getFilteredPragasForCurrentTab();
 
     if (pragasForCurrentTab.isEmpty) {
       return PragaCulturaEmptyStateWidget(
@@ -352,22 +353,17 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
-
+        
         // Calcula quantas linhas teremos
         final rowCount = (pragas.length / crossAxisCount).ceil();
-        final itemHeight = constraints.maxWidth /
-            crossAxisCount *
-            (1 / 0.85); // childAspectRatio inverse
-        final totalHeight = (rowCount * itemHeight) +
-            ((rowCount - 1) * 8) +
-            16; // spacing + padding
-
+        final itemHeight = constraints.maxWidth / crossAxisCount * (1 / 0.85); // childAspectRatio inverse
+        final totalHeight = (rowCount * itemHeight) + ((rowCount - 1) * 8) + 16; // spacing + padding
+        
         return SizedBox(
           height: totalHeight,
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
-            padding:
-                const EdgeInsets.symmetric(vertical: ReceitaAgroSpacing.sm),
+            padding: const EdgeInsets.symmetric(vertical: ReceitaAgroSpacing.sm),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               childAspectRatio: 0.85,
@@ -421,19 +417,19 @@ class _ListaPragasPorCulturaPageState extends State<ListaPragasPorCulturaPage>
   String _getHeaderSubtitle(PragasProvider provider) {
     final currentTypeFilter = tipoPragaValues[_tabIndex];
     final total = _getFilteredPragasForCurrentTab().length;
-
+    
     if (provider.isLoading && total == 0) {
       return 'Carregando pragas...';
     }
-
+    
     if (provider.errorMessage != null) {
       return 'Erro no carregamento';
     }
-
+    
     if (total > 0) {
       return '$total pragas identificadas';
     }
-
+    
     return 'Pragas desta cultura';
   }
 }

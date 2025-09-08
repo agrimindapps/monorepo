@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_provider_simplified.dart';
 
@@ -268,13 +270,10 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
   }
 
   void _navigateToDefensivoDetails(BuildContext context, FavoritoDefensivoEntity defensivo) {
-    Navigator.pushNamed(
-      context, 
-      '/detalhe-defensivo',
-      arguments: {
-        'defensivoName': defensivo.displayName,
-        'fabricante': defensivo.fabricante,
-      },
+    final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
+    navigationProvider.navigateToDetalheDefensivo(
+      defensivoName: defensivo.displayName,
+      fabricante: defensivo.fabricante,
     );
   }
 }

@@ -503,16 +503,12 @@ class _OdometerPageState extends State<OdometerPage> {
   void _addOdometer() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (dialogContext) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: Theme.of(context),
-        home: MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
-            ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
-          ],
-          builder: (context, child) => AddOdometerPage(vehicleId: _selectedVehicleId),
-        ),
+      builder: (dialogContext) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
+          ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+        ],
+        builder: (context, child) => AddOdometerPage(vehicleId: _selectedVehicleId),
       ),
     );
     
@@ -540,16 +536,12 @@ class _OdometerPageState extends State<OdometerPage> {
     try {
       result = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (dialogContext) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: Theme.of(context),
-          home: MultiProvider(
-            providers: [
-              ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
-              ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
-            ],
-            builder: (context, child) => AddOdometerPage(odometer: odometer),
-          ),
+        builder: (dialogContext) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
+            ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+          ],
+          builder: (context, child) => AddOdometerPage(odometer: odometer),
         ),
       );
     } catch (e) {

@@ -23,7 +23,7 @@ class ListaCulturasPage extends StatefulWidget {
 class _ListaCulturasPageState extends State<ListaCulturasPage> {
   final TextEditingController _searchController = TextEditingController();
   final CulturaCoreRepository _repository = sl<CulturaCoreRepository>();
-  
+
   List<CulturaHive> _culturas = [];
   List<CulturaHive> _filteredCulturas = [];
   bool _isLoading = false;
@@ -51,7 +51,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       final culturas = await _repository.getActiveCulturas();
       setState(() {
@@ -69,9 +69,9 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
 
   void _onSearchChanged() {
     _debounceTimer?.cancel();
-    
+
     final searchText = _searchController.text;
-    
+
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       _performSearch(searchText.trim());
     });
@@ -83,7 +83,9 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
         _filteredCulturas = _culturas;
       } else {
         _filteredCulturas = _culturas.where((cultura) {
-          return cultura.cultura.toLowerCase().contains(searchText.toLowerCase());
+          return cultura.cultura
+              .toLowerCase()
+              .contains(searchText.toLowerCase());
         }).toList();
       }
       _sortCulturas();
@@ -107,7 +109,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
 
   void _sortCulturas() {
     _filteredCulturas.sort((a, b) {
-      return _isAscending 
+      return _isAscending
           ? a.cultura.compareTo(b.cultura)
           : b.cultura.compareTo(a.cultura);
     });
@@ -135,7 +137,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     if (_isLoading) {
       return 'Carregando culturas...';
     }
-    
+
     if (_errorMessage != null) {
       return 'Erro no carregamento';
     }
@@ -179,7 +181,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                     child: Card(
                       elevation: 2,
                       color: isDark ? const Color(0xFF1E1E22) : Colors.white,
@@ -218,9 +220,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
             : 'Verifique se os dados foram carregados',
       );
     } else {
-      return _viewMode.isGrid
-          ? _buildGridView(isDark)
-          : _buildListView(isDark);
+      return _viewMode.isGrid ? _buildGridView(isDark) : _buildListView(isDark);
     }
   }
 
@@ -244,7 +244,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
-        
+
         return GridView.builder(
           padding: const EdgeInsets.all(8),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -274,5 +274,4 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     if (screenWidth < 1100) return 4;
     return 5;
   }
-
 }

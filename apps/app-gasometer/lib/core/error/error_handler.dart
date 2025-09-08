@@ -68,9 +68,17 @@ class Result<T> {
     U Function(AppError error) onError,
     U Function(T data) onSuccess,
   ) {
-    return isSuccess && data != null 
-        ? onSuccess(data as T) 
-        : onError(error!);
+    if (isSuccess && data != null) {
+      return onSuccess(data as T);
+    }
+    
+    // Ensure we have a valid error before calling onError
+    final errorToUse = error ?? UnexpectedError(
+      message: 'Unknown error occurred in Result.fold',
+      technicalDetails: 'Result was marked as failure but no error was provided',
+    );
+    
+    return onError(errorToUse);
   }
 
   @override

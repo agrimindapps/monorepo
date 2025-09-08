@@ -35,24 +35,14 @@ class PragaCardActionSection extends StatelessWidget {
     }
   }
 
-  /// Ações para modo lista (vertical stack)
+  /// Ações para modo lista (apenas favorito)
   Widget _buildListActions() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Botão de favorito
-        if (properties.showFavoriteButton && properties.onFavoriteToggle != null)
-          _buildStandardFavoriteButton(),
-        
-        const SizedBox(height: 8),
-        
-        // Indicador de navegação
-        Icon(
-          Icons.chevron_right_rounded,
-          color: PragaCardHelpers.getIconColor(properties.isDarkMode),
-          size: 24,
-        ),
-      ],
+    if (!properties.showFavoriteButton || properties.onFavoriteToggle == null) {
+      return const SizedBox.shrink();
+    }
+    
+    return Center(
+      child: _buildStandardFavoriteButton(),
     );
   }
 

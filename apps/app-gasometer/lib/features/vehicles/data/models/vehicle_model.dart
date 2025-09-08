@@ -325,6 +325,20 @@ class VehicleModel extends BaseSyncModel {
     );
   }
 
+  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
+  factory VehicleModel.fromJson(Map<String, dynamic> json) {
+    // Check if this is Firebase data (contains Timestamp objects)
+    final hasTimestamp = json.values.any((value) => value is Timestamp);
+    
+    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
+      // Use Firebase parsing for data from remote source
+      return VehicleModel.fromFirebaseMap(json);
+    } else {
+      // Use Hive parsing for local data
+      return VehicleModel.fromHiveMap(json);
+    }
+  }
+
   /// copyWith method for immutability
   @override
   VehicleModel copyWith({
@@ -381,7 +395,6 @@ class VehicleModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   Map<String, dynamic> toJson() => toHiveMap();
   factory VehicleModel.fromMap(Map<String, dynamic> map) => VehicleModel.fromHiveMap(map);
-  factory VehicleModel.fromJson(Map<String, dynamic> json) => VehicleModel.fromHiveMap(json);
 
   @override
   String toString() {

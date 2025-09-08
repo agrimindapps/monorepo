@@ -359,7 +359,7 @@ class _FuelPageState extends State<FuelPage> {
           child: ListView.builder(
             // ✅ Remove shrinkWrap and NeverScrollableScrollPhysics for proper virtualization
             itemCount: records.length,
-            itemExtent: 120.0, // Fixed item height for better performance
+            // Removed itemExtent to allow dynamic height based on content
             itemBuilder: (context, index) {
               return Consumer<VehiclesProvider>(
                 builder: (context, vehiclesProvider, child) {
@@ -515,7 +515,7 @@ class _FuelPageState extends State<FuelPage> {
       // Get providers before opening dialog to avoid context issues
       final authProvider = context.read<AuthProvider>();
       
-      final result = await showDialog<bool>(
+      final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (dialogContext) => MultiProvider(
           providers: [
@@ -527,9 +527,21 @@ class _FuelPageState extends State<FuelPage> {
         ),
       );
       
-      if (result == true && mounted) {
+      if (result?['success'] == true && mounted) {
         // Recarregar dados após adicionar combustível
         _loadData();
+        
+        // Mostrar mensagem de sucesso
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result?['message'] as String? ?? 'Abastecimento adicionado com sucesso!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Error opening add fuel dialog: $e');
@@ -545,7 +557,7 @@ class _FuelPageState extends State<FuelPage> {
     // Get providers before opening dialog to avoid context issues
     final authProvider = context.read<AuthProvider>();
     
-    final result = await showDialog<bool>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (dialogContext) => MultiProvider(
         providers: [
@@ -560,9 +572,21 @@ class _FuelPageState extends State<FuelPage> {
       ),
     );
     
-    if (result == true && mounted) {
+    if (result?['success'] == true && mounted) {
       // Recarregar dados após editar combustível
       _loadData();
+      
+      // Mostrar mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result?['message'] as String? ?? 'Abastecimento editado com sucesso!'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
     }
   }
 
@@ -923,27 +947,35 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
 
   Widget _buildRecordStats(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildInfoItem(
-          context,
-          Icons.water_drop_outlined,
-          '${record.litros.toStringAsFixed(1)} L',
-          'Litros',
+        Expanded(
+          child: _buildInfoItem(
+            context,
+            Icons.water_drop_outlined,
+            '${record.litros.toStringAsFixed(1)} L',
+            'Litros',
+          ),
         ),
-        _buildInfoItem(
-          context,
-          Icons.speed,
-          '${record.odometro.toStringAsFixed(0)} km',
-          'Odômetro',
+        Expanded(
+          child: _buildInfoItem(
+            context,
+            Icons.speed,
+            '${record.odometro.toStringAsFixed(0)} km',
+            'Odômetro',
+          ),
         ),
-        _buildInfoItem(
-          context,
-          Icons.attach_money,
-          'R\$ ${record.valorTotal.toStringAsFixed(2)}',
-          'Total',
+        Expanded(
+          child: _buildInfoItem(
+            context,
+            Icons.attach_money,
+            'R\$ ${record.valorTotal.toStringAsFixed(2)}',
+            'Total',
+          ),
         ),
-        if (record.tanqueCheio) _buildFullTankBadge(context),
+        if (record.tanqueCheio) 
+          Flexible(
+            child: _buildFullTankBadge(context),
+          ),
       ],
     );
   }
@@ -965,13 +997,19 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           SemanticText.label(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

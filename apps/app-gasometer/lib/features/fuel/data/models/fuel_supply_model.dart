@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:hive/hive.dart';
 
@@ -291,7 +292,19 @@ class FuelSupplyModel extends BaseSyncModel {
   Map<String, dynamic> toMap() => toHiveMap();
   Map<String, dynamic> toJson() => toHiveMap();
   factory FuelSupplyModel.fromMap(Map<String, dynamic> map) => FuelSupplyModel.fromHiveMap(map);
-  factory FuelSupplyModel.fromJson(Map<String, dynamic> json) => FuelSupplyModel.fromHiveMap(json);
+  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
+  factory FuelSupplyModel.fromJson(Map<String, dynamic> json) {
+    // Check if this is Firebase data (contains Timestamp objects)
+    final hasTimestamp = json.values.any((value) => value is Timestamp);
+    
+    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
+      // Use Firebase parsing for data from remote source
+      return FuelSupplyModel.fromFirebaseMap(json);
+    } else {
+      // Use Hive parsing for local data
+      return FuelSupplyModel.fromHiveMap(json);
+    }
+  }
 
   // Legacy Portuguese getters for backward compatibility
   String get veiculoId => vehicleId;

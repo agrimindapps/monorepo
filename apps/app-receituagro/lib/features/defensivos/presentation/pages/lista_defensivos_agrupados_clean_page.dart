@@ -149,8 +149,12 @@ class _ListaDefensivosAgrupadosCleanPageState
         return PopScope(
           canPop: provider.navigationLevel == 0,
           onPopInvokedWithResult: (didPop, result) {
-            if (!didPop && _canNavigateBack()) {
-              _navigateBack();
+            if (!didPop) {
+              if (_canNavigateBack()) {
+                _navigateBack();
+              } else if (Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+              }
             }
           },
           child: Scaffold(
@@ -182,7 +186,7 @@ class _ListaDefensivosAgrupadosCleanPageState
                 onBackPressed: () {
                   if (_canNavigateBack()) {
                     _navigateBack();
-                  } else {
+                  } else if (Navigator.canPop(context)) {
                     Navigator.of(context).pop();
                   }
                 },

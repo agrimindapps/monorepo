@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../providers/reports_provider.dart';
+import '../widgets/enhanced_stats_card.dart';
 
 /// ✅ PERFORMANCE FIX: Single Consumer with optimized sections
 class OptimizedReportsContent extends StatelessWidget {
@@ -47,11 +49,11 @@ class OptimizedReportsContent extends StatelessWidget {
                 () => reportsProvider.loadAllReportsForVehicle(selectedVehicleId!),
               )
             else ...[
-              OptimizedFuelSection(provider: reportsProvider),
-              const SizedBox(height: 24),
-              OptimizedConsumptionSection(provider: reportsProvider),
-              const SizedBox(height: 24),
-              OptimizedDistanceSection(provider: reportsProvider),
+              EnhancedFuelSection(provider: reportsProvider),
+              const SizedBox(height: 16),
+              EnhancedConsumptionSection(provider: reportsProvider),
+              const SizedBox(height: 16),
+              EnhancedDistanceSection(provider: reportsProvider),
             ],
           ],
         );
@@ -112,186 +114,111 @@ class OptimizedReportsContent extends StatelessWidget {
   }
 }
 
-/// ✅ PERFORMANCE FIX: Optimized fuel section without Consumer
-class OptimizedFuelSection extends StatelessWidget {
+/// Enhanced fuel section with performance indicators
+class EnhancedFuelSection extends StatelessWidget {
   final ReportsProvider provider;
   
-  const OptimizedFuelSection({super.key, required this.provider});
+  const EnhancedFuelSection({super.key, required this.provider});
   
   @override
   Widget build(BuildContext context) {
     final currentMonthStats = provider.getCurrentMonthStats();
     final currentYearStats = provider.getCurrentYearStats();
+    final monthlyComparisons = provider.getMonthlyComparisons();
+    final yearlyComparisons = provider.getYearlyComparisons();
     
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.local_gas_station, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Combustível',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: StatCard(
-                  title: 'Este Mês',
-                  value: currentMonthStats['fuel_spent'] ?? 'R\$ 0,00',
-                  subtitle: currentMonthStats['fuel_liters'] ?? '0,0L',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: StatCard(
-                  title: 'Este Ano',
-                  value: currentYearStats['fuel_spent'] ?? 'R\$ 0,00',
-                  subtitle: currentYearStats['fuel_liters'] ?? '0,0L',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return EnhancedStatsCard(
+      title: 'Abastecimento',
+      icon: Icons.local_gas_station,
+      iconColor: GasometerDesignTokens.colorAnalyticsBlue,
+      currentMonthValue: currentMonthStats['fuel_spent'] ?? 'R\$ 0,00',
+      previousMonthValue: monthlyComparisons['fuel_spent'] ?? 'R\$ 0,00',
+      currentYearValue: currentYearStats['fuel_spent'] ?? 'R\$ 0,00',
+      previousYearValue: yearlyComparisons['fuel_spent'] ?? 'R\$ 0,00',
+      currentMonthPercentageChange: _parsePercentage(monthlyComparisons['fuel_spent_growth']),
+      previousMonthPercentageChange: null, // Mês anterior não tem comparação
+      currentYearPercentageChange: _parsePercentage(yearlyComparisons['fuel_spent_growth']),
+      previousYearPercentageChange: null, // Ano anterior não tem comparação
+      isEmpty: false, // Always show data, even if zero
     );
+  }
+  
+  double? _parsePercentage(String? percentage) {
+    if (percentage == null || percentage == '0%') return null;
+    final cleanPercentage = percentage.replaceAll('%', '').replaceAll('+', '');
+    return double.tryParse(cleanPercentage);
   }
 }
 
-/// ✅ PERFORMANCE FIX: Optimized consumption section without Consumer
-class OptimizedConsumptionSection extends StatelessWidget {
+/// Enhanced consumption section with performance indicators
+class EnhancedConsumptionSection extends StatelessWidget {
   final ReportsProvider provider;
   
-  const OptimizedConsumptionSection({super.key, required this.provider});
+  const EnhancedConsumptionSection({super.key, required this.provider});
   
   @override
   Widget build(BuildContext context) {
     final currentMonthStats = provider.getCurrentMonthStats();
     final currentYearStats = provider.getCurrentYearStats();
+    final monthlyComparisons = provider.getMonthlyComparisons();
+    final yearlyComparisons = provider.getYearlyComparisons();
     
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.speed, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Consumo',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: StatCard(
-                  title: 'Média Mensal',
-                  value: currentMonthStats['consumption'] ?? '0,0 km/L',
-                  subtitle: 'Este mês',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: StatCard(
-                  title: 'Média Anual',
-                  value: currentYearStats['consumption'] ?? '0,0 km/L',
-                  subtitle: 'Este ano',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return EnhancedStatsCard(
+      title: 'Combustível',
+      icon: Icons.local_gas_station,
+      iconColor: GasometerDesignTokens.colorAnalyticsGreen,
+      currentMonthValue: currentMonthStats['fuel_liters'] ?? '0,0L',
+      previousMonthValue: monthlyComparisons['fuel_liters'] ?? '0,0L',
+      currentYearValue: currentYearStats['fuel_liters'] ?? '0,0L',
+      previousYearValue: yearlyComparisons['fuel_liters'] ?? '0,0L',
+      currentMonthPercentageChange: _parsePercentage(monthlyComparisons['fuel_liters_growth']),
+      previousMonthPercentageChange: null, // Mês anterior não tem comparação
+      currentYearPercentageChange: _parsePercentage(yearlyComparisons['fuel_liters_growth']),
+      previousYearPercentageChange: null, // Ano anterior não tem comparação
+      isEmpty: false, // Always show data, even if zero
     );
+  }
+  
+  double? _parsePercentage(String? percentage) {
+    if (percentage == null || percentage == '0%') return null;
+    final cleanPercentage = percentage.replaceAll('%', '').replaceAll('+', '');
+    return double.tryParse(cleanPercentage);
   }
 }
 
-/// ✅ PERFORMANCE FIX: Optimized distance section without Consumer
-class OptimizedDistanceSection extends StatelessWidget {
+/// Enhanced distance section with performance indicators
+class EnhancedDistanceSection extends StatelessWidget {
   final ReportsProvider provider;
   
-  const OptimizedDistanceSection({super.key, required this.provider});
+  const EnhancedDistanceSection({super.key, required this.provider});
   
   @override
   Widget build(BuildContext context) {
     final currentMonthStats = provider.getCurrentMonthStats();
     final currentYearStats = provider.getCurrentYearStats();
+    final monthlyComparisons = provider.getMonthlyComparisons();
+    final yearlyComparisons = provider.getYearlyComparisons();
     
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.straighten, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Distância',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: StatCard(
-                  title: 'Este Mês',
-                  value: currentMonthStats['distance'] ?? '0 km',
-                  subtitle: 'Distância percorrida',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: StatCard(
-                  title: 'Este Ano',
-                  value: currentYearStats['distance'] ?? '0 km',
-                  subtitle: 'Distância percorrida',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return EnhancedStatsCard(
+      title: 'Distância',
+      icon: Icons.speed,
+      iconColor: GasometerDesignTokens.colorAnalyticsPurple,
+      currentMonthValue: currentMonthStats['distance'] ?? '0 km',
+      previousMonthValue: monthlyComparisons['distance'] ?? '0 km',
+      currentYearValue: currentYearStats['distance'] ?? '0 km',
+      previousYearValue: yearlyComparisons['distance'] ?? '0 km',
+      currentMonthPercentageChange: _parsePercentage(monthlyComparisons['distance_growth']),
+      previousMonthPercentageChange: null, // Mês anterior não tem comparação
+      currentYearPercentageChange: _parsePercentage(yearlyComparisons['distance_growth']),
+      previousYearPercentageChange: null, // Ano anterior não tem comparação
+      isEmpty: false, // Always show data, even if zero
     );
+  }
+  
+  double? _parsePercentage(String? percentage) {
+    if (percentage == null || percentage == '0%') return null;
+    final cleanPercentage = percentage.replaceAll('%', '').replaceAll('+', '');
+    return double.tryParse(cleanPercentage);
   }
 }
 

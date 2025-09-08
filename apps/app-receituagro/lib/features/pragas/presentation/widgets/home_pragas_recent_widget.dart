@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/design/design_tokens.dart';
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
-import '../../detalhe_praga_page.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../providers/home_pragas_provider.dart';
 
@@ -122,14 +123,10 @@ class HomePragasRecentWidget extends StatelessWidget {
     // Registra o acesso através do provider
     provider.recordPragaAccess(praga);
     
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => DetalhePragaPage(
-          pragaName: pragaName,
-          pragaScientificName: scientificName,
-        ),
-      ),
+    final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
+    navigationProvider.navigateToDetalhePraga(
+      pragaName: pragaName,
+      pragaScientificName: scientificName,
     );
   }
 }

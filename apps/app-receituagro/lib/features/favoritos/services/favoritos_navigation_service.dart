@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../core/navigation/app_navigation_provider.dart';
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
-import '../../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../../DetalheDiagnostico/detalhe_diagnostico_page.dart';
-import '../../pragas/detalhe_praga_page.dart';
 import '../models/favorito_defensivo_model.dart';
 import '../models/favorito_diagnostico_model.dart';
 import '../models/favorito_praga_model.dart';
@@ -35,16 +35,12 @@ class FavoritosNavigationService {
       final defensivoReal = _fitossanitarioRepository.getById(defensivo.idReg);
       
       if (defensivoReal != null) {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetalheDefensivoPage(
-              defensivoName: defensivoReal.nomeComum.isNotEmpty 
-                  ? defensivoReal.nomeComum 
-                  : defensivoReal.nomeTecnico,
-              fabricante: defensivoReal.fabricante ?? 'Fabricante não informado',
-            ),
-          ),
+        final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
+        navigationProvider.navigateToDetalheDefensivo(
+          defensivoName: defensivoReal.nomeComum.isNotEmpty 
+              ? defensivoReal.nomeComum 
+              : defensivoReal.nomeTecnico,
+          fabricante: defensivoReal.fabricante ?? 'Fabricante não informado',
         );
       } else {
         _showNotFoundError(context, 'Defensivo não encontrado');
@@ -64,16 +60,12 @@ class FavoritosNavigationService {
       final pragaReal = _pragasRepository.getById(praga.idReg);
       
       if (pragaReal != null) {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetalhePragaPage(
-              pragaName: pragaReal.nomeComum,
-              pragaScientificName: pragaReal.nomeCientifico.isNotEmpty 
-                  ? pragaReal.nomeCientifico 
-                  : 'Nome científico não disponível',
-            ),
-          ),
+        final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
+        navigationProvider.navigateToDetalhePraga(
+          pragaName: pragaReal.nomeComum,
+          pragaScientificName: pragaReal.nomeCientifico.isNotEmpty 
+              ? pragaReal.nomeCientifico 
+              : 'Nome científico não disponível',
         );
       } else {
         _showNotFoundError(context, 'Praga não encontrada');

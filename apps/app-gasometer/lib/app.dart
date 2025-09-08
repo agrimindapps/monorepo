@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/injectable_config.dart' as local_di;
@@ -113,6 +114,15 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
                 return MaterialApp(
                   title: 'GasOMeter - Controle de Veículos',
                   theme: GasometerTheme.lightTheme,
+                  locale: const Locale('pt', 'BR'),
+                  localizationsDelegates: [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: [
+                    Locale('pt', 'BR'),
+                  ],
                   home: Scaffold(
                     body: Center(
                       child: Column(
@@ -144,6 +154,15 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
                     theme: GasometerTheme.lightTheme,
                     darkTheme: GasometerTheme.darkTheme,
                     themeMode: themeProvider.themeMode,
+                    locale: const Locale('pt', 'BR'),
+                    localizationsDelegates: [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    supportedLocales: [
+                      Locale('pt', 'BR'),
+                    ],
                     routerConfig: router,
                     debugShowCheckedModeBanner: false,
                   );

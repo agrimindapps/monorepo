@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/providers/preferences_provider.dart';
 import 'core/services/app_data_manager.dart';
+import 'core/services/culturas_data_loader.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/receituagro_storage_service.dart';
@@ -148,6 +149,12 @@ void main() async {
       // Data initialization successful
     },
   );
+
+  // 🔧 CRITICAL FIX: Load culturas data from JSON assets
+  // This fixes the empty culturas list issue
+  print('🔧 [MAIN] Iniciando carregamento de culturas...');
+  await CulturasDataLoader.loadCulturasData();
+  print('🔧 [MAIN] Carregamento de culturas finalizado.');
 
   // Run app
   if (EnvironmentConfig.enableAnalytics && !kIsWeb) {

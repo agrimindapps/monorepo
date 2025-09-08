@@ -251,28 +251,31 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: Column(
-            children: [
-            _buildModernHeader(context, isDark),
-            DefensivoSearchField(
-              controller: _searchController,
-              isDark: isDark,
-              isSearching: _isSearching,
-              selectedViewMode: _selectedViewMode,
-              onToggleViewMode: _toggleViewMode,
-              onClear: _clearSearch,
-              onSubmitted: () => _performSearch(_searchController.text),
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Column(
+              children: [
+                _buildModernHeader(context, isDark),
+                DefensivoSearchField(
+                  controller: _searchController,
+                  isDark: isDark,
+                  isSearching: _isSearching,
+                  selectedViewMode: _selectedViewMode,
+                  onToggleViewMode: _toggleViewMode,
+                  onClear: _clearSearch,
+                  onSubmitted: () => _performSearch(_searchController.text),
+                ),
+                Expanded(
+                  child: _buildContent(isDark),
+                ),
+              ],
             ),
-            Expanded(
-              child: _buildContent(isDark),
-            ),
-          ],
-        ),
+          ),
         ),
       ),
     );
@@ -408,7 +411,11 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
       rightIcon:
           _isAscending ? Icons.sort_by_alpha : Icons.sort_by_alpha_outlined,
       onRightIconPressed: _toggleSort,
-      onBackPressed: () => Navigator.of(context).pop(),
+      onBackPressed: () {
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+      },
     );
   }
 }

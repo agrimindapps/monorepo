@@ -234,7 +234,7 @@ class _TabContent extends StatelessWidget {
   Widget _buildTabLayout(
       BuildContext context, bool isActive, double animationValue) {
     if (showIconOnly) {
-      return _buildIconOnlyLayout(isActive, animationValue);
+      return _buildIconOnlyLayout(isActive, animationValue, context);
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -244,20 +244,20 @@ class _TabContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildIcon(isActive, animationValue),
+        _buildIcon(isActive, animationValue, context),
         if (shouldShowText) ...[
-          SizedBox(width: ComponentSpacing.tabIconTextGap),
+          const SizedBox(width: ComponentSpacing.tabIconTextGap),
           _buildText(isActive, animationValue, context),
         ],
       ],
     );
   }
 
-  Widget _buildIconOnlyLayout(bool isActive, double animationValue) {
-    return _buildIcon(isActive, animationValue);
+  Widget _buildIconOnlyLayout(bool isActive, double animationValue, BuildContext context) {
+    return _buildIcon(isActive, animationValue, context);
   }
 
-  Widget _buildIcon(bool isActive, double animationValue) {
+  Widget _buildIcon(bool isActive, double animationValue, BuildContext context) {
     final iconSize = 16.0 + (2.0 * animationValue);
 
     return AnimatedContainer(
@@ -265,6 +265,9 @@ class _TabContent extends StatelessWidget {
       child: Icon(
         tabData.icon,
         size: iconSize,
+        color: isActive 
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.primary,
         semanticLabel: tabData.text,
       ),
     );

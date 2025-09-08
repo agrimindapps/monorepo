@@ -90,66 +90,103 @@ class NavigationTestPage extends StatelessWidget {
               () => context.read<AppNavigationProvider>()
                   .navigateToListaCulturas(),
             ),
+            const SizedBox(height: 16),
+            _buildNavigationButton(
+              context,
+              'Detalhe Praga (SEM BottomNav)',
+              Icons.visibility,
+              () => context.read<AppNavigationProvider>()
+                  .navigateToDetalhePraga(
+                    pragaName: 'Praga Teste',
+                    pragaScientificName: 'Scientificus testus',
+                  ),
+            ),
+            const SizedBox(height: 8),
+            _buildNavigationButton(
+              context,
+              'Detalhe Defensivo (SEM BottomNav)',
+              Icons.visibility,
+              () => context.read<AppNavigationProvider>()
+                  .navigateToDetalheDefensivo(
+                    defensivoName: 'Defensivo Teste',
+                    fabricante: 'Fabricante Teste',
+                  ),
+            ),
             const SizedBox(height: 24),
             Consumer<AppNavigationProvider>(
               builder: (context, navigationProvider, child) {
-                if (navigationProvider.isInDetailPage) {
-                  return Column(
-                    children: [
-                      Card(
-                        color: Colors.green[50],
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info, color: Colors.green[700]),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Você está em uma página de detalhe!\n'
-                                  'Página atual: ${navigationProvider.currentPageTitle ?? "Sem título"}',
-                                  style: TextStyle(color: Colors.green[700]),
-                                ),
-                              ),
-                            ],
+                final debugInfo = navigationProvider.getNavigationDebugInfo();
+                
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Estado da Navegação:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => navigationProvider.goBack(),
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Voltar'),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton.icon(
-                        onPressed: () => navigationProvider.goBackToMain(),
-                        icon: const Icon(Icons.home),
-                        label: const Text('Voltar para página principal'),
-                      ),
-                    ],
-                  );
-                } else {
-                  return Card(
-                    color: Colors.blue[50],
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.blue[700]),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Você está em uma página principal!\n'
-                              'O bottomNavigationBar está sempre visível.',
-                              style: TextStyle(color: Colors.blue[700]),
+                        const SizedBox(height: 8),
+                        Text('Profundidade: ${debugInfo['navigationDepth']}'),
+                        Text('Em detalhe: ${debugInfo['isInDetailPage']}'),
+                        Text('Mostrar BottomNav: ${debugInfo['shouldShowBottomNavigation']}'),
+                        Text('Pode voltar: ${debugInfo['canGoBack']}'),
+                        Text('Página atual: ${debugInfo['currentPageType']?.replaceAll('AppPageType.', '') ?? 'N/A'}'),
+                        if (debugInfo['currentPageTitle'] != null)
+                          Text('Título: ${debugInfo['currentPageTitle']}'),
+                        const SizedBox(height: 8),
+                        if (navigationProvider.canGoBack) ...[
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () => navigationProvider.goBack(),
+                                icon: const Icon(Icons.arrow_back, size: 16),
+                                label: const Text('Voltar'),
+                                style: ElevatedButton.styleFrom(
+                                  textStyle: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              if (navigationProvider.navigationDepth > 1)
+                                ElevatedButton.icon(
+                                  onPressed: () => navigationProvider.goBackToMain(),
+                                  icon: const Icon(Icons.home, size: 16),
+                                  label: const Text('Início'),
+                                  style: ElevatedButton.styleFrom(
+                                    textStyle: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ] else ...[
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.blue[700], size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Você está na página principal!',
+                                    style: TextStyle(color: Colors.blue[700], fontSize: 12),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                  );
-                }
+                  ),
+                );
               },
             ),
           ],

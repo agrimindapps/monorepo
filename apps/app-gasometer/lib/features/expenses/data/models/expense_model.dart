@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:hive/hive.dart';
 
@@ -207,6 +208,20 @@ class ExpenseModel extends BaseSyncModel {
     );
   }
 
+  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
+  factory ExpenseModel.fromJson(Map<String, dynamic> json) {
+    // Check if this is Firebase data (contains Timestamp objects)
+    final hasTimestamp = json.values.any((value) => value is Timestamp);
+    
+    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
+      // Use Firebase parsing for data from remote source
+      return ExpenseModel.fromFirebaseMap(json);
+    } else {
+      // Use Hive parsing for local data
+      return ExpenseModel.fromHiveMap(json);
+    }
+  }
+
   /// copyWith method for immutability
   @override
   ExpenseModel copyWith({
@@ -258,8 +273,6 @@ class ExpenseModel extends BaseSyncModel {
   Map<String, dynamic> toJson() => toHiveMap();
   factory ExpenseModel.fromMap(Map<String, dynamic> map) =>
       ExpenseModel.fromHiveMap(map);
-  factory ExpenseModel.fromJson(Map<String, dynamic> json) =>
-      ExpenseModel.fromHiveMap(json);
 
   /// Get the expense date as DateTime object
   DateTime get expenseDate => DateTime.fromMillisecondsSinceEpoch(data);

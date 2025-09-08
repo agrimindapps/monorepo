@@ -256,7 +256,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
           child: ListView.builder(
             // Remove shrinkWrap and NeverScrollableScrollPhysics for proper virtualization
             itemCount: records.length,
-            itemExtent: 120.0, // Fixed item height for better performance
+            // Removed itemExtent to allow dynamic height based on content
             itemBuilder: (context, index) {
               return Consumer<VehiclesProvider>(
                 builder: (context, vehiclesProvider, child) {
@@ -346,24 +346,41 @@ class _ExpensesPageState extends State<ExpensesPage> {
         return;
       }
       
-      final result = await showDialog<bool>(
+      final result = await showDialog<dynamic>(
         context: context,
         builder: (dialogContext) => MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => ExpenseFormProvider()),
+            ChangeNotifierProvider(create: (_) => ExpenseFormProvider(
+              initialVehicleId: _selectedVehicleId,
+              userId: userId,
+            )),
             ChangeNotifierProvider.value(value: _vehiclesProvider),
             ChangeNotifierProvider.value(value: authProvider),
           ],
           builder: (context, child) => AddExpensePage(
             vehicleId: _selectedVehicleId,
-            userId: userId,
           ),
         ),
       );
       
-      if (result == true && mounted) {
-        // Recarregar dados após adicionar despesa
-        _loadData();
+      // Handle dialog result
+      if (result != null && mounted) {
+        if (result is Map<String, dynamic> && result['success'] == true) {
+          // Recarregar dados após adicionar despesa
+          _loadData();
+          
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message']?.toString() ?? 'Despesa adicionada com sucesso!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else if (result == true) {
+          // Fallback for old boolean return
+          _loadData();
+        }
       }
     } catch (e) {
       debugPrint('Error opening add expense dialog: $e');
@@ -396,25 +413,42 @@ class _ExpensesPageState extends State<ExpensesPage> {
       return;
     }
     
-    final result = await showDialog<bool>(
+    final result = await showDialog<dynamic>(
       context: context,
       builder: (dialogContext) => MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => ExpenseFormProvider()),
+          ChangeNotifierProvider(create: (_) => ExpenseFormProvider(
+            initialVehicleId: vehicleId,
+            userId: userId,
+          )),
           ChangeNotifierProvider.value(value: _vehiclesProvider),
           ChangeNotifierProvider.value(value: authProvider),
         ],
         builder: (context, child) => AddExpensePage(
           vehicleId: vehicleId,
-          userId: userId,
-          expenseToEdit: expenseToEdit,
+          editExpenseId: expenseToEdit.id,
         ),
       ),
     );
     
-    if (result == true && mounted) {
-      // Recarregar dados após editar despesa
-      _loadData();
+    // Handle dialog result
+    if (result != null && mounted) {
+      if (result is Map<String, dynamic> && result['success'] == true) {
+        // Recarregar dados após editar despesa
+        _loadData();
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']?.toString() ?? 'Despesa editada com sucesso!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else if (result == true) {
+        // Fallback for old boolean return
+        _loadData();
+      }
     }
   }
 
@@ -726,27 +760,35 @@ class _OptimizedExpenseRecordCard extends StatelessWidget {
 
   Widget _buildRecordStats(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildInfoItem(
-          context,
-          record.type.icon,
-          record.type.displayName,
-          'Tipo',
+        Expanded(
+          child: _buildInfoItem(
+            context,
+            record.type.icon,
+            record.type.displayName,
+            'Tipo',
+          ),
         ),
-        _buildInfoItem(
-          context,
-          Icons.speed,
-          '${record.odometer.toStringAsFixed(0)} km',
-          'Odômetro',
+        Expanded(
+          child: _buildInfoItem(
+            context,
+            Icons.speed,
+            '${record.odometer.toStringAsFixed(0)} km',
+            'Odômetro',
+          ),
         ),
-        _buildInfoItem(
-          context,
-          Icons.attach_money,
-          record.formattedAmount,
-          'Valor',
+        Expanded(
+          child: _buildInfoItem(
+            context,
+            Icons.attach_money,
+            record.formattedAmount,
+            'Valor',
+          ),
         ),
-        if (record.hasReceipt) _buildReceiptBadge(context),
+        if (record.hasReceipt) 
+          Flexible(
+            child: _buildReceiptBadge(context),
+          ),
       ],
     );
   }
@@ -768,6 +810,9 @@ class _OptimizedExpenseRecordCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           SemanticText.label(
             label,
@@ -775,6 +820,9 @@ class _OptimizedExpenseRecordCard extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

@@ -75,6 +75,20 @@ class ExpenseConstants {
   
   // Mapeamento de tipos de despesa com propriedades
   static const Map<ExpenseType, ExpenseTypeProperties> expenseTypeProperties = {
+    ExpenseType.fuel: ExpenseTypeProperties(
+      displayName: 'Combustível',
+      icon: Icons.local_gas_station,
+      color: 0xFF2196F3,
+      isRecurring: false,
+      description: 'Gastos com combustível',
+    ),
+    ExpenseType.maintenance: ExpenseTypeProperties(
+      displayName: 'Manutenção',
+      icon: Icons.build,
+      color: 0xFFFF9800,
+      isRecurring: false,
+      description: 'Gastos com manutenção do veículo',
+    ),
     ExpenseType.insurance: ExpenseTypeProperties(
       displayName: 'Seguro',
       icon: Icons.security,
@@ -234,7 +248,14 @@ class ExpenseTypeProperties {
 
 /// Extensions para facilitar o uso das constantes
 extension ExpenseTypeExtension on ExpenseType {
-  ExpenseTypeProperties get properties => ExpenseConstants.expenseTypeProperties[this]!;
+  ExpenseTypeProperties get properties => ExpenseConstants.expenseTypeProperties[this] ?? 
+      const ExpenseTypeProperties(
+        displayName: 'Desconhecido',
+        icon: Icons.help,
+        color: 0xFF9E9E9E,
+        isRecurring: false,
+        description: 'Tipo de despesa desconhecido',
+      );
   
   String get displayName => properties.displayName;
   IconData get icon => properties.icon;

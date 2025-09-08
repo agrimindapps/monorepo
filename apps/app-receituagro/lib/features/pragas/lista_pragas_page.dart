@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../core/navigation/app_navigation_provider.dart';
+import '../../core/design/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import 'detalhe_praga_page.dart';
 import 'domain/entities/praga_entity.dart';
@@ -24,9 +23,12 @@ class ListaPragasPage extends StatefulWidget {
   State<ListaPragasPage> createState() => _ListaPragasPageState();
 }
 
-class _ListaPragasPageState extends State<ListaPragasPage> {
+class _ListaPragasPageState extends State<ListaPragasPage>
+    with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounceTimer;
+  
+  late TabController _tabController;
 
   bool _isAscending = true;
   PragaViewMode _viewMode = PragaViewMode.grid;
@@ -40,6 +42,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
     
+    // Inicializa o TabController
+    final initialIndex = _getTabIndexFromType(_currentPragaType);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: initialIndex);
+    _tabController.addListener(_onTabChanged);
+    
     // Inicializa o provider diretamente
     _pragasProvider = GetIt.instance<PragasProvider>();
   }
@@ -49,10 +56,40 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _searchDebounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
     super.dispose();
   }
 
-  // Método migrado para PragasProvider
+  int _getTabIndexFromType(String pragaType) {
+    switch (pragaType) {
+      case '1': return 0; // Insetos
+      case '2': return 1; // Doenças  
+      case '3': return 2; // Plantas Daninhas
+      default: return 0;
+    }
+  }
+
+  String _getTypeFromTabIndex(int index) {
+    switch (index) {
+      case 0: return '1'; // Insetos
+      case 1: return '2'; // Doenças
+      case 2: return '3'; // Plantas Daninhas
+      default: return '1';
+    }
+  }
+
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      final newType = _getTypeFromTabIndex(_tabController.index);
+      setState(() {
+        _currentPragaType = newType;
+        _searchText = '';
+        _searchController.clear();
+      });
+      _pragasProvider.loadPragasByTipo(newType);
+    }
+  }
 
   void _onSearchChanged() {
     _searchDebounceTimer?.cancel();
@@ -132,33 +169,36 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       _pragasProvider.loadPragasByTipo(_currentPragaType);
     });
     
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1120),
-              child: Column(
-              children: [
-                AnimatedBuilder(
-                  animation: _pragasProvider,
-                  builder: (context, child) {
-                    return _buildModernHeader(isDark, _pragasProvider);
-                  },
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.zero,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
+                child: Column(
+                  children: [
+                    AnimatedBuilder(
+                      animation: _pragasProvider,
+                      builder: (context, child) {
+                        return _buildModernHeader(isDark, _pragasProvider);
+                      },
+                    ),
+                    Expanded(
+                      child: AnimatedBuilder(
+                        animation: _pragasProvider,
+                        builder: (context, child) {
+                          return _buildBody(isDark, _pragasProvider);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: AnimatedBuilder(
-                    animation: _pragasProvider,
-                    builder: (context, child) {
-                      return _buildBody(isDark, _pragasProvider);
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -168,14 +208,18 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     return ModernHeaderWidget(
       title: _getHeaderTitle(),
       subtitle: _getHeaderSubtitle(provider),
-      leftIcon: _getHeaderIcon(),
+      leftIcon: Icons.pest_control_outlined,
       rightIcon: _isAscending
           ? Icons.arrow_upward_outlined
           : Icons.arrow_downward_outlined,
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: () => Navigator.of(context).pop(),
+      onBackPressed: () {
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+      },
       onRightIconPressed: _toggleSort,
     );
   }
@@ -183,10 +227,86 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   Widget _buildBody(bool isDark, PragasProvider provider) {
     return Column(
       children: [
+        _buildTabBar(),
+        const SizedBox(height: 8),
         _buildSearchField(isDark),
         Expanded(child: _buildContent(isDark, provider)),
       ],
     );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        tabs: _buildFavoritesStyleTabs(),
+        labelColor: Colors.white,
+        unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        indicator: BoxDecoration(
+          color: const Color(0xFF4CAF50),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelStyle: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 0, // Hide text in inactive tabs
+          fontWeight: FontWeight.w400,
+        ),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 6.0),
+        indicatorPadding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        dividerColor: Colors.transparent,
+      ),
+    );
+  }
+
+  List<Widget> _buildFavoritesStyleTabs() {
+    final tabData = [
+      {'icon': Icons.bug_report_outlined, 'text': 'Insetos'},
+      {'icon': Icons.coronavirus_outlined, 'text': 'Doenças'},
+      {'icon': Icons.grass_outlined, 'text': 'Plantas Daninhas'},
+    ];
+
+    return tabData.map((data) => Tab(
+      child: AnimatedBuilder(
+        animation: _tabController,
+        builder: (context, child) {
+          final isActive = _tabController.index == tabData.indexOf(data);
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                data['icon'] as IconData,
+                size: 16,
+                color: isActive
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              if (isActive) ...[
+                const SizedBox(width: 6),
+                Text(
+                  data['text'] as String,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    )).toList();
   }
 
   Widget _buildSearchField(bool isDark) {
@@ -202,10 +322,24 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   Widget _buildContent(bool isDark, PragasProvider provider) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-        child: _buildPragasList(isDark, provider),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: ReceitaAgroSpacing.sm),
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _buildPragasList(isDark, provider),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -292,10 +426,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     }
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: ReceitaAgroElevation.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+        side: BorderSide.none,
+      ),
       color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-      margin: const EdgeInsets.only(top: 4),
+      margin: EdgeInsets.zero,
       child: _viewMode.isGrid
           ? _buildGridView(isDark, provider)
           : _buildListView(isDark, provider),
@@ -303,36 +440,50 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   Widget _buildGridView(bool isDark, PragasProvider provider) {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-      child: StaggeredGrid.count(
-        crossAxisCount: 2,
-        mainAxisSpacing: 4,
-        crossAxisSpacing: 4,
-        children: List.generate(provider.pragas.length, (int index) {
-          final praga = provider.pragas[index];
-          return StaggeredGridTile.fit(
-            crossAxisCellCount: 1,
-            child: PragaCardWidget(
-              praga: praga,
-              mode: PragaCardMode.grid,
-              isDarkMode: isDark,
-              isFavorite: false, // TODO: Implementar verificação de favoritos
-              onTap: () => _handleItemTap(praga),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
+        
+        // Calcula quantas linhas teremos
+        final rowCount = (provider.pragas.length / crossAxisCount).ceil();
+        final itemHeight = constraints.maxWidth / crossAxisCount * (1 / 0.85); // childAspectRatio inverse
+        final totalHeight = (rowCount * itemHeight) + ((rowCount - 1) * ReceitaAgroSpacing.sm) + (ReceitaAgroSpacing.sm * 2); // spacing + vertical padding only
+        
+        return SizedBox(
+          height: totalHeight,
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: ReceitaAgroSpacing.sm),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: 0.85,
+              crossAxisSpacing: ReceitaAgroSpacing.sm,
+              mainAxisSpacing: ReceitaAgroSpacing.sm,
             ),
-          );
-        }),
-      ),
+            itemCount: provider.pragas.length,
+            itemBuilder: (context, index) {
+              final praga = provider.pragas[index];
+              return PragaCardWidget(
+                praga: praga,
+                mode: PragaCardMode.grid,
+                isDarkMode: isDark,
+                isFavorite: false, // TODO: Implementar verificação de favoritos
+                onTap: () => _handleItemTap(praga),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
   Widget _buildListView(bool isDark, PragasProvider provider) {
-    return ListView.builder(
-      shrinkWrap: true,
+    return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(8),
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: ReceitaAgroSpacing.xs),
       itemCount: provider.pragas.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 4),
       itemBuilder: (context, index) {
         final praga = provider.pragas[index];
         return PragaCardWidget(
@@ -345,7 +496,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       },
     );
   }
-
 
   String _getHeaderTitle() {
     switch (_currentPragaType) {
@@ -374,16 +524,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     return '$total registros disponíveis';
   }
 
-  IconData _getHeaderIcon() {
-    switch (_currentPragaType) {
-      case '1':
-        return Icons.bug_report_outlined;
-      case '2':
-        return Icons.coronavirus_outlined;
-      case '3':
-        return Icons.grass_outlined;
-      default:
-        return Icons.pest_control_outlined;
-    }
+  int _calculateCrossAxisCount(double screenWidth) {
+    if (screenWidth < 600) return 2;
+    if (screenWidth < 900) return 3;
+    if (screenWidth < 1100) return 4;
+    return 5;
   }
+
 }

@@ -487,54 +487,105 @@ class _MaintenancePageState extends State<MaintenancePage> {
     }
   }
 
+  /// Clear filter cache to force recalculation
+  void _clearFilterCache() {
+    _cachedFilteredRecords = null;
+    _lastVehicleId = null;
+    _lastMaintenanceRecords = null;
+  }
+
   Future<void> _showAddMaintenanceDialog() async {
-    // Get providers before opening dialog to avoid context issues
-    final authProvider = context.read<AuthProvider>();
-    
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
-          ChangeNotifierProvider.value(value: _vehiclesProvider),
-          ChangeNotifierProvider.value(value: authProvider),
-        ],
-        builder: (context, child) => AddMaintenancePage(vehicleId: _selectedVehicleId),
-      ),
-    );
-    
-    if (result == true && mounted) {
-      // Recarregar dados após adicionar manutenção
-      setState(() {
-        // Force reload by clearing cache
-      });
+    try {
+      // Get providers before opening dialog to avoid context issues
+      final authProvider = context.read<AuthProvider>();
+      
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (dialogContext) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
+            ChangeNotifierProvider.value(value: _vehiclesProvider),
+            ChangeNotifierProvider.value(value: authProvider),
+          ],
+          builder: (context, child) => AddMaintenancePage(vehicleId: _selectedVehicleId),
+        ),
+      );
+      
+      if (result?['success'] == true && mounted) {
+        // Recarregar dados após adicionar manutenção
+        await _maintenanceProvider.loadAllMaintenanceRecords();
+        _clearFilterCache();
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text((result?['message'] as String?) ?? 'Manutenção adicionada com sucesso!'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao abrir formulário: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
   Future<void> _showEditMaintenanceDialog(MaintenanceEntity maintenance) async {
-    // Get providers before opening dialog to avoid context issues
-    final authProvider = context.read<AuthProvider>();
-    
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
-          ChangeNotifierProvider.value(value: _vehiclesProvider),
-          ChangeNotifierProvider.value(value: authProvider),
-        ],
-        builder: (context, child) => AddMaintenancePage(
-          maintenanceToEdit: maintenance,
-          vehicleId: _selectedVehicleId,
+    try {
+      // Get providers before opening dialog to avoid context issues
+      final authProvider = context.read<AuthProvider>();
+      
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (dialogContext) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
+            ChangeNotifierProvider.value(value: _vehiclesProvider),
+            ChangeNotifierProvider.value(value: authProvider),
+          ],
+          builder: (context, child) => AddMaintenancePage(
+            maintenanceToEdit: maintenance,
+            vehicleId: _selectedVehicleId,
+          ),
         ),
-      ),
-    );
-    
-    if (result == true && mounted) {
-      // Recarregar dados após editar manutenção
-      setState(() {
-        // Force reload by clearing cache
-      });
+      );
+      
+      if (result?['success'] == true && mounted) {
+        // Recarregar dados após editar manutenção
+        await _maintenanceProvider.loadAllMaintenanceRecords();
+        _clearFilterCache();
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text((result?['message'] as String?) ?? 'Manutenção editada com sucesso!'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao abrir formulário: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 

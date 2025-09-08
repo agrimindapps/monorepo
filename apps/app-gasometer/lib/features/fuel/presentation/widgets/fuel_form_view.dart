@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
 import '../../../../core/presentation/widgets/form_section_widget.dart';
-import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/fuel_constants.dart';
 import '../../domain/services/fuel_formatter_service.dart';
@@ -38,20 +36,19 @@ class FuelFormView extends StatelessWidget {
           return _buildNoVehicleView(context);
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildVehicleInfoCard(context, vehicle),
-            FormSpacing.section(),
-            _buildFuelInfoSection(context, provider),
-            FormSpacing.section(),
-            _buildValuesSection(context, provider),
-            FormSpacing.section(),
-            _buildLocationSection(context, provider),
-            FormSpacing.section(),
-            _buildNotesSection(context, provider),
-            SizedBox(height: GasometerDesignTokens.spacingXxxl),
-          ],
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFuelInfoSection(context, provider),
+              const SizedBox(height: 16),
+              _buildValuesSection(context, provider),
+              const SizedBox(height: 16),
+              _buildLocationSection(context, provider),
+              const SizedBox(height: 16),
+              _buildNotesSection(context, provider),
+            ],
+          ),
         );
       },
     );
@@ -87,56 +84,7 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleInfoCard(BuildContext context, VehicleEntity vehicle) {
-    return Semantics(
-      label: 'Veículo selecionado: ${vehicle.displayName}, ${vehicle.color}, placa ${vehicle.licensePlate}${vehicle.tankCapacity != null ? ", tanque ${vehicle.tankCapacity!.toStringAsFixed(0)} litros" : ""}',
-      child: StandardCard.standard(
-        child: Row(
-          children: [
-            Icon(
-              Icons.directions_car,
-              size: GasometerDesignTokens.iconSizeAvatar,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            SizedBox(width: GasometerDesignTokens.spacingLg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    vehicle.displayName,
-                    style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeLg,
-                      fontWeight: GasometerDesignTokens.fontWeightBold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: GasometerDesignTokens.spacingXs),
-                  Text(
-                    '${vehicle.color} • ${vehicle.licensePlate}',
-                    style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeMd,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (vehicle.tankCapacity != null) ...[
-                    SizedBox(height: GasometerDesignTokens.spacingXs),
-                    Text(
-                      'Tanque: ${vehicle.tankCapacity!.toStringAsFixed(0)}L',
-                      style: TextStyle(
-                        fontSize: GasometerDesignTokens.fontSizeSm,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
@@ -240,6 +188,17 @@ class FuelFormView extends StatelessWidget {
           initialDate: provider.formModel.date,
           firstDate: DateTime.now().subtract(const Duration(days: 365)),
           lastDate: DateTime.now(),
+          locale: const Locale('pt', 'BR'),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              child: child!,
+            );
+          },
         );
         if (date != null) {
           provider.updateDate(date);
@@ -266,6 +225,8 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildLitersField(BuildContext context, FuelFormProvider provider) {
     final vehicle = provider.formModel.vehicle;
+    final error = provider.formModel.errors['liters'];
+    
     return ValidatedFormField(
       controller: provider.litersController,
       label: FuelConstants.litersLabel,
@@ -276,14 +237,17 @@ class FuelFormView extends StatelessWidget {
       tankCapacity: vehicle?.tankCapacity,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().litersFormatter],
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         suffixText: 'L',
+        errorText: error,
       ),
       onValidationChanged: (result) {},
     );
   }
 
   Widget _buildPricePerLiterField(BuildContext context, FuelFormProvider provider) {
+    final error = provider.formModel.errors['pricePerLiter'];
+    
     return ValidatedFormField(
       controller: provider.pricePerLiterController,
       label: FuelConstants.pricePerLiterLabel,
@@ -292,8 +256,9 @@ class FuelFormView extends StatelessWidget {
       validationType: ValidationType.fuelPrice,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().priceFormatter],
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         prefixText: 'R\$ ',
+        errorText: error,
       ),
       onValidationChanged: (result) {},
     );
@@ -323,6 +288,8 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildOdometerField(BuildContext context, FuelFormProvider provider) {
     final vehicle = provider.formModel.vehicle;
+    final error = provider.formModel.errors['odometer'];
+    
     return ValidatedFormField(
       controller: provider.odometerController,
       label: FuelConstants.odometerLabel,
@@ -336,14 +303,17 @@ class FuelFormView extends StatelessWidget {
       maxValue: 9999999.0,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().odometerFormatter],
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         suffixText: 'km',
+        errorText: error,
       ),
       onValidationChanged: (result) {},
     );
   }
 
   Widget _buildGasStationField(BuildContext context, FuelFormProvider provider) {
+    final error = provider.formModel.errors['gasStationName'];
+    
     return ValidatedFormField(
       controller: provider.gasStationController,
       label: FuelConstants.gasStationLabel,
@@ -353,6 +323,9 @@ class FuelFormView extends StatelessWidget {
       validationType: ValidationType.length,
       minLength: 2,
       maxLengthValidation: 100,
+      decoration: error != null ? InputDecoration(
+        errorText: error,
+      ) : null,
       onValidationChanged: (result) {},
     );
   }

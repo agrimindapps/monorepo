@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_provider_simplified.dart';
@@ -239,13 +241,10 @@ class FavoritosPragasTabWidget extends StatelessWidget {
   }
 
   void _navigateToPragaDetails(BuildContext context, FavoritoPragaEntity praga) {
-    Navigator.pushNamed(
-      context,
-      '/detalhe-praga',
-      arguments: {
-        'pragaName': praga.nomeComum,
-        'pragaScientificName': praga.nomeCientifico,
-      },
+    final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
+    navigationProvider.navigateToDetalhePraga(
+      pragaName: praga.nomeComum,
+      pragaScientificName: praga.nomeCientifico,
     );
   }
 }

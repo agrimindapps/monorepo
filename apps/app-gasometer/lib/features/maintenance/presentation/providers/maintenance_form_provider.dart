@@ -549,6 +549,21 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   /// Valida todo o formulário
   @override
   bool validateForm() {
+    debugPrint('[MAINTENANCE VALIDATION] Starting form validation...');
+    debugPrint('[MAINTENANCE VALIDATION] type: ${_formModel.type}');
+    debugPrint('[MAINTENANCE VALIDATION] title: "${titleController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] description: "${descriptionController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] cost: "${costController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] odometer: "${odometerController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] serviceDate: ${_formModel.serviceDate}');
+    debugPrint('[MAINTENANCE VALIDATION] workshopName: "${workshopNameController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] workshopPhone: "${workshopPhoneController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] workshopAddress: "${workshopAddressController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] nextServiceDate: ${_formModel.nextServiceDate}');
+    debugPrint('[MAINTENANCE VALIDATION] nextServiceOdometer: "${nextOdometerController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] notes: "${notesController.text}"');
+    debugPrint('[MAINTENANCE VALIDATION] vehicle: ${_formModel.vehicle?.displayName ?? "null"}');
+    
     final errors = _validator.validateCompleteForm(
       type: _formModel.type,
       title: titleController.text,
@@ -565,6 +580,9 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
       vehicle: _formModel.vehicle,
     );
 
+    debugPrint('[MAINTENANCE VALIDATION] Validation errors: $errors');
+    debugPrint('[MAINTENANCE VALIDATION] Form is ${errors.isEmpty ? "VALID" : "INVALID"}');
+
     _formModel = _formModel.copyWith(errors: errors);
     notifyListeners();
 
@@ -579,6 +597,16 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
       firstDate: DateTime.now().subtract(const Duration(days: 365 * MaintenanceConstants.maxYearsBack)),
       lastDate: DateTime.now(),
       locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (date != null) {
@@ -601,8 +629,19 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
       initialTime: TimeOfDay.fromDateTime(_formModel.serviceDate),
       builder: (context, child) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: child!,
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: Localizations.override(
+            context: context,
+            locale: const Locale('pt', 'BR'),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              child: child!,
+            ),
+          ),
         );
       },
     );
@@ -626,6 +665,16 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
       firstDate: _formModel.serviceDate,
       lastDate: _formModel.serviceDate.add(const Duration(days: 365 * MaintenanceConstants.maxYearsForward)),
       locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (date != null) {

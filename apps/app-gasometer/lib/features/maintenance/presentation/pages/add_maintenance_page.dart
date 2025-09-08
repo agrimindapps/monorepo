@@ -1,21 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
-import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/presentation/widgets/enhanced_dropdown.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/form_dialog.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
 
-class AddMaintenancePage extends BaseFormPage<MaintenanceFormProvider> {
+class AddMaintenancePage extends StatefulWidget {
   final MaintenanceEntity? maintenanceToEdit;
   final String? vehicleId;
 
@@ -26,134 +26,119 @@ class AddMaintenancePage extends BaseFormPage<MaintenanceFormProvider> {
   });
 
   @override
-  BaseFormPageState<MaintenanceFormProvider> createState() => _AddMaintenancePageState();
+  State<AddMaintenancePage> createState() => _AddMaintenancePageState();
 }
 
-class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider> {
+class _AddMaintenancePageState extends State<AddMaintenancePage> {
+  late MaintenanceFormProvider _formProvider;
   final Map<String, ValidationResult> _validationResults = {};
   
-  @override
-  String get pageTitle => (widget as AddMaintenancePage).maintenanceToEdit != null ? 'Editar Manutenção' : 'Nova Manutenção';
+  // Rate limiting and loading state
+  bool _isInitialized = false;
+  bool _isSubmitting = false;
+  Timer? _debounceTimer;
+  Timer? _timeoutTimer;
+  
+  // Rate limiting constants
+  static const Duration _debounceDuration = Duration(milliseconds: 500);
+  static const Duration _submitTimeout = Duration(seconds: 30);
+
+  bool get isEditMode => widget.maintenanceToEdit != null;
   
   @override
-  MaintenanceFormProvider createFormProvider() {
-    final authProvider = context.read<AuthProvider>();
-    return MaintenanceFormProvider(
-      userId: authProvider.userId,
-      initialVehicleId: (widget as AddMaintenancePage).vehicleId,
-    );
+  void initState() {
+    super.initState();
+    // Initialization will be done in didChangeDependencies
   }
   
   @override
-  Future<void> initializeFormProvider(MaintenanceFormProvider provider) async {
-    final authProvider = context.read<AuthProvider>();
-    final maintenanceToEdit = (widget as AddMaintenancePage).maintenanceToEdit;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _initializeProviders();
+      _isInitialized = true;
+    }
+  }
+  
+  void _initializeProviders() async {
+    _formProvider = Provider.of<MaintenanceFormProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     // Set context for dependency injection access
-    provider.setContext(context);
+    _formProvider.setContext(context);
 
-    await provider.initialize(
-      vehicleId: (widget as AddMaintenancePage).vehicleId,
+    await _formProvider.initialize(
+      vehicleId: widget.vehicleId,
       userId: authProvider.userId,
     );
     
-    // If editing, populate form with existing data
-    if (maintenanceToEdit != null) {
-      await provider.initializeWithMaintenance(maintenanceToEdit);
+    if (widget.maintenanceToEdit != null) {
+      await _loadMaintenanceForEdit(_formProvider);
+    }
+    
+    // Notify changes after current build completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          // Force rebuild after initialization
+        });
+      }
+    });
+  }
+
+  Future<void> _loadMaintenanceForEdit(MaintenanceFormProvider provider) async {
+    try {
+      await provider.initializeWithMaintenance(widget.maintenanceToEdit!);
+    } catch (e) {
+      throw Exception('Erro ao carregar registro para edição: $e');
     }
   }
 
   @override
-  Widget buildFormContent(BuildContext context, MaintenanceFormProvider provider) {
-    return SingleChildScrollView(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              FormSpacing.section(),
-              _buildVehicleInfoCard(),
-              FormSpacing.section(),
-              _buildBasicInfo(),
-              _buildCostAndOdometer(),
-              _buildDescription(),
-              _buildNextServiceDate(),
-              FormSpacing.section(),
-              _buildActionButtons(),
-            ],
-          ),
-        ),
+  void dispose() {
+    // Clean up timers to prevent memory leaks
+    _debounceTimer?.cancel();
+    _timeoutTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FormDialog(
+      title: 'Manutenção',
+      subtitle: 'Registre a manutenção do seu veículo',
+      headerIcon: Icons.build,
+      isLoading: context.watch<MaintenanceFormProvider>().isLoading || _isSubmitting,
+      confirmButtonText: 'Salvar',
+      onCancel: () => Navigator.of(context).pop(),
+      onConfirm: _submitFormWithRateLimit,
+      content: Consumer<MaintenanceFormProvider>(
+        builder: (context, formProvider, child) {
+          if (!formProvider.isInitialized) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return _buildFormContent(formProvider);
+        },
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: const Icon(
-              Icons.build,
-              color: Colors.white,
-              size: 19,
-            ),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Registrar Manutenção',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Adicione informações sobre a manutenção realizada',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    height: 1.3,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  Widget _buildFormContent(MaintenanceFormProvider provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildBasicInfo(),
+        _buildCostAndOdometer(),
+        _buildDescription(),
+        _buildNextServiceDate(),
+      ],
     );
   }
+
 
 
   Widget _buildBasicInfo() {
@@ -163,7 +148,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
       content: Column(
         children: [
           ValidatedFormField(
-            controller: formProvider.titleController,
+            controller: _formProvider.titleController,
             label: 'Tipo de Manutenção',
             hint: 'Ex: Troca de óleo, Revisão completa...',
             required: true,
@@ -171,11 +156,14 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
             minLength: 3,
             maxLengthValidation: 100,
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'))],
+            decoration: _formProvider.formModel.errors['title'] != null ? InputDecoration(
+              errorText: _formProvider.formModel.errors['title'],
+            ) : null,
             onValidationChanged: (result) => _validationResults['type'] = result,
           ),
           FormSpacing.large(),
           ValidatedFormField(
-            controller: formProvider.workshopNameController,
+            controller: _formProvider.workshopNameController,
             label: 'Oficina/Local',
             hint: 'Nome da oficina ou local da manutenção',
             required: true,
@@ -183,6 +171,9 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
             minLength: 2,
             maxLengthValidation: 100,
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)\/&]'))],
+            decoration: _formProvider.formModel.errors['workshopName'] != null ? InputDecoration(
+              errorText: _formProvider.formModel.errors['workshopName'],
+            ) : null,
             onValidationChanged: (result) => _validationResults['workshop'] = result,
           ),
           FormSpacing.large(),
@@ -191,9 +182,9 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
               /// ✅ UX ENHANCEMENT: Enhanced maintenance type dropdown
               EnhancedDropdown<String>(
                 label: 'Tipo',
-                value: formProvider.formModel.type == MaintenanceType.preventive ? 'preventiva' : 'corretiva',
+                value: _formProvider.formModel.type == MaintenanceType.preventive ? 'preventiva' : 'corretiva',
                 prefixIcon: Icon(
-                  formProvider.formModel.type == MaintenanceType.preventive 
+                  _formProvider.formModel.type == MaintenanceType.preventive 
                     ? Icons.schedule 
                     : Icons.build,
                   color: Theme.of(context).colorScheme.primary,
@@ -223,7 +214,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                     ),
                   ),
                 ],
-                onChanged: (value) => formProvider.updateType(
+                onChanged: (value) => _formProvider.updateType(
                   value == 'preventiva' ? MaintenanceType.preventive : MaintenanceType.corrective
                 ),
               ),
@@ -250,7 +241,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                       ),
                       SizedBox(width: GasometerDesignTokens.spacingSm),
                       Text(
-                        '${formProvider.formModel.serviceDate.day.toString().padLeft(2, '0')}/${formProvider.formModel.serviceDate.month.toString().padLeft(2, '0')}/${formProvider.formModel.serviceDate.year}',
+                        '${_formProvider.formModel.serviceDate.day.toString().padLeft(2, '0')}/${_formProvider.formModel.serviceDate.month.toString().padLeft(2, '0')}/${_formProvider.formModel.serviceDate.year}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -273,7 +264,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
       content: FormFieldRow.standard(
         children: [
           ValidatedFormField(
-            controller: formProvider.costController,
+            controller: _formProvider.costController,
             label: 'Custo',
             hint: '0,00',
             required: true,
@@ -281,13 +272,14 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
             minValue: 0.0,
             maxValue: 999999.99,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               prefixText: 'R\$ ',
+              errorText: _formProvider.formModel.errors['cost'],
             ),
             onValidationChanged: (result) => _validationResults['cost'] = result,
           ),
           ValidatedFormField(
-            controller: formProvider.odometerController,
+            controller: _formProvider.odometerController,
             label: 'Odômetro',
             hint: '0,0',
             required: true,
@@ -296,8 +288,9 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
             maxValue: 9999999.0,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               suffixText: 'km',
+              errorText: _formProvider.formModel.errors['odometer'],
             ),
             onValidationChanged: (result) => _validationResults['odometer'] = result,
           ),
@@ -311,7 +304,7 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
       title: 'Descrição',
       icon: Icons.description_outlined,
       content: ValidatedFormField(
-        controller: formProvider.descriptionController,
+        controller: _formProvider.descriptionController,
         label: 'Detalhes da manutenção',
         hint: 'Descreva os serviços realizados, peças trocadas, etc.',
         required: true,
@@ -321,6 +314,9 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
         maxLines: 4,
         maxLength: 500,
         showCharacterCount: true,
+        decoration: _formProvider.formModel.errors['description'] != null ? InputDecoration(
+          errorText: _formProvider.formModel.errors['description'],
+        ) : null,
         onValidationChanged: (result) => _validationResults['description'] = result,
       ),
     );
@@ -380,11 +376,11 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                     ),
                     SizedBox(width: GasometerDesignTokens.spacingSm),
                     Text(
-                      formProvider.formModel.nextServiceDate != null
-                          ? '${formProvider.formModel.nextServiceDate!.day.toString().padLeft(2, '0')}/${formProvider.formModel.nextServiceDate!.month.toString().padLeft(2, '0')}/${formProvider.formModel.nextServiceDate!.year}'
+                      _formProvider.formModel.nextServiceDate != null
+                          ? '${_formProvider.formModel.nextServiceDate!.day.toString().padLeft(2, '0')}/${_formProvider.formModel.nextServiceDate!.month.toString().padLeft(2, '0')}/${_formProvider.formModel.nextServiceDate!.year}'
                           : 'Definir data da próxima manutenção',
                       style: TextStyle(
-                        color: formProvider.formModel.nextServiceDate != null
+                        color: _formProvider.formModel.nextServiceDate != null
                             ? Theme.of(context).colorScheme.onSurface
                             : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
@@ -393,11 +389,11 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
                 ),
               ),
             ),
-            if (formProvider.formModel.nextServiceDate != null)
+            if (_formProvider.formModel.nextServiceDate != null)
               Padding(
                 padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
                 child: TextButton(
-                  onPressed: () => formProvider.updateNextServiceDate(null),
+                  onPressed: () => _formProvider.updateNextServiceDate(null),
                   child: Text(
                     'Remover data',
                     style: TextStyle(
@@ -412,180 +408,160 @@ class _AddMaintenancePageState extends BaseFormPageState<MaintenanceFormProvider
     );
   }
 
-  Widget _buildActionButtons() {
-    return FormActionButtons.standard(
-      secondaryButton: OutlinedButton(
-        onPressed: () => context.pop(),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Theme.of(context).colorScheme.outline),
-          padding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingLg),
-          shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-          ),
-        ),
-        child: Text(
-          'Cancelar',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: GasometerDesignTokens.fontSizeLg,
-          ),
-        ),
-      ),
-      primaryButton: ElevatedButton(
-        onPressed: () => onSubmitForm(context, formProvider),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          padding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingLg),
-          shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-          ),
-        ),
-        child: Text(
-          'Salvar Manutenção',
-          style: TextStyle(
-            fontSize: GasometerDesignTokens.fontSizeLg,
-            fontWeight: GasometerDesignTokens.fontWeightSemiBold,
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> _selectDate(BuildContext context) async {
-    await formProvider.pickServiceDate(context);
+    await _formProvider.pickServiceDate(context);
   }
 
   Future<void> _selectNextServiceDate(BuildContext context) async {
-    await formProvider.pickNextServiceDate(context);
+    await _formProvider.pickNextServiceDate(context);
   }
 
-  @override
-  Future<bool> onSubmitForm(BuildContext context, MaintenanceFormProvider provider) async {
-    if (!provider.validateForm()) {
-      return false;
+  /// Rate-limited submit method that implements debouncing and prevents rapid clicks
+  void _submitFormWithRateLimit() {
+    debugPrint('[MAINTENANCE DEBUG] Submit button clicked - Rate limit check');
+    
+    // Prevent multiple rapid clicks
+    if (_isSubmitting) {
+      debugPrint('[MAINTENANCE DEBUG] Submit already in progress, ignoring duplicate request');
+      return;
     }
 
+    debugPrint('[MAINTENANCE DEBUG] Starting debounce timer');
+    // Cancel any existing debounce timer
+    _debounceTimer?.cancel();
+    
+    // Set debounce timer to prevent rapid consecutive submissions
+    _debounceTimer = Timer(_debounceDuration, () {
+      if (mounted && !_isSubmitting) {
+        debugPrint('[MAINTENANCE DEBUG] Debounce timer fired, calling _submitForm()');
+        _submitForm();
+      } else {
+        debugPrint('[MAINTENANCE DEBUG] Debounce timer fired but widget unmounted or already submitting');
+      }
+    });
+  }
+
+  /// Internal submit method with enhanced protection and timeout handling
+  Future<void> _submitForm() async {
+    debugPrint('[MAINTENANCE DEBUG] _submitForm() called - Starting validation');
+    
+    // Double-check form validation
+    if (!_formProvider.validateForm()) {
+      debugPrint('[MAINTENANCE DEBUG] Form validation FAILED - submission aborted');
+      return;
+    }
+    
+    debugPrint('[MAINTENANCE DEBUG] Form validation PASSED - proceeding with submission');
+
+    // Prevent concurrent submissions
+    if (_isSubmitting) {
+      debugPrint('Submit already in progress, aborting duplicate submission');
+      return;
+    }
+
+    // Set submitting state
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final formProvider = _formProvider;
+    final maintenanceProvider = Provider.of<MaintenanceProvider>(context, listen: false);
+
     try {
-      final maintenanceProvider = context.read<MaintenanceProvider>();
-      final maintenanceToEdit = (widget as AddMaintenancePage).maintenanceToEdit;
-      
-      // Criar entidade usando o FormProvider
-      final maintenanceEntity = provider.formModel.toMaintenanceEntity();
+      // Setup timeout protection
+      _timeoutTimer = Timer(_submitTimeout, () {
+        if (mounted && _isSubmitting) {
+          debugPrint('Submit timeout reached, resetting state');
+          setState(() {
+            _isSubmitting = false;
+          });
+          _showErrorDialog(
+            'Timeout',
+            'A operação demorou muito para ser concluída. Tente novamente.',
+          );
+        }
+      });
+
+      // Provider will handle its own loading state
+
+      final maintenanceEntity = formProvider.formModel.toMaintenanceEntity();
+      debugPrint('[MAINTENANCE DEBUG] Created maintenance entity: ${maintenanceEntity.toString()}');
       
       bool success;
-      if (maintenanceToEdit != null) {
+      if (widget.maintenanceToEdit != null) {
+        debugPrint('[MAINTENANCE DEBUG] Calling updateMaintenanceRecord()');
         // Modo edição - preservar ID da entidade original
-        final updatedEntity = maintenanceEntity.copyWith(id: maintenanceToEdit.id);
+        final updatedEntity = maintenanceEntity.copyWith(id: widget.maintenanceToEdit!.id);
         success = await maintenanceProvider.updateMaintenanceRecord(updatedEntity);
       } else {
+        debugPrint('[MAINTENANCE DEBUG] Calling addMaintenanceRecord()');
         // Modo criação
         success = await maintenanceProvider.addMaintenanceRecord(maintenanceEntity);
       }
+      
+      debugPrint('[MAINTENANCE DEBUG] Provider operation result: $success');
 
       if (success) {
-        final message = maintenanceToEdit != null 
-            ? 'Manutenção atualizada com sucesso!' 
-            : 'Manutenção salva com sucesso!';
-        showSuccessSnackbar(message);
+        debugPrint('[MAINTENANCE DEBUG] SUCCESS - Closing dialog');
+        if (mounted) {
+          // Close dialog with success result for parent context to handle
+          Navigator.of(context).pop({
+            'success': true,
+            'action': widget.maintenanceToEdit != null ? 'edit' : 'create',
+            'message': widget.maintenanceToEdit != null 
+                ? 'Manutenção editada com sucesso!'
+                : 'Manutenção adicionada com sucesso!',
+          });
+        }
       } else {
-        onFormSubmitFailure('Erro ao salvar: ${maintenanceProvider.errorMessage ?? "Erro desconhecido"}');
+        debugPrint('[MAINTENANCE DEBUG] FAILURE - Showing error dialog');
+        debugPrint('[MAINTENANCE DEBUG] Provider error message: ${maintenanceProvider.errorMessage}');
+        if (mounted) {
+          // Show error in dialog context (before closing)
+          final errorMessage = maintenanceProvider.errorMessage?.isNotEmpty == true 
+              ? maintenanceProvider.errorMessage! 
+              : 'Erro ao salvar manutenção';
+          _showErrorDialog('Erro', errorMessage);
+        }
       }
-      
-      return success;
     } catch (e) {
-      onFormSubmitFailure('Erro ao salvar manutenção: ${e.toString()}');
-      return false;
+      debugPrint('Error submitting form: $e');
+      if (mounted) {
+        _showErrorDialog(
+          'Erro',
+          'Erro inesperado: $e',
+        );
+      }
+    } finally {
+      // Clean up timeout timer
+      _timeoutTimer?.cancel();
+      
+      // Loading state managed by provider
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
-
-  /// Card informativo do veículo selecionado
-  Widget _buildVehicleInfoCard() {
-    final vehicle = formProvider.formModel.vehicle;
-    
-    if (vehicle == null) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.error,
-            width: 1,
+  
+  void _showErrorDialog(String title, String message) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.warning,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Veículo não foi informado',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outline,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.directions_car,
-                color: Theme.of(context).colorScheme.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${vehicle.brand} ${vehicle.model}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${vehicle.color} • ${vehicle.licensePlate}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
+
 
   /// ✅ REMOVED: Old dropdown method no longer needed with EnhancedDropdown
 }

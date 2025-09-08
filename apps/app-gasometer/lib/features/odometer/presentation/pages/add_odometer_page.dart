@@ -350,7 +350,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
           textAlign: TextAlign.right,
           decoration: InputDecoration(
             labelText: OdometerConstants.fieldLabels['odometro'],
-            hintText: OdometerConstants.fieldHints['odometro'],
+            hintText: '0,00',
             suffixText: OdometerConstants.units['odometro'],
             suffixIcon: formProvider.odometerValue > 0
                 ? IconButton(
@@ -489,13 +489,14 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   // Formatadores de entrada
   List<TextInputFormatter> _getOdometroFormatters() {
     return [
-      // Permitir apenas números e vírgula para decimal
-      FilteringTextInputFormatter.allow(RegExp(r'[0-9,]')),
-      // Limitar a 999999,9 (máximo 6 dígitos inteiros + 1 decimal)
-      LengthLimitingTextInputFormatter(8), // 999999,9
+      // Permitir apenas números e vírgula para decimal (consistente com cadastro de veículos)
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+      // Limitar a 999999,99 (máximo 6 dígitos inteiros + 2 decimais)
+      LengthLimitingTextInputFormatter(9), // 999999,99
       // Formatter personalizado para controlar vírgula decimal
       TextInputFormatter.withFunction((oldValue, newValue) {
         var text = newValue.text;
+        var selection = newValue.selection;
         
         // Não permitir vírgula no início
         if (text.startsWith(',')) {
@@ -508,11 +509,15 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
           return oldValue;
         }
         
-        // Se tem vírgula, limitar a apenas 1 dígito após a vírgula
+        // Se tem vírgula, limitar a 2 dígitos após a vírgula (consistente com cadastro de veículos)
         if (text.contains(',')) {
           final parts = text.split(',');
-          if (parts.length == 2 && parts[1].length > 1) {
-            text = '${parts[0]},${parts[1].substring(0, 1)}';
+          if (parts.length == 2 && parts[1].length > 2) {
+            text = '${parts[0]},${parts[1].substring(0, 2)}';
+            // Ajustar cursor se o texto foi truncado
+            if (selection.baseOffset > text.length) {
+              selection = TextSelection.collapsed(offset: text.length);
+            }
           }
           // Não permitir vírgula no final se não há dígitos após
           if (parts.length == 2 && parts[1].isEmpty && text.endsWith(',')) {
@@ -520,10 +525,18 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
           }
         }
         
-        return TextEditingValue(
-          text: text,
-          selection: TextSelection.collapsed(offset: text.length),
-        );
+        // Preservar a seleção original se possível, senão posicionar no final
+        if (selection.baseOffset <= text.length) {
+          return TextEditingValue(
+            text: text,
+            selection: selection,
+          );
+        } else {
+          return TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+        }
       }),
     ];
   }
@@ -536,6 +549,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       initialDate: formProvider.registrationDate,
       firstDate: OdometerConstants.minDate,
       lastDate: OdometerConstants.maxDate,
+      locale: const Locale('pt', 'BR'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -556,13 +570,20 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
           context: context,
           initialTime: currentTime,
           builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Theme.of(context).colorScheme.primary,
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+              child: Localizations.override(
+                context: context,
+                locale: const Locale('pt', 'BR'),
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                      primary: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  child: child!,
                 ),
               ),
-              child: child!,
             );
           },
         );

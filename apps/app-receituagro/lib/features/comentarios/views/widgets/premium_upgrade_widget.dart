@@ -35,7 +35,7 @@ class PremiumUpgradeWidget extends StatelessWidget {
   }) {
     return PremiumUpgradeWidget(
       title: ComentariosDesignTokens.limitReachedTitle,
-      description: 
+      description:
           'Você já adicionou $current de $max comentários disponíveis.\nPara adicionar mais comentários, assine o plano premium.',
       buttonText: ComentariosDesignTokens.upgradeToPremiumText,
       onUpgrade: onUpgrade,
@@ -48,7 +48,8 @@ class PremiumUpgradeWidget extends StatelessWidget {
 
     return Center(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: ComentariosDesignTokens.maxDialogWidth),
+        constraints: const BoxConstraints(
+            maxWidth: ComentariosDesignTokens.maxDialogWidth),
         margin: ComentariosDesignTokens.defaultPadding,
         padding: ComentariosDesignTokens.cardPadding,
         decoration: ComentariosDesignTokens.getWarningDecoration(),
@@ -60,7 +61,8 @@ class PremiumUpgradeWidget extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: ComentariosDesignTokens.warningColor.withValues(alpha: 0.2),
+                  color: ComentariosDesignTokens.warningColor
+                      .withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -92,7 +94,8 @@ class PremiumUpgradeWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ComentariosDesignTokens.warningColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

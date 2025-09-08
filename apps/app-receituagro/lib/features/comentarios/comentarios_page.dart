@@ -81,8 +81,10 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
     
     return Scaffold(
       body: SafeArea(
-        child: ResponsiveContentWrapper(
-          child: Column(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: ResponsiveContentWrapper(
+            child: Column(
             children: [
               _buildModernHeader(context, isDark),
               Expanded(
@@ -119,6 +121,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),

@@ -168,7 +168,10 @@ class ExpenseFormProvider extends BaseProvider {
     // Safely access VehiclesProvider through dependency injection
     final vehiclesProvider = _vehiclesProvider;
     if (vehiclesProvider == null) {
-      throw Exception('VehiclesProvider não disponível. Certifique-se de chamar setContext() primeiro.');
+      // If context not set, skip vehicle loading for now
+      // This prevents null exceptions during initialization
+      debugPrint('Warning: VehiclesProvider not available, skipping vehicle data loading');
+      return;
     }
 
     await executeDataOperation(
@@ -183,8 +186,12 @@ class ExpenseFormProvider extends BaseProvider {
             odometer: vehicle.currentOdometer,
           );
         } else {
-          throw const VehicleNotFoundError(
-            technicalDetails: 'Vehicle data not found in provider',
+          debugPrint('Warning: Vehicle not found for id: $vehicleId');
+          // Don't throw here, just log the warning
+          // Set a default odometer value when vehicle is not found
+          _formModel = _formModel.copyWith(
+            vehicle: null,
+            odometer: 0.0,
           );
         }
       },
@@ -441,6 +448,16 @@ class ExpenseFormProvider extends BaseProvider {
       firstDate: DateTime.now().subtract(const Duration(days: 365 * ExpenseConstants.maxYearsBack)),
       lastDate: DateTime.now(),
       locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (date != null) {
@@ -463,8 +480,19 @@ class ExpenseFormProvider extends BaseProvider {
       initialTime: TimeOfDay.fromDateTime(_formModel.date),
       builder: (context, child) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: child!,
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: Localizations.override(
+            context: context,
+            locale: const Locale('pt', 'BR'),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              child: child!,
+            ),
+          ),
         );
       },
     );

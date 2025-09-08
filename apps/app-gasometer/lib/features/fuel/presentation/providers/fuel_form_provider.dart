@@ -150,13 +150,19 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
       _updateTextControllers();
       
       _isInitialized = true;
-      notifyListeners();
+      // Delay notification to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     } catch (e) {
       _formModel = _formModel.copyWith(
         lastError: 'Erro ao inicializar: $e',
         isLoading: false,
       );
-      notifyListeners();
+      // Delay notification to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     }
   }
 
@@ -164,7 +170,10 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   Future<void> _loadVehicleData(String vehicleId) async {
     try {
       _formModel = _formModel.copyWith(isLoading: true);
-      notifyListeners();
+      // Delay notification to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
 
       // Safely access VehiclesProvider through dependency injection
       final vehiclesProvider = _vehiclesProvider;
@@ -190,11 +199,21 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
       } else {
         throw Exception('Veículo não encontrado');
       }
+      
+      // Notify after successful completion
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     } catch (e) {
       _formModel = _formModel.copyWith(
         lastError: 'Erro ao carregar veículo: $e',
         isLoading: false,
       );
+      
+      // Notify after error handling
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     }
   }
 
@@ -414,6 +433,17 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   /// Valida todo o formulário
   @override
   bool validateForm() {
+    debugPrint('[FUEL VALIDATION] Starting form validation...');
+    debugPrint('[FUEL VALIDATION] liters: "${litersController.text}"');
+    debugPrint('[FUEL VALIDATION] pricePerLiter: "${pricePerLiterController.text}"');
+    debugPrint('[FUEL VALIDATION] odometer: "${odometerController.text}"');
+    debugPrint('[FUEL VALIDATION] fuelType: ${_formModel.fuelType}');
+    debugPrint('[FUEL VALIDATION] date: ${_formModel.date}');
+    debugPrint('[FUEL VALIDATION] gasStationName: "${gasStationController.text}"');
+    debugPrint('[FUEL VALIDATION] notes: "${notesController.text}"');
+    debugPrint('[FUEL VALIDATION] vehicle: ${_formModel.vehicle?.displayName ?? "null"}');
+    debugPrint('[FUEL VALIDATION] lastRecordOdometer: $_lastOdometerReading');
+    
     final errors = _validator.validateCompleteForm(
       liters: litersController.text,
       pricePerLiter: pricePerLiterController.text,
@@ -425,6 +455,9 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
       vehicle: _formModel.vehicle,
       lastRecordOdometer: _lastOdometerReading,
     );
+
+    debugPrint('[FUEL VALIDATION] Validation errors: $errors');
+    debugPrint('[FUEL VALIDATION] Form is ${errors.isEmpty ? "VALID" : "INVALID"}');
 
     _formModel = _formModel.copyWith(errors: errors);
     notifyListeners();

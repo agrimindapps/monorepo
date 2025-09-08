@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../../core/design/design_tokens.dart';
-
 class PragaCulturaTabBarWidget extends StatefulWidget {
   final TabController tabController;
-  final Function(int) onTabTap;
+  final void Function(int) onTabTap;
   final bool isDark;
 
   const PragaCulturaTabBarWidget({
@@ -58,112 +56,77 @@ class _PragaCulturaTabBarWidgetState extends State<PragaCulturaTabBarWidget>
   }
 
   Widget _buildTabBar() {
-    return Card(
-      elevation: ReceitaAgroElevation.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-        side: BorderSide.none,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(20),
       ),
-      color: widget.isDark ? const Color(0xFF222228) : Colors.white,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-          border: Border.all(
-            color: widget.isDark 
-                ? Colors.grey.shade800 
-                : Colors.grey.shade200,
-            width: 1,
-          ),
+      child: TabBar(
+        controller: widget.tabController,
+        onTap: widget.onTabTap,
+        tabs: _buildFavoritesStyleTabs(),
+        labelColor: Colors.white,
+        unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        indicator: BoxDecoration(
+          color: const Color(0xFF4CAF50),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: TabBar(
-          controller: widget.tabController,
-          onTap: widget.onTabTap,
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.sm),
-            color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
-            border: Border.all(
-              color: const Color(0xFF2E7D32).withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          labelColor: const Color(0xFF2E7D32),
-          unselectedLabelColor: widget.isDark 
-              ? Colors.grey.shade400 
-              : Colors.grey.shade600,
-          labelStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-          tabs: [
-            _buildTab(
-              icon: FontAwesomeIcons.seedling,
-              label: 'Plantas',
-              index: 0,
-            ),
-            _buildTab(
-              icon: FontAwesomeIcons.virus,
-              label: 'Doenças',
-              index: 1,
-            ),
-            _buildTab(
-              icon: FontAwesomeIcons.bug,
-              label: 'Insetos',
-              index: 2,
-            ),
-          ],
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelStyle: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
         ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 0, // Hide text in inactive tabs
+          fontWeight: FontWeight.w400,
+        ),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 6.0),
+        indicatorPadding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        dividerColor: Colors.transparent,
       ),
     );
   }
 
-  Widget _buildTab({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
-    final isSelected = widget.tabController.index == index;
-    
-    return Tab(
-      height: 60,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: ReceitaAgroSpacing.sm, 
-          vertical: ReceitaAgroSpacing.sm,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(
-              icon,
-              size: 16,
-              color: isSelected 
-                  ? const Color(0xFF2E7D32)
-                  : (widget.isDark 
-                      ? Colors.grey.shade400 
-                      : Colors.grey.shade600),
-            ),
-            const SizedBox(height: ReceitaAgroSpacing.xs + 2),
-            Text(
-              label,
-              style: ReceitaAgroTypography.itemCategory.copyWith(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected 
-                    ? const Color(0xFF2E7D32)
-                    : (widget.isDark 
-                        ? Colors.grey.shade400 
-                        : Colors.grey.shade600),
+  List<Widget> _buildFavoritesStyleTabs() {
+    final tabData = [
+      {'icon': FontAwesomeIcons.seedling, 'text': 'Plantas'},
+      {'icon': FontAwesomeIcons.virus, 'text': 'Doenças'},
+      {'icon': FontAwesomeIcons.bug, 'text': 'Insetos'},
+    ];
+
+    return tabData.map((data) => Tab(
+      child: AnimatedBuilder(
+        animation: widget.tabController,
+        builder: (context, child) {
+          final isActive = widget.tabController.index == tabData.indexOf(data);
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(
+                data['icon'] as IconData,
+                size: 16,
+                color: isActive
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
-            ),
-          ],
-        ),
+              if (isActive) ...[
+                const SizedBox(width: 6),
+                Text(
+                  data['text'] as String,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
       ),
-    );
+    )).toList();
   }
 }

@@ -29,12 +29,19 @@ class CulturaHive extends HiveObject {
 
   factory CulturaHive.fromJson(Map<String, dynamic> json) {
     return CulturaHive(
-      objectId: (json['objectId'] as String?) ?? '',
-      createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
-      updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
-      idReg: (json['idReg'] as String?) ?? '',
-      cultura: (json['cultura'] as String?) ?? '',
+      objectId: (json['objectId']?.toString()) ?? '',
+      createdAt: _parseIntSafely(json['createdAt']),
+      updatedAt: _parseIntSafely(json['updatedAt']),
+      idReg: (json['idReg']?.toString()) ?? '',
+      cultura: (json['cultura']?.toString()) ?? '',
     );
+  }
+
+  static int _parseIntSafely(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return int.tryParse(value.toString()) ?? 0;
   }
 
   Map<String, dynamic> toJson() {

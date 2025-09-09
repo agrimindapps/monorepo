@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
+import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_defensivo_details_repository.dart';
@@ -15,15 +15,15 @@ import '../mappers/diagnostico_mapper.dart';
 class DefensivoDetailsRepositoryImpl implements IDefensivoDetailsRepository {
   final FitossanitarioHiveRepository _fitossanitarioRepository;
   final FavoritosHiveRepository _favoritosRepository;
-  final DiagnosticosRepositoryImpl _diagnosticosRepository;
+  final IDiagnosticosRepository _diagnosticosRepository;
 
   DefensivoDetailsRepositoryImpl({
     FitossanitarioHiveRepository? fitossanitarioRepository,
     FavoritosHiveRepository? favoritosRepository,
-    DiagnosticosRepositoryImpl? diagnosticosRepository,
+    IDiagnosticosRepository? diagnosticosRepository,
   }) : _fitossanitarioRepository = fitossanitarioRepository ?? sl<FitossanitarioHiveRepository>(),
         _favoritosRepository = favoritosRepository ?? sl<FavoritosHiveRepository>(),
-        _diagnosticosRepository = diagnosticosRepository ?? sl<DiagnosticosRepositoryImpl>();
+        _diagnosticosRepository = diagnosticosRepository ?? sl<IDiagnosticosRepository>();
 
   @override
   Future<Either<Failure, DefensivoDetailsEntity?>> getDefensivoByName(String name) async {

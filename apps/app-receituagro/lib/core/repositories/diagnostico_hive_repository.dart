@@ -26,9 +26,28 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
     return findBy((item) => item.fkIdCultura == fkIdCultura);
   }
 
+  /// Busca diagnósticos por praga
+  List<DiagnosticoHive> findByPraga(String fkIdPraga) {
+    return findBy((item) => item.fkIdPraga == fkIdPraga);
+  }
+
   /// Busca diagnósticos por cultura e defensivo
   List<DiagnosticoHive> findByCulturaAndDefensivo(String fkIdCultura, String fkIdDefensivo) {
     return findBy((item) => 
         item.fkIdCultura == fkIdCultura && item.fkIdDefensivo == fkIdDefensivo);
+  }
+
+  /// Busca diagnósticos por múltiplos critérios
+  List<DiagnosticoHive> findByMultipleCriteria({
+    String? defensivoId,
+    String? culturaId, 
+    String? pragaId,
+  }) {
+    return findBy((item) {
+      if (defensivoId != null && item.fkIdDefensivo != defensivoId) return false;
+      if (culturaId != null && item.fkIdCultura != culturaId) return false;
+      if (pragaId != null && item.fkIdPraga != pragaId) return false;
+      return true;
+    });
   }
 }

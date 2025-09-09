@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
+import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
 /// Model para diagnóstico usado na UI
 class DiagnosticoModel {
@@ -25,7 +25,7 @@ class DiagnosticoModel {
 /// Provider para gerenciar diagnósticos relacionados à praga
 /// Responsabilidade única: filtros e busca de diagnósticos
 class DiagnosticosPragaProvider extends ChangeNotifier {
-  final DiagnosticosRepositoryImpl _diagnosticosRepository = sl<DiagnosticosRepositoryImpl>();
+  final IDiagnosticosRepository _diagnosticosRepository = sl<IDiagnosticosRepository>();
 
   // Estado dos diagnósticos
   List<DiagnosticoModel> _diagnosticos = [];

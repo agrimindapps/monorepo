@@ -81,6 +81,7 @@ class OptimizedTabBarWidget extends StatelessWidget {
               Icon(
                 data['icon'] as IconData,
                 size: isActive ? 18 : 16,
+                color: isActive ? Colors.white : Colors.green.shade800,
               ),
               if (isActive) ...[
                 const SizedBox(width: 4),

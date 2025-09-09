@@ -13,7 +13,7 @@ import 'widgets/praga_card_widget.dart';
 import 'widgets/praga_cultura_empty_state_widget.dart';
 import 'widgets/praga_cultura_loading_skeleton_widget.dart';
 import 'widgets/praga_cultura_search_field_widget.dart';
-import 'widgets/praga_cultura_tab_bar_widget.dart';
+import '../../core/widgets/standard_tab_bar_widget.dart';
 
 class ListaPragasPorCulturaPageFixed extends StatefulWidget {
   final String? culturaId;
@@ -245,10 +245,10 @@ class _ListaPragasPorCulturaPageFixedState extends State<ListaPragasPorCulturaPa
   }
 
   Widget _buildTabBar(bool isDark) {
-    return PragaCulturaTabBarWidget(
+    return StandardTabBarWidget(
       tabController: _tabController,
-      onTabTap: _setTabIndex,
-      isDark: isDark,
+      tabs: StandardTabData.pragaCultureTabs,
+      onTabTap: () => _setTabIndex(_tabController.index),
     );
   }
 

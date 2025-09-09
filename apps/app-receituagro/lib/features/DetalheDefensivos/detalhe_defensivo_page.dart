@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import '../../core/design/spacing_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import '../../core/widgets/unified_tab_bar_widget.dart';
-import '../diagnosticos/presentation/providers/diagnosticos_provider.dart';
+import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
+import 'presentation/providers/diagnosticos_provider_legacy.dart';
 import 'presentation/providers/detalhe_defensivo_provider.dart';
 import 'presentation/widgets/comentarios_tab_widget.dart';
 import 'presentation/widgets/defensivo_info_cards_widget.dart';
@@ -53,19 +53,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       premiumService: sl(),
     );
 
-    _diagnosticosProvider = DiagnosticosProvider(
-      getDiagnosticosUseCase: sl(),
-      getDiagnosticoByIdUseCase: sl(),
-      getRecomendacoesUseCase: sl(),
-      getDiagnosticosByDefensivoUseCase: sl(),
-      getDiagnosticosByCulturaUseCase: sl(),
-      getDiagnosticosByPragaUseCase: sl(),
-      searchDiagnosticosWithFiltersUseCase: sl(),
-      getDiagnosticoStatsUseCase: sl(),
-      validateCompatibilidadeUseCase: sl(),
-      searchDiagnosticosByPatternUseCase: sl(),
-      getDiagnosticoFiltersDataUseCase: sl(),
-    );
+    // Usa o provider legacy que já tem filtros implementados
+    _diagnosticosProvider = DiagnosticosProvider();
   }
 
   Future<void> _loadData() async {
@@ -73,7 +62,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     
     // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
     if (_defensivoProvider.defensivoData != null) {
-      await _diagnosticosProvider.getDiagnosticosByDefensivo(_defensivoProvider.defensivoData!.idReg);
+      await _diagnosticosProvider.loadDiagnosticos(_defensivoProvider.defensivoData!.idReg);
     }
   }
 
@@ -155,8 +144,9 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Widget _buildContent() {
     return Column(
       children: [
-        UnifiedTabBarWidget.forDefensivos(
+        StandardTabBarWidget(
           tabController: _tabController,
+          tabs: StandardTabData.defensivoDetailsTabs,
         ),
         Expanded(
           child: Container(

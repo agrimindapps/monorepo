@@ -10,6 +10,7 @@ import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
 // Culturas dependencies removed - using direct CulturaCoreRepository access
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_stub.dart';
+import '../../features/diagnosticos/data/repositories/diagnosticos_repository_legacy_adapter.dart';
 // Diagnósticos Clean Architecture
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
@@ -37,7 +38,7 @@ import '../services/diagnostico_integration_service.dart';
 import '../services/navigation_service.dart';
 import '../services/premium_service_real.dart';
 import '../services/receituagro_notification_service.dart';
-import '../services/receituagro_storage_service.dart';
+import '../services/receituagro_storage_service_emergency_stub.dart';
 // Core Package Integration temporarily disabled
 // import 'core_package_integration.dart';
 
@@ -101,9 +102,10 @@ Future<void> init() async {
     () => sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
   );
   
-  // Storage Service - Adapter que usa HiveStorageService do core
-  sl.registerLazySingleton<ReceitaAgroStorageService>(
-    () => ReceitaAgroStorageService(sl<HiveStorageService>()),
+  // Storage Service - EMERGENCY FIX: Using complete stub without Core Package
+  // This prevents app crashes while we fix the Hive system integration
+  sl.registerLazySingleton(
+    () => ReceitaAgroStorageServiceEmergencyStub(),
   );
   
   // TEMPORARILY DISABLED: Interface do core para compatibilidade
@@ -277,10 +279,10 @@ Future<void> init() async {
 
   // ===== DIAGNÓSTICOS CLEAN ARCHITECTURE =====
   
-  // EMERGENCY FIX: Using stub repository to avoid Core Package conflicts
-  // This prevents app crashes while we fix the Hive system
+  // EMERGENCY FIX: Using legacy adapter with real data instead of stub
+  // This provides real diagnostics data while avoiding Core Package conflicts
   sl.registerLazySingleton<IDiagnosticosRepository>(
-    () => const DiagnosticosRepositoryStub(),
+    () => DiagnosticosRepositoryLegacyAdapter(sl<DiagnosticoHiveRepository>()),
   );
 
   // Use Cases para Diagnósticos

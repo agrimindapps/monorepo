@@ -26,28 +26,6 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Debug info card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  border: Border.all(color: Colors.blue.shade200),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Status Premium: ${provider.isPremium}', 
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Loading: ${provider.isLoadingComments}'),
-                    Text('Comments: ${provider.comentarios.length}'),
-                    Text('Defensivo: ${provider.defensivoData?.nomeComum ?? 'null'}'),
-                  ],
-                ),
-              ),
-              
               // Content
               provider.isPremium 
                 ? _buildPremiumContent(provider)

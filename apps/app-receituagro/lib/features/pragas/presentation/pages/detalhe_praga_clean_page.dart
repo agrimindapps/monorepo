@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
-import '../../../../core/widgets/unified_tab_bar_widget.dart';
+import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../favoritos/favoritos_page.dart';
 import '../providers/detalhe_praga_provider.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 import '../widgets/comentarios_praga_widget.dart';
-import '../widgets/diagnosticos_praga_widget.dart';
+import '../widgets/diagnosticos_praga_mockup_widget.dart';
 import '../widgets/praga_info_widget.dart';
 
 /// Página refatorada seguindo Clean Architecture
@@ -129,8 +129,9 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
                         builder: (context, provider, child) {
                           return Column(
                             children: [
-                              UnifiedTabBarWidget.forPragas(
+                              StandardTabBarWidget(
                                 tabController: _tabController,
+                                tabs: StandardTabData.pragaDetailsTabs,
                               ),
                               Expanded(
                                 child: TabBarView(
@@ -141,7 +142,7 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
                                       pragaScientificName:
                                           widget.pragaScientificName,
                                     ),
-                                    DiagnosticosPragaWidget(
+                                    DiagnosticosPragaMockupWidget(
                                       pragaName: widget.pragaName,
                                     ),
                                     const ComentariosPragaWidget(),

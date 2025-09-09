@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedef.dart';
-import '../../../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
+import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/diagnostico_repository.dart';
 import '../models/diagnostico_model.dart';
@@ -10,11 +10,11 @@ import '../models/diagnostico_model.dart';
 /// Implementação do repositório de diagnósticos
 /// 
 /// Esta classe implementa o contrato definido no domain layer,
-/// usando o DiagnosticosRepositoryImpl como fonte de dados
+/// usando o IDiagnosticosRepository como fonte de dados
 class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   const DiagnosticoRepositoryImpl(this._diagnosticosRepository);
 
-  final DiagnosticosRepositoryImpl _diagnosticosRepository;
+  final IDiagnosticosRepository _diagnosticosRepository;
 
   @override
   ResultFuture<List<DiagnosticoEntity>> getDiagnosticosByDefensivo(String idDefensivo) async {

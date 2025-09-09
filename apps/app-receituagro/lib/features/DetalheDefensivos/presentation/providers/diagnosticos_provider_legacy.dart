@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../data/repositories/diagnostico_repository_impl.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_by_defensivo_usecase.dart';
@@ -12,7 +13,7 @@ class DiagnosticosProvider extends ChangeNotifier {
 
   DiagnosticosProvider()
       : _getDiagnosticosUseCase = GetDiagnosticosByDefensivoUseCase(
-          DiagnosticoRepositoryImpl(sl()),
+          DiagnosticoRepositoryImpl(sl<IDiagnosticosRepository>()),
         );
 
   List<DiagnosticoEntity> _diagnosticos = [];

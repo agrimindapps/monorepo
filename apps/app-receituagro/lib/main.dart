@@ -15,7 +15,7 @@ import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/receituagro_notification_service.dart';
-import 'core/services/receituagro_storage_service.dart';
+import 'core/services/receituagro_storage_service_emergency_stub.dart';
 import 'core/services/revenuecat_service.dart' as local_rc;
 import 'core/services/startup_optimization_service.dart';
 // import 'core/setup/receituagro_data_setup.dart'; // temporarily disabled
@@ -108,8 +108,8 @@ void main() async {
   final startupOptimizationService = StartupOptimizationService();
   await startupOptimizationService.initializeApp();
 
-  // Initialize storage service
-  final storageService = di.sl<ReceitaAgroStorageService>();
+  // Initialize storage service - EMERGENCY FIX: Using stub during Core Package repair
+  final storageService = di.sl<ReceitaAgroStorageServiceEmergencyStub>();
   await storageService.initialize();
 
   // Initialize notifications
@@ -151,10 +151,10 @@ void main() async {
     },
   );
 
-  // 🔧 EMERGENCY FIX: Culturas data loading temporarily disabled
-  print('🔧 [MAIN] EMERGENCY: Iniciando estabilização do sistema...');
-  await CulturasDataLoader.loadCulturasData(); // Will just mark as loaded
-  print('🔧 [MAIN] EMERGENCY: Sistema estabilizado para desenvolvimento.');
+  // 🌱 CULTURAS: Loading culturas data using legacy repository system
+  print('🌱 [MAIN] Carregando dados de culturas...');
+  await CulturasDataLoader.loadCulturasData();
+  print('🌱 [MAIN] Dados de culturas carregados com sucesso.');
 
   // Run app
   if (EnvironmentConfig.enableAnalytics && !kIsWeb) {

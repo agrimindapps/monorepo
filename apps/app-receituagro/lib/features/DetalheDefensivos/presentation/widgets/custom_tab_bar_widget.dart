@@ -74,7 +74,11 @@ class CustomTabBarWidget extends StatelessWidget {
                 mainAxisSize: isActive ? MainAxisSize.min : MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(data['icon'] as IconData, size: isActive ? 18 : 16),
+                  Icon(
+                    data['icon'] as IconData, 
+                    size: isActive ? 18 : 16,
+                    color: isActive ? Colors.white : Colors.green.shade800,
+                  ),
                   if (isActive) ...[
                     const SizedBox(width: 4),
                     Flexible(

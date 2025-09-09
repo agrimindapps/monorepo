@@ -60,7 +60,7 @@ class EnvironmentConfig {
     final key = String.fromEnvironment(keyName, defaultValue: fallback ?? '');
     if (key.isEmpty || (fallback != null && key == fallback)) {
       if (kDebugMode && fallback != null) {
-        print('⚠️ WARNING: Using fallback value for $keyName');
+        debugPrint('⚠️ WARNING: Using fallback configuration for environment key');
       }
     }
     return key;
@@ -102,23 +102,35 @@ class EnvironmentConfig {
     }
   }
 
-  /// Print current configuration for debugging
+  /// Print current configuration for debugging (non-sensitive data only)
   static void printConfig({Map<String, dynamic>? additionalConfig}) {
     if (kDebugMode && isDebugMode) {
-      print('=== Core Environment Configuration ===');
-      print('Environment: $environmentName');
-      print('Enable Logging: $enableLogging');
-      print('Enable Analytics: $enableAnalytics');
-      print('Storage Prefix: $storagePrefix');
+      debugPrint('=== Core Environment Configuration ===');
+      debugPrint('Environment: $environmentName');
+      debugPrint('Enable Logging: $enableLogging');
+      debugPrint('Enable Analytics: $enableAnalytics');
+      debugPrint('Storage Prefix: $storagePrefix');
       
       if (additionalConfig != null) {
-        print('=== Additional Configuration ===');
+        debugPrint('=== Additional Configuration ===');
         additionalConfig.forEach((key, value) {
-          print('$key: $value');
+          // Only log non-sensitive configuration values
+          if (!_isSensitiveKey(key)) {
+            debugPrint('$key: $value');
+          } else {
+            debugPrint('$key: [REDACTED]');
+          }
         });
       }
-      print('==========================================');
+      debugPrint('==========================================');
     }
+  }
+
+  /// Checks if a configuration key contains sensitive information
+  static bool _isSensitiveKey(String key) {
+    final sensitivePatterns = ['key', 'secret', 'password', 'token', 'credential', 'api'];
+    final keyLower = key.toLowerCase();
+    return sensitivePatterns.any((pattern) => keyLower.contains(pattern));
   }
 }
 

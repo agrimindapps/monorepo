@@ -114,32 +114,32 @@ class FirebaseAuthService implements IAuthRepository {
   Future<Either<Failure, core_entities.UserEntity>> signInAnonymously() async {
     try {
       if (kDebugMode) {
-        print('🔄 Firebase: Tentando signInAnonymously...');
+        debugPrint('🔄 Firebase: Attempting anonymous sign in...');
       }
       final credential = await _firebaseAuth.signInAnonymously();
       if (kDebugMode) {
-        print('🔄 Firebase: Credential recebido: ${credential.user?.uid}');
+        debugPrint('🔄 Firebase: Credential received successfully');
       }
 
       if (credential.user == null) {
         if (kDebugMode) {
-          print('❌ Firebase: credential.user é null');
+          debugPrint('❌ Firebase: credential.user is null');
         }
         return const Left(AuthFailure('Falha no login anônimo'));
       }
 
       if (kDebugMode) {
-        print('✅ Firebase: Login anônimo bem-sucedido');
+        debugPrint('✅ Firebase: Anonymous login successful');
       }
       return Right(_mapFirebaseUserToEntity(credential.user!));
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        print('❌ Firebase: FirebaseAuthException - code: ${e.code}, message: ${e.message}');
+        debugPrint('❌ Firebase: FirebaseAuthException - code: ${e.code}');
       }
       return Left(AuthFailure(_mapFirebaseAuthError(e)));
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Firebase: Erro geral - $e');
+        debugPrint('❌ Firebase: General error occurred');
       }
       return Left(AuthFailure('Erro inesperado: $e'));
     }

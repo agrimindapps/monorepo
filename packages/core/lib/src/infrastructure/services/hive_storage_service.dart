@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/repositories/i_local_storage_repository.dart';
@@ -50,7 +51,9 @@ class HiveStorageService implements ILocalStorageRepository {
       final result = await _boxRegistry.registerBox(config);
       if (result.isLeft()) {
         // Log o erro mas continua - boxes core devem sempre funcionar
-        print('Aviso: Falha ao registrar box core "${config.name}": ${result.fold((f) => f.message, (_) => '')}');
+        if (kDebugMode) {
+          debugPrint('Warning: Failed to register core box "${config.name}"');
+        }
       }
     }
   }

@@ -11,6 +11,9 @@ import '../../shared/config/environment_config.dart';
 import '../../shared/utils/failure.dart';
 
 /// Implementação concreta do repositório de assinaturas usando RevenueCat
+/// 
+/// Serviço responsável por gerenciar assinaturas através da plataforma RevenueCat.
+/// Suporta múltiplas apps do monorepo com configuração específica por aplicativo.
 class RevenueCatService implements ISubscriptionRepository {
   final StreamController<core_entities.SubscriptionEntity?> _subscriptionController =
       StreamController<core_entities.SubscriptionEntity?>.broadcast();
@@ -18,6 +21,9 @@ class RevenueCatService implements ISubscriptionRepository {
   bool _isInitialized = false;
   bool _isDisabled = false; // For web/dev environments
 
+  /// Construtor do RevenueCat service
+  /// 
+  /// Inicializa automaticamente o serviço conforme a configuração do ambiente
   RevenueCatService() {
     _initialize();
   }
@@ -31,12 +37,12 @@ class RevenueCatService implements ISubscriptionRepository {
     if (_isInitialized) return;
 
     try {
-      final apiKey = EnvironmentConfig.revenueCatApiKey;
+      final apiKey = EnvironmentConfig.getApiKey('REVENUE_CAT_API_KEY', fallback: 'rcat_dev_dummy_key');
       
       // Skip RevenueCat initialization in web/dev with dummy key
       if (kIsWeb || apiKey == 'rcat_dev_dummy_key') {
         if (kDebugMode) {
-          print('⚠️ RevenueCat skipped - Web environment or dummy key detected');
+          debugPrint('[RevenueCat] Skipped - Web environment or dummy key detected');
         }
         _isDisabled = true;
         _isInitialized = true; // Mark as initialized to avoid retries
@@ -56,7 +62,7 @@ class RevenueCatService implements ISubscriptionRepository {
       _isInitialized = true;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao inicializar RevenueCat: $e');
+        debugPrint('[RevenueCat] Initialization error: ${e.runtimeType}');
       }
       // Don't set _isInitialized = true on error
     }
@@ -341,16 +347,16 @@ class RevenueCatService implements ISubscriptionRepository {
   @override
   Future<Either<Failure, List<ProductInfo>>> getPlantisProducts() async {
     return getAvailableProducts(productIds: [
-      EnvironmentConfig.plantisMonthlyProduct,
-      EnvironmentConfig.plantisYearlyProduct,
+      EnvironmentConfig.getProductId('plantis_monthly'),
+      EnvironmentConfig.getProductId('plantis_yearly'),
     ]);
   }
 
   @override
   Future<Either<Failure, List<ProductInfo>>> getReceitaAgroProducts() async {
     return getAvailableProducts(productIds: [
-      EnvironmentConfig.receitaAgroMonthlyProduct,
-      EnvironmentConfig.receitaAgroYearlyProduct,
+      EnvironmentConfig.getProductId('receituagro_monthly'),
+      EnvironmentConfig.getProductId('receituagro_yearly'),
     ]);
   }
 
@@ -362,8 +368,8 @@ class RevenueCatService implements ISubscriptionRepository {
   @override
   Future<Either<Failure, List<ProductInfo>>> getGasometerProducts() async {
     return getAvailableProducts(productIds: [
-      EnvironmentConfig.gasometerMonthlyProduct,
-      EnvironmentConfig.gasometerYearlyProduct,
+      EnvironmentConfig.getProductId('gasometer_monthly'),
+      EnvironmentConfig.getProductId('gasometer_yearly'),
     ]);
   }
 
@@ -426,7 +432,7 @@ class RevenueCatService implements ISubscriptionRepository {
   core_entities.SubscriptionEntity? _mapEntitlementToSubscription(EntitlementInfo entitlement) {
     return core_entities.SubscriptionEntity(
       id: entitlement.identifier,
-      userId: entitlement.originalPurchaseDate.toString() ?? 'unknown',
+      userId: entitlement.originalPurchaseDate.toString(),
       productId: entitlement.productIdentifier,
       status: entitlement.isActive 
           ? core_entities.SubscriptionStatus.active 
@@ -537,6 +543,9 @@ class RevenueCatService implements ISubscriptionRepository {
     }
   }
 
+  /// Limpa recursos do serviço
+  /// 
+  /// Deve ser chamado quando o serviço não for mais utilizado para evitar memory leaks
   void dispose() {
     _subscriptionController.close();
   }

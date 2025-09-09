@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/services/i_box_registry_service.dart';
@@ -164,8 +165,9 @@ class BoxRegistryService implements IBoxRegistryService {
         final result = await closeBox(boxName);
         if (result.isLeft()) {
           // Log erro mas continua fechando outras boxes
-          // Em produção, isso deveria usar um logger apropriado
-          print('Erro ao fechar box "$boxName" do app "$appId": ${result.fold((f) => f.message, (_) => '')}');
+          if (kDebugMode) {
+            debugPrint('Error closing box "$boxName" for app "$appId"');
+          }
         }
       }
       

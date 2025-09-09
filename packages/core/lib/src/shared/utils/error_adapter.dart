@@ -214,21 +214,23 @@ mixin ErrorDisplayMixin {
 class ErrorLogger {
   /// Registra erro no sistema de logging
   static void logError(AppError error) {
-    // final errorData = error.toMap(); // Unused variable removed
-    
     if (kDebugMode) {
-      print('🚨 AppError: ${error.message}');
-      print('   Category: ${error.category.name}');
-      print('   Severity: ${error.severity.name}');
-      if (error.code != null) print('   Code: ${error.code}');
-      if (error.stackTrace != null) print('   Stack: ${error.stackTrace}');
+      debugPrint('🚨 AppError: ${_sanitizeMessage(error.message)}');
+      debugPrint('   Category: ${error.category.name}');
+      debugPrint('   Severity: ${error.severity.name}');
+      if (error.code != null) debugPrint('   Code: ${error.code}');
+      // Don't log full stack traces in production builds or when they might contain sensitive data
+      if (error.stackTrace != null && error.severity == ErrorSeverity.critical) {
+        debugPrint('   Stack: [Stack trace available for critical errors]');
+      }
     }
 
-    // Aqui você pode integrar com serviços de logging como Firebase Crashlytics
+    // Integrate with logging services like Firebase Crashlytics in production
+    // Only send sanitized error information to external services
     // FirebaseCrashlytics.instance.recordError(
-    //   error.message,
-    //   error.stackTrace,
-    //   information: errorData,
+    //   _sanitizeMessage(error.message),
+    //   null, // Don't send stack traces unless necessary
+    //   information: _sanitizeErrorData(error),
     // );
   }
 
@@ -238,18 +240,53 @@ class ErrorLogger {
     String? userId,
     Map<String, dynamic>? additionalContext,
   }) {
-    final context = {
-      'user_id': userId,
-      'error': error.toMap(),
-      ...?additionalContext,
+    final sanitizedContext = <String, dynamic>{
+      'user_id': userId != null ? _sanitizeUserId(userId) : null,
+      'error_category': error.category.name,
+      'error_severity': error.severity.name,
+      'error_code': error.code,
     };
-
-    if (kDebugMode) {
-      print('🚨 AppError with context: ${error.message}');
-      print('   Context: $context');
+    
+    // Add non-sensitive additional context separately
+    if (additionalContext != null) {
+      for (final entry in additionalContext.entries) {
+        if (!_isSensitiveKey(entry.key)) {
+          sanitizedContext[entry.key] = entry.value;
+        }
+      }
     }
 
-    // Integração com analytics/logging
+    if (kDebugMode) {
+      debugPrint('🚨 AppError with context: ${_sanitizeMessage(error.message)}');
+      debugPrint('   Context: $sanitizedContext');
+    }
+
+    // Integration with analytics/logging - send only sanitized data
+  }
+
+  /// Sanitizes error messages to remove sensitive information
+  static String _sanitizeMessage(String message) {
+    // Remove common sensitive patterns
+    return message
+        .replaceAll(RegExp(r'password[\s:=][\w]+', caseSensitive: false), 'password=[REDACTED]')
+        .replaceAll(RegExp(r'token[\s:=][\w\-._]+', caseSensitive: false), 'token=[REDACTED]')
+        .replaceAll(RegExp(r'key[\s:=][\w\-._]+', caseSensitive: false), 'key=[REDACTED]')
+        .replaceAll(RegExp(r'secret[\s:=][\w\-._]+', caseSensitive: false), 'secret=[REDACTED]')
+        .replaceAll(RegExp(r'[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}'), '[EMAIL_REDACTED]')
+        .replaceAll(RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'), '[CARD_REDACTED]');
+  }
+
+  /// Sanitizes user ID to remove sensitive information while keeping it useful for debugging
+  static String _sanitizeUserId(String userId) {
+    if (userId.length <= 8) return userId;
+    return '${userId.substring(0, 4)}...${userId.substring(userId.length - 4)}';
+  }
+
+  /// Checks if a key contains sensitive information
+  static bool _isSensitiveKey(String key) {
+    final sensitivePatterns = ['password', 'secret', 'token', 'key', 'credential', 'auth', 'session'];
+    final keyLower = key.toLowerCase();
+    return sensitivePatterns.any((pattern) => keyLower.contains(pattern));
   }
 }
 

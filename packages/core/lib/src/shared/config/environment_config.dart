@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 
 enum Environment { development, staging, production }
 
-/// Configuração centralizada de ambiente para o monorepo
-/// Gerencia configurações de Firebase, RevenueCat e outros serviços
+/// Generic environment configuration for the monorepo
+/// This provides common environment utilities without app-specific configuration
+/// Apps should create their own specific environment configs that extend or use this
 class EnvironmentConfig {
   static Environment get environment {
     const env = String.fromEnvironment('ENV', defaultValue: 'development');
@@ -20,131 +21,7 @@ class EnvironmentConfig {
 
   static String get environmentName => environment.name;
 
-  // Firebase Configuration
-  static String get firebaseProjectId {
-    switch (environment) {
-      case Environment.development:
-        return 'plantis-receituagro-dev';
-      case Environment.staging:
-        return 'plantis-receituagro-staging';
-      case Environment.production:
-        return 'plantis-receituagro-prod';
-    }
-  }
-
-  // RevenueCat Configuration
-  static String get revenueCatApiKey {
-    switch (environment) {
-      case Environment.development:
-        const key = String.fromEnvironment('REVENUE_CAT_DEV_KEY', defaultValue: 'rcat_dev_dummy_key');
-        if (key == 'rcat_dev_dummy_key') {
-          if (kDebugMode) {
-            print('⚠️ WARNING: Using dummy RevenueCat key for development/web');
-          }
-        }
-        return key;
-      case Environment.staging:
-        const key = String.fromEnvironment('REVENUE_CAT_STAGING_KEY');
-        if (key.isEmpty) throw Exception('REVENUE_CAT_STAGING_KEY not configured');
-        return key;
-      case Environment.production:
-        const key = String.fromEnvironment('REVENUE_CAT_PROD_KEY');
-        if (key.isEmpty) throw Exception('REVENUE_CAT_PROD_KEY not configured');
-        return key;
-    }
-  }
-
-  // Plantis Subscription Products
-  static String get plantisMonthlyProduct {
-    switch (environment) {
-      case Environment.development:
-        return 'plantis_premium_monthly_dev';
-      case Environment.staging:
-        return 'plantis_premium_monthly_staging';
-      case Environment.production:
-        return 'plantis_premium_monthly';
-    }
-  }
-
-  static String get plantisYearlyProduct {
-    switch (environment) {
-      case Environment.development:
-        return 'plantis_premium_yearly_dev';
-      case Environment.staging:
-        return 'plantis_premium_yearly_staging';
-      case Environment.production:
-        return 'plantis_premium_yearly';
-    }
-  }
-
-  // ReceitaAgro Subscription Products
-  static String get receitaAgroMonthlyProduct {
-    switch (environment) {
-      case Environment.development:
-        return 'receituagro_pro_monthly_dev';
-      case Environment.staging:
-        return 'receituagro_pro_monthly_staging';
-      case Environment.production:
-        return 'receituagro_pro_monthly';
-    }
-  }
-
-  static String get receitaAgroYearlyProduct {
-    switch (environment) {
-      case Environment.development:
-        return 'receituagro_pro_yearly_dev';
-      case Environment.staging:
-        return 'receituagro_pro_yearly_staging';
-      case Environment.production:
-        return 'receituagro_pro_yearly';
-    }
-  }
-
-  // GasOMeter Subscription Products
-  static String get gasometerMonthlyProduct {
-    switch (environment) {
-      case Environment.development:
-        return 'gasometer_premium_monthly_dev';
-      case Environment.staging:
-        return 'gasometer_premium_monthly_staging';
-      case Environment.production:
-        return 'gasometer_premium_monthly';
-    }
-  }
-
-  static String get gasometerYearlyProduct {
-    switch (environment) {
-      case Environment.development:
-        return 'gasometer_premium_yearly_dev';
-      case Environment.staging:
-        return 'gasometer_premium_yearly_staging';
-      case Environment.production:
-        return 'gasometer_premium_yearly';
-    }
-  }
-
-  // API Keys
-  static String get weatherApiKey {
-    const key = String.fromEnvironment('WEATHER_API_KEY', defaultValue: 'weather_dummy_key');
-    if (key == 'weather_dummy_key') {
-      if (kDebugMode) {
-        print('⚠️ WARNING: Using dummy weather API key for development/web');
-      }
-    }
-    return key;
-  }
-
-  static String get googleMapsApiKey {
-    const key = String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: 'maps_dummy_key');
-    if (key == 'maps_dummy_key') {
-      if (kDebugMode) {
-        print('⚠️ WARNING: Using dummy Google Maps API key for development/web');
-      }
-    }
-    return key;
-  }
-
-  // Debug Configuration
+  // Generic Configuration Methods
   static bool get isDebugMode {
     return environment == Environment.development;
   }
@@ -153,19 +30,11 @@ class EnvironmentConfig {
     return environment == Environment.production;
   }
 
-  // App Configuration
-  static String get apiBaseUrl {
-    switch (environment) {
-      case Environment.development:
-        return 'https://dev-api.plantisreceituagro.com';
-      case Environment.staging:
-        return 'https://staging-api.plantisreceituagro.com';
-      case Environment.production:
-        return 'https://api.plantisreceituagro.com';
-    }
+  static bool get isStagingMode {
+    return environment == Environment.staging;
   }
 
-  // Logging Configuration
+  // Generic Logging Configuration
   static bool get enableLogging {
     return environment != Environment.production;
   }
@@ -174,7 +43,7 @@ class EnvironmentConfig {
     return environment == Environment.production || environment == Environment.staging;
   }
 
-  // Storage Configuration (for different environments)
+  // Generic Storage Configuration (for different environments)
   static String get storagePrefix {
     switch (environment) {
       case Environment.development:
@@ -186,16 +55,95 @@ class EnvironmentConfig {
     }
   }
 
-  /// Print current configuration for debugging
-  static void printConfig() {
-    if (kDebugMode && isDebugMode) {
-      print('=== Environment Configuration ===');
-      print('Environment: $environmentName');
-      print('Firebase Project: $firebaseProjectId');
-      print('API Base URL: $apiBaseUrl');
-      print('Enable Logging: $enableLogging');
-      print('Enable Analytics: $enableAnalytics');
-      print('====================================');
+  // Generic API Key Helper
+  static String getApiKey(String keyName, {String? fallback}) {
+    final key = String.fromEnvironment(keyName, defaultValue: fallback ?? '');
+    if (key.isEmpty || (fallback != null && key == fallback)) {
+      if (kDebugMode && fallback != null) {
+        print('⚠️ WARNING: Using fallback value for $keyName');
+      }
+    }
+    return key;
+  }
+
+  // Generic Firebase Project ID Helper
+  static String getFirebaseProjectId(String projectBaseName) {
+    switch (environment) {
+      case Environment.development:
+        return '$projectBaseName-dev';
+      case Environment.staging:
+        return '$projectBaseName-staging';
+      case Environment.production:
+        return '$projectBaseName-prod';
     }
   }
+
+  // Generic API Base URL Helper
+  static String getApiBaseUrl(String domain) {
+    switch (environment) {
+      case Environment.development:
+        return 'https://dev-api.$domain';
+      case Environment.staging:
+        return 'https://staging-api.$domain';
+      case Environment.production:
+        return 'https://api.$domain';
+    }
+  }
+
+  // Generic Product ID Helper for subscriptions
+  static String getProductId(String baseName) {
+    switch (environment) {
+      case Environment.development:
+        return '${baseName}_dev';
+      case Environment.staging:
+        return '${baseName}_staging';
+      case Environment.production:
+        return baseName;
+    }
+  }
+
+  /// Print current configuration for debugging
+  static void printConfig({Map<String, dynamic>? additionalConfig}) {
+    if (kDebugMode && isDebugMode) {
+      print('=== Core Environment Configuration ===');
+      print('Environment: $environmentName');
+      print('Enable Logging: $enableLogging');
+      print('Enable Analytics: $enableAnalytics');
+      print('Storage Prefix: $storagePrefix');
+      
+      if (additionalConfig != null) {
+        print('=== Additional Configuration ===');
+        additionalConfig.forEach((key, value) {
+          print('$key: $value');
+        });
+      }
+      print('==========================================');
+    }
+  }
+}
+
+/// Base class for app-specific environment configurations
+/// Apps should extend this class to add their own specific configurations
+abstract class AppEnvironmentConfig {
+  /// App identifier
+  String get appId;
+
+  /// Firebase project base name
+  String get firebaseProjectBaseName;
+
+  /// API domain
+  String get apiDomain;
+
+  // Convenience getters using core helpers
+  String get firebaseProjectId => 
+      EnvironmentConfig.getFirebaseProjectId(firebaseProjectBaseName);
+
+  String get apiBaseUrl => 
+      EnvironmentConfig.getApiBaseUrl(apiDomain);
+
+  Environment get environment => EnvironmentConfig.environment;
+  bool get isDebugMode => EnvironmentConfig.isDebugMode;
+  bool get isProductionMode => EnvironmentConfig.isProductionMode;
+  bool get enableLogging => EnvironmentConfig.enableLogging;
+  bool get enableAnalytics => EnvironmentConfig.enableAnalytics;
 }

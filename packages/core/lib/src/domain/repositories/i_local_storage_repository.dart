@@ -215,22 +215,20 @@ class LocalStorageKeys {
   static const String onboardingCompleted = 'onboarding_completed';
   static const String tutorialShown = 'tutorial_shown';
 
-  // App específico - Plantis
-  static const String plantisSettings = 'plantis_settings';
-  static const String plantisCache = 'plantis_cache';
-  static const String plantisOffline = 'plantis_offline';
-
-  // App específico - ReceitaAgro
-  static const String receitaAgroSettings = 'receituagro_settings';
-  static const String receitaAgroCache = 'receituagro_cache';
-  static const String receitaAgroOffline = 'receituagro_offline';
+  // App-specific keys should be defined in respective apps, not in core package
+  // This ensures proper separation of concerns and prevents cross-app contamination
 }
 
-/// Nomes das boxes do Hive
+/// Nomes das boxes core do Hive (genéricas para todos os apps)
+/// IMPORTANTE: Não adicionar boxes específicas de apps aqui
+/// Cada app deve definir suas próprias boxes usando o BoxRegistryService
 class HiveBoxes {
   static const String settings = 'settings';
   static const String cache = 'cache';
   static const String offline = 'offline';
-  static const String plantis = 'plantis';
-  static const String receituagro = 'receituagro';
+  
+  // REMOVED: App-specific boxes moved to respective apps
+  // - plantis: moved to app-plantis/lib/core/storage/plantis_boxes.dart
+  // - receituagro: moved to app-receituagro/lib/core/storage/receituagro_boxes.dart
+  // This prevents cross-app contamination and maintains clean architecture
 }

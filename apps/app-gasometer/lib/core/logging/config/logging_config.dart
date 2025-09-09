@@ -1,9 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/log_entry.dart';
 
-@module
-abstract class LoggingConfigModule {
+/// Configurações do módulo de logging
+class LoggingConfigModule {
   /// Configura o sistema de logging
   static Future<void> configure() async {
     // Registrar TypeAdapters para Hive

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:core/core.dart';
 
 import '../models/favorito_item_hive.dart';
+import '../storage/receituagro_boxes.dart';
 import 'core_base_hive_repository.dart';
 
 /// Repositório para gerenciar favoritos usando core package
@@ -53,7 +54,7 @@ class FavoritosCoreRepository extends CoreBaseHiveRepository<FavoritoItemHive> {
       final result = await _localStorageService.save<Map<String, dynamic>>(
         key: '${_localBoxName}_$key',
         data: favorito.toJson(),
-        box: HiveBoxes.receituagro,
+        box: ReceitaAgroBoxes.favoritos,
       );
       
       return result.isRight();
@@ -68,7 +69,7 @@ class FavoritosCoreRepository extends CoreBaseHiveRepository<FavoritoItemHive> {
       final key = '${tipo}_$itemId';
       final result = await _localStorageService.remove(
         key: '${_localBoxName}_$key',
-        box: HiveBoxes.receituagro,
+        box: ReceitaAgroBoxes.favoritos,
       );
       
       return result.isRight();
@@ -100,7 +101,7 @@ class FavoritosCoreRepository extends CoreBaseHiveRepository<FavoritoItemHive> {
       final key = getKeyFromEntity(favorito);
       await _localStorageService.remove(
         key: '${_localBoxName}_$key',
-        box: HiveBoxes.receituagro,
+        box: ReceitaAgroBoxes.favoritos,
       );
     }
   }

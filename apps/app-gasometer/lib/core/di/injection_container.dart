@@ -8,16 +8,15 @@ import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Injectable configuration
+import 'injectable_config.dart';
+
 // Logging imports
 import '../logging/data/datasources/log_local_data_source.dart';
 import '../logging/data/datasources/log_remote_data_source.dart';
 import '../logging/data/repositories/log_repository_impl.dart';
 import '../logging/repositories/log_repository.dart';
 import '../logging/services/logging_service.dart';
-import '../interfaces/i_sync_service.dart';
-import '../sync/services/sync_service.dart';
-import '../sync/services/sync_queue.dart';
-import '../sync/services/sync_operations.dart';
 import '../sync/services/conflict_resolver.dart';
 import '../services/analytics_service.dart';
 import '../services/avatar_service.dart';
@@ -112,7 +111,6 @@ import '../../features/vehicles/domain/usecases/update_vehicle.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 // Additional imports (removing duplicates)
 import '../error/error_handler.dart';
-import '../error/error_logger.dart';
 import '../error/error_reporter.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
@@ -122,47 +120,39 @@ import '../sync/presentation/providers/sync_status_provider.dart';
 
 final sl = GetIt.instance;
 
-/// Configuração manual do DI até o build_runner gerar o arquivo .config
+/// Configuração completa do DI usando injectable + manual registrations
 Future<void> initializeDependencies() async {
+  // ===== Call injectable configuration first =====
+  configureDependencies();
+  
   // ===== External Dependencies =====
   
-  // Firebase
-  sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+  // Firebase services will be registered by injectable RegisterModule
   
-  // SharedPreferences
-  final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+  // SharedPreferences will be registered by injectable RegisterModule
   
-  // FlutterSecureStorage
-  const secureStorageConfig = AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
-  sl.registerLazySingleton<FlutterSecureStorage>(
-    () => const FlutterSecureStorage(aOptions: secureStorageConfig),
-  );
+  // FlutterSecureStorage will be registered by injectable RegisterModule
 
   // ===== Services =====
   
   // Core Services
-  sl.registerLazySingleton<LocalDataService>(() => LocalDataService());
-  sl.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
+  // LocalDataService is now registered by injectable (@singleton annotation)
+  // AnalyticsService will be registered by injectable (@singleton annotation)
   sl.registerLazySingleton<AvatarService>(() => AvatarService());
   
-  // Logging Service - requires AnalyticsService and LogRepository
-  sl.registerLazySingleton<LoggingService>(() => LoggingService(sl(), sl()));
+  // Logging Service - requires AnalyticsService and LogRepository (both now injectable)
+  // LoggingService is now registered by injectable (@LazySingleton annotation)
   
-  sl.registerLazySingleton<AuthRateLimiter>(() => AuthRateLimiter(sl()));
+  // AuthRateLimiter is now registered by injectable (@LazySingleton annotation)
   sl.registerLazySingleton<GasOMeterNotificationService>(() => GasOMeterNotificationService());
-  sl.registerLazySingleton<PlatformService>(() => const PlatformService());
+  // PlatformService will be registered by injectable (@injectable annotation)
 
   // Error Handling Services
-  sl.registerLazySingleton<ErrorLogger>(() => ErrorLogger());
+  // ErrorLogger will be registered by injectable (@injectable annotation)
   sl.registerLazySingleton<ErrorHandler>(() => ErrorHandler(sl()));
   sl.registerLazySingleton<ErrorReporter>(() => ErrorReporter(sl()));
 
-  // Core Package Services
-  sl.registerLazySingleton<core.ISubscriptionRepository>(() => core.RevenueCatService());
+  // Core Package Services - ISubscriptionRepository will be registered by injectable RegisterModule
   
   // App Rating Service from core package
   sl.registerLazySingleton<core.IAppRatingRepository>(() => core.AppRatingService(
@@ -176,23 +166,11 @@ Future<void> initializeDependencies() async {
   ));
 
   // Sync Services
-  sl.registerLazySingleton<SyncQueue>(() => SyncQueue());
-  // Register the specific ConflictResolver<BaseSyncModel> that SyncService needs
-  sl.registerLazySingleton<ConflictResolver<BaseSyncModel>>(() => BaseSyncModelConflictResolver());
-  sl.registerLazySingleton<SyncOperations>(() => SyncOperations(sl(), sl(), sl()));
-  sl.registerLazySingleton<SyncService>(() => SyncService(sl(), sl(), sl(), sl(), sl()));
-  
-  // Register ISyncService interface mapped to SyncService
-  sl.registerLazySingleton<ISyncService>(() => sl<SyncService>());
-  
-  // Initialize LocalDataService
-  final localDataService = sl<LocalDataService>();
-  if (!localDataService.isInitialized) {
-    await localDataService.initialize();
-  }
+  // Note: SyncQueue, SyncOperations and SyncService are now registered by injectable
+  // ConflictResolver<BaseSyncModel> is also registered by injectable now
 
   // ===== Connectivity =====
-  sl.registerLazySingleton<Connectivity>(() => Connectivity());
+  // Connectivity will be registered by injectable RegisterModule
 
   // ===== Data Sources =====
   
@@ -521,6 +499,9 @@ Future<void> initializeDependencies() async {
 
   // Sync Provider
   sl.registerFactory<SyncStatusProvider>(() => SyncStatusProvider(sl()));
+
+  // ===== Initialize services that need post-DI setup =====
+  await initializePostDIServices();
 }
 
 @module

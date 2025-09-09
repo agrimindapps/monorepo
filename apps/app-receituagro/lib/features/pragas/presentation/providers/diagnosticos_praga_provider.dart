@@ -30,6 +30,8 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
   // Estado dos diagnósticos
   List<DiagnosticoModel> _diagnosticos = [];
   bool _isLoading = false;
+  bool _isLoadingFilters = false;
+  bool _hasPartialData = false;
   String? _errorMessage;
 
   // Estado dos filtros
@@ -51,12 +53,16 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
   List<DiagnosticoModel> get diagnosticos => _diagnosticos;
   List<DiagnosticoModel> get filteredDiagnosticos => _filterDiagnosticos();
   bool get isLoading => _isLoading;
+  bool get isLoadingFilters => _isLoadingFilters;
+  bool get hasPartialData => _hasPartialData;
+  bool get hasData => _diagnosticos.isNotEmpty;
+  bool get hasError => _errorMessage != null;
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
   String get selectedCultura => _selectedCultura;
   List<String> get culturas => _culturas;
 
-  /// Carrega diagnósticos para uma praga específica
+  /// Carrega diagnósticos para uma praga específica por ID
   Future<void> loadDiagnosticos(String pragaId) async {
     debugPrint('🔍 Carregando diagnósticos para praga ID: $pragaId');
     _isLoading = true;
@@ -73,7 +79,48 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
           debugPrint('❌ $_errorMessage');
         },
         (diagnosticosEntities) {
-          debugPrint('✅ Encontrados ${diagnosticosEntities.length} diagnósticos para praga: $pragaId');
+          debugPrint('✅ Encontrados ${diagnosticosEntities.length} diagnósticos para praga ID: $pragaId');
+          // Converte entidades para o modelo usado na UI
+          _diagnosticos = diagnosticosEntities.map((entity) {
+            return DiagnosticoModel(
+              id: entity.id,
+              nome: entity.nomeDefensivo ?? 'Defensivo não especificado',
+              ingredienteAtivo: entity.idDefensivo,
+              dosagem: entity.dosagem.toString(),
+              cultura: entity.nomeCultura ?? 'Não especificado',
+              grupo: entity.nomePraga ?? '',
+            );
+          }).toList();
+        },
+      );
+    } catch (e) {
+      _errorMessage = 'Erro ao carregar diagnósticos: $e';
+      _diagnosticos = [];
+      debugPrint(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Carrega diagnósticos para uma praga específica por NOME
+  Future<void> loadDiagnosticosByNomePraga(String nomePraga) async {
+    debugPrint('🔍 Carregando diagnósticos para praga NOME: $nomePraga');
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await _diagnosticosRepository.searchByNomePraga(nomePraga);
+
+      result.fold(
+        (failure) {
+          _errorMessage = 'Erro ao carregar diagnósticos: ${failure.toString()}';
+          _diagnosticos = [];
+          debugPrint('❌ $_errorMessage');
+        },
+        (diagnosticosEntities) {
+          debugPrint('✅ Encontrados ${diagnosticosEntities.length} diagnósticos para praga NOME: $nomePraga');
           // Converte entidades para o modelo usado na UI
           _diagnosticos = diagnosticosEntities.map((entity) {
             return DiagnosticoModel(
@@ -99,13 +146,23 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
 
   /// Atualiza query de pesquisa
   void updateSearchQuery(String query) {
+    _isLoadingFilters = true;
+    notifyListeners();
+    
     _searchQuery = query;
+    
+    _isLoadingFilters = false;
     notifyListeners();
   }
 
   /// Atualiza cultura selecionada
   void updateSelectedCultura(String cultura) {
+    _isLoadingFilters = true;
+    notifyListeners();
+    
     _selectedCultura = cultura;
+    
+    _isLoadingFilters = false;
     notifyListeners();
   }
 
@@ -156,5 +213,27 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Limpa dados em memória para otimização
+  void clearData() {
+    _diagnosticos.clear();
+    _errorMessage = null;
+    _hasPartialData = false;
+    _isLoading = false;
+    _isLoadingFilters = false;
+    notifyListeners();
+  }
+
+  /// Retorna estatísticas dos dados carregados
+  Map<String, int> getDataStats() {
+    final stats = <String, int>{};
+    stats['total'] = _diagnosticos.length;
+    stats['filtered'] = filteredDiagnosticos.length;
+    
+    final culturaGroups = groupedDiagnosticos;
+    stats['culturas'] = culturaGroups.keys.length;
+    
+    return stats;
   }
 }

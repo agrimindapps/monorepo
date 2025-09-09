@@ -35,7 +35,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   late String _currentPragaType;
   late PragasProvider _pragasProvider;
   late FavoritosRepositorySimplified _favoritosRepository;
-  
+
   // Cache local para status de favoritos
   final Map<String, bool> _favoritesCache = {};
 
@@ -48,7 +48,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     // Inicializa o provider diretamente
     _pragasProvider = GetIt.instance<PragasProvider>();
     _favoritosRepository = GetIt.instance<FavoritosRepositorySimplified>();
-    
+
     // Carrega favoritos iniciais
     _loadFavoritesStatus();
   }
@@ -135,52 +135,54 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       ),
     );
   }
-  
+
   /// Carrega o status de favoritos para as pragas atuais
   Future<void> _loadFavoritesStatus() async {
     if (_pragasProvider.pragas.isEmpty) return;
-    
+
     for (final praga in _pragasProvider.pragas) {
       try {
-        final isFavorite = await _favoritosRepository.isFavorito(TipoFavorito.praga, praga.idReg);
+        final isFavorite = await _favoritosRepository.isFavorito(
+            TipoFavorito.praga, praga.idReg);
         _favoritesCache[praga.idReg] = isFavorite;
       } catch (e) {
         _favoritesCache[praga.idReg] = false;
       }
     }
-    
+
     if (mounted) {
       setState(() {});
     }
   }
-  
+
   /// Alterna o status de favorito para uma praga
   Future<void> _toggleFavorite(PragaEntity praga) async {
     try {
-      final result = await _favoritosRepository.toggleFavorito(TipoFavorito.praga, praga.idReg);
-      
+      final result = await _favoritosRepository.toggleFavorito(
+          TipoFavorito.praga, praga.idReg);
+
       if (result) {
         // Atualiza cache local
         final currentStatus = _favoritesCache[praga.idReg] ?? false;
         _favoritesCache[praga.idReg] = !currentStatus;
-        
+
         if (mounted) {
           setState(() {});
         }
-        
+
         // Mostra feedback visual
         final newStatus = _favoritesCache[praga.idReg] ?? false;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              newStatus 
-                ? '${praga.nomeComum} adicionada aos favoritos'
-                : '${praga.nomeComum} removida dos favoritos',
+            SnackBar(
+              content: Text(
+                newStatus
+                    ? '${praga.nomeComum} adicionada aos favoritos'
+                    : '${praga.nomeComum} removida dos favoritos',
+              ),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
             ),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
           );
         }
       }
@@ -196,7 +198,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       }
     }
   }
-  
+
   /// Verifica se uma praga é favorita
   bool _isFavorite(PragaEntity praga) {
     return _favoritesCache[praga.idReg] ?? false;

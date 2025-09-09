@@ -1,6 +1,9 @@
 /// Interface for sync service operations
 /// Provides contract for different sync implementations
 abstract class ISyncService {
+  /// Initialize the sync service
+  Future<void> initialize();
+
   /// Start synchronization process
   Future<void> startSync();
 
@@ -40,15 +43,15 @@ enum SyncStatus {
 
 /// Sync result information
 class SyncResult {
-  final bool success;
-  final String? error;
-  final int itemsSynced;
-  final DateTime timestamp;
-
   const SyncResult({
     required this.success,
     this.error,
     required this.itemsSynced,
     required this.timestamp,
   });
+
+  final bool success;
+  final String? error;
+  final int itemsSynced;
+  final DateTime timestamp;
 }

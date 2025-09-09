@@ -2,34 +2,56 @@ import 'package:dartz/dartz.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/repositories/i_local_storage_repository.dart';
+import '../../domain/services/i_box_registry_service.dart';
 import '../../shared/utils/failure.dart';
+import '../models/box_configuration.dart';
 
 /// Implementação concreta do repositório de storage local usando Hive
+/// Agora utiliza BoxRegistryService para gerenciamento dinâmico de boxes
+/// Isso elimina o hardcoding de boxes específicas de apps
 class HiveStorageService implements ILocalStorageRepository {
-  final Map<String, Box> _openBoxes = {};
+  final IBoxRegistryService _boxRegistry;
   bool _isInitialized = false;
+
+  /// Constructor que recebe o registry service
+  HiveStorageService(this._boxRegistry);
 
   @override
   Future<Either<Failure, void>> initialize() async {
     try {
       if (_isInitialized) return const Right(null);
 
-      await Hive.initFlutter();
+      // Inicializa o BoxRegistryService primeiro
+      final registryResult = await _boxRegistry.initialize();
+      if (registryResult.isLeft()) {
+        return registryResult.fold((failure) => Left(failure), (_) => const Right(null));
+      }
 
-      // Registrar adapters customizados se necessário
-      _registerAdapters();
-
-      // Abrir boxes principais
-      await _openBox(HiveBoxes.settings);
-      await _openBox(HiveBoxes.cache);
-      await _openBox(HiveBoxes.offline);
-      await _openBox(HiveBoxes.plantis);
-      await _openBox(HiveBoxes.receituagro);
+      // Registra as boxes core comuns (genéricas)
+      // Apps específicos devem registrar suas próprias boxes via BoxRegistryService
+      await _registerCoreBoxes();
 
       _isInitialized = true;
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao inicializar storage local: $e'));
+    }
+  }
+
+  /// Registra as boxes core que são comuns a todos os apps
+  Future<void> _registerCoreBoxes() async {
+    final coreBoxes = [
+      BoxConfiguration.basic(name: HiveBoxes.settings, appId: 'core'),
+      BoxConfiguration.basic(name: HiveBoxes.cache, appId: 'core'), 
+      BoxConfiguration.basic(name: HiveBoxes.offline, appId: 'core'),
+    ];
+
+    for (final config in coreBoxes) {
+      final result = await _boxRegistry.registerBox(config);
+      if (result.isLeft()) {
+        // Log o erro mas continua - boxes core devem sempre funcionar
+        print('Aviso: Falha ao registrar box core "${config.name}": ${result.fold((f) => f.message, (_) => '')}');
+      }
     }
   }
 
@@ -41,10 +63,15 @@ class HiveStorageService implements ILocalStorageRepository {
   }) async {
     try {
       await _ensureInitialized();
-      final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-
-      await targetBox.put(key, data);
-      return const Right(null);
+      final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
+      
+      return boxResult.fold(
+        (failure) => Left(failure),
+        (targetBox) async {
+          await targetBox.put(key, data);
+          return const Right(null);
+        },
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao salvar dados: $e'));
     }
@@ -63,10 +90,15 @@ class HiveStorageService implements ILocalStorageRepository {
   Future<Either<Failure, T?>> get<T>({required String key, String? box}) async {
     try {
       await _ensureInitialized();
-      final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-
-      final data = targetBox.get(key) as T?;
-      return Right(data);
+      final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
+      
+      return boxResult.fold(
+        (failure) => Left(failure),
+        (targetBox) {
+          final data = targetBox.get(key) as T?;
+          return Right(data);
+        },
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao obter dados: $e'));
     }
@@ -79,10 +111,15 @@ class HiveStorageService implements ILocalStorageRepository {
   }) async {
     try {
       await _ensureInitialized();
-      final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-
-      await targetBox.delete(key);
-      return const Right(null);
+      final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
+      
+      return boxResult.fold(
+        (failure) => Left(failure),
+        (targetBox) async {
+          await targetBox.delete(key);
+          return const Right(null);
+        },
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao remover dados: $e'));
     }
@@ -92,10 +129,15 @@ class HiveStorageService implements ILocalStorageRepository {
   Future<Either<Failure, void>> clear({String? box}) async {
     try {
       await _ensureInitialized();
-      final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-
-      await targetBox.clear();
-      return const Right(null);
+      final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
+      
+      return boxResult.fold(
+        (failure) => Left(failure),
+        (targetBox) async {
+          await targetBox.clear();
+          return const Right(null);
+        },
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao limpar dados: $e'));
     }
@@ -457,32 +499,6 @@ class HiveStorageService implements ILocalStorageRepository {
     }
   }
 
-  /// Registra adapters customizados para tipos específicos
-  void _registerAdapters() {
-    // TODO: Registrar adapters para tipos customizados se necessário
-    // Exemplo: Hive.registerAdapter(UserEntityAdapter());
-  }
-
-  /// Abre uma box específica
-  Future<Box> _openBox(String boxName) async {
-    if (_openBoxes.containsKey(boxName)) {
-      return _openBoxes[boxName]!;
-    }
-
-    final box = await Hive.openBox(boxName);
-    _openBoxes[boxName] = box;
-    return box;
-  }
-
-  /// Garante que uma box está aberta
-  Future<Box> _ensureBoxOpen(String boxName) async {
-    if (_openBoxes.containsKey(boxName)) {
-      return _openBoxes[boxName]!;
-    }
-
-    return _openBox(boxName);
-  }
-
   /// Garante que o Hive está inicializado
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
@@ -490,12 +506,20 @@ class HiveStorageService implements ILocalStorageRepository {
     }
   }
 
-  /// Fecha todas as boxes e limpa o cache
+  /// Garante que uma box está aberta
+  Future<Box> _ensureBoxOpen(String boxName) async {
+    await _ensureInitialized();
+    final boxResult = await _boxRegistry.getBox(boxName);
+    
+    return boxResult.fold(
+      (failure) => throw Exception('Failed to open box "$boxName": ${failure.message}'),
+      (box) => box,
+    );
+  }
+
+  /// Fecha todas as boxes e limpa recursos
   Future<void> dispose() async {
-    for (final box in _openBoxes.values) {
-      await box.close();
-    }
-    _openBoxes.clear();
+    await _boxRegistry.dispose();
     _isInitialized = false;
   }
 }

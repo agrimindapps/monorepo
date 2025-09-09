@@ -446,63 +446,36 @@ enum ImageUploadType {
   final String folder;
 }
 
-/// Configurações específicas por app
-class AppImageConfigs {
-  /// Configuração para app-plantis
-  static const plantisConfig = ImageServiceConfig(
+/// Generic configurations that apps can use as a base
+/// Apps should define their own specific configurations in their respective folders
+class DefaultImageConfigs {
+  /// Standard quality configuration for most use cases
+  static const standard = ImageServiceConfig(
     maxWidth: 1920,
     maxHeight: 1920,
     imageQuality: 85,
     maxImagesCount: 5,
-    defaultFolder: 'plants',
-    folders: {
-      'plant': 'plants',
-      'space': 'spaces',
-      'task': 'tasks',
-      'profile': 'profiles',
-    },
+    defaultFolder: 'images',
+    folders: {},
   );
 
-  /// Configuração para app-gasometer
-  static const gasometerConfig = ImageServiceConfig(
-    maxWidth: 1920,
-    maxHeight: 1920,
-    imageQuality: 90,
+  /// High quality configuration for apps that need better image quality
+  static const highQuality = ImageServiceConfig(
+    maxWidth: 2048,
+    maxHeight: 2048,
+    imageQuality: 95,
     maxImagesCount: 3,
-    defaultFolder: 'gasometers',
-    folders: {
-      'gasometer': 'gasometers',
-      'reading': 'readings',
-      'profile': 'profiles',
-    },
+    defaultFolder: 'images',
+    folders: {},
   );
 
-  /// Configuração para app-receituagro
-  static const receituagroConfig = ImageServiceConfig(
-    maxWidth: 1920,
-    maxHeight: 1920,
-    imageQuality: 85,
+  /// Optimized configuration for mobile with lower quality for bandwidth saving
+  static const optimized = ImageServiceConfig(
+    maxWidth: 1280,
+    maxHeight: 1280,
+    imageQuality: 75,
     maxImagesCount: 10,
-    defaultFolder: 'diagnostics',
-    folders: {
-      'diagnostic': 'diagnostics',
-      'defensivo': 'defensivos',
-      'praga': 'pragas',
-      'profile': 'profiles',
-    },
-  );
-
-  /// Configuração para app_task_manager
-  static const taskManagerConfig = ImageServiceConfig(
-    maxWidth: 1920,
-    maxHeight: 1920,
-    imageQuality: 85,
-    maxImagesCount: 5,
-    defaultFolder: 'tasks',
-    folders: {
-      'task': 'tasks',
-      'subtask': 'subtasks',
-      'profile': 'profiles',
-    },
+    defaultFolder: 'images',
+    folders: {},
   );
 }

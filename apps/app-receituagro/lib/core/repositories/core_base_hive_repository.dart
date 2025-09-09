@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../contracts/i_static_data_repository.dart';
+import '../storage/receituagro_boxes.dart';
 
 /// Repositório base que utiliza o HiveStorageService do core package
 /// Substitui o BaseHiveRepository antigo que usava Hive diretamente
@@ -33,7 +34,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
       }
 
       // Limpa dados existentes
-      final clearResult = await _storageService.clear(box: HiveBoxes.receituagro);
+      final clearResult = await _storageService.clear(box: ReceitaAgroBoxes.receituagro);
       if (clearResult.isLeft()) {
         return Left(Exception('Erro ao limpar dados: ${clearResult.fold((f) => f.message, (_) => '')}'));
       }
@@ -46,7 +47,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
         final saveResult = await _storageService.save<Map<String, dynamic>>(
           key: '${_boxName}_$key',
           data: json,
-          box: HiveBoxes.receituagro,
+          box: ReceitaAgroBoxes.receituagro,
         );
         
         if (saveResult.isLeft()) {
@@ -58,7 +59,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
       final versionResult = await _storageService.save<String>(
         key: '${_boxName}_$_versionKey',
         data: appVersion,
-        box: HiveBoxes.receituagro,
+        box: ReceitaAgroBoxes.receituagro,
       );
       
       if (versionResult.isLeft()) {
@@ -91,7 +92,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
   /// Versão assíncrona de getAll
   Future<List<T>> getAllAsync() async {
     try {
-      final result = await _storageService.getKeys(box: HiveBoxes.receituagro);
+      final result = await _storageService.getKeys(box: ReceitaAgroBoxes.receituagro);
       
       final entities = await result.fold(
         (failure) => Future.value(<T>[]),
@@ -102,7 +103,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
           for (final key in relevantKeys) {
             final dataResult = await _storageService.get<Map<String, dynamic>>(
               key: key,
-              box: HiveBoxes.receituagro,
+              box: ReceitaAgroBoxes.receituagro,
             );
             
             dataResult.fold(
@@ -147,7 +148,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
     try {
       final result = await _storageService.get<Map<String, dynamic>>(
         key: '${_boxName}_$id',
-        box: HiveBoxes.receituagro,
+        box: ReceitaAgroBoxes.receituagro,
       );
 
       return result.fold(
@@ -174,7 +175,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
   @override
   Future<Either<Exception, void>> clear() async {
     try {
-      final result = await _storageService.clear(box: HiveBoxes.receituagro);
+      final result = await _storageService.clear(box: ReceitaAgroBoxes.receituagro);
       
       return result.fold(
         (failure) => Left(Exception('Erro ao limpar dados: ${failure.message}')),
@@ -200,7 +201,7 @@ abstract class CoreBaseHiveRepository<T> implements IStaticDataRepository<T> {
     try {
       final result = await _storageService.get<String>(
         key: '${_boxName}_$_versionKey',
-        box: HiveBoxes.receituagro,
+        box: ReceitaAgroBoxes.receituagro,
       );
 
       return result.fold(

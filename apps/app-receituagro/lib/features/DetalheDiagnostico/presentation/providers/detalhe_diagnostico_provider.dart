@@ -7,9 +7,13 @@ import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
+import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
+import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
 class DetalheDiagnosticoProvider extends ChangeNotifier {
-  final DiagnosticoHiveRepository _repository = sl<DiagnosticoHiveRepository>();
+  final IDiagnosticosRepository _diagnosticosRepository = sl<IDiagnosticosRepository>();
+  final DiagnosticoHiveRepository _hiveRepository = sl<DiagnosticoHiveRepository>();
   final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
   final IPremiumService _premiumService = sl<IPremiumService>();
 
@@ -18,8 +22,9 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
   bool _hasError = false;
   String? _errorMessage;
 
-  // Estado dos dados
-  DiagnosticoHive? _diagnostico;
+  // Estado dos dados - usando modelo unificado
+  DiagnosticoEntity? _diagnostico;
+  DiagnosticoHive? _diagnosticoHive; // Manter temporariamente para compatibilidade
   Map<String, String> _diagnosticoData = {};
   bool _isFavorited = false;
   bool _isPremium = false;
@@ -31,36 +36,61 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get hasError => _hasError;
   String? get errorMessage => _errorMessage;
-  DiagnosticoHive? get diagnostico => _diagnostico;
+  DiagnosticoEntity? get diagnostico => _diagnostico;
+  DiagnosticoHive? get diagnosticoHive => _diagnosticoHive; // Compatibilidade
   Map<String, String> get diagnosticoData => _diagnosticoData;
   bool get isFavorited => _isFavorited;
   bool get isPremium => _isPremium;
   bool get isSharingContent => _isSharingContent;
 
-  /// Carrega os dados do diagnóstico
+  /// Carrega os dados do diagnóstico usando modelo unificado
   Future<void> loadDiagnosticoData(String diagnosticoId) async {
     _setLoadingState(true);
     
     try {
-      // Verifica se há dados na base local
-      final totalDiagnosticos = _repository.count;
+      // Tenta primeiro através do repository Clean Architecture
+      final result = await _diagnosticosRepository.getById(diagnosticoId);
       
-      // Busca diagnóstico por ID
-      final diagnostico = _repository.getById(diagnosticoId);
-      
-      if (diagnostico != null) {
-        _diagnostico = diagnostico;
-        _diagnosticoData = diagnostico.toDataMap();
-        _setLoadingState(false);
-      } else {
-        _setErrorState(
-          totalDiagnosticos == 0
-              ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
-              : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.'
-        );
-      }
+      result.fold(
+        (failure) {
+          // Em caso de falha, tenta fallback
+          throw Exception('Erro no repository Clean Architecture: $failure');
+        },
+        (diagnosticoEntity) {
+          if (diagnosticoEntity != null) {
+            _diagnostico = diagnosticoEntity;
+            
+            // Fallback para buscar dados Hive para compatibilidade de UI
+            final diagnosticoHive = _hiveRepository.getById(diagnosticoId);
+            _diagnosticoHive = diagnosticoHive;
+            _diagnosticoData = diagnosticoHive != null ? diagnosticoHive.toDataMap() : <String, String>{};
+            
+            _setLoadingState(false);
+          } else {
+            final totalDiagnosticos = _hiveRepository.count;
+            _setErrorState(
+              totalDiagnosticos == 0
+                  ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
+                  : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.'
+            );
+          }
+        },
+      );
     } catch (e) {
-      _setErrorState('Erro ao acessar dados locais: $e. Tente reiniciar o aplicativo ou resincronizar os dados.');
+      // Fallback para método antigo em caso de erro
+      try {
+        final diagnosticoHive = _hiveRepository.getById(diagnosticoId);
+        if (diagnosticoHive != null) {
+          _diagnostico = DiagnosticoMapper.fromHive(diagnosticoHive);
+          _diagnosticoHive = diagnosticoHive;
+          _diagnosticoData = diagnosticoHive.toDataMap();
+          _setLoadingState(false);
+        } else {
+          _setErrorState('Diagnóstico não encontrado: $diagnosticoId');
+        }
+      } catch (fallbackError) {
+        _setErrorState('Erro ao acessar dados locais: $fallbackError. Tente reiniciar o aplicativo ou resincronizar os dados.');
+      }
     }
   }
 

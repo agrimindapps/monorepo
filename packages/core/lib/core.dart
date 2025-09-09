@@ -21,6 +21,8 @@ export 'src/domain/repositories/i_analytics_repository.dart';
 export 'src/domain/repositories/i_app_rating_repository.dart';
 // Repository Interfaces
 export 'src/domain/repositories/i_auth_repository.dart';
+// Box Registry Service (NEW - Clean Architecture Pattern)
+export 'src/domain/services/i_box_registry_service.dart';
 export 'src/domain/repositories/i_crashlytics_repository.dart';
 export 'src/domain/repositories/i_encrypted_storage_repository.dart';
 export 'src/domain/repositories/i_file_repository.dart';
@@ -48,6 +50,9 @@ export 'src/infrastructure/services/enhanced_storage_service.dart';
 export 'src/infrastructure/services/file_manager_service.dart';
 export 'src/infrastructure/services/firebase_analytics_service.dart';
 // ========== INFRASTRUCTURE LAYER ==========
+// Box Registry Models and Services (NEW - Clean Architecture)
+export 'src/infrastructure/models/box_configuration.dart';
+export 'src/infrastructure/services/box_registry_service.dart';
 // Core Services (Existing)
 export 'src/infrastructure/services/firebase_auth_service.dart';
 export 'src/infrastructure/services/firebase_crashlytics_service.dart';

@@ -16,8 +16,8 @@ import 'core/services/analytics_service.dart';
 import 'core/services/database_inspector_service.dart';
 import 'core/services/gasometer_firebase_service.dart';
 import 'core/services/gasometer_notification_service.dart';
+import 'core/interfaces/i_sync_service.dart';
 import 'core/sync/models/sync_queue_item.dart';
-import 'core/sync/services/sync_service.dart';
 import 'features/expenses/data/models/expense_model.dart';
 import 'features/fuel/data/models/fuel_supply_model.dart';
 import 'features/maintenance/data/models/maintenance_model.dart';
@@ -123,7 +123,7 @@ void main() async {
 
   // Initialize Sync Service
   print('🔄 Initializing Sync Service...');
-  final syncService = sl<SyncService>();
+  final syncService = sl<ISyncService>();
   await syncService.initialize();
   print('✅ Sync Service initialized successfully');
 

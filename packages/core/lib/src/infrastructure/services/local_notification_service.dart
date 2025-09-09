@@ -8,6 +8,27 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/i_notification_repository.dart';
 
+/// Helper para detecção de plataforma web-safe
+class _PlatformHelper {
+  static bool get isAndroid {
+    try {
+      return !kIsWeb && Platform.isAndroid;
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  static bool get isIOS {
+    try {
+      return !kIsWeb && Platform.isIOS;
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  static bool get isWeb => kIsWeb;
+}
+
 /// Implementação do serviço de notificações locais usando flutter_local_notifications
 class LocalNotificationService implements INotificationRepository {
   static final LocalNotificationService _instance = LocalNotificationService._internal();
@@ -30,6 +51,15 @@ class LocalNotificationService implements INotificationRepository {
   @override
   Future<bool> initialize({List<NotificationChannelEntity>? defaultChannels}) async {
     if (_isInitialized) return true;
+
+    // Web platform doesn't support local notifications
+    if (_PlatformHelper.isWeb) {
+      _isInitialized = true;
+      if (_settings.enableDebugLogs) {
+        debugPrint('🔔 NotificationService: Web platform detected, notifications not supported');
+      }
+      return true;
+    }
 
     try {
       // Configurações de inicialização para Android
@@ -63,7 +93,7 @@ class LocalNotificationService implements INotificationRepository {
       );
 
       // Criar canais padrão para Android
-      if (Platform.isAndroid && defaultChannels != null) {
+      if (_PlatformHelper.isAndroid && defaultChannels != null) {
         for (final channel in defaultChannels) {
           await createNotificationChannel(channel);
         }
@@ -87,7 +117,7 @@ class LocalNotificationService implements INotificationRepository {
   @override
   Future<NotificationPermissionEntity> getPermissionStatus() async {
     try {
-      if (Platform.isAndroid) {
+      if (_PlatformHelper.isAndroid) {
         final status = await Permission.notification.status;
         final canScheduleExact = await canScheduleExactNotifications();
         
@@ -100,7 +130,7 @@ class LocalNotificationService implements INotificationRepository {
           shouldShowRationale: status.isPermanentlyDenied,
           isPermanentlyDenied: status.isPermanentlyDenied,
         );
-      } else if (Platform.isIOS) {
+      } else if (_PlatformHelper.isIOS) {
         final bool? granted = await _notifications
             .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
             ?.requestPermissions(
@@ -142,7 +172,7 @@ class LocalNotificationService implements INotificationRepository {
   @override
   Future<NotificationPermissionEntity> requestPermission() async {
     try {
-      if (Platform.isAndroid) {
+      if (_PlatformHelper.isAndroid) {
         final status = await Permission.notification.request();
         final canScheduleExact = await canScheduleExactNotifications();
         
@@ -155,7 +185,7 @@ class LocalNotificationService implements INotificationRepository {
           shouldShowRationale: status.isPermanentlyDenied,
           isPermanentlyDenied: status.isPermanentlyDenied,
         );
-      } else if (Platform.isIOS) {
+      } else if (_PlatformHelper.isIOS) {
         final bool? granted = await _notifications
             .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
             ?.requestPermissions(
@@ -197,14 +227,14 @@ class LocalNotificationService implements INotificationRepository {
   @override
   Future<bool> openNotificationSettings() async {
     try {
-      if (Platform.isAndroid) {
+      if (_PlatformHelper.isAndroid) {
         return await Permission.notification.request().then((status) {
           if (status.isPermanentlyDenied) {
             return openAppSettings();
           }
           return status.isGranted;
         });
-      } else if (Platform.isIOS) {
+      } else if (_PlatformHelper.isIOS) {
         return await openAppSettings();
       }
       return false;
@@ -218,7 +248,7 @@ class LocalNotificationService implements INotificationRepository {
 
   @override
   Future<bool> createNotificationChannel(NotificationChannelEntity channel) async {
-    if (!Platform.isAndroid) return true;
+    if (!_PlatformHelper.isAndroid) return true;
 
     try {
       final androidChannel = AndroidNotificationChannel(
@@ -252,7 +282,7 @@ class LocalNotificationService implements INotificationRepository {
 
   @override
   Future<bool> deleteNotificationChannel(String channelId) async {
-    if (!Platform.isAndroid) return true;
+    if (!_PlatformHelper.isAndroid) return true;
 
     try {
       await _notifications
@@ -274,7 +304,7 @@ class LocalNotificationService implements INotificationRepository {
 
   @override
   Future<List<NotificationChannelEntity>> getNotificationChannels() async {
-    if (!Platform.isAndroid) return [];
+    if (!_PlatformHelper.isAndroid) return [];
 
     try {
       final channels = await _notifications
@@ -545,12 +575,12 @@ class LocalNotificationService implements INotificationRepository {
   }
 
   @override
-  void setNotificationTapCallback(Function(String? payload) callback) {
+  void setNotificationTapCallback(void Function(String? payload) callback) {
     _onNotificationTap = callback;
   }
 
   @override
-  void setNotificationActionCallback(Function(String actionId, String? payload) callback) {
+  void setNotificationActionCallback(void Function(String actionId, String? payload) callback) {
     _onNotificationAction = callback;
   }
 
@@ -577,7 +607,7 @@ class LocalNotificationService implements INotificationRepository {
 
   @override
   Future<bool> canScheduleExactNotifications() async {
-    if (!Platform.isAndroid) return true;
+    if (!_PlatformHelper.isAndroid) return true;
 
     try {
       final androidPlugin = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -592,7 +622,7 @@ class LocalNotificationService implements INotificationRepository {
 
   @override
   Future<bool> requestExactNotificationPermission() async {
-    if (!Platform.isAndroid) return true;
+    if (!_PlatformHelper.isAndroid) return true;
 
     try {
       final androidPlugin = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();

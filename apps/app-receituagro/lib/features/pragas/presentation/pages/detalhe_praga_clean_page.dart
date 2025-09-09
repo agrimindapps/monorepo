@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/unified_tab_bar_widget.dart';
 import '../../../favoritos/favoritos_page.dart';
@@ -55,19 +56,53 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
     super.dispose();
   }
 
-  /// Carrega dados iniciais
+  /// Carrega dados iniciais com tratamento de timeout e retry
   Future<void> _loadInitialData() async {
-    // Inicializar provider da praga de forma assíncrona
-    await _pragaProvider.initializeAsync(
-        widget.pragaName, widget.pragaScientificName);
+    try {
+      // Inicializar provider da praga com timeout
+      await _pragaProvider.initializeAsync(
+        widget.pragaName, 
+        widget.pragaScientificName
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          debugPrint('⏰ Timeout ao inicializar praga provider');
+          throw TimeoutException('Timeout ao carregar dados da praga', const Duration(seconds: 10));
+        },
+      );
 
-    // Se praga carregada com sucesso, carregar diagnósticos
-    if (_pragaProvider.pragaData != null) {
-      await _diagnosticosProvider
-          .loadDiagnosticos(_pragaProvider.pragaData!.idReg);
-    } else {
-      // Fallback: tentar carregar usando o nome da praga diretamente
-      await _diagnosticosProvider.loadDiagnosticos(widget.pragaName);
+      // Aguardar um frame para garantir que o provider foi inicializado
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Se praga carregada com sucesso, carregar diagnósticos por ID
+      if (_pragaProvider.pragaData != null && _pragaProvider.pragaData!.idReg.isNotEmpty) {
+        debugPrint('✅ Carregando diagnósticos por ID: ${_pragaProvider.pragaData!.idReg}');
+        await _diagnosticosProvider
+            .loadDiagnosticos(_pragaProvider.pragaData!.idReg)
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                debugPrint('⏰ Timeout ao carregar diagnósticos por ID');
+                throw TimeoutException('Timeout ao carregar diagnósticos por ID', const Duration(seconds: 15));
+              },
+            );
+      } else {
+        // Fallback: carregar diagnósticos usando o nome da praga
+        debugPrint('🔄 Fallback: carregando diagnósticos por nome: ${widget.pragaName}');
+        await _diagnosticosProvider
+            .loadDiagnosticosByNomePraga(widget.pragaName)
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                debugPrint('⏰ Timeout ao carregar diagnósticos por nome');
+                throw TimeoutException('Timeout ao carregar diagnósticos por nome', const Duration(seconds: 15));
+              },
+            );
+      }
+    } catch (e) {
+      debugPrint('❌ Erro ao carregar dados iniciais: $e');
+      // Não relançar a exceção para não quebrar a UI
+      // O provider já terá o estado de erro interno
     }
   }
 

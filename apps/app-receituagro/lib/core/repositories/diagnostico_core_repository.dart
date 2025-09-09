@@ -6,6 +6,13 @@ import 'core_base_hive_repository.dart';
 /// Repositório para DiagnosticoHive usando Core Package
 /// Substitui DiagnosticoHiveRepository que usava Hive diretamente
 class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> {
+  // Cache de consultas frequentes para otimização
+  Map<String, List<DiagnosticoHive>>? _pragaCache;
+  Map<String, List<DiagnosticoHive>>? _culturaCache;
+  Map<String, List<DiagnosticoHive>>? _defensivoCache;
+  DateTime? _cacheExpiry;
+  static const Duration _cacheDuration = Duration(minutes: 15);
+
   DiagnosticoCoreRepository(ILocalStorageRepository storageService)
       : super(storageService, 'receituagro_diagnosticos');
 
@@ -19,29 +26,83 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
     return entity.idReg;
   }
 
-  /// Busca diagnósticos por defensivo de forma assíncrona
+  /// Verifica se o cache está válido
+  bool _isCacheValid() {
+    return _cacheExpiry != null && DateTime.now().isBefore(_cacheExpiry!);
+  }
+
+
+  /// Inicializa o cache com dados otimizados
+  Future<void> _initializeCache() async {
+    if (_isCacheValid()) return;
+
+    final diagnosticos = await getAllAsync();
+    _pragaCache = <String, List<DiagnosticoHive>>{};
+    _culturaCache = <String, List<DiagnosticoHive>>{};
+    _defensivoCache = <String, List<DiagnosticoHive>>{};
+
+    // Agrupa diagnósticos por índices para busca rápida
+    for (final diagnostico in diagnosticos) {
+      // Index por praga
+      _pragaCache!.putIfAbsent(diagnostico.fkIdPraga, () => []).add(diagnostico);
+      
+      // Index por cultura
+      _culturaCache!.putIfAbsent(diagnostico.fkIdCultura, () => []).add(diagnostico);
+      
+      // Index por defensivo
+      _defensivoCache!.putIfAbsent(diagnostico.fkIdDefensivo, () => []).add(diagnostico);
+    }
+
+    _cacheExpiry = DateTime.now().add(_cacheDuration);
+  }
+
+  /// Limpa cache manualmente (útil após atualizações de dados)
+  void clearCache() {
+    _pragaCache = null;
+    _culturaCache = null;
+    _defensivoCache = null;
+    _cacheExpiry = null;
+  }
+
+  /// Força rebuild do cache
+  Future<void> rebuildCache() async {
+    clearCache();
+    await _initializeCache();
+  }
+
+  /// Busca diagnósticos por defensivo de forma assíncrona OTIMIZADA
   Future<List<DiagnosticoHive>> findByDefensivo(String fkIdDefensivo) async {
-    return findBy((item) => item.fkIdDefensivo == fkIdDefensivo);
+    await _initializeCache();
+    return _defensivoCache?[fkIdDefensivo] ?? [];
   }
 
-  /// Busca diagnósticos por cultura de forma assíncrona
+  /// Busca diagnósticos por cultura de forma assíncrona OTIMIZADA
   Future<List<DiagnosticoHive>> findByCultura(String fkIdCultura) async {
-    return findBy((item) => item.fkIdCultura == fkIdCultura);
+    await _initializeCache();
+    return _culturaCache?[fkIdCultura] ?? [];
   }
 
-  /// Busca diagnósticos por cultura e defensivo de forma assíncrona
+  /// Busca diagnósticos por cultura e defensivo de forma assíncrona OTIMIZADA
   Future<List<DiagnosticoHive>> findByCulturaAndDefensivo(
       String fkIdCultura, String fkIdDefensivo) async {
-    return findBy((item) => 
-        item.fkIdCultura == fkIdCultura && item.fkIdDefensivo == fkIdDefensivo);
+    await _initializeCache();
+    
+    // Intersecção entre as duas listas usando cache
+    final porCultura = _culturaCache?[fkIdCultura] ?? [];
+    final porDefensivo = _defensivoCache?[fkIdDefensivo] ?? [];
+    
+    // Retorna interseção (diagnósticos que aparecem em ambas as listas)
+    return porCultura.where((diagnostico) => 
+      porDefensivo.any((d) => d.idReg == diagnostico.idReg)).toList();
   }
 
-  /// Busca diagnósticos por praga
+  /// Busca diagnósticos por praga OTIMIZADA
   Future<List<DiagnosticoHive>> findByPraga(String fkIdPraga) async {
-    return findBy((item) => item.fkIdPraga == fkIdPraga);
+    await _initializeCache();
+    return _pragaCache?[fkIdPraga] ?? [];
   }
 
-  /// Busca diagnósticos complexa por múltiplos critérios
+  /// Busca diagnósticos complexa por múltiplos critérios OTIMIZADA
   Future<List<DiagnosticoHive>> findByMultipleCriteria({
     String? culturaId,
     String? defensivoId,
@@ -50,41 +111,62 @@ class DiagnosticoCoreRepository extends CoreBaseHiveRepository<DiagnosticoHive> 
     List<String>? defensivoIds,
     List<String>? pragaIds,
   }) async {
-    return findBy((diagnostico) {
+    await _initializeCache();
+    
+    List<DiagnosticoHive> results = [];
+    
+    // Otimização: começar com o critério mais restritivo
+    if (pragaId != null) {
+      results = _pragaCache?[pragaId] ?? [];
+    } else if (defensivoId != null) {
+      results = _defensivoCache?[defensivoId] ?? [];
+    } else if (culturaId != null) {
+      results = _culturaCache?[culturaId] ?? [];
+    } else if (pragaIds != null && pragaIds.isNotEmpty) {
+      results = [];
+      for (final id in pragaIds) {
+        results.addAll(_pragaCache?[id] ?? []);
+      }
+    } else if (defensivoIds != null && defensivoIds.isNotEmpty) {
+      results = [];
+      for (final id in defensivoIds) {
+        results.addAll(_defensivoCache?[id] ?? []);
+      }
+    } else if (culturaIds != null && culturaIds.isNotEmpty) {
+      results = [];
+      for (final id in culturaIds) {
+        results.addAll(_culturaCache?[id] ?? []);
+      }
+    } else {
+      // Se não há critérios específicos, retorna todos
+      return await getAllAsync();
+    }
+
+    // Aplica filtros adicionais nos resultados iniciais
+    return results.where((diagnostico) {
       bool matches = true;
 
-      // Critério único de cultura
       if (culturaId != null) {
         matches = matches && diagnostico.fkIdCultura == culturaId;
       }
-
-      // Critério único de defensivo
       if (defensivoId != null) {
         matches = matches && diagnostico.fkIdDefensivo == defensivoId;
       }
-
-      // Critério único de praga
       if (pragaId != null) {
         matches = matches && diagnostico.fkIdPraga == pragaId;
       }
-
-      // Critérios múltiplos de culturas
       if (culturaIds != null && culturaIds.isNotEmpty) {
         matches = matches && culturaIds.contains(diagnostico.fkIdCultura);
       }
-
-      // Critérios múltiplos de defensivos
       if (defensivoIds != null && defensivoIds.isNotEmpty) {
         matches = matches && defensivoIds.contains(diagnostico.fkIdDefensivo);
       }
-
-      // Critérios múltiplos de pragas
       if (pragaIds != null && pragaIds.isNotEmpty) {
         matches = matches && pragaIds.contains(diagnostico.fkIdPraga);
       }
 
       return matches;
-    });
+    }).toList();
   }
 
   /// Obter todos os defensivos relacionados a uma cultura

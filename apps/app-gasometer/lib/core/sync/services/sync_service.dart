@@ -23,8 +23,8 @@ import 'sync_status_manager.dart';
 
 
 /// Serviço principal de sincronização que orquestra todas as operações
-@singleton
 @LazySingleton(as: sync_interface.ISyncService)
+@LazySingleton()  // Also register as concrete type for SyncStatusProvider
 class SyncService implements sync_interface.ISyncService {
   final SyncQueue _syncQueue;
   final SyncOperations _syncOperations;
@@ -85,6 +85,7 @@ class SyncService implements sync_interface.ISyncService {
   }
 
   /// Inicializa o serviço de sincronização
+  @override
   Future<void> initialize() async {
     if (_isInitialized) return;
 

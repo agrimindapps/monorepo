@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/defensivos_agrupados_view_mode.dart';
-import '../../widgets/defensivo_agrupado_search_field_widget.dart';
+import 'defensivo_agrupado_search_field_widget.dart';
 
 /// Widget especializado de busca para Lista de Defensivos Agrupados
 /// Wrapper do DefensivoAgrupadoSearchFieldWidget com lógica específica

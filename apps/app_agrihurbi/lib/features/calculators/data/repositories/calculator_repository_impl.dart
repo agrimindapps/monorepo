@@ -23,7 +23,7 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
   CalculatorRepositoryImpl(
     this._localDataSource,
   ) : _analyticsService = FirebaseAnalyticsService(),
-      _hiveStorageService = HiveStorageService();
+      _hiveStorageService = HiveStorageService(BoxRegistryService());
 
   @override
   Future<Either<Failure, List<CalculatorEntity>>> getAllCalculators() async {

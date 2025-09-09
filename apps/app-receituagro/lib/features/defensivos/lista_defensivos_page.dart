@@ -9,10 +9,10 @@ import '../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import 'models/view_mode.dart';
-import 'widgets/defensivo_item_widget.dart';
-import 'widgets/defensivo_search_field.dart';
-import 'widgets/defensivos_empty_state_widget.dart';
-import 'widgets/defensivos_loading_skeleton_widget.dart';
+import 'presentation/widgets/defensivo_item_widget.dart';
+import 'presentation/widgets/defensivo_search_field.dart';
+import 'presentation/widgets/defensivos_empty_state_widget.dart';
+import 'presentation/widgets/defensivos_loading_skeleton_widget.dart';
 
 class ListaDefensivosPage extends StatefulWidget {
   const ListaDefensivosPage({super.key});
@@ -322,12 +322,11 @@ class _ListaDefensivosPageState extends State<ListaDefensivosPage> {
       );
     } else if (_displayedDefensivos.isEmpty) {
       return DefensivosEmptyStateWidget(
-        isDark: isDark,
-        isSearchResult: _searchController.text.isNotEmpty,
-        message: _searchController.text.isNotEmpty
+        onClearFilters: _clearSearch,
+        customTitle: _searchController.text.isNotEmpty
             ? 'Nenhum defensivo encontrado'
             : 'Nenhum defensivo disponível',
-        subtitle: _searchController.text.isNotEmpty
+        customMessage: _searchController.text.isNotEmpty
             ? 'Tente ajustar os termos da busca'
             : 'Verifique se os dados foram carregados',
       );

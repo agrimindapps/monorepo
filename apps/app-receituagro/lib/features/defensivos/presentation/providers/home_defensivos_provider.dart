@@ -1,305 +1,152 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/models/fitossanitario_hive.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/services/access_history_service.dart';
-import '../../../../core/services/random_selection_service.dart';
+import 'defensivos_statistics_provider.dart';
+import 'defensivos_history_provider.dart';
+import 'home_defensivos_ui_provider.dart';
 
-/// Model for statistics data computed in background
-class DefensivosStatistics {
-  final int totalDefensivos;
-  final int totalFabricantes;
-  final int totalModoAcao;
-  final int totalIngredienteAtivo;
-  final int totalClasseAgronomica;
-  final List<FitossanitarioHive> recentDefensivos;
-  final List<FitossanitarioHive> newDefensivos;
-
-  const DefensivosStatistics({
-    required this.totalDefensivos,
-    required this.totalFabricantes,
-    required this.totalModoAcao,
-    required this.totalIngredienteAtivo,
-    required this.totalClasseAgronomica,
-    required this.recentDefensivos,
-    required this.newDefensivos,
-  });
-}
-
-/// Static function for compute() - calculates statistics in background isolate
-/// Performance optimization: Prevents UI thread blocking during heavy statistical calculations
-DefensivosStatistics _calculateDefensivosStatistics(List<FitossanitarioHive> defensivos) {
-  // Calculate real statistics - moved to background thread to prevent UI blocking
-  final totalDefensivos = defensivos.length;
-  final totalFabricantes = defensivos.map((d) => d.displayFabricante).toSet().length;
-  final totalModoAcao = defensivos.map((d) => d.displayModoAcao).where((m) => m.isNotEmpty).toSet().length;
-  final totalIngredienteAtivo = defensivos.map((d) => d.displayIngredient).where((i) => i.isNotEmpty).toSet().length;
-  final totalClasseAgronomica = defensivos.map((d) => d.displayClass).where((c) => c.isNotEmpty).toSet().length;
-  
-  // Sort by name to ensure consistent ordering
-  defensivos.sort((a, b) => a.displayName.compareTo(b.displayName));
-  
-  // Retorna listas vazias - a seleção será feita no provider principal
-  final recentDefensivos = <FitossanitarioHive>[];
-  final newDefensivos = <FitossanitarioHive>[];
-
-  return DefensivosStatistics(
-    totalDefensivos: totalDefensivos,
-    totalFabricantes: totalFabricantes,
-    totalModoAcao: totalModoAcao,
-    totalIngredienteAtivo: totalIngredienteAtivo,
-    totalClasseAgronomica: totalClasseAgronomica,
-    recentDefensivos: recentDefensivos,
-    newDefensivos: newDefensivos,
-  );
-}
-
-/// Provider seguindo padrão Clean Architecture para página Home de Defensivos
+/// Refactored Home Defensivos Provider following SOLID principles
 /// 
-/// Performance optimizations:
-/// - Uses compute() to move heavy calculations to background isolate
-/// - Consolidates state updates using single notifyListeners() call
-/// - Implements proper error handling without multiple setState calls
+/// SOLID Improvements:
+/// - Single Responsibility: Coordinates between specialized providers
+/// - Dependency Inversion: Injects repository and specialized providers
+/// - Open/Closed: Easy to extend with new functionality without modification
+/// - Interface Segregation: Delegates specific responsibilities to appropriate providers
 class HomeDefensivosProvider extends ChangeNotifier {
-  final FitossanitarioHiveRepository _repository;
-  final AccessHistoryService _historyService = AccessHistoryService();
-
-  // Estados consolidados
-  bool _isLoading = false;
-  String? _errorMessage;
-  
-  // Dados calculados em background
-  int _totalDefensivos = 0;
-  int _totalFabricantes = 0;
-  int _totalModoAcao = 0;
-  int _totalIngredienteAtivo = 0;
-  int _totalClasseAgronomica = 0;
-  
-  List<FitossanitarioHive> _recentDefensivos = [];
-  List<FitossanitarioHive> _newDefensivos = [];
+  final DefensivosStatisticsProvider _statisticsProvider;
+  final DefensivosHistoryProvider _historyProvider;
+  final HomeDefensivosUIProvider _uiProvider;
 
   HomeDefensivosProvider({
     required FitossanitarioHiveRepository repository,
-  }) : _repository = repository;
+  }) : _statisticsProvider = DefensivosStatisticsProvider(repository: repository),
+       _historyProvider = DefensivosHistoryProvider(repository: repository),
+       _uiProvider = HomeDefensivosUIProvider() {
+    
+    // Listen to specialized providers and coordinate updates
+    _statisticsProvider.addListener(_onProviderUpdate);
+    _historyProvider.addListener(_onProviderUpdate);
+    _uiProvider.addListener(_onProviderUpdate);
+  }
 
-  // Getters
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  // Delegated getters to specialized providers
+  bool get isLoading => _statisticsProvider.isLoading || _historyProvider.isLoading;
+  String? get errorMessage => _uiProvider.getCombinedErrorMessage(
+    statisticsError: _statisticsProvider.errorMessage,
+    historyError: _historyProvider.errorMessage,
+  );
   
-  int get totalDefensivos => _totalDefensivos;
-  int get totalFabricantes => _totalFabricantes;
-  int get totalModoAcao => _totalModoAcao;
-  int get totalIngredienteAtivo => _totalIngredienteAtivo;
-  int get totalClasseAgronomica => _totalClasseAgronomica;
+  int get totalDefensivos => _statisticsProvider.totalDefensivos;
+  int get totalFabricantes => _statisticsProvider.totalFabricantes;
+  int get totalModoAcao => _statisticsProvider.totalModoAcao;
+  int get totalIngredienteAtivo => _statisticsProvider.totalIngredienteAtivo;
+  int get totalClasseAgronomica => _statisticsProvider.totalClasseAgronomica;
   
-  List<FitossanitarioHive> get recentDefensivos => List.unmodifiable(_recentDefensivos);
-  List<FitossanitarioHive> get newDefensivos => List.unmodifiable(_newDefensivos);
+  List<FitossanitarioHive> get recentDefensivos => _historyProvider.recentDefensivos;
+  List<FitossanitarioHive> get newDefensivos => _historyProvider.newDefensivos;
   
-  // Getters de conveniência
-  bool get hasData => _totalDefensivos > 0;
-  bool get hasRecentDefensivos => _recentDefensivos.isNotEmpty;
-  bool get hasNewDefensivos => _newDefensivos.isNotEmpty;
-  String get subtitleText => _isLoading ? 'Carregando defensivos...' : '$_totalDefensivos Registros Disponíveis';
+  // Convenience getters
+  bool get hasData => _statisticsProvider.hasData;
+  bool get hasRecentDefensivos => _historyProvider.hasRecentDefensivos;
+  bool get hasNewDefensivos => _historyProvider.hasNewDefensivos;
+  String get subtitleText => _uiProvider.getHeaderSubtitle(
+    statisticsLoading: _statisticsProvider.isLoading,
+    historyLoading: _historyProvider.isLoading,
+    totalDefensivos: totalDefensivos,
+  );
 
-  /// Carrega dados reais com otimização de performance
+  /// Load data by coordinating specialized providers
   Future<void> loadData() async {
     try {
-      _setLoading(true);
-      _clearError();
-      
-      // Carrega dados do repositório na main thread (necessário para Hive)
-      final defensivos = _repository.getActiveDefensivos();
-      
-      // Verifica se há dados carregados
-      if (defensivos.isEmpty) {
-        _setError('Base de dados ainda não foi carregada.\n\nAguarde alguns instantes ou tente novamente.\nOs dados estão sendo sincronizados em segundo plano.');
-        _resetToDefaultValues();
-        return;
-      }
-      
-      // Calcular estatísticas diretamente (objetos Hive não são serializáveis para compute)
-      final statistics = _calculateDefensivosStatistics(defensivos);
-      
-      // Aplica resultados consolidadamente
-      await _applyStatistics(statistics);
-      
+      // Load statistics and history concurrently for better performance
+      await Future.wait([
+        _statisticsProvider.loadStatistics(),
+        _historyProvider.loadHistory(),
+      ]);
     } catch (e) {
-      _setError('Erro ao carregar dados: ${e.toString()}');
-      _resetToDefaultValues();
-    } finally {
-      _setLoading(false);
+      _uiProvider.setUIMessage('Erro ao carregar dados: ${e.toString()}');
     }
   }
 
-  /// Atualiza dados sem mostrar loading (para refresh silencioso)
+  /// Refresh data without showing loading indicators
   Future<void> refreshData() async {
     try {
-      _clearError();
+      _uiProvider.startRefresh();
       
-      final defensivos = _repository.getActiveDefensivos();
-      final statistics = _calculateDefensivosStatistics(defensivos);
+      await Future.wait([
+        _statisticsProvider.refreshStatistics(),
+        _historyProvider.refreshHistory(),
+      ]);
       
-      await _applyStatistics(statistics);
-      
+      _uiProvider.completeRefresh(message: 'Dados atualizados com sucesso');
     } catch (e) {
-      _setError('Erro ao atualizar dados: ${e.toString()}');
+      _uiProvider.completeRefresh(message: 'Erro ao atualizar dados: ${e.toString()}');
     }
   }
 
-  /// Limpa erro atual
+  /// Clear current error from all providers
   void clearError() {
-    if (_errorMessage != null) {
-      _errorMessage = null;
-      notifyListeners();
-    }
+    _statisticsProvider.clearError();
+    _historyProvider.clearError();
+    _uiProvider.clearUIMessage();
   }
 
-  /// Registra acesso a um defensivo
+  /// Record access to a defensivo
   Future<void> recordDefensivoAccess(FitossanitarioHive defensivo) async {
-    await _historyService.recordDefensivoAccess(
-      id: defensivo.idReg,
-      name: defensivo.displayName,
-      fabricante: defensivo.displayFabricante,
-      ingrediente: defensivo.displayIngredient,
-      classe: defensivo.displayClass,
+    await _historyProvider.recordDefensivoAccess(defensivo);
+  }
+
+  @override
+  void dispose() {
+    // Clean up specialized providers
+    _statisticsProvider.removeListener(_onProviderUpdate);
+    _historyProvider.removeListener(_onProviderUpdate);
+    _uiProvider.removeListener(_onProviderUpdate);
+    
+    _statisticsProvider.dispose();
+    _historyProvider.dispose();
+    _uiProvider.dispose();
+    
+    super.dispose();
+  }
+
+  // Private methods
+  void _onProviderUpdate() {
+    // Coordinate updates from specialized providers
+    notifyListeners();
+  }
+}
+
+/// Extension for UI convenience methods
+extension HomeDefensivosProviderUI on HomeDefensivosProvider {
+  HomeDefensivosViewState get viewState {
+    return _uiProvider.getViewState(
+      statisticsLoading: _statisticsProvider.isLoading,
+      historyLoading: _historyProvider.isLoading,
+      statisticsError: _statisticsProvider.errorMessage,
+      historyError: _historyProvider.errorMessage,
+      hasStatisticsData: _statisticsProvider.hasData,
     );
   }
 
-  // Métodos privados para gerenciar estado consolidado
-
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _setError(String error) {
-    _errorMessage = error;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    if (_errorMessage != null) {
-      _errorMessage = null;
-    }
-  }
-
-  Future<void> _applyStatistics(DefensivosStatistics statistics) async {
-    _totalDefensivos = statistics.totalDefensivos;
-    _totalFabricantes = statistics.totalFabricantes;
-    _totalModoAcao = statistics.totalModoAcao;
-    _totalIngredienteAtivo = statistics.totalIngredienteAtivo;
-    _totalClasseAgronomica = statistics.totalClasseAgronomica;
-    
-    // Carrega histórico real para recent e new
-    await _loadHistoryData(statistics);
-    
-    // Single notification consolidates all state changes
-    notifyListeners();
-  }
-
-  /// Carrega dados do histórico e combina com seleção aleatória
-  Future<void> _loadHistoryData(DefensivosStatistics statistics) async {
-    try {
-      // Carrega histórico de acessos
-      final historyItems = await _historyService.getDefensivosHistory();
-      
-      // Converte histórico para FitossanitarioHive
-      final allDefensivos = _repository.getActiveDefensivos();
-      
-      // Se não há defensivos, retorna listas vazias
-      if (allDefensivos.isEmpty) {
-        _recentDefensivos = [];
-        _newDefensivos = [];
-        return;
-      }
-      
-      final historicDefensivos = <FitossanitarioHive>[];
-      
-      for (final historyItem in historyItems.take(10)) {
-        final defensivo = allDefensivos.firstWhere(
-          (d) => d.idReg == historyItem.id,
-          orElse: () => allDefensivos.firstWhere(
-            (d) => d.displayName == historyItem.name,
-            orElse: () => FitossanitarioHive(
-              idReg: '',
-              status: false,
-              nomeComum: '',
-              nomeTecnico: '',
-              comercializado: 0,
-              elegivel: false,
-            ),
-          ),
-        );
-        
-        if (defensivo.idReg.isNotEmpty) {
-          historicDefensivos.add(defensivo);
-        }
-      }
-      
-      // Combina histórico com seleção aleatória
-      _recentDefensivos = RandomSelectionService.combineHistoryWithRandom(
-        historicDefensivos,
-        allDefensivos,
-        10,
-        RandomSelectionService.selectRandomDefensivos,
-      );
-      
-      // Para "novos", usa seleção aleatória com lógica de "mais recentes"
-      _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
-      
-    } catch (e) {
-      // Em caso de erro, usa seleção aleatória como fallback
-      final allDefensivos = _repository.getActiveDefensivos();
-      if (allDefensivos.isNotEmpty) {
-        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 3);
-        _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 4);
-      } else {
-        _recentDefensivos = [];
-        _newDefensivos = [];
-      }
-    }
-  }
-
-  void _resetToDefaultValues() {
-    _totalDefensivos = 0;
-    _totalFabricantes = 0;
-    _totalModoAcao = 0;
-    _totalIngredienteAtivo = 0;
-    _totalClasseAgronomica = 0;
-    _recentDefensivos = [];
-    _newDefensivos = [];
-  }
-}
-
-/// Estados específicos para UI
-enum HomeDefensivosViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-  empty,
-}
-
-/// Extension para facilitar uso na UI
-extension HomeDefensivosProviderUI on HomeDefensivosProvider {
-  HomeDefensivosViewState get viewState {
-    if (isLoading) return HomeDefensivosViewState.loading;
-    if (errorMessage != null) return HomeDefensivosViewState.error;
-    if (!hasData) return HomeDefensivosViewState.empty;
-    return HomeDefensivosViewState.loaded;
-  }
-
-  /// Retorna texto formatado para contadores
+  /// Returns formatted count text
   String getFormattedCount(int count) {
     return isLoading ? '...' : '$count';
   }
 
-  /// Verifica se deve mostrar seção de dados
-  bool get shouldShowContent => !isLoading || hasData;
+  /// Whether to show content sections
+  bool get shouldShowContent => _uiProvider.shouldShowContent(
+    statisticsLoading: _statisticsProvider.isLoading,
+    historyLoading: _historyProvider.isLoading,
+    hasStatisticsData: _statisticsProvider.hasData,
+  );
 
-  /// Texto para header da página
+  /// Header subtitle text
   String get headerSubtitle => subtitleText;
+
+  /// Access to specialized providers for advanced use cases
+  DefensivosStatisticsProvider get statisticsProvider => _statisticsProvider;
+  DefensivosHistoryProvider get historyProvider => _historyProvider;
+  HomeDefensivosUIProvider get uiProvider => _uiProvider;
 }

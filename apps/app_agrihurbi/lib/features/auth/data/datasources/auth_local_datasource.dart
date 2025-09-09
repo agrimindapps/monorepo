@@ -71,7 +71,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   AuthLocalDataSourceImpl(
     this._sharedPreferences,
     this._secureStorage,
-  ) : _hiveStorageService = HiveStorageService(),
+  ) : _hiveStorageService = HiveStorageService(BoxRegistryService()),
       _analyticsService = FirebaseAnalyticsService();
 
   @override

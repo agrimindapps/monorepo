@@ -11,8 +11,11 @@ class ReceitaAgroStorageService {
   static const String _offlineDataBox = 'receituagro_offline_data';
   
   // Usando o HiveStorageService do core package
-  final HiveStorageService _hiveStorage = HiveStorageService();
+  final HiveStorageService _hiveStorage;
   bool _isInitialized = false;
+  
+  /// Constructor que aceita HiveStorageService como dependência
+  ReceitaAgroStorageService(this._hiveStorage);
   
   /// Expõe o HiveStorageService interno para compatibilidade com DI
   HiveStorageService get hiveStorage => _hiveStorage;

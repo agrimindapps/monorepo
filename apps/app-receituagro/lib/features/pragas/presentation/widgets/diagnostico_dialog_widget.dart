@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../../../DetalheDiagnostico/detalhe_diagnostico_page.dart';
+import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico

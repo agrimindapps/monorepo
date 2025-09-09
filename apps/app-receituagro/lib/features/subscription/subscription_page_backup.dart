@@ -50,8 +50,8 @@ class _SubscriptionPageBackupState extends State<SubscriptionPageBackup> {
       // Carregar produtos disponíveis
       final productsResult = await _subscriptionRepository.getAvailableProducts(
         productIds: [
-          EnvironmentConfig.receitaAgroMonthlyProduct,
-          EnvironmentConfig.receitaAgroYearlyProduct,
+          EnvironmentConfig.getProductId('receituagro_monthly'),
+          EnvironmentConfig.getProductId('receituagro_yearly'),
         ],
       );
       
@@ -721,8 +721,8 @@ class _SubscriptionPageBackupState extends State<SubscriptionPageBackup> {
         onPressed: () {
           // Encontrar o produto baseado no plano selecionado
           final productId = _selectedPlan == 'yearly' 
-              ? EnvironmentConfig.receitaAgroYearlyProduct
-              : EnvironmentConfig.receitaAgroMonthlyProduct;
+              ? EnvironmentConfig.getProductId('receituagro_yearly')
+              : EnvironmentConfig.getProductId('receituagro_monthly');
           _purchaseProduct(productId);
         },
         style: ElevatedButton.styleFrom(

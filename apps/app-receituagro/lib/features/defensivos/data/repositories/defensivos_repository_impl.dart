@@ -220,4 +220,159 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       return Left(CacheFailure('Erro ao verificar status do defensivo: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<DefensivoEntity>>> getDefensivosAgrupados({
+    required String tipoAgrupamento,
+    String? filtroTexto,
+  }) async {
+    try {
+      final allDefensivos = _coreRepository.getAllItems();
+      var defensivosFiltrados = allDefensivos.toList();
+      
+      // Aplicar filtro de texto se fornecido
+      if (filtroTexto != null && filtroTexto.isNotEmpty) {
+        defensivosFiltrados = defensivosFiltrados.where((defensivo) {
+          final nomeMatch = defensivo.nomeComum.toLowerCase().contains(filtroTexto.toLowerCase());
+          final ingredienteMatch = defensivo.ingredienteAtivo?.toLowerCase().contains(filtroTexto.toLowerCase()) == true;
+          final classeMatch = defensivo.classeAgronomica?.toLowerCase().contains(filtroTexto.toLowerCase()) == true;
+          return nomeMatch || ingredienteMatch || classeMatch;
+        }).toList();
+      }
+      
+      // Agrupar por tipo solicitado
+      Map<String, List<DefensivoEntity>> grupos = {};
+      
+      for (final defensivo in defensivosFiltrados) {
+        String chaveGrupo;
+        switch (tipoAgrupamento.toLowerCase()) {
+          case 'classe':
+            chaveGrupo = defensivo.classeAgronomica ?? 'Sem classe';
+            break;
+          case 'fabricante':
+            chaveGrupo = defensivo.fabricante ?? 'Sem fabricante';
+            break;
+          case 'modo_acao':
+            chaveGrupo = defensivo.modoAcao ?? 'Sem modo de ação';
+            break;
+          default:
+            chaveGrupo = 'Todos';
+        }
+        
+        if (!grupos.containsKey(chaveGrupo)) {
+          grupos[chaveGrupo] = [];
+        }
+        grupos[chaveGrupo]!.add(DefensivoMapper.fromHiveToEntity(defensivo));
+      }
+      
+      // Converter grupos para lista com informação de agrupamento
+      final List<DefensivoEntity> resultado = [];
+      for (final entrada in grupos.entries) {
+        final nomeGrupo = entrada.key;
+        final defensivosDoGrupo = entrada.value;
+        
+        // Adicionar cabeçalho do grupo
+        resultado.add(DefensivoEntity(
+          id: 'grupo_$nomeGrupo',
+          nome: nomeGrupo,
+          ingredienteAtivo: '',
+          line1: nomeGrupo,
+          line2: '${defensivosDoGrupo.length} item(s)',
+          count: defensivosDoGrupo.length.toString(),
+          categoria: tipoAgrupamento,
+        ));
+        
+        // Adicionar itens do grupo
+        resultado.addAll(defensivosDoGrupo);
+      }
+      
+      return Right(resultado);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos agrupados: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DefensivoEntity>>> getDefensivosCompletos() async {
+    try {
+      // Esta implementação seria expandida para incluir dados de diagnósticos
+      // Por agora, retorna todos os defensivos com informações básicas
+      final allDefensivos = _coreRepository.getAllItems();
+      final defensivosEntities = allDefensivos.map((hive) {
+        return DefensivoMapper.fromHiveToEntity(hive).copyWith(
+          quantidadeDiagnosticos: 0, // TODO: integrar com DiagnosticoIntegrationService
+          nivelPrioridade: 1,
+          isComercializado: hive.status,
+          isElegivel: hive.status,
+        );
+      }).toList();
+      
+      return Right(defensivosEntities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos completos: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DefensivoEntity>>> getDefensivosComFiltros({
+    String? ordenacao,
+    String? filtroToxicidade,
+    String? filtroTipo,
+    bool apenasComercializados = false,
+    bool apenasElegiveis = false,
+  }) async {
+    try {
+      final allDefensivos = _coreRepository.getAllItems();
+      var defensivosFiltrados = DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      
+      // Aplicar filtros
+      if (apenasComercializados) {
+        defensivosFiltrados = defensivosFiltrados.where((d) => d.isComercializado).toList();
+      }
+      
+      if (apenasElegiveis) {
+        defensivosFiltrados = defensivosFiltrados.where((d) => d.isElegivel).toList();
+      }
+      
+      if (filtroToxicidade != null && filtroToxicidade != 'todos') {
+        defensivosFiltrados = defensivosFiltrados.where((d) {
+          final toxico = d.displayToxico.toLowerCase();
+          switch (filtroToxicidade) {
+            case 'baixa': return toxico.contains('iv') || toxico.contains('4');
+            case 'media': return toxico.contains('iii') || toxico.contains('3');
+            case 'alta': return toxico.contains('ii') || toxico.contains('2');
+            case 'extrema': return toxico.contains('i') && !toxico.contains('ii') && !toxico.contains('iii') && !toxico.contains('iv');
+            default: return true;
+          }
+        }).toList();
+      }
+      
+      if (filtroTipo != null && filtroTipo != 'todos') {
+        defensivosFiltrados = defensivosFiltrados.where((d) {
+          final classe = d.displayClass.toLowerCase();
+          return classe.contains(filtroTipo);
+        }).toList();
+      }
+      
+      // Aplicar ordenação
+      switch (ordenacao) {
+        case 'nome':
+          defensivosFiltrados.sort((a, b) => a.displayName.compareTo(b.displayName));
+          break;
+        case 'fabricante':
+          defensivosFiltrados.sort((a, b) => a.displayFabricante.compareTo(b.displayFabricante));
+          break;
+        case 'usos':
+          defensivosFiltrados.sort((a, b) => (b.quantidadeDiagnosticos ?? 0).compareTo(a.quantidadeDiagnosticos ?? 0));
+          break;
+        case 'prioridade':
+        default:
+          defensivosFiltrados.sort((a, b) => (b.nivelPrioridade ?? 0).compareTo(a.nivelPrioridade ?? 0));
+      }
+      
+      return Right(defensivosFiltrados);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos com filtros: ${e.toString()}'));
+    }
+  }
 }

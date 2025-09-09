@@ -14,7 +14,7 @@ class GasometerStorageService {
   bool _isInitialized = false;
 
   /// Initialize the gasometer storage system
-  Future<Result<void, Failure>> initialize() async {
+  Future<Result<void>> initialize() async {
     try {
       if (_isInitialized) return Result.success(null);
 
@@ -28,7 +28,7 @@ class GasometerStorageService {
       _isInitialized = true;
       return Result.success(null);
     } catch (e) {
-      return Result.failure(CacheFailure('Failed to initialize gasometer storage: $e'));
+      return Result.error(StorageError(message: 'Failed to initialize gasometer storage: $e'));
     }
   }
 
@@ -66,117 +66,127 @@ class GasometerStorageService {
   }
 
   /// Save vehicle data
-  Future<Result<void, Failure>> saveVehicle<T>({
+  Future<Result<void>> saveVehicle<T>({
     required String vehicleId,
     required T vehicle,
   }) async {
     await _ensureInitialized();
-    return _storage.save<T>(
+    final result = await _storage.save<T>(
       key: vehicleId,
       data: vehicle,
       box: GasometerBoxes.vehicles,
     );
+    return result.toResult();
   }
 
   /// Get vehicle data
-  Future<Result<T?, Failure>> getVehicle<T>({
+  Future<Result<T?>> getVehicle<T>({
     required String vehicleId,
   }) async {
     await _ensureInitialized();
-    return _storage.get<T>(
+    final result = await _storage.get<T>(
       key: vehicleId,
       box: GasometerBoxes.vehicles,
     );
+    return result.toResult();
   }
 
   /// Save odometer reading
-  Future<Result<void, Failure>> saveReading<T>({
+  Future<Result<void>> saveReading<T>({
     required String readingId,
     required T reading,
   }) async {
     await _ensureInitialized();
-    return _storage.save<T>(
+    final result = await _storage.save<T>(
       key: readingId,
       data: reading,
       box: GasometerBoxes.readings,
     );
+    return result.toResult();
   }
 
   /// Get odometer reading
-  Future<Result<T?, Failure>> getReading<T>({
+  Future<Result<T?>> getReading<T>({
     required String readingId,
   }) async {
     await _ensureInitialized();
-    return _storage.get<T>(
+    final result = await _storage.get<T>(
       key: readingId,
       box: GasometerBoxes.readings,
     );
+    return result.toResult();
   }
 
   /// Get all readings
-  Future<Result<List<T>, Failure>> getAllReadings<T>() async {
+  Future<Result<List<T>>> getAllReadings<T>() async {
     await _ensureInitialized();
-    return _storage.getValues<T>(box: GasometerBoxes.readings);
+    final result = await _storage.getValues<T>(box: GasometerBoxes.readings);
+    return result.toResult();
   }
 
   /// Save statistics
-  Future<Result<void, Failure>> saveStatistics<T>({
+  Future<Result<void>> saveStatistics<T>({
     required String key,
     required T statistics,
   }) async {
     await _ensureInitialized();
-    return _storage.save<T>(
+    final result = await _storage.save<T>(
       key: key,
       data: statistics,
       box: GasometerBoxes.statistics,
     );
+    return result.toResult();
   }
 
   /// Get statistics
-  Future<Result<T?, Failure>> getStatistics<T>({
+  Future<Result<T?>> getStatistics<T>({
     required String key,
   }) async {
     await _ensureInitialized();
-    return _storage.get<T>(
+    final result = await _storage.get<T>(
       key: key,
       box: GasometerBoxes.statistics,
     );
+    return result.toResult();
   }
 
   /// Save backup data
-  Future<Result<void, Failure>> saveBackup<T>({
+  Future<Result<void>> saveBackup<T>({
     required String backupId,
     required T backupData,
   }) async {
     await _ensureInitialized();
-    return _storage.save<T>(
+    final result = await _storage.save<T>(
       key: backupId,
       data: backupData,
       box: GasometerBoxes.backups,
     );
+    return result.toResult();
   }
 
   /// Get backup data
-  Future<Result<List<T>, Failure>> getAllBackups<T>() async {
+  Future<Result<List<T>>> getAllBackups<T>() async {
     await _ensureInitialized();
-    return _storage.getValues<T>(box: GasometerBoxes.backups);
+    final result = await _storage.getValues<T>(box: GasometerBoxes.backups);
+    return result.toResult();
   }
 
   /// Save gasometer-specific setting
-  Future<Result<void, Failure>> saveGasometerSetting({
+  Future<Result<void>> saveGasometerSetting({
     required String key,
     required dynamic value,
   }) async {
     await _ensureInitialized();
-    return _storage.save<dynamic>(
+    final result = await _storage.save<dynamic>(
       key: 'gasometer_$key', // Prefix to avoid conflicts
       data: value,
       box: GasometerBoxes.main,
     );
+    return result.toResult();
   }
 
   /// Get gasometer-specific setting
-  Future<Result<T?, Failure>> getGasometerSetting<T>({
+  Future<Result<T?>> getGasometerSetting<T>({
     required String key,
     T? defaultValue,
   }) async {
@@ -187,13 +197,13 @@ class GasometerStorageService {
     );
     
     return result.fold(
-      (failure) => Result.failure(failure),
+      (failure) => Result.error(AppErrorFactory.fromFailure(failure)),
       (value) => Result.success(value ?? defaultValue),
     );
   }
 
   /// Clear all gasometer data (for reset/uninstall)
-  Future<Result<void, Failure>> clearAllGasometerData() async {
+  Future<Result<void>> clearAllGasometerData() async {
     await _ensureInitialized();
     
     final boxes = [
@@ -207,7 +217,7 @@ class GasometerStorageService {
     for (final boxName in boxes) {
       final result = await _storage.clear(box: boxName);
       if (result.isLeft()) {
-        return result;
+        return result.toResult();
       }
     }
 

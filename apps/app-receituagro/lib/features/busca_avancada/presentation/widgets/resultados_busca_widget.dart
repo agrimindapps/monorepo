@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/services/diagnostico_integration_service.dart';
-import '../../../DetalheDiagnostico/widgets/diagnostico_relacional_card_widget.dart';
+import '../../../detalhes_diagnostico/widgets/diagnostico_relacional_card_widget.dart';
 import '../providers/busca_avancada_provider.dart';
 
 /// Widget especializado para exibir resultados da busca avançada

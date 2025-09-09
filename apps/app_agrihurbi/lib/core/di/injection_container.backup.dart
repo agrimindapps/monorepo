@@ -70,7 +70,10 @@ final getIt = GetIt.instance;
 /// Configure dependencies manually until we generate the config file
 Future<void> configureDependencies() async {
   // Core Services
-  getIt.registerSingleton<core_lib.HiveStorageService>(core_lib.HiveStorageService());
+  getIt.registerSingleton<core_lib.IBoxRegistryService>(core_lib.BoxRegistryService());
+  getIt.registerSingleton<core_lib.HiveStorageService>(
+    core_lib.HiveStorageService(getIt<core_lib.IBoxRegistryService>())
+  );
   getIt.registerSingleton<core_lib.FirebaseAuthService>(core_lib.FirebaseAuthService());
   getIt.registerSingleton<core_lib.RevenueCatService>(core_lib.RevenueCatService());
   getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(core_lib.FirebaseAnalyticsService());
@@ -393,7 +396,11 @@ void _initializeWeatherSystem() {
 @module
 abstract class CoreServicesModule {
   @singleton
-  core_lib.HiveStorageService get hiveService => core_lib.HiveStorageService();
+  core_lib.IBoxRegistryService get boxRegistryService => core_lib.BoxRegistryService();
+  
+  @singleton
+  core_lib.HiveStorageService get hiveService => 
+    core_lib.HiveStorageService(boxRegistryService);
   
   @singleton  
   core_lib.FirebaseAuthService get authService => core_lib.FirebaseAuthService();

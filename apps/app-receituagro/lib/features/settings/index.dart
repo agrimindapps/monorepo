@@ -1,5 +1,3 @@
-// Main pages
-export 'config_page.dart';
 // Constants
 export 'constants/settings_design_tokens.dart';
 // Data layer
@@ -15,15 +13,7 @@ export 'models/settings_state.dart';
 // Presentation layer
 export 'presentation/providers/settings_provider.dart';
 export 'presentation/providers/user_settings_provider.dart';
-// Providers (legacy)
-export 'providers/settings_providers.dart';
-// Sections (legacy)
-export 'sections/desenvolvimento_section.dart';
-export 'sections/publicidade_section.dart';
-export 'sections/site_access_section.dart';
-export 'sections/sobre_section.dart';
-export 'sections/speech_to_text_section.dart';
-// Services (legacy)
+// Services
 export 'services/device_service.dart';
 export 'services/navigation_service.dart';
 export 'services/premium_service.dart';
@@ -31,8 +21,7 @@ export 'services/theme_service.dart';
 // Note: Use cases não são exportados para evitar duplicação de exceções
 // Importe diretamente quando necessário
 
-// Integration
-export 'settings_integration_example.dart';
+// Main pages
 export 'settings_page.dart';
 // Widgets (legacy)
 export 'widgets/section_title_widget.dart';

@@ -89,7 +89,13 @@ class PlantisImageService {
   /// Obter instância do core image service (lazy initialization)
   core.ImageService get _getCoreImageService {
     return _coreImageService ??= core.ImageService(
-      config: core.AppImageConfigs.plantisConfig,
+      config: core.DefaultImageConfigs.standard.copyWith(
+        folders: {
+          'plants': 'plants',
+          'spaces': 'spaces',
+          'tasks': 'tasks',
+        },
+      ),
     );
   }
 

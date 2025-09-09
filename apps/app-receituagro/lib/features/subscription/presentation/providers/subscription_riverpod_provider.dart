@@ -110,8 +110,8 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> _loadAvailableProducts() async {
     final result = await _subscriptionRepository.getAvailableProducts(
       productIds: [
-        EnvironmentConfig.receitaAgroMonthlyProduct,
-        EnvironmentConfig.receitaAgroYearlyProduct,
+        EnvironmentConfig.getProductId('receituagro_monthly'),
+        EnvironmentConfig.getProductId('receituagro_yearly'),
       ],
     );
     

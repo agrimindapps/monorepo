@@ -104,8 +104,11 @@ void _initCoreServices() {
     () => FirebaseCrashlyticsService(),
   );
 
+  // Box Registry Service (required by HiveStorageService)
+  sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
+  
   // Storage repositories
-  sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService());
+  sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService(sl<IBoxRegistryService>()));
   
   // Secure Storage Service
   sl.registerLazySingleton<SecureStorageService>(() => SecureStorageService.instance);

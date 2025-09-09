@@ -14,12 +14,6 @@ import '../../features/diagnosticos/data/repositories/diagnosticos_repository_im
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
 import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
-import '../../features/favoritos/data/repositories/favoritos_repository_impl.dart';
-import '../../features/favoritos/data/services/favoritos_storage_service.dart' as fav_services;
-import '../../features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart';
-import '../../features/favoritos/domain/usecases/favoritos_usecases_stub.dart';
-import '../../features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart';
-import '../../features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart';
 import '../../features/favoritos/favoritos_di.dart';
 import '../../features/favoritos/services/favoritos_cache_service.dart';
 import '../../features/favoritos/services/favoritos_navigation_service.dart';
@@ -65,9 +59,12 @@ Future<void> init() async {
   // Initialize all Core Package services first
   await CorePackageIntegration.initializeCoreServices();
   
+  // Box Registry Service (required by HiveStorageService)
+  sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
+  
   // Core Storage Service - HiveStorageService do packages/core
   sl.registerLazySingleton<HiveStorageService>(
-    () => HiveStorageService(),
+    () => HiveStorageService(sl<IBoxRegistryService>()),
   );
 
   // Analytics Repository
@@ -112,7 +109,7 @@ Future<void> init() async {
   
   // Storage Service - Adapter que usa HiveStorageService do core
   sl.registerLazySingleton<ReceitaAgroStorageService>(
-    () => ReceitaAgroStorageService(),
+    () => ReceitaAgroStorageService(sl<HiveStorageService>()),
   );
   
   // Interface do core para compatibilidade
@@ -277,65 +274,10 @@ Future<void> init() async {
     ),
   );
 
-  // ===== IMPLEMENTAÇÕES ESPECÍFICAS =====
-  
-  // Implementações para Favoritos
-  sl.registerLazySingleton<fav_services.FavoritosValidatorService>(
-    () => fav_services.FavoritosValidatorService(),
-  );
 
-  sl.registerLazySingleton<fav_services.FavoritosStorageService>(
-    () => fav_services.FavoritosStorageService(),
-  );
+  // Favoritos system using simplified DI
+  FavoritosDI.registerDependencies();
 
-  sl.registerLazySingleton<fav_services.FavoritosCacheService>(
-    () => fav_services.FavoritosCacheService(),
-  );
-
-  sl.registerLazySingleton<fav_services.FavoritosDataResolverService>(
-    () => fav_services.FavoritosDataResolverService(),
-  );
-
-  sl.registerLazySingleton<fav_services.FavoritosEntityFactoryService>(
-    () => fav_services.FavoritosEntityFactoryService(),
-  );
-
-  sl.registerLazySingleton<FavoritosDefensivosRepositoryImpl>(
-    () => FavoritosDefensivosRepositoryImpl(
-      storage: sl<fav_services.FavoritosStorageService>(),
-      dataResolver: sl<fav_services.FavoritosDataResolverService>(),
-      entityFactory: sl<fav_services.FavoritosEntityFactoryService>(),
-      cache: sl<fav_services.FavoritosCacheService>(),
-    ),
-  );
-
-  // ===== USE CASES =====
-  
-  // Use Cases para Favoritos de Defensivos
-  sl.registerLazySingleton<GetFavoritoDefensivosUseCase>(
-    () => GetFavoritoDefensivosUseCase(
-      sl<FavoritosDefensivosRepositoryImpl>(),
-    ),
-  );
-
-  sl.registerLazySingleton<AddFavoritoDefensivoUseCase>(
-    () => AddFavoritoDefensivoUseCase(
-      sl<FavoritosDefensivosRepositoryImpl>(),
-      sl<fav_services.FavoritosValidatorService>(),
-    ),
-  );
-
-  sl.registerLazySingleton<RemoveFavoritoDefensivoUseCase>(
-    () => RemoveFavoritoDefensivoUseCase(
-      sl<FavoritosDefensivosRepositoryImpl>(),
-      sl<fav_services.FavoritosValidatorService>(),
-    ),
-  );
-
-  // Agregador de Use Cases para Favoritos (stub temporário)
-  sl.registerLazySingleton<FavoritosUsecases>(
-    () => const FavoritosUsecases(),
-  );
 
   // ===== CULTURAS SIMPLIFIED =====
   // Clean Architecture removed - using direct CulturaCoreRepository access

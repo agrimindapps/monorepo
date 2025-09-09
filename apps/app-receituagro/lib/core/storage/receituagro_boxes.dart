@@ -77,9 +77,11 @@ class ReceitaAgroBoxes {
     ),
   ];
 
-  /// Storage keys específicos para o ReceitaAgro
-  /// Estes substituem os keys que estavam no core package
-  static class StorageKeys {
+}
+
+/// Storage keys específicos para o ReceitaAgro
+/// Estes substituem os keys que estavam no core package
+class ReceitaAgroStorageKeys {
     // Configurações do usuário
     static const String userPreferences = 'receituagro_user_preferences';
     static const String appVersion = 'receituagro_app_version';
@@ -101,4 +103,3 @@ class ReceitaAgroBoxes {
     static const String offlineRecipes = 'receituagro_offline_recipes';
     static const String syncStatus = 'receituagro_sync_status';
   }
-}

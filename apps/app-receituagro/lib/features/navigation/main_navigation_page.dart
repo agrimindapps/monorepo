@@ -6,7 +6,7 @@ import '../../core/widgets/responsive_content_wrapper.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../comentarios/comentarios_page.dart';
 import '../culturas/lista_culturas_page.dart';
-import '../defensivos/defensivos_page.dart';
+import '../defensivos/home_defensivos_page.dart';
 import '../defensivos/lista_defensivos_page.dart';
 import '../favoritos/favoritos_page.dart';
 import '../pragas/detalhe_praga_page.dart';
@@ -140,7 +140,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     switch (pageType) {
       // Páginas principais
       case AppPageType.defensivos:
-        page = const DefensivosPage();
+        page = const HomeDefensivosPage();
         break;
       case AppPageType.pragas:
         page = const PragasPage();

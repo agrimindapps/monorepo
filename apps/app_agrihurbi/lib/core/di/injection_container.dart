@@ -322,7 +322,10 @@ Future<void> configureAppDependencies() async {
   // === EXTERNAL DEPENDENCIES (not @injectable) ===
   
   // Core Services (cannot be @injectable due to external package)
-  getIt.registerSingleton<core_lib.HiveStorageService>(core_lib.HiveStorageService());
+  getIt.registerSingleton<core_lib.IBoxRegistryService>(core_lib.BoxRegistryService());
+  getIt.registerSingleton<core_lib.HiveStorageService>(
+    core_lib.HiveStorageService(getIt<core_lib.IBoxRegistryService>())
+  );
   getIt.registerSingleton<core_lib.FirebaseAuthService>(core_lib.FirebaseAuthService());
   getIt.registerSingleton<core_lib.RevenueCatService>(core_lib.RevenueCatService());
   getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(core_lib.FirebaseAnalyticsService());

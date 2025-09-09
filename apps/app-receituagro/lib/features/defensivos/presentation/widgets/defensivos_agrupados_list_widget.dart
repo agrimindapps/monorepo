@@ -4,9 +4,9 @@ import '../../models/defensivo_agrupado_item_model.dart';
 import '../../models/defensivos_agrupados_category.dart';
 import '../../models/defensivos_agrupados_state.dart';
 import '../../models/defensivos_agrupados_view_mode.dart';
-import '../../widgets/defensivo_agrupado_item_widget.dart';
-import '../../widgets/defensivos_agrupados_empty_state_widget.dart';
-import '../../widgets/defensivos_agrupados_loading_skeleton_widget.dart';
+import 'defensivo_agrupado_item_widget.dart';
+import 'defensivos_agrupados_empty_state_widget.dart';
+import 'defensivos_agrupados_loading_skeleton_widget.dart';
 
 /// Widget principal de lista para Defensivos Agrupados
 /// Gerencia exibição de lista, grid, loading e empty states

@@ -1,9 +1,8 @@
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../storage/hive_service.dart';
 import 'di_module.dart';
-import 'modules/auth_module.dart';
+import 'injectable_config.dart';
 import 'modules/core_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
@@ -21,11 +20,10 @@ class ModularInjectionContainer {
     // Initialize Hive with all adapters and boxes
     await HiveService.instance.init();
 
-    // Initialize SharedPreferences first (required by other modules)
-    final sharedPreferences = await SharedPreferences.getInstance();
-    _getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+    // Initialize injectable dependencies (includes SharedPreferences, Firebase services, etc.)
+    configureDependencies();
 
-    // Register modules in dependency order
+    // Register additional modules in dependency order
     final modules = _createModules();
     
     for (final module in modules) {
@@ -42,7 +40,7 @@ class ModularInjectionContainer {
   static List<DIModule> _createModules() {
     return [
       CoreModule(),        // External services and core infrastructure
-      AuthModule(),        // Authentication services (depends on core)
+      // AuthModule(),     // Auth services now registered via @injectable
       // TODO: Add more modules in Phase 2
       // AnimalsModule(),
       // CalculatorsModule(),

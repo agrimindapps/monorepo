@@ -18,7 +18,7 @@ import 'core/services/receituagro_notification_service.dart';
 import 'core/services/receituagro_storage_service.dart';
 import 'core/services/revenuecat_service.dart' as local_rc;
 import 'core/services/startup_optimization_service.dart';
-import 'core/setup/receituagro_data_setup.dart';
+// import 'core/setup/receituagro_data_setup.dart'; // temporarily disabled
 import 'core/theme/receituagro_theme.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
@@ -87,16 +87,17 @@ void main() async {
   // Initialize dependency injection
   await di.init();
 
-  // Initialize ReceitaAgro data (Hive boxes)
+  // EMERGENCY FIX: ReceitaAgro data initialization temporarily disabled
   try {
-    await ReceitaAgroDataSetup.initialize();
+    print('🔧 [EMERGENCY] ReceitaAgro data initialization temporarily disabled to prevent Hive conflicts');
+    // await ReceitaAgroDataSetup.initialize(); // Temporarily disabled
   } catch (e) {
     // Log error but don't block app startup
     if (EnvironmentConfig.enableAnalytics) {
       await FirebaseCrashlytics.instance.recordError(
         e,
         StackTrace.current,
-        reason: 'Failed to initialize ReceitaAgro data',
+        reason: 'Failed to initialize ReceitaAgro data (emergency mode)',
         fatal: false,
       );
     }
@@ -150,11 +151,10 @@ void main() async {
     },
   );
 
-  // 🔧 CRITICAL FIX: Load culturas data from JSON assets
-  // This fixes the empty culturas list issue
-  print('🔧 [MAIN] Iniciando carregamento de culturas...');
-  await CulturasDataLoader.loadCulturasData();
-  print('🔧 [MAIN] Carregamento de culturas finalizado.');
+  // 🔧 EMERGENCY FIX: Culturas data loading temporarily disabled
+  print('🔧 [MAIN] EMERGENCY: Iniciando estabilização do sistema...');
+  await CulturasDataLoader.loadCulturasData(); // Will just mark as loaded
+  print('🔧 [MAIN] EMERGENCY: Sistema estabilizado para desenvolvimento.');
 
   // Run app
   if (EnvironmentConfig.enableAnalytics && !kIsWeb) {

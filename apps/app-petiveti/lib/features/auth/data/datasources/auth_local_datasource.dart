@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -16,6 +17,7 @@ abstract class AuthLocalDataSource {
   Future<void> setFirstLaunchCompleted();
 }
 
+@LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _userKey = 'cached_user';
   static const String _tokenKey = 'auth_token';

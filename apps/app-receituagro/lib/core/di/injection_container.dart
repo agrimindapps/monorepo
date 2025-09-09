@@ -9,7 +9,7 @@ import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
 // Culturas dependencies removed - using direct CulturaCoreRepository access
-import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
+import '../../features/diagnosticos/data/repositories/diagnosticos_repository_stub.dart';
 // Diagnósticos Clean Architecture
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
@@ -21,17 +21,12 @@ import '../../features/pragas/di/pragas_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../interfaces/i_premium_service.dart';
 import '../repositories/comentarios_hive_repository.dart';
-// New Core-based repositories
-import '../repositories/cultura_core_repository.dart';
+// Legacy repositories (temporary during Core Package fix)
 import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_core_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/favoritos_core_repository.dart';
 import '../repositories/favoritos_hive_repository.dart';
-import '../repositories/fitossanitario_core_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/pragas_core_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
@@ -43,8 +38,8 @@ import '../services/navigation_service.dart';
 import '../services/premium_service_real.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/receituagro_storage_service.dart';
-// Core Package Integration
-import 'core_package_integration.dart';
+// Core Package Integration temporarily disabled
+// import 'core_package_integration.dart';
 
 final sl = GetIt.instance;
 
@@ -55,17 +50,16 @@ Future<void> init() async {
     () => AppNavigationProvider(),
   );
   
-  // ===== CORE PACKAGE INTEGRATION (FASE 2.6 FINAL) =====
-  // Initialize all Core Package services first
-  await CorePackageIntegration.initializeCoreServices();
+  // ===== CORE PACKAGE INTEGRATION TEMPORARILY DISABLED =====
+  // EMERGENCY FIX: Disabling Core Package to resolve Hive conflicts
+  // await CorePackageIntegration.initializeCoreServices();
   
-  // Box Registry Service (required by HiveStorageService)
-  sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
-  
-  // Core Storage Service - HiveStorageService do packages/core
-  sl.registerLazySingleton<HiveStorageService>(
-    () => HiveStorageService(sl<IBoxRegistryService>()),
-  );
+  // TEMPORARILY DISABLED: Box Registry Service and Core Storage Service
+  // EMERGENCY FIX: Avoiding dual Hive system conflicts
+  // sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
+  // sl.registerLazySingleton<HiveStorageService>(
+  //   () => HiveStorageService(sl<IBoxRegistryService>()),
+  // );
 
   // Analytics Repository
   sl.registerLazySingleton<IAnalyticsRepository>(
@@ -112,10 +106,11 @@ Future<void> init() async {
     () => ReceitaAgroStorageService(sl<HiveStorageService>()),
   );
   
-  // Interface do core para compatibilidade
-  sl.registerLazySingleton<ILocalStorageRepository>(
-    () => sl<HiveStorageService>(),
-  );
+  // TEMPORARILY DISABLED: Interface do core para compatibilidade
+  // EMERGENCY FIX: Using legacy repositories directly
+  // sl.registerLazySingleton<ILocalStorageRepository>(
+  //   () => sl<HiveStorageService>(),
+  // );
   
   // Navigation Service - Serviço de navegação global
   sl.registerLazySingleton<INavigationService>(
@@ -155,26 +150,27 @@ Future<void> init() async {
   );
   */
 
-  // NEW: Core-based repositories using HiveStorageService
-  sl.registerLazySingleton<PragasCoreRepository>(
-    () => PragasCoreRepository(sl<ILocalStorageRepository>()),
-  );
-  
-  sl.registerLazySingleton<FitossanitarioCoreRepository>(
-    () => FitossanitarioCoreRepository(sl<ILocalStorageRepository>()),
-  );
-  
-  sl.registerLazySingleton<FavoritosCoreRepository>(
-    () => FavoritosCoreRepository(sl<ILocalStorageRepository>()),
-  );
-  
-  sl.registerLazySingleton<CulturaCoreRepository>(
-    () => CulturaCoreRepository(sl<ILocalStorageRepository>()),
-  );
-  
-  sl.registerLazySingleton<DiagnosticoCoreRepository>(
-    () => DiagnosticoCoreRepository(sl<ILocalStorageRepository>()),
-  );
+  // TEMPORARILY DISABLED: Core-based repositories using HiveStorageService
+  // EMERGENCY FIX: Using legacy repositories only to avoid conflicts
+  // sl.registerLazySingleton<PragasCoreRepository>(
+  //   () => PragasCoreRepository(sl<ILocalStorageRepository>()),
+  // );
+  // 
+  // sl.registerLazySingleton<FitossanitarioCoreRepository>(
+  //   () => FitossanitarioCoreRepository(sl<ILocalStorageRepository>()),
+  // );
+  // 
+  // sl.registerLazySingleton<FavoritosCoreRepository>(
+  //   () => FavoritosCoreRepository(sl<ILocalStorageRepository>()),
+  // );
+  // 
+  // sl.registerLazySingleton<CulturaCoreRepository>(
+  //   () => CulturaCoreRepository(sl<ILocalStorageRepository>()),
+  // );
+  // 
+  // sl.registerLazySingleton<DiagnosticoCoreRepository>(
+  //   () => DiagnosticoCoreRepository(sl<ILocalStorageRepository>()),
+  // );
   
   // Temporary repositories that still need migration
   // TEMPORARY: Re-registering legacy repositories for backward compatibility
@@ -275,24 +271,16 @@ Future<void> init() async {
   );
 
 
-  // Favoritos system using simplified DI
-  FavoritosDI.registerDependencies();
-
-
   // ===== CULTURAS SIMPLIFIED =====
   // Clean Architecture removed - using direct CulturaCoreRepository access
   // ListaCulturasPage now uses sl<CulturaCoreRepository>() directly
 
   // ===== DIAGNÓSTICOS CLEAN ARCHITECTURE =====
   
-  // Repository Implementation para Diagnósticos
+  // EMERGENCY FIX: Using stub repository to avoid Core Package conflicts
+  // This prevents app crashes while we fix the Hive system
   sl.registerLazySingleton<IDiagnosticosRepository>(
-    () => DiagnosticosRepositoryImpl(sl<DiagnosticoCoreRepository>()),
-  );
-  
-  // Registro adicional para compatibilidade com código que busca por classe concreta
-  sl.registerLazySingleton<DiagnosticosRepositoryImpl>(
-    () => sl<IDiagnosticosRepository>() as DiagnosticosRepositoryImpl,
+    () => const DiagnosticosRepositoryStub(),
   );
 
   // Use Cases para Diagnósticos
@@ -357,13 +345,14 @@ Future<void> init() async {
     ),
   );
   
+  // ===== FAVORITOS SYSTEM =====
+  // Sistema de Favoritos usando DI simplificado
+  FavoritosDI.registerDependencies();
+  
   // ===== MÓDULOS ESPECÍFICOS =====
   
   // Configurar DI do módulo DetalheDefensivos
   initDefensivoDetailsDI();
-  
-  // Configurar DI do módulo de Favoritos  
-  FavoritosDI.registerDependencies();
   
   // Configurar DI do módulo de Pragas
   PragasDI.configure();

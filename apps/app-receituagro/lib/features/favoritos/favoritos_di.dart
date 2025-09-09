@@ -15,6 +15,11 @@ class FavoritosDI {
 
   /// Registra APENAS 3 dependências essenciais - ultra simplificado
   static void registerDependencies() {
+    // Verificação de registro duplicado para prevenir erros
+    if (_getIt.isRegistered<FavoritosService>()) {
+      return; // Já registrado, evita duplicação
+    }
+    
     // 1. Service consolidado (unifica storage, cache, resolver, factory, validator)
     _getIt.registerLazySingleton<FavoritosService>(
       () => FavoritosService(),

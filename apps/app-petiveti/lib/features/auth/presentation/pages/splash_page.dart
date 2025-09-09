@@ -51,17 +51,37 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   void _checkAuthState() {
-    // Get auth state immediately, then delay navigation
-    final authState = ref.read(authProvider);
-    
-    // Delay mínimo para mostrar o splash
-    Future.delayed(SplashConstants.splashMinimumDuration, () {
+    // CORREÇÃO: Aguardar DI estar pronto antes de acessar authProvider
+    Future.delayed(SplashConstants.splashMinimumDuration, () async {
       if (!mounted) return; // Check if widget is still mounted
       
-      if (authState.isAuthenticated) {
-        context.go(SplashConstants.homeRoute);
-      } else {
-        context.go(SplashConstants.promoRoute);
+      try {
+        // Tentar acessar authProvider de forma segura
+        final authState = ref.read(authProvider);
+        
+        if (authState.isAuthenticated) {
+          context.go(SplashConstants.homeRoute);
+        } else {
+          context.go(SplashConstants.promoRoute);
+        }
+      } catch (e) {
+        // Se authProvider ainda não está pronto, aguardar mais um pouco
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        
+        try {
+          final authState = ref.read(authProvider);
+          if (authState.isAuthenticated) {
+            context.go(SplashConstants.homeRoute);
+          } else {
+            context.go(SplashConstants.promoRoute);
+          }
+        } catch (e2) {
+          // Se ainda não conseguiu, ir para promo como fallback
+          if (mounted) {
+            context.go(SplashConstants.promoRoute);
+          }
+        }
       }
     });
   }

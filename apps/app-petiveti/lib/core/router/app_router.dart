@@ -37,32 +37,45 @@ import '../../features/weight/presentation/pages/weight_page.dart';
 import '../navigation/bottom_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  
-  // Determine initial route based on auth state
-  final initialRoute = authState.isAuthenticated ? '/' : '/promo';
+  // CORREÇÃO: Não tentar acessar authProvider imediatamente
+  // Sempre começar com splash para dar tempo da inicialização DI
+  final initialRoute = '/splash';
   
   return GoRouter(
     initialLocation: initialRoute,
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      final isAuthenticated = authState.isAuthenticated;
-      final isOnAuthPage = state.matchedLocation.startsWith('/login') || 
-                           state.matchedLocation.startsWith('/register');
+      // CORREÇÃO: Só fazer redirects após sair da splash
+      // Durante splash, permitir navegação normal
       final isOnSplash = state.matchedLocation == '/splash';
-      final isOnPromo = state.matchedLocation == '/promo';
       
-      // If authenticated, redirect to home (except splash)
-      if (isAuthenticated && (isOnPromo || isOnAuthPage)) {
-        return '/';
+      if (isOnSplash) {
+        return null; // Permitir acesso à splash sempre
       }
+      
+      // Para outras rotas, tentar acessar auth de forma segura
+      try {
+        final authState = ref.read(authProvider);
+        final isAuthenticated = authState.isAuthenticated;
+        final isOnAuthPage = state.matchedLocation.startsWith('/login') || 
+                             state.matchedLocation.startsWith('/register');
+        final isOnPromo = state.matchedLocation == '/promo';
+        
+        // If authenticated, redirect to home (except splash)
+        if (isAuthenticated && (isOnPromo || isOnAuthPage)) {
+          return '/';
+        }
 
-      // If not authenticated and trying to access protected pages, redirect to promo
-      if (!isAuthenticated && !isOnAuthPage && !isOnSplash && !isOnPromo) {
-        return '/promo';
+        // If not authenticated and trying to access protected pages, redirect to promo
+        if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
+          return '/promo';
+        }
+
+        return null; // No redirect needed
+      } catch (e) {
+        // Se authProvider ainda não está pronto, redirecionar para splash
+        return '/splash';
       }
-
-      return null; // No redirect needed
     },
     routes: [
       ShellRoute(
@@ -165,7 +178,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/edit',
-            name: 'edit-medication',
+            name: 'new-medication',
             builder: (context, state) {
               final args = state.extra as Map<String, dynamic>? ?? {};
               return AddMedicationForm(

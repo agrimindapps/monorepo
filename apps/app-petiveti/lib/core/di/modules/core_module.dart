@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:core/core.dart' as core;
 
 import '../../cache/cache_service.dart';
@@ -44,13 +41,9 @@ class CoreModule implements DIModule {
       () => FirebaseCrashlytics.instance,
     );
 
-    getIt.registerLazySingleton<FirebaseFirestore>(
-      () => FirebaseFirestore.instance,
-    );
-
-    getIt.registerLazySingleton<firebase_auth.FirebaseAuth>(
-      () => firebase_auth.FirebaseAuth.instance,
-    );
+    // NOTE: FirebaseFirestore and FirebaseAuth are now registered by injectable 
+    // via RegisterModule to avoid duplicate registration errors
+    // They are available via RegisterModule.firestore and RegisterModule.firebaseAuth
 
     // Core package repositories (new migration path) 
     // These will be used by new code and gradual migration
@@ -74,21 +67,14 @@ class CoreModule implements DIModule {
       debugPrint('⚠️ Warning: Could not register core repositories: $e');
     }
 
-    // Google Sign In
-    getIt.registerLazySingleton<GoogleSignIn>(
-      () => GoogleSignIn(
-        scopes: ['email'],
-        clientId: kIsWeb 
-          ? '877618226732-7v4qhq8g97v05c7fmqd9mql3c5jfh55s.apps.googleusercontent.com'
-          : null,
-      ),
-    );
+    // NOTE: GoogleSignIn is now registered by injectable via RegisterModule
+    // to avoid duplicate registration errors
 
     // Connectivity (always available)
     getIt.registerLazySingleton<Connectivity>(() => Connectivity());
 
-    // SharedPreferences (already registered in main init)
-    // This is handled in the main initialization
+    // NOTE: SharedPreferences is now registered by injectable via RegisterModule
+    // with @preResolve to ensure it's available during DI initialization
   }
 
   Future<void> _registerCoreServices(GetIt getIt) async {

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/fitossanitario_hive.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/services/premium_status_notifier.dart';
 import '../../../comentarios/models/comentario_model.dart';
 import '../../../comentarios/services/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
@@ -40,6 +43,9 @@ class DetalheDefensivoProvider extends ChangeNotifier {
   // Estado dos comentários
   List<ComentarioModel> _comentarios = [];
   bool _isLoadingComments = false;
+  
+  // Subscription para mudanças no status premium
+  StreamSubscription<bool>? _premiumStatusSubscription;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -247,6 +253,26 @@ class DetalheDefensivoProvider extends ChangeNotifier {
     _premiumService.addListener(() {
       notifyListeners();
     });
+    
+    // Configura listener para notificações globais de premium
+    _setupPremiumStatusListener();
+  }
+  
+  /// Configura listener para mudanças automáticas no status premium
+  void _setupPremiumStatusListener() {
+    _premiumStatusSubscription?.cancel();
+    _premiumStatusSubscription = PremiumStatusNotifier.instance
+        .premiumStatusStream
+        .listen((isPremiumStatus) {
+      debugPrint('📱 DetalheDefensivo: Received premium status change = $isPremiumStatus');
+      notifyListeners(); // Força rebuild quando status premium muda
+    });
+  }
+  
+  @override
+  void dispose() {
+    _premiumStatusSubscription?.cancel();
+    super.dispose();
   }
 
   // Public getters for external access

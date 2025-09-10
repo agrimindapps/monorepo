@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +8,7 @@ import '../../presentation/providers/settings_provider.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
+import 'diagnostic_debug_section.dart';
 
 /// Development tools section (debug mode only)
 /// Provides testing and debugging functionality
@@ -17,10 +17,8 @@ class DevelopmentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only show in debug mode
-    if (!EnvironmentConfig.isDebugMode) {
-      return const SizedBox.shrink();
-    }
+    // DEVELOPMENT: Always show during app development
+    // TODO: Remove or gate this properly for production builds
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,6 +87,9 @@ class DevelopmentSection extends StatelessWidget {
             ],
           ),
         ),
+
+        // Diagnostic debug section
+        const DiagnosticDebugSection(),
       ],
     );
   }

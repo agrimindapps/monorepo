@@ -1,26 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
+import '../../domain/entities/defensivo_group_entity.dart';
+import '../../models/defensivo_view_mode.dart';
+import '../providers/defensivos_drill_down_provider.dart';
 import '../providers/defensivos_unificado_provider.dart';
 import '../widgets/comparacao_defensivos_widget.dart';
+import '../widgets/defensivo_search_field_widget.dart';
+import '../widgets/defensivos_drill_down_navigation_widget.dart';
+import '../widgets/defensivos_group_list_widget.dart';
 import '../widgets/defensivos_list_widget.dart';
-import '../widgets/filtros_defensivos_widget.dart';
 
 /// Página unificada de defensivos
 /// Consolida funcionalidades de defensivos individuais e agrupados
 /// Implementa arquitetura SOLID e Clean Architecture
+/// 
+/// Argumentos de navegação:
+/// - tipoAgrupamento: String? - Tipo de agrupamento (fabricantes, modoAcao, etc.)
+/// - textoFiltro: String? - Filtro de texto opcional
+/// - modoCompleto: bool - Controle de modo de exibição (não usado para filtros)
+/// - isAgrupados: bool - Se true, carrega dados agrupados por categoria
 class DefensivosUnificadoPage extends StatefulWidget {
   final String? tipoAgrupamento;
   final String? textoFiltro;
   final bool modoCompleto;
+  final bool isAgrupados;
 
   const DefensivosUnificadoPage({
     super.key,
     this.tipoAgrupamento,
     this.textoFiltro,
     this.modoCompleto = false,
+    this.isAgrupados = false,
   });
 
   @override
@@ -28,24 +43,98 @@ class DefensivosUnificadoPage extends StatefulWidget {
 }
 
 class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
+  final TextEditingController _searchController = TextEditingController();
+  DefensivoViewMode _viewMode = DefensivoViewMode.list;
+  String _searchText = '';
+  bool _isAscending = true;
+  
+  // Providers para drill-down
+  late DefensivosDrillDownProvider _drillDownProvider;
+
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
+    _initializeDrillDownProvider();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _carregarDefensivos();
     });
+  }
+  
+  void _initializeDrillDownProvider() {
+    _drillDownProvider = DefensivosDrillDownProvider(
+      groupingService: DefensivosGroupingService(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _drillDownProvider.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchText = _searchController.text;
+    });
+    
+    // Atualizar drill-down provider se estiver usando drill-down
+    if (widget.isAgrupados && widget.tipoAgrupamento != null) {
+      _drillDownProvider.updateSearchFilter(_searchText);
+    }
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchText = '';
+    });
+    
+    // Limpar filtro no drill-down provider
+    if (widget.isAgrupados && widget.tipoAgrupamento != null) {
+      _drillDownProvider.clearSearchFilter();
+    }
+  }
+
+  void _toggleViewMode(DefensivoViewMode mode) {
+    setState(() {
+      _viewMode = mode;
+    });
+  }
+
+  void _toggleSort() {
+    setState(() {
+      _isAscending = !_isAscending;
+    });
+    
+    // Atualizar ordenação no drill-down provider
+    if (widget.isAgrupados && widget.tipoAgrupamento != null) {
+      _drillDownProvider.toggleSort();
+    }
   }
 
   void _carregarDefensivos() {
     final provider = context.read<DefensivosUnificadoProvider>();
     
-    if (widget.modoCompleto) {
+    if (widget.isAgrupados && widget.tipoAgrupamento != null) {
+      // Carrega defensivos agrupados e inicializa drill-down
+      provider.carregarDefensivosAgrupados(
+        tipoAgrupamento: widget.tipoAgrupamento!,
+        filtroTexto: widget.textoFiltro,
+      ).then((_) {
+        // Inicializar drill-down provider com dados carregados
+        _drillDownProvider.initializeWithDefensivos(
+          defensivos: provider.defensivos,
+          tipoAgrupamento: widget.tipoAgrupamento!,
+        );
+      });
+    } else if (widget.modoCompleto) {
+      // Carrega defensivos completos (lista simples)
       provider.carregarDefensivosCompletos();
     } else {
-      provider.carregarDefensivosAgrupados(
-        tipoAgrupamento: widget.tipoAgrupamento ?? 'classe',
-        filtroTexto: widget.textoFiltro,
-      );
+      // Fallback para lista simples
+      provider.carregarDefensivosCompletos();
     }
   }
 
@@ -72,7 +161,9 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
                             ? const Center(child: CircularProgressIndicator())
                             : provider.hasError
                                 ? _buildErrorState(provider)
-                                : _buildContent(provider),
+                                : widget.isAgrupados && widget.tipoAgrupamento != null
+                                    ? _buildDrillDownContent(provider)
+                                    : _buildContent(provider),
                       ),
                     ],
                   );
@@ -99,81 +190,76 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   Widget _buildModernHeader(DefensivosUnificadoProvider provider, bool isDark) {
-    final subtitulo = provider.modoComparacao 
-        ? 'Modo comparação - ${provider.defensivosSelecionados.length}/3 selecionados'
-        : '${provider.defensivosFiltrados.length} defensivo(s) encontrado(s)';
+    String titulo;
+    String subtitulo;
+
+    if (widget.isAgrupados && widget.tipoAgrupamento != null) {
+      // Header para drill-down
+      titulo = _drillDownProvider.pageTitle;
+      subtitulo = _drillDownProvider.pageSubtitle;
+      
+      // Se está no nível de itens, mostrar contador dos itens filtrados
+      if (_drillDownProvider.isAtItemLevel) {
+        subtitulo = '${_drillDownProvider.currentGroupItems.length} defensivo(s) encontrado(s)';
+      }
+    } else {
+      // Header tradicional
+      titulo = 'Lista de Defensivos';
+      subtitulo = '${provider.defensivosFiltrados.length} defensivo(s) encontrado(s)';
+    }
 
     return ModernHeaderWidget(
-      title: widget.modoCompleto ? 'Defensivos Detalhados' : 'Defensivos Agrupados',
+      title: titulo,
       subtitle: subtitulo,
       leftIcon: Icons.medical_services,
-      rightIcon: provider.modoComparacao ? Icons.close : Icons.compare_arrows,
+      rightIcon: _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: () => Navigator.of(context).pop(),
-      onRightIconPressed: provider.toggleModoComparacao,
-      additionalActions: [
-        IconButton(
-          icon: const Icon(Icons.refresh, color: Colors.white),
-          onPressed: provider.reload,
-        ),
-        if (provider.defensivosFiltrados.isNotEmpty)
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${provider.defensivosFiltrados.length}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-      ],
+      onBackPressed: widget.isAgrupados && _drillDownProvider.canGoBack 
+          ? _onDrillDownBack 
+          : null,
+      onRightIconPressed: _toggleSort,
     );
   }
 
   Widget _buildContent(DefensivosUnificadoProvider provider) {
-    return CustomScrollView(
-      slivers: [
-        // Filtros (apenas em modo completo)
-        if (widget.modoCompleto)
-          SliverToBoxAdapter(
-            child: RepaintBoundary(
-              child: Container(
-                margin: const EdgeInsets.all(8.0),
-                child: FiltrosDefensivosWidget(
-                  ordenacao: provider.ordenacao,
-                  filtroToxicidade: provider.filtroToxicidade,
-                  filtroTipo: provider.filtroTipo,
-                  apenasComercializados: provider.apenasComercializados,
-                  apenasElegiveis: provider.apenasElegiveis,
-                  onOrdenacaoChanged: (valor) => provider.atualizarFiltros(ordenacao: valor),
-                  onToxicidadeChanged: (valor) => provider.atualizarFiltros(filtroToxicidade: valor),
-                  onTipoChanged: (valor) => provider.atualizarFiltros(filtroTipo: valor),
-                  onComercializadosChanged: (valor) => provider.atualizarFiltros(apenasComercializados: valor),
-                  onElegiveisChanged: (valor) => provider.atualizarFiltros(apenasElegiveis: valor),
-                ),
-              ),
-            ),
+    // Aplicar ordenação local aos defensivos
+    final defensivosOrdenados = List<DefensivoEntity>.from(provider.defensivosFiltrados);
+    defensivosOrdenados.sort((a, b) {
+      final comparison = a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
+      return _isAscending ? comparison : -comparison;
+    });
+
+    return Column(
+      children: [
+        _buildSearchField(provider),
+        Expanded(
+          child: DefensivosListWidget(
+            defensivos: defensivosOrdenados,
+            modoComparacao: provider.modoComparacao,
+            defensivosSelecionados: provider.defensivosSelecionados,
+            onTap: _navegarParaDetalhes,
+            onSelecaoChanged: provider.modoComparacao ? provider.toggleSelecaoDefensivo : null,
+            onClearFilters: provider.limparFiltros,
           ),
-        
-        // Lista de defensivos
-        DefensivosListWidget(
-          defensivos: provider.defensivosFiltrados,
-          modoComparacao: provider.modoComparacao,
-          defensivosSelecionados: provider.defensivosSelecionados,
-          onTap: _navegarParaDetalhes,
-          onSelecaoChanged: provider.modoComparacao ? provider.toggleSelecaoDefensivo : null,
-          onClearFilters: provider.limparFiltros,
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchField(DefensivosUnificadoProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return DefensivoSearchFieldWidget(
+      controller: _searchController,
+      tipoAgrupamento: widget.tipoAgrupamento,
+      isDark: isDark,
+      viewMode: _viewMode,
+      onViewModeChanged: _toggleViewMode,
+      onClear: _clearSearch,
+      onChanged: (value) {}, // O listener já está no controller
+      isSearching: provider.isLoading,
     );
   }
 
@@ -213,18 +299,124 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
     );
   }
 
-  void _navegarParaDetalhes(DefensivoEntity defensivo) {
-    // TODO: Implementar navegação para detalhes
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Detalhes do defensivo: ${defensivo.displayName}'),
-        duration: const Duration(seconds: 2),
+  /// Constrói conteúdo para drill-down navigation
+  Widget _buildDrillDownContent(DefensivosUnificadoProvider provider) {
+    return ListenableBuilder(
+      listenable: _drillDownProvider,
+      builder: (context, _) {
+        if (_drillDownProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (_drillDownProvider.hasError) {
+          return _buildDrillDownErrorState();
+        }
+
+        return Column(
+          children: [
+            _buildSearchField(provider),
+            Expanded(
+              child: _drillDownProvider.isAtGroupLevel
+                  ? _buildGroupsList()
+                  : _buildItemsList(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Constrói lista de grupos
+  Widget _buildGroupsList() {
+    return DefensivosGroupListWidget(
+      grupos: _drillDownProvider.groups,
+      onGroupTap: _onGroupTap,
+      onClearFilters: _clearSearch,
+      searchText: _searchText,
+    );
+  }
+
+  /// Constrói lista de itens do grupo
+  Widget _buildItemsList() {
+    return DefensivosListWidget(
+      defensivos: _drillDownProvider.currentGroupItems,
+      modoComparacao: context.read<DefensivosUnificadoProvider>().modoComparacao,
+      defensivosSelecionados: context.read<DefensivosUnificadoProvider>().defensivosSelecionados,
+      onTap: _navegarParaDetalhes,
+      onSelecaoChanged: context.read<DefensivosUnificadoProvider>().modoComparacao 
+          ? context.read<DefensivosUnificadoProvider>().toggleSelecaoDefensivo 
+          : null,
+      onClearFilters: _clearSearch,
+    );
+  }
+
+  /// Estado de erro para drill-down
+  Widget _buildDrillDownErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red.shade300,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar grupos',
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _drillDownProvider.errorMessage ?? 'Erro desconhecido',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _reloadDrillDownData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Tentar Novamente'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  // Handlers para drill-down navigation
+  
+  void _onGroupTap(DefensivoGroupEntity group) {
+    _drillDownProvider.drillDownToGroup(group);
+  }
+
+  void _onDrillDownBack() {
+    _drillDownProvider.goBackToGroups();
+  }
+
+  void _onDrillDownReset() {
+    _drillDownProvider.reset();
+  }
+
+  void _reloadDrillDownData() {
+    _drillDownProvider.clearError();
+    _carregarDefensivos();
+  }
+
+  void _navegarParaDetalhes(DefensivoEntity defensivo) {
+    final navigationProvider = context.read<AppNavigationProvider>();
+    
+    navigationProvider.navigateToDetalheDefensivo(
+      defensivoName: defensivo.displayName,
+      fabricante: defensivo.fabricante,
+    );
+  }
+
   void _mostrarComparacao(List<DefensivoEntity> defensivos) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => SizedBox(

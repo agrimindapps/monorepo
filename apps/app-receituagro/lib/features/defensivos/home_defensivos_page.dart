@@ -152,19 +152,32 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
 
     switch (category.toLowerCase()) {
       case 'defensivos':
+        // Para defensivos, mantém navegação original (lista simples)
         navigationProvider.navigateToListaDefensivos();
         break;
       case 'fabricantes':
-        navigationProvider.navigateToListaDefensivos();
+        // Para fabricantes, vai para lista agrupada por fabricante
+        navigationProvider.navigateToDefensivosAgrupados(
+          tipoAgrupamento: 'fabricantes',
+        );
         break;
       case 'modoacao':
-        navigationProvider.navigateToListaDefensivos();
+        // Para modo de ação, vai para lista agrupada por modo de ação
+        navigationProvider.navigateToDefensivosAgrupados(
+          tipoAgrupamento: 'modoAcao',
+        );
         break;
       case 'ingredienteativo':
-        navigationProvider.navigateToListaDefensivos();
+        // Para ingrediente ativo, vai para lista agrupada por ingrediente ativo
+        navigationProvider.navigateToDefensivosAgrupados(
+          tipoAgrupamento: 'ingredienteAtivo',
+        );
         break;
       case 'classeagronomica':
-        navigationProvider.navigateToListaDefensivos();
+        // Para classe agronômica, vai para lista agrupada por classe
+        navigationProvider.navigateToDefensivosAgrupados(
+          tipoAgrupamento: 'classeAgronomica',
+        );
         break;
       default:
         navigationProvider.navigateToListaDefensivos();

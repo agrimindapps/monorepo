@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/design/spacing_tokens.dart';
 import '../../core/di/injection_container.dart';
+import '../../core/navigation/app_navigation_provider.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
@@ -114,7 +115,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           isDark: isDark,
           showBackButton: true,
           showActions: true,
-          onBackPressed: () => Navigator.of(context).pop(),
+          onBackPressed: () => context.read<AppNavigationProvider>().goBack(),
           onRightIconPressed: () => _handleFavoriteToggle(provider),
         );
       },

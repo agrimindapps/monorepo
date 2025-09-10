@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -7,6 +9,7 @@ import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../../core/services/premium_status_notifier.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
@@ -31,6 +34,9 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
 
   // Estado do compartilhamento
   bool _isSharingContent = false;
+  
+  // Subscription para mudanças no status premium
+  StreamSubscription<bool>? _premiumStatusSubscription;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -100,11 +106,27 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
       final premium = await _premiumService.isPremiumUser();
       _isPremium = premium;
       notifyListeners();
+      debugPrint('🔍 DetalheDiagnostico: Premium status loaded = $premium');
+      
+      // Configura listener para mudanças automáticas
+      _setupPremiumStatusListener();
     } catch (e) {
       // Em caso de erro, manter como não premium
       _isPremium = false;
       notifyListeners();
     }
+  }
+  
+  /// Configura listener para mudanças automáticas no status premium
+  void _setupPremiumStatusListener() {
+    _premiumStatusSubscription?.cancel();
+    _premiumStatusSubscription = PremiumStatusNotifier.instance
+        .premiumStatusStream
+        .listen((isPremium) {
+      debugPrint('📱 DetalheDiagnostico: Received premium status change = $isPremium');
+      _isPremium = isPremium;
+      notifyListeners();
+    });
   }
 
   /// Carrega o estado de favorito
@@ -247,6 +269,12 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
     _isFavorited = false;
     _isSharingContent = false;
     notifyListeners();
+  }
+  
+  @override
+  void dispose() {
+    _premiumStatusSubscription?.cancel();
+    super.dispose();
   }
 
 }

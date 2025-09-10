@@ -36,8 +36,6 @@ class CulturaSectionMockupWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _buildIcon(),
-            const SizedBox(width: 12), // Espaçamento específico do mockup
             Expanded(child: _buildText()),
           ],
         ),
@@ -45,14 +43,6 @@ class CulturaSectionMockupWidget extends StatelessWidget {
     );
   }
 
-  /// Ícone de folha verde exatamente como no mockup
-  Widget _buildIcon() {
-    return Icon(
-      DiagnosticoMockupTokens.sectionIcon,
-      color: DiagnosticoMockupTokens.primaryGreen,
-      size: DiagnosticoMockupTokens.sectionIconSize,
-    );
-  }
 
   /// Texto da cultura com contador
   Widget _buildText() {
@@ -102,8 +92,6 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildIcon(),
-          const SizedBox(width: 12),
           Expanded(child: _buildText()),
           if (trailing != null) ...[
             const SizedBox(width: 8),
@@ -135,14 +123,6 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
     return RepaintBoundary(child: child);
   }
 
-  /// Ícone de folha verde
-  Widget _buildIcon() {
-    return Icon(
-      DiagnosticoMockupTokens.sectionIcon,
-      color: DiagnosticoMockupTokens.primaryGreen,
-      size: DiagnosticoMockupTokens.sectionIconSize,
-    );
-  }
 
   /// Texto da cultura com contador
   Widget _buildText() {

@@ -163,7 +163,14 @@ class DiagnosticoDialogWidget extends StatelessWidget {
 
   /// Ações do modal (botões defensivo e diagnóstico)
   Widget _buildActions(BuildContext context) {
-    final provider = Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+    // Tenta obter provider, mas não falha se não estiver disponível
+    DiagnosticosPragaProvider? provider;
+    try {
+      provider = Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+    } catch (e) {
+      // Provider não disponível - continuamos sem ele
+      provider = null;
+    }
     
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -278,25 +285,28 @@ class _DiagnosticoInfoRow extends StatelessWidget {
 /// Botão para navegar ao defensivo
 class _DefensivoButton extends StatelessWidget {
   final DiagnosticoModel diagnostico;
-  final DiagnosticosPragaProvider provider;
+  final DiagnosticosPragaProvider? provider;
 
   const _DefensivoButton({
     required this.diagnostico,
-    required this.provider,
+    this.provider,
   });
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: () {
-        final defensivoData = provider.getDefensivoData(diagnostico.nome);
+        // Tenta obter dados do provider, senão usa valores padrão
+        final defensivoData = provider?.getDefensivoData(diagnostico.nome);
+        final fabricante = defensivoData?['fabricante'] as String? ?? 'Fabricante Desconhecido';
+        
         Navigator.of(context).pop();
         Navigator.push(
           context,
           MaterialPageRoute<void>(
             builder: (context) => DetalheDefensivoPage(
               defensivoName: diagnostico.nome,
-              fabricante: defensivoData?['fabricante'] as String? ?? 'Fabricante Desconhecido',
+              fabricante: fabricante,
             ),
           ),
         );

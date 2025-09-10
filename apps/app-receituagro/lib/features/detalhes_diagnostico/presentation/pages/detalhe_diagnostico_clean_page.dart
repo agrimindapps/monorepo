@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/premium_status_notifier.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/premium_test_controls_widget.dart';
 import '../../../navigation/bottom_nav_wrapper.dart';
 import '../providers/detalhe_diagnostico_provider.dart';
 import '../widgets/aplicacao_instrucoes_widget.dart';
 import '../widgets/diagnostico_detalhes_widget.dart';
 import '../widgets/diagnostico_info_widget.dart';
+import '../widgets/premium_feature_widget.dart';
 import '../widgets/share_bottom_sheet_widget.dart';
 
 class DetalheDiagnosticoCleanPage extends StatefulWidget {
@@ -27,7 +30,9 @@ class DetalheDiagnosticoCleanPage extends StatefulWidget {
   State<DetalheDiagnosticoCleanPage> createState() => _DetalheDiagnosticoCleanPageState();
 }
 
-class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPage> {
+class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPage>
+    with PremiumStatusListener {
+  
   @override
   void initState() {
     super.initState();
@@ -37,6 +42,13 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
       provider.loadFavoritoState(widget.diagnosticoId);
       provider.loadPremiumStatus();
     });
+  }
+  
+  @override
+  void onPremiumStatusChanged(bool isPremium) {
+    // Atualiza o provider quando o status premium muda
+    final provider = context.read<DetalheDiagnosticoProvider>();
+    provider.loadPremiumStatus();
   }
 
   @override
@@ -62,9 +74,7 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
                             ? _buildLoadingState()
                             : provider.hasError
                                 ? _buildErrorState(provider)
-                                : provider.isPremium
-                                    ? _buildContent(provider)
-                                    : _buildPremiumGate(),
+                                : _buildContent(provider),
                       ),
                     ],
                   ),
@@ -305,7 +315,11 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Seção de Informações e Imagem
+          // Widget de teste para desenvolvimento (removido automaticamente em produção)
+          const PremiumTestControlsWidget(),
+          const SizedBox(height: 8),
+          
+          // Seção de Informações e Imagem (sempre visível)
           DiagnosticoInfoWidget(
             nomePraga: widget.nomePraga,
             nomeDefensivo: widget.nomeDefensivo,
@@ -314,17 +328,112 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
           ),
           const SizedBox(height: 24),
           
-          // Seção de Detalhes do Diagnóstico
+          // Seção de Detalhes do Diagnóstico (sempre visível)
           DiagnosticoDetalhesWidget(
             diagnosticoData: provider.diagnosticoData,
           ),
           const SizedBox(height: 24),
           
-          // Seção de Instruções de Aplicação
+          // Seção de Instruções de Aplicação (sempre visível)
           AplicacaoInstrucoesWidget(
             diagnosticoData: provider.diagnosticoData,
           ),
+          const SizedBox(height: 24),
+          
+          // Recursos Premium - Visíveis mas controlados por isPremium
+          _buildPremiumFeatures(provider),
+          
           const SizedBox(height: 80), // Espaço para bottom navigation
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildPremiumFeatures(DetalheDiagnosticoProvider provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Seção de Compartilhamento Premium
+        PremiumFeatureWidget(
+          isPremium: provider.isPremium,
+          title: 'Compartilhamento Avançado',
+          description: 'Compartilhe diagnósticos com formatação profissional',
+          icon: Icons.share_outlined,
+          onPremiumAction: () => _compartilhar(provider),
+          onUpgradeRequested: _showPremiumDialog,
+        ),
+        const SizedBox(height: 16),
+        
+        // Seção de Comentários Premium (placeholder para futuro)
+        PremiumFeatureWidget(
+          isPremium: provider.isPremium,
+          title: 'Comentários Ilimitados',
+          description: 'Adicione comentários e notas pessoais aos diagnósticos',
+          icon: Icons.comment_outlined,
+          onPremiumAction: () => _showComingSoon('Comentários'),
+          onUpgradeRequested: _showPremiumDialog,
+        ),
+        const SizedBox(height: 16),
+        
+        // Indicador de Status Premium
+        _buildPremiumStatusIndicator(provider),
+      ],
+    );
+  }
+  
+  Widget _buildPremiumStatusIndicator(DetalheDiagnosticoProvider provider) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: provider.isPremium 
+            ? Colors.green.withOpacity(0.1)
+            : Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: provider.isPremium ? Colors.green : Colors.orange,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            provider.isPremium ? Icons.diamond : Icons.lock_outline,
+            color: provider.isPremium ? Colors.green : Colors.orange,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  provider.isPremium ? 'Usuário Premium Ativo' : 'Recursos Premium Limitados',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  provider.isPremium 
+                      ? 'Você tem acesso completo a todos os recursos'
+                      : 'Assine Premium para acesso completo aos recursos',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!provider.isPremium)
+            TextButton(
+              onPressed: _showPremiumDialog,
+              child: const Text('Assinar'),
+            ),
         ],
       ),
     );
@@ -391,8 +500,8 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
           style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         content: Text(
-          'Este diagnóstico está disponível apenas para usuários premium. '
-          'Assine agora para ter acesso completo.',
+          'Este recurso está disponível apenas para usuários premium. '
+          'Assine agora para ter acesso completo a todos os recursos.',
           style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         ),
         actions: [
@@ -412,6 +521,16 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
             child: const Text('Assinar'),
           ),
         ],
+      ),
+    );
+  }
+  
+  void _showComingSoon(String featureName) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$featureName - Em breve para usuários Premium!'),
+        backgroundColor: Colors.blue,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

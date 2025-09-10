@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
@@ -9,6 +11,7 @@ import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../../core/repositories/pragas_inf_hive_repository.dart';
 import '../../../../core/repositories/plantas_inf_hive_repository.dart';
+import '../../../../core/services/premium_status_notifier.dart';
 import '../../../comentarios/models/comentario_model.dart';
 import '../../../comentarios/services/comentarios_service.dart';
 
@@ -41,8 +44,8 @@ class DetalhePragaProvider extends ChangeNotifier {
   PragasInfHive? _pragaInfo;
   PlantasInfHive? _plantaInfo;
   
-  // Listener para premium status
-  VoidCallback? _premiumStatusListener;
+  // Subscription para mudanças no status premium
+  StreamSubscription<bool>? _premiumStatusSubscription;
 
   // Getters
   String get pragaName => _pragaName;
@@ -162,20 +165,21 @@ class DetalhePragaProvider extends ChangeNotifier {
   void _loadPremiumStatus() {
     _isPremium = _premiumService.isPremium;
     
-    // Remove listener anterior se existir
-    if (_premiumStatusListener != null) {
-      _premiumService.removeListener(_premiumStatusListener!);
-    }
-    
-    // Cria novo listener
-    _premiumStatusListener = () {
-      _isPremium = _premiumService.isPremium;
-      notifyListeners();
-    };
-    
-    // Escuta mudanças no status premium
-    _premiumService.addListener(_premiumStatusListener!);
+    // Configura listener para mudanças no status premium
+    _setupPremiumStatusListener();
     notifyListeners();
+  }
+  
+  /// Configura listener para mudanças automáticas no status premium
+  void _setupPremiumStatusListener() {
+    _premiumStatusSubscription?.cancel();
+    _premiumStatusSubscription = PremiumStatusNotifier.instance
+        .premiumStatusStream
+        .listen((isPremiumStatus) {
+      debugPrint('📱 DetalhePraga: Received premium status change = $isPremiumStatus');
+      _isPremium = isPremiumStatus;
+      notifyListeners();
+    });
   }
 
   /// Carrega comentários da praga
@@ -306,11 +310,7 @@ class DetalhePragaProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Remove listener do premium service
-    if (_premiumStatusListener != null) {
-      _premiumService.removeListener(_premiumStatusListener!);
-      _premiumStatusListener = null;
-    }
+    _premiumStatusSubscription?.cancel();
     super.dispose();
   }
 }

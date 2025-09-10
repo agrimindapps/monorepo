@@ -270,6 +270,24 @@ class AppNavigationProvider extends ChangeNotifier {
     );
   }
 
+  /// Navega para lista de defensivos agrupados por categoria
+  void navigateToDefensivosAgrupados({
+    String? tipoAgrupamento,
+    String? textoFiltro,
+    bool modoCompleto = false,
+  }) {
+    navigateToPage(
+      AppPageType.listaDefensivos,
+      arguments: {
+        'tipoAgrupamento': tipoAgrupamento,
+        'textoFiltro': textoFiltro,
+        'modoCompleto': false, // Explícito para agrupados
+        'isAgrupados': true,
+      },
+      title: _getTitleForAgrupamento(tipoAgrupamento),
+    );
+  }
+
   /// Navega para detalhe de defensivo
   void navigateToDetalheDefensivo({
     required String defensivoName,
@@ -443,6 +461,23 @@ class AppNavigationProvider extends ChangeNotifier {
         return 'Plantas Daninhas';
       default:
         return 'Pragas';
+    }
+  }
+
+  String _getTitleForAgrupamento(String? tipoAgrupamento) {
+    switch (tipoAgrupamento?.toLowerCase()) {
+      case 'classeagronomica':
+        return 'Classe Agronômica';
+      case 'fabricantes':
+        return 'Fabricantes';
+      case 'modoacao':
+        return 'Modo de Ação';
+      case 'ingredienteativo':
+        return 'Ingrediente Ativo';
+      case 'defensivos':
+        return 'Defensivos';
+      default:
+        return 'Lista de Defensivos';
     }
   }
   

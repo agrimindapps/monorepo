@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/navigation/app_navigation_provider.dart';
@@ -7,7 +8,8 @@ import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../comentarios/comentarios_page.dart';
 import '../culturas/lista_culturas_page.dart';
 import '../defensivos/home_defensivos_page.dart';
-import '../defensivos/lista_defensivos_page.dart';
+import '../defensivos/presentation/pages/defensivos_unificado_page.dart';
+import '../defensivos/presentation/providers/defensivos_unificado_provider.dart';
 import '../favoritos/favoritos_page.dart';
 import '../pragas/detalhe_praga_page.dart';
 import '../pragas/lista_pragas_page.dart';
@@ -168,7 +170,15 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         );
         break;
       case AppPageType.listaDefensivos:
-        page = const ListaDefensivosPage();
+        page = ChangeNotifierProvider(
+          create: (_) => GetIt.instance<DefensivosUnificadoProvider>(),
+          child: DefensivosUnificadoPage(
+            modoCompleto: arguments?['modoCompleto'] as bool? ?? true,
+            tipoAgrupamento: arguments?['tipoAgrupamento'] as String?,
+            textoFiltro: arguments?['textoFiltro'] as String?,
+            isAgrupados: arguments?['isAgrupados'] as bool? ?? false,
+          ),
+        );
         break;
       case AppPageType.detalheDefensivo:
         page = DetalheDefensivoPage(

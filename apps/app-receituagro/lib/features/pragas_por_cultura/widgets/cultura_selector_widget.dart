@@ -85,12 +85,17 @@ class CulturaSelectorWidget extends StatelessWidget {
   }
 
   Widget _buildSelectorCultura(ThemeData theme) {
-    final culturaSelecionada = culturaIdSelecionada != null
-        ? culturas.firstWhere(
-            (c) => c['id'] == culturaIdSelecionada,
-            orElse: () => {'nome': 'Cultura não encontrada'},
-          )['nome']
-        : null;
+    String? culturaSelecionada;
+    if (culturaIdSelecionada != null) {
+      if (culturaIdSelecionada == 'todas') {
+        culturaSelecionada = 'Todas as culturas';
+      } else {
+        culturaSelecionada = culturas.firstWhere(
+          (c) => c['id'] == culturaIdSelecionada,
+          orElse: () => {'nome': 'Cultura não encontrada'},
+        )['nome'];
+      }
+    }
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -176,7 +181,7 @@ class CulturaSelectorWidget extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Selecione uma cultura',
                 hintStyle: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 border: InputBorder.none,
@@ -184,13 +189,45 @@ class CulturaSelectorWidget extends StatelessWidget {
               ),
               dropdownColor: theme.cardColor,
               items: [
+                // Opção para todas as culturas - PRIMEIRO ITEM
+                DropdownMenuItem<String>(
+                  value: 'todas',
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Icon(
+                          Icons.select_all,
+                          size: 10,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Todas as culturas',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 // Item vazio para limpar seleção
                 const DropdownMenuItem<String>(
                   value: '',
                   child: Text(
                     'Selecione uma cultura...',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -202,14 +239,14 @@ class CulturaSelectorWidget extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(3),
                           decoration: BoxDecoration(
                             color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Icon(
                             FontAwesomeIcons.seedling,
-                            size: 12,
+                            size: 10,
                             color: Colors.green,
                           ),
                         ),
@@ -217,7 +254,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                         Expanded(
                           child: Text(
                             cultura['nome']!,
-                            style: const TextStyle(fontSize: 14),
+                            style: const TextStyle(fontSize: 12),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -227,7 +264,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                 }),
               ],
               onChanged: (value) {
-                if (value != null && value.isNotEmpty) {
+                if (value != null) {
                   onCulturaChanged(value);
                 }
               },
@@ -289,7 +326,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                         Text(
                           culturaSelecionada ?? 'N/A',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: Colors.green.shade700,
                           ),

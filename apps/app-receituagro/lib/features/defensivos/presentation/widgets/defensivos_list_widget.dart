@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../../core/widgets/content_section_widget.dart';
 import '../../domain/entities/defensivo_entity.dart';
-import 'defensivo_completo_card_widget.dart';
 import 'defensivos_empty_state_widget.dart';
 
-/// Widget especializado para exibir lista de defensivos
-/// Migrado e adaptado de defensivos_agrupados para nova arquitetura SOLID
+/// Widget simplificado para exibir lista de defensivos
+/// Usa o ContentListItemWidget padrão para consistência visual
 /// 
 /// Características:
+/// - Design consistente com home defensivos
 /// - Renderização otimizada com SliverList
-/// - Suporte a modo comparação
-/// - Callback para navegação e seleção
+/// - Items limpos e minimalistas
 /// - Estado vazio integrado
-/// - Performance otimizada com RepaintBoundary
 class DefensivosListWidget extends StatelessWidget {
   final List<DefensivoEntity> defensivos;
   final bool modoComparacao;
@@ -34,34 +34,64 @@ class DefensivosListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (defensivos.isEmpty) {
-      return SliverToBoxAdapter(
-        child: DefensivosEmptyStateWidget(
-          onClearFilters: onClearFilters,
-        ),
+      return DefensivosEmptyStateWidget(
+        onClearFilters: onClearFilters,
       );
     }
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final defensivo = defensivos[index];
-          return RepaintBoundary(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: DefensivoCompletoCardWidget(
-                defensivo: defensivo,
-                modoComparacao: modoComparacao,
-                isSelected: defensivosSelecionados.contains(defensivo),
+    return Container(
+      margin: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: defensivos.length,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 1,
+            indent: 64,
+            endIndent: 8,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          ),
+          itemBuilder: (context, index) {
+            final defensivo = defensivos[index];
+            
+            return RepaintBoundary(
+              child: ContentListItemWidget(
+                title: defensivo.nome,
+                subtitle: _getSubtitle(defensivo),
+                category: _getCategory(defensivo),
+                icon: FontAwesomeIcons.sprayCan,
+                iconColor: const Color(0xFF4CAF50),
                 onTap: () => onTap(defensivo),
-                onSelecaoChanged: onSelecaoChanged != null 
-                    ? () => onSelecaoChanged!(defensivo)
-                    : null,
               ),
-            ),
-          );
-        },
-        childCount: defensivos.length,
+            );
+          },
+        ),
       ),
     );
+  }
+
+  String _getSubtitle(DefensivoEntity defensivo) {
+    if (defensivo.fabricante?.isNotEmpty == true) {
+      return defensivo.fabricante!;
+    }
+    if (defensivo.ingredienteAtivo?.isNotEmpty == true) {
+      return defensivo.ingredienteAtivo!;
+    }
+    return 'Defensivo';
+  }
+
+  String? _getCategory(DefensivoEntity defensivo) {
+    if (defensivo.classeAgronomica?.isNotEmpty == true) {
+      return defensivo.classeAgronomica;
+    }
+    if (defensivo.modoAcao?.isNotEmpty == true) {
+      return defensivo.modoAcao;
+    }
+    return null;
   }
 }

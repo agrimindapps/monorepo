@@ -16,6 +16,24 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
     return entity.idReg;
   }
 
+  /// Busca por objectId (ID do Firebase) se idReg não funcionar
+  @override
+  DiagnosticoHive? getById(String id) {
+    try {
+      // Primeiro tenta buscar pela chave normal (idReg)
+      final result = super.getById(id);
+      if (result != null) {
+        return result;
+      }
+      
+      // Se não encontrou, tenta buscar por objectId
+      final matches = findBy((item) => item.objectId == id);
+      return matches.isNotEmpty ? matches.first : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Busca diagnósticos por defensivo
   List<DiagnosticoHive> findByDefensivo(String fkIdDefensivo) {
     return findBy((item) => item.fkIdDefensivo == fkIdDefensivo);

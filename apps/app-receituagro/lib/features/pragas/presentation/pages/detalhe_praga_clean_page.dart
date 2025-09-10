@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/premium_status_notifier.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../favoritos/favoritos_page.dart';
@@ -29,7 +30,7 @@ class DetalhePragaCleanPage extends StatefulWidget {
 }
 
 class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, PremiumStatusListener {
   late TabController _tabController;
   late DetalhePragaProvider _pragaProvider;
   late DiagnosticosPragaProvider _diagnosticosProvider;
@@ -184,6 +185,12 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
         );
       },
     );
+  }
+
+  @override
+  void onPremiumStatusChanged(bool isPremium) {
+    // Método vazio - o provider já escuta mudanças automaticamente
+    // através do PremiumStatusNotifier configurado no _setupPremiumStatusListener
   }
 
   /// Alterna estado de favorito

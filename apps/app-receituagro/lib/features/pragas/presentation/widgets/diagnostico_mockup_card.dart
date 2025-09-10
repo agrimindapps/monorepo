@@ -6,7 +6,7 @@ import '../providers/diagnosticos_praga_provider.dart';
 import 'diagnostico_mockup_tokens.dart';
 
 /// Widget que replica EXATAMENTE o design do card do mockup IMG_3186.PNG
-/// 
+///
 /// Layout do mockup analisado:
 /// - Container branco com shadow sutil
 /// - Ícone verde quadrado com símbolo químico
@@ -15,7 +15,7 @@ import 'diagnostico_mockup_tokens.dart';
 /// - Dosagem oculta com "••• mg/L" se premium
 /// - Ícone premium amarelo (⚠️)
 /// - Chevron (>) para navegação
-/// 
+///
 /// Responsabilidade única: renderizar card de diagnóstico pixel-perfect
 class DiagnosticoMockupCard extends StatelessWidget {
   final DiagnosticoModel diagnostico;
@@ -60,9 +60,11 @@ class DiagnosticoMockupCard extends StatelessWidget {
               child: Row(
                 children: [
                   _buildIcon(),
-                  const SizedBox(width: DiagnosticoMockupTokens.cardInternalSpacing),
+                  const SizedBox(
+                      width: DiagnosticoMockupTokens.cardInternalSpacing),
                   Expanded(child: _buildContent()),
-                  const SizedBox(width: DiagnosticoMockupTokens.cardInternalSpacing),
+                  const SizedBox(
+                      width: DiagnosticoMockupTokens.cardInternalSpacing),
                   _buildTrailing(),
                 ],
               ),
@@ -104,7 +106,7 @@ class DiagnosticoMockupCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 1),
-        
+
         // Ingrediente ativo - linha 2
         Text(
           diagnostico.ingredienteAtivo,
@@ -113,7 +115,7 @@ class DiagnosticoMockupCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 1),
-        
+
         // Dosagem - linha 3 (oculta se premium)
         Text(
           _getDosageText(),
@@ -137,7 +139,7 @@ class DiagnosticoMockupCard extends StatelessWidget {
           size: DiagnosticoMockupTokens.premiumIconSize,
         ),
         SizedBox(width: 8),
-        
+
         // Chevron de navegação
         Icon(
           DiagnosticoMockupTokens.chevronIcon,
@@ -151,8 +153,8 @@ class DiagnosticoMockupCard extends StatelessWidget {
   /// Retorna texto da dosagem - oculto se premium
   String _getDosageText() {
     if (isPremium) {
-      return DiagnosticoMockupTokens.dosagePrefix + 
-             DiagnosticoMockupTokens.hiddenDosage;
+      return DiagnosticoMockupTokens.dosagePrefix +
+          DiagnosticoMockupTokens.hiddenDosage;
     }
     return DiagnosticoMockupTokens.dosagePrefix + diagnostico.dosagem;
   }
@@ -177,7 +179,7 @@ class DiagnosticoMockupCardPremium extends StatelessWidget {
       builder: (context, snapshot) {
         // Se está carregando, assume não premium (oculta dosagem)
         final isUserPremium = snapshot.data ?? false;
-        
+
         return DiagnosticoMockupCard(
           diagnostico: diagnostico,
           onTap: onTap,
@@ -186,7 +188,7 @@ class DiagnosticoMockupCardPremium extends StatelessWidget {
       },
     );
   }
-  
+
   /// Verifica status premium usando o service registrado
   Future<bool> _checkPremiumStatus() async {
     try {
@@ -211,7 +213,7 @@ mixin DiagnosticoMockupCardFactory {
       onTap: onTap,
     );
   }
-  
+
   /// Cria card com estado premium explícito
   static Widget createWithPremiumState({
     required DiagnosticoModel diagnostico,
@@ -224,7 +226,7 @@ mixin DiagnosticoMockupCardFactory {
       isPremium: isPremium,
     );
   }
-  
+
   /// Cria card para preview (sempre mostra dosagem)
   static Widget createPreview({
     required DiagnosticoModel diagnostico,

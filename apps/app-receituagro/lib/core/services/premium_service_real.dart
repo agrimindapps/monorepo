@@ -7,6 +7,7 @@ import '../interfaces/i_premium_service.dart';
 import '../models/premium_status_hive.dart';
 import '../repositories/premium_hive_repository.dart';
 import 'navigation_service.dart';
+import 'premium_status_notifier.dart';
 
 /// Service premium real que integra RevenueCat com cache Hive local
 /// Unifica todas as interfaces IPremiumService fragmentadas do projeto
@@ -26,6 +27,13 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   DateTime? _lastSyncTime;
   static const Duration _syncCooldown = Duration(minutes: 5);
 
+  // Circuit breaker pattern para prevenir loops infinitos
+  int _failureCount = 0;
+  DateTime? _lastFailureTime;
+  static const int _maxFailures = 3;
+  static const Duration _circuitBreakerTimeout = Duration(minutes: 15);
+  bool _circuitBreakerOpen = false;
+
   PremiumServiceReal({
     required PremiumHiveRepository hiveRepository,
     required ISubscriptionRepository subscriptionRepository,
@@ -42,13 +50,15 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
     if (hiveStatus != null) {
       _cachedStatus = _convertHiveToStatus(hiveStatus);
 
-      // Se precisa sincronizar online, faz em background
-      if (hiveStatus.shouldSyncOnline) {
+      // Se precisa sincronizar online, faz em background (respeitando circuit breaker)
+      if (hiveStatus.shouldSyncOnline && !_isCircuitBreakerOpen()) {
         _syncOnlineInBackground();
       }
     } else {
-      // Primeira vez - busca online
-      _syncOnlineInBackground();
+      // Primeira vez - busca online (respeitando circuit breaker)
+      if (!_isCircuitBreakerOpen()) {
+        _syncOnlineInBackground();
+      }
     }
   }
 
@@ -75,17 +85,33 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   Future<void> checkPremiumStatus() async {
     if (_isCheckingStatus) return;
+    
+    // Respeita circuit breaker
+    if (_isCircuitBreakerOpen()) {
+      debugPrint('🚫 Skipping premium check - circuit breaker is open');
+      return;
+    }
 
     _isCheckingStatus = true;
     try {
       await _syncWithRevenueCat();
+      _resetCircuitBreaker(); // Reset on success
+    } catch (e) {
+      _recordFailure();
+      rethrow;
     } finally {
       _isCheckingStatus = false;
     }
   }
 
-  /// Sincronização em background com debounce
+  /// Sincronização em background com debounce e circuit breaker
   void _syncOnlineInBackground() {
+    // Verifica circuit breaker primeiro
+    if (_isCircuitBreakerOpen()) {
+      debugPrint('🚫 Circuit breaker open - skipping sync for ${_getTimeUntilReset().inMinutes} minutes');
+      return;
+    }
+
     // Cancela timer anterior se existe
     _syncDebounceTimer?.cancel();
     
@@ -102,8 +128,10 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       try {
         _lastSyncTime = DateTime.now();
         await _syncWithRevenueCat();
+        _resetCircuitBreaker(); // Reset on success
       } catch (e) {
         debugPrint('Background sync failed: $e');
+        _recordFailure();
       }
     });
   }
@@ -120,7 +148,7 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
 
       hasActiveResult.fold((failure) {
         debugPrint('Error checking subscription: ${failure.message}');
-        return; // Mantém cache atual se falhar
+        throw Exception('Subscription check failed: ${failure.message}');
       }, (active) => hasActive = active);
 
       // Se tem assinatura ativa, obtém detalhes
@@ -173,8 +201,11 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       debugPrint('Premium status synced successfully: isPremium=$isPremium');
     } catch (e) {
       debugPrint('Error syncing premium status: $e');
-      // Em caso de erro, marca para tentar novamente
-      await _hiveRepository.markCurrentUserNeedsSync();
+      // NÃO marca para tentar novamente se circuit breaker estiver ativo
+      if (!_isCircuitBreakerOpen()) {
+        await _hiveRepository.markCurrentUserNeedsSync();
+      }
+      rethrow; // Propaga erro para ativar circuit breaker
     }
   }
 
@@ -204,7 +235,11 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       );
 
       _notifyStatusChange();
-      debugPrint('Test subscription generated successfully');
+      debugPrint('✅ Test subscription generated successfully - Broadcasting to all screens');
+      
+      // Força refresh imediato em todas as telas
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      _broadcastPremiumStatusChange();
     } catch (e) {
       debugPrint('Error generating test subscription: $e');
       throw Exception('Falha ao gerar assinatura teste: $e');
@@ -220,7 +255,11 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
       _cachedStatus = const PremiumStatus(isActive: false);
 
       _notifyStatusChange();
-      debugPrint('Test subscription removed successfully');
+      debugPrint('❌ Test subscription removed successfully - Broadcasting to all screens');
+      
+      // Força refresh imediato em todas as telas
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      _broadcastPremiumStatusChange();
     } catch (e) {
       debugPrint('Error removing test subscription: $e');
       throw Exception('Falha ao remover assinatura teste: $e');
@@ -245,6 +284,8 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
 
   /// Força nova sincronização (limpa cache)
   Future<void> forceRefresh() async {
+    // Force refresh bypasses circuit breaker but resets it first
+    _resetCircuitBreaker();
     await _hiveRepository.clearPremiumCache();
     await checkPremiumStatus();
   }
@@ -414,10 +455,69 @@ class PremiumServiceReal extends ChangeNotifier implements IPremiumService {
   @override
   Stream<bool> get premiumStatusStream => _statusStreamController.stream;
 
-  /// Notifica mudanças no status premium via stream
+  /// Notifica mudanças no status premium via stream e força refresh em todas as telas
   void _notifyStatusChange() {
     notifyListeners();
     _statusStreamController.add(isPremium);
+    
+    // Força refresh em todas as telas que dependem do status premium
+    _broadcastPremiumStatusChange();
+  }
+  
+  /// Broadcasta mudanças de status premium para todas as telas do app
+  void _broadcastPremiumStatusChange() {
+    debugPrint('🔄 Broadcasting premium status change: isPremium=$isPremium');
+    
+    // Envia notificação global via NotificationCenter ou similar
+    // Para simplificar, vamos usar um event bus simples
+    PremiumStatusNotifier.instance.notifyStatusChanged(isPremium);
+  }
+
+  // ============ CIRCUIT BREAKER METHODS ============
+
+  /// Verifica se circuit breaker está aberto
+  bool _isCircuitBreakerOpen() {
+    if (!_circuitBreakerOpen) return false;
+    
+    // Verifica se timeout expirou
+    if (_lastFailureTime != null) {
+      final timeElapsed = DateTime.now().difference(_lastFailureTime!);
+      if (timeElapsed > _circuitBreakerTimeout) {
+        _resetCircuitBreaker();
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  /// Registra uma falha no circuit breaker
+  void _recordFailure() {
+    _failureCount++;
+    _lastFailureTime = DateTime.now();
+    
+    if (_failureCount >= _maxFailures) {
+      _circuitBreakerOpen = true;
+      debugPrint('🔴 Circuit breaker opened after $_failureCount failures. Will retry in ${_circuitBreakerTimeout.inMinutes} minutes.');
+    }
+  }
+
+  /// Reseta o circuit breaker após sucesso
+  void _resetCircuitBreaker() {
+    _failureCount = 0;
+    _lastFailureTime = null;
+    _circuitBreakerOpen = false;
+    debugPrint('🟢 Circuit breaker reset - sync operations resumed');
+  }
+
+  /// Obtém tempo até próximo reset do circuit breaker
+  Duration _getTimeUntilReset() {
+    if (_lastFailureTime == null) return Duration.zero;
+    
+    final elapsed = DateTime.now().difference(_lastFailureTime!);
+    final remaining = _circuitBreakerTimeout - elapsed;
+    
+    return remaining.isNegative ? Duration.zero : remaining;
   }
 
   @override

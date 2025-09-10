@@ -1,17 +1,11 @@
 import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
 
-import '../navigation/app_navigation_provider.dart';
-
-// DetalheDefensivos DI
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
-// Culturas dependencies removed - using direct CulturaCoreRepository access
-import '../../features/diagnosticos/data/repositories/diagnosticos_repository_stub.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_legacy_adapter.dart';
-// Diagnósticos Clean Architecture
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
 import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
@@ -21,30 +15,36 @@ import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../interfaces/i_premium_service.dart';
+import '../navigation/app_navigation_provider.dart';
 import '../repositories/comentarios_hive_repository.dart';
-// Legacy repositories (temporary during Core Package fix)
 import '../repositories/cultura_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
 import '../repositories/favoritos_hive_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
+import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
-import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
 import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
+import '../services/enhanced_diagnostic_integration_service.dart';
 import '../services/navigation_service.dart';
 import '../services/premium_service_real.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/receituagro_storage_service_emergency_stub.dart';
 // Core Package Integration temporarily disabled
 // import 'core_package_integration.dart';
+import 'repositories_di.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
+  // Configure all Clean Architecture dependencies first
+  configureAllRepositoriesDependencies();
+  
   // ===== NAVEGAÇÃO =====
   // Registra AppNavigationProvider como singleton para navegação global
   sl.registerLazySingleton<AppNavigationProvider>(
@@ -220,6 +220,16 @@ Future<void> init() async {
       fitossanitarioInfoRepo: sl<FitossanitarioInfoHiveRepository>(),
     ),
   );
+
+  // Enhanced DiagnosticoIntegrationService - Serviço aprimorado com resolução de nomes
+  sl.registerLazySingleton<EnhancedDiagnosticIntegrationService>(
+    () => EnhancedDiagnosticIntegrationService(
+      diagnosticoRepo: sl<DiagnosticoHiveRepository>(),
+      fitossanitarioRepo: sl<FitossanitarioHiveRepository>(),
+      culturaRepo: sl<CulturaHiveRepository>(),
+      pragasRepo: sl<PragasHiveRepository>(),
+    ),
+  );
   
   // Cache Services - Serviços de cache para otimização
   // TEMPORARY: Re-registering with legacy repositories for backward compatibility  
@@ -279,8 +289,8 @@ Future<void> init() async {
 
   // ===== DIAGNÓSTICOS CLEAN ARCHITECTURE =====
   
-  // EMERGENCY FIX: Using legacy adapter with real data instead of stub
-  // This provides real diagnostics data while avoiding Core Package conflicts
+  // ENHANCED FIX: Using legacy adapter enhanced with automatic name resolution
+  // This provides enriched diagnostics data with proper defensivo/praga/cultura names
   sl.registerLazySingleton<IDiagnosticosRepository>(
     () => DiagnosticosRepositoryLegacyAdapter(sl<DiagnosticoHiveRepository>()),
   );

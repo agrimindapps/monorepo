@@ -1,18 +1,29 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/repositories/diagnostico_hive_repository.dart';
+import '../../../../core/services/enhanced_diagnostic_integration_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
 import '../mappers/diagnostico_mapper.dart';
 
 /// Adapter temporário para usar DiagnosticoHiveRepository em vez de DiagnosticoCoreRepository
-/// EMERGENCY FIX: Esta implementação resolve conflitos de Hive usando apenas o sistema legacy
+/// ENHANCED: Esta implementação resolve conflitos de Hive usando o enhanced service para nomes
 class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
   final DiagnosticoHiveRepository _hiveRepository;
+  late final EnhancedDiagnosticIntegrationService _enhancedService;
 
-  const DiagnosticosRepositoryLegacyAdapter(this._hiveRepository);
+  DiagnosticosRepositoryLegacyAdapter(this._hiveRepository) {
+    // Lazy load the enhanced service to avoid circular dependencies
+    try {
+      _enhancedService = sl<EnhancedDiagnosticIntegrationService>();
+    } catch (e) {
+      debugPrint('⚠️ Enhanced service not available, falling back to legacy mapper');
+    }
+  }
 
   @override
   Future<Either<Failure, List<DiagnosticoEntity>>> getAll({
@@ -30,9 +41,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
         diagnosticosPaginated = diagnosticosPaginated.take(limit).toList();
       }
       
-      final entities = diagnosticosPaginated
-          .map((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosPaginated);
       
       return Right(entities);
     } catch (e) {
@@ -48,7 +57,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
         return const Right(null);
       }
       
-      final entity = DiagnosticoMapper.fromHive(diagnosticoHive);
+      final entity = await _convertToEntityEnhanced(diagnosticoHive);
       return Right(entity);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar diagnóstico por ID: ${e.toString()}'));
@@ -59,9 +68,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
   Future<Either<Failure, List<DiagnosticoEntity>>> getByDefensivo(String idDefensivo) async {
     try {
       final diagnosticosHive = _hiveRepository.findByDefensivo(idDefensivo);
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -73,9 +80,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
   Future<Either<Failure, List<DiagnosticoEntity>>> getByCultura(String idCultura) async {
     try {
       final diagnosticosHive = _hiveRepository.findByCultura(idCultura);
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -87,9 +92,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
   Future<Either<Failure, List<DiagnosticoEntity>>> getByPraga(String idPraga) async {
     try {
       final diagnosticosHive = _hiveRepository.findByPraga(idPraga);
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -109,9 +112,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
         culturaId: idCultura,
         pragaId: idPraga,
       );
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -127,9 +128,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
           d.fkIdDefensivo.contains(nome) || 
           (d.nomeDefensivo?.toLowerCase().contains(nome.toLowerCase()) ?? false)
       ).toList();
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -145,9 +144,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
           d.fkIdCultura.contains(nome) || 
           (d.nomeCultura?.toLowerCase().contains(nome.toLowerCase()) ?? false)
       ).toList();
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -163,9 +160,7 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
           d.fkIdPraga.contains(nome) || 
           (d.nomePraga?.toLowerCase().contains(nome.toLowerCase()) ?? false)
       ).toList();
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = await _convertToEntitiesEnhanced(diagnosticosHive);
       
       return Right(entities);
     } catch (e) {
@@ -578,6 +573,32 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
       return Right(combined);
     } catch (e) {
       return Left(CacheFailure('Erro na busca por padrão: ${e.toString()}'));
+    }
+  }
+
+  /// Helper method para converter Hive models para entities com enhancement
+  Future<List<DiagnosticoEntity>> _convertToEntitiesEnhanced(List<DiagnosticoHive> hiveModels) async {
+    if (hiveModels.isEmpty) return [];
+
+    try {
+      // Tenta usar o enhanced service se disponível
+      return await _enhancedService.enrichDiagnosticsBatch(hiveModels);
+    } catch (e) {
+      debugPrint('⚠️ Enhanced conversion failed, falling back to legacy: $e');
+      // Fallback para conversão legacy
+      return hiveModels.map((hive) => DiagnosticoMapper.fromHive(hive)).toList();
+    }
+  }
+
+  /// Helper method para converter um único Hive model para entity com enhancement
+  Future<DiagnosticoEntity> _convertToEntityEnhanced(DiagnosticoHive hiveModel) async {
+    try {
+      // Tenta usar o enhanced service se disponível
+      return await _enhancedService.enrichDiagnostic(hiveModel);
+    } catch (e) {
+      debugPrint('⚠️ Enhanced conversion failed, falling back to legacy: $e');
+      // Fallback para conversão legacy
+      return DiagnosticoMapper.fromHive(hiveModel);
     }
   }
 }

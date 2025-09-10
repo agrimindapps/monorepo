@@ -437,12 +437,6 @@ class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDe
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.agriculture,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: SpacingTokens.sm),
                 Expanded(
                   child: Text(
                     displayName,
@@ -481,18 +475,6 @@ class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDe
                 ),
               ],
             ),
-            // Mostrar informações adicionais da cultura se disponíveis
-            if (_culturaData != null && _culturaData!.idReg.isNotEmpty) ...[
-              const SizedBox(height: SpacingTokens.xs),
-              Text(
-                'ID: ${_culturaData!.idReg}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
           ],
         ),
       ),

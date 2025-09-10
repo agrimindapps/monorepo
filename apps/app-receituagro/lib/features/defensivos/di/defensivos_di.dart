@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import '../data/repositories/defensivos_repository_impl.dart';
 // Domain
 import '../domain/repositories/i_defensivos_repository.dart';
+// Core Repository (legacy fallback)
+import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../domain/usecases/get_defensivos_usecase.dart';
 import '../domain/usecases/get_defensivos_agrupados_usecase.dart';
 import '../domain/usecases/get_defensivos_completos_usecase.dart';
@@ -20,7 +22,7 @@ void configureDefensivosDependencies() {
 
   // Repository
   getIt.registerLazySingleton<IDefensivosRepository>(
-    () => DefensivosRepositoryImpl(getIt()),
+    () => DefensivosRepositoryImpl(getIt<FitossanitarioHiveRepository>()),
   );
 
   // Use Cases - Básicos

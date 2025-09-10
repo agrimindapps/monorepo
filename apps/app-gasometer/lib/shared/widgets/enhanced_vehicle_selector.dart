@@ -43,7 +43,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
       final savedVehicleId = prefs.getString(_selectedVehicleKey);
       debugPrint('🚗 Carregando veículo salvo: $savedVehicleId');
       
-      if (savedVehicleId != null && mounted) {
+      if (mounted) {
         final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
         
         // Aguarda a inicialização do provider se necessário
@@ -52,25 +52,66 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
           await vehiclesProvider.initialize();
         }
         
-        // Verifica se o veículo ainda exists
-        final vehicleExists = vehiclesProvider.vehicles.any((v) => v.id == savedVehicleId);
-        debugPrint('🚗 Veículo existe na lista: $vehicleExists (${vehiclesProvider.vehicles.length} veículos)');
+        // Se há um veículo salvo, verifica se ele ainda existe
+        if (savedVehicleId != null) {
+          final vehicleExists = vehiclesProvider.vehicles.any((v) => v.id == savedVehicleId);
+          debugPrint('🚗 Veículo existe na lista: $vehicleExists (${vehiclesProvider.vehicles.length} veículos)');
+          
+          if (vehicleExists) {
+            setState(() {
+              _currentSelectedVehicleId = savedVehicleId;
+            });
+            widget.onVehicleChanged(savedVehicleId);
+            debugPrint('✅ Veículo restaurado com sucesso: $savedVehicleId');
+            return; // Sai da função se encontrou o veículo salvo
+          } else {
+            // Remove a preferência se o veículo não existe mais
+            await prefs.remove(_selectedVehicleKey);
+            debugPrint('🗑️ Veículo removido das preferências: $savedVehicleId');
+          }
+        }
         
-        if (vehicleExists) {
-          setState(() {
-            _currentSelectedVehicleId = savedVehicleId;
-          });
-          widget.onVehicleChanged(savedVehicleId);
-          debugPrint('✅ Veículo restaurado com sucesso: $savedVehicleId');
-        } else {
-          // Remove a preferência se o veículo não existe mais
-          await prefs.remove(_selectedVehicleKey);
-          debugPrint('🗑️ Veículo removido das preferências: $savedVehicleId');
+        // Auto-seleção: se não há veículo selecionado mas há veículos disponíveis
+        if (_currentSelectedVehicleId == null && vehiclesProvider.vehicles.isNotEmpty) {
+          final vehicleToSelect = _selectBestVehicle(vehiclesProvider.vehicles);
+          if (vehicleToSelect != null) {
+            setState(() {
+              _currentSelectedVehicleId = vehicleToSelect.id;
+            });
+            widget.onVehicleChanged(vehicleToSelect.id);
+            await _saveSelectedVehicle(vehicleToSelect.id);
+            debugPrint('🎯 Auto-seleção realizada: ${vehicleToSelect.brand} ${vehicleToSelect.model} (${vehicleToSelect.id})');
+          }
         }
       }
     } catch (e) {
       debugPrint('❌ Erro ao carregar veículo selecionado: $e');
     }
+  }
+
+  /// Seleciona o melhor veículo disponível para auto-seleção
+  /// Prioriza veículos ativos e ordena por data de criação (mais recente primeiro)
+  VehicleEntity? _selectBestVehicle(List<VehicleEntity> vehicles) {
+    if (vehicles.isEmpty) return null;
+    
+    // Separa veículos ativos e inativos
+    final activeVehicles = vehicles.where((v) => v.isActive).toList();
+    final inactiveVehicles = vehicles.where((v) => !v.isActive).toList();
+    
+    // Ordena por data de criação (mais recente primeiro)
+    activeVehicles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    inactiveVehicles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    // Prioriza veículos ativos, senão pega o primeiro inativo
+    if (activeVehicles.isNotEmpty) {
+      debugPrint('🎯 Selecionando veículo ativo: ${activeVehicles.first.brand} ${activeVehicles.first.model}');
+      return activeVehicles.first;
+    } else if (inactiveVehicles.isNotEmpty) {
+      debugPrint('🎯 Selecionando veículo inativo: ${inactiveVehicles.first.brand} ${inactiveVehicles.first.model}');
+      return inactiveVehicles.first;
+    }
+    
+    return null;
   }
 
   /// Salva o veículo selecionado no SharedPreferences
@@ -121,12 +162,14 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector> {
           return _buildEmptyState(context);
         }
 
-        // Se há apenas um veículo, seleciona automaticamente
-        if (vehiclesProvider.vehicles.length == 1 && _currentSelectedVehicleId == null) {
-          final singleVehicle = vehiclesProvider.vehicles.first;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _onVehicleSelected(singleVehicle.id);
-          });
+        // Auto-seleção quando há veículos disponíveis mas nenhum selecionado
+        if (vehiclesProvider.vehicles.isNotEmpty && _currentSelectedVehicleId == null) {
+          final vehicleToSelect = _selectBestVehicle(vehiclesProvider.vehicles);
+          if (vehicleToSelect != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _onVehicleSelected(vehicleToSelect.id);
+            });
+          }
         }
 
         return _buildDropdown(context, vehiclesProvider);

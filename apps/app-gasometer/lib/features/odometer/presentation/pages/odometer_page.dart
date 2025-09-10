@@ -35,8 +35,7 @@ class _OdometerPageState extends State<OdometerPage> {
   ];
 
   // Get odometers from the provider instead of maintaining local state
-  List<OdometerEntity> get _odometers {
-    final provider = Provider.of<OdometerProvider>(context, listen: false);
+  List<OdometerEntity> _getOdometers(OdometerProvider provider) {
     if (_selectedVehicleId != null) {
       return provider.getOdometersByVehicle(_selectedVehicleId!);
     }
@@ -67,11 +66,12 @@ class _OdometerPageState extends State<OdometerPage> {
       body: SafeArea(
         child: Consumer<OdometerProvider>(
           builder: (context, odometerProvider, child) {
+            final odometers = _getOdometers(odometerProvider);
             return Column(
               children: [
                 _buildHeader(),
-                _buildControls(),
-                Expanded(child: _buildContent()),
+                _buildControls(odometers),
+                Expanded(child: _buildContent(odometers)),
               ],
             );
           },
@@ -147,7 +147,7 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildControls(List<OdometerEntity> odometers) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(8.0),
@@ -164,7 +164,7 @@ class _OdometerPageState extends State<OdometerPage> {
                   });
                 },
               ),
-              if (_selectedVehicleId != null) ...[
+              if (_selectedVehicleId != null && odometers.isNotEmpty) ...[
                 SizedBox(height: GasometerDesignTokens.spacingLg),
                 _buildMonthsBar(),
               ],
@@ -210,13 +210,13 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(List<OdometerEntity> odometers) {
     if (_selectedVehicleId == null) {
       return _buildNoVehicleSelected();
     }
 
     // Se não há registros de odômetro, mostrar empty state
-    if (_odometers.isEmpty) {
+    if (odometers.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -228,11 +228,11 @@ class _OdometerPageState extends State<OdometerPage> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                if (_showStatistics && _odometers.isNotEmpty) ...[
-                  _buildStatisticsCard(),
+                if (_showStatistics && odometers.isNotEmpty) ...[
+                  _buildStatisticsCard(odometers),
                   SizedBox(height: GasometerDesignTokens.spacingLg),
                 ],
-                _buildOdometerList(),
+                _buildOdometerList(odometers),
               ],
             ),
           ),
@@ -252,9 +252,9 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Widget _buildStatisticsCard() {
+  Widget _buildStatisticsCard(List<OdometerEntity> odometers) {
     // Calcular estatísticas reais baseadas nos registros
-    final statistics = _calculateStatistics();
+    final statistics = _calculateStatistics(odometers);
     
     return StandardCard.standard(
       child: Column(
@@ -278,8 +278,8 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Map<String, String> _calculateStatistics() {
-    if (_odometers.isEmpty) {
+  Map<String, String> _calculateStatistics(List<OdometerEntity> odometers) {
+    if (odometers.isEmpty) {
       return {
         'kmInicial': '-',
         'kmFinal': '-', 
@@ -289,7 +289,7 @@ class _OdometerPageState extends State<OdometerPage> {
     }
 
     // Ordenar por data para calcular estatísticas do mês atual
-    final sortedOdometers = List<OdometerEntity>.from(_odometers);
+    final sortedOdometers = List<OdometerEntity>.from(odometers);
     sortedOdometers.sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
 
     // Filtrar registros do mês atual
@@ -361,13 +361,13 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  Widget _buildOdometerList() {
-    if (_odometers.isEmpty) {
+  Widget _buildOdometerList(List<OdometerEntity> odometers) {
+    if (odometers.isEmpty) {
       return _buildEmptyState();
     }
 
     return Column(
-      children: _odometers.map((odometer) => _buildOdometerItem(odometer)).toList(),
+      children: odometers.map((odometer) => _buildOdometerItem(odometer)).toList(),
     );
   }
 

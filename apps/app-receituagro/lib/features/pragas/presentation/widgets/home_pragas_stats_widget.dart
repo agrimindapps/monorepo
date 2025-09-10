@@ -34,7 +34,7 @@ class HomePragasStatsWidget extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: ReceitaAgroSpacing.sm,
+            horizontal: 0,
             vertical: ReceitaAgroSpacing.sm,
           ),
           child: provider.errorMessage != null
@@ -100,8 +100,8 @@ class HomePragasStatsWidget extends StatelessWidget {
   }
 
   Widget _buildVerticalLayout(BuildContext context, double availableWidth) {
-    final buttonWidth = (availableWidth - 32) / 3; // Três botões por linha
-    final cultureButtonWidth = availableWidth - 16; // Botão cultura ocupa linha inteira
+    final buttonWidth = (availableWidth - 16) / 3; // Três botões por linha com espaçamento reduzido
+    final cultureButtonWidth = availableWidth - 8; // Botão cultura ocupa linha inteira
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -118,7 +118,7 @@ class HomePragasStatsWidget extends StatelessWidget {
               onTap: () => _navigateToCategory(context, 'insetos'),
               icon: Icons.bug_report,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
               count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
@@ -127,7 +127,7 @@ class HomePragasStatsWidget extends StatelessWidget {
               onTap: () => _navigateToCategory(context, 'doencas'),
               icon: Icons.coronavirus,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
               count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
@@ -153,8 +153,8 @@ class HomePragasStatsWidget extends StatelessWidget {
   }
 
   Widget _buildGridLayout(BuildContext context, double availableWidth) {
-    final buttonWidth = (availableWidth - 32) / 3; // Três botões por linha
-    final cultureButtonWidth = availableWidth - 16; // Botão cultura ocupa linha inteira
+    final buttonWidth = (availableWidth - 16) / 3; // Três botões por linha com espaçamento reduzido
+    final cultureButtonWidth = availableWidth - 8; // Botão cultura ocupa linha inteira
 
     return Column(
       children: [
@@ -170,7 +170,7 @@ class HomePragasStatsWidget extends StatelessWidget {
               onTap: () => _navigateToCategory(context, 'insetos'),
               icon: Icons.bug_report,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
               count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
@@ -179,7 +179,7 @@ class HomePragasStatsWidget extends StatelessWidget {
               onTap: () => _navigateToCategory(context, 'doencas'),
               icon: Icons.coronavirus,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
               count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
@@ -268,7 +268,7 @@ class HomePragasStatsWidget extends StatelessWidget {
                             color: theme.colorScheme.onPrimary,
                             size: 22,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 2),

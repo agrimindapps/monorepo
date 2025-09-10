@@ -108,12 +108,12 @@ class _HomePragasContent extends StatelessWidget {
               // Grid de estatísticas/categorias
               HomePragasStatsWidget(provider: provider),
               
-              const SizedBox(height: ReceitaAgroSpacing.lg),
+              const SizedBox(height: ReceitaAgroSpacing.sm),
               
               // Seção de sugestões com carrossel
               HomePragasSuggestionsWidget(provider: provider),
               
-              const SizedBox(height: ReceitaAgroSpacing.lg),
+              const SizedBox(height: ReceitaAgroSpacing.sm),
               
               // Seção de últimos acessados
               HomePragasRecentWidget(provider: provider),

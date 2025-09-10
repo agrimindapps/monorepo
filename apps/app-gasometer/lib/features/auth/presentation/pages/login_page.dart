@@ -379,57 +379,62 @@ class _LoginPageState extends State<LoginPage>
   void _handleAuthSuccess() {
     if (!mounted) return;
     
-    final authProvider = context.read<AuthProvider>();
     final controller = context.read<LoginController>();
+    final authProvider = context.read<AuthProvider>();
     
-    // Se há sincronização em progresso, mostrar SimpleSyncLoading
-    if (authProvider.isSyncing) {
-      _showSimpleSyncLoading(authProvider, controller.isSignUpMode);
-    } else {
-      // Navegar para destino apropriado baseado no tipo de autenticação
-      _navigateBasedOnAuthType(controller.isSignUpMode);
+    // 1. Navegação DIRETA para /vehicles (padrão app-plantis)
+    _navigateBasedOnAuthType(controller.isSignUpMode);
+    
+    // 2. SE há sync em progresso, mostra loading NA TELA DESTINO
+    if (authProvider.isSyncInProgress) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _showSimpleSyncLoading(authProvider, context);
+        }
+      });
     }
   }
-  
-  /// Mostra loading simples de sincronização que navega automaticamente
-  void _showSimpleSyncLoading(AuthProvider authProvider, bool isSignUpMode) {
+
+  /// Navegação DIRETA para /vehicles - padrão app-plantis
+  void _navigateBasedOnAuthType(bool isSignUpMode) {
+    if (isSignUpMode) {
+      // Novo usuário - primeiro acesso com flag
+      context.go('/vehicles?first_access=true');
+    } else {
+      // Login normal - ir direto para /vehicles
+      // Sync acontece em background na tela destino
+      context.go('/vehicles');
+    }
+  }
+
+  /// Mostra loading simples de sincronização que navega automaticamente - padrão app-plantis
+  void _showSimpleSyncLoading(AuthProvider authProvider, BuildContext context) {
     SimpleSyncLoading.show(
       context,
-      message: authProvider.syncProgressController?.currentMessage ?? 'Sincronizando dados automotivos...',
+      message: authProvider.syncMessage,
     );
     
     // Navegar quando sync terminar
-    _navigateAfterSync(authProvider, isSignUpMode);
+    _navigateAfterSync(authProvider, context);
   }
   
-  /// Navega para home quando sync terminar
-  void _navigateAfterSync(AuthProvider authProvider, bool isSignUpMode) {
-    late StreamSubscription<void> subscription;
+  /// Navega para vehicles quando sync terminar - padrão app-plantis
+  void _navigateAfterSync(AuthProvider authProvider, BuildContext context) {
+    late StreamSubscription<int> subscription;
     
-    subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
+    subscription = Stream<int>.periodic(const Duration(milliseconds: 500), (count) => count)
         .listen((_) {
-      if (!authProvider.isSyncing) {
+      if (!authProvider.isSyncInProgress) {
         subscription.cancel();
         
         // Pequeno delay para garantir que o loading foi fechado
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            _navigateBasedOnAuthType(isSignUpMode);
+        Future<void>.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && Navigator.canPop(context)) {
+            // Fecha o SimpleSyncLoading se ainda estiver aberto
+            Navigator.of(context).pop();
           }
         });
       }
     });
-  }
-
-  /// Navega para destino apropriado baseado no tipo de autenticação
-  void _navigateBasedOnAuthType(bool isSignUpMode) {
-    if (isSignUpMode) {
-      // Novo usuário - primeiro acesso
-      // Navegar para tela de boas-vindas ou setup inicial
-      context.go('/vehicles?first_access=true');
-    } else {
-      // Login normal - voltar para home
-      context.go('/');
-    }
   }
 }

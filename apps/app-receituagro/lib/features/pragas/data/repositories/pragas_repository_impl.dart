@@ -52,22 +52,53 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<List<PragaEntity>> searchByName(String searchTerm) async {
     try {
-      if (searchTerm.isEmpty) return [];
+      if (searchTerm.trim().isEmpty) return [];
 
       // Usa método assíncrono para aguardar box estar aberto
       final allPragas = await _hiveRepository.getAllAsync();
-      final term = searchTerm.toLowerCase();
+      final term = searchTerm.trim().toLowerCase();
+      
+      // Performance optimization: use more efficient filtering
+      final filteredPragas = <PragasHive>[];
+      
+      for (final praga in allPragas) {
+        final nomeComumLower = praga.nomeComum.toLowerCase();
+        final nomeCientificoLower = praga.nomeCientifico.toLowerCase();
+        
+        // Case-insensitive search with multiple criteria
+        if (nomeComumLower.contains(term) || 
+            nomeCientificoLower.contains(term) ||
+            // Also search in alternative names if available
+            (praga.nomeComum.contains(';') && 
+             praga.nomeComum.toLowerCase().split(';').any((name) => 
+               name.trim().toLowerCase().contains(term)))) {
+          filteredPragas.add(praga);
+        }
+      }
+      
+      // Convert to entities and sort by relevance
+      final entities = filteredPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      
+      // Sort by relevance: exact matches first, then startsWith, then contains
+      entities.sort((a, b) {
+        final aNameLower = a.nomeComum.toLowerCase();
+        final bNameLower = b.nomeComum.toLowerCase();
+        
+        // Exact match priority
+        if (aNameLower == term && bNameLower != term) return -1;
+        if (bNameLower == term && aNameLower != term) return 1;
+        
+        // StartsWith priority
+        final aStartsWith = aNameLower.startsWith(term);
+        final bStartsWith = bNameLower.startsWith(term);
+        if (aStartsWith && !bStartsWith) return -1;
+        if (bStartsWith && !aStartsWith) return 1;
+        
+        // Alphabetical order for same relevance
+        return a.nomeComum.compareTo(b.nomeComum);
+      });
 
-      final filteredPragas =
-          allPragas
-              .where(
-                (praga) =>
-                    praga.nomeComum.toLowerCase().contains(term) ||
-                    praga.nomeCientifico.toLowerCase().contains(term),
-              )
-              .toList();
-
-      return filteredPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      return entities;
     } catch (e) {
       throw PragasRepositoryException('Erro ao buscar pragas por nome: $e');
     }

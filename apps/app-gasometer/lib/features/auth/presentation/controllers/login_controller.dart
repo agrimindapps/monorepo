@@ -63,9 +63,8 @@ class LoginController extends ChangeNotifier {
   bool get isAuthLoading => _authProvider.isLoading;
   String? get authError => _authProvider.errorMessage;
   
-  // Estado da sincronização
+  // Estado da sincronização simplificado
   bool get isSyncing => _authProvider.isSyncing;
-  dynamic get syncProgressController => _authProvider.syncProgressController;
 
   @override
   void dispose() {
@@ -209,40 +208,35 @@ class LoginController extends ChangeNotifier {
     }
   }
 
-  /// Login com email e senha com sincronização automática (novo método)
-  Future<bool> signInWithEmailAndSync({bool showSyncOverlay = true}) async {
+  /// Login com email e senha com sincronização automática simplificado - padrão app-plantis
+  Future<void> signInWithEmailAndSync() async {
     if (kDebugMode) {
-      print('🔄 LoginController: Iniciando login com sincronização automática (showSyncOverlay: $showSyncOverlay)');
+      print('🔄 LoginController: Iniciando login com sincronização simplificada');
     }
     
-    if (!_validateLoginForm()) return false;
+    if (!_validateLoginForm()) return;
 
     _setLoading(true);
     _clearError();
 
     try {
-      final success = await _authProvider.loginAndSync(
+      await _authProvider.loginAndSync(
         _emailController.text.trim(),
         _passwordController.text,
-        showSyncOverlay: showSyncOverlay,
       );
 
-      if (success && _authProvider.isAuthenticated) {
+      if (_authProvider.isAuthenticated) {
         await _saveFormData();
         await _analytics.logUserAction('login_with_sync_success', parameters: {
-          'method': 'email_with_sync',
+          'method': 'email_with_sync_simplified',
           'remember_me': _rememberMe.toString(),
-          'show_overlay': showSyncOverlay.toString(),
         });
       } else if (_authProvider.errorMessage != null) {
         _errorMessage = _authProvider.errorMessage;
         await _analytics.logUserAction('login_with_sync_failed', parameters: {
           'error': _authProvider.errorMessage ?? 'unknown',
-          'show_overlay': showSyncOverlay.toString(),
         });
       }
-
-      return success;
     } catch (e) {
       _errorMessage = 'Erro inesperado durante o login com sincronização';
       await _analytics.recordError(
@@ -251,7 +245,6 @@ class LoginController extends ChangeNotifier {
         reason: 'Login with sync error',
         customKeys: {'action': 'signInWithEmailAndSync'},
       );
-      return false;
     } finally {
       _setLoading(false);
     }
@@ -556,17 +549,9 @@ class LoginController extends ChangeNotifier {
     }
   }
   
-  /// Limpa o controlador de progresso de sincronização
-  void clearSyncProgress() {
-    _authProvider.clearSyncProgress();
+  /// Para sincronização em andamento
+  void stopSync() {
+    _authProvider.stopSync();
+    _analytics.logUserAction('sync_stopped_by_user');
   }
-  
-  /// Cancela a sincronização em andamento (se possível)
-  void cancelSync() {
-    _authProvider.clearSyncProgress();
-    _analytics.logUserAction('sync_cancelled_by_user');
-  }
-  
-  /// Verifica se há sincronização em andamento
-  bool get hasSyncInProgress => _authProvider.syncProgressController != null;
 }

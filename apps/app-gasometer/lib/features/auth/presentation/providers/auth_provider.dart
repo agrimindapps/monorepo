@@ -8,7 +8,6 @@ import '../../../../core/interfaces/i_sync_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
-import '../../../../shared/widgets/sync/sync_progress_overlay.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user.dart';
@@ -44,10 +43,10 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isInitialized = false;
   bool _isPremium = false;
-  StreamSubscription? _authStateSubscription;
+  StreamSubscription<void>? _authStateSubscription;
   
-  // Sync Progress Controller para gerenciar o overlay
-  SyncProgressController? _syncProgressController;
+  // Flags de sincronização simplificadas
+  bool _isSyncing = false;
   
   AuthProvider({
     required GetCurrentUser getCurrentUser,
@@ -92,9 +91,10 @@ class AuthProvider extends ChangeNotifier {
   String? get userEmail => _currentUser?.email;
   String get userId => _currentUser?.id ?? '';
   
-  // Getters para sync progress
-  SyncProgressController? get syncProgressController => _syncProgressController;
-  bool get isSyncing => _syncProgressController?.currentState == SyncProgressState.syncing;
+  // Getters para sync progress simplificados
+  bool get isSyncing => _isSyncing;
+  bool get isSyncInProgress => _isSyncing; // Alias para compatibilidade com app-plantis
+  String get syncMessage => 'Sincronizando dados automotivos...';
   
   /// Obtém informações sobre o rate limiting de login
   Future<AuthRateLimitInfo> getRateLimitInfo() => _rateLimiter.getRateLimitInfo();
@@ -675,80 +675,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
   
-  /// Login com sincronização automática específica do Gasometer
-  Future<bool> loginAndSync(String email, String password, {bool showSyncOverlay = true}) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-    
+  /// Login com sincronização automática simplificada - padrão app-plantis
+  Future<void> loginAndSync(String email, String password) async {
     try {
-      // 1. Verificar rate limiting
-      final canAttempt = await _rateLimiter.canAttemptLogin();
-      if (!canAttempt) {
-        final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
-        _errorMessage = rateLimitInfo.lockoutMessage;
-        _isLoading = false;
-        notifyListeners();
-        return false;
+      // 1. Fazer login primeiro (reutilizar método existente)
+      await login(email, password);
+      
+      // 2. Se login falhou, não continua com sync
+      if (!isAuthenticated || _errorMessage != null) {
+        return;
       }
       
-      // 2. Fazer login primeiro
-      final loginResult = await _signInWithEmail(SignInWithEmailParams(
-        email: email,
-        password: password,
-      ));
-      
-      bool loginSuccess = false;
-      await loginResult.fold(
-        (failure) async {
-          await _rateLimiter.recordFailedAttempt();
-          final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
-          
-          String errorMsg = _mapFailureToMessage(failure);
-          if (!rateLimitInfo.canAttemptLogin) {
-            errorMsg = rateLimitInfo.lockoutMessage;
-          } else if (rateLimitInfo.warningMessage.isNotEmpty) {
-            errorMsg += '\n\n${rateLimitInfo.warningMessage}';
-          }
-          
-          _errorMessage = errorMsg;
-          
-          await _analytics.logUserAction('login_failed', parameters: {
-            'method': 'email_with_sync',
-            'failure_type': failure.runtimeType.toString(),
-          });
-        },
-        (user) async {
-          await _rateLimiter.recordSuccessfulAttempt();
-          _currentUser = user;
-          loginSuccess = true;
-          
-          await _analytics.logLogin('email');
-          await _analytics.logUserAction('login_success', parameters: {
-            'method': 'email_with_sync',
-          });
-        },
-      );
-      
-      if (!loginSuccess) {
-        _isLoading = false;
-        notifyListeners();
-        return false;
+      // 3. Iniciar sincronização em background (não bloqueia navegação)
+      if (!isAnonymous) {
+        _performBackgroundSync();
       }
-      
-      // 3. Inicializar controlador de progresso se necessário
-      if (showSyncOverlay) {
-        _initializeSyncProgressController();
-      }
-      
-      // 4. Executar sincronização dos dados do Gasometer
-      final syncSuccess = await _performGasometerSync(showProgress: showSyncOverlay);
-      
-      _isLoading = false;
-      notifyListeners();
-      
-      return syncSuccess;
-      
     } catch (e) {
       _errorMessage = 'Erro interno no login com sincronização. Tente novamente.';
       _isLoading = false;
@@ -759,109 +700,68 @@ class AuthProvider extends ChangeNotifier {
         StackTrace.current,
         reason: 'loginAndSync_error',
       );
-      
-      return false;
     }
   }
   
-  /// Inicializa o controlador de progresso de sincronização
-  void _initializeSyncProgressController() {
-    _syncProgressController?.dispose();
-    _syncProgressController = SyncProgressController();
-    _syncProgressController!.initializeGasometerSteps();
-    notifyListeners();
+  /// Executa sincronização em background sem bloquear navegação
+  void _performBackgroundSync() {
+    // Executar em background sem bloquear a UI
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (isAuthenticated && !isAnonymous) {
+        _startBackgroundDataSync();
+      }
+    });
   }
   
-  /// Executa sincronização específica do Gasometer
-  Future<bool> _performGasometerSync({bool showProgress = true}) async {
+  /// Sincronização de dados em background (padrão app-plantis)
+  Future<void> _startBackgroundDataSync() async {
+    if (_isSyncing) return;
+    
+    _isSyncing = true;
+    notifyListeners();
+    
     try {
-      if (showProgress && _syncProgressController != null) {
-        _syncProgressController!.updateState(
-          SyncProgressState.preparing, 
-          message: 'Preparando sincronização dos dados automotivos...'
-        );
+      if (kDebugMode) {
+        debugPrint('🔄 Iniciando sincronização em background...');
       }
       
-      // Sincronizar cada tipo de dados do Gasometer em ordem
-      final steps = [
-        {'id': 'vehicles_data', 'type': 'vehicle', 'message': 'Sincronizando veículos...'},
-        {'id': 'fuel_data', 'type': 'fuel_supply', 'message': 'Sincronizando abastecimentos...'},
-        {'id': 'maintenance_data', 'type': 'maintenance', 'message': 'Sincronizando manutenções...'},
-        {'id': 'expense_data', 'type': 'expense', 'message': 'Sincronizando despesas...'},
-        {'id': 'reports_data', 'type': 'reports', 'message': 'Atualizando relatórios...'},
-      ];
+      // Sincronizar dados do Gasometer de forma simples
+      await _syncGasometerData();
       
-      if (showProgress && _syncProgressController != null) {
-        _syncProgressController!.updateState(
-          SyncProgressState.syncing, 
-          message: 'Sincronizando dados automotivos...'
-        );
-      }
-      
-      for (final step in steps) {
-        try {
-          if (showProgress && _syncProgressController != null) {
-            _syncProgressController!.startStep(step['id']!, message: step['message']);
-          }
-          
-          // Simular sincronização por tipo (em implementação real, usar SyncService específico)
-          await _syncStepData(step['type']!);
-          
-          if (showProgress && _syncProgressController != null) {
-            _syncProgressController!.completeStep(
-              step['id']!, 
-              message: '${step['message']} concluído'
-            );
-          }
-          
-          // Pequeno delay para UX
-          await Future.delayed(const Duration(milliseconds: 200));
-          
-        } catch (e) {
-          if (showProgress && _syncProgressController != null) {
-            _syncProgressController!.errorStep(
-              step['id']!, 
-              message: 'Erro ao sincronizar ${step['type']}'
-            );
-          }
-          
-          await _analytics.recordError(
-            e,
-            StackTrace.current,
-            reason: 'gasometer_sync_step_error',
-            customKeys: {'step': step['type']!},
-          );
-          
-          // Continuar com próximos steps mesmo com erro
-          continue;
-        }
-      }
-      
-      if (showProgress && _syncProgressController != null) {
-        _syncProgressController!.updateState(
-          SyncProgressState.completed, 
-          message: 'Todos os dados automotivos sincronizados!'
-        );
-      }
-      
-      await _analytics.log('gasometer_sync_completed');
-      return true;
+      await _analytics.log('gasometer_background_sync_completed');
       
     } catch (e) {
-      if (showProgress && _syncProgressController != null) {
-        _syncProgressController!.updateState(
-          SyncProgressState.error, 
-          message: 'Erro na sincronização. Alguns dados podem não estar atualizados.'
-        );
+      if (kDebugMode) {
+        debugPrint('❌ Erro na sincronização em background: $e');
       }
       
       await _analytics.recordError(
         e,
         StackTrace.current,
-        reason: 'gasometer_sync_general_error',
+        reason: 'gasometer_background_sync_error',
       );
-      
-      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
+  }
+  
+  /// Sincronizar dados do Gasometer de forma simplificada
+  Future<void> _syncGasometerData() async {
+    final dataTypes = ['vehicle', 'fuel_supply', 'maintenance', 'expense', 'reports'];
+    
+    for (final dataType in dataTypes) {
+      try {
+        await _syncStepData(dataType);
+        // Delay menor para não impactar performance
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('❌ Erro ao sincronizar $dataType: $e');
+        }
+        // Continuar com próximos tipos mesmo com erro
+        continue;
+      }
     }
   }
   
@@ -896,20 +796,18 @@ class AuthProvider extends ChangeNotifier {
     }
     
     // Aguardar sincronização ser processada
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
   }
   
-  /// Limpa o controlador de progresso
-  void clearSyncProgress() {
-    _syncProgressController?.dispose();
-    _syncProgressController = null;
+  /// Para sincronização em andamento
+  void stopSync() {
+    _isSyncing = false;
     notifyListeners();
   }
   
   @override
   void dispose() {
     _authStateSubscription?.cancel();
-    _syncProgressController?.dispose();
     super.dispose();
   }
   

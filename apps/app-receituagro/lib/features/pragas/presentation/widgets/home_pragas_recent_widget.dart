@@ -38,11 +38,11 @@ class HomePragasRecentWidget extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: provider.recentPragas.length,
               separatorBuilder: (context, index) => Divider(
-                height: 0.5,
-                thickness: 0.5,
+                height: 1,
+                thickness: 1.2,
                 indent: 64, // Alinhado com o texto (ícone + espaço reduzido)
                 endIndent: 8,
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
               ),
               itemBuilder: (context, index) {
                 final praga = provider.recentPragas[index];

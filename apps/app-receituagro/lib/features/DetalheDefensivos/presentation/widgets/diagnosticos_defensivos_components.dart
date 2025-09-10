@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/models/cultura_hive.dart';
+import '../../../../core/models/pragas_hive.dart';
+import '../../../../core/repositories/cultura_hive_repository.dart';
+import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
 import '../../detalhe_defensivo_page.dart' as defensivo_page;
 import '../providers/diagnosticos_provider_legacy.dart';
@@ -316,71 +321,178 @@ class DiagnosticoDefensivoEmptyWidget extends StatelessWidget {
 // SEÇÃO DE CULTURA
 // ============================================================================
 
-/// Widget para seção de cultura com contador de diagnósticos
-class DiagnosticoDefensivoCultureSectionWidget extends StatelessWidget {
+/// Widget para seção de cultura com contador de diagnósticos e dados detalhados
+class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
   final String cultura;
   final int diagnosticCount;
+  /// Lista de diagnósticos para buscar dados de cultura reais
+  final List<dynamic>? diagnosticos;
 
   const DiagnosticoDefensivoCultureSectionWidget({
     super.key,
     required this.cultura,
     required this.diagnosticCount,
+    this.diagnosticos,
   });
+
+  @override
+  State<DiagnosticoDefensivoCultureSectionWidget> createState() => _DiagnosticoDefensivoCultureSectionWidgetState();
+}
+
+class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDefensivoCultureSectionWidget> {
+  CulturaHive? _culturaData;
+  bool _isLoadingCultura = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCulturaData();
+  }
+
+  Future<void> _loadCulturaData() async {
+    if (widget.cultura == 'Não especificado' || widget.diagnosticos == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingCultura = true;
+    });
+
+    try {
+      final culturaRepository = sl<CulturaHiveRepository>();
+      
+      // Tenta buscar pelos diagnósticos primeiro (usando idCultura)
+      for (final diagnostic in widget.diagnosticos!) {
+        final idCultura = _getProperty(diagnostic, 'idCultura');
+        if (idCultura != null) {
+          final culturaData = culturaRepository.getById(idCultura);
+          if (culturaData != null && culturaData.cultura.toLowerCase() == widget.cultura.toLowerCase()) {
+            if (mounted) {
+              setState(() {
+                _culturaData = culturaData;
+                _isLoadingCultura = false;
+              });
+            }
+            return;
+          }
+        }
+      }
+      
+      // Se não encontrou, tenta buscar por nome
+      final culturaData = culturaRepository.findByName(widget.cultura);
+      if (mounted) {
+        setState(() {
+          _culturaData = culturaData;
+          _isLoadingCultura = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingCultura = false;
+        });
+      }
+    }
+  }
+
+  /// Helper para extrair propriedades
+  String? _getProperty(dynamic obj, String property) {
+    try {
+      if (obj is Map<String, dynamic>) {
+        return obj[property]?.toString();
+      } else {
+        switch (property) {
+          case 'idCultura':
+            return obj.idCultura?.toString();
+          default:
+            return null;
+        }
+      }
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final displayName = widget.cultura;
     
     return RepaintBoundary(
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.lg,
-          vertical: SpacingTokens.sm,
+          vertical: SpacingTokens.md,
         ),
         margin: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
         decoration: BoxDecoration(
           color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.eco,
-              color: theme.colorScheme.primary,
-              size: 20,
-            ),
-            const SizedBox(width: SpacingTokens.sm),
-            Expanded(
-              child: Text(
-                cultura,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
+            Row(
+              children: [
+                Icon(
+                  Icons.agriculture,
+                  color: theme.colorScheme.primary,
+                  size: 20,
                 ),
-              ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Text(
+                    displayName,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                if (_isLoadingCultura) ...[
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ],
+                const SizedBox(width: SpacingTokens.sm),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                    vertical: SpacingTokens.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${widget.diagnosticCount}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.sm,
-                vertical: SpacingTokens.xs,
-              ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$diagnosticCount',
+            // Mostrar informações adicionais da cultura se disponíveis
+            if (_culturaData != null && _culturaData!.idReg.isNotEmpty) ...[
+              const SizedBox(height: SpacingTokens.xs),
+              Text(
+                'ID: ${_culturaData!.idReg}',
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -396,10 +508,11 @@ class DiagnosticoDefensivoCultureSectionWidget extends StatelessWidget {
 /// 
 /// Responsabilidade única: exibir dados de um diagnóstico específico
 /// - Layout consistente com card design
-/// - Informações principais visíveis (nome, ingrediente ativo, dosagem)
+/// - Informações principais visíveis (nome comum, nome científico, dosagem)
+/// - Avatar com imagem da praga baseada no nome científico
 /// - Ação de tap configurável
 /// - Performance otimizada com RepaintBoundary
-class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
+class DiagnosticoDefensivoListItemWidget extends StatefulWidget {
   final dynamic diagnostico;
   final VoidCallback onTap;
 
@@ -410,17 +523,121 @@ class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
   });
 
   @override
+  State<DiagnosticoDefensivoListItemWidget> createState() => _DiagnosticoDefensivoListItemWidgetState();
+}
+
+class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensivoListItemWidget> {
+  PragasHive? _pragaData;
+  bool _isLoadingPraga = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPragaData();
+  }
+
+  Future<void> _loadPragaData() async {
+    try {
+      final pragasRepository = sl<PragasHiveRepository>();
+      
+      // Debug completo do diagnóstico
+      print('🔬 === DEBUG DIAGNÓSTICO COMPLETO ===');
+      print('📋 Tipo do objeto: ${widget.diagnostico.runtimeType}');
+      
+      if (widget.diagnostico is Map<String, dynamic>) {
+        final map = widget.diagnostico as Map<String, dynamic>;
+        print('🗝️ Chaves disponíveis: ${map.keys.toList()}');
+        print('📊 Valores: ${map}');
+      } else {
+        print('🔧 Propriedades do objeto:');
+        try {
+          final props = [
+            'idPraga', 'fkIdPraga', 'idDefensivo', 'nomeDefensivo', 
+            'nomePraga', 'idCultura', 'fkIdCultura', 'nomeCultura'
+          ];
+          for (final prop in props) {
+            final value = _getProperty(prop);
+            print('  • $prop: $value');
+          }
+        } catch (e) {
+          print('  ❌ Erro ao acessar propriedades: $e');
+        }
+      }
+      
+      final idPraga = _getProperty('idPraga');
+      print('🎯 idPraga extraído: "$idPraga" (tipo: ${idPraga.runtimeType})');
+      
+      // Debug do repositório de pragas
+      print('📦 === DEBUG REPOSITÓRIO PRAGAS ===');
+      final todasPragas = pragasRepository.getAll();
+      print('📊 Total de pragas na box: ${todasPragas.length}');
+      
+      if (todasPragas.isNotEmpty) {
+        print('🔍 Primeiras 3 pragas como exemplo:');
+        for (int i = 0; i < 3 && i < todasPragas.length; i++) {
+          final p = todasPragas[i];
+          print('  ${i + 1}. ID: "${p.idReg}" | Nome: "${p.nomeComum}" | Científico: "${p.nomeCientifico}"');
+        }
+        
+        // Verifica se existe uma praga com o idPraga exato
+        if (idPraga != null) {
+          final pragaExata = todasPragas.where((p) => p.idReg == idPraga).toList();
+          print('🎯 Pragas com ID "$idPraga": ${pragaExata.length}');
+          if (pragaExata.isNotEmpty) {
+            print('✅ Praga encontrada: "${pragaExata.first.nomeComum}"');
+          } else {
+            print('❌ Nenhuma praga encontrada com ID "$idPraga"');
+            // Procura IDs similares
+            final similares = todasPragas.where((p) => p.idReg.contains(idPraga)).toList();
+            print('🔍 IDs similares ($similares.length): ${similares.map((p) => '"${p.idReg}"').take(5).join(", ")}');
+          }
+        }
+      }
+      
+      if (idPraga != null) {
+        final praga = pragasRepository.getById(idPraga);
+        print('🔍 Resultado getById("$idPraga"): ${praga != null ? '"${praga.nomeComum}"' : 'null'}');
+        
+        if (mounted) {
+          setState(() {
+            _pragaData = praga;
+            _isLoadingPraga = false;
+          });
+        }
+      } else {
+        print('⚠️ idPraga é null - não há o que buscar');
+        if (mounted) {
+          setState(() {
+            _isLoadingPraga = false;
+          });
+        }
+      }
+      
+      print('🏁 === FIM DEBUG ===');
+      
+    } catch (e, stackTrace) {
+      print('❌ Erro ao carregar dados da praga: $e');
+      print('📚 Stack trace: $stackTrace');
+      if (mounted) {
+        setState(() {
+          _isLoadingPraga = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
           padding: const EdgeInsets.all(SpacingTokens.md),
           decoration: _buildCardDecoration(context),
           child: Row(
             children: [
-              _buildIcon(context),
+              _buildAvatar(context),
               const SizedBox(width: SpacingTokens.lg),
               Expanded(
                 child: _buildContent(context),
@@ -451,9 +668,80 @@ class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
     );
   }
 
-  /// Ícone representativo do diagnóstico
-  Widget _buildIcon(BuildContext context) {
+  /// Avatar com imagem da praga baseada no nome científico
+  Widget _buildAvatar(BuildContext context) {
     final theme = Theme.of(context);
+    
+    if (_isLoadingPraga) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+    
+    if (_pragaData?.nomeCientifico != null) {
+      // Gera URL da imagem baseada no nome científico
+      final nomeCientificoFormatted = _pragaData!.nomeCientifico
+          .toLowerCase()
+          .replaceAll(' ', '_')
+          .replaceAll(RegExp(r'[^a-z_]'), '');
+      final imageUrl = 'https://example.com/images/$nomeCientificoFormatted.jpg';
+      
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.3),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            imageUrl,
+            width: 48,
+            height: 48,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.bug_report,
+                color: theme.colorScheme.primary,
+                size: 24,
+              );
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
     
     return Container(
       width: 48,
@@ -463,7 +751,7 @@ class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
-        Icons.agriculture,
+        Icons.bug_report,
         color: theme.colorScheme.onPrimary,
         size: 24,
       ),
@@ -474,67 +762,63 @@ class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
     
-    // Extração de propriedades com fallbacks para diferentes tipos de modelo
-    final nome = _getProperty('nomeDefensivo', 'nome') ?? 'Diagnóstico não identificado';
-    final ingredienteAtivo = _getProperty('ingredienteAtivo') ?? 'Ingrediente ativo não especificado';
-    final cultura = _getProperty('nomeCultura', 'cultura') ?? 'Cultura não especificada';
-    final praga = _getProperty('nomePraga', 'grupo') ?? '';
-    final dosagem = _getProperty('dosagem') ?? '';
+    // Dados da praga com formatação específica
+    String nomeComumPraga = 'Praga não identificada';
+    String nomeCientificoPraga = '';
+    
+    if (_pragaData != null) {
+      // Primeira linha: nome comum da praga, se separado por vírgula ou ponto vírgula, apenas o primeiro valor
+      final nomeComumCompleto = _pragaData!.nomeComum;
+      if (nomeComumCompleto.contains(',')) {
+        nomeComumPraga = nomeComumCompleto.split(',').first.trim();
+      } else if (nomeComumCompleto.contains(';')) {
+        nomeComumPraga = nomeComumCompleto.split(';').first.trim();
+      } else {
+        nomeComumPraga = nomeComumCompleto;
+      }
+      
+      // Segunda linha: Nome científico da praga
+      nomeCientificoPraga = _pragaData!.nomeCientifico;
+    }
+    
+    // Terceira linha: Dosagem
+    final dosagemEntity = _getProperty('dosagem');
+    String dosagemFormatada = '';
+    
+    if (dosagemEntity != null) {
+      dosagemFormatada = dosagemEntity.toString();
+    }
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Primeira linha: nome comum da praga
         Text(
-          nome,
+          nomeComumPraga,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: SpacingTokens.xs),
-        Text(
-          ingredienteAtivo,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                cultura,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            if (praga.isNotEmpty) ...[
-              const SizedBox(width: SpacingTokens.sm),
-              Icon(
-                Icons.bug_report,
-                size: 12,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: SpacingTokens.xs),
-              Text(
-                praga,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
-        ),
-        if (dosagem.isNotEmpty) ...[
+        if (nomeCientificoPraga.isNotEmpty) ...[
           const SizedBox(height: SpacingTokens.xs),
+          // Segunda linha: Nome científico da praga
           Text(
-            'Dosagem: $dosagem',
+            nomeCientificoPraga,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontStyle: FontStyle.italic,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+        if (dosagemFormatada.isNotEmpty) ...[
+          const SizedBox(height: SpacingTokens.xs),
+          // Terceira linha: Dosagem
+          Text(
+            dosagemFormatada,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -560,16 +844,16 @@ class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
   /// Helper para extrair propriedades com fallbacks
   String? _getProperty(String primaryKey, [String? fallbackKey]) {
     try {
-      if (diagnostico is Map<String, dynamic>) {
-        final map = diagnostico as Map<String, dynamic>;
+      if (widget.diagnostico is Map<String, dynamic>) {
+        final map = widget.diagnostico as Map<String, dynamic>;
         return map[primaryKey]?.toString() ?? (fallbackKey != null ? map[fallbackKey]?.toString() : null);
       } else {
         // Tenta acessar como propriedade do objeto
-        final primary = _getObjectProperty(diagnostico, primaryKey);
+        final primary = _getObjectProperty(widget.diagnostico, primaryKey);
         if (primary != null) return primary.toString();
         
         if (fallbackKey != null) {
-          final fallback = _getObjectProperty(diagnostico, fallbackKey);
+          final fallback = _getObjectProperty(widget.diagnostico, fallbackKey);
           if (fallback != null) return fallback.toString();
         }
       }
@@ -583,22 +867,22 @@ class DiagnosticoDefensivoListItemWidget extends StatelessWidget {
   dynamic _getObjectProperty(dynamic obj, String property) {
     try {
       switch (property) {
+        case 'idPraga':
+          return obj.idPraga;
+        case 'idCultura':
+          return obj.idCultura;
         case 'nomeDefensivo':
           return obj.nomeDefensivo;
-        case 'ingredienteAtivo':
-          return obj.ingredienteAtivo;
         case 'nomeCultura':
           return obj.nomeCultura;
-        case 'cultura':
-          return obj.cultura;
         case 'nomePraga':
           return obj.nomePraga;
-        case 'grupo':
-          return obj.grupo;
         case 'dosagem':
           return obj.dosagem;
-        case 'nome':
-          return obj.nome;
+        case 'cultura':
+          return obj.cultura;
+        case 'grupo':
+          return obj.grupo;
         default:
           return null;
       }
@@ -649,82 +933,140 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     final theme = Theme.of(context);
     
     return Dialog(
-      backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
           maxWidth: MediaQuery.of(context).size.width - 32,
+        ),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(context),
+            _buildModernHeader(context),
             Flexible(
-              child: _buildContent(context),
+              child: _buildModernContent(context),
             ),
-            _buildActions(context),
+            _buildModernActions(context),
           ],
         ),
       ),
     );
   }
 
-  /// Cabeçalho do modal com título e botão de fechar
-  Widget _buildHeader(BuildContext context) {
+  /// Cabeçalho moderno baseado no mockup
+  Widget _buildModernHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final nome = _getProperty('nomeDefensivo', 'nome') ?? 'Diagnóstico';
+    final nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? 'Defensivo não identificado';
+    final ingredienteAtivo = _getProperty('ingredienteAtivo') ?? 'Ingrediente ativo não especificado';
     
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
-      child: Row(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              nome,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  nomeDefensivo,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                icon: Icon(
+                  Icons.close,
+                  size: 24,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                splashRadius: 20,
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(
-              Icons.close,
+          const SizedBox(height: 8),
+          Text(
+            'Ingrediente Ativo: $ingredienteAtivo',
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
               color: theme.colorScheme.onSurfaceVariant,
             ),
-            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
     );
   }
 
-  /// Conteúdo principal do modal
-  Widget _buildContent(BuildContext context) {
+  /// Cabeçalho do modal com título e botão de fechar (método legacy)
+  Widget _buildHeader(BuildContext context) {
+    return _buildModernHeader(context);
+  }
+
+  /// Conteúdo moderno com seções organizadas
+  Widget _buildModernContent(BuildContext context) {
+    final dosagem = _getProperty('dosagem')?.toString() ?? '...';
+    final aplicacaoTerrestre = _getProperty('aplicacaoTerrestre') ?? '...';
+    final aplicacaoAerea = _getProperty('aplicacaoAerea') ?? '...';
+    final intervalo = _getProperty('intervaloDias')?.toString() ?? '...';
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoSection('Ingrediente Ativo', _getProperty('ingredienteAtivo') ?? 'Não especificado', context),
-          _buildInfoSection('Cultura', _getProperty('nomeCultura', 'cultura') ?? 'Não especificada', context),
-          _buildInfoSection('Praga', _getProperty('nomePraga', 'grupo') ?? 'Não especificada', context),
-          _buildInfoSection('Dosagem', _getProperty('dosagem') ?? 'Não especificada', context),
-          if (_getProperty('unidadeDosagem') != null)
-            _buildInfoSection('Unidade', _getProperty('unidadeDosagem')!, context),
-          if (_getProperty('modoAplicacao') != null)
-            _buildInfoSection('Modo de Aplicação', _getProperty('modoAplicacao')!, context),
-          if (_getProperty('intervaloDias') != null)
-            _buildInfoSection('Intervalo (dias)', _getProperty('intervaloDias').toString(), context),
-          if (_getProperty('observacoes') != null)
-            _buildInfoSection('Observações', _getProperty('observacoes')!, context),
+          _buildModernInfoItem(
+            context,
+            icon: Icons.medical_services,
+            title: 'Dosagem',
+            value: '$dosagem mg/L',
+            isPremium: true,
+          ),
+          _buildModernInfoItem(
+            context,
+            icon: Icons.agriculture,
+            title: 'Aplicação Terrestre',
+            value: '$aplicacaoTerrestre L/ha',
+            isPremium: true,
+          ),
+          _buildModernInfoItem(
+            context,
+            icon: Icons.flight,
+            title: 'Aplicação Aérea',
+            value: '$aplicacaoAerea L/ha',
+            isPremium: true,
+          ),
+          _buildModernInfoItem(
+            context,
+            icon: Icons.schedule,
+            title: 'Intervalo de Aplicação',
+            value: '$intervalo dias',
+            isPremium: true,
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
+  }
+
+  /// Conteúdo principal do modal (método legacy)
+  Widget _buildContent(BuildContext context) {
+    return _buildModernContent(context);
   }
 
   /// Constrói uma seção de informação
@@ -757,34 +1099,156 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     );
   }
 
-  /// Ações do modal (botões inferiores)
-  Widget _buildActions(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
+  /// Widget para item de informação moderno
+  Widget _buildModernInfoItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+    bool isPremium = false,
+  }) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isPremium) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.shade300),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.diamond,
+                    size: 12,
+                    color: Colors.amber.shade700,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Premium',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amber.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Ações modernas do modal (botões inferiores)
+  Widget _buildModernActions(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
           Expanded(
             child: OutlinedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _navigateToDetailedDiagnostic(context);
+                _navigateToDefensivo(context);
               },
-              child: const Text('Ver Detalhes'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: BorderSide(color: theme.colorScheme.outline),
+              ),
+              child: Text(
+                'Defensivo',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: SpacingTokens.md),
+          const SizedBox(width: 16),
           Expanded(
             child: ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _navigateToDefensivo(context);
+                _navigateToDetailedDiagnostic(context);
               },
-              child: const Text('Ver Defensivo'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Diagnóstico',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Ações do modal (método legacy)
+  Widget _buildActions(BuildContext context) {
+    return _buildModernActions(context);
   }
 
   /// Navega para a página de detalhes do diagnóstico

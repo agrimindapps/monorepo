@@ -246,7 +246,7 @@ class _ResponsiveVehiclesList extends StatelessWidget {
   }
 }
 
-/// Responsive grid that adapts to screen size
+/// Responsive grid that adapts to screen size and uses full width available (1120px)
 class _ResponsiveVehiclesGrid extends StatelessWidget {
   final List<VehicleEntity> vehicles;
   
@@ -259,6 +259,12 @@ class _ResponsiveVehiclesGrid extends StatelessWidget {
         final columns = ResponsiveBreakpoints.getGridColumns(constraints.maxWidth);
         final spacing = AdaptiveSpacing.md(context);
         
+        // Calcular largura efetiva para distribuir uniformemente na largura total
+        final double availableWidth = constraints.maxWidth;
+        final double totalSpacing = (columns - 1) * spacing + (2 * spacing); // spacing lateral
+        final double effectiveWidth = availableWidth - totalSpacing;
+        final double cardWidth = effectiveWidth / columns;
+        
         return GridView.builder(
           padding: EdgeInsets.all(spacing),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -269,9 +275,12 @@ class _ResponsiveVehiclesGrid extends StatelessWidget {
           ),
           itemCount: vehicles.length,
           itemBuilder: (context, index) {
-            return _ResponsiveVehicleCard(
-              key: ValueKey(vehicles[index].id),
-              vehicle: vehicles[index],
+            return SizedBox(
+              width: cardWidth,
+              child: _ResponsiveVehicleCard(
+                key: ValueKey(vehicles[index].id),
+                vehicle: vehicles[index],
+              ),
             );
           },
         );

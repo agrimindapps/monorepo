@@ -49,6 +49,9 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _pragasProvider = GetIt.instance<PragasProvider>();
     _favoritosRepository = GetIt.instance<FavoritosRepositorySimplified>();
 
+    // Inicia o loading imediatamente para evitar flash do empty state
+    _pragasProvider.startInitialLoading();
+    
     // Carrega favoritos iniciais
     _loadFavoritesStatus();
   }

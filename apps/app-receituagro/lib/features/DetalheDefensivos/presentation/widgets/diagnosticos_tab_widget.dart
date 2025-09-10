@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../providers/detalhe_defensivo_provider.dart';
 import '../providers/diagnosticos_provider_legacy.dart';
 import 'diagnosticos_defensivos_components.dart';
@@ -83,25 +85,64 @@ class DiagnosticosTabWidget extends StatelessWidget {
     );
   }
   
-  /// Agrupa diagnósticos por cultura
+  /// Agrupa diagnósticos por cultura usando dados reais do repositório
   Map<String, List<dynamic>> _groupDiagnosticsByCulture(
     List<dynamic> diagnosticos,
   ) {
     final grouped = <String, List<dynamic>>{};
+    final culturaRepository = sl<CulturaHiveRepository>();
     
     for (final diagnostic in diagnosticos) {
-      String cultura;
+      String culturaNome = 'Não especificado';
+      
       try {
-        final nomeCultura = diagnostic.nomeCultura;
-        final culturaProp = diagnostic.cultura;
-        cultura = (nomeCultura?.toString() ?? culturaProp?.toString() ?? 'Não especificado');
+        // Primeiro tenta buscar pela idCultura (estrutura nova)
+        final idCultura = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
+        if (idCultura != null) {
+          final culturaData = culturaRepository.getById(idCultura);
+          if (culturaData != null) {
+            culturaNome = culturaData.cultura;
+          }
+        }
+        
+        // Se não encontrou pela ID, tenta usar nomeCultura como fallback
+        if (culturaNome == 'Não especificado') {
+          final nomeCultura = _getPropertyFromDiagnostic(diagnostic, 'nomeCultura');
+          final culturaProp = _getPropertyFromDiagnostic(diagnostic, 'cultura');
+          culturaNome = nomeCultura ?? culturaProp ?? 'Não especificado';
+        }
       } catch (e) {
-        cultura = 'Não especificado';
+        // Em caso de erro, mantém o valor padrão
+        culturaNome = 'Não especificado';
       }
-      grouped.putIfAbsent(cultura, () => []).add(diagnostic);
+      
+      grouped.putIfAbsent(culturaNome, () => []).add(diagnostic);
     }
     
     return grouped;
+  }
+  
+  /// Helper para extrair propriedades de um diagnóstico
+  String? _getPropertyFromDiagnostic(dynamic diagnostic, String property) {
+    try {
+      if (diagnostic is Map<String, dynamic>) {
+        return diagnostic[property]?.toString();
+      } else {
+        // Tenta acessar como propriedade do objeto
+        switch (property) {
+          case 'idCultura':
+            return diagnostic.idCultura?.toString();
+          case 'nomeCultura':
+            return diagnostic.nomeCultura?.toString();
+          case 'cultura':
+            return diagnostic.cultura?.toString();
+          default:
+            return null;
+        }
+      }
+    } catch (e) {
+      return null;
+    }
   }
   
   /// Constrói widgets agrupados por cultura
@@ -116,6 +157,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
         DiagnosticoDefensivoCultureSectionWidget(
           cultura: cultura,
           diagnosticCount: diagnostics.length,
+          diagnosticos: diagnostics,
         ),
       );
       widgets.add(SpacingTokens.gapLG);

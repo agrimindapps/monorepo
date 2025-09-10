@@ -195,7 +195,7 @@ class ContentListItemWidget extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
@@ -205,7 +205,7 @@ class ContentListItemWidget extends StatelessWidget {
                       fontSize: 13,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (category != null && category!.isNotEmpty) ...[

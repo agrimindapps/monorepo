@@ -25,68 +25,67 @@ import '../../shared/config/environment_config.dart';
 final GetIt getIt = GetIt.instance;
 
 /// Dependency Injection Container for Core Package
-/// 
+///
 /// Manages service registration and dependency resolution for all core services.
 /// Services are registered in dependency order to ensure proper initialization.
 class InjectionContainer {
   /// Initializes all core services and their dependencies
-  /// 
+  ///
   /// Must be called before using any services from the core package.
   /// Throws exception if initialization fails.
   static Future<void> init() async {
     try {
       // Initialize Firebase first
       await Firebase.initializeApp();
-      
+
       // Register Core Services (Order matters due to dependencies)
-      
+
       // 1. BoxRegistryService - Required by HiveStorageService
       getIt.registerLazySingleton<IBoxRegistryService>(
         () => BoxRegistryService(),
       );
-      
+
       // 2. Firebase Services
-      getIt.registerLazySingleton<IAuthRepository>(
-        () => FirebaseAuthService(),
-      );
-      
+      getIt.registerLazySingleton<IAuthRepository>(() => FirebaseAuthService());
+
       getIt.registerLazySingleton<ICrashlyticsRepository>(
         () => FirebaseCrashlyticsService(),
       );
-      
+
       getIt.registerLazySingleton<IStorageRepository>(
         () => FirebaseStorageService(),
       );
-      
+
       // 3. Analytics - usa Mock em debug, Firebase em produção
       getIt.registerLazySingleton<IAnalyticsRepository>(
-        () => EnvironmentConfig.isDebugMode 
-          ? MockAnalyticsService()
-          : FirebaseAnalyticsService(),
+        () =>
+            EnvironmentConfig.isDebugMode
+                ? MockAnalyticsService()
+                : FirebaseAnalyticsService(),
       );
-      
+
       // 4. Hive Storage - Depends on IBoxRegistryService
       getIt.registerLazySingleton<ILocalStorageRepository>(
         () => HiveStorageService(getIt<IBoxRegistryService>()),
       );
-      
+
       // 5. RevenueCat para gerenciar assinaturas
       getIt.registerLazySingleton<ISubscriptionRepository>(
         () => RevenueCatService(),
       );
-      
+
       // Register Use Cases with explicit types
       getIt.registerLazySingleton<LoginUseCase>(
         () => LoginUseCase(
-          getIt<IAuthRepository>(), 
-          getIt<IAnalyticsRepository>()
+          getIt<IAuthRepository>(),
+          getIt<IAnalyticsRepository>(),
         ),
       );
-      
+
       getIt.registerLazySingleton<LogoutUseCase>(
         () => LogoutUseCase(
-          getIt<IAuthRepository>(), 
-          getIt<IAnalyticsRepository>()
+          getIt<IAuthRepository>(),
+          getIt<IAnalyticsRepository>(),
         ),
       );
     } catch (e) {
@@ -96,9 +95,9 @@ class InjectionContainer {
       rethrow;
     }
   }
-  
+
   /// Resets all registered services
-  /// 
+  ///
   /// Used for testing or when reinitializing the container
   static void reset() {
     getIt.reset();

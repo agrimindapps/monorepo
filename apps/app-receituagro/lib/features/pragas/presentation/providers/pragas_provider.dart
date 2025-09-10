@@ -135,10 +135,18 @@ class PragasProvider extends ChangeNotifier {
 
   /// Pesquisa pragas por nome
   Future<void> searchPragas(String searchTerm) async {
+    final trimmedTerm = searchTerm.trim();
+    
+    // Early return for empty search
+    if (trimmedTerm.isEmpty) {
+      _pragas = [];
+      notifyListeners();
+      return;
+    }
+    
     await _executeUseCase(() async {
-      _pragas = await _searchPragasUseCase.execute(searchTerm);
-      // Ordena resultados da busca alfabeticamente
-      _pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+      _pragas = await _searchPragasUseCase.execute(trimmedTerm);
+      // Results are already sorted by relevance in repository
     });
   }
 
@@ -238,9 +246,10 @@ class PragasProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Limpa resultados de pesquisa
-  void clearSearch() {
+  /// Limpa resultados de pesquisa e recarrega dados iniciais
+  Future<void> clearSearch() async {
     _pragas.clear();
+    _clearError();
     notifyListeners();
   }
 
@@ -248,6 +257,11 @@ class PragasProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Inicia estado de loading (para evitar flash de empty state)
+  void startInitialLoading() {
+    _setLoading(true);
   }
 
   /// Registra acesso a uma praga

@@ -384,6 +384,7 @@ class _ErrorState extends StatelessWidget {
 
 
 /// ✅ PERFORMANCE FIX: Grid com CustomScrollView e SliverGrid para virtualização
+/// ✅ LAYOUT FIX: Ocupa toda a largura disponível (1120px) distribuindo cards uniformemente
 class _OptimizedVehiclesGrid extends StatelessWidget {
   final List<VehicleEntity> vehicles;
   final void Function(BuildContext, VehicleEntity) onEditVehicle;
@@ -401,32 +402,49 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
       builder: (context, constraints) {
         // Determinar número de colunas baseado na largura disponível
         int crossAxisCount = 1;
-        double cardWidth = 300;
+        final double availableWidth = constraints.maxWidth;
+        const double spacing = 16.0;
+        const double horizontalPadding = 16.0;
         
-        if (constraints.maxWidth > 1200) {
-          crossAxisCount = (constraints.maxWidth / cardWidth).floor().clamp(2, 4);
-        } else if (constraints.maxWidth > 800) {
+        // Calcular colunas baseado na largura disponível
+        if (availableWidth > 1200) {
+          crossAxisCount = 4;
+        } else if (availableWidth > 800) {
+          crossAxisCount = 3;
+        } else if (availableWidth > 500) {
           crossAxisCount = 2;
         }
         
+        // Calcular largura efetiva dos cards para ocupar toda a largura
+        final double totalSpacing = (crossAxisCount - 1) * spacing + (2 * horizontalPadding);
+        final double effectiveWidth = availableWidth - totalSpacing;
+        final double cardWidth = effectiveWidth / crossAxisCount;
+        
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: 8.0,
+          ),
           child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: crossAxisCount * cardWidth + (crossAxisCount - 1) * 16),
+              // Remove constraint fixa, permitindo uso completo da largura disponível
+              constraints: BoxConstraints(maxWidth: availableWidth),
               child: AlignedGridView.count(
                 crossAxisCount: crossAxisCount,
-                mainAxisSpacing: 16.0,
-                crossAxisSpacing: 16.0,
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: vehicles.length,
                 itemBuilder: (context, index) {
-                  return VehicleCard(
-                    key: ValueKey(vehicles[index].id),
-                    vehicle: vehicles[index],
-                    onEdit: () => onEditVehicle(context, vehicles[index]),
-                    onDelete: () => onDeleteVehicle(context, vehicles[index]),
+                  return SizedBox(
+                    width: cardWidth,
+                    child: VehicleCard(
+                      key: ValueKey(vehicles[index].id),
+                      vehicle: vehicles[index],
+                      onEdit: () => onEditVehicle(context, vehicles[index]),
+                      onDelete: () => onDeleteVehicle(context, vehicles[index]),
+                    ),
                   );
                 },
               ),

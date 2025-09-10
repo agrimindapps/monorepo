@@ -102,13 +102,13 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
                                 onCategoryTap: (category) =>
                                     _navigateToCategory(context, category),
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: ReceitaAgroSpacing.sm),
                               // Recent access section
                               DefensivosRecentSection(
                                 provider: provider,
                                 onDefensivoTap: _navigateToDefensivoDetails,
                               ),
-                              const SizedBox(height: 32),
+                              const SizedBox(height: ReceitaAgroSpacing.sm),
                               // New items section
                               DefensivosNewItemsSection(
                                 provider: provider,

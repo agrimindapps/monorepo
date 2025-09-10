@@ -291,11 +291,11 @@ class LoginFormWidget extends StatelessWidget {
 
   void _handleLogin(BuildContext context) async {
     if (kDebugMode) {
-      print('🎯 LoginFormWidget: Chamando login com sincronização automática');
+      print('🎯 LoginFormWidget: Chamando login simplificado - padrão app-plantis');
     }
     
     final controller = context.read<LoginController>();
-    await controller.signInWithEmailAndSync(showSyncOverlay: true);
+    await controller.signInWithEmailAndSync();
     
     if (controller.isAuthenticated && onLoginSuccess != null) {
       onLoginSuccess!();

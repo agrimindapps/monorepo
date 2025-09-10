@@ -39,11 +39,11 @@ class DefensivosNewItemsSection extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: provider.newDefensivos.length,
           separatorBuilder: (context, index) => Divider(
-            height: 0.5,
-            thickness: 0.5,
+            height: 1,
+            thickness: 1.2,
             indent: 64, // Aligned with text (icon + reduced space)
             endIndent: 8,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
           ),
           itemBuilder: (context, index) {
             final defensivo = provider.newDefensivos[index];

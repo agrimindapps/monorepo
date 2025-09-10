@@ -86,8 +86,9 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
       return _buildEmptyCarousel(context);
     }
 
-    return SizedBox(
+    return Container(
       height: 280,
+      padding: const EdgeInsets.only(left: 0),
       child: PageView.builder(
         controller: _pageController,
         itemCount: suggestions.length,
@@ -96,16 +97,17 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
         },
         itemBuilder: (context, index) {
           final suggestion = suggestions[index];
-          return _buildCarouselItem(context, suggestion);
+          return _buildCarouselItem(context, suggestion, index);
         },
       ),
     );
   }
 
-  Widget _buildCarouselItem(BuildContext context, Map<String, dynamic> suggestion) {
+  Widget _buildCarouselItem(BuildContext context, Map<String, dynamic> suggestion, int index) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: ReceitaAgroSpacing.xs + 1,
+      margin: EdgeInsets.only(
+        left: index == 0 ? 0 : ReceitaAgroSpacing.horizontalPadding,
+        right: ReceitaAgroSpacing.xs + 1,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),

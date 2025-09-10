@@ -34,7 +34,7 @@ class DefensivosStatsGrid extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: ReceitaAgroSpacing.sm,
+            horizontal: 0,
             vertical: ReceitaAgroSpacing.sm,
           ),
           child: LayoutBuilder(
@@ -61,7 +61,7 @@ class DefensivosStatsGrid extends StatelessWidget {
 
   Widget _buildVerticalLayout(double availableWidth, BuildContext context) {
     final theme = Theme.of(context);
-    final buttonWidth = availableWidth - 16;
+    final buttonWidth = availableWidth;  // Largura total sem padding extra
     final standardColor = theme.colorScheme.primary;
 
     return Column(
@@ -119,8 +119,7 @@ class DefensivosStatsGrid extends StatelessWidget {
     final theme = Theme.of(context);
     final isMediumDevice =
         MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
-    final buttonWidth =
-        isMediumDevice ? (availableWidth - 32) / 2 : (availableWidth - 40) / 2;
+    final buttonWidth = (availableWidth - 6) / 2;  // Apenas o espaço do gap entre botões
     final standardColor = theme.colorScheme.primary;
 
     return Column(
@@ -174,7 +173,7 @@ class DefensivosStatsGrid extends StatelessWidget {
         DefensivosCategoryButton(
           count: provider.getFormattedCount(provider.totalDefensivos),
           title: 'Defensivos',
-          width: isMediumDevice ? availableWidth - 16 : availableWidth * 0.75,
+          width: availableWidth,  // Largura total para o último botão
           onTap: () => onCategoryTap('defensivos'),
           icon: FontAwesomeIcons.sprayCan,
           color: standardColor,

@@ -37,7 +37,7 @@ dependencies:
   # RSS & External Data (será adicionado na Fase 5)
   
   # Utils específicos do app
-  intl: ^0.19.0
+  intl: ^0.20.2
   
   # UI
   cupertino_icons: ^1.0.8

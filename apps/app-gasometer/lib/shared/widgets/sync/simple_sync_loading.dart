@@ -1,32 +1,36 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
 
-/// Loading simples para sincronização que aparece e some automaticamente
-/// Versão do Gasometer adaptada do padrão usado no Plantis
+/// Loading simples para sincronização - versão otimizada seguindo padrão app-plantis
 class SimpleSyncLoading extends StatefulWidget {
   final String message;
+  final Duration? autoHideDuration;
   
   const SimpleSyncLoading({
     super.key,
     this.message = 'Sincronizando dados automotivos...',
+    this.autoHideDuration,
   });
 
   @override
   State<SimpleSyncLoading> createState() => _SimpleSyncLoadingState();
 
-  /// Mostra loading simples que desaparece automaticamente quando sync termina
-  static void show(BuildContext context, {String? message}) {
+  /// Mostra loading simples que desaparece automaticamente
+  static void show(
+    BuildContext context, {
+    String? message,
+    Duration? autoHideDuration = const Duration(seconds: 3),
+  }) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black26,
       builder: (context) => SimpleSyncLoading(
         message: message ?? 'Sincronizando dados automotivos...',
+        autoHideDuration: autoHideDuration,
       ),
     );
   }
@@ -40,55 +44,28 @@ class SimpleSyncLoading extends StatefulWidget {
 }
 
 class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
-  StreamSubscription<void>? _syncSubscription;
+  Timer? _autoHideTimer;
   String _currentMessage = '';
 
   @override
   void initState() {
     super.initState();
     _currentMessage = widget.message;
-    _startListeningToSync();
+    
+    // Auto-hide após duração especificada (padrão app-plantis)
+    if (widget.autoHideDuration != null) {
+      _autoHideTimer = Timer(widget.autoHideDuration!, () {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    _syncSubscription?.cancel();
+    _autoHideTimer?.cancel();
     super.dispose();
-  }
-
-  /// Monitora automaticamente o estado da sincronização do Gasometer
-  void _startListeningToSync() {
-    final authProvider = context.read<AuthProvider>();
-    
-    // Verificar periodicamente se a sincronização terminou
-    _syncSubscription = Stream<void>.periodic(const Duration(milliseconds: 500))
-        .listen((_) {
-      if (!mounted) return;
-      
-      // Atualizar mensagem se mudou (usando o controller de progresso)
-      if (authProvider.syncProgressController != null) {
-        final currentMsg = authProvider.syncProgressController!.currentMessage;
-        if (currentMsg != null && _currentMessage != currentMsg) {
-          setState(() {
-            _currentMessage = currentMsg;
-          });
-        }
-      }
-      
-      // Fechar automaticamente quando sincronização termina
-      if (!authProvider.isSyncing) {
-        _autoClose();
-      }
-    });
-  }
-
-  /// Fecha automaticamente o loading
-  void _autoClose() {
-    _syncSubscription?.cancel();
-    
-    if (mounted && Navigator.canPop(context)) {
-      Navigator.of(context).pop();
-    }
   }
 
   @override
@@ -141,7 +118,7 @@ class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
                 ),
                 const SizedBox(height: 16),
                 
-                // Mensagem dinâmica
+                // Mensagem estática (mais simples)
                 Text(
                   _currentMessage,
                   style: const TextStyle(

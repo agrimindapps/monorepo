@@ -120,6 +120,11 @@ class DefensivosUnificadoProvider extends ChangeNotifier {
   void _aplicarFiltros() {
     var filtrados = List<DefensivoEntity>.from(_defensivos);
     
+    // Filtrar itens com descrição menor que 3 caracteres
+    filtrados = filtrados.where((d) {
+      return d.displayName.length >= 3;
+    }).toList();
+    
     // Filtro por texto
     if (_filtroTexto.isNotEmpty) {
       filtrados = filtrados.where((d) {

@@ -20,6 +20,7 @@ class DefensivosListWidget extends StatelessWidget {
   final Function(DefensivoEntity) onTap;
   final Function(DefensivoEntity)? onSelecaoChanged;
   final VoidCallback onClearFilters;
+  final bool hasActiveSearch;
 
   const DefensivosListWidget({
     super.key,
@@ -29,6 +30,7 @@ class DefensivosListWidget extends StatelessWidget {
     required this.onTap,
     this.onSelecaoChanged,
     required this.onClearFilters,
+    this.hasActiveSearch = false,
   });
 
   @override
@@ -36,6 +38,8 @@ class DefensivosListWidget extends StatelessWidget {
     if (defensivos.isEmpty) {
       return DefensivosEmptyStateWidget(
         onClearFilters: onClearFilters,
+        showClearButton: false,
+        showSuggestions: false,
       );
     }
 

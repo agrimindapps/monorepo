@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import 'diagnostico_mockup_tokens.dart';
 
 /// Widget que replica EXATAMENTE o design dos filtros do mockup IMG_3186.PNG
+/// com melhorias visuais aplicadas baseadas no detalhe de defensivos
 /// 
 /// Layout do mockup analisado:
-/// - Row com 2 campos flexíveis
-/// - Campo esquerdo: "Localizar" com ícone lupa verde
-/// - Campo direito: "Todas" com ícone calendário verde
-/// - Background branco, bordas sutis
-/// - Border radius específico
+/// - Row com 2 campos flexíveis com comportamento responsivo
+/// - Campo esquerdo: "Localizar" com ícone lupa verde e focus behavior
+/// - Campo direito: "Todas" com ícone calendário verde (oculta quando search tem foco)
+/// - Background branco, bordas sutis com tema consciente
+/// - Border radius específico e shadows melhoradas
 /// 
-/// Responsabilidade única: renderizar filtros superiores pixel-perfect
-class FiltersMockupWidget extends StatelessWidget {
+/// Responsabilidade única: renderizar filtros superiores pixel-perfect com UX melhorada
+class FiltersMockupWidget extends StatefulWidget {
   final String searchText;
   final String selectedFilter;
   final ValueChanged<String> onSearchChanged;
@@ -29,32 +30,69 @@ class FiltersMockupWidget extends StatelessWidget {
   });
 
   @override
+  State<FiltersMockupWidget> createState() => _FiltersMockupWidgetState();
+}
+
+class _FiltersMockupWidgetState extends State<FiltersMockupWidget> {
+  final FocusNode _searchFocusNode = FocusNode();
+  bool _isSearchFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchFocusNode.addListener(_onSearchFocusChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.removeListener(_onSearchFocusChanged);
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onSearchFocusChanged() {
+    setState(() {
+      _isSearchFocused = _searchFocusNode.hasFocus;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            // Campo de busca "Localizar"
-            Expanded(
-              flex: 1,
+            // Campo de busca "Localizar" com comportamento responsivo e animação
+            AnimatedContainer(
+              duration: DiagnosticoMockupTokens.focusAnimationDuration,
+              width: _isSearchFocused 
+                ? MediaQuery.of(context).size.width - 64 // Largura total menos padding
+                : (MediaQuery.of(context).size.width - 76) / 2, // Metade da largura menos padding e spacing
               child: _SearchFieldMockup(
-                text: searchText,
-                onChanged: onSearchChanged,
+                text: widget.searchText,
+                onChanged: widget.onSearchChanged,
+                focusNode: _searchFocusNode,
               ),
             ),
             
-            const SizedBox(width: 12), // Espaçamento entre campos
-            
-            // Dropdown "Todas" 
-            Expanded(
-              flex: 1,
-              child: _FilterDropdownMockup(
-                value: selectedFilter,
-                options: filterOptions,
-                onChanged: onFilterChanged,
-              ),
+            // Dropdown "Todas" - oculta quando search tem foco com animação
+            AnimatedContainer(
+              duration: DiagnosticoMockupTokens.focusAnimationDuration,
+              width: _isSearchFocused ? 0 : 12, // Espaçamento animado
+              child: _isSearchFocused ? null : const SizedBox(width: 12),
             ),
+            
+            if (!_isSearchFocused)
+              AnimatedContainer(
+                duration: DiagnosticoMockupTokens.focusAnimationDuration,
+                width: (MediaQuery.of(context).size.width - 76) / 2,
+                child: _FilterDropdownMockup(
+                  value: widget.selectedFilter,
+                  options: widget.filterOptions,
+                  onChanged: widget.onFilterChanged,
+                ),
+              ),
           ],
         ),
       ),
@@ -62,14 +100,16 @@ class FiltersMockupWidget extends StatelessWidget {
   }
 }
 
-/// Campo de busca "Localizar" exatamente como no mockup
+/// Campo de busca "Localizar" exatamente como no mockup com melhorias de UX
 class _SearchFieldMockup extends StatefulWidget {
   final String text;
   final ValueChanged<String> onChanged;
+  final FocusNode focusNode;
 
   const _SearchFieldMockup({
     required this.text,
     required this.onChanged,
+    required this.focusNode,
   });
 
   @override
@@ -115,6 +155,7 @@ class _SearchFieldMockupState extends State<_SearchFieldMockup> {
       ),
       child: TextField(
         controller: _controller,
+        focusNode: widget.focusNode,
         onChanged: widget.onChanged,
         style: DiagnosticoMockupTokens.filterHintStyle.copyWith(
           color: DiagnosticoMockupTokens.textPrimary,

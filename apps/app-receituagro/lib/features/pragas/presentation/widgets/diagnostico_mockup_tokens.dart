@@ -135,13 +135,29 @@ class DiagnosticoMockupTokens {
   // SHADOWS E ELEVAÇÕES
   // ========================================
   
-  /// Shadow sutil dos cards
+  /// Shadow sutil dos cards com melhorias visuais baseadas no detalhe de defensivos
   static const List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: Color(0x0A000000), // 4% opacity black
+      color: Color(0x19000000), // 10% opacity black para melhor profundidade
       offset: Offset(0, 2),
       blurRadius: 8,
+      spreadRadius: 1,
+    ),
+    BoxShadow(
+      color: Color(0x0F000000), // 6% opacity black para sombra secundária
+      offset: Offset(0, 4),
+      blurRadius: 12,
       spreadRadius: 0,
+    ),
+  ];
+
+  /// Shadow para cards com foco
+  static const List<BoxShadow> cardFocusedShadow = [
+    BoxShadow(
+      color: Color(0x1A4CAF50), // Verde com transparência para foco
+      offset: Offset(0, 4),
+      blurRadius: 16,
+      spreadRadius: 2,
     ),
   ];
   
@@ -192,4 +208,44 @@ class DiagnosticoMockupTokens {
   
   /// Duração para feedback visual de tap
   static const Duration tapFeedbackDuration = Duration(milliseconds: 150);
+
+  /// Duração para animações de focus
+  static const Duration focusAnimationDuration = Duration(milliseconds: 250);
+
+  // ========================================
+  // HELPERS THEME-AWARE
+  // ========================================
+
+  /// Retorna shadow adequada baseada no tema do contexto
+  static List<BoxShadow> getCardShadow(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    if (isDark) {
+      return [
+        BoxShadow(
+          color: theme.shadowColor.withAlpha(51), // 20% opacity no tema escuro
+          offset: const Offset(0, 2),
+          blurRadius: 8,
+          spreadRadius: 1,
+        ),
+      ];
+    }
+    
+    return cardShadow;
+  }
+
+  /// Retorna cor de background adequada para cards baseada no tema
+  static Color getCardBackgroundColor(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.cardColor;
+  }
+
+  /// Retorna cor de texto adequada baseada no tema
+  static Color getTextColor(BuildContext context, {bool isSecondary = false}) {
+    final theme = Theme.of(context);
+    return isSecondary 
+      ? theme.textTheme.bodyMedium?.color?.withAlpha(153) ?? textSecondary
+      : theme.textTheme.bodyLarge?.color ?? textPrimary;
+  }
 }

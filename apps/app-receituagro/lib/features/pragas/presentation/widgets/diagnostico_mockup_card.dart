@@ -51,18 +51,18 @@ class DiagnosticoMockupCard extends StatelessWidget {
               ),
               padding: DiagnosticoMockupTokens.cardPadding,
               decoration: BoxDecoration(
-                color: DiagnosticoMockupTokens.cardBackground,
+                color: DiagnosticoMockupTokens.getCardBackgroundColor(context),
                 borderRadius: BorderRadius.circular(
                   DiagnosticoMockupTokens.cardBorderRadius,
                 ),
-                boxShadow: DiagnosticoMockupTokens.cardShadow,
+                boxShadow: DiagnosticoMockupTokens.getCardShadow(context),
               ),
               child: Row(
                 children: [
                   _buildIcon(),
                   const SizedBox(
                       width: DiagnosticoMockupTokens.cardInternalSpacing),
-                  Expanded(child: _buildContent()),
+                  Expanded(child: _buildContent(context)),
                   const SizedBox(
                       width: DiagnosticoMockupTokens.cardInternalSpacing),
                   _buildTrailing(),
@@ -93,7 +93,7 @@ class DiagnosticoMockupCard extends StatelessWidget {
   }
 
   /// Conteúdo principal: nome, ingrediente ativo e dosagem
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -101,7 +101,9 @@ class DiagnosticoMockupCard extends StatelessWidget {
         // Nome do produto - linha 1
         Text(
           diagnostico.nome,
-          style: DiagnosticoMockupTokens.cardProductNameStyle,
+          style: DiagnosticoMockupTokens.cardProductNameStyle.copyWith(
+            color: DiagnosticoMockupTokens.getTextColor(context),
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -110,7 +112,9 @@ class DiagnosticoMockupCard extends StatelessWidget {
         // Ingrediente ativo - linha 2
         Text(
           diagnostico.ingredienteAtivo,
-          style: DiagnosticoMockupTokens.cardIngredientStyle,
+          style: DiagnosticoMockupTokens.cardIngredientStyle.copyWith(
+            color: DiagnosticoMockupTokens.getTextColor(context, isSecondary: true),
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -119,7 +123,9 @@ class DiagnosticoMockupCard extends StatelessWidget {
         // Dosagem - linha 3 (oculta se premium)
         Text(
           _getDosageText(),
-          style: DiagnosticoMockupTokens.cardDosageStyle,
+          style: DiagnosticoMockupTokens.cardDosageStyle.copyWith(
+            color: DiagnosticoMockupTokens.getTextColor(context, isSecondary: true),
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

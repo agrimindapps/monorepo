@@ -5,6 +5,7 @@ import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/models/cultura_hive.dart';
 import '../../../../core/models/pragas_hive.dart';
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
@@ -12,7 +13,7 @@ import '../../detalhe_defensivo_page.dart' as defensivo_page;
 import '../providers/diagnosticos_provider_legacy.dart';
 
 /// Componentes modulares para exibição de diagnósticos em páginas de defensivos
-/// 
+///
 /// Este arquivo contém todos os widgets auxiliares necessários para replicar
 /// a funcionalidade e visual dos diagnósticos da página de pragas, adaptados
 /// para funcionar com defensivos.
@@ -22,39 +23,71 @@ import '../providers/diagnosticos_provider_legacy.dart';
 // ============================================================================
 
 /// Widget responsável pelos filtros de diagnósticos
-/// 
+///
 /// Responsabilidade única: renderizar e gerenciar filtros de pesquisa e cultura
 /// - Campo de busca por texto
 /// - Dropdown de seleção de cultura
 /// - Layout responsivo e design consistente
-class DiagnosticoDefensivoFilterWidget extends StatelessWidget {
+class DiagnosticoDefensivoFilterWidget extends StatefulWidget {
   const DiagnosticoDefensivoFilterWidget({super.key});
+
+  @override
+  State<DiagnosticoDefensivoFilterWidget> createState() =>
+      _DiagnosticoDefensivoFilterWidgetState();
+}
+
+class _DiagnosticoDefensivoFilterWidgetState
+    extends State<DiagnosticoDefensivoFilterWidget> {
+  final FocusNode _searchFocusNode = FocusNode();
+  bool _isSearchFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchFocusNode.addListener(_onSearchFocusChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.removeListener(_onSearchFocusChanged);
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onSearchFocusChanged() {
+    setState(() {
+      _isSearchFocused = _searchFocusNode.hasFocus;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Consumer<DiagnosticosProvider>(
         builder: (context, provider, child) {
-          
           return Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
             child: Row(
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: _isSearchFocused ? 2 : 1,
                   child: _SearchField(
+                    focusNode: _searchFocusNode,
                     onChanged: (query) => provider.setSearchQuery(query),
                   ),
                 ),
-                const SizedBox(width: SpacingTokens.md),
-                Expanded(
-                  flex: 1,
-                  child: _CultureDropdown(
-                    value: provider.selectedCultura ?? 'Todas',
-                    cultures: provider.availableCulturas,
-                    onChanged: (cultura) => provider.setSelectedCultura(cultura),
+                if (!_isSearchFocused) ...[
+                  const SizedBox(width: SpacingTokens.md),
+                  Expanded(
+                    flex: 1,
+                    child: _CultureDropdown(
+                      value: provider.selectedCultura ?? 'Todas',
+                      cultures: provider.availableCulturas,
+                      onChanged: (cultura) =>
+                          provider.setSelectedCultura(cultura),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           );
@@ -62,22 +95,25 @@ class DiagnosticoDefensivoFilterWidget extends StatelessWidget {
       ),
     );
   }
-
 }
 
 /// Campo de busca personalizado
 class _SearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
+  final FocusNode focusNode;
 
-  const _SearchField({required this.onChanged});
+  const _SearchField({
+    required this.onChanged,
+    required this.focusNode,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -86,6 +122,7 @@ class _SearchField extends StatelessWidget {
         ),
       ),
       child: TextField(
+        focusNode: focusNode,
         onChanged: onChanged,
         decoration: const InputDecoration(
           hintText: 'Pesquisar diagnósticos...',
@@ -112,7 +149,7 @@ class _CultureDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.lg),
@@ -136,19 +173,34 @@ class _CultureDropdown extends StatelessWidget {
           Icons.keyboard_arrow_down,
           color: theme.colorScheme.onSurfaceVariant,
         ),
-        items: cultures.map<DropdownMenuItem<String>>((String culture) {
-          return DropdownMenuItem<String>(
-            value: culture,
+        items: [
+          DropdownMenuItem<String>(
+            value: 'Todas',
             child: Text(
-              culture,
+              'Todas as culturas',
               style: TextStyle(
                 fontSize: 16,
                 color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          );
-        }).toList(),
+          ),
+          ...cultures
+              .where((culture) => culture != 'Todas')
+              .map<DropdownMenuItem<String>>((String culture) {
+            return DropdownMenuItem<String>(
+              value: culture,
+              child: Text(
+                culture,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -325,6 +377,7 @@ class DiagnosticoDefensivoEmptyWidget extends StatelessWidget {
 class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
   final String cultura;
   final int diagnosticCount;
+
   /// Lista de diagnósticos para buscar dados de cultura reais
   final List<dynamic>? diagnosticos;
 
@@ -336,10 +389,12 @@ class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
   });
 
   @override
-  State<DiagnosticoDefensivoCultureSectionWidget> createState() => _DiagnosticoDefensivoCultureSectionWidgetState();
+  State<DiagnosticoDefensivoCultureSectionWidget> createState() =>
+      _DiagnosticoDefensivoCultureSectionWidgetState();
 }
 
-class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDefensivoCultureSectionWidget> {
+class _DiagnosticoDefensivoCultureSectionWidgetState
+    extends State<DiagnosticoDefensivoCultureSectionWidget> {
   CulturaHive? _culturaData;
   bool _isLoadingCultura = false;
 
@@ -360,13 +415,15 @@ class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDe
 
     try {
       final culturaRepository = sl<CulturaHiveRepository>();
-      
+
       // Tenta buscar pelos diagnósticos primeiro (usando idCultura)
       for (final diagnostic in widget.diagnosticos!) {
         final idCultura = _getProperty(diagnostic, 'idCultura');
         if (idCultura != null) {
           final culturaData = culturaRepository.getById(idCultura);
-          if (culturaData != null && culturaData.cultura.toLowerCase() == widget.cultura.toLowerCase()) {
+          if (culturaData != null &&
+              culturaData.cultura.toLowerCase() ==
+                  widget.cultura.toLowerCase()) {
             if (mounted) {
               setState(() {
                 _culturaData = culturaData;
@@ -377,7 +434,7 @@ class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDe
           }
         }
       }
-      
+
       // Se não encontrou, tenta buscar por nome
       final culturaData = culturaRepository.findByName(widget.cultura);
       if (mounted) {
@@ -417,7 +474,7 @@ class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDe
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final displayName = widget.cultura;
-    
+
     return RepaintBoundary(
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -487,7 +544,7 @@ class _DiagnosticoDefensivoCultureSectionWidgetState extends State<DiagnosticoDe
 // ============================================================================
 
 /// Widget responsável por renderizar um item de diagnóstico na lista
-/// 
+///
 /// Responsabilidade única: exibir dados de um diagnóstico específico
 /// - Layout consistente com card design
 /// - Informações principais visíveis (nome comum, nome científico, dosagem)
@@ -505,10 +562,12 @@ class DiagnosticoDefensivoListItemWidget extends StatefulWidget {
   });
 
   @override
-  State<DiagnosticoDefensivoListItemWidget> createState() => _DiagnosticoDefensivoListItemWidgetState();
+  State<DiagnosticoDefensivoListItemWidget> createState() =>
+      _DiagnosticoDefensivoListItemWidgetState();
 }
 
-class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensivoListItemWidget> {
+class _DiagnosticoDefensivoListItemWidgetState
+    extends State<DiagnosticoDefensivoListItemWidget> {
   PragasHive? _pragaData;
   bool _isLoadingPraga = true;
 
@@ -521,21 +580,28 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
   Future<void> _loadPragaData() async {
     try {
       final pragasRepository = sl<PragasHiveRepository>();
-      
+
       // Debug completo do diagnóstico
       print('🔬 === DEBUG DIAGNÓSTICO COMPLETO ===');
       print('📋 Tipo do objeto: ${widget.diagnostico.runtimeType}');
-      
+
       if (widget.diagnostico is Map<String, dynamic>) {
         final map = widget.diagnostico as Map<String, dynamic>;
         print('🗝️ Chaves disponíveis: ${map.keys.toList()}');
-        print('📊 Valores: ${map}');
+        print('📊 Valores: $map');
       } else {
         print('🔧 Propriedades do objeto:');
         try {
           final props = [
-            'idPraga', 'fkIdPraga', 'idDefensivo', 'nomeDefensivo', 
-            'nomePraga', 'idCultura', 'fkIdCultura', 'nomeCultura'
+            'fkIdPraga',
+            'idPraga',
+            'fkIdDefensivo',
+            'idDefensivo',
+            'nomeDefensivo',
+            'nomePraga',
+            'fkIdCultura',
+            'idCultura',
+            'nomeCultura'
           ];
           for (final prop in props) {
             final value = _getProperty(prop);
@@ -545,41 +611,46 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
           print('  ❌ Erro ao acessar propriedades: $e');
         }
       }
-      
-      final idPraga = _getProperty('idPraga');
-      print('🎯 idPraga extraído: "$idPraga" (tipo: ${idPraga.runtimeType})');
-      
+
+      final idPraga = _getProperty('fkIdPraga');
+      print('🎯 fkIdPraga extraído: "$idPraga" (tipo: ${idPraga.runtimeType})');
+
       // Debug do repositório de pragas
       print('📦 === DEBUG REPOSITÓRIO PRAGAS ===');
       final todasPragas = pragasRepository.getAll();
       print('📊 Total de pragas na box: ${todasPragas.length}');
-      
+
       if (todasPragas.isNotEmpty) {
         print('🔍 Primeiras 3 pragas como exemplo:');
         for (int i = 0; i < 3 && i < todasPragas.length; i++) {
           final p = todasPragas[i];
-          print('  ${i + 1}. ID: "${p.idReg}" | Nome: "${p.nomeComum}" | Científico: "${p.nomeCientifico}"');
+          print(
+              '  ${i + 1}. ID: "${p.idReg}" | Nome: "${p.nomeComum}" | Científico: "${p.nomeCientifico}"');
         }
-        
+
         // Verifica se existe uma praga com o idPraga exato
         if (idPraga != null) {
-          final pragaExata = todasPragas.where((p) => p.idReg == idPraga).toList();
+          final pragaExata =
+              todasPragas.where((p) => p.idReg == idPraga).toList();
           print('🎯 Pragas com ID "$idPraga": ${pragaExata.length}');
           if (pragaExata.isNotEmpty) {
             print('✅ Praga encontrada: "${pragaExata.first.nomeComum}"');
           } else {
             print('❌ Nenhuma praga encontrada com ID "$idPraga"');
             // Procura IDs similares
-            final similares = todasPragas.where((p) => p.idReg.contains(idPraga)).toList();
-            print('🔍 IDs similares ($similares.length): ${similares.map((p) => '"${p.idReg}"').take(5).join(", ")}');
+            final similares =
+                todasPragas.where((p) => p.idReg.contains(idPraga)).toList();
+            print(
+                '🔍 IDs similares ($similares.length): ${similares.map((p) => '"${p.idReg}"').take(5).join(", ")}');
           }
         }
       }
-      
+
       if (idPraga != null) {
         final praga = pragasRepository.getById(idPraga);
-        print('🔍 Resultado getById("$idPraga"): ${praga != null ? '"${praga.nomeComum}"' : 'null'}');
-        
+        print(
+            '🔍 Resultado getById("$idPraga"): ${praga != null ? '"${praga.nomeComum}"' : 'null'}');
+
         if (mounted) {
           setState(() {
             _pragaData = praga;
@@ -594,9 +665,8 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
           });
         }
       }
-      
+
       print('🏁 === FIM DEBUG ===');
-      
     } catch (e, stackTrace) {
       print('❌ Erro ao carregar dados da praga: $e');
       print('📚 Stack trace: $stackTrace');
@@ -635,7 +705,7 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
   /// Decoração do card do item
   BoxDecoration _buildCardDecoration(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return BoxDecoration(
       color: theme.cardColor,
       borderRadius: BorderRadius.circular(12),
@@ -653,7 +723,7 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
   /// Avatar com imagem da praga baseada no nome científico
   Widget _buildAvatar(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (_isLoadingPraga) {
       return Container(
         width: 48,
@@ -671,15 +741,12 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
         ),
       );
     }
-    
+
     if (_pragaData?.nomeCientifico != null) {
-      // Gera URL da imagem baseada no nome científico
-      final nomeCientificoFormatted = _pragaData!.nomeCientifico
-          .toLowerCase()
-          .replaceAll(' ', '_')
-          .replaceAll(RegExp(r'[^a-z_]'), '');
-      final imageUrl = 'https://example.com/images/$nomeCientificoFormatted.jpg';
-      
+      // Gera caminho da imagem baseado no nome científico
+      final imagePath =
+          'assets/imagens/bigsize/${_pragaData!.nomeCientifico}.jpg';
+
       return Container(
         width: 48,
         height: 48,
@@ -692,31 +759,18 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            imageUrl,
+          child: Image.asset(
+            imagePath,
             width: 48,
             height: 48,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return Icon(
-                Icons.bug_report,
+              return ColoredBox(
                 color: theme.colorScheme.primary,
-                size: 24,
-              );
-            },
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
+                child: Icon(
+                  Icons.bug_report,
+                  color: theme.colorScheme.onPrimary,
+                  size: 24,
                 ),
               );
             },
@@ -724,7 +778,7 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
         ),
       );
     }
-    
+
     return Container(
       width: 48,
       height: 48,
@@ -743,11 +797,11 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
   /// Conteúdo principal com informações do diagnóstico
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Dados da praga com formatação específica
     String nomeComumPraga = 'Praga não identificada';
     String nomeCientificoPraga = '';
-    
+
     if (_pragaData != null) {
       // Primeira linha: nome comum da praga, se separado por vírgula ou ponto vírgula, apenas o primeiro valor
       final nomeComumCompleto = _pragaData!.nomeComum;
@@ -758,19 +812,19 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
       } else {
         nomeComumPraga = nomeComumCompleto;
       }
-      
+
       // Segunda linha: Nome científico da praga
       nomeCientificoPraga = _pragaData!.nomeCientifico;
     }
-    
+
     // Terceira linha: Dosagem
     final dosagemEntity = _getProperty('dosagem');
     String dosagemFormatada = '';
-    
+
     if (dosagemEntity != null) {
       dosagemFormatada = dosagemEntity.toString();
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -815,7 +869,7 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
   /// Ações do lado direito do item
   Widget _buildTrailingActions(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Icon(
       Icons.arrow_forward_ios,
       size: 16,
@@ -828,12 +882,13 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
     try {
       if (widget.diagnostico is Map<String, dynamic>) {
         final map = widget.diagnostico as Map<String, dynamic>;
-        return map[primaryKey]?.toString() ?? (fallbackKey != null ? map[fallbackKey]?.toString() : null);
+        return map[primaryKey]?.toString() ??
+            (fallbackKey != null ? map[fallbackKey]?.toString() : null);
       } else {
         // Tenta acessar como propriedade do objeto
         final primary = _getObjectProperty(widget.diagnostico, primaryKey);
         if (primary != null) return primary.toString();
-        
+
         if (fallbackKey != null) {
           final fallback = _getObjectProperty(widget.diagnostico, fallbackKey);
           if (fallback != null) return fallback.toString();
@@ -849,8 +904,12 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
   dynamic _getObjectProperty(dynamic obj, String property) {
     try {
       switch (property) {
+        case 'fkIdPraga':
+          return obj.fkIdPraga;
         case 'idPraga':
           return obj.idPraga;
+        case 'fkIdCultura':
+          return obj.fkIdCultura;
         case 'idCultura':
           return obj.idCultura;
         case 'nomeDefensivo':
@@ -879,7 +938,7 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
 // ============================================================================
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
-/// 
+///
 /// Responsabilidade única: exibir detalhes completos de um diagnóstico em modal
 /// - Layout responsivo com constraints adequados
 /// - Informações detalhadas do diagnóstico
@@ -888,11 +947,13 @@ class _DiagnosticoDefensivoListItemWidgetState extends State<DiagnosticoDefensiv
 class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   final dynamic diagnostico;
   final String defensivoName;
+  final AppNavigationProvider navigationProvider;
 
   const DiagnosticoDefensivoDialogWidget({
     super.key,
     required this.diagnostico,
     required this.defensivoName,
+    required this.navigationProvider,
   });
 
   /// Mostra o modal de detalhes
@@ -901,11 +962,14 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     dynamic diagnostico,
     String defensivoName,
   ) {
+    final navigationProvider =
+        Provider.of<AppNavigationProvider>(context, listen: false);
     return showDialog<void>(
       context: context,
       builder: (context) => DiagnosticoDefensivoDialogWidget(
         diagnostico: diagnostico,
         defensivoName: defensivoName,
+        navigationProvider: navigationProvider,
       ),
     );
   }
@@ -913,7 +977,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(16),
@@ -950,9 +1014,11 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   /// Cabeçalho moderno baseado no mockup
   Widget _buildModernHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? 'Defensivo não identificado';
-    final ingredienteAtivo = _getProperty('ingredienteAtivo') ?? 'Ingrediente ativo não especificado';
-    
+    final nomeDefensivo =
+        _getProperty('nomeDefensivo', 'nome') ?? 'Defensivo não identificado';
+    final ingredienteAtivo = _getProperty('ingredienteAtivo') ??
+        'Ingrediente ativo não especificado';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -1007,7 +1073,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     final aplicacaoTerrestre = _getProperty('aplicacaoTerrestre') ?? '...';
     final aplicacaoAerea = _getProperty('aplicacaoAerea') ?? '...';
     final intervalo = _getProperty('intervaloDias')?.toString() ?? '...';
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -1054,7 +1120,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   /// Constrói uma seção de informação
   Widget _buildInfoSection(String label, String value, BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
       child: Column(
@@ -1090,7 +1156,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     bool isPremium = false,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -1170,7 +1236,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   /// Ações modernas do modal (botões inferiores)
   Widget _buildModernActions(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(24),
       child: Row(
@@ -1179,7 +1245,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _navigateToDefensivo(context);
+                _navigateToPraga(context);
               },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1189,7 +1255,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
                 side: BorderSide(color: theme.colorScheme.outline),
               ),
               child: Text(
-                'Defensivo',
+                'Pragas',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -1236,10 +1302,12 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   /// Navega para a página de detalhes do diagnóstico
   void _navigateToDetailedDiagnostic(BuildContext context) {
     final diagnosticoId = _getProperty('id');
-    final nomeCultura = _getProperty('nomeCultura', 'cultura') ?? 'Não especificado';
-    final nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? 'Não especificado';
+    final nomeCultura =
+        _getProperty('nomeCultura', 'cultura') ?? 'Não especificado';
+    final nomeDefensivo =
+        _getProperty('nomeDefensivo', 'nome') ?? 'Não especificado';
     final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Não especificado';
-    
+
     if (diagnosticoId != null) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -1254,16 +1322,30 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     }
   }
 
+  /// Navega para a página de detalhes da praga
+  void _navigateToPraga(BuildContext context) {
+    final nomePraga = _getProperty('nomePraga', 'grupo');
+    final nomeComumPraga = _getProperty('nomeComumPraga', 'nomeComum');
+
+    if (nomePraga != null) {
+      navigationProvider.navigateToDetalhePraga(
+        pragaName: nomePraga,
+        pragaScientificName: nomeComumPraga,
+      );
+    }
+  }
+
   /// Navega para a página de detalhes do defensivo
   void _navigateToDefensivo(BuildContext context) {
     final nomeDefensivo = _getProperty('nomeDefensivo', 'nome');
-    
+
     if (nomeDefensivo != null) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (context) => defensivo_page.DetalheDefensivoPage(
             defensivoName: nomeDefensivo,
-            fabricante: 'Não especificado', // Fabricante não disponível no contexto
+            fabricante:
+                'Não especificado', // Fabricante não disponível no contexto
           ),
         ),
       );
@@ -1275,12 +1357,13 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     try {
       if (diagnostico is Map<String, dynamic>) {
         final map = diagnostico as Map<String, dynamic>;
-        return map[primaryKey]?.toString() ?? (fallbackKey != null ? map[fallbackKey]?.toString() : null);
+        return map[primaryKey]?.toString() ??
+            (fallbackKey != null ? map[fallbackKey]?.toString() : null);
       } else {
         // Tenta acessar como propriedade do objeto
         final primary = _getObjectProperty(diagnostico, primaryKey);
         if (primary != null) return primary.toString();
-        
+
         if (fallbackKey != null) {
           final fallback = _getObjectProperty(diagnostico, fallbackKey);
           if (fallback != null) return fallback.toString();
@@ -1298,6 +1381,10 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
       switch (property) {
         case 'id':
           return obj.id;
+        case 'fkIdPraga':
+          return obj.fkIdPraga;
+        case 'fkIdDefensivo':
+          return obj.fkIdDefensivo;
         case 'idDefensivo':
           return obj.idDefensivo;
         case 'nomeDefensivo':

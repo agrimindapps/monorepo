@@ -12,14 +12,14 @@ import 'filters_mockup_widget.dart';
 
 /// Widget principal que implementa EXATAMENTE o design do mockup IMG_3186.PNG
 /// substituindo o DiagnosticosPragaWidget original
-/// 
+///
 /// Layout do mockup analisado:
 /// - Filtros no topo (Localizar + dropdown Todas)
 /// - Lista agrupada por cultura
 /// - Seções cinza com ícone de folha
 /// - Cards brancos com ícone verde, texto e premium icon
 /// - Estados de loading, erro e vazio
-/// 
+///
 /// Responsabilidade: orquestrar componentes mockup mantendo funcionalidade
 class DiagnosticosPragaMockupWidget extends StatelessWidget {
   final String pragaName;
@@ -32,28 +32,31 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Filtros superiores pixel-perfect
-          _buildFiltersMockup(),
-          
-          // Lista de diagnósticos com gerenciamento de estados
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                top: SpacingTokens.xs,
-                bottom: SpacingTokens.bottomNavSpace,
-              ),
-              child: DiagnosticoStateManager(
-                builder: (diagnosticos) => Builder(
-                  builder: (context) => _buildDiagnosticsMockupList(diagnosticos, context),
+      child: Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Filtros superiores pixel-perfect
+            _buildFiltersMockup(),
+
+            // Lista de diagnósticos com gerenciamento de estados
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  top: SpacingTokens.xs,
+                  bottom: SpacingTokens.bottomNavSpace,
                 ),
-                onRetry: () => _retryLoadDiagnostics(context),
+                child: DiagnosticoStateManager(
+                  builder: (diagnosticos) => Builder(
+                    builder: (context) =>
+                        _buildDiagnosticsMockupList(diagnosticos, context),
+                  ),
+                  onRetry: () => _retryLoadDiagnostics(context),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -75,34 +78,36 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
 
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(BuildContext context) {
-    final provider = Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+    final provider =
+        Provider.of<DiagnosticosPragaProvider>(context, listen: false);
     provider.clearError();
   }
 
   /// Constrói lista de diagnósticos agrupados por cultura usando widgets mockup
-  Widget _buildDiagnosticsMockupList(List<DiagnosticoModel> diagnosticos, BuildContext context) {
+  Widget _buildDiagnosticsMockupList(
+      List<DiagnosticoModel> diagnosticos, BuildContext context) {
     final groupedDiagnostics = _groupDiagnosticsByCulture(diagnosticos);
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: _buildGroupedMockupWidgets(groupedDiagnostics, context),
     );
   }
-  
+
   /// Agrupa diagnósticos por cultura
   Map<String, List<DiagnosticoModel>> _groupDiagnosticsByCulture(
     List<DiagnosticoModel> diagnosticos,
   ) {
     final grouped = <String, List<DiagnosticoModel>>{};
-    
+
     for (final diagnostic in diagnosticos) {
       grouped.putIfAbsent(diagnostic.cultura, () => []).add(diagnostic);
     }
-    
+
     return grouped;
   }
-  
+
   /// Constrói widgets agrupados usando componentes mockup
   List<Widget> _buildGroupedMockupWidgets(
     Map<String, List<DiagnosticoModel>> groupedDiagnostics,
@@ -118,9 +123,10 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
           diagnosticoCount: diagnostics.length,
         ),
       );
-      
+
       // Espaçamento após seção
-      widgets.add(SizedBox(height: DiagnosticoMockupTokens.sectionToCardSpacing));
+      widgets
+          .add(SizedBox(height: DiagnosticoMockupTokens.sectionToCardSpacing));
 
       // Cards de diagnósticos mockup
       for (int i = 0; i < diagnostics.length; i++) {
@@ -135,7 +141,7 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
           ),
         );
       }
-      
+
       // Espaçamento entre grupos de cultura
       widgets.add(const SizedBox(height: 24));
     });
@@ -144,7 +150,8 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
   }
 
   /// Mostra modal de detalhes do diagnóstico (mantém funcionalidade original)
-  void _showDiagnosticoDialog(BuildContext context, DiagnosticoModel diagnostico) {
+  void _showDiagnosticoDialog(
+      BuildContext context, DiagnosticoModel diagnostico) {
     DiagnosticoDialogWidget.show(context, diagnostico, pragaName);
   }
 }
@@ -209,7 +216,7 @@ class _DiagnosticosPragaMockupDebugWidgetState
       children: [
         // Debug controls
         if (_showDebugInfo) _buildDebugControls(),
-        
+
         // Main widget
         Expanded(
           child: DiagnosticosPragaTransitionWidget(
@@ -217,7 +224,7 @@ class _DiagnosticosPragaMockupDebugWidgetState
             useMockupLayout: _useMockupLayout,
           ),
         ),
-        
+
         // Debug toggle
         _buildDebugToggle(),
       ],

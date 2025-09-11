@@ -201,6 +201,9 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
       // Se está no nível de itens, mostrar contador dos itens filtrados
       if (_drillDownProvider.isAtItemLevel) {
         subtitulo = '${_drillDownProvider.currentGroupItems.length} defensivo(s) encontrado(s)';
+      } else {
+        // No nível de grupos, mostrar quantidade de grupos
+        subtitulo = '${_drillDownProvider.groups.length} grupo(s) encontrado(s)';
       }
     } else {
       // Header tradicional
@@ -242,6 +245,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
             onTap: _navegarParaDetalhes,
             onSelecaoChanged: provider.modoComparacao ? provider.toggleSelecaoDefensivo : null,
             onClearFilters: provider.limparFiltros,
+            hasActiveSearch: _searchText.isNotEmpty,
           ),
         ),
       ],
@@ -347,6 +351,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
           ? context.read<DefensivosUnificadoProvider>().toggleSelecaoDefensivo 
           : null,
       onClearFilters: _clearSearch,
+      hasActiveSearch: _searchText.isNotEmpty,
     );
   }
 
@@ -397,9 +402,6 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
     _drillDownProvider.goBackToGroups();
   }
 
-  void _onDrillDownReset() {
-    _drillDownProvider.reset();
-  }
 
   void _reloadDrillDownData() {
     _drillDownProvider.clearError();

@@ -60,7 +60,7 @@ class DrillDownNavigationState extends Equatable {
   String get pageTitle {
     switch (currentLevel) {
       case DrillDownLevel.groups:
-        return 'Defensivos Agrupados';
+        return displayTipoAgrupamento;
       case DrillDownLevel.items:
         return currentGroup?.displayName ?? 'Defensivos';
     }
@@ -148,9 +148,15 @@ class DrillDownNavigationState extends Equatable {
         return 'Fabricante';
       case 'modo_acao':
       case 'modoacao':
+      case 'modoAcao':
         return 'Modo de Ação';
+      case 'ingrediente_ativo':
+      case 'ingredienteativo':
+      case 'ingredienteAtivo':
+        return 'Ingrediente Ativo';
       case 'classe':
       case 'classe_agronomica':
+      case 'classeagronomica':
         return 'Classe Agronômica';
       case 'categoria':
         return 'Categoria';

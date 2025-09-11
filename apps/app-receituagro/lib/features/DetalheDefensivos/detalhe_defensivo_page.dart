@@ -59,11 +59,13 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Future<void> _loadData() async {
-    await _defensivoProvider.initializeData(widget.defensivoName, widget.fabricante);
-    
+    await _defensivoProvider.initializeData(
+        widget.defensivoName, widget.fabricante);
+
     // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
     if (_defensivoProvider.defensivoData != null) {
-      await _diagnosticosProvider.loadDiagnosticos(_defensivoProvider.defensivoData!.idReg);
+      await _diagnosticosProvider
+          .loadDiagnosticos(_defensivoProvider.defensivoData!.idReg);
     }
   }
 
@@ -111,7 +113,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           title: widget.defensivoName,
           subtitle: widget.fabricante,
           leftIcon: Icons.shield_outlined,
-          rightIcon: provider.isFavorited ? Icons.favorite : Icons.favorite_border,
+          rightIcon:
+              provider.isFavorited ? Icons.favorite : Icons.favorite_border,
           isDark: isDark,
           showBackButton: true,
           showActions: true,
@@ -151,7 +154,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         ),
         Expanded(
           child: Container(
-            margin: SpacingTokens.cardMargin,
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
@@ -212,7 +214,6 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         final entity = DefensivoDetailsEntity.fromHive(provider.defensivoData!);
 
         return SingleChildScrollView(
-          padding: SpacingTokens.scrollPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -228,22 +229,23 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Future<void> _handleFavoriteToggle(DetalheDefensivoProvider provider) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final wasAlreadyFavorited = provider.isFavorited;
-    
+
     // Mostra feedback imediato
     scaffoldMessenger.showSnackBar(
       SnackBar(
         content: Text(
-          wasAlreadyFavorited 
-            ? '\u2764\ufe0f Removendo dos favoritos...' 
-            : '\u2764\ufe0f Adicionando aos favoritos...',
+          wasAlreadyFavorited
+              ? '\u2764\ufe0f Removendo dos favoritos...'
+              : '\u2764\ufe0f Adicionando aos favoritos...',
         ),
         duration: const Duration(milliseconds: 1500),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
-    
-    final success = await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
-    
+
+    final success =
+        await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
+
     if (!mounted) return;
 
     // Feedback final baseado no resultado
@@ -251,16 +253,15 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     scaffoldMessenger.showSnackBar(
       SnackBar(
         content: Text(
-          success 
-            ? (wasAlreadyFavorited 
-                ? '\u2713 ${widget.defensivoName} removido dos favoritos' 
-                : '\u2713 ${widget.defensivoName} adicionado aos favoritos')
-            : '\u274c Erro ao alterar favorito',
+          success
+              ? (wasAlreadyFavorited
+                  ? '\u2713 ${widget.defensivoName} removido dos favoritos'
+                  : '\u2713 ${widget.defensivoName} adicionado aos favoritos')
+              : '\u274c Erro ao alterar favorito',
         ),
         duration: const Duration(seconds: 2),
-        backgroundColor: success 
-          ? Theme.of(context).colorScheme.primary 
-          : Colors.red,
+        backgroundColor:
+            success ? Theme.of(context).colorScheme.primary : Colors.red,
       ),
     );
   }

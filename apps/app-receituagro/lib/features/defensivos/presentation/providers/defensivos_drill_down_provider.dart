@@ -164,13 +164,18 @@ class DefensivosDrillDownProvider extends ChangeNotifier {
   /// Aplica filtros atuais
   void _applyCurrentFilters() {
     try {
+      // Primeiro, filtrar grupos com nomes muito curtos
+      var filteredGroups = _groups.where((group) {
+        return group.nome.length >= 3;
+      }).toList();
+      
       if (_navigationState.hasSearchFilter) {
         _filteredGroups = _groupingService.filtrarGrupos(
-          grupos: _groups,
+          grupos: filteredGroups,
           filtroTexto: _navigationState.searchText,
         );
       } else {
-        _filteredGroups = List.from(_groups);
+        _filteredGroups = filteredGroups;
       }
       
       _applySorting();
@@ -203,6 +208,11 @@ class DefensivosDrillDownProvider extends ChangeNotifier {
     try {
       // Aplicar filtros aos itens do grupo
       var items = List<DefensivoEntity>.from(currentGroup.itens);
+      
+      // Filtrar itens com descrição menor que 3 caracteres
+      items = items.where((item) {
+        return item.displayName.length >= 3;
+      }).toList();
       
       if (_navigationState.hasSearchFilter) {
         final filtroLower = _navigationState.searchText.toLowerCase();

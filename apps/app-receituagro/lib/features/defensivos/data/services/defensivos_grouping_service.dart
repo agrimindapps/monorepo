@@ -19,11 +19,32 @@ class DefensivosGroupingService {
 
     // Agrupar por tipo
     final Map<String, List<DefensivoEntity>> grupos = {};
+    
+    // Verificar se é agrupamento que necessita tratamento especial
+    final isIngredienteAtivo = _isIngredienteAtivoGrouping(tipoAgrupamento);
+    final isModoAcao = _isModoAcaoGrouping(tipoAgrupamento);
+    
     for (final defensivo in defensivosFiltrados) {
-      final chaveGrupo = _obterChaveGrupo(defensivo, tipoAgrupamento);
-      
-      grupos.putIfAbsent(chaveGrupo, () => <DefensivoEntity>[]);
-      grupos[chaveGrupo]!.add(defensivo);
+      if (isIngredienteAtivo) {
+        // Para ingrediente ativo, separar por "+" e criar grupos individuais
+        final ingredientes = _extrairIngredientesAtivos(defensivo);
+        for (final ingrediente in ingredientes) {
+          grupos.putIfAbsent(ingrediente, () => <DefensivoEntity>[]);
+          grupos[ingrediente]!.add(defensivo);
+        }
+      } else if (isModoAcao) {
+        // Para modo de ação, separar por "," e criar grupos individuais
+        final modosAcao = _extrairModosAcao(defensivo);
+        for (final modo in modosAcao) {
+          grupos.putIfAbsent(modo, () => <DefensivoEntity>[]);
+          grupos[modo]!.add(defensivo);
+        }
+      } else {
+        // Agrupamento normal para outros tipos
+        final chaveGrupo = _obterChaveGrupo(defensivo, tipoAgrupamento);
+        grupos.putIfAbsent(chaveGrupo, () => <DefensivoEntity>[]);
+        grupos[chaveGrupo]!.add(defensivo);
+      }
     }
 
     // Converter para DefensivoGroupEntity e ordenar
@@ -120,10 +141,17 @@ class DefensivosGroupingService {
       
       case 'modo_acao':
       case 'modoacao':
+      case 'modoAcao':
         return defensivo.displayModoAcao;
+      
+      case 'ingrediente_ativo':
+      case 'ingredienteativo':
+      case 'ingredienteAtivo':
+        return defensivo.displayIngredient;
       
       case 'classe':
       case 'classe_agronomica':
+      case 'classeagronomica':
         return defensivo.displayClass;
       
       case 'categoria':
@@ -150,8 +178,14 @@ class DefensivosGroupingService {
       case 'modoacao':
         return 'Defensivos com modo de ação: $nomeGrupo';
       
+      case 'ingrediente_ativo':
+      case 'ingredienteativo':
+      case 'ingredienteAtivo':
+        return 'Defensivos com ingrediente ativo: $nomeGrupo';
+      
       case 'classe':
       case 'classe_agronomica':
+      case 'classeagronomica':
         return 'Defensivos da classe agronômica: $nomeGrupo';
       
       case 'categoria':
@@ -173,8 +207,13 @@ class DefensivosGroupingService {
       'fabricantes',
       'modo_acao',
       'modoacao',
+      'modoAcao',
+      'ingrediente_ativo',
+      'ingredienteativo',
+      'ingredienteAtivo',
       'classe',
       'classe_agronomica',
+      'classeagronomica',
       'categoria',
       'toxico',
       'toxicidade',
@@ -202,9 +241,15 @@ class DefensivosGroupingService {
         return 'Fabricante';
       case 'modo_acao':
       case 'modoacao':
+      case 'modoAcao':
         return 'Modo de Ação';
+      case 'ingrediente_ativo':
+      case 'ingredienteativo':
+      case 'ingredienteAtivo':
+        return 'Ingrediente Ativo';
       case 'classe':
       case 'classe_agronomica':
+      case 'classeagronomica':
         return 'Classe Agronômica';
       case 'categoria':
         return 'Categoria';
@@ -214,5 +259,57 @@ class DefensivosGroupingService {
       default:
         return tipo.substring(0, 1).toUpperCase() + tipo.substring(1);
     }
+  }
+
+  /// Verifica se o tipo de agrupamento é por ingrediente ativo
+  bool _isIngredienteAtivoGrouping(String tipoAgrupamento) {
+    final tipo = tipoAgrupamento.toLowerCase();
+    return tipo == 'ingrediente_ativo' || 
+           tipo == 'ingredienteativo' || 
+           tipo == 'ingredienteAtivo';
+  }
+
+  /// Verifica se o tipo de agrupamento é por modo de ação
+  bool _isModoAcaoGrouping(String tipoAgrupamento) {
+    final tipo = tipoAgrupamento.toLowerCase();
+    return tipo == 'modo_acao' || 
+           tipo == 'modoacao' || 
+           tipo == 'modoAcao';
+  }
+
+  /// Extrai ingredientes ativos individuais separados por "+"
+  List<String> _extrairIngredientesAtivos(DefensivoEntity defensivo) {
+    final ingredientesText = defensivo.displayIngredient;
+    
+    if (ingredientesText.isEmpty || ingredientesText == 'Sem ingrediente ativo') {
+      return ['Não informado'];
+    }
+    
+    // Separar por "+" e aplicar trim em cada ingrediente
+    final ingredientes = ingredientesText
+        .split('+')
+        .map((ingrediente) => ingrediente.trim())
+        .where((ingrediente) => ingrediente.isNotEmpty && ingrediente.length >= 3)
+        .toList();
+    
+    return ingredientes.isEmpty ? ['Não informado'] : ingredientes;
+  }
+
+  /// Extrai modos de ação individuais separados por vírgula
+  List<String> _extrairModosAcao(DefensivoEntity defensivo) {
+    final modoAcaoText = defensivo.displayModoAcao;
+    
+    if (modoAcaoText.isEmpty || modoAcaoText == 'Não especificado') {
+      return ['Não especificado'];
+    }
+    
+    // Separar APENAS por vírgula e aplicar trim em cada modo de ação
+    final modosAcao = modoAcaoText
+        .split(',')
+        .map((modo) => modo.trim())
+        .where((modo) => modo.isNotEmpty && modo.length >= 3)
+        .toList();
+    
+    return modosAcao.isEmpty ? ['Não especificado'] : modosAcao;
   }
 }

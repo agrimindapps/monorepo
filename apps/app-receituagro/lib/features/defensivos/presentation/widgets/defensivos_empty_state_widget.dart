@@ -6,12 +6,16 @@ class DefensivosEmptyStateWidget extends StatelessWidget {
   final VoidCallback onClearFilters;
   final String? customMessage;
   final String? customTitle;
+  final bool showClearButton;
+  final bool showSuggestions;
 
   const DefensivosEmptyStateWidget({
     super.key,
     required this.onClearFilters,
     this.customMessage,
     this.customTitle,
+    this.showClearButton = true,
+    this.showSuggestions = true,
   });
 
   @override
@@ -49,21 +53,22 @@ class DefensivosEmptyStateWidget extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: onClearFilters,
-                icon: const Icon(Icons.clear_all),
-                label: const Text('Limpar Filtros'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          if (showClearButton)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: onClearFilters,
+                  icon: const Icon(Icons.clear_all),
+                  label: const Text('Limpar Filtros'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildSuggestions(theme),
+              ],
+            ),
+          if (showClearButton) const SizedBox(height: 16),
+          if (showSuggestions) _buildSuggestions(theme),
         ],
       ),
     );

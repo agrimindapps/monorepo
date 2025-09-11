@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Widget padronizado para TabBars baseado no design do sistema de favoritos
 /// Implementa o padrão visual consistente para todas as TabBars do app
-/// 
+///
 /// Design Tokens Aplicados:
 /// - borderRadius: 20
-/// - background: primaryContainer.withAlpha(0.3) 
+/// - background: primaryContainer.withAlpha(0.3)
 /// - indicator: Color(0xFF4CAF50) com borderRadius 16
 /// - labelColor: Colors.white
 /// - unselectedLabelColor: onSurface.withAlpha(0.6)
@@ -36,10 +36,10 @@ class StandardTabBarWidget extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: margin ?? const EdgeInsets.symmetric(horizontal: 0.0),
+      margin: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 8),
       decoration: BoxDecoration(
-        color: backgroundColor ?? 
-               theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        color: backgroundColor ??
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: TabBar(
@@ -47,7 +47,8 @@ class StandardTabBarWidget extends StatelessWidget {
         onTap: onTabTap != null ? (_) => onTabTap!() : null,
         tabs: _buildStandardTabs(theme),
         labelColor: Colors.white,
-        unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        unselectedLabelColor:
+            theme.colorScheme.onSurface.withValues(alpha: 0.6),
         indicator: BoxDecoration(
           color: indicatorColor ?? const Color(0xFF4CAF50),
           borderRadius: BorderRadius.circular(16),
@@ -63,7 +64,7 @@ class StandardTabBarWidget extends StatelessWidget {
         ),
         labelPadding: const EdgeInsets.symmetric(horizontal: 6.0),
         indicatorPadding: const EdgeInsets.symmetric(
-          horizontal: 6.0, 
+          horizontal: 6.0,
           vertical: 4.0,
         ),
         dividerColor: Colors.transparent,
@@ -91,7 +92,8 @@ class StandardTabBarWidget extends StatelessWidget {
                         size: 16,
                         color: isActive
                             ? Colors.white
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            : theme.colorScheme.onSurface
+                                .withValues(alpha: 0.6),
                       ),
                       if (isActive) ...[
                         const SizedBox(width: 6),
@@ -126,66 +128,66 @@ class StandardTabData {
   });
 
   /// Factory methods para contextos específicos do app
-  
+
   /// Para Detalhes da Praga
   static List<StandardTabData> get pragaDetailsTabs => [
-    const StandardTabData(
-      icon: Icons.info_outlined,
-      text: 'Informações',
-      semanticLabel: 'Informações da praga',
-    ),
-    const StandardTabData(
-      icon: Icons.search_outlined,
-      text: 'Diagnósticos',
-      semanticLabel: 'Diagnósticos relacionados',
-    ),
-    const StandardTabData(
-      icon: Icons.comment_outlined,
-      text: 'Comentários',
-      semanticLabel: 'Comentários e observações',
-    ),
-  ];
+        const StandardTabData(
+          icon: Icons.info_outlined,
+          text: 'Informações',
+          semanticLabel: 'Informações da praga',
+        ),
+        const StandardTabData(
+          icon: Icons.search_outlined,
+          text: 'Diagnósticos',
+          semanticLabel: 'Diagnósticos relacionados',
+        ),
+        const StandardTabData(
+          icon: Icons.comment_outlined,
+          text: 'Comentários',
+          semanticLabel: 'Comentários e observações',
+        ),
+      ];
 
   /// Para Detalhes do Defensivo
   static List<StandardTabData> get defensivoDetailsTabs => [
-    const StandardTabData(
-      icon: Icons.info_outlined,
-      text: 'Informações',
-      semanticLabel: 'Informações do defensivo',
-    ),
-    const StandardTabData(
-      icon: Icons.search_outlined,
-      text: 'Diagnóstico',
-      semanticLabel: 'Informações de diagnóstico',
-    ),
-    const StandardTabData(
-      icon: Icons.settings_outlined,
-      text: 'Tecnologia',
-      semanticLabel: 'Informações técnicas',
-    ),
-    const StandardTabData(
-      icon: Icons.comment_outlined,
-      text: 'Comentários',
-      semanticLabel: 'Comentários e observações',
-    ),
-  ];
+        const StandardTabData(
+          icon: Icons.info_outlined,
+          text: 'Informações',
+          semanticLabel: 'Informações do defensivo',
+        ),
+        const StandardTabData(
+          icon: Icons.search_outlined,
+          text: 'Diagnóstico',
+          semanticLabel: 'Informações de diagnóstico',
+        ),
+        const StandardTabData(
+          icon: Icons.settings_outlined,
+          text: 'Tecnologia',
+          semanticLabel: 'Informações técnicas',
+        ),
+        const StandardTabData(
+          icon: Icons.comment_outlined,
+          text: 'Comentários',
+          semanticLabel: 'Comentários e observações',
+        ),
+      ];
 
   /// Para Pragas por Cultura
   static List<StandardTabData> get pragaCultureTabs => [
-    const StandardTabData(
-      icon: Icons.grass_outlined,
-      text: 'Plantas Daninhas',
-      semanticLabel: 'Pragas do tipo plantas daninhas',
-    ),
-    const StandardTabData(
-      icon: Icons.coronavirus_outlined,
-      text: 'Doenças',
-      semanticLabel: 'Pragas do tipo doenças',
-    ),
-    const StandardTabData(
-      icon: Icons.bug_report_outlined,
-      text: 'Insetos',
-      semanticLabel: 'Pragas do tipo insetos',
-    ),
-  ];
+        const StandardTabData(
+          icon: Icons.grass_outlined,
+          text: 'Plantas Daninhas',
+          semanticLabel: 'Pragas do tipo plantas daninhas',
+        ),
+        const StandardTabData(
+          icon: Icons.coronavirus_outlined,
+          text: 'Doenças',
+          semanticLabel: 'Pragas do tipo doenças',
+        ),
+        const StandardTabData(
+          icon: Icons.bug_report_outlined,
+          text: 'Insetos',
+          semanticLabel: 'Pragas do tipo insetos',
+        ),
+      ];
 }

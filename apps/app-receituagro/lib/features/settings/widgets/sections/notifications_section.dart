@@ -48,7 +48,7 @@ class NotificationsSection extends StatelessWidget {
 
   Future<void> _showNotificationSettings(BuildContext context) async {
     final theme = Theme.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -74,32 +74,39 @@ class NotificationsSection extends StatelessWidget {
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 20),
-            
+
             // Lista de opções de notificação
             _buildNotificationOption(
               context,
               title: 'Pragas Detectadas',
               subtitle: 'Alertas quando uma praga for identificada',
               icon: Icons.bug_report,
-              enabled: context.watch<PreferencesProvider>().pragasDetectadasEnabled,
+              enabled:
+                  context.watch<PreferencesProvider>().pragasDetectadasEnabled,
               onChanged: (value) {
-                context.read<PreferencesProvider>().togglePragasDetectadas(value);
+                context
+                    .read<PreferencesProvider>()
+                    .togglePragasDetectadas(value);
               },
             ),
             const SizedBox(height: 12),
-            
+
             _buildNotificationOption(
               context,
               title: 'Lembretes de Aplicação',
               subtitle: 'Lembretes para aplicar defensivos',
               icon: Icons.schedule,
-              enabled: context.watch<PreferencesProvider>().lembretesAplicacaoEnabled,
+              enabled: context
+                  .watch<PreferencesProvider>()
+                  .lembretesAplicacaoEnabled,
               onChanged: (value) {
-                context.read<PreferencesProvider>().toggleLembretesAplicacao(value);
+                context
+                    .read<PreferencesProvider>()
+                    .toggleLembretesAplicacao(value);
               },
             ),
             const SizedBox(height: 12),
-            
+
             _buildNotificationOption(
               context,
               title: 'Novas Receitas',
@@ -108,7 +115,7 @@ class NotificationsSection extends StatelessWidget {
               enabled: false,
             ),
             const SizedBox(height: 12),
-            
+
             _buildNotificationOption(
               context,
               title: 'Alertas Climáticos',
@@ -149,12 +156,14 @@ class NotificationsSection extends StatelessWidget {
     Function(bool)? onChanged,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Icon(
           icon,
-          color: enabled ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          color: enabled
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurface.withValues(alpha: 0.6),
           size: 24,
         ),
         const SizedBox(width: 16),
@@ -166,7 +175,9 @@ class NotificationsSection extends StatelessWidget {
                 title,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: enabled ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: enabled
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               Text(
@@ -180,16 +191,17 @@ class NotificationsSection extends StatelessWidget {
         ),
         Switch(
           value: enabled,
-          onChanged: onChanged ?? (value) {
-            // Fallback para notificações não implementadas ainda
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  value ? 'Notificação ativada' : 'Notificação desativada',
-                ),
-              ),
-            );
-          },
+          onChanged: onChanged ??
+              (value) {
+                // Fallback para notificações não implementadas ainda
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      value ? 'Notificação ativada' : 'Notificação desativada',
+                    ),
+                  ),
+                );
+              },
         ),
       ],
     );
@@ -197,10 +209,10 @@ class NotificationsSection extends StatelessWidget {
 
   Future<void> _testNotification(BuildContext context) async {
     final provider = context.read<SettingsProvider>();
-    
+
     try {
       final success = await provider.testNotification();
-      
+
       if (context.mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -219,7 +231,8 @@ class NotificationsSection extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getErrorSnackbar('Erro ao enviar notificação: $e'),
+          SettingsDesignTokens.getErrorSnackbar(
+              'Erro ao enviar notificação: $e'),
         );
       }
     }

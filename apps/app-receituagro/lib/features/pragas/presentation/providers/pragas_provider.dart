@@ -259,6 +259,18 @@ class PragasProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Limpa todos os dados do provider (para evitar memory leaks)
+  void clear() {
+    _pragas.clear();
+    _recentPragas.clear();
+    _suggestedPragas.clear();
+    _selectedPraga = null;
+    _stats = null;
+    _isLoading = false;
+    _errorMessage = null;
+    // Não chama notifyListeners() pois o provider está sendo descartado
+  }
+
   /// Inicia estado de loading (para evitar flash de empty state)
   void startInitialLoading() {
     _setLoading(true);

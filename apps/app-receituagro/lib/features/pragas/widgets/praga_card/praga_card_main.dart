@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/praga_entity.dart';
-import 'praga_card_compact_mode.dart';
-import 'praga_card_featured_mode.dart';
 import 'praga_card_grid_mode.dart';
 import 'praga_card_list_mode.dart';
 
@@ -71,10 +69,6 @@ class PragaCardWidget extends StatelessWidget {
         return PragaCardListMode(properties: cardProps);
       case PragaCardMode.grid:
         return PragaCardGridMode(properties: cardProps);
-      case PragaCardMode.compact:
-        return PragaCardCompactMode(properties: cardProps);
-      case PragaCardMode.featured:
-        return PragaCardFeaturedMode(properties: cardProps);
     }
   }
 }
@@ -113,10 +107,4 @@ enum PragaCardMode {
   
   /// Modo grid vertical com imagem em destaque
   grid,
-  
-  /// Modo compacto para listas densas
-  compact,
-  
-  /// Modo destaque para itens selecionados/importantes
-  featured,
 }

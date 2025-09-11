@@ -28,146 +28,26 @@ class PragaCardActionSection extends StatelessWidget {
         return _buildListActions();
       case PragaCardActionMode.grid:
         return _buildGridActions();
-      case PragaCardActionMode.compact:
-        return _buildCompactActions();
-      case PragaCardActionMode.featured:
-        return _buildFeaturedActions();
     }
   }
 
-  /// Ações para modo lista (apenas favorito)
+  /// Ações para modo lista (sem botão de favorito)
   Widget _buildListActions() {
-    if (!properties.showFavoriteButton || properties.onFavoriteToggle == null) {
-      return const SizedBox.shrink();
-    }
-    
-    return Center(
-      child: _buildStandardFavoriteButton(),
-    );
+    // No modo lista, não mostra o botão de favorito
+    return const SizedBox.shrink();
   }
 
-  /// Ações para modo grid (floating favorite)
+  /// Ações para modo grid (sem botão de favorito)
   Widget _buildGridActions() {
-    if (!properties.showFavoriteButton || properties.onFavoriteToggle == null) {
-      return const SizedBox.shrink();
-    }
-    
-    return Positioned(
-      top: 8,
-      right: 8,
-      child: _buildFloatingFavoriteButton(),
-    );
+    // No modo grid, não mostra o botão de favorito
+    return const SizedBox.shrink();
   }
 
-  /// Ações para modo compacto (apenas favorito pequeno)
-  Widget _buildCompactActions() {
-    if (!properties.showFavoriteButton || properties.onFavoriteToggle == null) {
-      return const SizedBox.shrink();
-    }
-    
-    return _buildCompactFavoriteButton();
-  }
 
-  /// Ações para modo featured (floating bottom right)
-  Widget _buildFeaturedActions() {
-    if (!properties.showFavoriteButton || properties.onFavoriteToggle == null) {
-      return const SizedBox.shrink();
-    }
-    
-    return Positioned(
-      bottom: 16,
-      right: 16,
-      child: _buildFloatingFavoriteButton(),
-    );
-  }
-
-  /// Botão de favorito padrão para modo lista
-  Widget _buildStandardFavoriteButton() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: properties.isFavorite 
-            ? Colors.red.withValues(alpha: 0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: Icon(
-          properties.isFavorite ? Icons.favorite : Icons.favorite_border,
-          color: properties.isFavorite ? Colors.red : Colors.grey.shade500,
-          size: 20,
-        ),
-        onPressed: properties.onFavoriteToggle,
-        padding: const EdgeInsets.all(8),
-        constraints: const BoxConstraints(
-          minWidth: 36,
-          minHeight: 36,
-        ),
-      ),
-    );
-  }
-
-  /// Botão de favorito flutuante para grid/featured
-  Widget _buildFloatingFavoriteButton() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: properties.isFavorite 
-            ? Colors.red.withValues(alpha: 0.9)
-            : Colors.black.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(
-          properties.isFavorite ? Icons.favorite : Icons.favorite_border,
-          color: Colors.white,
-          size: 18,
-        ),
-        onPressed: properties.onFavoriteToggle,
-        padding: const EdgeInsets.all(8),
-        constraints: const BoxConstraints(
-          minWidth: 36,
-          minHeight: 36,
-        ),
-      ),
-    );
-  }
-
-  /// Botão de favorito compacto
-  Widget _buildCompactFavoriteButton() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: properties.isFavorite 
-            ? Colors.red.withValues(alpha: 0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: IconButton(
-        icon: Icon(
-          properties.isFavorite ? Icons.favorite : Icons.favorite_border,
-          color: properties.isFavorite ? Colors.red : Colors.grey.shade500,
-          size: 16,
-        ),
-        onPressed: properties.onFavoriteToggle,
-        padding: const EdgeInsets.all(4),
-        constraints: const BoxConstraints(
-          minWidth: 28,
-          minHeight: 28,
-        ),
-      ),
-    );
-  }
 }
 
 /// Modos de exibição das ações
 enum PragaCardActionMode {
   list,
   grid,
-  compact,
-  featured,
 }

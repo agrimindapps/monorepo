@@ -16,7 +16,6 @@ import '../pragas/lista_pragas_page.dart';
 import '../pragas/pragas_page.dart';
 import '../settings/settings_page.dart';
 import '../subscription/subscription_page.dart';
-import 'navigation_test_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -191,9 +190,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         break;
       case AppPageType.subscription:
         page = const SubscriptionPage();
-        break;
-      case AppPageType.navigationTest:
-        page = const NavigationTestPage();
         break;
       
       // Novas páginas para migração futura

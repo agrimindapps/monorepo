@@ -5,10 +5,9 @@ import 'package:get_it/get_it.dart';
 
 import '../../core/design/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import '../favoritos/data/repositories/favoritos_repository_simplified.dart';
-import '../favoritos/domain/entities/favorito_entity.dart';
 import 'detalhe_praga_page.dart';
 import 'domain/entities/praga_entity.dart';
+import 'domain/usecases/get_pragas_usecase.dart';
 import 'models/praga_view_mode.dart';
 import 'presentation/providers/pragas_provider.dart';
 import 'widgets/praga_card_widget.dart';
@@ -34,10 +33,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   String _searchText = '';
   late String _currentPragaType;
   late PragasProvider _pragasProvider;
-  late FavoritosRepositorySimplified _favoritosRepository;
-
-  // Cache local para status de favoritos
-  final Map<String, bool> _favoritesCache = {};
 
   @override
   void initState() {
@@ -47,13 +42,16 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
     // Inicializa o provider diretamente
     _pragasProvider = GetIt.instance<PragasProvider>();
-    _favoritosRepository = GetIt.instance<FavoritosRepositorySimplified>();
 
-    // Inicia o loading imediatamente para evitar flash do empty state
-    _pragasProvider.startInitialLoading();
-    
-    // Carrega favoritos iniciais
-    _loadFavoritesStatus();
+    // Inicialização única e ordenada
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await _pragasProvider.loadStats();
+        await _pragasProvider.loadPragasByTipo(_currentPragaType);
+      } catch (e) {
+        // Erro será tratado pelo provider
+      }
+    });
   }
 
   @override
@@ -61,6 +59,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _searchDebounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    
+    // Limpa dados do provider para evitar memory leaks
+    _pragasProvider.clear();
+    
     super.dispose();
   }
 
@@ -84,8 +86,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     } else {
       await _pragasProvider.searchPragas(searchText.trim());
     }
-    // Recarrega favoritos após busca
-    await _loadFavoritesStatus();
   }
 
   // Métodos de filtragem migrados para PragasProvider
@@ -99,8 +99,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     });
 
     await _pragasProvider.loadPragasByTipo(_currentPragaType);
-    // Recarrega favoritos após limpar busca
-    await _loadFavoritesStatus();
   }
 
   void _toggleViewMode(PragaViewMode mode) {
@@ -121,8 +119,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     } else {
       await _pragasProvider.searchPragas(_searchText);
     }
-    // Recarrega favoritos após ordenação
-    await _loadFavoritesStatus();
   }
 
   void _handleItemTap(PragaEntity praga) {
@@ -139,84 +135,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  /// Carrega o status de favoritos para as pragas atuais
-  Future<void> _loadFavoritesStatus() async {
-    if (_pragasProvider.pragas.isEmpty) return;
-
-    for (final praga in _pragasProvider.pragas) {
-      try {
-        final isFavorite = await _favoritosRepository.isFavorito(
-            TipoFavorito.praga, praga.idReg);
-        _favoritesCache[praga.idReg] = isFavorite;
-      } catch (e) {
-        _favoritesCache[praga.idReg] = false;
-      }
-    }
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  /// Alterna o status de favorito para uma praga
-  Future<void> _toggleFavorite(PragaEntity praga) async {
-    try {
-      final result = await _favoritosRepository.toggleFavorito(
-          TipoFavorito.praga, praga.idReg);
-
-      if (result) {
-        // Atualiza cache local
-        final currentStatus = _favoritesCache[praga.idReg] ?? false;
-        _favoritesCache[praga.idReg] = !currentStatus;
-
-        if (mounted) {
-          setState(() {});
-        }
-
-        // Mostra feedback visual
-        final newStatus = _favoritesCache[praga.idReg] ?? false;
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                newStatus
-                    ? '${praga.nomeComum} adicionada aos favoritos'
-                    : '${praga.nomeComum} removida dos favoritos',
-              ),
-              duration: const Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao alterar favorito: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  /// Verifica se uma praga é favorita
-  bool _isFavorite(PragaEntity praga) {
-    return _favoritesCache[praga.idReg] ?? false;
-  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Initialize provider data
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _pragasProvider.loadPragasByTipo(_currentPragaType);
-      // Carrega favoritos após carregar as pragas
-      await _loadFavoritesStatus();
-    });
 
     return PopScope(
       canPop: true,
@@ -304,9 +226,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
           Expanded(
             child: CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(
-                  child: _buildPragasList(isDark, provider),
-                ),
+                _buildPragasSliver(isDark, provider),
               ],
             ),
           ),
@@ -315,165 +235,187 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  Widget _buildPragasList(bool isDark, PragasProvider provider) {
+  Widget _buildPragasSliver(bool isDark, PragasProvider provider) {
     if (provider.isLoading) {
-      return PragasLoadingSkeletonWidget(viewMode: _viewMode, isDark: isDark);
+      return SliverToBoxAdapter(
+        child: PragasLoadingSkeletonWidget(viewMode: _viewMode, isDark: isDark),
+      );
     }
 
     if (provider.errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: isDark ? Colors.red.shade400 : Colors.red.shade600,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Erro ao carregar pragas',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: isDark ? Colors.red.shade400 : Colors.red.shade600,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                provider.errorMessage!,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                const SizedBox(height: 16),
+                Text(
+                  'Erro ao carregar pragas',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  provider.errorMessage!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     if (provider.pragas.isEmpty && _searchText.isEmpty) {
-      return PragasEmptyStateWidget(
-        pragaType: _currentPragaType,
-        isDark: isDark,
+      return SliverToBoxAdapter(
+        child: PragasEmptyStateWidget(
+          pragaType: _currentPragaType,
+          isDark: isDark,
+        ),
       );
     }
 
     if (provider.pragas.isEmpty && _searchText.isNotEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Icon(
-                Icons.search_off_rounded,
-                size: 64,
-                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Nenhum resultado encontrado',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tente usar outros termos de busca',
-                style: TextStyle(
-                  fontSize: 16,
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  size: 64,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum resultado encontrado',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tente usar outros termos de busca',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    return Card(
-      elevation: ReceitaAgroElevation.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-        side: BorderSide.none,
-      ),
-      color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-      margin: EdgeInsets.zero,
-      child: _viewMode.isGrid
-          ? _buildGridView(isDark, provider)
-          : _buildListView(isDark, provider),
-    );
+    return _viewMode.isGrid
+        ? _buildSliverGrid(isDark, provider)
+        : _buildSliverList(isDark, provider);
   }
 
-  Widget _buildGridView(bool isDark, PragasProvider provider) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
-
-        // Calcula quantas linhas teremos
-        final rowCount = (provider.pragas.length / crossAxisCount).ceil();
-        final itemHeight = constraints.maxWidth /
-            crossAxisCount *
-            (1 / 0.85); // childAspectRatio inverse
-        final totalHeight = (rowCount * itemHeight) +
-            ((rowCount - 1) * ReceitaAgroSpacing.sm) +
-            (ReceitaAgroSpacing.sm * 2); // spacing + vertical padding only
-
-        return SizedBox(
-          height: totalHeight,
-          child: GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            padding:
-                const EdgeInsets.symmetric(vertical: ReceitaAgroSpacing.sm),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: 0.85,
-              crossAxisSpacing: ReceitaAgroSpacing.sm,
-              mainAxisSpacing: ReceitaAgroSpacing.sm,
-            ),
-            itemCount: provider.pragas.length,
-            itemBuilder: (context, index) {
-              final praga = provider.pragas[index];
-              return PragaCardWidget(
-                praga: praga,
-                mode: PragaCardMode.grid,
-                isDarkMode: isDark,
-                isFavorite: _isFavorite(praga),
-                onTap: () => _handleItemTap(praga),
-                onFavoriteToggle: () => _toggleFavorite(praga),
+  Widget _buildSliverGrid(bool isDark, PragasProvider provider) {
+    return SliverPadding(
+      padding: const EdgeInsets.all(8.0),
+      sliver: SliverToBoxAdapter(
+        child: Card(
+          elevation: ReceitaAgroElevation.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+          ),
+          color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+          margin: EdgeInsets.zero,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
+              
+              return CustomScrollView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
+                    sliver: SliverGrid.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: 0.85,
+                        crossAxisSpacing: ReceitaAgroSpacing.sm,
+                        mainAxisSpacing: ReceitaAgroSpacing.sm,
+                      ),
+                      itemCount: provider.pragas.length,
+                      itemBuilder: (context, index) {
+                        final praga = provider.pragas[index];
+                        return PragaCardWidget(
+                          praga: praga,
+                          mode: PragaCardMode.grid,
+                          isDarkMode: isDark,
+                          onTap: () => _handleItemTap(praga),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget _buildListView(bool isDark, PragasProvider provider) {
-    return ListView.separated(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(vertical: ReceitaAgroSpacing.xs),
-      itemCount: provider.pragas.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 4),
-      itemBuilder: (context, index) {
-        final praga = provider.pragas[index];
-        return PragaCardWidget(
-          praga: praga,
-          mode: PragaCardMode.list,
-          isDarkMode: isDark,
-          isFavorite: _isFavorite(praga),
-          onTap: () => _handleItemTap(praga),
-          onFavoriteToggle: () => _toggleFavorite(praga),
-        );
-      },
+  Widget _buildSliverList(bool isDark, PragasProvider provider) {
+    return SliverPadding(
+      padding: const EdgeInsets.all(8.0),
+      sliver: SliverToBoxAdapter(
+        child: Card(
+          elevation: ReceitaAgroElevation.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
+          ),
+          color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+          margin: EdgeInsets.zero,
+          child: CustomScrollView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
+                sliver: SliverList.separated(
+                  itemCount: provider.pragas.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 4),
+                  itemBuilder: (context, index) {
+                    final praga = provider.pragas[index];
+                    return PragaCardWidget(
+                      praga: praga,
+                      mode: PragaCardMode.list,
+                      isDarkMode: isDark,
+                      onTap: () => _handleItemTap(praga),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+
 
   String _getHeaderTitle() {
     switch (_currentPragaType) {
@@ -489,9 +431,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   String _getHeaderSubtitle(PragasProvider provider) {
-    final total = provider.pragas.length;
-
-    if (provider.isLoading && total == 0) {
+    if (provider.isLoading && provider.pragas.isEmpty) {
       return 'Carregando registros...';
     }
 
@@ -499,7 +439,29 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       return 'Erro no carregamento';
     }
 
-    return '$total registros disponíveis';
+    // Usa as estatísticas da sessão em vez do count filtrado
+    final stats = provider.stats;
+    if (stats != null) {
+      final totalSessao = _getTotalPorTipo(stats);
+      return '$totalSessao registros na sessão';
+    }
+
+    // Fallback caso stats não esteja carregado
+    return 'Carregando estatísticas...';
+  }
+
+  /// Retorna o total de registros do tipo atual baseado nas estatísticas da sessão
+  int _getTotalPorTipo(PragasStats stats) {
+    switch (_currentPragaType) {
+      case '1': // Insetos
+        return stats.insetos;
+      case '2': // Doenças
+        return stats.doencas;
+      case '3': // Plantas Daninhas
+        return stats.plantas;
+      default:
+        return stats.total; // Total geral
+    }
   }
 
   int _calculateCrossAxisCount(double screenWidth) {

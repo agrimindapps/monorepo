@@ -74,15 +74,6 @@ class DevelopmentSection extends StatelessWidget {
                 title: 'Inspetor de Dados',
                 subtitle: 'Visualizar e gerenciar dados locais',
                 onTap: () => _openDataInspector(context),
-                showDivider: true,
-              ),
-              SettingsListTile(
-                leadingIcon: Icons.navigation,
-                iconColor: Colors.blue.shade600,
-                backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                title: 'Teste de Navegação',
-                subtitle: 'Testar sistema de navegação interna',
-                onTap: () => _openNavigationTest(context),
               ),
             ],
           ),
@@ -309,9 +300,5 @@ class DevelopmentSection extends StatelessWidget {
         builder: (context) => const DataInspectorPage(),
       ),
     );
-  }
-
-  void _openNavigationTest(BuildContext context) {
-    context.read<AppNavigationProvider>().navigateToNavigationTest();
   }
 }

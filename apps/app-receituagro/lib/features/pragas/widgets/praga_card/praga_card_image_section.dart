@@ -33,10 +33,6 @@ class PragaCardImageSection extends StatelessWidget {
         return _buildListImage();
       case PragaCardImageMode.grid:
         return _buildGridImage();
-      case PragaCardImageMode.compact:
-        return _buildCompactImage();
-      case PragaCardImageMode.featured:
-        return _buildFeaturedImage();
     }
   }
 
@@ -101,66 +97,6 @@ class PragaCardImageSection extends StatelessWidget {
     );
   }
 
-  /// Imagem para modo compacto (48x48)
-  Widget _buildCompactImage() {
-    return SizedBox(
-      width: width ?? 48,
-      height: height ?? 48,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: OptimizedPragaImageWidget(
-          nomeCientifico: properties.praga.nomeCientifico,
-          width: width ?? 48,
-          height: height ?? 48,
-          fit: BoxFit.cover,
-          enablePreloading: properties.enableImagePreloading,
-          errorWidget: _buildIconFallback(width ?? 48),
-        ),
-      ),
-    );
-  }
-
-  /// Imagem para modo featured (grande com overlay)
-  Widget _buildFeaturedImage() {
-    return SizedBox(
-      width: double.infinity,
-      height: height ?? 160,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        child: Stack(
-          children: [
-            OptimizedPragaImageWidget(
-              nomeCientifico: properties.praga.nomeCientifico,
-              width: double.infinity,
-              height: height ?? 160,
-              fit: BoxFit.cover,
-              enablePreloading: properties.enableImagePreloading,
-              errorWidget: _buildIconFallback(double.infinity),
-            ),
-            // Gradient overlay mais sutil para featured
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.5),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Constrói o fallback com ícone quando imagem falha
   Widget _buildIconFallback(double size) {
@@ -193,6 +129,4 @@ class PragaCardImageSection extends StatelessWidget {
 enum PragaCardImageMode {
   list,
   grid,
-  compact,
-  featured,
 }

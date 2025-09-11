@@ -6,7 +6,7 @@ import '../../core/di/injection_container.dart';
 import '../../core/models/cultura_hive.dart';
 import '../../core/repositories/cultura_core_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import '../pragas/lista_pragas_por_cultura_page.dart';
+import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
 import 'models/cultura_view_mode.dart';
 import 'widgets/cultura_item_widget.dart';
 import 'widgets/cultura_search_field.dart';
@@ -125,9 +125,8 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => ListaPragasPorCulturaPage(
-          culturaId: cultura.idReg,
-          culturaNome: cultura.cultura,
+        builder: (context) => PragasPorCulturaDetalhadasPage(
+          culturaIdInicial: cultura.idReg,
         ),
       ),
     );

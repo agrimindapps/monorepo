@@ -512,18 +512,25 @@ class _FuelPageState extends State<FuelPage> {
 
   Future<void> _showAddFuelDialog() async {
     try {
-      // Get providers before opening dialog to avoid context issues
+      // ✅ MEMORY LEAK FIX: Cache providers before async operations
       final authProvider = context.read<AuthProvider>();
+      final fuelProvider = context.read<FuelProvider>();
+      
+      // ✅ Ensure context is still valid after async gap
+      if (!mounted) return;
       
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (dialogContext) => MultiProvider(
           providers: [
+            // ✅ Create FuelFormProvider only when needed, will be disposed automatically
             ChangeNotifierProvider(create: (_) => FuelFormProvider()),
-            ChangeNotifierProvider.value(value: _vehiclesProvider),
-            ChangeNotifierProvider.value(value: authProvider),
+            // ✅ Use .value to avoid recreating existing providers
+            ChangeNotifierProvider<VehiclesProvider>.value(value: _vehiclesProvider),
+            ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+            ChangeNotifierProvider<FuelProvider>.value(value: fuelProvider),
           ],
-          builder: (context, child) => AddFuelPage(vehicleId: _selectedVehicleId),
+          child: AddFuelPage(vehicleId: _selectedVehicleId),
         ),
       );
       
@@ -554,18 +561,25 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   Future<void> _showEditFuelDialog(String fuelRecordId, String vehicleId) async {
-    // Get providers before opening dialog to avoid context issues
+    // ✅ MEMORY LEAK FIX: Cache providers before async operations
     final authProvider = context.read<AuthProvider>();
+    final fuelProvider = context.read<FuelProvider>();
+    
+    // ✅ Ensure context is still valid after async gap
+    if (!mounted) return;
     
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (dialogContext) => MultiProvider(
         providers: [
+          // ✅ Create FuelFormProvider only when needed, will be disposed automatically
           ChangeNotifierProvider(create: (_) => FuelFormProvider()),
-          ChangeNotifierProvider.value(value: _vehiclesProvider),
-          ChangeNotifierProvider.value(value: authProvider),
+          // ✅ Use .value to avoid recreating existing providers
+          ChangeNotifierProvider<VehiclesProvider>.value(value: _vehiclesProvider),
+          ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+          ChangeNotifierProvider<FuelProvider>.value(value: fuelProvider),
         ],
-        builder: (context, child) => AddFuelPage(
+        child: AddFuelPage(
           vehicleId: vehicleId,
           editFuelRecordId: fuelRecordId,
         ),
@@ -726,6 +740,7 @@ class _FuelPageState extends State<FuelPage> {
               final success = await _fuelProvider.deleteFuelRecord(record.id);
               
               if (mounted) {
+                // ✅ MEMORY LEAK FIX: Cache ScaffoldMessenger before using it
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 final message = success 
                   ? 'Registro excluído com sucesso!'

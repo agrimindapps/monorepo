@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/design/spacing_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/navigation/app_navigation_provider.dart';
 import '../../core/widgets/modern_header_widget.dart';
@@ -37,13 +39,23 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   late TabController _tabController;
   late DetalheDefensivoProvider _defensivoProvider;
   late DiagnosticosProvider _diagnosticosProvider;
+  int _currentTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(_handleTabChange);
     _initializeProviders();
     _loadData();
+  }
+
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) {
+      setState(() {
+        _currentTabIndex = _tabController.index;
+      });
+    }
   }
 
   void _initializeProviders() {
@@ -59,19 +71,27 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Future<void> _loadData() async {
-    await _defensivoProvider.initializeData(
-        widget.defensivoName, widget.fabricante);
+    try {
+      await _defensivoProvider.initializeData(
+          widget.defensivoName, widget.fabricante);
 
-    // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
-    if (_defensivoProvider.defensivoData != null) {
-      await _diagnosticosProvider
-          .loadDiagnosticos(_defensivoProvider.defensivoData!.idReg);
+      // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
+      if (_defensivoProvider.defensivoData != null) {
+        await _diagnosticosProvider
+            .loadDiagnosticos(_defensivoProvider.defensivoData!.idReg);
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar dados: $e');
+      // O estado de erro será gerenciado pelos providers individuais
     }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
+    _defensivoProvider.dispose();
+    _diagnosticosProvider.dispose();
     super.dispose();
   }
 
@@ -153,33 +173,37 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           tabs: StandardTabData.defensivoDetailsTabs,
         ),
         Expanded(
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _wrapTabContent(_buildInformacoesTab(), 'informacoes'),
-                _wrapTabContent(
-                  DiagnosticosTabWidget(defensivoName: widget.defensivoName),
-                  'diagnostico',
-                ),
-                _wrapTabContent(
-                  TecnologiaTabWidget(defensivoName: widget.defensivoName),
-                  'tecnologia',
-                ),
-                _wrapTabContent(
-                  ComentariosTabWidget(defensivoName: widget.defensivoName),
-                  'comentarios',
-                ),
-              ],
+            child: IndexedStack(
+              index: _currentTabIndex,
+              children: _buildTabContents(),
             ),
           ),
         ),
       ],
     );
+  }
+
+  List<Widget> _buildTabContents() {
+    return [
+      _wrapTabContent(_buildInformacoesTab(), 'informacoes'),
+      _wrapTabContent(
+        DiagnosticosTabWidget(defensivoName: widget.defensivoName),
+        'diagnostico',
+      ),
+      _wrapTabContent(
+        TecnologiaTabWidget(defensivoName: widget.defensivoName),
+        'tecnologia',
+      ),
+      _wrapTabContent(
+        ComentariosTabWidget(defensivoName: widget.defensivoName),
+        'comentarios',
+      ),
+    ];
   }
 
   Widget _wrapTabContent(Widget content, String type) {
@@ -227,42 +251,42 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Future<void> _handleFavoriteToggle(DetalheDefensivoProvider provider) async {
+    // Adicionar haptic feedback inicial
+    unawaited(HapticFeedback.lightImpact());
+    
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final wasAlreadyFavorited = provider.isFavorited;
-
-    // Mostra feedback imediato
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          wasAlreadyFavorited
-              ? '\u2764\ufe0f Removendo dos favoritos...'
-              : '\u2764\ufe0f Adicionando aos favoritos...',
-        ),
-        duration: const Duration(milliseconds: 1500),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-    );
 
     final success =
         await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
 
     if (!mounted) return;
 
-    // Feedback final baseado no resultado
-    scaffoldMessenger.hideCurrentSnackBar();
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? (wasAlreadyFavorited
-                  ? '\u2713 ${widget.defensivoName} removido dos favoritos'
-                  : '\u2713 ${widget.defensivoName} adicionado aos favoritos')
-              : '\u274c Erro ao alterar favorito',
+    // Feedback simplificado com haptic adequado
+    if (success) {
+      unawaited(HapticFeedback.selectionClick());
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            wasAlreadyFavorited
+                ? '\u2713 ${widget.defensivoName} removido dos favoritos'
+                : '\u2713 ${widget.defensivoName} adicionado aos favoritos',
+          ),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
         ),
-        duration: const Duration(seconds: 2),
-        backgroundColor:
-            success ? Theme.of(context).colorScheme.primary : Colors.red,
-      ),
-    );
+      );
+    } else {
+      unawaited(HapticFeedback.heavyImpact());
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('\u274c Erro ao alterar favorito'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

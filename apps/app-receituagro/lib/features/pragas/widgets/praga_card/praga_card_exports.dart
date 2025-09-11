@@ -4,9 +4,7 @@
 /// do sistema PragaCard para facilitar importação e uso.
 
 export 'praga_card_action_section.dart';
-export 'praga_card_compact_mode.dart';
 export 'praga_card_content_section.dart';
-export 'praga_card_featured_mode.dart';
 export 'praga_card_grid_mode.dart';
 // Utilitários
 export 'praga_card_helpers.dart';

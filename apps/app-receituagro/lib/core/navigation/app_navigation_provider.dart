@@ -17,7 +17,6 @@ enum AppPageType {
   listaCulturas,
   detalheDetalhes,
   subscription,
-  navigationTest,
   
   // Novas páginas para migração
   detalheCultura,
@@ -311,13 +310,6 @@ class AppNavigationProvider extends ChangeNotifier {
     );
   }
 
-  /// Navega para página de teste de navegação
-  void navigateToNavigationTest() {
-    navigateToPage(
-      AppPageType.navigationTest,
-      title: 'Teste de Navegação',
-    );
-  }
 
   /// Volta para a página anterior
   bool goBack() {

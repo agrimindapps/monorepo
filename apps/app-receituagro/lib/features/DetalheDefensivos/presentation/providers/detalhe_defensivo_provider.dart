@@ -101,14 +101,18 @@ class DetalheDefensivoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Carrega estado de favorito
+  /// Carrega estado de favorito usando sistema simplificado consistente
   Future<void> _loadFavoritoState(String defensivoName) async {
     final itemId = _defensivoData?.idReg ?? defensivoName;
     try {
-      _isFavorited = await _favoritosRepository.isFavoritoAsync('defensivos', itemId);
+      _isFavorited = await _favoritosProvider.isFavorito('defensivo', itemId);
     } catch (e) {
-      // Fallback to synchronous method
-      _isFavorited = _favoritosRepository.isFavorito('defensivos', itemId);
+      // Fallback para repository direto em caso de erro
+      try {
+        _isFavorited = await _favoritosRepository.isFavoritoAsync('defensivos', itemId);
+      } catch (fallbackError) {
+        _isFavorited = _favoritosRepository.isFavorito('defensivos', itemId);
+      }
     }
     notifyListeners();
   }

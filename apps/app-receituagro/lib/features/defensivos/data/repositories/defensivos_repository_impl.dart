@@ -241,53 +241,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         }).toList();
       }
       
-      // Agrupar por tipo solicitado
-      Map<String, List<DefensivoEntity>> grupos = {};
-      
-      for (final defensivo in defensivosFiltrados) {
-        String chaveGrupo;
-        switch (tipoAgrupamento.toLowerCase()) {
-          case 'classe':
-            chaveGrupo = defensivo.classeAgronomica ?? 'Sem classe';
-            break;
-          case 'fabricante':
-            chaveGrupo = defensivo.fabricante ?? 'Sem fabricante';
-            break;
-          case 'modo_acao':
-            chaveGrupo = defensivo.modoAcao ?? 'Sem modo de ação';
-            break;
-          default:
-            chaveGrupo = 'Todos';
-        }
-        
-        if (!grupos.containsKey(chaveGrupo)) {
-          grupos[chaveGrupo] = [];
-        }
-        grupos[chaveGrupo]!.add(DefensivoMapper.fromHiveToEntity(defensivo));
-      }
-      
-      // Converter grupos para lista com informação de agrupamento
-      final List<DefensivoEntity> resultado = [];
-      for (final entrada in grupos.entries) {
-        final nomeGrupo = entrada.key;
-        final defensivosDoGrupo = entrada.value;
-        
-        // Adicionar cabeçalho do grupo
-        resultado.add(DefensivoEntity(
-          id: 'grupo_$nomeGrupo',
-          nome: nomeGrupo,
-          ingredienteAtivo: '',
-          line1: nomeGrupo,
-          line2: '${defensivosDoGrupo.length} item(s)',
-          count: defensivosDoGrupo.length.toString(),
-          categoria: tipoAgrupamento,
-        ));
-        
-        // Adicionar itens do grupo
-        resultado.addAll(defensivosDoGrupo);
-      }
-      
-      return Right(resultado);
+      // CORREÇÃO: Não fazer agrupamento no repositório
+      // Retornar lista simples para que DefensivosGroupingService faça o agrupamento correto
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosFiltrados);
+      return Right(defensivosEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar defensivos agrupados: ${e.toString()}'));
     }

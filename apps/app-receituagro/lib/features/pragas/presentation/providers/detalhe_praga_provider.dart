@@ -8,6 +8,8 @@ import '../../../../core/models/pragas_hive.dart';
 import '../../../../core/models/pragas_inf_hive.dart';
 import '../../../../core/models/plantas_inf_hive.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../favoritos/favoritos_di.dart';
+import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../../core/repositories/pragas_inf_hive_repository.dart';
 import '../../../../core/repositories/plantas_inf_hive_repository.dart';
@@ -25,6 +27,11 @@ class DetalhePragaProvider extends ChangeNotifier {
   final PlantasInfHiveRepository _plantasInfRepository = sl<PlantasInfHiveRepository>();
   final IPremiumService _premiumService = sl<IPremiumService>();
   final ComentariosService _comentariosService = sl<ComentariosService>();
+  late final FavoritosProviderSimplified _favoritosProvider;
+
+  DetalhePragaProvider() {
+    _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
+  }
 
   // Estado da praga
   String _pragaName = '';
@@ -62,13 +69,13 @@ class DetalhePragaProvider extends ChangeNotifier {
   PlantasInfHive? get plantaInfo => _plantaInfo;
 
   /// Inicializa o provider com dados da praga
-  void initialize(String pragaName, String pragaScientificName) {
+  Future<void> initialize(String pragaName, String pragaScientificName) async {
     _pragaName = pragaName;
     _pragaScientificName = pragaScientificName;
     
-    _loadFavoritoState();
+    await _loadFavoritoState();
     _loadPremiumStatus();
-    _loadComentarios();
+    await _loadComentarios();
   }
 
   /// Versão assíncrona de initialize que aguarda dados estarem disponíveis
@@ -82,18 +89,20 @@ class DetalhePragaProvider extends ChangeNotifier {
     await _loadComentarios();
   }
 
-  /// Carrega estado de favorito da praga
-  void _loadFavoritoState() {
+  /// Carrega estado de favorito da praga usando sistema simplificado consistente
+  Future<void> _loadFavoritoState() async {
     // Busca a praga real pelo nome para obter o ID único
     final pragas = _pragasRepository.getAll()
         .where((p) => p.nomeComum == _pragaName);
     _pragaData = pragas.isNotEmpty ? pragas.first : null;
     
-    if (_pragaData != null) {
-      _isFavorited = _favoritosRepository.isFavorito('praga', _pragaData!.idReg);
-    } else {
-      // Fallback para nome se não encontrar no repositório
-      _isFavorited = _favoritosRepository.isFavorito('praga', _pragaName);
+    final itemId = _pragaData?.idReg ?? _pragaName;
+    
+    try {
+      _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
+    } catch (e) {
+      // Fallback para repository direto em caso de erro
+      _isFavorited = _favoritosRepository.isFavorito('pragas', itemId);
     }
     
     notifyListeners();
@@ -117,13 +126,19 @@ class DetalhePragaProvider extends ChangeNotifier {
       _pragaData = pragas.first;
     }
     
+    final itemId = _pragaData?.idReg ?? _pragaName;
+    
     if (_pragaData != null) {
       debugPrint('✅ Praga encontrada: ${_pragaData!.idReg} - ${_pragaData!.nomeComum}');
-      _isFavorited = _favoritosRepository.isFavorito('praga', _pragaData!.idReg);
     } else {
       debugPrint('❌ Praga não encontrada: $_pragaName');
-      // Fallback para nome se não encontrar no repositório
-      _isFavorited = _favoritosRepository.isFavorito('praga', _pragaName);
+    }
+    
+    try {
+      _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
+    } catch (e) {
+      // Fallback para repository direto em caso de erro  
+      _isFavorited = _favoritosRepository.isFavorito('pragas', itemId);
     }
     
     notifyListeners();
@@ -260,36 +275,61 @@ class DetalhePragaProvider extends ChangeNotifier {
     }
   }
 
-  /// Alterna estado de favorito
+  /// Alterna estado de favorito usando sistema simplificado consistente
   Future<bool> toggleFavorito() async {
     final wasAlreadyFavorited = _isFavorited;
     
     // Usa ID único do repositório se disponível, senão fallback para nome
     final itemId = _pragaData?.idReg ?? _pragaName;
-    final itemData = {
-      'nome': _pragaData?.nomeComum ?? _pragaName,
-      'nomeCientifico': _pragaData?.nomeCientifico ?? _pragaScientificName,
-      'idReg': itemId,
-    };
 
     // Atualiza UI imediatamente
     _isFavorited = !wasAlreadyFavorited;
     notifyListeners();
 
-    final success = wasAlreadyFavorited
-        ? await _favoritosRepository.removeFavorito('praga', itemId)
-        : await _favoritosRepository.addFavorito('praga', itemId, itemData);
+    try {
+      // Usa o sistema simplificado de favoritos
+      final success = await _favoritosProvider.toggleFavorito('praga', itemId);
 
-    if (!success) {
-      // Reverter estado em caso de falha
-      _isFavorited = wasAlreadyFavorited;
-      _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
-      notifyListeners();
-      return false;
+      if (!success) {
+        // Revert on failure
+        _isFavorited = wasAlreadyFavorited;
+        _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
+        notifyListeners();
+        return false;
+      }
+
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      // Fallback para sistema antigo em caso de erro
+      try {
+        final itemData = {
+          'nome': _pragaData?.nomeComum ?? _pragaName,
+          'nomeCientifico': _pragaData?.nomeCientifico ?? _pragaScientificName,
+          'idReg': itemId,
+        };
+
+        final success = wasAlreadyFavorited
+            ? await _favoritosRepository.removeFavorito('pragas', itemId)
+            : await _favoritosRepository.addFavorito('pragas', itemId, itemData);
+
+        if (!success) {
+          _isFavorited = wasAlreadyFavorited;
+          _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
+          notifyListeners();
+          return false;
+        }
+
+        _errorMessage = null;
+        return true;
+      } catch (fallbackError) {
+        // Revert on error
+        _isFavorited = wasAlreadyFavorited;
+        _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
+        notifyListeners();
+        return false;
+      }
     }
-
-    _errorMessage = null;
-    return true;
   }
 
   /// Limpa mensagem de erro

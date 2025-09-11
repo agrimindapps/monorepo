@@ -9,6 +9,8 @@ import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../favoritos/favoritos_di.dart';
+import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 import '../../../../core/services/premium_status_notifier.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
@@ -19,6 +21,11 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
   final DiagnosticoHiveRepository _hiveRepository = sl<DiagnosticoHiveRepository>();
   final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
   final IPremiumService _premiumService = sl<IPremiumService>();
+  late final FavoritosProviderSimplified _favoritosProvider;
+
+  DetalheDiagnosticoProvider() {
+    _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
+  }
 
   // Estado do loading e erro
   bool _isLoading = false;
@@ -129,13 +136,18 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
     });
   }
 
-  /// Carrega o estado de favorito
-  void loadFavoritoState(String diagnosticoId) {
-    _isFavorited = _favoritosRepository.isFavorito('diagnosticos', diagnosticoId);
+  /// Carrega o estado de favorito usando sistema simplificado consistente
+  Future<void> loadFavoritoState(String diagnosticoId) async {
+    try {
+      _isFavorited = await _favoritosProvider.isFavorito('diagnostico', diagnosticoId);
+    } catch (e) {
+      // Fallback para repository direto em caso de erro
+      _isFavorited = _favoritosRepository.isFavorito('diagnosticos', diagnosticoId);
+    }
     notifyListeners();
   }
 
-  /// Alterna o estado de favorito
+  /// Alterna o estado de favorito usando sistema simplificado consistente
   Future<bool> toggleFavorito(String diagnosticoId, Map<String, String> itemData) async {
     final wasAlreadyFavorited = _isFavorited;
     
@@ -143,18 +155,39 @@ class DetalheDiagnosticoProvider extends ChangeNotifier {
     _isFavorited = !wasAlreadyFavorited;
     notifyListeners();
 
-    // Executa operação
-    final success = wasAlreadyFavorited
-        ? await _favoritosRepository.removeFavorito('diagnosticos', diagnosticoId)
-        : await _favoritosRepository.addFavorito('diagnosticos', diagnosticoId, itemData);
+    try {
+      // Usa o sistema simplificado de favoritos
+      final success = await _favoritosProvider.toggleFavorito('diagnostico', diagnosticoId);
 
-    if (!success) {
-      // Reverter estado em caso de falha
-      _isFavorited = wasAlreadyFavorited;
-      notifyListeners();
+      if (!success) {
+        // Revert on failure
+        _isFavorited = wasAlreadyFavorited;
+        notifyListeners();
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      // Fallback para sistema antigo em caso de erro
+      try {
+        final success = wasAlreadyFavorited
+            ? await _favoritosRepository.removeFavorito('diagnosticos', diagnosticoId)
+            : await _favoritosRepository.addFavorito('diagnosticos', diagnosticoId, itemData);
+
+        if (!success) {
+          _isFavorited = wasAlreadyFavorited;
+          notifyListeners();
+          return false;
+        }
+
+        return true;
+      } catch (fallbackError) {
+        // Revert on error
+        _isFavorited = wasAlreadyFavorited;
+        notifyListeners();
+        return false;
+      }
     }
-
-    return success;
   }
 
   /// Cria texto para compartilhamento

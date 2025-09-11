@@ -36,11 +36,11 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = context.read<DetalheDiagnosticoProvider>();
-      provider.loadDiagnosticoData(widget.diagnosticoId);
-      provider.loadFavoritoState(widget.diagnosticoId);
-      provider.loadPremiumStatus();
+      await provider.loadDiagnosticoData(widget.diagnosticoId);
+      await provider.loadFavoritoState(widget.diagnosticoId);
+      await provider.loadPremiumStatus();
     });
   }
   

@@ -10,9 +10,13 @@ import 'presentation/providers/settings_provider.dart';
 import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/about_section.dart';
 import 'widgets/sections/app_info_section.dart';
+import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/development_section.dart';
+import 'widgets/sections/device_management_section.dart';
+import 'widgets/sections/feature_flags_section.dart';
 import 'widgets/sections/premium_section.dart';
 import 'widgets/sections/support_section.dart';
+import 'widgets/sections/user_profile_section.dart';
 
 /// Refactored Settings Page with Clean Architecture
 /// Uses modular components and unified provider
@@ -109,6 +113,11 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListView(
       padding: const EdgeInsets.all(8.0),
       children: const [
+        // Auth Section (Login/Logout)
+        AuthSection(),
+        
+        SizedBox(height: 4),
+        
         // App Info Section
         AppInfoSection(),
         
@@ -119,8 +128,23 @@ class _SettingsPageState extends State<SettingsPage> {
         
         SizedBox(height: 4),
         
+        // Device Management Section
+        DeviceManagementSection(),
+        
+        SizedBox(height: 4),
+        
+        // User Profile Section
+        UserProfileSection(),
+        
+        SizedBox(height: 4),
+        
         // Support Section
         SupportSection(),
+        
+        SizedBox(height: 4),
+        
+        // Feature Flags Section
+        FeatureFlagsSection(),
         
         // Development Section (only shown in debug mode)
         DevelopmentSection(),

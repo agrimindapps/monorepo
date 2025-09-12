@@ -1,4 +1,5 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
@@ -31,11 +32,16 @@ import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
 import '../services/enhanced_diagnostic_integration_service.dart';
 import '../services/navigation_service.dart';
+import '../providers/feature_flags_provider.dart';
+import '../providers/remote_config_provider.dart';
+import '../../features/analytics/analytics_service.dart';
+import '../services/cloud_functions_service.dart';
+import '../services/premium_service.dart';
 import '../services/premium_service_real.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/receituagro_storage_service_emergency_stub.dart';
-// Core Package Integration temporarily disabled
-// import 'core_package_integration.dart';
+import '../services/remote_config_service.dart';
+import 'core_package_integration.dart';
 import 'repositories_di.dart';
 
 final sl = GetIt.instance;
@@ -51,9 +57,52 @@ Future<void> init() async {
     () => AppNavigationProvider(),
   );
   
-  // ===== CORE PACKAGE INTEGRATION TEMPORARILY DISABLED =====
-  // EMERGENCY FIX: Disabling Core Package to resolve Hive conflicts
-  // await CorePackageIntegration.initializeCoreServices();
+  // ===== CORE PACKAGE INTEGRATION - AUTH SERVICES ONLY =====
+  // Enable only auth-related services for Sprint 1
+  await CorePackageIntegration.initializeAuthServices();
+  
+  // ===== SPRINT 1 SERVICES =====
+  // New services for Remote Config, Analytics, Cloud Functions, Premium
+  
+  // Remote Config Service
+  sl.registerLazySingleton<ReceitaAgroRemoteConfigService>(
+    () => ReceitaAgroRemoteConfigService.instance,
+  );
+  
+  // Analytics Service (uses Core Package Firebase services)
+  sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+    () => ReceitaAgroAnalyticsService(
+      analyticsRepository: sl<core.IAnalyticsRepository>(),
+      crashlyticsRepository: sl<core.ICrashlyticsRepository>(),
+    ),
+  );
+  
+  // Cloud Functions Service
+  sl.registerLazySingleton<ReceitaAgroCloudFunctionsService>(
+    () => ReceitaAgroCloudFunctionsService.instance,
+  );
+  
+  // Premium Service (New Architecture)
+  sl.registerLazySingleton<ReceitaAgroPremiumService>(
+    () {
+      final service = ReceitaAgroPremiumService.instance;
+      service.setDependencies(
+        analytics: sl<ReceitaAgroAnalyticsService>(),
+        cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
+        remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
+      );
+      return service;
+    },
+  );
+  
+  // Providers for state management
+  sl.registerLazySingleton<RemoteConfigProvider>(
+    () => RemoteConfigProvider(),
+  );
+  
+  sl.registerLazySingleton<FeatureFlagsProvider>(
+    () => FeatureFlagsProvider(),
+  );
   
   // TEMPORARILY DISABLED: Box Registry Service and Core Storage Service
   // EMERGENCY FIX: Avoiding dual Hive system conflicts
@@ -62,23 +111,23 @@ Future<void> init() async {
   //   () => HiveStorageService(sl<IBoxRegistryService>()),
   // );
 
-  // Analytics Repository
-  sl.registerLazySingleton<IAnalyticsRepository>(
-    () => FirebaseAnalyticsService(),
+  // Analytics Repository - Now registered via Core Package Integration
+  // sl.registerLazySingleton<IAnalyticsRepository>(
+  //   () => FirebaseAnalyticsService(),
+  // );
+
+  // Crashlytics Repository - Now registered via Core Package Integration
+  // sl.registerLazySingleton<ICrashlyticsRepository>(
+  //   () => FirebaseCrashlyticsService(),
+  // );
+
+  // Subscription Repository (RevenueCat) - Using Core Package
+  sl.registerLazySingleton<core.ISubscriptionRepository>(
+    () => core.RevenueCatService(),
   );
 
-  // Crashlytics Repository
-  sl.registerLazySingleton<ICrashlyticsRepository>(
-    () => FirebaseCrashlyticsService(),
-  );
-
-  // Subscription Repository (RevenueCat)
-  sl.registerLazySingleton<ISubscriptionRepository>(
-    () => RevenueCatService(),
-  );
-
-  // App Rating Repository
-  sl.registerLazySingleton<IAppRatingRepository>(() => AppRatingService(
+  // App Rating Repository - Using Core Package
+  sl.registerLazySingleton<core.IAppRatingRepository>(() => core.AppRatingService(
     appStoreId: '6738924932', // ReceitaAgro App Store ID real
     googlePlayId: 'br.com.agrimind.pragassoja', // Using the correct package ID
     minDays: 3,
@@ -102,11 +151,19 @@ Future<void> init() async {
     () => sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
   );
   
-  // Storage Service - EMERGENCY FIX: Using complete stub without Core Package
-  // This prevents app crashes while we fix the Hive system integration
-  sl.registerLazySingleton(
+  // Storage Service - Using Core Package EnhancedStorageService
+  sl.registerLazySingleton<ReceitaAgroStorageServiceEmergencyStub>(
     () => ReceitaAgroStorageServiceEmergencyStub(),
   );
+  
+  // Enhanced Storage Service from Core Package
+  try {
+    sl.registerLazySingleton<core.EnhancedStorageService>(
+      () => core.EnhancedStorageService(),
+    );
+  } catch (e) {
+    if (kDebugMode) print('EnhancedStorageService registration failed: $e');
+  }
   
   // TEMPORARILY DISABLED: Interface do core para compatibilidade
   // EMERGENCY FIX: Using legacy repositories directly
@@ -121,7 +178,7 @@ Future<void> init() async {
   
   // Device Identity Service - Gerenciador de UUID único por dispositivo
   sl.registerLazySingleton<DeviceIdentityService>(
-    () => DeviceIdentityService.instance,
+    () => DeviceIdentityService(),
   );
   
   // Hive Repositories - Repositórios de dados reais
@@ -270,7 +327,7 @@ Future<void> init() async {
   sl.registerLazySingleton<IPremiumService>(
     () => PremiumServiceReal(
       hiveRepository: sl<PremiumHiveRepository>(),
-      subscriptionRepository: sl<ISubscriptionRepository>(),
+      subscriptionRepository: sl<core.ISubscriptionRepository>(),
       navigationService: sl<INavigationService>(),
     ),
   );

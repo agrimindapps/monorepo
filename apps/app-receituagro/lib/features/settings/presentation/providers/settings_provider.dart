@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/i_premium_service.dart';
+import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/services/device_identity_service.dart';
 import '../../../../core/services/receituagro_notification_service.dart';
 import '../../domain/entities/user_settings_entity.dart';
 import '../../domain/usecases/get_user_settings_usecase.dart';
@@ -20,6 +22,8 @@ class SettingsProvider extends ChangeNotifier {
   late final IAnalyticsRepository _analyticsRepository;
   late final ICrashlyticsRepository _crashlyticsRepository;
   late final IAppRatingRepository _appRatingRepository;
+  late final DeviceIdentityService _deviceIdentityService;
+  late final FeatureFlagsProvider _featureFlagsProvider;
   
   SettingsProvider({
     required GetUserSettingsUseCase getUserSettingsUseCase,
@@ -36,6 +40,10 @@ class SettingsProvider extends ChangeNotifier {
   String _currentUserId = '';
   bool _isPremiumUser = false;
   bool _disposed = false;
+  
+  // Device Management State
+  DeviceInfo? _currentDevice;
+  List<DeviceInfo> _connectedDevices = [];
 
   // Getters
   UserSettingsEntity? get settings => _settings;
@@ -43,6 +51,11 @@ class SettingsProvider extends ChangeNotifier {
   String? get error => _error;
   bool get hasSettings => _settings != null;
   bool get isPremiumUser => _isPremiumUser;
+  
+  // Device Management Getters
+  DeviceInfo? get currentDevice => _currentDevice;
+  List<DeviceInfo> get connectedDevices => _connectedDevices;
+  bool get isDeviceManagementEnabled => _featureFlagsProvider.isDeviceManagementEnabled;
   
   // Settings getters for easier access
   bool get isDarkTheme => _settings?.isDarkTheme ?? false;
@@ -60,6 +73,8 @@ class SettingsProvider extends ChangeNotifier {
       _analyticsRepository = di.sl<IAnalyticsRepository>();
       _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
       _appRatingRepository = di.sl<IAppRatingRepository>();
+      _deviceIdentityService = di.sl<DeviceIdentityService>();
+      _featureFlagsProvider = di.sl<FeatureFlagsProvider>();
     } catch (e) {
       debugPrint('Error initializing services: $e');
     }
@@ -76,6 +91,7 @@ class SettingsProvider extends ChangeNotifier {
     await Future.wait([
       loadSettings(),
       _loadPremiumStatus(),
+      _loadDeviceInfo(),
     ]);
   }
 
@@ -356,7 +372,140 @@ class SettingsProvider extends ChangeNotifier {
     await Future.wait([
       loadSettings(),
       _loadPremiumStatus(),
+      _loadDeviceInfo(),
     ]);
+  }
+
+  // Device Management Methods
+  
+  /// Load device information
+  Future<void> _loadDeviceInfo() async {
+    try {
+      // Get current device info
+      _currentDevice = await _deviceIdentityService.getDeviceInfo();
+      
+      // Mock connected devices for demo (in real implementation, this would come from backend)
+      _connectedDevices = [
+        _currentDevice!,
+        // Add mock devices for demonstration
+        if (_currentDevice!.platform == 'iOS') ...[
+          DeviceInfo(
+            uuid: 'mock-android-device',
+            name: 'Samsung Galaxy S21',
+            model: 'SM-G991B',
+            platform: 'Android',
+            systemVersion: '13',
+            appVersion: _currentDevice!.appVersion,
+            buildNumber: _currentDevice!.buildNumber,
+            identifier: 'android-test-device',
+            isPhysicalDevice: true,
+            manufacturer: 'Samsung',
+            firstLoginAt: DateTime.now().subtract(const Duration(days: 5)),
+            lastActiveAt: DateTime.now().subtract(const Duration(hours: 2)),
+            isActive: true,
+          ),
+        ] else ...[
+          DeviceInfo(
+            uuid: 'mock-ios-device',
+            name: 'iPhone 14 Pro',
+            model: 'iPhone15,3',
+            platform: 'iOS',
+            systemVersion: '17.0',
+            appVersion: _currentDevice!.appVersion,
+            buildNumber: _currentDevice!.buildNumber,
+            identifier: 'ios-test-device',
+            isPhysicalDevice: true,
+            manufacturer: 'Apple',
+            firstLoginAt: DateTime.now().subtract(const Duration(days: 3)),
+            lastActiveAt: DateTime.now().subtract(const Duration(minutes: 30)),
+            isActive: true,
+          ),
+        ],
+      ];
+      
+      if (!_disposed) {
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading device info: $e');
+    }
+  }
+
+  /// Revoke device access
+  Future<void> revokeDevice(String deviceUuid) async {
+    try {
+      // In real implementation, this would call backend API
+      // For now, just remove from local list
+      _connectedDevices.removeWhere((device) => device.uuid == deviceUuid);
+      
+      if (!_disposed) {
+        notifyListeners();
+      }
+      
+      // Log analytics event
+      await _analyticsRepository.logEvent(
+        'device_revoked',
+        parameters: {
+          'device_uuid': deviceUuid,
+          'remaining_devices': _connectedDevices.length,
+          'user_id': _currentUserId,
+        },
+      );
+      
+    } catch (e) {
+      _setError('Erro ao revogar dispositivo: $e');
+      debugPrint('Error revoking device: $e');
+    }
+  }
+
+  /// Add new device (called during login from new device)
+  Future<bool> addDevice(DeviceInfo device) async {
+    try {
+      // Check device limit
+      if (_connectedDevices.length >= 3) {
+        _setError('Limite de dispositivos atingido (3 máximo)');
+        return false;
+      }
+      
+      // Add device to list
+      _connectedDevices.add(device);
+      
+      if (!_disposed) {
+        notifyListeners();
+      }
+      
+      // Log analytics event
+      await _analyticsRepository.logEvent(
+        'device_added',
+        parameters: {
+          'device_uuid': device.uuid,
+          'device_platform': device.platform,
+          'total_devices': _connectedDevices.length,
+          'user_id': _currentUserId,
+        },
+      );
+      
+      return true;
+      
+    } catch (e) {
+      _setError('Erro ao adicionar dispositivo: $e');
+      debugPrint('Error adding device: $e');
+      return false;
+    }
+  }
+
+  /// Check if user can add more devices
+  bool canAddMoreDevices() {
+    return _connectedDevices.length < 3;
+  }
+
+  /// Get device by UUID
+  DeviceInfo? getDeviceByUuid(String uuid) {
+    try {
+      return _connectedDevices.firstWhere((device) => device.uuid == uuid);
+    } catch (e) {
+      return null;
+    }
   }
 
   @override

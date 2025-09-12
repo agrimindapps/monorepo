@@ -30,6 +30,14 @@ class SettingsDesignTokens {
   static const IconData volumeIcon = Icons.volume_up;
   static const IconData paletteIcon = Icons.palette;
   static const IconData systemThemeIcon = Icons.auto_mode;
+  static const IconData deviceManagementIcon = Icons.devices;
+
+  // Section Layout
+  static const EdgeInsets sectionMargin = EdgeInsets.symmetric(vertical: 4.0);
+  static const EdgeInsets sectionHeaderPadding = EdgeInsets.fromLTRB(16, 16, 16, 8);
+  static const double cardElevation = 2.0;
+  static const double cardRadius = 12.0;
+  static const double sectionIconSize = 20.0;
 
   // Dimensions
   static const double maxPageWidth = 1120.0;

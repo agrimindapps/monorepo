@@ -4,6 +4,10 @@ import 'package:get_it/get_it.dart';
 
 import '../services/enhanced_error_handler.dart';
 import '../services/receituagro_validation_service.dart';
+import '../services/device_identity_service.dart';
+import '../services/user_data_migration_service.dart';
+import '../../features/analytics/analytics_service.dart';
+import '../providers/auth_provider.dart';
 
 /// Core Package Integration Configuration for ReceitaAgro
 /// This file centralizes all Core Package service registrations
@@ -20,6 +24,13 @@ class CorePackageIntegration {
     await _registerSyncAndFirebase();
     await _registerDevelopmentTools();
     await _registerReceitaAgroSpecificServices();
+  }
+
+  /// Initialize only auth-related Core Package services (Sprint 1)
+  static Future<void> initializeAuthServices() async {
+    await _registerAuthServices();
+    await _registerAnalyticsServices();
+    await _registerReceitaAgroAuthServices();
   }
 
   /// Register Core Package repositories (primary integration layer)
@@ -335,5 +346,76 @@ class CorePackageIntegration {
     buffer.writeln('CRITICAL SERVICES STATUS: ${validateCriticalServicesIntegration() ? "PASSED" : "FAILED"}');
     
     return buffer.toString();
+  }
+
+  // ===== AUTH-SPECIFIC SERVICES (Sprint 1) =====
+
+  /// Register only auth services from Core Package
+  static Future<void> _registerAuthServices() async {
+    // Firebase Auth Service
+    try {
+      _sl.registerLazySingleton<core.IAuthRepository>(
+        () => core.FirebaseAuthService(),
+      );
+      if (kDebugMode) print('✅ Core Package: Firebase Auth Service registered');
+    } catch (e) {
+      if (kDebugMode) print('❌ Core Package: Firebase Auth Service registration failed - $e');
+    }
+  }
+
+  /// Register analytics services from Core Package
+  static Future<void> _registerAnalyticsServices() async {
+    // Firebase Analytics Service
+    try {
+      _sl.registerLazySingleton<core.IAnalyticsRepository>(
+        () => core.FirebaseAnalyticsService(),
+      );
+      if (kDebugMode) print('✅ Core Package: Firebase Analytics Service registered');
+    } catch (e) {
+      if (kDebugMode) print('❌ Core Package: Firebase Analytics Service registration failed - $e');
+    }
+
+    // Firebase Crashlytics Service
+    try {
+      _sl.registerLazySingleton<core.ICrashlyticsRepository>(
+        () => core.FirebaseCrashlyticsService(),
+      );
+      if (kDebugMode) print('✅ Core Package: Firebase Crashlytics Service registered');
+    } catch (e) {
+      if (kDebugMode) print('❌ Core Package: Firebase Crashlytics Service registration failed - $e');
+    }
+  }
+
+  /// Register ReceitaAgro-specific auth services
+  static Future<void> _registerReceitaAgroAuthServices() async {
+    // Import dependencies for auth services
+    final deviceService = _sl.get<DeviceIdentityService>();
+    final migrationService = UserDataMigrationService.instance;
+    final analyticsService = ReceitaAgroAnalyticsService(
+      analyticsRepository: _sl<core.IAnalyticsRepository>(),
+      crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
+    );
+
+    // Register ReceitaAgro Analytics Service
+    _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+      () => analyticsService,
+    );
+
+    // Register Migration Service
+    _sl.registerLazySingleton<UserDataMigrationService>(
+      () => migrationService,
+    );
+
+    // Register ReceitaAgro Auth Provider
+    _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
+      () => ReceitaAgroAuthProvider(
+        authRepository: _sl<core.IAuthRepository>(),
+        deviceService: deviceService,
+        migrationService: migrationService,
+        analytics: analyticsService,
+      ),
+    );
+
+    if (kDebugMode) print('✅ ReceitaAgro: Auth services registered successfully');
   }
 }

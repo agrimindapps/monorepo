@@ -10,11 +10,17 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/injection_container.dart' as di;
+import 'core/providers/auth_provider.dart';
+import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
+import 'core/providers/remote_config_provider.dart';
+import 'features/analytics/analytics_service.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 import 'core/services/navigation_service.dart';
+import 'core/services/premium_service.dart';
 import 'core/services/receituagro_notification_service.dart';
+import 'core/services/remote_config_service.dart';
 import 'core/services/receituagro_storage_service_emergency_stub.dart';
 import 'core/services/revenuecat_service.dart' as local_rc;
 import 'core/services/startup_optimization_service.dart';
@@ -86,6 +92,20 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+  
+  // ===== SPRINT 1 SERVICES INITIALIZATION =====
+  
+  // Initialize Remote Config Service
+  final remoteConfigService = di.sl<ReceitaAgroRemoteConfigService>();
+  await remoteConfigService.initialize();
+  
+  // Initialize Analytics Service  
+  final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
+  await analyticsService.initialize();
+  
+  // Initialize Premium Service
+  final premiumService = di.sl<ReceitaAgroPremiumService>();
+  await premiumService.initialize();
 
   // EMERGENCY FIX: ReceitaAgro data initialization temporarily disabled
   try {
@@ -189,6 +209,20 @@ class ReceitaAgroApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
         ChangeNotifierProvider(
           create: (_) => PreferencesProvider()..initialize(),
+        ),
+        // Auth Provider from Core Package Integration
+        ChangeNotifierProvider(
+          create: (_) => di.sl<ReceitaAgroAuthProvider>(),
+        ),
+        // Sprint 1 Providers
+        ChangeNotifierProvider(
+          create: (_) => di.sl<RemoteConfigProvider>()..initialize(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<FeatureFlagsProvider>()..initialize(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<ReceitaAgroPremiumService>(),
         ),
       ],
       child: Consumer<ThemeProvider>(

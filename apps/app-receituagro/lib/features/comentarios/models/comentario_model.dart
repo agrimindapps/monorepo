@@ -8,6 +8,9 @@ class ComentarioModel {
   final bool status;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? userId;
+  final bool synchronized;
+  final DateTime? syncedAt;
 
   const ComentarioModel({
     required this.id,
@@ -19,6 +22,9 @@ class ComentarioModel {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.userId,
+    this.synchronized = false,
+    this.syncedAt,
   });
 
   factory ComentarioModel.fromMap(Map<String, dynamic> map) {
@@ -32,6 +38,11 @@ class ComentarioModel {
       status: map['status'] == true || map['status'] == 1,
       createdAt: DateTime.tryParse(map['createdAt']?.toString() ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(map['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      userId: map['userId']?.toString(),
+      synchronized: map['synchronized'] == true,
+      syncedAt: map['syncedAt'] != null
+          ? DateTime.tryParse(map['syncedAt'].toString())
+          : null,
     );
   }
 
@@ -46,6 +57,9 @@ class ComentarioModel {
       'status': status,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'userId': userId,
+      'synchronized': synchronized,
+      'syncedAt': syncedAt?.toIso8601String(),
     };
   }
 
@@ -59,6 +73,9 @@ class ComentarioModel {
     bool? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? userId,
+    bool? synchronized,
+    DateTime? syncedAt,
   }) {
     return ComentarioModel(
       id: id ?? this.id,
@@ -70,6 +87,23 @@ class ComentarioModel {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      userId: userId ?? this.userId,
+      synchronized: synchronized ?? this.synchronized,
+      syncedAt: syncedAt ?? this.syncedAt,
+    );
+  }
+
+  ComentarioModel markAsUnsynchronized() {
+    return copyWith(
+      synchronized: false,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  ComentarioModel markAsSynchronized() {
+    return copyWith(
+      synchronized: true,
+      syncedAt: DateTime.now(),
     );
   }
 

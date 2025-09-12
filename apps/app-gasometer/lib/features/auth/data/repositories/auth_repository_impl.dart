@@ -278,6 +278,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.signOut();
       await localDataSource.clearCachedUser();
+      // SECURITY + UX FIX: Clear password but preserve email for better UX
+      await localDataSource.clearCachedCredentialsPreservingEmail();
       return const Right(unit);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

@@ -558,7 +558,7 @@ class AccountSectionWidget extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await authProvider.logout();
+      await authProvider.logoutWithLoadingDialog(context);
       if (context.mounted && authProvider.errorMessage != null) {
         _showSnackBar(context, authProvider.errorMessage!);
       } else if (context.mounted) {

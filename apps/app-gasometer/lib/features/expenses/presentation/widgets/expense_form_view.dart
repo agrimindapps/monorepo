@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/theme/app_theme.dart';
+import '../../../../core/presentation/widgets/form_section_widget.dart';
+import '../../../../core/presentation/widgets/validated_datetime_field.dart';
 import '../../../../core/presentation/widgets/validated_text_field.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../core/constants/expense_constants.dart';
 import '../providers/expense_form_provider.dart';
 import 'expense_type_selector.dart';
@@ -35,59 +39,63 @@ class ExpenseFormView extends StatelessWidget {
                 if (showTitle) ...[
                   Text(
                     'Nova Despesa',
-                    style: AppTheme.textStyles.headlineSmall,
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeXl,
+                      fontWeight: GasometerDesignTokens.fontWeightBold,
+                      color: GasometerDesignTokens.colorTextPrimary,
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: GasometerDesignTokens.spacingMd),
                 ],
 
                 // Seção: Informações Básicas
-                _buildSection(
-                  context,
+                FormSectionWidget.withTitle(
                   title: ExpenseConstants.basicInfoSectionTitle,
-                  children: [
-                    // Seletor de tipo de despesa
-                    ExpenseTypeSelector(
-                      selectedType: provider.formModel.expenseType,
-                      onTypeSelected: provider.updateExpenseType,
-                      error: provider.formModel.getFieldError('expenseType'),
-                    ),
-                    
-                    const SizedBox(height: ExpenseConstants.fieldSpacing),
+                  icon: Icons.info_outline,
+                  content: Column(
+                    children: [
+                      // Seletor de tipo de despesa
+                      ExpenseTypeSelector(
+                        selectedType: provider.formModel.expenseType,
+                        onTypeSelected: provider.updateExpenseType,
+                        error: provider.formModel.getFieldError('expenseType'),
+                      ),
+                      
+                      SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                    // Descrição com validação em tempo real
-                    ValidatedTextField(
-                      controller: provider.descriptionController,
-                      label: 'Descrição *',
-                      hint: ExpenseConstants.descriptionPlaceholder,
-                      maxLength: ExpenseConstants.maxDescriptionLength,
-                      required: true,
-                      showCharacterCount: true,
-                      prefixIcon: Icons.description,
-                      validator: (value) => provider.validateField('description', value),
-                      // onChanged será tratado automaticamente pelo controller
-                      debounceDuration: const Duration(milliseconds: 300),
-                    ),
+                      // Descrição com validação em tempo real
+                      ValidatedTextField(
+                        controller: provider.descriptionController,
+                        label: 'Descrição *',
+                        hint: ExpenseConstants.descriptionPlaceholder,
+                        maxLength: ExpenseConstants.maxDescriptionLength,
+                        required: true,
+                        showCharacterCount: true,
+                        prefixIcon: Icons.description,
+                        validator: (value) => provider.validateField('description', value),
+                        debounceDuration: const Duration(milliseconds: 300),
+                      ),
 
-                    const SizedBox(height: ExpenseConstants.fieldSpacing),
+                      SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                    // Data e Hora
-                    _buildDateTimeFields(context, provider),
-                  ],
+                      // Data e Hora unified  
+                      _buildDateTimeField(context, provider),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: ExpenseConstants.sectionSpacing),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
                 // Seção: Valores
-                _buildSection(
-                  context,
+                FormSectionWidget.withTitle(
                   title: ExpenseConstants.expenseSectionTitle,
-                  children: [
-                    Row(
-                      children: [
-                        // Valor com validação monetária
-                        Expanded(
-                          flex: 2,
-                          child: ValidatedTextField(
+                  icon: Icons.attach_money,
+                  content: Column(
+                    children: [
+                      FormFieldRow.standard(
+                        children: [
+                          // Valor com validação monetária
+                          ValidatedTextField(
                             controller: provider.amountController,
                             label: 'Valor *',
                             hint: ExpenseConstants.amountPlaceholder,
@@ -95,25 +103,21 @@ class ExpenseFormView extends StatelessWidget {
                             prefixIcon: Icons.attach_money,
                             required: true,
                             validator: CommonValidators.moneyValidator,
-                            // onChanged será tratado automaticamente pelo controller
                             debounceDuration: const Duration(milliseconds: 500),
                           ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        // Odômetro
-                        Expanded(
-                          flex: 2,
-                          child: ValidatedTextField(
+                          // Odômetro
+                          ValidatedTextField(
                             controller: provider.odometerController,
                             label: 'Odômetro *',
                             hint: ExpenseConstants.odometerPlaceholder,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             prefixIcon: Icons.speed,
-                            suffix: const Text(
+                            suffix: Text(
                               ExpenseConstants.kilometerUnit,
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(
+                                color: GasometerDesignTokens.colorTextSecondary,
+                                fontSize: GasometerDesignTokens.fontSizeBody,
+                              ),
                             ),
                             required: true,
                             validator: (value) => CommonValidators.intValidator(
@@ -121,74 +125,73 @@ class ExpenseFormView extends StatelessWidget {
                               min: 0,
                               max: 999999,
                             ),
-                            // onChanged será tratado automaticamente pelo controller
                             debounceDuration: const Duration(milliseconds: 400),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
 
-                    const SizedBox(height: ExpenseConstants.fieldSpacing),
+                      SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                    // Localização (opcional)
-                    ValidatedTextField(
-                      controller: provider.locationController,
-                      label: 'Localização',
-                      hint: ExpenseConstants.locationPlaceholder,
-                      maxLength: ExpenseConstants.maxLocationLength,
-                      prefixIcon: Icons.location_on,
-                      showCharacterCount: true,
-                      validator: (value) {
-                        if (value != null && value.length > ExpenseConstants.maxLocationLength) {
-                          return 'Localização muito longa';
-                        }
-                        return null;
-                      },
-                      // onChanged será tratado automaticamente pelo controller
-                      debounceDuration: const Duration(milliseconds: 600),
-                    ),
-                  ],
+                      // Localização (opcional)
+                      ValidatedTextField(
+                        controller: provider.locationController,
+                        label: 'Localização',
+                        hint: ExpenseConstants.locationPlaceholder,
+                        maxLength: ExpenseConstants.maxLocationLength,
+                        prefixIcon: Icons.location_on,
+                        showCharacterCount: true,
+                        validator: (value) {
+                          if (value != null && value.length > ExpenseConstants.maxLocationLength) {
+                            return 'Localização muito longa';
+                          }
+                          return null;
+                        },
+                        debounceDuration: const Duration(milliseconds: 600),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: ExpenseConstants.sectionSpacing),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
                 // Seção: Comprovante e Observações
-                _buildSection(
-                  context,
+                FormSectionWidget.withTitle(
                   title: ExpenseConstants.additionalSectionTitle,
-                  children: [
-                    // Comprovante (imagem)
-                    ReceiptImagePicker(
-                      imagePath: provider.formModel.receiptImagePath,
-                      onImageSelected: provider.addReceiptImage,
-                      onImageRemoved: provider.removeReceiptImage,
-                      hasImage: provider.hasReceiptImage,
-                    ),
+                  icon: Icons.attachment,
+                  content: Column(
+                    children: [
+                      // Comprovante (imagem)
+                      ReceiptImagePicker(
+                        imagePath: provider.formModel.receiptImagePath,
+                        onImageSelected: provider.addReceiptImage,
+                        onImageRemoved: provider.removeReceiptImage,
+                        hasImage: provider.hasReceiptImage,
+                      ),
 
-                    const SizedBox(height: ExpenseConstants.fieldSpacing),
+                      SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                    // Observações
-                    ValidatedTextField(
-                      controller: provider.notesController,
-                      label: 'Observações',
-                      hint: ExpenseConstants.notesPlaceholder,
-                      maxLines: 3,
-                      maxLength: ExpenseConstants.maxNotesLength,
-                      prefixIcon: Icons.note_alt,
-                      showCharacterCount: true,
-                      validator: (value) {
-                        if (value != null && value.length > ExpenseConstants.maxNotesLength) {
-                          return 'Observação muito longa';
-                        }
-                        return null;
-                      },
-                      // onChanged será tratado automaticamente pelo controller
-                      debounceDuration: const Duration(milliseconds: 800),
-                    ),
-                  ],
+                      // Observações
+                      ValidatedTextField(
+                        controller: provider.notesController,
+                        label: 'Observações',
+                        hint: ExpenseConstants.notesPlaceholder,
+                        maxLines: 3,
+                        maxLength: ExpenseConstants.maxNotesLength,
+                        prefixIcon: Icons.note_alt,
+                        showCharacterCount: true,
+                        validator: (value) {
+                          if (value != null && value.length > ExpenseConstants.maxNotesLength) {
+                            return 'Observação muito longa';
+                          }
+                          return null;
+                        },
+                        debounceDuration: const Duration(milliseconds: 800),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: ExpenseConstants.sectionSpacing),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
                 // Resumo do formulário (se tem dados válidos)
                 if (provider.formModel.hasMinimumData)
@@ -201,84 +204,15 @@ class ExpenseFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTheme.textStyles.titleMedium?.copyWith(
-            color: AppTheme.colors.primary,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ...children,
-      ],
-    );
-  }
 
-  Widget _buildDateTimeFields(BuildContext context, ExpenseFormProvider provider) {
-    return Row(
-      children: [
-        // Data
-        Expanded(
-          flex: 3,
-          child: InkWell(
-            onTap: () => provider.pickDate(context),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Data *',
-                prefixIcon: const Icon(Icons.calendar_today),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                errorText: provider.formModel.getFieldError('date'),
-              ),
-              child: Text(
-                _formatDate(provider.formModel.date),
-                style: AppTheme.textStyles.bodyLarge,
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        // Hora
-        Expanded(
-          flex: 2,
-          child: InkWell(
-            onTap: () => provider.pickTime(context),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Hora',
-                prefixIcon: const Icon(Icons.access_time),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                _formatTime(provider.formModel.date),
-                style: AppTheme.textStyles.bodyLarge,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildFormSummary(BuildContext context, ExpenseFormProvider provider) {
     final model = provider.formModel;
     
     return Card(
-      color: AppTheme.colors.primaryLight.withOpacity(0.3),
+      color: GasometerDesignTokens.colorPrimaryLight.withOpacity(0.3),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -286,19 +220,21 @@ class ExpenseFormView extends StatelessWidget {
               children: [
                 Icon(
                   Icons.summarize,
-                  color: AppTheme.colors.primary,
-                  size: 20,
+                  color: GasometerDesignTokens.colorPrimary,
+                  size: GasometerDesignTokens.iconSizeSm,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: GasometerDesignTokens.spacingSm),
                 Text(
                   'Resumo',
-                  style: AppTheme.textStyles.titleSmall?.copyWith(
-                    color: AppTheme.colors.primary,
+                  style: TextStyle(
+                    fontSize: GasometerDesignTokens.fontSizeLg,
+                    fontWeight: GasometerDesignTokens.fontWeightMedium,
+                    color: GasometerDesignTokens.colorPrimary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: GasometerDesignTokens.spacingMd),
             
             _buildSummaryRow('Tipo:', model.expenseType.displayName),
             _buildSummaryRow('Valor:', 'R\$ ${model.amount.toStringAsFixed(2)}'),
@@ -314,14 +250,15 @@ class ExpenseFormView extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.attach_file,
-                    size: 16,
-                    color: AppTheme.colors.primary,
+                    size: GasometerDesignTokens.iconSizeXs,
+                    color: GasometerDesignTokens.colorPrimary,
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: GasometerDesignTokens.spacingXs),
                   Text(
                     'Comprovante anexado',
-                    style: AppTheme.textStyles.bodySmall?.copyWith(
-                      color: AppTheme.colors.primary,
+                    style: TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeBody,
+                      color: GasometerDesignTokens.colorPrimary,
                     ),
                   ),
                 ],
@@ -427,7 +364,7 @@ class ExpenseFormView extends StatelessWidget {
 
   Widget _buildSummaryRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingXs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -435,15 +372,19 @@ class ExpenseFormView extends StatelessWidget {
             width: 80,
             child: Text(
               label,
-              style: AppTheme.textStyles.labelSmall?.copyWith(
-                color: AppTheme.colors.onSurfaceVariant,
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeCaption,
+                color: GasometerDesignTokens.colorTextSecondary,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: AppTheme.textStyles.bodySmall,
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeBody,
+                color: GasometerDesignTokens.colorTextPrimary,
+              ),
             ),
           ),
         ],
@@ -455,7 +396,110 @@ class ExpenseFormView extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  Widget _buildDateTimeField(BuildContext context, ExpenseFormProvider provider) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _selectDateTime(context, provider),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Data e Hora',
+            suffixIcon: const Icon(
+              Icons.calendar_today,
+              size: 24,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  DateFormat('dd/MM/yyyy').format(provider.formModel.date),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                height: 20,
+                width: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  TimeOfDay.fromDateTime(provider.formModel.date).format(context),
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDateTime(BuildContext context, ExpenseFormProvider provider) async {
+    // Select date first
+    final date = await showDatePicker(
+      context: context,
+      initialDate: provider.formModel.date,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+      locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (date != null && context.mounted) {
+      // Then select time
+      final currentTime = TimeOfDay.fromDateTime(provider.formModel.date);
+      final time = await showTimePicker(
+        context: context,
+        initialTime: currentTime,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+            child: Localizations.override(
+              context: context,
+              locale: const Locale('pt', 'BR'),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                child: child!,
+              ),
+            ),
+          );
+        },
+      );
+
+      if (time != null) {
+        // Update provider with combined date and time
+        final combinedDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+        provider.updateDate(combinedDateTime);
+      }
+    }
   }
 }

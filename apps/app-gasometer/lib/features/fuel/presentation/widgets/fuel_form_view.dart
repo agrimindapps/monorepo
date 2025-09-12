@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
 import '../../../../core/presentation/widgets/form_section_widget.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/presentation/widgets/validated_text_field.dart';
+import '../../../../core/presentation/widgets/validated_dropdown_field.dart';
+import '../../../../core/presentation/widgets/validated_switch_field.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/fuel_constants.dart';
 import '../../domain/services/fuel_formatter_service.dart';
@@ -41,12 +46,8 @@ class FuelFormView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFuelInfoSection(context, provider),
-              const SizedBox(height: 16),
-              _buildValuesSection(context, provider),
-              const SizedBox(height: 16),
-              _buildLocationSection(context, provider),
-              const SizedBox(height: 16),
-              _buildNotesSection(context, provider),
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              _buildAdditionalInfoSection(context, provider),
             ],
           ),
         );
@@ -88,25 +89,25 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
-      title: FuelConstants.fuelInfoSection,
-      icon: Icons.local_gas_station,
+      title: 'Informações Básicas',
+      icon: Icons.calendar_today,
       showBorder: false,
       content: Column(
         children: [
           _buildFuelTypeDropdown(context, provider),
-          FormSpacing.large(),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildDateField(context, provider),
-          FormSpacing.large(),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildFullTankSwitch(context, provider),
         ],
       ),
     );
   }
 
-  Widget _buildValuesSection(BuildContext context, FuelFormProvider provider) {
+  Widget _buildAdditionalInfoSection(BuildContext context, FuelFormProvider provider) {
     return FormSectionWidget.withTitle(
-      title: FuelConstants.valuesSection,
-      icon: Icons.attach_money,
+      title: 'Adicionais',
+      icon: Icons.more_horiz,
       showBorder: false,
       content: Column(
         children: [
@@ -116,36 +117,14 @@ class FuelFormView extends StatelessWidget {
               _buildPricePerLiterField(context, provider),
             ],
           ),
-          FormSpacing.large(),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildTotalPriceField(context, provider),
-          FormSpacing.large(),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildOdometerField(context, provider),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
+          _buildNotesField(context, provider),
         ],
       ),
-    );
-  }
-
-  Widget _buildLocationSection(BuildContext context, FuelFormProvider provider) {
-    return FormSectionWidget.withTitle(
-      title: FuelConstants.locationSection,
-      icon: Icons.location_on,
-      showBorder: false,
-      content: Column(
-        children: [
-          _buildGasStationField(context, provider),
-          FormSpacing.large(),
-          _buildGasStationBrandField(context, provider),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotesSection(BuildContext context, FuelFormProvider provider) {
-    return FormSectionWidget.withTitle(
-      title: FuelConstants.notesSection,
-      icon: Icons.note_add,
-      showBorder: false,
-      content: _buildNotesField(context, provider),
     );
   }
 
@@ -153,19 +132,15 @@ class FuelFormView extends StatelessWidget {
     final vehicle = provider.formModel.vehicle!;
     final supportedFuels = vehicle.supportedFuels;
     
-    return DropdownButtonFormField<FuelType>(
+    return ValidatedDropdownField<FuelType>(
+      items: supportedFuels.map((fuelType) => 
+        ValidatedDropdownItem.text(fuelType, fuelType.displayName)
+      ).toList(),
       value: provider.formModel.fuelType,
-      decoration: const InputDecoration(
-        labelText: FuelConstants.fuelTypeLabel,
-        prefixIcon: Icon(Icons.local_gas_station),
-        border: OutlineInputBorder(),
-      ),
-      items: supportedFuels.map((fuelType) {
-        return DropdownMenuItem<FuelType>(
-          value: fuelType,
-          child: Text(fuelType.displayName),
-        );
-      }).toList(),
+      label: FuelConstants.fuelTypeLabel,
+      hint: 'Selecione o tipo de combustível',
+      prefixIcon: Icons.local_gas_station,
+      required: true,
       onChanged: (fuelType) {
         if (fuelType != null) {
           provider.updateFuelType(fuelType);
@@ -176,54 +151,64 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildDateField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
-      decoration: const InputDecoration(
-        labelText: FuelConstants.dateLabel,
-        prefixIcon: Icon(Icons.calendar_today),
-        border: OutlineInputBorder(),
-      ),
-      readOnly: true,
-      controller: TextEditingController(
-        text: _formatDate(provider.formModel.date),
-      ),
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: provider.formModel.date,
-          firstDate: DateTime.now().subtract(const Duration(days: 365)),
-          lastDate: DateTime.now(),
-          locale: const Locale('pt', 'BR'),
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Theme.of(context).colorScheme.primary,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _selectDateTime(context, provider),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: FuelConstants.dateLabel,
+            suffixIcon: const Icon(
+              Icons.calendar_today,
+              size: 24,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  DateFormat('dd/MM/yyyy').format(provider.formModel.date),
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
-              child: child!,
-            );
-          },
-        );
-        if (date != null) {
-          provider.updateDate(date);
-        }
-      },
+              const SizedBox(width: 16),
+              Container(
+                height: 20,
+                width: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  TimeOfDay.fromDateTime(provider.formModel.date).format(context),
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildFullTankSwitch(BuildContext context, FuelFormProvider provider) {
-    return Semantics(
-      label: provider.formModel.fullTank 
-        ? 'Tanque cheio ativado'
-        : 'Tanque cheio desativado',
-      hint: 'Toque para alterar se o tanque foi completamente abastecido',
-      child: SwitchListTile(
-        title: const Text(FuelConstants.fullTankLabel),
-        subtitle: const Text(FuelConstants.fullTankSubtitle),
-        value: provider.formModel.fullTank,
-        onChanged: (value) => provider.updateFullTank(value),
-        secondary: const Icon(Icons.water_drop),
-      ),
+    return ValidatedSwitchField(
+      value: provider.formModel.fullTank,
+      label: FuelConstants.fullTankLabel,
+      description: FuelConstants.fullTankSubtitle,
+      labelPosition: SwitchLabelPosition.start,
+      onChanged: (value) => provider.updateFullTank(value),
+      validator: (value) {
+        // Optional validation if needed
+        return null;
+      },
     );
   }
 
@@ -272,20 +257,22 @@ class FuelFormView extends StatelessWidget {
     final formatter = FuelFormatterService();
     final totalPrice = provider.formModel.totalPrice;
     
-    return TextFormField(
-      decoration: const InputDecoration(
-        labelText: FuelConstants.totalPriceLabel,
-        prefixText: 'R\$ ',
-        prefixIcon: Icon(Icons.attach_money),
-        border: OutlineInputBorder(),
-      ),
-      readOnly: true,
+    return ValidatedTextField(
       controller: TextEditingController(
         text: totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : '',
       ),
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.primary,
+      label: FuelConstants.totalPriceLabel,
+      hint: 'Calculado automaticamente',
+      prefixIcon: Icons.attach_money,
+      enabled: false,
+      decoration: InputDecoration(
+        prefixText: 'R\$ ',
+        filled: true,
+        fillColor: GasometerDesignTokens.colorNeutral50,
+      ),
+      textStyle: TextStyle(
+        fontWeight: GasometerDesignTokens.fontWeightBold,
+        color: GasometerDesignTokens.colorPrimary,
       ),
     );
   }
@@ -315,37 +302,6 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildGasStationField(BuildContext context, FuelFormProvider provider) {
-    final error = provider.formModel.errors['gasStationName'];
-    
-    return ValidatedFormField(
-      controller: provider.gasStationController,
-      label: FuelConstants.gasStationLabel,
-      hint: FuelConstants.gasStationHint,
-      prefixIcon: Icons.local_gas_station_outlined,
-      required: false,
-      validationType: ValidationType.length,
-      minLength: 2,
-      maxLengthValidation: 100,
-      decoration: error != null ? InputDecoration(
-        errorText: error,
-      ) : null,
-      onValidationChanged: (result) {},
-    );
-  }
-
-  Widget _buildGasStationBrandField(BuildContext context, FuelFormProvider provider) {
-    return TextFormField(
-      controller: provider.gasStationBrandController,
-      decoration: const InputDecoration(
-        labelText: FuelConstants.gasStationBrandLabel,
-        hintText: FuelConstants.gasStationBrandHint,
-        prefixIcon: Icon(Icons.business),
-        border: OutlineInputBorder(),
-      ),
-      textCapitalization: TextCapitalization.words,
-    );
-  }
 
   Widget _buildNotesField(BuildContext context, FuelFormProvider provider) {
     return ValidatedFormField(
@@ -363,7 +319,63 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  Future<void> _selectDateTime(BuildContext context, FuelFormProvider provider) async {
+    // Select date first
+    final date = await showDatePicker(
+      context: context,
+      initialDate: provider.formModel.date,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+      locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (date != null && context.mounted) {
+      // Then select time
+      final currentTime = TimeOfDay.fromDateTime(provider.formModel.date);
+      final time = await showTimePicker(
+        context: context,
+        initialTime: currentTime,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+            child: Localizations.override(
+              context: context,
+              locale: const Locale('pt', 'BR'),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                child: child!,
+              ),
+            ),
+          );
+        },
+      );
+
+      if (time != null) {
+        // Update provider with combined date and time
+        final combinedDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+        provider.updateDate(combinedDateTime);
+      }
+    }
   }
+
 }

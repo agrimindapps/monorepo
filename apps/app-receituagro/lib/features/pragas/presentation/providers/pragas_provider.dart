@@ -246,6 +246,18 @@ class PragasProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Ordena a lista atual de pragas alfabeticamente
+  void sortPragas(bool isAscending) {
+    if (_pragas.isEmpty) return;
+
+    _pragas.sort((a, b) {
+      final comparison = a.nomeComum.compareTo(b.nomeComum);
+      return isAscending ? comparison : -comparison;
+    });
+    
+    notifyListeners();
+  }
+
   /// Limpa resultados de pesquisa e recarrega dados iniciais
   Future<void> clearSearch() async {
     _pragas.clear();

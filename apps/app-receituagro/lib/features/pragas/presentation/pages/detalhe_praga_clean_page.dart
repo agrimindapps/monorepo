@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/services/premium_status_notifier.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
@@ -159,7 +160,7 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
           isDark: isDark,
           showBackButton: true,
           showActions: true,
-          onBackPressed: () => Navigator.of(context).pop(),
+          onBackPressed: () => context.read<AppNavigationProvider>().goBack(),
           onRightIconPressed: () => _toggleFavorito(provider),
         );
       },

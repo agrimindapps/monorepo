@@ -38,8 +38,10 @@ class SettingsListTile extends StatelessWidget {
           enabled: enabled,
           onTap: enabled ? onTap : null,
           contentPadding: SettingsDesignTokens.sectionPadding,
+          dense: true,
+          visualDensity: VisualDensity.compact,
           leading: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: backgroundColor ?? 
                      (iconColor ?? theme.colorScheme.primary).withValues(alpha: 0.1),
@@ -50,7 +52,7 @@ class SettingsListTile extends StatelessWidget {
               color: enabled 
                   ? (iconColor ?? theme.colorScheme.primary)
                   : theme.colorScheme.onSurface.withValues(alpha: 0.38),
-              size: 20,
+              size: 18,
             ),
           ),
           title: Text(

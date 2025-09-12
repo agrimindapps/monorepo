@@ -28,20 +28,30 @@ class FavoritosItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      elevation: isDark ? 4 : 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      color: isDark ? Colors.grey.shade800 : Colors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: _buildLeading(),
-        title: _buildTitle(),
-        subtitle: _buildSubtitle(),
-        trailing: _buildTrailing(),
-        onTap: () => _handleTap(context),
+    return Dismissible(
+      key: Key('favorito_${favorito.id}'),
+      direction: DismissDirection.endToStart,
+      background: _buildSwipeBackground(),
+      confirmDismiss: (direction) async {
+        return await _showRemoveDialog(context);
+      },
+      onDismissed: (direction) {
+        onRemove();
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        elevation: isDark ? 4 : 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: isDark ? Colors.grey.shade800 : Colors.white,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(12),
+          leading: _buildLeading(),
+          title: _buildTitle(),
+          subtitle: _buildSubtitle(),
+          onTap: () => _handleTap(context),
+        ),
       ),
     );
   }
@@ -157,7 +167,7 @@ class FavoritosItemWidget extends StatelessWidget {
         break;
     }
     
-    if (subtitle == null) return null;
+    // subtitle is never null in this implementation
     
     return Text(
       subtitle,
@@ -171,16 +181,35 @@ class FavoritosItemWidget extends StatelessWidget {
     );
   }
 
-  /// Constrói o trailing (botão de remoção)
-  Widget _buildTrailing() {
-    return IconButton(
-      onPressed: () => _showRemoveDialog(),
-      icon: const Icon(
-        Icons.delete_outline,
-        color: Colors.red,
-        size: 20,
+  /// Constrói o background do swipe (efeito de arrastar)
+  Widget _buildSwipeBackground() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.red.shade400,
+        borderRadius: BorderRadius.circular(12),
       ),
-      tooltip: 'Remover dos favoritos',
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.delete_outline,
+            color: Colors.white,
+            size: 28,
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Excluir',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -203,10 +232,66 @@ class FavoritosItemWidget extends StatelessWidget {
   }
 
   /// Mostra diálogo de confirmação para remoção
-  void _showRemoveDialog() {
-    // TODO: Implementar diálogo de confirmação
-    // Por ora, chama diretamente a remoção
-    onRemove();
+  Future<bool?> _showRemoveDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text('Confirmar Remoção'),
+            ],
+          ),
+          content: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 16,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              children: [
+                const TextSpan(text: 'Deseja remover '),
+                TextSpan(
+                  text: '"${favorito.nomeDisplay}"',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const TextSpan(text: ' dos seus favoritos?'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Remover'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// Obtém o nome científico se disponível, baseado no tipo específico

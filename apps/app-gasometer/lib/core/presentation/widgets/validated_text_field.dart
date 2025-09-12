@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
+import '../../theme/design_tokens.dart';
 
 /// Estados de validação para feedback visual
 enum ValidationState {
@@ -232,7 +233,7 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
           height: 16,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: AppTheme.colors.primary,
+            color: GasometerDesignTokens.colorPrimary,
           ),
         );
       case ValidationState.valid:
@@ -242,7 +243,7 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
       case ValidationState.invalid:
       case ValidationState.error:
         iconData = Icons.error;
-        iconColor = AppTheme.colors.error;
+        iconColor = GasometerDesignTokens.colorError;
         break;
       case ValidationState.initial:
         return const SizedBox.shrink();
@@ -266,9 +267,9 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
         return Colors.green;
       case ValidationState.invalid:
       case ValidationState.error:
-        return AppTheme.colors.error;
+        return GasometerDesignTokens.colorError;
       case ValidationState.validating:
-        return AppTheme.colors.primary;
+        return GasometerDesignTokens.colorPrimary;
       case ValidationState.initial:
         return null;
     }
@@ -299,7 +300,7 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
     switch (_validationState) {
       case ValidationState.invalid:
       case ValidationState.error:
-        return AppTheme.colors.error;
+        return GasometerDesignTokens.colorError;
       case ValidationState.valid:
         return Colors.green;
       default:
@@ -397,8 +398,8 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
           Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
-              color: AppTheme.colors.primary,
-              backgroundColor: AppTheme.colors.primary.withOpacity(0.2),
+              color: GasometerDesignTokens.colorPrimary,
+              backgroundColor: GasometerDesignTokens.colorPrimary.withOpacity(0.2),
             ),
           ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/navigation/app_navigation_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
@@ -97,7 +98,7 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
             ),
           ),
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.read<AppNavigationProvider>().goBack(),
             icon: const Icon(
               Icons.close,
               color: Colors.white,

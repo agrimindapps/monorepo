@@ -59,10 +59,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _searchDebounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-    
+
     // Limpa dados do provider para evitar memory leaks
     _pragasProvider.clear();
-    
+
     super.dispose();
   }
 
@@ -112,13 +112,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       _isAscending = !_isAscending;
     });
 
-    // TODO: Implementar ordenação no PragasProvider
-    // Por enquanto recarrega os dados
-    if (_searchText.isEmpty) {
-      await _pragasProvider.loadPragasByTipo(_currentPragaType);
-    } else {
-      await _pragasProvider.searchPragas(_searchText);
-    }
+    // Aplica ordenação diretamente na lista atual
+    _pragasProvider.sortPragas(_isAscending);
   }
 
   void _handleItemTap(PragaEntity praga) {
@@ -134,7 +129,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -215,23 +209,18 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   Widget _buildContent(bool isDark, PragasProvider provider) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: ReceitaAgroSpacing.horizontalPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: ReceitaAgroSpacing.sm),
-          Expanded(
-            child: CustomScrollView(
-              slivers: [
-                _buildPragasSliver(isDark, provider),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: ReceitaAgroSpacing.sm),
+        Expanded(
+          child: CustomScrollView(
+            slivers: [
+              _buildPragasSliver(isDark, provider),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -243,11 +232,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     }
 
     if (provider.errorMessage != null) {
-      return SliverToBoxAdapter(
+      return SliverFillRemaining(
+        hasScrollBody: false,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.error_outline,
@@ -280,7 +271,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     }
 
     if (provider.pragas.isEmpty && _searchText.isEmpty) {
-      return SliverToBoxAdapter(
+      return SliverFillRemaining(
+        hasScrollBody: false,
         child: PragasEmptyStateWidget(
           pragaType: _currentPragaType,
           isDark: isDark,
@@ -289,11 +281,13 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     }
 
     if (provider.pragas.isEmpty && _searchText.isNotEmpty) {
-      return SliverToBoxAdapter(
+      return SliverFillRemaining(
+        hasScrollBody: false,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.search_off_rounded,
@@ -331,7 +325,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
   Widget _buildSliverGrid(bool isDark, PragasProvider provider) {
     return SliverPadding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(0),
       sliver: SliverToBoxAdapter(
         child: Card(
           elevation: ReceitaAgroElevation.card,
@@ -342,8 +336,9 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
           margin: EdgeInsets.zero,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
-              
+              final crossAxisCount =
+                  _calculateCrossAxisCount(constraints.maxWidth);
+
               return CustomScrollView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -380,7 +375,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
 
   Widget _buildSliverList(bool isDark, PragasProvider provider) {
     return SliverPadding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(0),
       sliver: SliverToBoxAdapter(
         child: Card(
           elevation: ReceitaAgroElevation.card,
@@ -394,10 +389,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
             physics: const NeverScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
+                padding: const EdgeInsets.all(0),
                 sliver: SliverList.separated(
                   itemCount: provider.pragas.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 4),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     final praga = provider.pragas[index];
                     return PragaCardWidget(
@@ -415,7 +411,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       ),
     );
   }
-
 
   String _getHeaderTitle() {
     switch (_currentPragaType) {

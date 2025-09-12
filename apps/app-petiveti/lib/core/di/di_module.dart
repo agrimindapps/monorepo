@@ -9,20 +9,3 @@ abstract class DIModule {
   Future<void> register(GetIt getIt);
 }
 
-/// Factory for creating DI modules
-/// 
-/// Follows Factory Pattern for module instantiation
-class DIModuleFactory {
-  static const Map<String, DIModule Function()> _modules = {};
-  
-  /// Register a module factory
-  static void registerModule(String name, DIModule Function() factory) {
-    // This would be implemented if we need dynamic module loading
-  }
-  
-  /// Create all standard modules
-  static List<DIModule> createStandardModules() {
-    // Return standard modules - will be implemented in main injection container
-    return [];
-  }
-}

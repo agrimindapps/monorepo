@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
-import '../../../../core/presentation/widgets/enhanced_dropdown.dart';
+import '../../../../core/presentation/widgets/validated_datetime_field.dart';
+import '../../../../core/presentation/widgets/validated_dropdown_field.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -132,8 +134,11 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildBasicInfo(),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildCostAndOdometer(),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildDescription(),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildNextServiceDate(),
       ],
     );
@@ -162,7 +167,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             ) : null,
             onValidationChanged: (result) => _validationResults['type'] = result,
           ),
-          FormSpacing.large(),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           ValidatedFormField(
             controller: _formProvider.workshopNameController,
             label: 'Oficina/Local',
@@ -177,80 +182,35 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             ) : null,
             onValidationChanged: (result) => _validationResults['workshop'] = result,
           ),
-          FormSpacing.large(),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           FormFieldRow.standard(
             children: [
-              /// ✅ UX ENHANCEMENT: Enhanced maintenance type dropdown
-              EnhancedDropdown<String>(
+ValidatedDropdownField<MaintenanceType>(
                 label: 'Tipo',
-                value: _formProvider.formModel.type == MaintenanceType.preventive ? 'preventiva' : 'corretiva',
-                prefixIcon: Icon(
-                  _formProvider.formModel.type == MaintenanceType.preventive 
-                    ? Icons.schedule 
-                    : Icons.build,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
-                ),
-                items: const [
-                  EnhancedDropdownItem(
-                    value: 'preventiva',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Preventiva', style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text('Manutenção planejada', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                  EnhancedDropdownItem(
-                    value: 'corretiva',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Corretiva', style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text('Reparo de problema', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                ],
-                onChanged: (value) => _formProvider.updateType(
-                  value == 'preventiva' ? MaintenanceType.preventive : MaintenanceType.corrective
-                ),
-              ),
-              InkWell(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  padding: GasometerDesignTokens.paddingOnly(
-                    left: GasometerDesignTokens.spacingLg,
-                    right: GasometerDesignTokens.spacingLg,
-                    top: GasometerDesignTokens.spacingLg,
-                    bottom: GasometerDesignTokens.spacingLg,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                    border: Border.all(color: Theme.of(context).colorScheme.outline),
-                  ),
-                  child: Row(
+                value: _formProvider.formModel.type,
+                prefixIcon: Icons.build_circle,
+                items: MaintenanceType.values.map((type) => ValidatedDropdownItem<MaintenanceType>(
+                  value: type,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                      SizedBox(width: GasometerDesignTokens.spacingSm),
-                      Text(
-                        '${_formProvider.formModel.serviceDate.day.toString().padLeft(2, '0')}/${_formProvider.formModel.serviceDate.month.toString().padLeft(2, '0')}/${_formProvider.formModel.serviceDate.year}',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
+                      Text(type.displayName, style: TextStyle(
+                        fontWeight: GasometerDesignTokens.fontWeightMedium,
+                        color: GasometerDesignTokens.colorTextPrimary,
+                      )),
+                      Text(type.description, style: TextStyle(
+                        fontSize: GasometerDesignTokens.fontSizeCaption,
+                        color: GasometerDesignTokens.colorTextSecondary,
+                      )),
                     ],
                   ),
-                ),
+                )).toList(),
+                onChanged: (value) => _formProvider.updateType(value!),
+                required: true,
+                hint: 'Selecione o tipo de manutenção',
               ),
+_buildServiceDateTimeField(context, _formProvider),
             ],
           ),
         ],
@@ -333,43 +293,8 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-              onTap: () => _selectNextServiceDate(context),
-              child: Container(
-                padding: GasometerDesignTokens.paddingOnly(
-                      left: GasometerDesignTokens.spacingLg,
-                      right: GasometerDesignTokens.spacingLg,
-                      top: GasometerDesignTokens.spacingLg,
-                      bottom: GasometerDesignTokens.spacingLg,
-                    ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    SizedBox(width: GasometerDesignTokens.spacingSm),
-                    Text(
-                      _formProvider.formModel.nextServiceDate != null
-                          ? '${_formProvider.formModel.nextServiceDate!.day.toString().padLeft(2, '0')}/${_formProvider.formModel.nextServiceDate!.month.toString().padLeft(2, '0')}/${_formProvider.formModel.nextServiceDate!.year}'
-                          : 'Definir data da próxima manutenção',
-                      style: TextStyle(
-                        color: _formProvider.formModel.nextServiceDate != null
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (_formProvider.formModel.nextServiceDate != null)
+_buildNextServiceDateTimeField(context, _formProvider),
+if (_formProvider.formModel.nextServiceDate != null)
               Padding(
                 padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
                 child: TextButton(
@@ -377,7 +302,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                   child: Text(
                     'Remover data',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
+                      color: GasometerDesignTokens.colorError,
                     ),
                   ),
                 ),
@@ -388,13 +313,6 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
 
 
-  Future<void> _selectDate(BuildContext context) async {
-    await _formProvider.pickServiceDate(context);
-  }
-
-  Future<void> _selectNextServiceDate(BuildContext context) async {
-    await _formProvider.pickNextServiceDate(context);
-  }
 
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
@@ -543,4 +461,233 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
 
 
   /// ✅ REMOVED: Old dropdown method no longer needed with EnhancedDropdown
+
+  Widget _buildServiceDateTimeField(BuildContext context, MaintenanceFormProvider provider) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _selectServiceDateTime(context, provider),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Data e Hora do Serviço',
+            suffixIcon: const Icon(
+              Icons.calendar_today,
+              size: 24,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  DateFormat('dd/MM/yyyy').format(provider.formModel.serviceDate),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                height: 20,
+                width: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  TimeOfDay.fromDateTime(provider.formModel.serviceDate).format(context),
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNextServiceDateTimeField(BuildContext context, MaintenanceFormProvider provider) {
+    final nextDate = provider.formModel.nextServiceDate;
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _selectNextServiceDateTime(context, provider),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Próxima Manutenção (Opcional)',
+            suffixIcon: const Icon(
+              Icons.schedule,
+              size: 24,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            helperText: 'Opcional - ajuda a acompanhar a manutenção preventiva',
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  nextDate != null 
+                    ? DateFormat('dd/MM/yyyy').format(nextDate)
+                    : 'Selecionar data',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: nextDate != null 
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+              ),
+              if (nextDate != null) ...[
+                const SizedBox(width: 16),
+                Container(
+                  height: 20,
+                  width: 1,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    TimeOfDay.fromDateTime(nextDate).format(context),
+                    style: const TextStyle(fontSize: 16),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectServiceDateTime(BuildContext context, MaintenanceFormProvider provider) async {
+    // Select date first
+    final date = await showDatePicker(
+      context: context,
+      initialDate: provider.formModel.serviceDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+      locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (date != null && context.mounted) {
+      // Then select time
+      final currentTime = TimeOfDay.fromDateTime(provider.formModel.serviceDate);
+      final time = await showTimePicker(
+        context: context,
+        initialTime: currentTime,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+            child: Localizations.override(
+              context: context,
+              locale: const Locale('pt', 'BR'),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                child: child!,
+              ),
+            ),
+          );
+        },
+      );
+
+      if (time != null) {
+        // Update provider with combined date and time
+        final combinedDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+        provider.updateServiceDate(combinedDateTime);
+      }
+    }
+  }
+
+  Future<void> _selectNextServiceDateTime(BuildContext context, MaintenanceFormProvider provider) async {
+    // Select date first
+    final currentDate = provider.formModel.nextServiceDate ?? DateTime.now().add(const Duration(days: 30));
+    final date = await showDatePicker(
+      context: context,
+      initialDate: currentDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 3650)), // 10 years
+      locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (date != null && context.mounted) {
+      // Then select time
+      final currentTime = provider.formModel.nextServiceDate != null 
+        ? TimeOfDay.fromDateTime(provider.formModel.nextServiceDate!)
+        : const TimeOfDay(hour: 9, minute: 0); // Default to 9:00 AM
+      final time = await showTimePicker(
+        context: context,
+        initialTime: currentTime,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+            child: Localizations.override(
+              context: context,
+              locale: const Locale('pt', 'BR'),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                child: child!,
+              ),
+            ),
+          );
+        },
+      );
+
+      if (time != null) {
+        // Update provider with combined date and time
+        final combinedDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+        provider.updateNextServiceDate(combinedDateTime);
+      }
+    }
+  }
 }

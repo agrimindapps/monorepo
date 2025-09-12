@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,11 +5,12 @@ import '../../core/di/injection_container.dart' as di;
 import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
+import 'constants/settings_design_tokens.dart';
 import 'presentation/providers/settings_provider.dart';
+import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/about_section.dart';
 import 'widgets/sections/app_info_section.dart';
 import 'widgets/sections/development_section.dart';
-import 'widgets/sections/notifications_section.dart';
 import 'widgets/sections/premium_section.dart';
 import 'widgets/sections/support_section.dart';
 
@@ -24,10 +24,14 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  late SettingsProvider _settingsProvider;
+  
   @override
   void initState() {
     super.initState();
-    // Remove o addPostFrameCallback - não precisamos mais dele
+    _settingsProvider = di.sl<SettingsProvider>();
+    // Initialize provider only once
+    _initializeProvider(_settingsProvider);
   }
 
   @override
@@ -35,16 +39,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return ChangeNotifierProvider(
-      create: (_) {
-        final provider = di.sl<SettingsProvider>();
-        // Initialize asynchronously but safely
-        _initializeProvider(provider);
-        return provider;
-      },
-      builder: (context, child) {
-        return child!;
-      },
+    return ChangeNotifierProvider.value(
+      value: _settingsProvider,
       child: Scaffold(
         backgroundColor: theme.cardColor,
         body: SafeArea(
@@ -116,17 +112,12 @@ class _SettingsPageState extends State<SettingsPage> {
         // App Info Section
         AppInfoSection(),
         
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         
         // Premium Section
         PremiumSection(),
         
-        SizedBox(height: 8),
-        
-        // Notifications Section
-        NotificationsSection(),
-
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         
         // Support Section
         SupportSection(),
@@ -134,7 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
         // Development Section (only shown in debug mode)
         DevelopmentSection(),
         
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         
         // About Section
         AboutSection(),
@@ -146,8 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    
     return ModernHeaderWidget(
       title: 'Configurações',
       subtitle: 'Preferências e ajustes do app',
@@ -156,40 +145,43 @@ class _SettingsPageState extends State<SettingsPage> {
       showActions: true,
       isDark: isDark,
       additionalActions: [
-        _buildThemeToggleButton(context, themeProvider),
+        _buildThemeSettingsButton(context),
       ],
     );
   }
 
-  Widget _buildThemeToggleButton(BuildContext context, ThemeProvider themeProvider) {
-    return GestureDetector(
-      onTap: () => _toggleTheme(themeProvider),
-      child: Padding(
-        padding: const EdgeInsets.all(9),
-        child: Icon(
-          themeProvider.isDarkMode
-              ? Icons.light_mode
-              : themeProvider.isLightMode
-                  ? Icons.dark_mode
-                  : Icons.auto_mode,
-          color: Theme.of(context).colorScheme.onPrimary,
-          size: 17,
+  Widget _buildThemeSettingsButton(BuildContext context) {
+    return Semantics(
+      label: 'Configurações de tema',
+      hint: 'Toque para abrir as opções de tema',
+      button: true,
+      child: GestureDetector(
+        onTap: () => _openThemeDialog(context),
+        child: Padding(
+          padding: const EdgeInsets.all(9),
+          child: Icon(
+            SettingsDesignTokens.paletteIcon,
+            color: Theme.of(context).colorScheme.onPrimary,
+            size: 17,
+          ),
         ),
       ),
     );
   }
 
-  Future<void> _toggleTheme(ThemeProvider themeProvider) async {
-    if (themeProvider.isSystemMode) {
-      await themeProvider.setThemeMode(ThemeMode.light);
-    } else if (themeProvider.isLightMode) {
-      await themeProvider.setThemeMode(ThemeMode.dark);
-    } else {
-      await themeProvider.setThemeMode(ThemeMode.system);
-    }
+  Future<void> _openThemeDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => const ThemeSelectionDialog(),
+    );
   }
 
   Future<void> _initializeProvider(SettingsProvider provider) async {
+    // Avoid multiple initializations if provider is already loaded
+    if (provider.hasSettings && !provider.isLoading) {
+      return;
+    }
+    
     try {
       final deviceService = di.sl<DeviceIdentityService>();
       final deviceId = await deviceService.getDeviceUuid();

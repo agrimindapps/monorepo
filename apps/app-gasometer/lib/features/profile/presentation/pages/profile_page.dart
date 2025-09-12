@@ -802,7 +802,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (confirmed == true && context.mounted) {
-      await authProvider.logout();
+      await authProvider.logoutWithLoadingDialog(context);
       if (context.mounted) {
         if (authProvider.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(

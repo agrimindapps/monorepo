@@ -28,6 +28,8 @@ class SettingsDesignTokens {
   static const IconData verifiedIcon = Icons.verified_user;
   static const IconData circleInfoIcon = Icons.info_outline;
   static const IconData volumeIcon = Icons.volume_up;
+  static const IconData paletteIcon = Icons.palette;
+  static const IconData systemThemeIcon = Icons.auto_mode;
 
   // Dimensions
   static const double maxPageWidth = 1120.0;
@@ -37,9 +39,9 @@ class SettingsDesignTokens {
 
   // Padding & Margins
   static const EdgeInsets defaultPadding = EdgeInsets.all(16.0);
-  static const EdgeInsets cardPadding = EdgeInsets.all(12.0);
-  static const EdgeInsets sectionPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0);
-  static const EdgeInsets iconPadding = EdgeInsets.all(12.0);
+  static const EdgeInsets cardPadding = EdgeInsets.all(8.0);
+  static const EdgeInsets sectionPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
+  static const EdgeInsets iconPadding = EdgeInsets.all(8.0);
 
   // Text Styles
   static TextStyle getSectionTitleStyle(BuildContext context) {

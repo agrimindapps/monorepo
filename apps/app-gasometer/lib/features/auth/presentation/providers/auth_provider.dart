@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
@@ -8,6 +9,8 @@ import '../../../../core/interfaces/i_sync_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
+import '../../../../core/widgets/logout_loading_dialog.dart';
+import 'package:core/src/infrastructure/services/monorepo_auth_cache.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user.dart';
@@ -37,6 +40,9 @@ class AuthProvider extends ChangeNotifier {
   final AuthRateLimiter _rateLimiter;
   final ISyncService _syncService;
   final AuthLocalDataSource _authLocalDataSource;
+  
+  // MonorepoAuthCache instance for cross-module security
+  final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
   
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -78,6 +84,8 @@ class AuthProvider extends ChangeNotifier {
         _syncService = syncService,
         _authLocalDataSource = authLocalDataSource {
     _initializeAuthState();
+    // Initialize MonorepoAuthCache for cross-module security
+    _initializeMonorepoAuthCache();
   }
   
   UserEntity? get currentUser => _currentUser;
@@ -104,6 +112,20 @@ class AuthProvider extends ChangeNotifier {
   
   /// Reset do rate limiting (apenas para desenvolvimento/admin)
   Future<void> resetRateLimit() => _rateLimiter.resetRateLimit();
+  
+  /// Initialize MonorepoAuthCache for cross-module security
+  Future<void> _initializeMonorepoAuthCache() async {
+    try {
+      await _monorepoAuthCache.initialize();
+      if (kDebugMode) {
+        debugPrint('🔐 MonorepoAuthCache inicializado com sucesso');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('⚠️ Erro ao inicializar MonorepoAuthCache: $e');
+      }
+    }
+  }
   
   Future<void> _initializeAuthState() async {
     if (kDebugMode) {
@@ -408,10 +430,23 @@ class AuthProvider extends ChangeNotifier {
           _isLoading = false;
           notifyListeners();
         },
-        (_) {
+        (_) async {
           _currentUser = null;
           _isPremium = false;
           _isLoading = false;
+          
+          // SECURITY FIX: Clear cross-module cache to prevent contamination
+          try {
+            await _monorepoAuthCache.clearModuleData('app-gasometer');
+            if (kDebugMode) {
+              debugPrint('🔐 MonorepoAuthCache limpo para app-gasometer');
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              debugPrint('⚠️ Erro ao limpar MonorepoAuthCache: $e');
+            }
+            // Não falha o logout se houver erro na limpeza do cache
+          }
           
           if (kDebugMode) {
             debugPrint('🔐 Logout realizado com sucesso');
@@ -423,6 +458,42 @@ class AuthProvider extends ChangeNotifier {
       _errorMessage = 'Erro ao fazer logout: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Logout com loading dialog profissional
+  /// 
+  /// Exibe um dialog de loading não-cancelável durante o processo de logout
+  /// que é mantido por 2 segundos para melhor UX
+  Future<void> logoutWithLoadingDialog(BuildContext context) async {
+    try {
+      // Mostrar o dialog de loading
+      showLogoutLoading(
+        context,
+        message: 'Saindo...',
+        duration: const Duration(seconds: 2),
+      );
+
+      // Executar logout em paralelo com o dialog
+      await logout();
+
+      if (kDebugMode) {
+        debugPrint('🔐 Logout com loading dialog concluído');
+      }
+    } catch (e) {
+      // Fechar dialog se houver erro
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      
+      _errorMessage = 'Erro ao fazer logout: ${e.toString()}';
+      notifyListeners();
+      
+      await _analytics.recordError(
+        e,
+        StackTrace.current,
+        reason: 'logout_with_dialog_error',
+      );
     }
   }
 

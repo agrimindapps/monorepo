@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/services/analytics_service.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
+import '../../../../shared/widgets/auth/enhanced_login_flow.dart';
 import '../controllers/login_controller.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_tabs_widget.dart';
@@ -380,61 +381,12 @@ class _LoginPageState extends State<LoginPage>
     if (!mounted) return;
     
     final controller = context.read<LoginController>();
-    final authProvider = context.read<AuthProvider>();
     
-    // 1. Navegação DIRETA para /vehicles (padrão app-plantis)
-    _navigateBasedOnAuthType(controller.isSignUpMode);
-    
-    // 2. SE há sync em progresso, mostra loading NA TELA DESTINO
-    if (authProvider.isSyncInProgress) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          _showSimpleSyncLoading(authProvider, context);
-        }
-      });
-    }
-  }
-
-  /// Navegação DIRETA para /vehicles - padrão app-plantis
-  void _navigateBasedOnAuthType(bool isSignUpMode) {
-    if (isSignUpMode) {
-      // Novo usuário - primeiro acesso com flag
-      context.go('/vehicles?first_access=true');
-    } else {
-      // Login normal - ir direto para /vehicles
-      // Sync acontece em background na tela destino
-      context.go('/vehicles');
-    }
-  }
-
-  /// Mostra loading simples de sincronização que navega automaticamente - padrão app-plantis
-  void _showSimpleSyncLoading(AuthProvider authProvider, BuildContext context) {
-    SimpleSyncLoading.show(
+    // Usar o fluxo de login melhorado com UX profissional
+    AuthFlowIntegration.handleAuthSuccess(
       context,
-      message: authProvider.syncMessage,
+      isSignUp: controller.isSignUpMode,
+      primaryColor: Theme.of(context).primaryColor,
     );
-    
-    // Navegar quando sync terminar
-    _navigateAfterSync(authProvider, context);
-  }
-  
-  /// Navega para vehicles quando sync terminar - padrão app-plantis
-  void _navigateAfterSync(AuthProvider authProvider, BuildContext context) {
-    late StreamSubscription<int> subscription;
-    
-    subscription = Stream<int>.periodic(const Duration(milliseconds: 500), (count) => count)
-        .listen((_) {
-      if (!authProvider.isSyncInProgress) {
-        subscription.cancel();
-        
-        // Pequeno delay para garantir que o loading foi fechado
-        Future<void>.delayed(const Duration(milliseconds: 100), () {
-          if (mounted && Navigator.canPop(context)) {
-            // Fecha o SimpleSyncLoading se ainda estiver aberto
-            Navigator.of(context).pop();
-          }
-        });
-      }
-    });
   }
 }

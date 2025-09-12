@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
@@ -276,7 +277,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildBasicInfoSection(),
-            const SizedBox(height: 24),
+            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildAdditionalInfoSection(),
           ],
         ),
@@ -293,9 +294,9 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         Column(
           children: [
             _buildOdometerField(),
-            const SizedBox(height: 12),
+            SizedBox(height: GasometerDesignTokens.spacingMd),
             _buildRegistrationTypeField(),
-            const SizedBox(height: 12),
+            SizedBox(height: GasometerDesignTokens.spacingMd),
             _buildDateTimeField(),
           ],
         ),

@@ -16,6 +16,7 @@ abstract class AuthLocalDataSource {
   Future<Map<String, String>> getCachedCredentials();
   Future<void> cacheCredentials(String email, String hashedPassword);
   Future<void> clearCachedCredentials();
+  Future<void> clearCachedCredentialsPreservingEmail();
 }
 
 @LazySingleton(as: AuthLocalDataSource)
@@ -123,6 +124,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       ]);
     } catch (e) {
       throw CacheException('Failed to clear cached credentials: $e');
+    }
+  }
+
+  @override
+  Future<void> clearCachedCredentialsPreservingEmail() async {
+    try {
+      // SECURITY + UX: Clear only password, preserve email for better UX
+      await _secureStorage.delete(key: _cachedPasswordKey);
+    } catch (e) {
+      throw CacheException('Failed to clear cached password: $e');
     }
   }
 

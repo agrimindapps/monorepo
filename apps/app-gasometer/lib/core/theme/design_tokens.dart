@@ -137,6 +137,11 @@ class GasometerDesignTokens {
   static const double spacingPagePadding = spacingLg;         // 16.0
   static const double spacingDialogPadding = spacingXxl;      // 24.0
   
+  // Form-specific semantic spacing (from UnifiedDesignTokens)
+  static const double spacingFormField = 16.0;        // Entre campos de formulário
+  static const double spacingSection = 24.0;          // Entre seções
+  static const double spacingPageMargin = 20.0;       // Margens da página
+  
   // ICON SIZES
   static const double iconSizeXs = 16.0;
   static const double iconSizeSm = 20.0;
@@ -264,16 +269,24 @@ class GasometerDesignTokens {
   
   /// Helper para tamanhos responsivos
   static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < breakpointMobile;
+    return MediaQuery.of(context).size.width < breakpointTablet;
   }
   
   static bool isTablet(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    return width >= breakpointMobile && width < breakpointDesktop;
+    return width >= breakpointTablet && width < breakpointDesktop;
   }
   
   static bool isDesktop(BuildContext context) {
     return MediaQuery.of(context).size.width >= breakpointDesktop;
+  }
+  
+  /// Retorna espaçamento responsivo baseado no tamanho da tela (from UnifiedDesignTokens)
+  static double responsiveSpacing(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < breakpointTablet) return spacingLg;
+    if (width < breakpointDesktop) return spacingXl;
+    return spacingXxl;
   }
   
   /// Retorna padding adaptativo baseado no tamanho da tela
@@ -307,6 +320,9 @@ extension GasometerDesignTokensExtension on BuildContext {
   
   /// Retorna espaçamento adaptativo
   double get adaptiveSpacing => GasometerDesignTokens.adaptiveSpacing(this);
+  
+  /// Retorna espaçamento responsivo (from UnifiedDesignTokens)
+  double get responsiveSpacing => GasometerDesignTokens.responsiveSpacing(this);
   
   /// Retorna tamanho de ícone adaptativo
   double get adaptiveIconSize => GasometerDesignTokens.adaptiveIconSize(this);

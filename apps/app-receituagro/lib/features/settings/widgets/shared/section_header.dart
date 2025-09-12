@@ -25,7 +25,7 @@ class SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     
     return Padding(
-      padding: padding ?? const EdgeInsets.fromLTRB(16, 24, 16, 12),
+      padding: padding ?? const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
           if (showIcon && icon != null) ...[

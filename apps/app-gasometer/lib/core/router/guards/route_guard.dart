@@ -16,9 +16,13 @@ class RouteGuard {
   /// Retorna null se a navegação deve continuar, ou uma string com a rota de destino
   /// se deve redirecionar.
   String? handleRedirect(String currentLocation) {
-    // If AuthProvider is not available yet, allow navigation to continue
-    // (will be handled once provider is ready)
-    final isAuthenticated = _authProvider?.isAuthenticated ?? false;
+    // If AuthProvider is not available or not initialized yet, allow navigation to continue
+    // This prevents race conditions during app initialization
+    if (_authProvider == null || !_authProvider!.isInitialized) {
+      return null;
+    }
+    
+    final isAuthenticated = _authProvider!.isAuthenticated;
     final routeType = _getRouteType(currentLocation);
 
     // Aplicar regras de redirecionamento baseadas no tipo de rota

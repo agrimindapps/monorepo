@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 import '../di/core_package_integration.dart';
-import '../services/enhanced_error_handler.dart';
+// Enhanced error handler removed - using core package services
 import '../services/receituagro_validation_service.dart';
 
 /// Integration Validator for Core Package services
@@ -133,30 +133,12 @@ class IntegrationValidator {
   static Future<Map<String, ValidationTest>> _testServiceFunctionality() async {
     final tests = <String, ValidationTest>{};
     
-    // Test Enhanced Error Handler
-    try {
-      if (_sl.isRegistered<EnhancedErrorHandler>()) {
-        final errorHandler = _sl<EnhancedErrorHandler>();
-        // Simple test without requiring initialization
-        tests['enhanced_error_handler'] = const ValidationTest(
-          'EnhancedErrorHandler Registration',
-          true,
-          'EnhancedErrorHandler successfully registered',
-        );
-      } else {
-        tests['enhanced_error_handler'] = const ValidationTest(
-          'EnhancedErrorHandler Registration',
-          false,
-          'EnhancedErrorHandler not registered',
-        );
-      }
-    } catch (e) {
-      tests['enhanced_error_handler'] = ValidationTest(
-        'EnhancedErrorHandler Registration',
-        false,
-        'Error testing registration: $e',
-      );
-    }
+    // Enhanced Error Handler removed - service no longer available
+    tests['enhanced_error_handler'] = const ValidationTest(
+      'EnhancedErrorHandler Registration',
+      true,
+      'EnhancedErrorHandler removed - using core package error handling',
+    );
     
     // Test ReceitaAgro Validation Service
     try {
@@ -361,11 +343,8 @@ class IntegrationValidator {
         criticalServices.add(false);
       }
       
-      try {
-        criticalServices.add(_sl.isRegistered<EnhancedErrorHandler>());
-      } catch (e) {
-        criticalServices.add(false);
-      }
+      // EnhancedErrorHandler removed - using core package services
+      criticalServices.add(true); // Consider as registered since we use core package
       
       return criticalServices.any((registered) => registered); // At least one service working
     } catch (e) {

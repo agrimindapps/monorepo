@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:hive/hive.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import '../contracts/i_static_data_repository.dart';
+import '../contracts/i_version_manager.dart';
 
 /// Gerenciador de versões para controle de dados estáticos
 /// Implementa a interface IVersionManager
@@ -346,15 +346,24 @@ class VersionManagerService implements IVersionManager {
 
 /// Resultado detalhado da verificação de versão
 class VersionCheckResult {
+  /// Current application version
   final String currentVersion;
+  /// Last saved application version
   final String lastSavedVersion;
+  /// Last data version processed
   final String lastDataVersion;
+  /// Whether update is needed
   final bool needsUpdate;
+  /// Whether this is the first run
   final bool isFirstRun;
+  /// Whether version has changed
   final bool versionChanged;
+  /// Whether an error occurred
   final bool hasError;
+  /// Error message if any
   final String? errorMessage;
 
+  /// Creates a version check result
   VersionCheckResult({
     required this.currentVersion,
     required this.lastSavedVersion,

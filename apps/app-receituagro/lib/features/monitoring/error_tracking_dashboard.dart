@@ -188,7 +188,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
       padding: const EdgeInsets.all(16),
       itemCount: alerts.length,
       itemBuilder: (context, index) {
-        final alert = alerts[index];
+        final alert = alerts[index] as Map<String, dynamic>;
         return _buildAlertCard(alert);
       },
     );
@@ -403,7 +403,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     Color alertColor;
     IconData alertIcon;
 
-    switch (alert['level']) {
+    switch (alert['level'] as String) {
       case 'warning':
         alertColor = Colors.orange;
         alertIcon = Icons.warning;
@@ -421,21 +421,21 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(alertIcon, color: alertColor),
-        title: Text(alert['name']),
+        title: Text(alert['name'] as String),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(alert['message']),
+            Text(alert['message'] as String),
             const SizedBox(height: 4),
             Text(
-              alert['time'],
+              alert['time'] as String,
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
         trailing: Chip(
           label: Text(
-            alert['level'].toUpperCase(),
+            (alert['level'] as String).toUpperCase(),
             style: const TextStyle(fontSize: 10, color: Colors.white),
           ),
           backgroundColor: alertColor,
@@ -445,7 +445,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
   }
 
   void _showComponentDetails(ComponentHealthResult result) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(result.component.toUpperCase()),
@@ -481,7 +481,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
 
   void _showReportDetails(SystemHealthReport report) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => _ReportDetailsScreen(report: report),
       ),
     );

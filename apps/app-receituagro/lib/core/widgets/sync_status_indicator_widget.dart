@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -56,8 +58,7 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
   SyncStatus _currentSyncStatus = SyncStatus.idle;
   double _syncProgress = 0.0;
   String _lastSyncTime = '';
-  String _errorMessage = '';
-  bool _hasNetworkConnection = true;
+  final String _errorMessage = '';
 
   @override
   void initState() {
@@ -447,6 +448,3 @@ class FloatingPosition {
     this.right,
   });
 }
-
-/// Timer import placeholder - should be imported from dart:async
-import 'dart:async';

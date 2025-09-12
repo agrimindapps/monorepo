@@ -27,12 +27,12 @@ class DeviceInfo {
 
   factory DeviceInfo.fromJson(Map<String, dynamic> json) {
     return DeviceInfo(
-      deviceId: json['deviceId'] ?? '',
-      deviceName: json['deviceName'] ?? '',
-      platform: json['platform'] ?? '',
-      appVersion: json['appVersion'] ?? '',
-      lastActive: DateTime.tryParse(json['lastActive'] ?? '') ?? DateTime.now(),
-      isActive: json['isActive'] ?? true,
+      deviceId: json['deviceId']?.toString() ?? '',
+      deviceName: json['deviceName']?.toString() ?? '',
+      platform: json['platform']?.toString() ?? '',
+      appVersion: json['appVersion']?.toString() ?? '',
+      lastActive: DateTime.tryParse(json['lastActive']?.toString() ?? '') ?? DateTime.now(),
+      isActive: json['isActive'] as bool? ?? true,
     );
   }
 
@@ -72,16 +72,16 @@ class SubscriptionStatus {
 
   factory SubscriptionStatus.fromJson(Map<String, dynamic> json) {
     return SubscriptionStatus(
-      isValid: json['isValid'] ?? false,
-      isPremium: json['isPremium'] ?? false,
+      isValid: json['isValid'] as bool? ?? false,
+      isPremium: json['isPremium'] as bool? ?? false,
       expirationDate: json['expirationDate'] != null 
-          ? DateTime.tryParse(json['expirationDate'])
+          ? DateTime.tryParse(json['expirationDate']?.toString() ?? '')
           : null,
-      productId: json['productId'],
-      activeDevicesCount: json['activeDevicesCount'] ?? 0,
-      maxDevicesAllowed: json['maxDevicesAllowed'] ?? 3,
-      isInGracePeriod: json['isInGracePeriod'] ?? false,
-      errorMessage: json['errorMessage'],
+      productId: json['productId']?.toString(),
+      activeDevicesCount: json['activeDevicesCount'] as int? ?? 0,
+      maxDevicesAllowed: json['maxDevicesAllowed'] as int? ?? 3,
+      isInGracePeriod: json['isInGracePeriod'] as bool? ?? false,
+      errorMessage: json['errorMessage']?.toString(),
     );
   }
 
@@ -138,11 +138,11 @@ class ReceitaAgroCloudFunctionsService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          return Right(DeviceInfo.fromJson(data['device']));
+          return Right(DeviceInfo.fromJson(data['device'] as Map<String, dynamic>));
         } else {
-          return Left(data['error'] ?? 'Device registration failed');
+          return Left(data['error']?.toString() ?? 'Device registration failed');
         }
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -174,14 +174,14 @@ class ReceitaAgroCloudFunctionsService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          final devicesList = (data['devices'] as List)
-              .map((device) => DeviceInfo.fromJson(device))
+          final devicesList = (data['devices'] as List<dynamic>)
+              .map((device) => DeviceInfo.fromJson(device as Map<String, dynamic>))
               .toList();
           return Right(devicesList);
         } else {
-          return Left(data['error'] ?? 'Failed to fetch devices');
+          return Left(data['error']?.toString() ?? 'Failed to fetch devices');
         }
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -217,7 +217,7 @@ class ReceitaAgroCloudFunctionsService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         return Right(data['success'] == true);
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -253,11 +253,11 @@ class ReceitaAgroCloudFunctionsService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          return Right(SubscriptionStatus.fromJson(data['subscription']));
+          return Right(SubscriptionStatus.fromJson(data['subscription'] as Map<String, dynamic>));
         } else {
-          return Left(data['error'] ?? 'Subscription validation failed');
+          return Left(data['error']?.toString() ?? 'Subscription validation failed');
         }
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -300,11 +300,11 @@ class ReceitaAgroCloudFunctionsService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          return Right(SubscriptionStatus.fromJson(data['subscription']));
+          return Right(SubscriptionStatus.fromJson(data['subscription'] as Map<String, dynamic>));
         } else {
-          return Left(data['error'] ?? 'Purchase sync failed');
+          return Left(data['error']?.toString() ?? 'Purchase sync failed');
         }
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -385,7 +385,7 @@ class ReceitaAgroCloudFunctionsService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         return Right(data['success'] == true);
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');

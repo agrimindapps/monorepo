@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/models/fitossanitario_hive.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/services/fitossanitarios_data_loader.dart';
 
 /// Model for statistics data computed in background
 class DefensivosStatistics {
@@ -82,12 +85,25 @@ class DefensivosStatisticsProvider extends ChangeNotifier {
       _clearError();
       
       // Load data from repository on main thread (required for Hive)
-      final defensivos = _repository.getActiveDefensivos();
+      var defensivos = _repository.getActiveDefensivos();
       
+      // Se não há dados, verifica se precisa aguardar o carregamento
       if (defensivos.isEmpty) {
-        _setError('Base de dados ainda não foi carregada.\n\nAguarde alguns instantes ou tente novamente.\nOs dados estão sendo sincronizados em segundo plano.');
-        _statistics = DefensivosStatistics.empty();
-        return;
+        // Verifica se dados estão sendo carregados
+        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
+        
+        if (!isDataLoaded) {
+          // Aguarda um pouco e tenta novamente (dados podem estar sendo carregados)
+          await Future.delayed(const Duration(milliseconds: 500));
+          defensivos = _repository.getActiveDefensivos();
+          
+          // Se ainda estiver vazio após aguardar
+          if (defensivos.isEmpty) {
+            _setError('Dados não disponíveis no momento.\n\nPor favor, reinicie o aplicativo se o problema persistir.');
+            _statistics = DefensivosStatistics.empty();
+            return;
+          }
+        }
       }
       
       // Calculate statistics directly (Hive objects are not serializable for compute)
@@ -106,7 +122,10 @@ class DefensivosStatisticsProvider extends ChangeNotifier {
     try {
       _clearError();
       
-      final defensivos = _repository.getActiveDefensivos();
+      var defensivos = _repository.getActiveDefensivos();
+      
+      // Se não há dados, não mostra erro - apenas calcula com dados vazios
+      // (durante refresh, não queremos mostrar mensagens de erro)
       _statistics = _calculateDefensivosStatistics(defensivos);
       
       notifyListeners();

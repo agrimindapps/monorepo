@@ -7,7 +7,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 /// Serviço de identificação única de dispositivos
 class DeviceIdentityService {
-  DeviceIdentityService()
+  static DeviceIdentityService? _instance;
+  static DeviceIdentityService get instance => _instance ??= DeviceIdentityService._();
+
+  DeviceIdentityService._()
       : _deviceInfo = DeviceInfoPlugin(),
         _secureStorage = const FlutterSecureStorage(
           aOptions: AndroidOptions(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:hive/hive.dart';
 import 'package:core/core.dart';
 
 /// Serviço avançado de resolução de conflitos de sincronização
@@ -8,7 +9,7 @@ class ConflictResolutionService {
     required this.storage,
   });
 
-  final AnalyticsService analytics;
+  final IAnalyticsRepository analytics;
   final HiveStorageService storage;
 
   final _conflictController = StreamController<ConflictEvent>.broadcast();
@@ -71,10 +72,13 @@ class ConflictResolutionService {
       return result;
 
     } catch (e) {
-      analytics.logError('conflict_resolution_failed', e, {
-        'conflict_id': conflict.id,
-        'strategy': strategy?.name ?? 'auto',
-      });
+      analytics.logError(
+        error: 'conflict_resolution_failed: $e',
+        additionalInfo: {
+          'conflict_id': conflict.id,
+          'strategy': strategy?.name ?? 'auto',
+        },
+      );
 
       _conflictController.add(ConflictEvent.failed(conflict, e.toString()));
 
@@ -422,8 +426,6 @@ class ConflictResolutionService {
     SyncConflict conflict,
     Map<String, dynamic> resolvedData,
   ) async {
-    final backupBox = await storage.box('conflict_backups');
-    
     final backup = {
       'conflictId': conflict.id,
       'collection': conflict.collection,
@@ -434,32 +436,34 @@ class ConflictResolutionService {
       'backedUpAt': DateTime.now().millisecondsSinceEpoch,
     };
 
-    await backupBox.put('${conflict.id}_backup', backup);
+    await storage.save(
+      key: '${conflict.id}_backup',
+      data: backup,
+      box: 'conflict_backups',
+    );
     
     // Limpar backups antigos (manter apenas últimos 100)
-    await _cleanupOldBackups(backupBox);
+    await _cleanupOldBackups();
   }
 
   /// Limpa backups antigos
-  Future<void> _cleanupOldBackups(Box backupBox) async {
-    final keys = backupBox.keys.toList();
-    if (keys.length <= 100) return;
+  Future<void> _cleanupOldBackups() async {
+    final keysResult = await storage.getKeys(box: 'conflict_backups');
+    await keysResult.fold(
+      (failure) async => null, // Ignora erro de limpeza
+      (keys) async {
+        if (keys.length <= 100) return;
 
-    // Ordenar por timestamp e remover mais antigos
-    keys.sort((a, b) {
-      final backupA = backupBox.get(a) as Map?;
-      final backupB = backupBox.get(b) as Map?;
-      
-      final timestampA = backupA?['backedUpAt'] as int? ?? 0;
-      final timestampB = backupB?['backedUpAt'] as int? ?? 0;
-      
-      return timestampA.compareTo(timestampB);
-    });
+        // Para simplicidade, remover os primeiros 20 keys (mais antigos baseado na ordem de inserção)
+        // Uma implementação mais sofisticada poderia buscar timestamps, mas isso seria custoso
+        final keysToRemove = keys.take(20).toList();
 
-    // Remover os 20 mais antigos
-    for (int i = 0; i < 20 && i < keys.length; i++) {
-      await backupBox.delete(keys[i]);
-    }
+        // Remover os mais antigos
+        for (final key in keysToRemove) {
+          await storage.remove(key: key, box: 'conflict_backups');
+        }
+      },
+    );
   }
 
   /// Obtém validador para uma coleção
@@ -476,36 +480,45 @@ class ConflictResolutionService {
 
   /// Obtém preferência do usuário para resolução de conflitos
   Future<ConflictStrategy?> _getUserConflictPreference(String collection) async {
-    final settingsBox = await storage.box('user_preferences');
-    final preference = settingsBox.get('conflict_strategy_$collection') as String?;
+    final preferenceResult = await storage.get<String>(
+      key: 'conflict_strategy_$collection',
+      box: 'user_preferences',
+    );
     
-    if (preference != null) {
-      return ConflictStrategy.values.firstWhere(
-        (strategy) => strategy.name == preference,
-        orElse: () => ConflictStrategy.lastWriteWins,
-      );
-    }
-    
-    return null;
+    return preferenceResult.fold(
+      (failure) => null,
+      (preference) {
+        if (preference != null) {
+          return ConflictStrategy.values.firstWhere(
+            (strategy) => strategy.name == preference,
+            orElse: () => ConflictStrategy.lastWriteWins,
+          );
+        }
+        return null;
+      },
+    );
   }
 
   /// Obtém estatísticas de conflitos resolvidos
   Future<ConflictStats> getConflictStats() async {
-    final backupBox = await storage.box('conflict_backups');
-    final total = backupBox.length;
+    final lengthResult = await storage.length(box: 'conflict_backups');
     
-    // Analisar estratégias mais usadas, etc.
-    final strategyCounts = <ConflictStrategy, int>{};
-    
-    for (final key in backupBox.keys) {
-      final backup = backupBox.get(key) as Map?;
-      // Análise das estatísticas...
-    }
-
-    return ConflictStats(
-      totalConflictsResolved: total,
-      strategyCounts: strategyCounts,
-      averageResolutionTime: Duration(minutes: 2), // Calculado dinamicamente
+    return lengthResult.fold(
+      (failure) => const ConflictStats(
+        totalConflictsResolved: 0,
+        strategyCounts: {},
+        averageResolutionTime: Duration(minutes: 2),
+      ),
+      (total) {
+        // Analisar estratégias mais usadas, etc.
+        final strategyCounts = <ConflictStrategy, int>{};
+        
+        return ConflictStats(
+          totalConflictsResolved: total,
+          strategyCounts: strategyCounts,
+          averageResolutionTime: const Duration(minutes: 2), // Calculado dinamicamente
+        );
+      },
     );
   }
 

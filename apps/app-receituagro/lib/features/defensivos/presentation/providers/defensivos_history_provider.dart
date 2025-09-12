@@ -138,8 +138,8 @@ class DefensivosHistoryProvider extends ChangeNotifier {
       _recentDefensivos = RandomSelectionService.combineHistoryWithRandom(
         historicDefensivos,
         allDefensivos,
-        10,
         RandomSelectionService.selectRandomDefensivos,
+        count: 10,
       );
       
       // For "new", use random selection with "latest" logic

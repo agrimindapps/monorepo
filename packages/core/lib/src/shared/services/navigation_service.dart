@@ -30,6 +30,7 @@ abstract class INavigationService {
 
 /// Production implementation of NavigationService
 class NavigationService implements INavigationService {
+  /// Global navigator key for accessing navigation context
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   
   @override
@@ -139,6 +140,8 @@ class NavigationService implements INavigationService {
 /// Mock implementation for development and testing
 class MockNavigationService implements INavigationService {
   BuildContext? _context;
+  
+  /// Set the context for mock navigation operations
   
   void setContext(BuildContext context) {
     _context = context;

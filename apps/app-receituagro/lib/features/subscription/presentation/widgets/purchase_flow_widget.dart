@@ -37,7 +37,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late AnimationController _slideController;
-  late Animation<Offset> _slideAnimation;
+  // Animation removed as unused
   
   int _currentStep = 0;
   bool _isPurchasing = false;
@@ -57,13 +57,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeInOut,
-    ));
+    // Slide animation removed as unused
   }
 
   @override
@@ -124,7 +118,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
           // Progress Bar
           LinearProgressIndicator(
             value: (_currentStep + 1) / _stepTitles.length,
-            backgroundColor: theme.colorScheme.surfaceVariant,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
           ),
           
@@ -140,7 +134,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                   decoration: BoxDecoration(
                     color: index <= _currentStep 
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.surfaceVariant,
+                        : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -214,7 +208,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   /// Step 2: Purchase Confirmation
   Widget _buildConfirmationStep(BuildContext context, SubscriptionProvider subscriptionProvider) {
     final selectedPlan = subscriptionProvider.availablePlans
-        .firstWhere((plan) => plan.id == _selectedPlanId);
+        .firstWhere((plan) => (plan as Map<String, dynamic>)['id'] == _selectedPlanId) as Map<String, dynamic>;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -240,7 +234,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                     const Icon(Icons.workspace_premium, size: 24),
                     const SizedBox(width: 8),
                     Text(
-                      selectedPlan.title,
+                      selectedPlan['title'] as String,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -253,7 +247,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                 Row(
                   children: [
                     Text(
-                      selectedPlan.priceString,
+                      selectedPlan['priceString'] as String,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -261,7 +255,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '/ ${selectedPlan.period}',
+                      '/ ${selectedPlan['period'] as String}',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -270,7 +264,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                 ),
                 
                 // Trial Info (if applicable)
-                if (selectedPlan.hasTrialPeriod) ...[
+                if (selectedPlan['hasTrialPeriod'] as bool) ...[
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -279,7 +273,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${selectedPlan.trialPeriodDays} dias grátis',
+                      '${selectedPlan['trialPeriodDays'] as int} dias grátis',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.green.shade700,
                         fontWeight: FontWeight.w600,
@@ -302,7 +296,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
           ),
           const SizedBox(height: 12),
           
-          ...selectedPlan.features.map((feature) {
+          ...(selectedPlan['features'] as List<String>).map((feature) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
@@ -311,7 +305,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      feature,
+                      feature as String,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -352,7 +346,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                       ],
                     )
                   : Text(
-                      'Confirmar Compra • ${selectedPlan.priceString}',
+                      'Confirmar Compra • ${selectedPlan['priceString'] as String}',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
             ),
@@ -463,7 +457,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
     final theme = Theme.of(context);
     
     return GestureDetector(
-      onTap: () => _selectPlan(plan.id),
+      onTap: () => _selectPlan((plan as Map<String, dynamic>)['id'] as String),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -486,7 +480,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
               children: [
                 // Selection Radio
                 Radio<String>(
-                  value: plan.id,
+                  value: (plan as Map<String, dynamic>)['id'] as String,
                   groupValue: _selectedPlanId,
                   onChanged: _selectPlan,
                 ),
@@ -499,14 +493,14 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        plan.title,
+                        (plan as Map<String, dynamic>)['title'] as String,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        plan.description,
+                        (plan as Map<String, dynamic>)['description'] as String,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -520,14 +514,14 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      plan.priceString,
+                      (plan as Map<String, dynamic>)['priceString'] as String,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.primary,
                       ),
                     ),
                     Text(
-                      '/ ${plan.period}',
+                      '/ ${(plan as Map<String, dynamic>)['period'] as String}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -538,7 +532,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
             ),
             
             // Promotional Badge
-            if (plan.isPromotional) ...[
+            if ((plan as Map<String, dynamic>)['isPromotional'] as bool) ...[
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -659,6 +653,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
         curve: Curves.easeInOut,
       );
       
+      if (!mounted) return;
       final subscriptionProvider = context.read<SubscriptionProvider>();
       await subscriptionProvider.purchasePlan(_selectedPlanId!);
       

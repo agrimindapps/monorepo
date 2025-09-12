@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Sync Progress Notification Widget
@@ -297,7 +299,7 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
       case NotificationType.warning:
         return Colors.orange.shade50;
       case NotificationType.sync:
-        return Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3);
+        return Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
     }
   }
 
@@ -471,9 +473,6 @@ class SyncNotificationService {
 
   _SyncProgressNotificationManagerState? _managerState;
 
-  void _setManager(_SyncProgressNotificationManagerState manager) {
-    _managerState = manager;
-  }
 
   /// Show sync progress notification
   void showSyncNotification({
@@ -539,6 +538,3 @@ class SyncNotificationService {
     _managerState?.clearAllNotifications();
   }
 }
-
-// Timer import
-import 'dart:async';

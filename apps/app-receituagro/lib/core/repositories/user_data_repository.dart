@@ -19,7 +19,7 @@ class UserDataRepository {
   UserDataRepository(this._authProvider);
 
   /// Obtém o userId atual do AuthProvider
-  String? get currentUserId => _authProvider.currentUser?.uid;
+  String? get currentUserId => _authProvider.currentUser?.id;
 
   /// Verifica se há um usuário logado
   bool get hasCurrentUser => currentUserId != null;

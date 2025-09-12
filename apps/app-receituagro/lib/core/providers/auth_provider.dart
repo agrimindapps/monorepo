@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../models/user_session_data.dart';
 import '../services/device_identity_service.dart';
-import '../services/user_data_migration_service.dart';
 
 /// AuthProvider específico do ReceitauAgro
 /// Integra com o core package FirebaseAuthService e gerencia estado de autenticação
@@ -14,7 +13,6 @@ import '../services/user_data_migration_service.dart';
 class ReceitaAgroAuthProvider extends ChangeNotifier {
   final IAuthRepository _authRepository;
   final DeviceIdentityService _deviceService;
-  final UserDataMigrationService _migrationService;
   final ReceitaAgroAnalyticsService _analytics;
   
   StreamSubscription<UserEntity?>? _userSubscription;
@@ -26,11 +24,9 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   ReceitaAgroAuthProvider({
     required IAuthRepository authRepository,
     required DeviceIdentityService deviceService,
-    required UserDataMigrationService migrationService,
     required ReceitaAgroAnalyticsService analytics,
   })  : _authRepository = authRepository,
         _deviceService = deviceService,
-        _migrationService = migrationService,
         _analytics = analytics {
     _initializeAuthProvider();
   }
@@ -128,14 +124,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
         deviceCount: 1, // TODO: Get actual device count
       );
 
-      // Migration check for non-anonymous users
-      if (!user.isAnonymous) {
-        final needsMigration = await _migrationService.needsMigration();
-        if (needsMigration) {
-          await _migrationService.performMigration(user.id);
-          _analytics.trackMigrationComplete(0, 0); // TODO: Add actual counts
-        }
-      }
+      // Migration removed - functionality not in use
 
       _errorMessage = null;
       if (kDebugMode) print('✅ Auth Provider: User session initialized for ${user.displayName}');
@@ -421,5 +410,8 @@ enum UserType { guest, registered, premium }
 
 // Extension to check if UserEntity is anonymous
 extension UserEntityExtensions on UserEntity {
-  bool get isAnonymous => provider == AuthProvider.anonymous;
+  bool get isAnonymous => provider.toString() == 'anonymous';
 }
+
+/// Alias for compatibility (different from core.AuthProvider enum)
+typedef AuthProvider = ReceitaAgroAuthProvider;

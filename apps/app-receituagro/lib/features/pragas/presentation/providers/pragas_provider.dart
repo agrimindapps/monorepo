@@ -185,8 +185,8 @@ class PragasProvider extends ChangeNotifier {
             _recentPragas = RandomSelectionService.combineHistoryWithRandom(
               historicPragas,
               allPragas,
-              10,
               RandomSelectionService.selectRandomPragas,
+              count: 10,
             );
           },
         );

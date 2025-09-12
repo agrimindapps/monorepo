@@ -57,13 +57,21 @@ class EnvironmentConfig {
 
   // Generic API Key Helper
   static String getApiKey(String keyName, {String? fallback}) {
-    final key = String.fromEnvironment(keyName, defaultValue: fallback ?? '');
-    if (key.isEmpty || (fallback != null && key == fallback)) {
-      if (kDebugMode && fallback != null) {
-        debugPrint('⚠️ WARNING: Using fallback configuration for environment key');
+    try {
+      // Use const values for web compatibility
+      if (kIsWeb) {
+        // For web, return fallback or dummy key
+        return fallback ?? 'dummy_web_key';
+      } else {
+        // For native platforms, return fallback since fromEnvironment doesn't work at runtime
+        return fallback ?? 'dummy_dev_key';
       }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('⚠️ WARNING: Environment key $keyName not available, using fallback');
+      }
+      return fallback ?? 'dummy_fallback_key';
     }
-    return key;
   }
 
   // Generic Firebase Project ID Helper

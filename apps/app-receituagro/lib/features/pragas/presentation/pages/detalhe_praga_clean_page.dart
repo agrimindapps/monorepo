@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/services/premium_status_notifier.dart';
+import '../../../../core/mixins/premium_status_listener.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../favoritos/favoritos_page.dart';

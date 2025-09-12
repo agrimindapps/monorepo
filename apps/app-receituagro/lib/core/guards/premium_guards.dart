@@ -65,16 +65,19 @@ class PremiumGuards {
   /// Verifica se o usuário tem acesso a uma feature premium
   Future<PremiumAccessResult> checkFeatureAccess(PremiumFeature feature) async {
     try {
-      final subscription = await _premiumService.getCurrentSubscription();
+      final subscriptionData = _premiumService.getCurrentSubscription();
 
       // Se não há subscription, negar acesso
-      if (subscription == null) {
+      if (subscriptionData == null) {
         await _trackAccessDenied(feature, 'No subscription found');
         return PremiumAccessResult.denied(
           feature,
           'Premium subscription required to access ${feature.key}',
         );
       }
+
+      // Converter Map para SubscriptionDataModel
+      final subscription = SubscriptionDataModel.fromMap(subscriptionData);
 
       // Verificar se a subscription está ativa
       if (!subscription.isActive) {
@@ -142,11 +145,14 @@ class PremiumGuards {
 
   /// Guard específico para comentários (com limite para usuários gratuitos)
   Future<PremiumAccessResult> checkUnlimitedComments(int currentCount) async {
-    final subscription = await _premiumService.getCurrentSubscription();
+    final subscriptionData = _premiumService.getCurrentSubscription();
     
     // Se tem subscription ativa, permitir comentários ilimitados
-    if (subscription != null && subscription.isActive) {
-      return PremiumAccessResult.granted(PremiumFeature.premiumContent, subscription);
+    if (subscriptionData != null) {
+      final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+      if (subscription.isActive) {
+        return PremiumAccessResult.granted(PremiumFeature.premiumContent, subscription);
+      }
     }
 
     // Para usuários gratuitos, verificar limite
@@ -166,7 +172,7 @@ class PremiumGuards {
       );
     }
 
-    return PremiumAccessResult(
+    return const PremiumAccessResult(
       hasAccess: true,
       reason: 'Within free user limits',
       feature: PremiumFeature.premiumContent,
@@ -203,10 +209,15 @@ class PremiumGuards {
 
   /// Obtém lista de features disponíveis para o usuário atual
   Future<List<PremiumFeature>> getAvailableFeatures() async {
-    final subscription = await _premiumService.getCurrentSubscription();
+    final subscriptionData = _premiumService.getCurrentSubscription();
     
-    if (subscription == null || !subscription.isActive) {
+    if (subscriptionData == null) {
       return []; // Nenhuma feature premium disponível
+    }
+    
+    final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+    if (!subscription.isActive) {
+      return []; // Subscription inativa
     }
     
     return PremiumFeature.values
@@ -228,8 +239,13 @@ class PremiumGuards {
     required int currentFavorites,
     required int currentComments,
   }) async {
-    final subscription = await _premiumService.getCurrentSubscription();
-    final isPremium = subscription != null && subscription.isActive;
+    final subscriptionData = _premiumService.getCurrentSubscription();
+    bool isPremium = false;
+    
+    if (subscriptionData != null) {
+      final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+      isPremium = subscription.isActive;
+    }
     
     if (isPremium) {
       return {

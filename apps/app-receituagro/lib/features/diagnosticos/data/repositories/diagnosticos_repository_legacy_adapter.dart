@@ -580,25 +580,33 @@ class DiagnosticosRepositoryLegacyAdapter implements IDiagnosticosRepository {
   Future<List<DiagnosticoEntity>> _convertToEntitiesEnhanced(List<DiagnosticoHive> hiveModels) async {
     if (hiveModels.isEmpty) return [];
 
+    // Enhanced service is stub - use legacy conversion directly
     try {
-      // Tenta usar o enhanced service se disponível
-      return await _enhancedService.enrichDiagnosticsBatch(hiveModels);
+      // Check if enhanced service is available (but don't use it since it's a stub)
+      if (_enhancedService.isIntegrationEnabled()) {
+        // Would use enhanced service here in real implementation
+      }
     } catch (e) {
-      debugPrint('⚠️ Enhanced conversion failed, falling back to legacy: $e');
-      // Fallback para conversão legacy
-      return hiveModels.map((hive) => DiagnosticoMapper.fromHive(hive)).toList();
+      debugPrint('⚠️ Enhanced service not available: $e');
     }
+    
+    // Always use fallback for now since enhanced service is a stub
+    return hiveModels.map((hive) => DiagnosticoMapper.fromHive(hive)).toList();
   }
 
   /// Helper method para converter um único Hive model para entity com enhancement
   Future<DiagnosticoEntity> _convertToEntityEnhanced(DiagnosticoHive hiveModel) async {
+    // Enhanced service is stub - use legacy conversion directly
     try {
-      // Tenta usar o enhanced service se disponível
-      return await _enhancedService.enrichDiagnostic(hiveModel);
+      // Check if enhanced service is available (but don't use it since it's a stub)
+      if (_enhancedService.isIntegrationEnabled()) {
+        // Would use enhanced service here in real implementation
+      }
     } catch (e) {
-      debugPrint('⚠️ Enhanced conversion failed, falling back to legacy: $e');
-      // Fallback para conversão legacy
-      return DiagnosticoMapper.fromHive(hiveModel);
+      debugPrint('⚠️ Enhanced service not available: $e');
     }
+    
+    // Always use fallback for now since enhanced service is a stub
+    return DiagnosticoMapper.fromHive(hiveModel);
   }
 }

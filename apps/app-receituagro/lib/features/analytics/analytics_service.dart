@@ -314,3 +314,6 @@ class ReceitaAgroAnalyticsService {
     if (kDebugMode) print('❌ Analytics Error [$context]: $error');
   }
 }
+
+/// Alias for compatibility
+typedef AnalyticsService = ReceitaAgroAnalyticsService;

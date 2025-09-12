@@ -5,6 +5,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
+import 'device_identity_service.dart';
 
 /// Serviço de sincronização bidirecional com Firestore
 class FirestoreSyncService {
@@ -20,7 +21,7 @@ class FirestoreSyncService {
   final FirebaseFunctions functions;
   final HiveStorageService storage;
   final DeviceIdentityService deviceService;
-  final AnalyticsService analytics;
+  final IAnalyticsRepository analytics;
 
   // Queue de operações offline
   final List<SyncOperation> _pendingOperations = [];
@@ -75,7 +76,7 @@ class FirestoreSyncService {
       _updateSyncStatus(SyncStatus.idle());
       
     } catch (e) {
-      analytics.logError('sync_service_initialization_failed', e, null);
+      analytics.logError(error: 'sync_service_initialization_failed: $e');
       _updateSyncStatus(SyncStatus.error('Failed to initialize sync service'));
       rethrow;
     }
@@ -87,12 +88,12 @@ class FirestoreSyncService {
     
     // Estado inicial
     final initialResult = await connectivity.checkConnectivity();
-    _isOnline = initialResult != ConnectivityResult.none;
+    _isOnline = !initialResult.contains(ConnectivityResult.none);
     
     // Monitorar mudanças
-    connectivity.onConnectivityChanged.listen((ConnectivityResult result) async {
+    connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) async {
       final wasOnline = _isOnline;
-      _isOnline = result != ConnectivityResult.none;
+      _isOnline = !results.contains(ConnectivityResult.none);
       
       if (!wasOnline && _isOnline) {
         // Voltou online - tentar sincronizar
@@ -137,10 +138,13 @@ class FirestoreSyncService {
       }
       
     } catch (e) {
-      analytics.logError('sync_operation_queue_failed', e, {
-        'operation_id': operation.id,
-        'collection': operation.collection,
-      });
+      analytics.logError(
+        error: 'sync_operation_queue_failed: $e',
+        additionalInfo: {
+          'operation_id': operation.id,
+          'collection': operation.collection,
+        },
+      );
     }
   }
 
@@ -188,10 +192,13 @@ class FirestoreSyncService {
       
     } catch (e) {
       stopwatch.stop();
-      analytics.logError('sync_failed', e, {
-        'duration_ms': stopwatch.elapsedMilliseconds.toString(),
-        'pending_operations': _pendingOperations.length.toString(),
-      });
+      analytics.logError(
+        error: 'sync_failed: $e',
+        additionalInfo: {
+          'duration_ms': stopwatch.elapsedMilliseconds.toString(),
+          'pending_operations': _pendingOperations.length.toString(),
+        },
+      );
       
       _updateSyncStatus(SyncStatus.error('Sync failed: ${e.toString()}'));
       return SyncResult.error(e.toString());
@@ -211,7 +218,7 @@ class FirestoreSyncService {
     // 3. Executar sincronização via Cloud Function
     final HttpsCallable syncFunction = functions.httpsCallable('syncUserData');
     
-    final response = await syncFunction.call({
+    final response = await syncFunction.call<Map<String, dynamic>>({
       'operations': operationsToSend.map((op) => op.toMap()).toList(),
       'deviceId': _deviceId,
       'collections': collectionsToSync,
@@ -260,27 +267,35 @@ class FirestoreSyncService {
       try {
         await _applyLocalOperation(operation);
       } catch (e) {
-        analytics.logError('server_operation_apply_failed', e, {
-          'operation_id': operation.id,
-          'operation_type': operation.operation.name,
-          'collection': operation.collection,
-        });
+        analytics.logError(
+          error: 'server_operation_apply_failed: $e',
+          additionalInfo: {
+            'operation_id': operation.id,
+            'operation_type': operation.operation.name,
+            'collection': operation.collection,
+          },
+        );
       }
     }
   }
 
   /// Aplica uma operação localmente no Hive
   Future<void> _applyLocalOperation(SyncOperation operation) async {
-    final box = await storage.openBox(operation.collection);
-    
     switch (operation.operation) {
       case SyncOperationType.create:
       case SyncOperationType.update:
-        await box.put(operation.id, operation.data);
+        await storage.save(
+          key: operation.id,
+          data: operation.data,
+          box: operation.collection,
+        );
         break;
         
       case SyncOperationType.delete:
-        await box.delete(operation.id);
+        await storage.remove(
+          key: operation.id,
+          box: operation.collection,
+        );
         break;
     }
   }
@@ -302,7 +317,7 @@ class FirestoreSyncService {
     try {
       final HttpsCallable resolveFunction = functions.httpsCallable('resolveConflicts');
       
-      final response = await resolveFunction.call({
+      final response = await resolveFunction.call<Map<String, dynamic>>({
         'conflictId': conflictId,
         'resolution': resolution.toMap(),
       });
@@ -322,9 +337,12 @@ class FirestoreSyncService {
       }
       
     } catch (e) {
-      analytics.logError('conflict_resolution_failed', e, {
-        'conflict_id': conflictId,
-      });
+      analytics.logError(
+        error: 'conflict_resolution_failed: $e',
+        additionalInfo: {
+          'conflict_id': conflictId,
+        },
+      );
       rethrow;
     }
   }
@@ -342,64 +360,89 @@ class FirestoreSyncService {
         retryCount++;
         
         if (retryCount >= _maxRetries) {
-          analytics.logError('sync_max_retries_reached', e, {
-            'retry_count': retryCount.toString(),
-          });
+          analytics.logError(
+            error: 'sync_max_retries_reached: $e',
+            additionalInfo: {
+              'retry_count': retryCount.toString(),
+            },
+          );
           _updateSyncStatus(SyncStatus.error('Max retries reached'));
           return;
         }
         
         // Aguardar antes de tentar novamente
-        await Future.delayed(_retryDelay * retryCount);
+        await Future<void>.delayed(_retryDelay * retryCount);
       }
     }
   }
 
   /// Persiste operação localmente
   Future<void> _persistOperation(SyncOperation operation) async {
-    final operationsBox = await storage.openBox('sync_pending_operations');
-    await operationsBox.put(operation.id, operation.toMap());
+    await storage.save(
+      key: operation.id,
+      data: operation.toMap(),
+      box: 'sync_pending_operations',
+    );
   }
 
   /// Carrega operações persistidas
   Future<void> _processPendingOperations() async {
     try {
-      final operationsBox = await storage.openBox('sync_pending_operations');
-      
-      for (final key in operationsBox.keys) {
-        final operationData = operationsBox.get(key) as Map<String, dynamic>?;
-        if (operationData != null) {
-          final operation = SyncOperation.fromMap(operationData);
-          _pendingOperations.add(operation);
-        }
-      }
+      final keysResult = await storage.getKeys(box: 'sync_pending_operations');
+      await keysResult.fold(
+        (failure) async => null,
+        (keys) async {
+          for (final key in keys) {
+            final operationResult = await storage.get<Map<String, dynamic>>(
+              key: key,
+              box: 'sync_pending_operations',
+            );
+            operationResult.fold(
+              (failure) => null,
+              (operationData) {
+                if (operationData != null) {
+                  final operation = SyncOperation.fromMap(operationData);
+                  _pendingOperations.add(operation);
+                }
+              },
+            );
+          }
+        },
+      );
       
       analytics.logEvent('pending_operations_loaded', parameters: {
         'count': _pendingOperations.length.toString(),
       });
       
     } catch (e) {
-      analytics.logError('pending_operations_load_failed', e, null);
+      analytics.logError(error: 'pending_operations_load_failed: $e');
     }
   }
 
   /// Limpa operações persistidas
   Future<void> _clearPersistedOperations() async {
-    final operationsBox = await storage.openBox('sync_pending_operations');
-    await operationsBox.clear();
+    await storage.clear(box: 'sync_pending_operations');
   }
 
   /// Carrega timestamp do último sync
   Future<DateTime?> _loadLastSyncTimestamp() async {
-    final settingsBox = await storage.openBox('sync_settings');
-    final timestamp = settingsBox.get('last_sync_timestamp') as int?;
-    return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
+    final timestampResult = await storage.get<int>(
+      key: 'last_sync_timestamp',
+      box: 'sync_settings',
+    );
+    return timestampResult.fold(
+      (failure) => null,
+      (timestamp) => timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null,
+    );
   }
 
   /// Salva timestamp do último sync
   Future<void> _saveLastSyncTimestamp(DateTime timestamp) async {
-    final settingsBox = await storage.openBox('sync_settings');
-    await settingsBox.put('last_sync_timestamp', timestamp.millisecondsSinceEpoch);
+    await storage.save(
+      key: 'last_sync_timestamp',
+      data: timestamp.millisecondsSinceEpoch,
+      box: 'sync_settings',
+    );
   }
 
   /// Atualiza status de sincronização
@@ -422,8 +465,7 @@ class FirestoreSyncService {
     _pendingOperations.clear();
     await _clearPersistedOperations();
     
-    final settingsBox = await storage.openBox('sync_settings');
-    await settingsBox.clear();
+    await storage.clear(box: 'sync_settings');
     
     _lastSyncTimestamp = null;
     

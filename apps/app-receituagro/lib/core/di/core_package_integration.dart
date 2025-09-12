@@ -2,10 +2,8 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
-import '../services/enhanced_error_handler.dart';
 import '../services/receituagro_validation_service.dart';
 import '../services/device_identity_service.dart';
-import '../services/user_data_migration_service.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../providers/auth_provider.dart';
 
@@ -213,11 +211,6 @@ class CorePackageIntegration {
 
   /// Register ReceitaAgro-specific services that extend Core Package functionality
   static Future<void> _registerReceitaAgroSpecificServices() async {
-    // Enhanced Error Handler (integrates with Core Package services)
-    _sl.registerLazySingleton<EnhancedErrorHandler>(
-      () => EnhancedErrorHandler(),
-    );
-    
     // ReceitaAgro Validation Service (extends Core Package ValidationService)
     _sl.registerLazySingleton<ReceitaAgroValidationService>(
       () => ReceitaAgroValidationService(),
@@ -229,30 +222,6 @@ class CorePackageIntegration {
 
   /// Initialize services that require dependencies
   static Future<void> _initializeEnhancedServices() async {
-    try {
-      // Initialize Enhanced Error Handler with Core Package services
-      final errorHandler = _sl<EnhancedErrorHandler>();
-      
-      // Check if all required services are available before initializing
-      final hasLogging = _sl.isRegistered<core.EnhancedLoggingService>();
-      final hasPerformance = _sl.isRegistered<core.IPerformanceRepository>();
-      final hasSecurity = _sl.isRegistered<core.ISecurityRepository>();
-      
-      if (hasLogging && hasPerformance && hasSecurity) {
-        await errorHandler.initialize(
-          loggingService: _sl<core.EnhancedLoggingService>(),
-          performanceService: _sl<core.IPerformanceRepository>(),
-          securityService: _sl<core.ISecurityRepository>(),
-        );
-      } else {
-        if (kDebugMode) {
-          print('Enhanced Error Handler initialization: logging=$hasLogging, performance=$hasPerformance, security=$hasSecurity');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) print('Enhanced Error Handler initialization failed: $e');
-    }
-    
     try {
       // Initialize ReceitaAgro Validation Service with Core Package ValidationService
       final validationService = _sl<ReceitaAgroValidationService>();
@@ -283,7 +252,6 @@ class CorePackageIntegration {
       'SyncFirebaseService': false, // Uses factory pattern, not registered
       'EnhancedStorageService': _sl.isRegistered<core.EnhancedStorageService>(),
       'FileManagerService': _sl.isRegistered<core.FileManagerService>(),
-      'EnhancedErrorHandler': _sl.isRegistered<EnhancedErrorHandler>(),
       'ReceitaAgroValidationService': _sl.isRegistered<ReceitaAgroValidationService>(),
     };
     
@@ -388,31 +356,20 @@ class CorePackageIntegration {
 
   /// Register ReceitaAgro-specific auth services
   static Future<void> _registerReceitaAgroAuthServices() async {
-    // Import dependencies for auth services
-    final deviceService = _sl.get<DeviceIdentityService>();
-    final migrationService = UserDataMigrationService.instance;
-    final analyticsService = ReceitaAgroAnalyticsService(
-      analyticsRepository: _sl<core.IAnalyticsRepository>(),
-      crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
-    );
-
-    // Register ReceitaAgro Analytics Service
+    // Register ReceitaAgro Analytics Service first
     _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-      () => analyticsService,
+      () => ReceitaAgroAnalyticsService(
+        analyticsRepository: _sl<core.IAnalyticsRepository>(),
+        crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
+      ),
     );
 
-    // Register Migration Service
-    _sl.registerLazySingleton<UserDataMigrationService>(
-      () => migrationService,
-    );
-
-    // Register ReceitaAgro Auth Provider
+    // Register ReceitaAgro Auth Provider (lazy evaluation of dependencies)
     _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
       () => ReceitaAgroAuthProvider(
         authRepository: _sl<core.IAuthRepository>(),
-        deviceService: deviceService,
-        migrationService: migrationService,
-        analytics: analyticsService,
+        deviceService: _sl<DeviceIdentityService>(),
+        analytics: _sl<ReceitaAgroAnalyticsService>(),
       ),
     );
 

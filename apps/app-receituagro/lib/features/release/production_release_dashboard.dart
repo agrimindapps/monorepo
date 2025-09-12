@@ -1,6 +1,54 @@
 import 'package:flutter/material.dart';
 import '../../core/services/beta_testing_service.dart';
 
+/// Data class for beta feedback
+class BetaFeedback {
+  final String title;
+  final String description;
+  final String category;
+  final DateTime createdAt;
+  
+  const BetaFeedback({
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.createdAt,
+  });
+  
+  factory BetaFeedback.fromMap(Map<String, dynamic> map) {
+    return BetaFeedback(
+      title: map['title'] as String? ?? '',
+      description: map['description'] as String? ?? '',
+      category: map['category'] as String? ?? '',
+      createdAt: map['createdAt'] as DateTime? ?? DateTime.now(),
+    );
+  }
+}
+
+/// Data class for beta tester
+class BetaTester {
+  final String id;
+  final String name;
+  final String email;
+  final DateTime joinedAt;
+  
+  const BetaTester({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.joinedAt,
+  });
+  
+  factory BetaTester.fromMap(Map<String, dynamic> map) {
+    return BetaTester(
+      id: map['id'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      email: map['email'] as String? ?? '',
+      joinedAt: map['joinedAt'] as DateTime? ?? DateTime.now(),
+    );
+  }
+}
+
 /// Production Release Dashboard for monitoring release readiness
 class ProductionReleaseDashboard extends StatefulWidget {
   const ProductionReleaseDashboard({super.key});
@@ -19,6 +67,8 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
   bool _isReadyForProduction = false;
   Map<String, dynamic>? _releaseReport;
   bool _isLoading = true;
+  List<BetaTester> _betaTesters = [];
+  List<BetaFeedback> _betaFeedback = [];
 
   @override
   void initState() {
@@ -40,10 +90,17 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
     });
 
     try {
-      _checklist = _betaTestingService.getReleaseChecklist();
-      _readinessScore = _betaTestingService.getReleaseReadinessScore();
-      _isReadyForProduction = _betaTestingService.isReadyForProduction();
-      _releaseReport = _betaTestingService.generateReleaseReport();
+      _checklist = await _betaTestingService.getReleaseChecklist();
+      _readinessScore = await _betaTestingService.getReleaseReadinessScore();
+      _isReadyForProduction = await _betaTestingService.isReadyForProduction();
+      _releaseReport = await _betaTestingService.generateReleaseReport();
+      
+      // Load beta testing data
+      final testersData = await _betaTestingService.getBetaTesters();
+      final feedbackData = await _betaTestingService.getBetaFeedback();
+      
+      _betaTesters = testersData.map((data) => BetaTester.fromMap(data)).toList();
+      _betaFeedback = feedbackData.map((data) => BetaFeedback.fromMap(data)).toList();
 
       setState(() {
         _isLoading = false;
@@ -91,7 +148,7 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
 
   Future<void> _exportReleaseReport() async {
     try {
-      final data = await _betaTestingService.exportBetaData();
+      await _betaTestingService.exportBetaData();
       
       // In production, this would export to a file or share
       if (mounted) {
@@ -318,7 +375,7 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
                 Expanded(
                   child: _buildStatCard(
                     'Beta Testers',
-                    '${_betaTestingService.getBetaTesters().length}',
+                    '${_betaTesters.length}',
                     Icons.people,
                     Colors.orange,
                   ),
@@ -489,8 +546,8 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
   }
 
   Widget _buildBetaTestingTab() {
-    final testers = _betaTestingService.getBetaTesters();
-    final feedback = _betaTestingService.getBetaFeedback();
+    final testers = _betaTesters;
+    final feedback = _betaFeedback;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -550,7 +607,7 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            ...feedback.take(5).map((f) => Card(
+            ...feedback.take(5).map((BetaFeedback f) => Card(
                   child: ListTile(
                     title: Text(f.title),
                     subtitle: Text(f.description),

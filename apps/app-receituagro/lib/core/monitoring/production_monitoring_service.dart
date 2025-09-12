@@ -70,7 +70,7 @@ class ProductionMonitoringService {
     // Log to crashlytics
     _crashlytics.recordError(
       exception: details.exception,
-      stackTrace: details.stack,
+      stackTrace: details.stack ?? StackTrace.empty,
       reason: 'Flutter Error: ${details.library}',
       fatal: false,
     );

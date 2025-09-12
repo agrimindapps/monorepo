@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
-import '../../../../core/services/device_identity_service.dart';
 import '../providers/subscription_provider.dart';
 
 /// Premium Validation Widget for Cross-platform Premium Status
@@ -379,7 +378,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(

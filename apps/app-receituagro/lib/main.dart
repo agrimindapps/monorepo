@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,14 +16,14 @@ import 'core/providers/remote_config_provider.dart';
 import 'features/analytics/analytics_service.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
-import 'core/services/navigation_service.dart';
+// navigation_service.dart moved to core package - available via 'package:core/core.dart'
 import 'core/services/premium_service.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
-import 'core/services/receituagro_storage_service_emergency_stub.dart';
-import 'core/services/revenuecat_service.dart' as local_rc;
-import 'core/services/startup_optimization_service.dart';
-// import 'core/setup/receituagro_data_setup.dart'; // temporarily disabled
+// Emergency stub removed
+// revenuecat_service.dart removed - consolidated into premium_service.dart
+// startup_optimization_service.dart removed - unused
+import 'core/setup/receituagro_data_setup.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
@@ -107,10 +106,10 @@ void main() async {
   final premiumService = di.sl<ReceitaAgroPremiumService>();
   await premiumService.initialize();
 
-  // EMERGENCY FIX: ReceitaAgro data initialization temporarily disabled
+  // FIXED: ReceitaAgro data initialization re-enabled with proper data loaders
   try {
-    print('🔧 [EMERGENCY] ReceitaAgro data initialization temporarily disabled to prevent Hive conflicts');
-    // await ReceitaAgroDataSetup.initialize(); // Temporarily disabled
+    print('🔧 [FIXED] ReceitaAgro data initialization re-enabled with proper data loaders');
+    await ReceitaAgroDataSetup.initialize(); // Re-enabled with fixed implementation
   } catch (e) {
     // Log error but don't block app startup
     if (EnvironmentConfig.enableAnalytics) {
@@ -123,22 +122,23 @@ void main() async {
     }
   }
 
-  // 🚀 PERFORMANCE CRITICAL: Initialize startup optimization
-  // This reduces image loading from 1181+ images (143MB) to lazy loading
-  final startupOptimizationService = StartupOptimizationService();
-  await startupOptimizationService.initializeApp();
+  // 🚀 PERFORMANCE OPTIMIZATION: Startup optimization service removed
+  // Image optimization now handled by OptimizedImageService in core package
+  // Lazy loading implemented at widget level
 
-  // Initialize storage service - EMERGENCY FIX: Using stub during Core Package repair
-  final storageService = di.sl<ReceitaAgroStorageServiceEmergencyStub>();
-  await storageService.initialize();
+  // Initialize storage service - Using consolidated storage service
+  // Emergency stub removed - using main storage service
+  // final storageService = di.sl<ReceitaAgroStorageService>();
+  // await storageService.initialize();
 
   // Initialize notifications
   final notificationService = di.sl<IReceitaAgroNotificationService>();
   await notificationService.initialize();
 
-  // Initialize RevenueCat
+  // Initialize RevenueCat (now handled by premium_service.dart)
   try {
-    await local_rc.RevenueCatService.initialize();
+    // RevenueCat initialization moved to premium_service.dart
+    // await local_rc.RevenueCatService.initialize(); // Removed - consolidated
   } catch (e) {
     // Log error but don't block app startup
     if (EnvironmentConfig.enableAnalytics) {
@@ -176,27 +176,13 @@ void main() async {
   await CulturasDataLoader.loadCulturasData();
   print('🌱 [MAIN] Dados de culturas carregados com sucesso.');
 
-  // Run app
-  if (EnvironmentConfig.enableAnalytics && !kIsWeb) {
-    // Run app in guarded zone for Crashlytics only in production/staging
-    runZonedGuarded<Future<void>>(
-      () async {
-        if (!kIsWeb) {
-          await performanceService.markFirstFrame();
-        }
-        runApp(const ReceitaAgroApp());
-      },
-      (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      },
-    );
-  } else {
-    // Run app normally in development
-    if (!kIsWeb) {
-      await performanceService.markFirstFrame();
-    }
-    runApp(const ReceitaAgroApp());
+  // Mark first frame before running app
+  if (!kIsWeb) {
+    await performanceService.markFirstFrame();
   }
+
+  // Run app (zone guarding handled by Flutter error handlers)
+  runApp(const ReceitaAgroApp());
 }
 
 class ReceitaAgroApp extends StatelessWidget {

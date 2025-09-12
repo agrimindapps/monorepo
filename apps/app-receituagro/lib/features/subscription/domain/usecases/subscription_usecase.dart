@@ -48,19 +48,43 @@ class GetAvailableProductsUseCase implements UseCase<List<ProductInfo>, NoParams
   }
 }
 
+/// Parâmetros para o use case de compra
+class PurchaseProductUseCaseParams {
+  final String productId;
+  final String? userId;
+  final Map<String, dynamic>? metadata;
+
+  const PurchaseProductUseCaseParams({
+    required this.productId,
+    this.userId,
+    this.metadata,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PurchaseProductUseCaseParams &&
+        other.productId == productId &&
+        other.userId == userId;
+  }
+
+  @override
+  int get hashCode => Object.hash(productId, userId);
+}
+
 /// Use case para comprar produto (usa core repository diretamente)
-class PurchaseProductUseCase implements UseCase<SubscriptionEntity, String> {
+class PurchaseProductUseCase implements UseCase<SubscriptionEntity, PurchaseProductUseCaseParams> {
   final ISubscriptionRepository coreRepository;
 
   PurchaseProductUseCase(this.coreRepository);
 
   @override
-  Future<Either<Failure, SubscriptionEntity>> call(String productId) async {
-    if (productId.trim().isEmpty) {
+  Future<Either<Failure, SubscriptionEntity>> call(PurchaseProductUseCaseParams params) async {
+    if (params.productId.trim().isEmpty) {
       return const Left(ValidationFailure('ID do produto não pode ser vazio'));
     }
 
-    return await coreRepository.purchaseProduct(productId: productId);
+    return await coreRepository.purchaseProduct(productId: params.productId);
   }
 }
 
@@ -93,7 +117,7 @@ class RestorePurchasesUseCase implements UseCase<List<SubscriptionEntity>, NoPar
     
     // Atualiza cache local após restaurar
     await result.fold(
-      (failure) => Future.value(),
+      (failure) => Future<void>.value(),
       (subscriptions) async {
         final hasReceitaAgro = subscriptions.any((s) => s.isReceitaAgroSubscription && s.isActive);
         await appRepository.cachePremiumStatus(hasReceitaAgro);
@@ -118,7 +142,7 @@ class RefreshSubscriptionStatusUseCase implements UseCase<bool, NoParams> {
     
     // Atualiza cache após refresh
     await result.fold(
-      (failure) => Future.value(),
+      (failure) => Future<void>.value(),
       (isPremium) => repository.cachePremiumStatus(isPremium),
     );
     

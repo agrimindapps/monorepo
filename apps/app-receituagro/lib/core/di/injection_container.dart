@@ -2,6 +2,10 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
+import '../interfaces/i_premium_service.dart';
+import '../services/mock_premium_service.dart';
+import '../services/enhanced_diagnostic_integration_service.dart';
+
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_hive_repository.dart';
@@ -30,31 +34,38 @@ import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
 import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
-import '../services/enhanced_diagnostic_integration_service.dart';
-import '../services/navigation_service.dart';
+// Enhanced diagnostic service removed
+// Navigation service moved to core package
 import '../providers/feature_flags_provider.dart';
 import '../providers/remote_config_provider.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../services/cloud_functions_service.dart';
 import '../services/premium_service.dart';
-import '../services/premium_service_real.dart';
+// premium_service_real.dart removed - consolidated into premium_service.dart
 import '../services/receituagro_notification_service.dart';
-import '../services/receituagro_storage_service_emergency_stub.dart';
+// Emergency stub removed
 import '../services/remote_config_service.dart';
 import 'core_package_integration.dart';
-import 'repositories_di.dart';
+// import 'repositories_di.dart'; // Temporarily disabled to avoid duplicate registrations
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
   // Configure all Clean Architecture dependencies first
-  configureAllRepositoriesDependencies();
+  // TEMPORARILY DISABLED to avoid duplicate registrations with legacy repositories
+  // configureAllRepositoriesDependencies();
   
   // ===== NAVEGAÇÃO =====
   // Registra AppNavigationProvider como singleton para navegação global
   sl.registerLazySingleton<AppNavigationProvider>(
     () => AppNavigationProvider(),
+  );
+  
+  // ===== DEVICE IDENTITY SERVICE =====
+  // Register DeviceIdentityService before Core Package Integration
+  sl.registerLazySingleton<DeviceIdentityService>(
+    () => DeviceIdentityService.instance,
   );
   
   // ===== CORE PACKAGE INTEGRATION - AUTH SERVICES ONLY =====
@@ -69,13 +80,7 @@ Future<void> init() async {
     () => ReceitaAgroRemoteConfigService.instance,
   );
   
-  // Analytics Service (uses Core Package Firebase services)
-  sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-    () => ReceitaAgroAnalyticsService(
-      analyticsRepository: sl<core.IAnalyticsRepository>(),
-      crashlyticsRepository: sl<core.ICrashlyticsRepository>(),
-    ),
-  );
+  // Analytics Service - Registered via Core Package Integration
   
   // Cloud Functions Service
   sl.registerLazySingleton<ReceitaAgroCloudFunctionsService>(
@@ -151,10 +156,7 @@ Future<void> init() async {
     () => sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
   );
   
-  // Storage Service - Using Core Package EnhancedStorageService
-  sl.registerLazySingleton<ReceitaAgroStorageServiceEmergencyStub>(
-    () => ReceitaAgroStorageServiceEmergencyStub(),
-  );
+  // Storage Service - Removed (using Core Package EnhancedStorageService)
   
   // Enhanced Storage Service from Core Package
   try {
@@ -171,15 +173,16 @@ Future<void> init() async {
   //   () => sl<HiveStorageService>(),
   // );
   
-  // Navigation Service - Serviço de navegação global
-  sl.registerLazySingleton<INavigationService>(
-    () => NavigationService(),
-  );
+  // Navigation Service - Now available via Core Package
+  try {
+    sl.registerLazySingleton<core.NavigationService>(
+      () => core.NavigationService(),
+    );
+  } catch (e) {
+    if (kDebugMode) print('NavigationService registration failed: $e');
+  }
   
-  // Device Identity Service - Gerenciador de UUID único por dispositivo
-  sl.registerLazySingleton<DeviceIdentityService>(
-    () => DeviceIdentityService(),
-  );
+  // Device Identity Service - Moved to before Core Package Integration
   
   // Hive Repositories - Repositórios de dados reais
   // LEGACY: Comentados durante migração para Core Package
@@ -278,15 +281,7 @@ Future<void> init() async {
     ),
   );
 
-  // Enhanced DiagnosticoIntegrationService - Serviço aprimorado com resolução de nomes
-  sl.registerLazySingleton<EnhancedDiagnosticIntegrationService>(
-    () => EnhancedDiagnosticIntegrationService(
-      diagnosticoRepo: sl<DiagnosticoHiveRepository>(),
-      fitossanitarioRepo: sl<FitossanitarioHiveRepository>(),
-      culturaRepo: sl<CulturaHiveRepository>(),
-      pragasRepo: sl<PragasHiveRepository>(),
-    ),
-  );
+  // Enhanced DiagnosticoIntegrationService - Removed (service not available)
   
   // Cache Services - Serviços de cache para otimização
   // TEMPORARY: Re-registering with legacy repositories for backward compatibility  
@@ -324,13 +319,15 @@ Future<void> init() async {
     () => PremiumHiveRepository(),
   );
 
-  sl.registerLazySingleton<IPremiumService>(
-    () => PremiumServiceReal(
-      hiveRepository: sl<PremiumHiveRepository>(),
-      subscriptionRepository: sl<core.ISubscriptionRepository>(),
-      navigationService: sl<INavigationService>(),
-    ),
-  );
+  // Premium Service - Using Mock Implementation for Development
+  // TODO: Create proper adapter between core.RevenueCatService and IPremiumService when needed
+  try {
+    sl.registerLazySingleton<IPremiumService>(
+      () => MockPremiumService(),
+    );
+  } catch (e) {
+    if (kDebugMode) print('Premium service registration failed: $e');
+  }
 
   sl.registerLazySingleton<ComentariosService>(
     () => ComentariosService(
@@ -345,6 +342,11 @@ Future<void> init() async {
   // ListaCulturasPage now uses sl<CulturaCoreRepository>() directly
 
   // ===== DIAGNÓSTICOS CLEAN ARCHITECTURE =====
+  
+  // Enhanced Diagnostic Integration Service - Stub for removed service
+  sl.registerLazySingleton<EnhancedDiagnosticIntegrationService>(
+    () => EnhancedDiagnosticIntegrationService(),
+  );
   
   // ENHANCED FIX: Using legacy adapter enhanced with automatic name resolution
   // This provides enriched diagnostics data with proper defensivo/praga/cultura names

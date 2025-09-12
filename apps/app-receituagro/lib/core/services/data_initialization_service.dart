@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
 import '../repositories/cultura_hive_repository.dart';
@@ -9,8 +10,6 @@ import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
-import 'asset_loader_service.dart';
-import 'version_manager_service.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
 /// Orquestra o carregamento de JSONs e populacião das Hive boxes

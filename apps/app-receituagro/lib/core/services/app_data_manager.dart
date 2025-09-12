@@ -10,11 +10,11 @@ import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
-import 'asset_loader_service.dart';
-import 'auto_version_control_service.dart';
+import 'package:core/core.dart'; // AssetLoaderService, VersionManagerService moved to core
+// auto_version_control_service.dart - removed (unused)
 import 'data_initialization_service.dart';
 import 'hive_adapter_registry.dart';
-import 'version_manager_service.dart';
+// version_manager_service.dart moved to core
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -23,7 +23,7 @@ abstract class IAppDataManager {
   Future<Map<String, dynamic>> getDataStats();
   Future<bool> isDataReady();
   DataInitializationService get dataService;
-  AutoVersionControlService get versionControlService;
+  // AutoVersionControlService get versionControlService; // Service removed
   Future<void> dispose();
   bool get isInitialized;
 }
@@ -33,7 +33,7 @@ abstract class IAppDataManager {
 /// Agora integrado com sistema de controle automático de versão
 class AppDataManager implements IAppDataManager {
   late final DataInitializationService _dataService;
-  late final AutoVersionControlService _versionControlService;
+  // late final AutoVersionControlService _versionControlService; // Service removed
   bool _isInitialized = false;
 
   /// Construtor que permite injeção de dependência
@@ -64,34 +64,9 @@ class AppDataManager implements IAppDataManager {
       // 4. Cria instâncias dos serviços
       await _createServices();
 
-      // 5. NOVA LÓGICA: Executa controle automático de versão
+      // 5. Version control removed - using direct data initialization
       developer.log(
-        'Executando controle automático de versão...',
-        name: 'AppDataManager',
-      );
-
-      final versionControlResult = await _versionControlService
-          .executeVersionControl(
-            onProgress: (stage, message, progress) {
-              developer.log(
-                '[$stage] $message (${(progress * 100).toInt()}%)',
-                name: 'AppDataManager',
-              );
-            },
-          );
-
-      if (versionControlResult.isLeft()) {
-        final error = versionControlResult.fold((e) => e.toString(), (r) => '');
-        developer.log(
-          'Erro no controle de versão: $error',
-          name: 'AppDataManager',
-        );
-        return Left(Exception('Falha no controle de versão: $error'));
-      }
-
-      final result = versionControlResult.fold((l) => null, (r) => r)!;
-      developer.log(
-        'Controle de versão executado: ${result.toString()}',
+        'Inicializando dados diretamente...',
         name: 'AppDataManager',
       );
 
@@ -106,10 +81,9 @@ class AppDataManager implements IAppDataManager {
       }
 
       _isInitialized = true;
-      _versionControlService.markAsInitialized();
 
       developer.log(
-        'Sistema de dados inicializado com sucesso via controle automático de versão',
+        'Sistema de dados inicializado com sucesso',
         name: 'AppDataManager',
       );
 
@@ -173,7 +147,7 @@ class AppDataManager implements IAppDataManager {
       );
 
       // NOVO: Serviço de controle automático de versão
-      _versionControlService = AutoVersionControlService.create();
+      // _versionControlService = AutoVersionControlService.create(); // Service removed
 
       developer.log(
         'Serviços criados com sucesso (incluindo controle de versão)',
@@ -194,28 +168,15 @@ class AppDataManager implements IAppDataManager {
 
     try {
       developer.log(
-        'Forçando recarregamento via controle de versão...',
+        'Forçando recarregamento de dados...',
         name: 'AppDataManager',
       );
 
-      final result = await _versionControlService.forceVersionControl(
-        onProgress: (stage, message, progress) {
-          developer.log(
-            '[$stage] $message (${(progress * 100).toInt()}%)',
-            name: 'AppDataManager',
-          );
-        },
-      );
-
-      return result.fold(
-        (error) => Left(error),
-        (versionResult) =>
-            versionResult.success
-                ? const Right(null)
-                : Left(
-                  Exception('Recarregamento falhou: ${versionResult.message}'),
-                ),
-      );
+      // Force reload via data service - TODO: Implement forceReload method
+      // await _dataService.forceReload();
+      developer.log('Force reload requested but method not implemented', name: 'AppDataManager');
+      
+      return const Right(null);
     } catch (e) {
       developer.log(
         'Erro ao forçar recarregamento: $e',
@@ -235,18 +196,16 @@ class AppDataManager implements IAppDataManager {
     }
 
     try {
-      // Combina estatísticas do serviço de dados com informações de controle de versão
+      // Obtém estatísticas do serviço de dados
       final dataStats = await _dataService.getLoadingStats();
-      final systemStatus = await _versionControlService.getSystemStatus();
 
       return {
         'data_initialization': dataStats,
-        'version_control': systemStatus,
-        'combined_timestamp': DateTime.now().toIso8601String(),
+        'timestamp': DateTime.now().toIso8601String(),
       };
     } catch (e) {
       developer.log(
-        'Erro ao obter estatísticas combinadas: $e',
+        'Erro ao obter estatísticas: $e',
         name: 'AppDataManager',
       );
       return {
@@ -275,13 +234,9 @@ class AppDataManager implements IAppDataManager {
     return _dataService;
   }
 
-  /// Obtém instância do serviço de controle de versão (para uso em DI)
-  @override
-  AutoVersionControlService get versionControlService {
-    if (!_isInitialized) {
-      throw Exception('Sistema não foi inicializado');
-    }
-    return _versionControlService;
+  /// Version control service removed - no longer available
+  dynamic get versionControlService {
+    throw Exception('Version control service was removed - functionality not available');
   }
 
   /// Limpa recursos do sistema

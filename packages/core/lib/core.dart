@@ -107,6 +107,18 @@ export 'src/shared/di/injection_container.dart';
 export 'src/shared/enums/log_level.dart';
 // Extensions
 export 'src/shared/extensions/log_level_extensions.dart';
+// Contracts for shared services
+export 'src/shared/contracts/i_asset_loader.dart';
+export 'src/shared/contracts/i_version_manager.dart';
+// Services (Moved from app-receituagro)
+export 'src/shared/services/asset_loader_service.dart';
+export 'src/shared/services/cache_management_service.dart' hide CacheConfig;
+export 'src/shared/services/navigation_service.dart';
+export 'src/shared/services/optimized_image_service.dart';
+export 'src/shared/services/preferences_service.dart';
+export 'src/shared/services/version_manager_service.dart';
+// Features
+export 'src/features/subscription/subscription_page.dart';
 export 'src/shared/utils/app_error.dart';
 export 'src/shared/utils/error_adapter.dart';
 // Utils

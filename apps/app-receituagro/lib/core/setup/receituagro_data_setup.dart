@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
-import '../services/receituagro_hive_service.dart';
+import '../services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
+import '../services/fitossanitarios_data_loader.dart';
+import '../services/pragas_data_loader.dart';
 
 /// Configuração e inicialização dos dados estáticos do ReceitaAgro
 class ReceitaAgroDataSetup {
@@ -23,15 +25,21 @@ class ReceitaAgroDataSetup {
     }
   }
 
-  /// Carrega dados de teste temporários
+  /// Carrega dados reais dos JSON assets
   static Future<void> _loadTestData() async {
     try {
-      // TODO: Substituir por carregamento real dos JSONs quando disponíveis
-      await ReceitaAgroHiveService.saveTestData();
+      developer.log('Iniciando carregamento de dados reais dos JSONs...', name: 'ReceitaAgroDataSetup');
       
-      developer.log('Dados de teste carregados', name: 'ReceitaAgroDataSetup');
+      // Carrega dados de fitossanitários (defensivos)
+      await FitossanitariosDataLoader.loadFitossanitariosData();
+      
+      // Carrega dados de pragas
+      await PragasDataLoader.loadPragasData();
+      
+      developer.log('Dados reais carregados com sucesso!', name: 'ReceitaAgroDataSetup');
     } catch (e) {
-      developer.log('Erro ao carregar dados de teste: $e', name: 'ReceitaAgroDataSetup');
+      developer.log('Erro ao carregar dados reais: $e', name: 'ReceitaAgroDataSetup');
+      rethrow;
     }
   }
 
@@ -45,8 +53,9 @@ class ReceitaAgroDataSetup {
       await ReceitaAgroHiveService.closeBoxes();
       await ReceitaAgroHiveService.openBoxes();
       
-      // Recarrega dados
-      await _loadTestData();
+      // Força recarregamento individual dos loaders
+      await FitossanitariosDataLoader.forceReload();
+      await PragasDataLoader.forceReload();
       
       developer.log('✅ Recarregamento concluído!', name: 'ReceitaAgroDataSetup');
     } catch (e) {
@@ -77,18 +86,26 @@ class ReceitaAgroDataSetup {
   /// Obtém estatísticas dos dados carregados
   static Future<Map<String, dynamic>> getDataStats() async {
     try {
-      final pragas = ReceitaAgroHiveService.getPragas();
+      // Obtém estatísticas dos loaders individuais
+      final pragasStats = await PragasDataLoader.getStats();
+      final fitossanitariosStats = await FitossanitariosDataLoader.getStats();
+      
+      final int pragasCount = (pragasStats['total_pragas'] as int?) ?? 0;
+      final int fitossanitariosCount = (fitossanitariosStats['total_fitossanitarios'] as int?) ?? 0;
+      
+      // Obter culturas e diagnósticos usando o stub service
       final culturas = ReceitaAgroHiveService.getCulturas();
-      final fitossanitarios = ReceitaAgroHiveService.getFitossanitarios();
       final diagnosticos = ReceitaAgroHiveService.getDiagnosticos();
 
       return {
-        'pragas_count': pragas.length,
+        'pragas_count': pragasCount,
         'culturas_count': culturas.length,
-        'fitossanitarios_count': fitossanitarios.length,
+        'fitossanitarios_count': fitossanitariosCount,
         'diagnosticos_count': diagnosticos.length,
-        'total_items': pragas.length + culturas.length + fitossanitarios.length + diagnosticos.length,
+        'total_items': pragasCount + culturas.length + fitossanitariosCount + diagnosticos.length,
         'last_updated': DateTime.now().toIso8601String(),
+        'pragas_loaded': pragasStats['is_loaded'] ?? false,
+        'fitossanitarios_loaded': fitossanitariosStats['is_loaded'] ?? false,
       };
     } catch (e) {
       developer.log('Erro ao obter estatísticas: $e', name: 'ReceitaAgroDataSetup');
@@ -99,6 +116,8 @@ class ReceitaAgroDataSetup {
         'fitossanitarios_count': 0,
         'diagnosticos_count': 0,
         'total_items': 0,
+        'pragas_loaded': false,
+        'fitossanitarios_loaded': false,
       };
     }
   }

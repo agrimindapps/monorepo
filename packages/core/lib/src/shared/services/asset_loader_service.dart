@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/services.dart';
 
-import '../contracts/i_static_data_repository.dart';
+import '../contracts/i_asset_loader.dart';
 
 /// Serviço para carregamento de assets JSON
 /// Implementa a interface IAssetLoader

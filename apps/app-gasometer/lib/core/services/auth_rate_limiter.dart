@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
@@ -28,9 +29,16 @@ class AuthRateLimiter {
     if (lockoutEndTimeStr != null) {
       final lockoutEndTime = int.parse(lockoutEndTimeStr);
       if (now < lockoutEndTime) {
+        final remainingMin = ((lockoutEndTime - now) / (1000 * 60)).ceil();
+        if (kDebugMode) {
+          debugPrint('🔒 INTERNO: Usuário bloqueado - restam $remainingMin minutos');
+        }
         return false; // Ainda está em lockout
       } else {
         // Lockout expirou, limpa os dados
+        if (kDebugMode) {
+          debugPrint('🔒 INTERNO: Lockout expirou - limpando dados');
+        }
         await _clearLockoutData();
       }
     }
@@ -85,6 +93,11 @@ class AuthRateLimiter {
     if (attemptCount >= _maxAttempts) {
       final lockoutEndTime = now + (_lockoutDurationMinutes * 60 * 1000);
       await _secureStorage.write(key: _lockoutEndTimeKey, value: lockoutEndTime.toString());
+      
+      if (kDebugMode) {
+        debugPrint('🔒 INTERNO: Rate limiting ativado - $attemptCount tentativas em $_attemptWindowMinutes min');
+        debugPrint('🔒 INTERNO: Bloqueio por $_lockoutDurationMinutes minutos');
+      }
     }
   }
   

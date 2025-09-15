@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_provider.dart';
 import '../dialogs/user_profile_dialog.dart';
 import '../items/sync_status_item.dart';
+import '../shared/settings_list_tile.dart';
 
-/// User Profile & Settings Sync Section
+/// User Profile & Account Management Section
 /// 
 /// Features:
-/// - User profile display and editing
+/// - Authentication options for guests (login/register)
+/// - User profile display and editing for authenticated users
 /// - Avatar, display name, email management
+/// - Device management (when applicable)
 /// - Settings sync status indicators
 /// - Account management options
 /// - Theme/language sync between devices
@@ -21,13 +25,8 @@ class UserProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SettingsProvider, FeatureFlagsProvider>(
-      builder: (context, settingsProvider, featureFlags, child) {
-        // Only show if user is logged in or sync is enabled
-        if (!_shouldShowSection(settingsProvider, featureFlags)) {
-          return const SizedBox.shrink();
-        }
-
+    return Consumer3<SettingsProvider, FeatureFlagsProvider, ReceitaAgroAuthProvider>(
+      builder: (context, settingsProvider, featureFlags, authProvider, child) {
         return Card(
           margin: SettingsDesignTokens.sectionMargin,
           elevation: SettingsDesignTokens.cardElevation,
@@ -38,17 +37,23 @@ class UserProfileSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
-              _buildSectionHeader(context, settingsProvider),
+              _buildSectionHeader(context, authProvider),
               
-              // User Profile Info
-              _buildUserProfile(context, settingsProvider),
-              
-              // Settings Sync Status
-              if (featureFlags.isContentSynchronizationEnabled)
-                _buildSyncStatus(context, settingsProvider, featureFlags),
-              
-              // Account Management Actions
-              _buildAccountActions(context, settingsProvider),
+              // Content based on auth status
+              if (!authProvider.isAuthenticated || authProvider.isAnonymous) ...[
+                // Authentication options for guests
+                _buildAuthenticationOptions(context, authProvider),
+              ] else ...[
+                // User profile for authenticated users
+                _buildUserProfile(context, settingsProvider, authProvider),
+                
+                // Settings Sync Status
+                if (featureFlags.isContentSynchronizationEnabled)
+                  _buildSyncStatus(context, settingsProvider, featureFlags),
+                
+                // Account Management Actions
+                _buildAccountActions(context, settingsProvider, authProvider),
+              ],
             ],
           ),
         );
@@ -63,9 +68,38 @@ class UserProfileSection extends StatelessWidget {
            featureFlags.isContentSynchronizationEnabled;
   }
 
+  /// Authentication options for guests
+  Widget _buildAuthenticationOptions(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    return Column(
+      children: [
+        SettingsListTile(
+          leadingIcon: Icons.login,
+          title: 'Fazer Login',
+          subtitle: 'Acesse sua conta existente',
+          onTap: () => _showLoginDialog(context, authProvider),
+        ),
+        const Divider(height: 1),
+        SettingsListTile(
+          leadingIcon: Icons.person_add,
+          title: 'Criar Conta',
+          subtitle: 'Cadastre-se para sincronizar dados',
+          onTap: () => _showSignupDialog(context, authProvider),
+        ),
+        const Divider(height: 1),
+        SettingsListTile(
+          leadingIcon: Icons.info_outline,
+          title: 'Sobre Conta',
+          subtitle: 'Benefícios de ter uma conta',
+          onTap: () => _showAccountBenefitsDialog(context),
+        ),
+      ],
+    );
+  }
+
   /// Section Header
-  Widget _buildSectionHeader(BuildContext context, SettingsProvider settingsProvider) {
+  Widget _buildSectionHeader(BuildContext context, ReceitaAgroAuthProvider authProvider) {
     final theme = Theme.of(context);
+    final isAuthenticated = authProvider.isAuthenticated && !authProvider.isAnonymous;
 
     return Padding(
       padding: SettingsDesignTokens.sectionHeaderPadding,
@@ -104,7 +138,7 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// User Profile Display
-  Widget _buildUserProfile(BuildContext context, SettingsProvider settingsProvider) {
+  Widget _buildUserProfile(BuildContext context, SettingsProvider settingsProvider, ReceitaAgroAuthProvider authProvider) {
     final theme = Theme.of(context);
     final currentDevice = settingsProvider.currentDevice;
     
@@ -243,7 +277,7 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Account Management Actions
-  Widget _buildAccountActions(BuildContext context, SettingsProvider settingsProvider) {
+  Widget _buildAccountActions(BuildContext context, SettingsProvider settingsProvider, ReceitaAgroAuthProvider authProvider) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
@@ -338,7 +372,7 @@ class UserProfileSection extends StatelessWidget {
 
   /// Open Account Management
   void _openAccountManagement(BuildContext context, SettingsProvider settingsProvider) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Gerenciar Conta'),
@@ -357,6 +391,201 @@ class UserProfileSection extends StatelessWidget {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Show login dialog
+  void _showLoginDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Fazer Login'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Senha',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => _performLogin(context, authProvider, emailController.text, passwordController.text),
+            child: const Text('Entrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show signup dialog
+  void _showSignupDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Criar Conta'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nome',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Senha',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => _performSignup(
+              context, 
+              authProvider, 
+              nameController.text, 
+              emailController.text, 
+              passwordController.text
+            ),
+            child: const Text('Criar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show account benefits dialog
+  void _showAccountBenefitsDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Benefícios de ter uma conta'),
+        content: const Text(
+          'Ao criar uma conta no ReceitaAgro você pode:\n\n'
+          '✅ Sincronizar dados entre dispositivos\n'
+          '✅ Backup automático de favoritos\n'
+          '✅ Histórico de consultas\n'
+          '✅ Acesso a recursos premium\n'
+          '✅ Suporte prioritário\n'
+          '✅ Personalização avançada\n\n'
+          'É grátis e leva apenas alguns minutos!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Depois'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Chamar o método de criar conta
+              final authProvider = Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
+              _showSignupDialog(context, authProvider);
+            },
+            child: const Text('Criar Conta'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Perform login
+  Future<void> _performLogin(BuildContext context, ReceitaAgroAuthProvider authProvider, String email, String password) async {
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar(context, 'Preencha todos os campos', Colors.red);
+      return;
+    }
+
+    Navigator.pop(context);
+    
+    final result = await authProvider.signInWithEmailAndPassword(
+      email: email.trim(), 
+      password: password,
+    );
+    
+    if (context.mounted) {
+      _showSnackBar(
+        context,
+        result.isSuccess ? 'Login realizado com sucesso!' : 'Erro ao fazer login: ${result.errorMessage ?? "Erro desconhecido"}',
+        result.isSuccess ? Colors.green : Colors.red,
+      );
+    }
+  }
+
+  /// Perform signup
+  Future<void> _performSignup(BuildContext context, ReceitaAgroAuthProvider authProvider, String name, String email, String password) async {
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      _showSnackBar(context, 'Preencha todos os campos', Colors.red);
+      return;
+    }
+
+    Navigator.pop(context);
+    
+    final result = await authProvider.signUpWithEmailAndPassword(
+      email: email.trim(), 
+      password: password,
+      displayName: name.trim(),
+    );
+    
+    if (context.mounted) {
+      _showSnackBar(
+        context,
+        result.isSuccess ? 'Conta criada com sucesso!' : 'Erro ao criar conta: ${result.errorMessage ?? "Erro desconhecido"}',
+        result.isSuccess ? Colors.green : Colors.red,
+      );
+    }
+  }
+
+  /// Show snackbar helper
+  void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
       ),
     );
   }

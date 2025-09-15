@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/theme/app_theme.dart';
 import '../../../../core/presentation/widgets/form_section_widget.dart';
-import '../../../../core/presentation/widgets/validated_datetime_field.dart';
 import '../../../../core/presentation/widgets/validated_text_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../core/constants/expense_constants.dart';
@@ -15,204 +13,185 @@ import 'receipt_image_picker.dart';
 /// Widget principal do formulário de despesas
 class ExpenseFormView extends StatelessWidget {
   final ExpenseFormProvider formProvider;
-  final bool showTitle;
-  final EdgeInsets? padding;
 
   const ExpenseFormView({
     super.key,
     required this.formProvider,
-    this.showTitle = true,
-    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding ?? const EdgeInsets.all(16.0),
-      child: Consumer<ExpenseFormProvider>(
-        builder: (context, provider, child) {
-          return Form(
-            key: provider.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (showTitle) ...[
-                  Text(
-                    'Nova Despesa',
-                    style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeXl,
-                      fontWeight: GasometerDesignTokens.fontWeightBold,
-                      color: GasometerDesignTokens.colorTextPrimary,
+    return Consumer<ExpenseFormProvider>(
+      builder: (context, provider, child) {
+        return Form(
+          key: provider.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Seção: Informações Básicas
+              _buildSectionWithoutPadding(
+                title: ExpenseConstants.basicInfoSectionTitle,
+                icon: Icons.info_outline,
+                content: Column(
+                  children: [
+                    // Seletor de tipo de despesa
+                    ExpenseTypeSelector(
+                      selectedType: provider.formModel.expenseType,
+                      onTypeSelected: provider.updateExpenseType,
+                      error: provider.formModel.getFieldError('expenseType'),
                     ),
-                  ),
-                  SizedBox(height: GasometerDesignTokens.spacingMd),
-                ],
 
-                // Seção: Informações Básicas
-                FormSectionWidget.withTitle(
-                  title: ExpenseConstants.basicInfoSectionTitle,
-                  icon: Icons.info_outline,
-                  content: Column(
-                    children: [
-                      // Seletor de tipo de despesa
-                      ExpenseTypeSelector(
-                        selectedType: provider.formModel.expenseType,
-                        onTypeSelected: provider.updateExpenseType,
-                        error: provider.formModel.getFieldError('expenseType'),
-                      ),
-                      
-                      SizedBox(height: GasometerDesignTokens.spacingMd),
+                    SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                      // Descrição com validação em tempo real
-                      ValidatedTextField(
-                        controller: provider.descriptionController,
-                        label: 'Descrição *',
-                        hint: ExpenseConstants.descriptionPlaceholder,
-                        maxLength: ExpenseConstants.maxDescriptionLength,
-                        required: true,
-                        showCharacterCount: true,
-                        prefixIcon: Icons.description,
-                        validator: (value) => provider.validateField('description', value),
-                        debounceDuration: const Duration(milliseconds: 300),
-                      ),
+                    // Descrição com validação em tempo real
+                    ValidatedTextField(
+                      controller: provider.descriptionController,
+                      label: 'Descrição *',
+                      hint: ExpenseConstants.descriptionPlaceholder,
+                      maxLength: ExpenseConstants.maxDescriptionLength,
+                      required: true,
+                      showCharacterCount: true,
+                      prefixIcon: Icons.description,
+                      validator: (value) =>
+                          provider.validateField('description', value),
+                      debounceDuration: const Duration(milliseconds: 300),
+                    ),
 
-                      SizedBox(height: GasometerDesignTokens.spacingMd),
+                    SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                      // Data e Hora unified  
-                      _buildDateTimeField(context, provider),
-                    ],
-                  ),
+                    // Data e Hora unified
+                    _buildDateTimeField(context, provider),
+                  ],
                 ),
+              ),
 
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
-                // Seção: Valores
-                FormSectionWidget.withTitle(
-                  title: ExpenseConstants.expenseSectionTitle,
-                  icon: Icons.attach_money,
-                  content: Column(
-                    children: [
-                      FormFieldRow.standard(
-                        children: [
-                          // Valor com validação monetária
-                          ValidatedTextField(
-                            controller: provider.amountController,
-                            label: 'Valor *',
-                            hint: ExpenseConstants.amountPlaceholder,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            prefixIcon: Icons.attach_money,
-                            required: true,
-                            validator: CommonValidators.moneyValidator,
-                            debounceDuration: const Duration(milliseconds: 500),
-                          ),
-                          // Odômetro
-                          ValidatedTextField(
-                            controller: provider.odometerController,
-                            label: 'Odômetro *',
-                            hint: ExpenseConstants.odometerPlaceholder,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            prefixIcon: Icons.speed,
-                            suffix: Text(
-                              ExpenseConstants.kilometerUnit,
-                              style: TextStyle(
-                                color: GasometerDesignTokens.colorTextSecondary,
-                                fontSize: GasometerDesignTokens.fontSizeBody,
-                              ),
+              // Seção: Valores
+              _buildSectionWithoutPadding(
+                title: ExpenseConstants.expenseSectionTitle,
+                icon: Icons.attach_money,
+                content: Column(
+                  children: [
+                    FormFieldRow.standard(
+                      children: [
+                        // Valor com validação monetária
+                        ValidatedTextField(
+                          controller: provider.amountController,
+                          label: 'Valor *',
+                          hint: ExpenseConstants.amountPlaceholder,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          prefixIcon: Icons.attach_money,
+                          required: true,
+                          validator: _validateMoney,
+                          debounceDuration: const Duration(milliseconds: 500),
+                        ),
+                        // Odômetro
+                        ValidatedTextField(
+                          controller: provider.odometerController,
+                          label: 'Odômetro *',
+                          hint: ExpenseConstants.odometerPlaceholder,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          prefixIcon: Icons.speed,
+                          suffix: Text(
+                            ExpenseConstants.kilometerUnit,
+                            style: TextStyle(
+                              color: GasometerDesignTokens.colorTextSecondary,
+                              fontSize: GasometerDesignTokens.fontSizeBody,
                             ),
-                            required: true,
-                            validator: (value) => CommonValidators.intValidator(
-                              value,
-                              min: 0,
-                              max: 999999,
-                            ),
-                            debounceDuration: const Duration(milliseconds: 400),
                           ),
-                        ],
-                      ),
+                          required: true,
+                          validator: _validateOdometer,
+                          debounceDuration: const Duration(milliseconds: 400),
+                        ),
+                      ],
+                    ),
 
-                      SizedBox(height: GasometerDesignTokens.spacingMd),
+                    SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                      // Localização (opcional)
-                      ValidatedTextField(
-                        controller: provider.locationController,
-                        label: 'Localização',
-                        hint: ExpenseConstants.locationPlaceholder,
-                        maxLength: ExpenseConstants.maxLocationLength,
-                        prefixIcon: Icons.location_on,
-                        showCharacterCount: true,
-                        validator: (value) {
-                          if (value != null && value.length > ExpenseConstants.maxLocationLength) {
-                            return 'Localização muito longa';
-                          }
-                          return null;
-                        },
-                        debounceDuration: const Duration(milliseconds: 600),
-                      ),
-                    ],
-                  ),
+                    // Localização (opcional)
+                    ValidatedTextField(
+                      controller: provider.locationController,
+                      label: 'Localização',
+                      hint: ExpenseConstants.locationPlaceholder,
+                      maxLength: ExpenseConstants.maxLocationLength,
+                      prefixIcon: Icons.location_on,
+                      showCharacterCount: true,
+                      validator: (value) {
+                        if (value != null &&
+                            value.length > ExpenseConstants.maxLocationLength) {
+                          return 'Localização muito longa';
+                        }
+                        return null;
+                      },
+                      debounceDuration: const Duration(milliseconds: 600),
+                    ),
+                  ],
                 ),
+              ),
 
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
-                // Seção: Comprovante e Observações
-                FormSectionWidget.withTitle(
-                  title: ExpenseConstants.additionalSectionTitle,
-                  icon: Icons.attachment,
-                  content: Column(
-                    children: [
-                      // Comprovante (imagem)
-                      ReceiptImagePicker(
-                        imagePath: provider.formModel.receiptImagePath,
-                        onImageSelected: provider.addReceiptImage,
-                        onImageRemoved: provider.removeReceiptImage,
-                        hasImage: provider.hasReceiptImage,
-                      ),
+              // Seção: Comprovante e Observações
+              _buildSectionWithoutPadding(
+                title: ExpenseConstants.additionalSectionTitle,
+                icon: Icons.attachment,
+                content: Column(
+                  children: [
+                    // Comprovante (imagem)
+                    ReceiptImagePicker(
+                      imagePath: provider.formModel.receiptImagePath,
+                      onImageSelected: provider.addReceiptImage,
+                      onImageRemoved: provider.removeReceiptImage,
+                      hasImage: provider.hasReceiptImage,
+                    ),
 
-                      SizedBox(height: GasometerDesignTokens.spacingMd),
+                    SizedBox(height: GasometerDesignTokens.spacingMd),
 
-                      // Observações
-                      ValidatedTextField(
-                        controller: provider.notesController,
-                        label: 'Observações',
-                        hint: ExpenseConstants.notesPlaceholder,
-                        maxLines: 3,
-                        maxLength: ExpenseConstants.maxNotesLength,
-                        prefixIcon: Icons.note_alt,
-                        showCharacterCount: true,
-                        validator: (value) {
-                          if (value != null && value.length > ExpenseConstants.maxNotesLength) {
-                            return 'Observação muito longa';
-                          }
-                          return null;
-                        },
-                        debounceDuration: const Duration(milliseconds: 800),
-                      ),
-                    ],
-                  ),
+                    // Observações
+                    ValidatedTextField(
+                      controller: provider.notesController,
+                      label: 'Observações',
+                      hint: ExpenseConstants.notesPlaceholder,
+                      maxLines: 3,
+                      maxLength: ExpenseConstants.maxNotesLength,
+                      prefixIcon: Icons.note_alt,
+                      showCharacterCount: true,
+                      validator: (value) {
+                        if (value != null &&
+                            value.length > ExpenseConstants.maxNotesLength) {
+                          return 'Observação muito longa';
+                        }
+                        return null;
+                      },
+                      debounceDuration: const Duration(milliseconds: 800),
+                    ),
+                  ],
                 ),
+              ),
 
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
-                // Resumo do formulário (se tem dados válidos)
-                if (provider.formModel.hasMinimumData)
-                  _buildFormSummary(context, provider),
-              ],
-            ),
-          );
-        },
-      ),
+              // Resumo do formulário (se tem dados válidos)
+              if (provider.formModel.hasMinimumData)
+                _buildFormSummary(context, provider),
+            ],
+          ),
+        );
+      },
     );
   }
 
-
-
   Widget _buildFormSummary(BuildContext context, ExpenseFormProvider provider) {
     final model = provider.formModel;
-    
+
     return Card(
-      color: GasometerDesignTokens.colorPrimaryLight.withOpacity(0.3),
+      color: GasometerDesignTokens.colorPrimaryLight.withValues(alpha: 0.3),
       child: Padding(
-        padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
+        padding:
+            GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -235,17 +214,19 @@ class ExpenseFormView extends StatelessWidget {
               ],
             ),
             SizedBox(height: GasometerDesignTokens.spacingMd),
-            
+
             _buildSummaryRow('Tipo:', model.expenseType.displayName),
-            _buildSummaryRow('Valor:', 'R\$ ${model.amount.toStringAsFixed(2)}'),
+            _buildSummaryRow(
+                'Valor:', 'R\$ ${model.amount.toStringAsFixed(2)}'),
             _buildSummaryRow('Data:', _formatDate(model.date)),
-            _buildSummaryRow('Odômetro:', '${model.odometer.toStringAsFixed(0)} km'),
-            
+            _buildSummaryRow(
+                'Odômetro:', '${model.odometer.toStringAsFixed(0)} km'),
+
             if (model.location.isNotEmpty)
               _buildSummaryRow('Local:', model.location),
-              
+
             if (model.hasReceipt) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: GasometerDesignTokens.spacingSm),
               Row(
                 children: [
                   Icon(
@@ -266,16 +247,18 @@ class ExpenseFormView extends StatelessWidget {
             ],
 
             // Indicadores de status
-            const SizedBox(height: 12),
+            SizedBox(height: GasometerDesignTokens.spacingMd),
             Row(
               children: [
                 // Status de validação
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: GasometerDesignTokens.spacingSm,
+                      vertical: GasometerDesignTokens.spacingXs),
                   decoration: BoxDecoration(
-                    color: model.canSubmit 
-                        ? Colors.green.withOpacity(0.2) 
-                        : Colors.orange.withOpacity(0.2),
+                    color: model.canSubmit
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -286,25 +269,29 @@ class ExpenseFormView extends StatelessWidget {
                         size: 14,
                         color: model.canSubmit ? Colors.green : Colors.orange,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: GasometerDesignTokens.spacingXs),
                       Text(
                         model.canSubmit ? 'Pronto' : 'Pendente',
-                        style: AppTheme.textStyles.labelSmall?.copyWith(
-                          color: model.canSubmit ? Colors.green : Colors.orange,
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: model.canSubmit
+                                  ? Colors.green
+                                  : Colors.orange,
+                            ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                SizedBox(width: GasometerDesignTokens.spacingSm),
 
                 // Indicador de valor alto
                 if (model.isHighValue)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: GasometerDesignTokens.spacingSm,
+                        vertical: GasometerDesignTokens.spacingXs),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: Colors.blue.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -315,12 +302,13 @@ class ExpenseFormView extends StatelessWidget {
                           size: 14,
                           color: Colors.blue,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Alto valor',
-                          style: AppTheme.textStyles.labelSmall?.copyWith(
-                            color: Colors.blue,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.blue,
+                                  ),
                         ),
                       ],
                     ),
@@ -328,11 +316,13 @@ class ExpenseFormView extends StatelessWidget {
 
                 // Indicador de recorrente
                 if (model.isRecurring) ...[
-                  const SizedBox(width: 8),
+                  SizedBox(width: GasometerDesignTokens.spacingSm),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: GasometerDesignTokens.spacingSm,
+                        vertical: GasometerDesignTokens.spacingXs),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.2),
+                      color: Colors.purple.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -343,12 +333,13 @@ class ExpenseFormView extends StatelessWidget {
                           size: 14,
                           color: Colors.purple,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Recorrente',
-                          style: AppTheme.textStyles.labelSmall?.copyWith(
-                            color: Colors.purple,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.purple,
+                                  ),
                         ),
                       ],
                     ),
@@ -396,7 +387,8 @@ class ExpenseFormView extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  Widget _buildDateTimeField(BuildContext context, ExpenseFormProvider provider) {
+  Widget _buildDateTimeField(
+      BuildContext context, ExpenseFormProvider provider) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -432,7 +424,8 @@ class ExpenseFormView extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  TimeOfDay.fromDateTime(provider.formModel.date).format(context),
+                  TimeOfDay.fromDateTime(provider.formModel.date)
+                      .format(context),
                   style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.end,
                 ),
@@ -444,7 +437,8 @@ class ExpenseFormView extends StatelessWidget {
     );
   }
 
-  Future<void> _selectDateTime(BuildContext context, ExpenseFormProvider provider) async {
+  Future<void> _selectDateTime(
+      BuildContext context, ExpenseFormProvider provider) async {
     // Select date first
     final date = await showDatePicker(
       context: context,
@@ -456,8 +450,8 @@ class ExpenseFormView extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-            ),
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
           ),
           child: child!,
         );
@@ -479,8 +473,8 @@ class ExpenseFormView extends StatelessWidget {
               child: Theme(
                 data: Theme.of(context).copyWith(
                   colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: Theme.of(context).colorScheme.primary,
-                  ),
+                        primary: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
                 child: child!,
               ),
@@ -501,5 +495,75 @@ class ExpenseFormView extends StatelessWidget {
         provider.updateDate(combinedDateTime);
       }
     }
+  }
+
+  // Helper para criar seções sem padding lateral
+  Widget _buildSectionWithoutPadding({
+    required String title,
+    required IconData icon,
+    required Widget content,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: GasometerDesignTokens.spacingMd),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: GasometerDesignTokens.iconSizeSm,
+                color: GasometerDesignTokens.colorPrimary,
+              ),
+              SizedBox(width: GasometerDesignTokens.spacingSm),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: GasometerDesignTokens.fontSizeLg,
+                  fontWeight: GasometerDesignTokens.fontWeightMedium,
+                  color: GasometerDesignTokens.colorTextPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        content,
+      ],
+    );
+  }
+
+  // Validadores locais
+  String? _validateMoney(String? value) {
+    if (value == null || value.isEmpty) return null;
+
+    // Remove formatação e tenta converter
+    final cleanValue = value.replaceAll(RegExp(r'[^\d,.]'), '');
+    final doubleValue = double.tryParse(cleanValue.replaceAll(',', '.'));
+
+    if (doubleValue == null) {
+      return 'Valor inválido';
+    }
+
+    if (doubleValue <= 0) {
+      return 'Valor deve ser maior que zero';
+    }
+
+    return null;
+  }
+
+  String? _validateOdometer(String? value) {
+    if (value == null || value.isEmpty) return 'Campo obrigatório';
+
+    final intValue = int.tryParse(value.replaceAll(RegExp(r'[^\d]'), ''));
+
+    if (intValue == null) {
+      return 'Valor inválido';
+    }
+
+    if (intValue < 0 || intValue > 999999) {
+      return 'Valor deve estar entre 0 e 999999';
+    }
+
+    return null;
   }
 }

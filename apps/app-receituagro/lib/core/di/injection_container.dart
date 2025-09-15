@@ -19,7 +19,6 @@ import '../../features/favoritos/services/favoritos_cache_service.dart';
 import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
 import '../../features/settings/di/settings_di.dart';
-import '../interfaces/i_premium_service.dart';
 import '../navigation/app_navigation_provider.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/cultura_hive_repository.dart';
@@ -46,15 +45,14 @@ import '../services/receituagro_notification_service.dart';
 // Emergency stub removed
 import '../services/remote_config_service.dart';
 import 'core_package_integration.dart';
-// import 'repositories_di.dart'; // Temporarily disabled to avoid duplicate registrations
+import 'repositories_di.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
   // Configure all Clean Architecture dependencies first
-  // TEMPORARILY DISABLED to avoid duplicate registrations with legacy repositories
-  // configureAllRepositoriesDependencies();
+  configureAllRepositoriesDependencies();
   
   // ===== NAVEGAÇÃO =====
   // Registra AppNavigationProvider como singleton para navegação global
@@ -109,12 +107,11 @@ Future<void> init() async {
     () => FeatureFlagsProvider(),
   );
   
-  // TEMPORARILY DISABLED: Box Registry Service and Core Storage Service
-  // EMERGENCY FIX: Avoiding dual Hive system conflicts
-  // sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
-  // sl.registerLazySingleton<HiveStorageService>(
-  //   () => HiveStorageService(sl<IBoxRegistryService>()),
-  // );
+  // Box Registry Service and Core Storage Service
+  sl.registerLazySingleton<core.IBoxRegistryService>(() => core.BoxRegistryService());
+  sl.registerLazySingleton<core.HiveStorageService>(
+    () => core.HiveStorageService(sl<core.IBoxRegistryService>()),
+  );
 
   // Analytics Repository - Now registered via Core Package Integration
   // sl.registerLazySingleton<IAnalyticsRepository>(
@@ -167,11 +164,10 @@ Future<void> init() async {
     if (kDebugMode) print('EnhancedStorageService registration failed: $e');
   }
   
-  // TEMPORARILY DISABLED: Interface do core para compatibilidade
-  // EMERGENCY FIX: Using legacy repositories directly
-  // sl.registerLazySingleton<ILocalStorageRepository>(
-  //   () => sl<HiveStorageService>(),
-  // );
+  // Interface do core para compatibilidade
+  sl.registerLazySingleton<core.ILocalStorageRepository>(
+    () => sl<core.HiveStorageService>(),
+  );
   
   // Navigation Service - Now available via Core Package
   try {

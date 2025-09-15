@@ -59,7 +59,7 @@ class FuelFormView extends StatelessWidget {
     return Center(
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(GasometerDesignTokens.spacingLg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -88,10 +88,9 @@ class FuelFormView extends StatelessWidget {
 
 
   Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
-    return FormSectionWidget.withTitle(
+    return _buildSectionWithoutPadding(
       title: 'Informações Básicas',
       icon: Icons.calendar_today,
-      showBorder: false,
       content: Column(
         children: [
           _buildFuelTypeDropdown(context, provider),
@@ -105,10 +104,9 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildAdditionalInfoSection(BuildContext context, FuelFormProvider provider) {
-    return FormSectionWidget.withTitle(
+    return _buildSectionWithoutPadding(
       title: 'Adicionais',
       icon: Icons.more_horiz,
-      showBorder: false,
       content: Column(
         children: [
           FormFieldRow.standard(
@@ -202,8 +200,8 @@ class FuelFormView extends StatelessWidget {
     return ValidatedSwitchField(
       value: provider.formModel.fullTank,
       label: FuelConstants.fullTankLabel,
-      description: FuelConstants.fullTankSubtitle,
       labelPosition: SwitchLabelPosition.start,
+      showValidationIcon: false,
       onChanged: (value) => provider.updateFullTank(value),
       validator: (value) {
         // Optional validation if needed
@@ -376,6 +374,41 @@ class FuelFormView extends StatelessWidget {
         provider.updateDate(combinedDateTime);
       }
     }
+  }
+
+  // Helper para criar seções sem padding lateral
+  Widget _buildSectionWithoutPadding({
+    required String title,
+    required IconData icon,
+    required Widget content,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: GasometerDesignTokens.spacingMd),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: GasometerDesignTokens.iconSizeSm,
+                color: GasometerDesignTokens.colorPrimary,
+              ),
+              SizedBox(width: GasometerDesignTokens.spacingSm),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: GasometerDesignTokens.fontSizeLg,
+                  fontWeight: GasometerDesignTokens.fontWeightMedium,
+                  color: GasometerDesignTokens.colorTextPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        content,
+      ],
+    );
   }
 
 }

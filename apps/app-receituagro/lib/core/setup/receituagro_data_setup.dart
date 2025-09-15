@@ -9,18 +9,33 @@ class ReceitaAgroDataSetup {
   /// Inicializa o sistema de dados estáticos do ReceitaAgro
   static Future<void> initialize() async {
     try {
-      // 1. Inicializa o Hive e registra adapters
-      await ReceitaAgroHiveService.initialize();
+      developer.log('🔧 [SETUP] Verificando se Hive já está inicializado...', name: 'ReceitaAgroDataSetup');
       
-      // 2. Abre todas as boxes
-      await ReceitaAgroHiveService.openBoxes();
+      // Verifica se Hive já está inicializado (pelo AppDataManager)
+      bool hiveReady = false;
+      try {
+        // Tenta verificar se existe uma box padrão aberta
+        final testBox = await ReceitaAgroHiveService.getCulturas();
+        hiveReady = testBox.isNotEmpty;
+        developer.log('✅ [SETUP] Hive já inicializado pelo AppDataManager com ${testBox.length} culturas', name: 'ReceitaAgroDataSetup');
+      } catch (e) {
+        developer.log('⚠️ [SETUP] Hive não inicializado ainda, procedendo com inicialização...', name: 'ReceitaAgroDataSetup');
+      }
       
-      // 3. Carrega dados de teste temporário
+      if (!hiveReady) {
+        // 1. Inicializa o Hive e registra adapters
+        await ReceitaAgroHiveService.initialize();
+        
+        // 2. Abre todas as boxes
+        await ReceitaAgroHiveService.openBoxes();
+      }
+      
+      // 3. Carrega dados adicionais se necessário
       await _loadTestData();
       
-      developer.log('ReceitaAgro data setup concluído', name: 'ReceitaAgroDataSetup');
+      developer.log('✅ [SETUP] ReceitaAgro data setup concluído', name: 'ReceitaAgroDataSetup');
     } catch (e) {
-      developer.log('Erro durante setup: $e', name: 'ReceitaAgroDataSetup');
+      developer.log('❌ [SETUP] Erro durante setup: $e', name: 'ReceitaAgroDataSetup');
       rethrow;
     }
   }
@@ -28,18 +43,33 @@ class ReceitaAgroDataSetup {
   /// Carrega dados reais dos JSON assets
   static Future<void> _loadTestData() async {
     try {
-      developer.log('Iniciando carregamento de dados reais dos JSONs...', name: 'ReceitaAgroDataSetup');
+      developer.log('🔄 [SETUP] Verificando se dados adicionais precisam ser carregados...', name: 'ReceitaAgroDataSetup');
       
-      // Carrega dados de fitossanitários (defensivos)
-      await FitossanitariosDataLoader.loadFitossanitariosData();
+      // Verifica se os dados já estão carregados pelo AppDataManager
+      bool fitossanitariosLoaded = await FitossanitariosDataLoader.isDataLoaded();
+      bool pragasLoaded = await PragasDataLoader.isDataLoaded();
       
-      // Carrega dados de pragas
-      await PragasDataLoader.loadPragasData();
+      developer.log('📊 [SETUP] Status: Fitossanitários=$fitossanitariosLoaded, Pragas=$pragasLoaded', name: 'ReceitaAgroDataSetup');
       
-      developer.log('Dados reais carregados com sucesso!', name: 'ReceitaAgroDataSetup');
+      // Só carrega se não estiver carregado
+      if (!fitossanitariosLoaded) {
+        developer.log('🛡️ [SETUP] Carregando fitossanitários...', name: 'ReceitaAgroDataSetup');
+        await FitossanitariosDataLoader.loadFitossanitariosData();
+      } else {
+        developer.log('✅ [SETUP] Fitossanitários já carregados, pulando...', name: 'ReceitaAgroDataSetup');
+      }
+      
+      if (!pragasLoaded) {
+        developer.log('🐛 [SETUP] Carregando pragas...', name: 'ReceitaAgroDataSetup');
+        await PragasDataLoader.loadPragasData();
+      } else {
+        developer.log('✅ [SETUP] Pragas já carregadas, pulando...', name: 'ReceitaAgroDataSetup');
+      }
+      
+      developer.log('✅ [SETUP] Verificação de dados complementares concluída!', name: 'ReceitaAgroDataSetup');
     } catch (e) {
-      developer.log('Erro ao carregar dados reais: $e', name: 'ReceitaAgroDataSetup');
-      rethrow;
+      developer.log('⚠️ [SETUP] Erro ao carregar dados complementares (AppDataManager já carregou dados principais): $e', name: 'ReceitaAgroDataSetup');
+      // Não propaga o erro - AppDataManager já carregou os dados principais
     }
   }
 
@@ -71,7 +101,7 @@ class ReceitaAgroDataSetup {
       
       await ReceitaAgroHiveService.closeBoxes();
       
-      // TODO: Implementar limpeza das boxes quando necessário
+      // Implementar limpeza das boxes quando necessário
       // await Hive.deleteBoxFromDisk('receituagro_pragas');
       // await Hive.deleteBoxFromDisk('receituagro_culturas');
       // etc...

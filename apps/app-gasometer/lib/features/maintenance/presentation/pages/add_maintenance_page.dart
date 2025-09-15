@@ -147,10 +147,9 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
 
 
   Widget _buildBasicInfo() {
-    return FormSectionWidget.withTitle(
+    return _buildSectionWithoutPadding(
       title: 'Informações Básicas',
       icon: Icons.info_outline,
-      showBorder: false,
       content: Column(
         children: [
           ValidatedFormField(
@@ -183,47 +182,43 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             onValidationChanged: (result) => _validationResults['workshop'] = result,
           ),
           SizedBox(height: GasometerDesignTokens.spacingMd),
-          FormFieldRow.standard(
-            children: [
-ValidatedDropdownField<MaintenanceType>(
-                label: 'Tipo',
-                value: _formProvider.formModel.type,
-                prefixIcon: Icons.build_circle,
-                items: MaintenanceType.values.map((type) => ValidatedDropdownItem<MaintenanceType>(
-                  value: type,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(type.displayName, style: TextStyle(
-                        fontWeight: GasometerDesignTokens.fontWeightMedium,
-                        color: GasometerDesignTokens.colorTextPrimary,
-                      )),
-                      Text(type.description, style: TextStyle(
-                        fontSize: GasometerDesignTokens.fontSizeCaption,
-                        color: GasometerDesignTokens.colorTextSecondary,
-                      )),
-                    ],
-                  ),
-                )).toList(),
-                onChanged: (value) => _formProvider.updateType(value!),
-                required: true,
-                hint: 'Selecione o tipo de manutenção',
+          ValidatedDropdownField<MaintenanceType>(
+            label: 'Tipo',
+            value: _formProvider.formModel.type,
+            prefixIcon: Icons.build_circle,
+            items: MaintenanceType.values.map((type) => ValidatedDropdownItem<MaintenanceType>(
+              value: type,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(type.displayName, style: TextStyle(
+                    fontWeight: GasometerDesignTokens.fontWeightMedium,
+                    color: GasometerDesignTokens.colorTextPrimary,
+                  )),
+                  Text(type.description, style: TextStyle(
+                    fontSize: GasometerDesignTokens.fontSizeCaption,
+                    color: GasometerDesignTokens.colorTextSecondary,
+                  )),
+                ],
               ),
-_buildServiceDateTimeField(context, _formProvider),
-            ],
+            )).toList(),
+            onChanged: (value) => _formProvider.updateType(value!),
+            required: true,
+            hint: 'Selecione o tipo de manutenção',
           ),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
+          _buildServiceDateTimeField(context, _formProvider),
         ],
       ),
     );
   }
 
   Widget _buildCostAndOdometer() {
-    return FormSectionWidget.withTitle(
+    return _buildSectionWithoutPadding(
       title: 'Valores e Medições',
       icon: Icons.monetization_on_outlined,
-      showBorder: false,
-      content: FormFieldRow.standard(
+      content: Column(
         children: [
           ValidatedFormField(
             controller: _formProvider.costController,
@@ -240,6 +235,7 @@ _buildServiceDateTimeField(context, _formProvider),
             ),
             onValidationChanged: (result) => _validationResults['cost'] = result,
           ),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
           ValidatedFormField(
             controller: _formProvider.odometerController,
             label: 'Odômetro',
@@ -262,10 +258,9 @@ _buildServiceDateTimeField(context, _formProvider),
   }
 
   Widget _buildDescription() {
-    return FormSectionWidget.withTitle(
+    return _buildSectionWithoutPadding(
       title: 'Descrição',
       icon: Icons.description_outlined,
-      showBorder: false,
       content: ValidatedFormField(
         controller: _formProvider.descriptionController,
         label: 'Detalhes da manutenção',
@@ -286,10 +281,9 @@ _buildServiceDateTimeField(context, _formProvider),
   }
 
   Widget _buildNextServiceDate() {
-    return FormSectionWidget.withTitle(
+    return _buildSectionWithoutPadding(
       title: 'Próxima Manutenção (Opcional)',
       icon: Icons.notification_important,
-      showBorder: false,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -689,5 +683,40 @@ if (_formProvider.formModel.nextServiceDate != null)
         provider.updateNextServiceDate(combinedDateTime);
       }
     }
+  }
+
+  // Helper para criar seções sem padding lateral
+  Widget _buildSectionWithoutPadding({
+    required String title,
+    required IconData icon,
+    required Widget content,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: GasometerDesignTokens.spacingMd),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: GasometerDesignTokens.iconSizeSm,
+                color: GasometerDesignTokens.colorPrimary,
+              ),
+              SizedBox(width: GasometerDesignTokens.spacingSm),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: GasometerDesignTokens.fontSizeLg,
+                  fontWeight: GasometerDesignTokens.fontWeightMedium,
+                  color: GasometerDesignTokens.colorTextPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        content,
+      ],
+    );
   }
 }

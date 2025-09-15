@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../models/user_session_data.dart';
 import '../services/device_identity_service.dart';
+import '../services/sync_orchestrator.dart';
 
 /// AuthProvider específico do ReceitauAgro
 /// Integra com o core package FirebaseAuthService e gerencia estado de autenticação
@@ -14,6 +15,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   final IAuthRepository _authRepository;
   final DeviceIdentityService _deviceService;
   final ReceitaAgroAnalyticsService _analytics;
+  final SyncOrchestrator? _syncOrchestrator;
   
   StreamSubscription<UserEntity?>? _userSubscription;
   UserEntity? _currentUser;
@@ -25,9 +27,11 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
     required IAuthRepository authRepository,
     required DeviceIdentityService deviceService,
     required ReceitaAgroAnalyticsService analytics,
+    SyncOrchestrator? syncOrchestrator,
   })  : _authRepository = authRepository,
         _deviceService = deviceService,
-        _analytics = analytics {
+        _analytics = analytics,
+        _syncOrchestrator = syncOrchestrator {
     _initializeAuthProvider();
   }
 
@@ -89,6 +93,9 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
         // Check if this is a new device for the user
         if (!user.isAnonymous) {
           await _handleDeviceLogin(user);
+          
+          // Trigger automatic sync after successful authentication
+          await _triggerPostAuthSync(user, previousUser);
         }
       }
     } else {
@@ -154,6 +161,68 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       _analytics.trackDeviceAdded('mobile'); // TODO: Get actual platform from device service
     } catch (e) {
       if (kDebugMode) print('❌ Auth Provider: Device login handling error - $e');
+    }
+  }
+
+  /// Trigger sincronização automática após autenticação bem-sucedida
+  /// Preserva dados locais e sincroniza com a nuvem
+  Future<void> _triggerPostAuthSync(UserEntity user, UserEntity? previousUser) async {
+    if (_syncOrchestrator == null) {
+      if (kDebugMode) print('⚠️ Auth Provider: SyncOrchestrator not available, skipping post-auth sync');
+      return;
+    }
+
+    try {
+      _analytics.trackEvent('post_auth_sync_triggered', parameters: {
+        'user_id': user.id,
+        'was_anonymous': (previousUser?.isAnonymous ?? false).toString(),
+        'new_login': (previousUser?.id != user.id).toString(),
+      });
+
+      if (kDebugMode) print('🔄 Auth Provider: Triggering post-authentication sync for user ${user.displayName}');
+
+      // Executar sincronização em background para não bloquear a UI
+      _syncOrchestrator!.performFullSync().then((result) {
+        if (result.success) {
+          _analytics.trackEvent('post_auth_sync_success', parameters: {
+            'operations_sent': result.operationsSent.toString(),
+            'operations_received': result.operationsReceived.toString(),
+            'conflicts': result.conflicts.length.toString(),
+          });
+
+          if (kDebugMode) {
+            print('✅ Auth Provider: Post-auth sync completed successfully');
+            print('   - Operations sent: ${result.operationsSent}');
+            print('   - Operations received: ${result.operationsReceived}');
+            print('   - Conflicts: ${result.conflicts.length}');
+          }
+
+          // Se havia dados de usuário anônimo e agora está logado, 
+          // garantir que os dados foram preservados
+          if (previousUser?.isAnonymous == true && !user.isAnonymous) {
+            _analytics.trackEvent('anonymous_to_authenticated_migration', parameters: {
+              'previous_user_id': previousUser?.id ?? 'unknown',
+              'new_user_id': user.id,
+              'migration_result': 'success',
+            });
+
+            if (kDebugMode) print('✅ Auth Provider: Anonymous to authenticated migration completed');
+          }
+        } else {
+          _analytics.trackEvent('post_auth_sync_failed', parameters: {
+            'error': result.message ?? 'unknown',
+          });
+
+          if (kDebugMode) print('❌ Auth Provider: Post-auth sync failed: ${result.message}');
+        }
+      }).catchError((error) {
+        _analytics.trackError('post_auth_sync_exception', error.toString());
+        if (kDebugMode) print('❌ Auth Provider: Post-auth sync exception: $error');
+      });
+
+    } catch (e) {
+      _analytics.trackError('post_auth_sync_trigger_error', e.toString());
+      if (kDebugMode) print('❌ Auth Provider: Error triggering post-auth sync: $e');
     }
   }
 

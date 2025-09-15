@@ -13,6 +13,7 @@ export 'src/domain/entities/log_entry.dart';
 export 'src/domain/entities/module_auth_config.dart';
 export 'src/domain/entities/notification_entity.dart';
 export 'src/domain/entities/performance_entity.dart';
+export 'src/domain/entities/profile_image_result.dart';
 export 'src/domain/entities/security_entity.dart';
 export 'src/domain/entities/shared_preferences_record.dart';
 export 'src/domain/entities/subscription_entity.dart';
@@ -66,6 +67,7 @@ export 'src/infrastructure/services/log_repository_service.dart';
 export 'src/infrastructure/services/mock_analytics_service.dart';
 export 'src/infrastructure/services/monorepo_auth_cache.dart';
 export 'src/infrastructure/services/performance_service.dart';
+export 'src/infrastructure/services/profile_image_service.dart';
 export 'src/infrastructure/services/revenue_cat_service.dart';
 export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/selective_sync_service.dart';
@@ -93,6 +95,8 @@ export 'src/presentation/widgets/image_widgets.dart';
 // ========== PRESENTATION LAYER ==========
 // Widgets
 export 'src/presentation/widgets/loading_widget.dart';
+export 'src/presentation/widgets/profile_avatar.dart';
+export 'src/presentation/widgets/profile_image_picker.dart';
 
 // ========== DATA INSPECTOR ==========
 // Unified Data Inspector for all monorepo apps

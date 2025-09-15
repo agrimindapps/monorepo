@@ -28,7 +28,7 @@ class SettingsDesignTokens {
   static const IconData verifiedIcon = Icons.verified_user;
   static const IconData circleInfoIcon = Icons.info_outline;
   static const IconData volumeIcon = Icons.volume_up;
-  static const IconData paletteIcon = Icons.palette;
+  static const IconData paletteIcon = Icons.nightlight_round;
   static const IconData systemThemeIcon = Icons.auto_mode;
   static const IconData deviceManagementIcon = Icons.devices;
 

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../services/platform_service.dart';
 
@@ -23,21 +25,58 @@ class RouteGuard {
     }
     
     final isAuthenticated = _authProvider!.isAuthenticated;
+    final hasAuthError = _authProvider!.errorMessage != null;
+    final isLoading = _authProvider!.isLoading;
     final routeType = _getRouteType(currentLocation);
+
+    // SECURITY + UX FIX: If there's an authentication error and we're on login page,
+    // don't redirect to prevent login error handling from being interrupted
+    if (hasAuthError && currentLocation == '/login') {
+      if (kDebugMode) {
+        debugPrint('🛡️ RouteGuard: Erro de auth detectado em /login - mantendo usuário na página');
+      }
+      return null;
+    }
+
+    // SECURITY + UX FIX: If authentication is in progress and we're on login page,
+    // don't redirect to avoid interrupting the auth flow
+    if (isLoading && currentLocation == '/login') {
+      if (kDebugMode) {
+        debugPrint('🛡️ RouteGuard: Login em progresso em /login - mantendo usuário na página');
+      }
+      return null;
+    }
+
+    // Debug logging for route decisions
+    if (kDebugMode) {
+      debugPrint('🛡️ RouteGuard: Avaliando rota $currentLocation - Autenticado: $isAuthenticated, Tipo: $routeType');
+    }
 
     // Aplicar regras de redirecionamento baseadas no tipo de rota
     switch (routeType) {
       case RouteType.authProtected:
-        return _handleAuthProtectedRoute(isAuthenticated, currentLocation);
+        final redirect = _handleAuthProtectedRoute(isAuthenticated, currentLocation);
+        if (kDebugMode && redirect != null) {
+          debugPrint('🛡️ RouteGuard: Redirecionando rota protegida $currentLocation -> $redirect');
+        }
+        return redirect;
       
       case RouteType.publicOnly:
-        return _handlePublicOnlyRoute(isAuthenticated);
+        final redirect = _handlePublicOnlyRoute(isAuthenticated);
+        if (kDebugMode && redirect != null) {
+          debugPrint('🛡️ RouteGuard: Redirecionando rota pública $currentLocation -> $redirect');
+        }
+        return redirect;
       
       case RouteType.alwaysPublic:
         return null; // Sempre permitir acesso
       
       case RouteType.appContent:
-        return _handleAppContentRoute(isAuthenticated, currentLocation);
+        final redirect = _handleAppContentRoute(isAuthenticated, currentLocation);
+        if (kDebugMode && redirect != null) {
+          debugPrint('🛡️ RouteGuard: Redirecionando rota de app $currentLocation -> $redirect');
+        }
+        return redirect;
     }
   }
 
@@ -90,6 +129,8 @@ class RouteGuard {
     if (isAuthenticated) {
       return '/';
     }
+    // SECURITY + UX FIX: Stay on login/promo pages when not authenticated
+    // This prevents unwanted redirects during failed login attempts
     return null;
   }
 

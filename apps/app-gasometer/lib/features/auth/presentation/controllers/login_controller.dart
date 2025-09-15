@@ -225,20 +225,37 @@ class LoginController extends ChangeNotifier {
         _passwordController.text,
       );
 
+      if (kDebugMode) {
+        print('🔄 LoginController: Após loginAndSync - autenticado: ${_authProvider.isAuthenticated}, erro: ${_authProvider.errorMessage}');
+      }
+
       if (_authProvider.isAuthenticated) {
         await _saveFormData();
         await _analytics.logUserAction('login_with_sync_success', parameters: {
           'method': 'email_with_sync_simplified',
           'remember_me': _rememberMe.toString(),
         });
+        if (kDebugMode) {
+          print('✅ LoginController: Login bem-sucedido');
+        }
       } else if (_authProvider.errorMessage != null) {
         _errorMessage = _authProvider.errorMessage;
+        if (kDebugMode) {
+          print('❌ LoginController: Login falhou - ${_authProvider.errorMessage}');
+        }
         await _analytics.logUserAction('login_with_sync_failed', parameters: {
           'error': _authProvider.errorMessage ?? 'unknown',
         });
+      } else {
+        if (kDebugMode) {
+          print('⚠️ LoginController: Estado inconsistente - não autenticado e sem erro');
+        }
       }
     } catch (e) {
       _errorMessage = 'Erro inesperado durante o login com sincronização';
+      if (kDebugMode) {
+        print('💥 LoginController: Exceção durante login - $e');
+      }
       await _analytics.recordError(
         e,
         StackTrace.current,

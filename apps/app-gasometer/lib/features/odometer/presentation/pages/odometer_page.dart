@@ -5,6 +5,7 @@ import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_form_provider.dart';
@@ -47,7 +48,7 @@ class _OdometerPageState extends State<OdometerPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       _loadOdometerData();
     });
   }
@@ -90,7 +91,8 @@ class _OdometerPageState extends State<OdometerPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+            color: GasometerDesignTokens.colorHeaderBackground
+                .withValues(alpha: 0.2),
             blurRadius: 9,
             offset: const Offset(0, 3),
             spreadRadius: 0,
@@ -153,7 +155,8 @@ class _OdometerPageState extends State<OdometerPage> {
       padding: const EdgeInsets.all(8.0),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
+          constraints: const BoxConstraints(
+              maxWidth: GasometerDesignTokens.maxWidthContent),
           child: Column(
             children: [
               EnhancedVehicleSelector(
@@ -175,7 +178,6 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-
   Widget _buildMonthsBar() {
     return SizedBox(
       height: 40,
@@ -190,16 +192,25 @@ class _OdometerPageState extends State<OdometerPage> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline,
                 ),
               ),
               child: Text(
                 _months[index],
                 style: TextStyle(
-                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -223,7 +234,8 @@ class _OdometerPageState extends State<OdometerPage> {
     return SingleChildScrollView(
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: GasometerDesignTokens.maxWidthContent),
+          constraints: const BoxConstraints(
+              maxWidth: GasometerDesignTokens.maxWidthContent),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -246,7 +258,8 @@ class _OdometerPageState extends State<OdometerPage> {
       child: EnhancedEmptyState.generic(
         icon: Icons.directions_car_outlined,
         title: 'Selecione um veículo',
-        description: 'Escolha um veículo para visualizar os registros de odômetro',
+        description:
+            'Escolha um veículo para visualizar os registros de odômetro',
         height: MediaQuery.of(context).size.height * 0.6,
       ),
     );
@@ -255,7 +268,7 @@ class _OdometerPageState extends State<OdometerPage> {
   Widget _buildStatisticsCard(List<OdometerEntity> odometers) {
     // Calcular estatísticas reais baseadas nos registros
     final statistics = _calculateStatistics(odometers);
-    
+
     return StandardCard.standard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,10 +280,18 @@ class _OdometerPageState extends State<OdometerPage> {
           SizedBox(height: GasometerDesignTokens.spacingXl),
           Row(
             children: [
-              Expanded(child: _buildStatisticItem('Km Inicial', statistics['kmInicial'] ?? '-', Icons.trip_origin)),
-              Expanded(child: _buildStatisticItem('Km Final', statistics['kmFinal'] ?? '-', Icons.flag)),
-              Expanded(child: _buildStatisticItem('Total Rodado', statistics['totalRodado'] ?? '-', Icons.trending_up)),
-              Expanded(child: _buildStatisticItem('Média/Dia', statistics['mediaDia'] ?? '-', Icons.timeline)),
+              Expanded(
+                  child: _buildStatisticItem('Km Inicial',
+                      statistics['kmInicial'] ?? '-', Icons.trip_origin)),
+              Expanded(
+                  child: _buildStatisticItem(
+                      'Km Final', statistics['kmFinal'] ?? '-', Icons.flag)),
+              Expanded(
+                  child: _buildStatisticItem('Total Rodado',
+                      statistics['totalRodado'] ?? '-', Icons.trending_up)),
+              Expanded(
+                  child: _buildStatisticItem('Média/Dia',
+                      statistics['mediaDia'] ?? '-', Icons.timeline)),
             ],
           ),
         ],
@@ -282,7 +303,7 @@ class _OdometerPageState extends State<OdometerPage> {
     if (odometers.isEmpty) {
       return {
         'kmInicial': '-',
-        'kmFinal': '-', 
+        'kmFinal': '-',
         'totalRodado': '-',
         'mediaDia': '-',
       };
@@ -290,18 +311,21 @@ class _OdometerPageState extends State<OdometerPage> {
 
     // Ordenar por data para calcular estatísticas do mês atual
     final sortedOdometers = List<OdometerEntity>.from(odometers);
-    sortedOdometers.sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
+    sortedOdometers
+        .sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
 
     // Filtrar registros do mês atual
     final now = DateTime.now();
-    final currentMonthOdometers = sortedOdometers.where((o) => 
-      o.registrationDate.year == now.year && o.registrationDate.month == now.month
-    ).toList();
+    final currentMonthOdometers = sortedOdometers
+        .where((o) =>
+            o.registrationDate.year == now.year &&
+            o.registrationDate.month == now.month)
+        .toList();
 
     if (currentMonthOdometers.isEmpty) {
       return {
         'kmInicial': '-',
-        'kmFinal': '-', 
+        'kmFinal': '-',
         'totalRodado': '-',
         'mediaDia': '-',
       };
@@ -310,7 +334,9 @@ class _OdometerPageState extends State<OdometerPage> {
     final kmInicial = currentMonthOdometers.first.value;
     final kmFinal = currentMonthOdometers.last.value;
     final totalRodado = kmFinal - kmInicial;
-    final diasNoMes = currentMonthOdometers.last.registrationDate.difference(currentMonthOdometers.first.registrationDate).inDays;
+    final diasNoMes = currentMonthOdometers.last.registrationDate
+        .difference(currentMonthOdometers.first.registrationDate)
+        .inDays;
     final mediaDia = diasNoMes > 0 ? totalRodado / diasNoMes : 0.0;
 
     return {
@@ -353,7 +379,10 @@ class _OdometerPageState extends State<OdometerPage> {
           label,
           style: TextStyle(
             fontSize: GasometerDesignTokens.fontSizeSm,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withOpacity(GasometerDesignTokens.opacitySecondary),
           ),
           textAlign: TextAlign.center,
         ),
@@ -367,7 +396,8 @@ class _OdometerPageState extends State<OdometerPage> {
     }
 
     return Column(
-      children: odometers.map((odometer) => _buildOdometerItem(odometer)).toList(),
+      children:
+          odometers.map((odometer) => _buildOdometerItem(odometer)).toList(),
     );
   }
 
@@ -383,94 +413,40 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildOdometerItem(OdometerEntity odometer) {
-    final date = odometer.registrationDate;
-    final dayOfMonth = date.day.toString().padLeft(2, '0');
-    final weekday = _getWeekdayName(date.weekday);
-
-    return StandardCard.standard(
+    return Container(
       margin: const EdgeInsets.only(bottom: 4.0),
-      onTap: () => _editOdometer(odometer),
-      child: Row(
-        children: [
-          // Data
-          Column(
-            children: [
-              Text(
-                weekday,
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeSm,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                  fontWeight: GasometerDesignTokens.fontWeightMedium,
-                ),
-              ),
-              SizedBox(height: GasometerDesignTokens.spacingXs),
-              Text(
-                dayOfMonth,
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeXxxl,
-                  fontWeight: GasometerDesignTokens.fontWeightBold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingLg),
-          Container(
-            width: 1,
-            height: 40,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingLg),
-          // Informações
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CardInfoRow(
-                  icon: Icons.speed,
-                  label: 'Odômetro',
-                  value: '${odometer.value.toStringAsFixed(1)} km',
-                  iconColor: Theme.of(context).colorScheme.primary,
-                ),
-                if (odometer.description.isNotEmpty) ...[
-                  SizedBox(height: GasometerDesignTokens.spacingSm),
-                  Text(
-                    odometer.description,
-                    style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeSm,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
-          ),
-        ],
+      child: StandardListItemCard.odometer(
+        date: odometer.registrationDate,
+        odometer: odometer.value,
+        location: odometer.description.isNotEmpty ? odometer.description : null,
+        onTap: () => _editOdometer(odometer),
+        actionWidget: Icon(
+          Icons.chevron_right,
+          color: Theme.of(context)
+              .colorScheme
+              .onSurface
+              .withOpacity(GasometerDesignTokens.opacityHint),
+        ),
       ),
     );
   }
 
-
   Widget _buildFloatingActionButton() {
     final hasSelectedVehicle = _selectedVehicleId != null;
-    
+
     return FloatingActionButton(
       onPressed: hasSelectedVehicle ? _addOdometer : _showSelectVehicleMessage,
-      backgroundColor: hasSelectedVehicle 
+      backgroundColor: hasSelectedVehicle
           ? Theme.of(context).colorScheme.primary
           : Theme.of(context).disabledColor,
-      foregroundColor: hasSelectedVehicle 
+      foregroundColor: hasSelectedVehicle
           ? Theme.of(context).colorScheme.onPrimary
           : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      tooltip: hasSelectedVehicle 
-          ? 'Adicionar registro de odômetro' 
+      tooltip: hasSelectedVehicle
+          ? 'Adicionar registro de odômetro'
           : 'Selecione um veículo primeiro',
       child: const Icon(Icons.add),
     );
@@ -502,16 +478,18 @@ class _OdometerPageState extends State<OdometerPage> {
       builder: (dialogContext) => MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
-          ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+          ChangeNotifierProvider.value(
+              value: Provider.of<VehiclesProvider>(context, listen: false)),
         ],
-        builder: (context, child) => AddOdometerPage(vehicleId: _selectedVehicleId),
+        builder: (context, child) =>
+            AddOdometerPage(vehicleId: _selectedVehicleId),
       ),
     );
-    
+
     if (result != null && mounted) {
       // Refresh data from provider instead of managing local state
       _loadOdometerData();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Registro cadastrado com sucesso'),
@@ -535,7 +513,8 @@ class _OdometerPageState extends State<OdometerPage> {
         builder: (dialogContext) => MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (_) => OdometerFormProvider()),
-            ChangeNotifierProvider.value(value: Provider.of<VehiclesProvider>(context, listen: false)),
+            ChangeNotifierProvider.value(
+                value: Provider.of<VehiclesProvider>(context, listen: false)),
           ],
           builder: (context, child) => AddOdometerPage(odometer: odometer),
         ),
@@ -553,11 +532,11 @@ class _OdometerPageState extends State<OdometerPage> {
       debugPrint('Error editing odometer: $e');
       return;
     }
-    
+
     if (result != null && mounted) {
       // Refresh data from provider instead of managing local state
       _loadOdometerData();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Registro editado com sucesso'),

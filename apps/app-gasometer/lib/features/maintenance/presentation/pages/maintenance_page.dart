@@ -5,6 +5,7 @@ import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
@@ -781,175 +782,29 @@ class _OptimizedMaintenanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = record.serviceDate;
-    final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     final isPreventive = record.type == MaintenanceType.preventive;
     final typeDescription = isPreventive ? 'preventiva' : 'corretiva';
-    final semanticLabel = 'Manutenção $typeDescription ${record.title} em $formattedDate, custo R\$ ${record.cost.toStringAsFixed(2)}, odômetro ${record.odometer} km';
+    final semanticLabel = 'Manutenção $typeDescription ${record.title} em ${_formatDate(record.serviceDate)}, custo R\$ ${record.cost.toStringAsFixed(2)}, odômetro ${record.odometer} km';
 
-    return SemanticCard(
-      semanticLabel: semanticLabel,
-      semanticHint: 'Toque para ver detalhes completos da manutenção',
-      onTap: onTap,
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          _buildHeader(context, formattedDate, isPreventive),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
-          const Divider(height: 1),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildFooter(context, isPreventive),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, String formattedDate, bool isPreventive) {
-    return Row(
-      children: [
-        Container(
-          padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd - 2),
-          decoration: BoxDecoration(
-            color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
-                .withOpacity(0.1),
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-          ),
-          child: Icon(
-            isPreventive ? Icons.schedule : Icons.build_circle,
-            color: isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary,
-            size: 24,
-          ),
-        ),
-        SizedBox(width: GasometerDesignTokens.spacingLg),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: SemanticText.heading(
-                      record.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SemanticText.label(
-                    formattedDate,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: GasometerDesignTokens.spacingXs),
-              Row(
-                children: [
-                  Text(
-                    'Veículo: ${record.vehicleId}', // Vehicle name lookup pending
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                  SizedBox(width: GasometerDesignTokens.spacingSm),
-                  Text(
-                    '•',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
-                    ),
-                  ),
-                  SizedBox(width: GasometerDesignTokens.spacingSm),
-                  Text(
-                    record.workshopName ?? 'Oficina não informada',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFooter(BuildContext context, bool isPreventive) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildInfoItem(
-          context,
-          Icons.speed,
-          '${record.odometer} km',
-          'Odômetro',
-        ),
-        _buildInfoItem(
-          context,
-          Icons.attach_money,
-          'R\$ ${record.cost.toStringAsFixed(2)}',
-          'Custo',
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: (isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary)
-                .withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            isPreventive ? 'Preventiva' : 'Corretiva',
-            style: TextStyle(
-              fontSize: 12,
-              color: isPreventive ? Colors.blue : Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoItem(BuildContext context, IconData icon, String value, String label) {
     return Semantics(
-      label: '$label: $value',
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingXs + 2),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SemanticText(
-                value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-              SemanticText.label(
-                label,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ],
+      label: semanticLabel,
+      hint: 'Toque para ver detalhes completos da manutenção',
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: StandardListItemCard.maintenance(
+          date: record.serviceDate,
+          maintenanceType: record.title,
+          cost: record.cost,
+          odometer: record.odometer,
+          description: record.description,
+          location: record.workshopName,
+          onTap: onTap,
+        ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }

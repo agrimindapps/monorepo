@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -90,7 +91,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       
       return userModel;
     } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Sign in failed: ${e.message}');
+      if (kDebugMode) {
+        debugPrint('🔥 Firebase Auth Error - Code: ${e.code}, Message: ${e.message}');
+      }
+      
+      // Handle specific Firebase Auth error codes
+      switch (e.code) {
+        case 'too-many-requests':
+          if (kDebugMode) {
+            debugPrint('🔥 Firebase rate limiting detected - too-many-requests');
+          }
+          throw AuthenticationException('FIREBASE BLOQUEIO: Muitas tentativas. Tente novamente mais tarde.');
+        case 'user-disabled':
+          throw AuthenticationException('Esta conta foi desabilitada.');
+        case 'user-not-found':
+          throw AuthenticationException('Email não encontrado.');
+        case 'wrong-password':
+          throw AuthenticationException('Senha incorreta.');
+        case 'invalid-email':
+          throw AuthenticationException('Email inválido.');
+        case 'operation-not-allowed':
+          throw AuthenticationException('Operação não permitida.');
+        default:
+          throw AuthenticationException('Erro de autenticação: ${e.message}');
     } catch (e) {
       throw ServerException('Unexpected sign in error: $e');
     }

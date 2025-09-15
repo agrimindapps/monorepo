@@ -170,6 +170,18 @@ class _SidebarNavigationItems extends StatelessWidget {
           ),
         ],
         
+        // Settings section - moved to top priority
+        _SidebarNavigationItem(
+          icon: Icons.settings_outlined,
+          activeIcon: Icons.settings,
+          label: 'Configurações',
+          route: '/settings',
+          isActive: currentLocation.startsWith('/settings'),
+          isCollapsed: isCollapsed,
+        ),
+        
+        const SizedBox(height: 32),
+        
         // Main navigation items
         _SidebarNavigationItem(
           icon: Icons.directions_car_outlined,
@@ -222,18 +234,6 @@ class _SidebarNavigationItems extends StatelessWidget {
           label: 'Relatórios',
           route: '/reports',
           isActive: currentLocation.startsWith('/reports'),
-          isCollapsed: isCollapsed,
-        ),
-        
-        const SizedBox(height: 32),
-        
-        // Settings section
-        _SidebarNavigationItem(
-          icon: Icons.settings_outlined,
-          activeIcon: Icons.settings,
-          label: 'Configurações',
-          route: '/settings',
-          isActive: currentLocation.startsWith('/settings'),
           isCollapsed: isCollapsed,
         ),
       ],

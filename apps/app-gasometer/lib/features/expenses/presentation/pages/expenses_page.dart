@@ -5,6 +5,7 @@ import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
@@ -661,200 +662,29 @@ class _OptimizedExpenseRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = record.date;
-    final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     final vehicleName = getVehicleName(record.vehicleId);
-    final semanticLabel = 'Despesa $vehicleName em $formattedDate, ${record.type.displayName}, ${record.formattedAmount}${record.hasLocation ? ', ${record.location}' : ''}';
+    final semanticLabel = 'Despesa $vehicleName em ${_formatDate(record.date)}, ${record.type.displayName}, ${record.formattedAmount}${record.hasLocation ? ', ${record.location}' : ''}';
 
-    return SemanticCard(
-      semanticLabel: semanticLabel,
-      semanticHint: 'Toque para ver detalhes completos, mantenha pressionado para editar ou excluir',
-      onTap: onTap,
-      onLongPress: onLongPress,
-      margin: const EdgeInsets.only(bottom: 4.0),
-      child: Column(
-        children: [
-          _buildRecordHeader(context, vehicleName, formattedDate),
-          _buildRecordDivider(context),
-          _buildRecordStats(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecordHeader(BuildContext context, String vehicleName, String formattedDate) {
-    return Row(
-      children: [
-        _buildRecordIcon(context),
-        SizedBox(width: GasometerDesignTokens.spacingLg),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SemanticText.heading(
-                    vehicleName,
-                    style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeLg,
-                      fontWeight: GasometerDesignTokens.fontWeightBold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  SemanticText.label(
-                    formattedDate,
-                    style: TextStyle(
-                      fontSize: GasometerDesignTokens.fontSizeMd,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: GasometerDesignTokens.spacingXs),
-              SemanticText.subtitle(
-                record.description,
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecordIcon(BuildContext context) {
-    return Container(
-      padding: GasometerDesignTokens.paddingAll(
-        GasometerDesignTokens.spacingMd - 2,
-      ),
-      decoration: BoxDecoration(
-        color: record.type.color.withOpacity(GasometerDesignTokens.opacityOverlay),
-        borderRadius: GasometerDesignTokens.borderRadius(
-          GasometerDesignTokens.radiusMd + 2,
-        ),
-      ),
-      child: Icon(
-        record.type.icon,
-        color: record.type.color,
-        size: GasometerDesignTokens.iconSizeListItem,
-      ),
-    );
-  }
-
-  Widget _buildRecordDivider(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: GasometerDesignTokens.spacingMd),
-        Divider(
-          height: 1,
-          color: Theme.of(context).colorScheme.outline.withOpacity(GasometerDesignTokens.opacityDivider),
-        ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
-      ],
-    );
-  }
-
-  Widget _buildRecordStats(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildInfoItem(
-            context,
-            record.type.icon,
-            record.type.displayName,
-            'Tipo',
-          ),
-        ),
-        Expanded(
-          child: _buildInfoItem(
-            context,
-            Icons.speed,
-            '${record.odometer.toStringAsFixed(0)} km',
-            'Odômetro',
-          ),
-        ),
-        Expanded(
-          child: _buildInfoItem(
-            context,
-            Icons.attach_money,
-            record.formattedAmount,
-            'Valor',
-          ),
-        ),
-        if (record.hasReceipt) 
-          Flexible(
-            child: _buildReceiptBadge(context),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildInfoItem(BuildContext context, IconData icon, String value, String label) {
     return Semantics(
-      label: '$label: $value',
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: record.type.color,
-          ),
-          const SizedBox(height: 4),
-          SemanticText(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SemanticText.label(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              fontSize: 12,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+      label: semanticLabel,
+      hint: 'Toque para ver detalhes completos, mantenha pressionado para editar ou excluir',
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4.0),
+        child: StandardListItemCard.expense(
+          date: record.date,
+          expenseType: record.type.displayName,
+          amount: record.amount,
+          odometer: record.odometer,
+          description: record.description,
+          location: record.hasLocation ? record.location : null,
+          onTap: onTap,
+          onLongPress: onLongPress,
+        ),
       ),
     );
   }
 
-  Widget _buildReceiptBadge(BuildContext context) {
-    return SemanticStatusIndicator(
-      status: 'Comprovante anexado',
-      description: 'Esta despesa possui comprovante/foto anexada',
-      child: Container(
-        padding: GasometerDesignTokens.paddingOnly(
-          left: GasometerDesignTokens.spacingSm,
-          right: GasometerDesignTokens.spacingSm,
-          top: GasometerDesignTokens.spacingXs,
-          bottom: GasometerDesignTokens.spacingXs,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.green.withOpacity(GasometerDesignTokens.opacityOverlay),
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusSm,
-          ),
-        ),
-        child: SemanticText.label(
-          'Recibo',
-          style: TextStyle(
-            color: Colors.green,
-            fontSize: GasometerDesignTokens.fontSizeSm,
-            fontWeight: GasometerDesignTokens.fontWeightMedium,
-          ),
-        ),
-      ),
-    );
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }

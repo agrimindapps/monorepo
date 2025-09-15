@@ -78,6 +78,24 @@ class LoginFormWidget extends StatelessWidget {
               if (controller.errorMessage != null) ...[
                 const SizedBox(height: 16),
                 _buildErrorMessage(context, controller.errorMessage!),
+              ] else if (kDebugMode && controller.authError != null) ...[
+                // Debug: Mostrar erro do AuthProvider se não há erro no controller
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange.shade200),
+                  ),
+                  child: Text(
+                    'DEBUG - AuthProvider Error: ${controller.authError}',
+                    style: TextStyle(
+                      color: Colors.orange.shade700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               ],
               const SizedBox(height: 30),
 
@@ -296,6 +314,10 @@ class LoginFormWidget extends StatelessWidget {
     
     final controller = context.read<LoginController>();
     await controller.signInWithEmailAndSync();
+    
+    if (kDebugMode) {
+      print('🎯 LoginFormWidget: Após login - autenticado: ${controller.isAuthenticated}, erro controller: ${controller.errorMessage}, erro auth: ${controller.authError}');
+    }
     
     if (controller.isAuthenticated && onLoginSuccess != null) {
       onLoginSuccess!();

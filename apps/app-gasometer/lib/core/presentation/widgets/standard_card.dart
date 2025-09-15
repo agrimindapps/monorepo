@@ -3,31 +3,31 @@ import 'package:flutter/material.dart';
 import '../../theme/design_tokens.dart';
 
 /// Card padrão para consistência visual em todo o app
-/// 
+///
 /// Baseado no design system do GasOMeter, mantém padding,
 /// border radius, elevação e estilos consistentes.
 class StandardCard extends StatelessWidget {
   /// Conteúdo do card
   final Widget child;
-  
+
   /// Padding interno do card
   final EdgeInsets? padding;
-  
+
   /// Margin externa do card
   final EdgeInsets? margin;
-  
+
   /// Callback para quando o card é tocado
   final VoidCallback? onTap;
-  
+
   /// Se o card deve ter uma sombra
   final bool hasElevation;
-  
+
   /// Cor de fundo customizada
   final Color? backgroundColor;
-  
+
   /// Border radius customizado
   final double? borderRadius;
-  
+
   /// Se deve mostrar border ao redor do card
   final bool showBorder;
 
@@ -98,9 +98,10 @@ class StandardCard extends StatelessWidget {
       padding: GasometerDesignTokens.paddingAll(
         GasometerDesignTokens.spacingCardPadding,
       ),
-      margin: margin ?? EdgeInsets.only(
-        bottom: GasometerDesignTokens.spacingLg,
-      ),
+      margin: margin ??
+          EdgeInsets.only(
+            bottom: GasometerDesignTokens.spacingLg,
+          ),
       onTap: onTap,
       hasElevation: false,
       showBorder: showBorder,
@@ -118,15 +119,15 @@ class StandardCard extends StatelessWidget {
     return Container(
       margin: margin,
       child: Card(
-        elevation: hasElevation 
-            ? GasometerDesignTokens.elevationCard 
+        elevation: hasElevation
+            ? GasometerDesignTokens.elevationCard
             : GasometerDesignTokens.elevationNone,
         color: backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: GasometerDesignTokens.borderRadius(
             borderRadius ?? GasometerDesignTokens.radiusCard,
           ),
-          side: showBorder 
+          side: showBorder
               ? BorderSide(
                   color: Theme.of(context).colorScheme.outline,
                   width: 1.0,
@@ -225,15 +226,21 @@ class CardInfoRow extends StatelessWidget {
               Icon(
                 icon,
                 size: GasometerDesignTokens.iconSizeXs,
-                color: iconColor ?? 
-                  Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                color: iconColor ??
+                    Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(GasometerDesignTokens.opacitySecondary),
               ),
               SizedBox(width: GasometerDesignTokens.spacingXs + 2),
             ],
             Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(GasometerDesignTokens.opacitySecondary),
                 fontSize: GasometerDesignTokens.fontSizeMd,
               ),
             ),

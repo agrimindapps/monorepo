@@ -31,7 +31,8 @@ class FormSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingSectionSpacing),
+      padding:
+          EdgeInsets.only(bottom: GasometerDesignTokens.spacingSectionSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

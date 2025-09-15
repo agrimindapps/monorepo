@@ -14,6 +14,7 @@ import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
 import 'features/analytics/analytics_service.dart';
+import 'features/settings/presentation/providers/profile_provider.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 // navigation_service.dart moved to core package - available via 'package:core/core.dart'
@@ -106,22 +107,6 @@ void main() async {
   final premiumService = di.sl<ReceitaAgroPremiumService>();
   await premiumService.initialize();
 
-  // FIXED: ReceitaAgro data initialization re-enabled with proper data loaders
-  try {
-    print('🔧 [FIXED] ReceitaAgro data initialization re-enabled with proper data loaders');
-    await ReceitaAgroDataSetup.initialize(); // Re-enabled with fixed implementation
-  } catch (e) {
-    // Log error but don't block app startup
-    if (EnvironmentConfig.enableAnalytics) {
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        StackTrace.current,
-        reason: 'Failed to initialize ReceitaAgro data (emergency mode)',
-        fatal: false,
-      );
-    }
-  }
-
   // 🚀 PERFORMANCE OPTIMIZATION: Startup optimization service removed
   // Image optimization now handled by OptimizedImageService in core package
   // Lazy loading implemented at widget level
@@ -167,9 +152,28 @@ void main() async {
       }
     },
     (_) {
-      // Data initialization successful
+      // Data initialization successful - Now safe to initialize ReceitaAgroDataSetup
+      print('✅ [MAIN] AppDataManager inicializado com sucesso - Hive pronto');
     },
   );
+
+  // FIXED: ReceitaAgro data initialization moved AFTER AppDataManager initialization
+  try {
+    print('🔧 [FIXED] Iniciando ReceitaAgroDataSetup após AppDataManager...');
+    await ReceitaAgroDataSetup.initialize();
+    print('✅ [MAIN] ReceitaAgroDataSetup concluído com sucesso');
+  } catch (e) {
+    print('⚠️ [MAIN] ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados: $e');
+    // Log error but don't block app startup - AppDataManager already loaded the data
+    if (EnvironmentConfig.enableAnalytics) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        StackTrace.current,
+        reason: 'ReceitaAgroDataSetup failed but AppDataManager succeeded',
+        fatal: false,
+      );
+    }
+  }
 
   // 🌱 CULTURAS: Loading culturas data using legacy repository system
   print('🌱 [MAIN] Carregando dados de culturas...');
@@ -209,6 +213,10 @@ class ReceitaAgroApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => di.sl<ReceitaAgroPremiumService>(),
+        ),
+        // Profile Provider for user profile management
+        ChangeNotifierProvider(
+          create: (_) => di.sl<ProfileProvider>(),
         ),
       ],
       child: Consumer<ThemeProvider>(

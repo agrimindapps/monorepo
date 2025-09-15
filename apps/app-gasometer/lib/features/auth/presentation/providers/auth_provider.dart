@@ -54,6 +54,9 @@ class AuthProvider extends ChangeNotifier {
   // Flags de sincronização simplificadas
   bool _isSyncing = false;
   
+  // SECURITY + UX FIX: Flag to prevent automatic anonymous login during active login attempts
+  bool _isInLoginAttempt = false;
+  
   AuthProvider({
     required GetCurrentUser getCurrentUser,
     required WatchAuthState watchAuthState,
@@ -165,7 +168,7 @@ class AuthProvider extends ChangeNotifier {
             // If no user and should use anonymous mode, initialize anonymously
             final shouldUseAnonymous = await shouldUseAnonymousMode();
             if (kDebugMode) {
-              debugPrint('🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile})');
+              debugPrint('🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=${_isInLoginAttempt})');
             }
             
             if (shouldUseAnonymous) {
@@ -255,6 +258,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
+    _isInLoginAttempt = true; // SECURITY + UX FIX: Mark that we're in an active login attempt
     notifyListeners();
     
     try {
@@ -280,6 +284,10 @@ class AuthProvider extends ChangeNotifier {
       
       result.fold(
         (failure) async {
+          if (kDebugMode) {
+            debugPrint('🔐 AuthProvider: Login falhou - Tipo: ${failure.runtimeType}, Mensagem: ${failure.message}');
+          }
+          
           // Registra tentativa falhada no rate limiter
           await _rateLimiter.recordFailedAttempt();
           
@@ -287,6 +295,10 @@ class AuthProvider extends ChangeNotifier {
           final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
           
           String errorMsg = _mapFailureToMessage(failure);
+          
+          if (kDebugMode) {
+            debugPrint('🔐 AuthProvider: Mensagem de erro mapeada: $errorMsg');
+          }
           
           // Adiciona aviso de rate limiting se aplicável
           if (!rateLimitInfo.canAttemptLogin) {
@@ -297,6 +309,13 @@ class AuthProvider extends ChangeNotifier {
           
           _errorMessage = errorMsg;
           _isLoading = false;
+          _isInLoginAttempt = false; // SECURITY + UX FIX: Clear login attempt flag on failure
+          
+          if (kDebugMode) {
+            debugPrint('🔐 AuthProvider: Definindo errorMessage como: $_errorMessage');
+            debugPrint('🔐 AuthProvider: Chamando notifyListeners()');
+          }
+          
           notifyListeners();
           
           // Log analytics para tentativa falhada
@@ -313,6 +332,7 @@ class AuthProvider extends ChangeNotifier {
           
           _currentUser = user;
           _isLoading = false;
+          _isInLoginAttempt = false; // SECURITY + UX FIX: Clear login attempt flag on success
           
           // Log analytics
           await _analytics.logLogin('email');
@@ -326,6 +346,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Erro interno no sistema de login. Tente novamente.';
       _isLoading = false;
+      _isInLoginAttempt = false; // SECURITY + UX FIX: Clear login attempt flag on exception
       notifyListeners();
       
       // Log erro inesperado
@@ -722,6 +743,14 @@ class AuthProvider extends ChangeNotifier {
   
   Future<bool> shouldUseAnonymousMode() async {
     try {
+      // SECURITY + UX FIX: Don't use anonymous mode if we're in the middle of a login attempt
+      if (_isInLoginAttempt) {
+        if (kDebugMode) {
+          debugPrint('🔐 Não usar anônimo - tentativa de login em andamento');
+        }
+        return false;
+      }
+      
       // Use platform service to determine if anonymous mode should be used by default
       return _platformService.shouldUseAnonymousByDefault;
     } catch (e) {
@@ -754,6 +783,12 @@ class AuthProvider extends ChangeNotifier {
       
       // 2. Se login falhou, não continua com sync
       if (!isAuthenticated || _errorMessage != null) {
+        // SECURITY + UX FIX: Ensure UI is notified of login failure
+        // The login() method already sets the error and calls notifyListeners(),
+        // but we ensure it here for consistency
+        if (_errorMessage != null) {
+          notifyListeners();
+        }
         return;
       }
       

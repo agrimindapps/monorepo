@@ -739,14 +739,14 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Foram encontrados os seguintes avisos:'),
-              const SizedBox(height: 8),
+              SizedBox(height: GasometerDesignTokens.spacingSm),
               ...warnings.entries.map((entry) => 
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text('• ${entry.value}'),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: GasometerDesignTokens.spacingMd),
               const Text('Deseja continuar mesmo assim?'),
             ],
           ),

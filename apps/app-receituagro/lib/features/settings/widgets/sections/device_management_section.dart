@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_provider.dart';
@@ -21,11 +22,16 @@ class DeviceManagementSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer<SettingsProvider>(
-      builder: (context, provider, child) {
+    return Consumer2<SettingsProvider, ReceitaAgroAuthProvider>(
+      builder: (context, provider, authProvider, child) {
         final devices = provider.connectedDevices;
         final currentDevice = provider.currentDevice;
         final hasDeviceManagement = provider.isDeviceManagementEnabled;
+
+        // Only show for authenticated users (not anonymous)
+        if (!authProvider.isAuthenticated || authProvider.isAnonymous) {
+          return const SizedBox.shrink();
+        }
 
         // Don't show section if device management is disabled
         if (!hasDeviceManagement) {

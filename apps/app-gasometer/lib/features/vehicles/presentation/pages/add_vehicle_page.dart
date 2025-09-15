@@ -445,7 +445,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             color: Theme.of(context).colorScheme.error,
             size: 48,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: GasometerDesignTokens.spacingSm),
           Text(
             'Erro ao carregar imagem',
             style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -506,7 +506,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
               size: 48,
               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: GasometerDesignTokens.spacingSm),
             Text(
               'Carregando...',
               style: TextStyle(

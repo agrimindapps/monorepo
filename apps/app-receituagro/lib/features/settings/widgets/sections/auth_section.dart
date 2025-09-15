@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/providers/auth_provider.dart';
-import '../shared/section_header.dart';
-import '../shared/settings_list_tile.dart';
+import '../../constants/settings_design_tokens.dart';
+import '../../pages/profile_page.dart';
 
-/// Seção de autenticação nas configurações
-/// Mostra estado do usuário e opções de login/logout
+/// Seção simplificada de usuário nas configurações
+/// Mostra apenas resumo do usuário com navegação para perfil completo
 class AuthSection extends StatelessWidget {
   const AuthSection({super.key});
 
@@ -15,344 +15,414 @@ class AuthSection extends StatelessWidget {
     return Consumer<ReceitaAgroAuthProvider>(
       builder: (context, authProvider, child) {
         if (authProvider.isLoading) {
-          return _buildLoadingSection();
+          return _buildLoadingSection(context);
         }
 
         if (!authProvider.isAuthenticated || authProvider.isAnonymous) {
-          return _buildGuestSection(context, authProvider);
+          return _buildGuestSummary(context);
         }
 
-        return _buildAuthenticatedSection(context, authProvider);
+        return _buildUserSummary(context, authProvider);
       },
     );
   }
 
-  Widget _buildLoadingSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionHeader(title: '👤 Conta'),
-        Card(
-          child: ListTile(
-            leading: const CircularProgressIndicator(),
-            title: const Text('Carregando...'),
-            subtitle: const Text('Verificando autenticação'),
-          ),
+  Widget _buildLoadingSection(BuildContext context) {
+    return Container(
+      decoration: SettingsDesignTokens.getCardDecoration(context),
+      margin: SettingsDesignTokens.sectionMargin,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 16,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 12,
+                    width: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildGuestSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionHeader(title: '👤 Conta'),
-        Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.person_outline),
-                title: const Text('Visitante'),
-                subtitle: const Text('Faça login para sincronizar seus dados'),
-                trailing: const Icon(Icons.info_outline, color: Colors.orange),
-              ),
-              const Divider(height: 1),
-              SettingsListTile(
-                leadingIcon: Icons.login,
-                title: 'Fazer Login',
-                subtitle: 'Acessar sua conta',
-                onTap: () => _showLoginDialog(context, authProvider),
-              ),
-              SettingsListTile(
-                leadingIcon: Icons.person_add,
-                title: 'Criar Conta',
-                subtitle: 'Cadastre-se para sincronizar dados',
-                onTap: () => _showSignupDialog(context, authProvider),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildGuestSummary(BuildContext context) {
+    final theme = Theme.of(context);
 
-  Widget _buildAuthenticatedSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    final user = authProvider.currentUser!;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionHeader(title: '👤 Conta'),
-        Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.green,
-                  child: Text(
-                    user.displayName.isNotEmpty 
-                        ? user.displayName[0].toUpperCase() 
-                        : '?',
-                    style: const TextStyle(color: Colors.white),
+    return Container(
+      decoration: SettingsDesignTokens.getCardDecoration(context),
+      margin: SettingsDesignTokens.sectionMargin,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _navigateToUserProfile(context),
+          borderRadius:
+              BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.grey.shade400,
+                        Colors.grey.shade600,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.person_outline,
+                    color: Colors.white,
+                    size: 28,
                   ),
                 ),
-                title: Text(user.displayName),
-                subtitle: Text(user.email),
-                trailing: Icon(
-                  Icons.verified_user,
-                  color: user.isEmailVerified ? Colors.green : Colors.orange,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Visitante',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Toque para fazer login ou criar conta',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        decoration: BoxDecoration(
+                          color: SettingsDesignTokens.primaryColor
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Faça login para sincronizar',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: SettingsDesignTokens.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              if (!user.isEmailVerified) ...[
-                const Divider(height: 1),
-                SettingsListTile(
-                  leadingIcon: Icons.email_outlined,
-                  title: 'Verificar Email',
-                  subtitle: 'Clique para verificar seu email',
-                  onTap: () => _verifyEmail(context, authProvider),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ],
-              const Divider(height: 1),
-              SettingsListTile(
-                leadingIcon: Icons.edit,
-                title: 'Editar Perfil',
-                subtitle: 'Alterar nome e informações',
-                onTap: () => _showEditProfileDialog(context, authProvider),
-              ),
-              const Divider(height: 1),
-              SettingsListTile(
-                leadingIcon: Icons.logout,
-                title: 'Fazer Logout',
-                subtitle: 'Sair da conta',
-                onTap: () => _showLogoutConfirmation(context, authProvider),
-              ),
-            ],
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  void _showLoginDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+  Widget _buildUserSummary(
+      BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    final user = authProvider.currentUser!;
+    final theme = Theme.of(context);
+    final createdDate = user.createdAt != null
+        ? _formatDate(user.createdAt!)
+        : 'Data não disponível';
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fazer Login'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
+    final userInitial = user.displayName.isNotEmpty
+        ? user.displayName[0].toUpperCase()
+        : (user.email.isNotEmpty ? user.email[0].toUpperCase() : '?');
+
+    return Container(
+      decoration: SettingsDesignTokens.getCardDecoration(context),
+      margin: SettingsDesignTokens.sectionMargin,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _navigateToUserProfile(context),
+          borderRadius:
+              BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    // Avatar Hero com gradiente
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            SettingsDesignTokens.primaryColor,
+                            Color(0xFF66BB6A), // Slightly lighter green
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: SettingsDesignTokens.primaryColor
+                                .withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Text(
+                            userInitial,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (user.isEmailVerified)
+                            Positioned(
+                              bottom: -2,
+                              right: -2,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.verified,
+                                  color: SettingsDesignTokens.successColor,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // User Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Nome/Email principal
+                          Text(
+                            user.displayName.isNotEmpty
+                                ? user.displayName
+                                : user.email,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+
+                          // Email secundário (se houver nome)
+                          if (user.displayName.isNotEmpty &&
+                              user.email.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              user.email,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+
+                          const SizedBox(height: 8),
+
+                          // Data de criação
+                          Text(
+                            'Membro desde $createdDate',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Action button
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Status badges
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    // Status de verificação
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: user.isEmailVerified
+                            ? SettingsDesignTokens.successBackgroundColor
+                            : SettingsDesignTokens.warningColor
+                                .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: user.isEmailVerified
+                              ? SettingsDesignTokens.successColor
+                                  .withValues(alpha: 0.3)
+                              : SettingsDesignTokens.warningColor
+                                  .withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            user.isEmailVerified
+                                ? Icons.verified_user
+                                : Icons.warning_outlined,
+                            size: 14,
+                            color: user.isEmailVerified
+                                ? SettingsDesignTokens.successColor
+                                : SettingsDesignTokens.warningColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            user.isEmailVerified
+                                ? 'Verificado'
+                                : 'Não verificado',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: user.isEmailVerified
+                                  ? SettingsDesignTokens.successColor
+                                  : SettingsDesignTokens.warningColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Hint para gerenciar perfil
+                    Text(
+                      'Toque para gerenciar',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant
+                            .withValues(alpha: 0.7),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Senha',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-                _showErrorSnackBar(context, 'Preencha todos os campos');
-                return;
-              }
-              
-              final result = await authProvider.signInWithEmailAndPassword(
-                email: emailController.text.trim(),
-                password: passwordController.text,
-              );
-              
-              if (result.isSuccess) {
-                Navigator.pop(context);
-                _showSuccessSnackBar(context, 'Login realizado com sucesso!');
-              } else {
-                _showErrorSnackBar(context, result.errorMessage ?? 'Erro no login');
-              }
-            },
-            child: const Text('Entrar'),
-          ),
-        ],
       ),
     );
   }
 
-  void _showSignupDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Criar Conta'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nome',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Senha',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.isEmpty || 
-                  emailController.text.isEmpty || 
-                  passwordController.text.isEmpty) {
-                _showErrorSnackBar(context, 'Preencha todos os campos');
-                return;
-              }
-              
-              final result = await authProvider.signUpWithEmailAndPassword(
-                email: emailController.text.trim(),
-                password: passwordController.text,
-                displayName: nameController.text.trim(),
-              );
-              
-              if (result.isSuccess) {
-                Navigator.pop(context);
-                _showSuccessSnackBar(context, 'Conta criada com sucesso!');
-              } else {
-                _showErrorSnackBar(context, result.errorMessage ?? 'Erro ao criar conta');
-              }
-            },
-            child: const Text('Criar'),
-          ),
-        ],
+  void _navigateToUserProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => const ProfilePage(),
       ),
     );
   }
 
-  void _showEditProfileDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    final nameController = TextEditingController(text: authProvider.currentUser?.displayName);
+  String _formatDate(DateTime date) {
+    final months = [
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro'
+    ];
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar Perfil'),
-        content: TextField(
-          controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Nome',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Implement profile update
-              Navigator.pop(context);
-              _showInfoSnackBar(context, 'Funcionalidade em desenvolvimento');
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _verifyEmail(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    // TODO: Implement email verification
-    _showInfoSnackBar(context, 'Email de verificação enviado!');
-  }
-
-  void _showLogoutConfirmation(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fazer Logout'),
-        content: const Text('Tem certeza que deseja sair da sua conta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              authProvider.signOut();
-              _showInfoSnackBar(context, 'Logout realizado');
-            },
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  void _showInfoSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-      ),
-    );
+    return '${date.day} de ${months[date.month - 1]} de ${date.year}';
   }
 }

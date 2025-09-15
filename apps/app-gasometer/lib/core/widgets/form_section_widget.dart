@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/design_tokens.dart';
 
+/// FormSectionWidget - Versão Simplificada
+/// 
+/// NOTA: Existe também uma versão mais avançada em core/presentation/widgets/form_section_widget.dart
+/// Esta versão usa API: FormSectionWidget(title, icon, children)
+/// A versão avançada usa API: FormSectionWidget(title, content, titleIcon, etc.)
+/// 
+/// TODO: Considerar unificação das APIs no futuro
 class FormSectionWidget extends StatelessWidget {
   final String title;
   final IconData icon;

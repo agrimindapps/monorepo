@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedef.dart';
-import '../entities/comentario_entity.dart';
+import '../../../comentarios/domain/entities/comentario_entity.dart';
 import '../repositories/comentario_repository.dart';
 
 /// Caso de uso para gerenciar comentários (adicionar/editar/remover)

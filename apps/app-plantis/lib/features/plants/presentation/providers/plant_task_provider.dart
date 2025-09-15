@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
-import '../../domain/services/task_generation_service.dart';
+import '../../domain/services/plant_task_generator.dart';
 
 class PlantTaskProvider extends ChangeNotifier {
-  final TaskGenerationService _taskGenerationService;
+  final PlantTaskGenerator _taskGenerationService;
 
-  PlantTaskProvider({TaskGenerationService? taskGenerationService})
-    : _taskGenerationService = taskGenerationService ?? TaskGenerationService();
+  PlantTaskProvider({PlantTaskGenerator? taskGenerationService})
+    : _taskGenerationService = taskGenerationService ?? PlantTaskGenerator();
 
   // State
   final Map<String, List<PlantTask>> _plantTasks = {};

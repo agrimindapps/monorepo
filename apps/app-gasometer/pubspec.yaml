@@ -5,8 +5,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.3.0"
+  sdk: ">=3.7.2 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
@@ -34,7 +34,7 @@ dependencies:
   # Nota: Firebase, Hive e SharedPreferences vêm do core package
   
   # Utilities
-  equatable: ^2.0.5
+  equatable: ^2.0.7
   dartz: ^0.10.1
   uuid: ^4.5.1
   intl: ^0.20.2
@@ -55,7 +55,7 @@ dependencies:
   flutter_local_notifications: ^19.4.0
   
   # Connectivity
-  connectivity_plus: ^6.1.0
+  connectivity_plus: ^6.1.5
   
   # Synchronization
   synchronized: ^3.3.0+3

@@ -18,6 +18,13 @@ export 'src/domain/entities/security_entity.dart';
 export 'src/domain/entities/shared_preferences_record.dart';
 export 'src/domain/entities/subscription_entity.dart';
 export 'src/domain/entities/user_entity.dart';
+export 'src/domain/entities/device_entity.dart';
+
+// Data Migration Entities
+export 'src/domain/entities/data_migration/anonymous_data.dart';
+export 'src/domain/entities/data_migration/account_data.dart';
+export 'src/domain/entities/data_migration/data_conflict_result.dart';
+export 'src/domain/entities/data_migration/data_resolution_choice.dart';
 export 'src/domain/repositories/i_analytics_repository.dart';
 export 'src/domain/repositories/i_app_rating_repository.dart';
 // Repository Interfaces
@@ -34,10 +41,14 @@ export 'src/domain/repositories/i_security_repository.dart';
 export 'src/domain/repositories/i_storage_repository.dart';
 export 'src/domain/repositories/i_subscription_repository.dart';
 export 'src/domain/repositories/i_sync_repository.dart';
+export 'src/domain/repositories/i_device_repository.dart';
 export 'src/domain/usecases/auth/login_usecase.dart';
 export 'src/domain/usecases/auth/logout_usecase.dart';
 // Use Cases
 export 'src/domain/usecases/base_usecase.dart';
+export 'src/domain/usecases/get_user_devices_usecase.dart';
+export 'src/domain/usecases/validate_device_usecase.dart';
+export 'src/domain/usecases/revoke_device_usecase.dart';
 // Helpers
 export 'src/infrastructure/helpers/notification_helper.dart';
 export 'src/infrastructure/services/app_rating_service.dart';
@@ -75,6 +86,14 @@ export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
 
+// Device Management Services
+export 'src/infrastructure/services/device_management_service.dart';
+export 'src/infrastructure/services/firebase_device_service.dart';
+
+// Data Migration Services
+export 'src/infrastructure/services/data_migration_service.dart';
+export 'src/infrastructure/services/anonymous_data_cleaner.dart';
+
 // ========== UNIFIED SYNC SYSTEM ==========
 // Unified Sync Manager and Components
 export 'src/sync/app_sync_config.dart';
@@ -97,6 +116,10 @@ export 'src/presentation/widgets/image_widgets.dart';
 export 'src/presentation/widgets/loading_widget.dart';
 export 'src/presentation/widgets/profile_avatar.dart';
 export 'src/presentation/widgets/profile_image_picker.dart';
+
+// Data Migration Widgets
+export 'src/presentation/widgets/data_migration/data_conflict_dialog.dart';
+export 'src/presentation/widgets/data_migration/migration_progress_dialog.dart';
 
 // ========== DATA INSPECTOR ==========
 // Unified Data Inspector for all monorepo apps

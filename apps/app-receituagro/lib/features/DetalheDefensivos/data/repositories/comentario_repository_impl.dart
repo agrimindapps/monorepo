@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart' as local_failures;
 import '../../../../core/utils/typedef.dart';
 import '../../../comentarios/services/comentarios_service.dart';
-import '../../domain/entities/comentario_entity.dart';
+import '../../../comentarios/domain/entities/comentario_entity.dart';
 import '../../domain/repositories/comentario_repository.dart';
 import '../models/comentario_model.dart';
 

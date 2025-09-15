@@ -114,6 +114,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           throw AuthenticationException('Operação não permitida.');
         default:
           throw AuthenticationException('Erro de autenticação: ${e.message}');
+      }
     } catch (e) {
       throw ServerException('Unexpected sign in error: $e');
     }

@@ -22,8 +22,8 @@ class DeviceManagementDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final devices = provider.connectedDevices;
-    final currentDevice = provider.currentDevice;
+    final devices = provider.connectedDevicesInfo;
+    final currentDevice = provider.currentDeviceInfo;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -96,7 +96,7 @@ class DeviceManagementDialog extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(

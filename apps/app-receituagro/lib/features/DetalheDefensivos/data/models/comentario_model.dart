@@ -1,5 +1,5 @@
 import '../../../comentarios/models/comentario_model.dart' as LegacyComentarioModel;
-import '../../domain/entities/comentario_entity.dart';
+import '../../../comentarios/domain/entities/comentario_entity.dart';
 
 /// Modelo de dados para Comentario
 /// 

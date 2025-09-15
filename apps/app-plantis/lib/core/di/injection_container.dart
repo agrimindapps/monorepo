@@ -40,7 +40,7 @@ import '../services/test_data_generator_service.dart';
 import '../services/url_launcher_service.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
-import '../utils/navigation_service.dart';
+import '../utils/navigation_service.dart' as local;
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
@@ -305,7 +305,7 @@ void _initBackup() {
 
 void _initAppServices() {
   // Navigation Service
-  sl.registerLazySingleton(() => NavigationService.instance);
+  sl.registerLazySingleton(() => local.NavigationService.instance);
 
   // Analytics Provider
   sl.registerLazySingleton<AnalyticsProvider>(

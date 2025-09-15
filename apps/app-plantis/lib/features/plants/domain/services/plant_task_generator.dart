@@ -2,7 +2,7 @@ import 'dart:math';
 import '../entities/plant.dart';
 import '../entities/plant_task.dart';
 
-class TaskGenerationService {
+class PlantTaskGenerator {
   static const String _taskIdPrefix = 'task_';
 
   /// Generates tasks for a plant based on its care configuration

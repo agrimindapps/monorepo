@@ -12,7 +12,6 @@ import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
 import 'models/cultura_view_mode.dart';
 import 'widgets/cultura_item_widget.dart';
 import 'widgets/cultura_search_field.dart';
-import 'widgets/empty_state_widget.dart';
 import 'widgets/loading_skeleton_widget.dart';
 
 class ListaCulturasPage extends StatefulWidget {
@@ -202,23 +201,74 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
   }
 
   Widget _buildContent(bool isDark) {
+    final theme = Theme.of(context);
     if (_isLoading) {
       return LoadingSkeletonWidget(isDark: isDark);
     } else if (_errorMessage != null) {
-      return EmptyStateWidget(
-        isDark: isDark,
-        message: 'Erro ao carregar culturas',
-        subtitle: _errorMessage,
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: isDark ? Colors.red[300] : Colors.red[600],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar culturas',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: isDark ? Colors.white : Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isDark ? Colors.grey[300] : Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
+        ),
       );
     } else if (_filteredCulturas.isEmpty) {
-      return EmptyStateWidget(
-        isDark: isDark,
-        message: _searchController.text.isNotEmpty
-            ? 'Nenhuma cultura encontrada'
-            : 'Nenhuma cultura disponível',
-        subtitle: _searchController.text.isNotEmpty
-            ? 'Tente ajustar os termos da busca'
-            : 'Verifique se os dados foram carregados',
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _searchController.text.isNotEmpty 
+                ? Icons.search_off 
+                : Icons.grass_outlined,
+              size: 64,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _searchController.text.isNotEmpty
+                  ? 'Nenhuma cultura encontrada'
+                  : 'Nenhuma cultura disponível',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: isDark ? Colors.white : Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _searchController.text.isNotEmpty
+                  ? 'Tente ajustar os termos da busca'
+                  : 'Verifique se os dados foram carregados',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.grey[300] : Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       );
     } else {
       return _viewMode.isGrid ? _buildGridView(isDark) : _buildListView(isDark);

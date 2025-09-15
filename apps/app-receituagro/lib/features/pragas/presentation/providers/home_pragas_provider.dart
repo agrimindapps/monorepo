@@ -29,6 +29,7 @@ class HomePragasProvider extends ChangeNotifier {
   bool _isInitializing = true;
   bool _initializationFailed = false;
   String? _initializationError;
+  bool _disposed = false;
 
   // Dados de culturas
   int _totalCulturas = 0;
@@ -59,16 +60,22 @@ class HomePragasProvider extends ChangeNotifier {
       // Inicializa pragas com retry logic
       await _initializePragasWithRetry();
       
-      _isInitializing = false;
-      _initializationFailed = false;
-      _initializationError = null;
+      if (!_disposed) {
+        _isInitializing = false;
+        _initializationFailed = false;
+        _initializationError = null;
+      }
     } catch (e) {
-      _isInitializing = false;
-      _initializationFailed = true;
-      _initializationError = e.toString();
+      if (!_disposed) {
+        _isInitializing = false;
+        _initializationFailed = true;
+        _initializationError = e.toString();
+      }
     }
     
-    notifyListeners();
+    if (!_disposed) {
+      notifyListeners();
+    }
   }
 
   /// Carrega dados de culturas do repositório
@@ -86,9 +93,13 @@ class HomePragasProvider extends ChangeNotifier {
     const int maxAttempts = 10;
     const Duration delayBetweenAttempts = Duration(milliseconds: 500);
     
+    if (_disposed) return;
+    
     try {
       // Aguarda dados estarem prontos
       final isDataReady = await _appDataManager.isDataReady();
+      
+      if (_disposed) return;
       
       if (isDataReady) {
         await _pragasProvider.initialize();
@@ -98,24 +109,34 @@ class HomePragasProvider extends ChangeNotifier {
       // Verifica se atingiu o limite de tentativas
       if (attempts >= maxAttempts - 1) {
         // Fallback: inicializa mesmo sem dados prontos
-        await _pragasProvider.initialize();
+        if (!_disposed) {
+          await _pragasProvider.initialize();
+        }
         return;
       }
       
       // Se dados não estão prontos, aguarda e tenta novamente
       await Future<void>.delayed(delayBetweenAttempts);
-      await _initializePragasWithRetry(attempts + 1);
+      if (!_disposed) {
+        await _initializePragasWithRetry(attempts + 1);
+      }
     } catch (e) {
+      if (_disposed) return;
+      
       // Se ainda há tentativas, tenta novamente
       if (attempts < maxAttempts - 1) {
         await Future<void>.delayed(delayBetweenAttempts);
-        await _initializePragasWithRetry(attempts + 1);
+        if (!_disposed) {
+          await _initializePragasWithRetry(attempts + 1);
+        }
       } else {
         // Último recurso: inicializa diretamente
-        try {
-          await _pragasProvider.initialize();
-        } catch (finalError) {
-          rethrow;
+        if (!_disposed) {
+          try {
+            await _pragasProvider.initialize();
+          } catch (finalError) {
+            rethrow;
+          }
         }
       }
     }
@@ -123,7 +144,7 @@ class HomePragasProvider extends ChangeNotifier {
 
   /// Atualiza o índice do carrossel
   void updateCarouselIndex(int index) {
-    if (_currentCarouselIndex != index) {
+    if (!_disposed && _currentCarouselIndex != index) {
       _currentCarouselIndex = index;
       notifyListeners();
     }
@@ -131,16 +152,22 @@ class HomePragasProvider extends ChangeNotifier {
 
   /// Força atualização dos dados de pragas
   Future<void> refreshPragasData() async {
-    await _pragasProvider.initialize();
+    if (!_disposed) {
+      await _pragasProvider.initialize();
+    }
   }
 
   /// Registra acesso a uma praga
   void recordPragaAccess(PragaEntity praga) {
-    _pragasProvider.recordPragaAccess(praga);
+    if (!_disposed) {
+      _pragasProvider.recordPragaAccess(praga);
+    }
   }
 
   /// Força recarregamento completo de todos os dados
   Future<void> forceRefresh() async {
+    if (_disposed) return;
+    
     _isInitializing = true;
     _initializationFailed = false;
     _initializationError = null;
@@ -181,6 +208,12 @@ class HomePragasProvider extends ChangeNotifier {
         'emoji': emoji,
       };
     }).toList();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
 }

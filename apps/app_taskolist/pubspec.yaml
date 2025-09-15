@@ -4,16 +4,16 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.3.0"
+  sdk: ">=3.7.2 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
     sdk: flutter
   
   # State Management
-  riverpod: ^2.4.0
-  flutter_riverpod: ^2.4.0
+  riverpod: ^2.6.1
+  flutter_riverpod: ^2.6.1
   
   # Nota: Hive e path_provider vêm do core package
   
@@ -33,9 +33,9 @@ dependencies:
   injectable: ^2.3.2
   
   # Utils
-  uuid: ^4.1.0
+  uuid: ^4.5.1
   intl: ^0.20.2
-  equatable: ^2.0.5
+  equatable: ^2.0.7
   dartz: ^0.10.1
   device_info_plus: ^11.5.0
   

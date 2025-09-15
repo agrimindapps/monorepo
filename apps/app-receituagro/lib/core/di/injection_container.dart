@@ -8,7 +8,6 @@ import '../services/enhanced_diagnostic_integration_service.dart';
 
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
-import '../../features/comentarios/services/comentarios_hive_repository.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_legacy_adapter.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
@@ -19,6 +18,7 @@ import '../../features/favoritos/services/favoritos_cache_service.dart';
 import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
 import '../../features/settings/di/settings_di.dart';
+import '../../features/settings/di/device_management_di.dart';
 import '../navigation/app_navigation_provider.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/cultura_hive_repository.dart';
@@ -53,6 +53,10 @@ Future<void> init() async {
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
   // Configure all Clean Architecture dependencies first
   configureAllRepositoriesDependencies();
+  
+  // ===== DEVICE MANAGEMENT =====
+  // Configure device management dependencies
+  await DeviceManagementDI.registerDependencies(sl);
   
   // ===== NAVEGAÇÃO =====
   // Registra AppNavigationProvider como singleton para navegação global
@@ -306,9 +310,6 @@ Future<void> init() async {
     () => ComentariosHiveRepository(),
   );
 
-  sl.registerLazySingleton<ComentariosRealRepository>(
-    () => ComentariosRealRepository(sl<ComentariosHiveRepository>()),
-  );
 
   // Sistema Premium com cache Hive
   sl.registerLazySingleton<PremiumHiveRepository>(
@@ -327,7 +328,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton<ComentariosService>(
     () => ComentariosService(
-      repository: sl<ComentariosRealRepository>(),
+      repository: sl<ComentariosHiveRepository>(),
       premiumService: sl<IPremiumService>(),
     ),
   );

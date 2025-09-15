@@ -30,6 +30,7 @@ class PragasProvider extends ChangeNotifier {
   
   bool _isLoading = false;
   String? _errorMessage;
+  bool _disposed = false;
 
   PragasProvider({
     required GetPragasUseCase getPragasUseCase,
@@ -300,6 +301,8 @@ class PragasProvider extends ChangeNotifier {
 
   /// Método helper para executar use cases com tratamento de erro
   Future<void> _executeUseCase(Future<void> Function() useCase) async {
+    if (_disposed) return;
+    
     try {
       _setLoading(true);
       _clearError();
@@ -307,29 +310,42 @@ class PragasProvider extends ChangeNotifier {
       await useCase();
       
     } catch (e) {
-      _setError(e.toString());
+      if (!_disposed) {
+        _setError(e.toString());
+      }
     } finally {
-      _setLoading(false);
+      if (!_disposed) {
+        _setLoading(false);
+      }
     }
   }
 
   void _setLoading(bool loading) {
-    if (_isLoading != loading) {
+    if (!_disposed && _isLoading != loading) {
       _isLoading = loading;
       notifyListeners();
     }
   }
 
   void _setError(String error) {
-    _errorMessage = error;
-    notifyListeners();
+    if (!_disposed) {
+      _errorMessage = error;
+      notifyListeners();
+    }
   }
 
   void _clearError() {
-    if (_errorMessage != null) {
+    if (!_disposed && _errorMessage != null) {
       _errorMessage = null;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    clear();
+    super.dispose();
   }
 }
 

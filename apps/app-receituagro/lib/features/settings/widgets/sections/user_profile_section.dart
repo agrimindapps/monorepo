@@ -61,12 +61,6 @@ class UserProfileSection extends StatelessWidget {
     );
   }
 
-  /// Determine if section should be shown
-  bool _shouldShowSection(SettingsProvider settingsProvider, FeatureFlagsProvider featureFlags) {
-    // Show if user has settings OR sync is enabled
-    return settingsProvider.hasSettings || 
-           featureFlags.isContentSynchronizationEnabled;
-  }
 
   /// Authentication options for guests
   Widget _buildAuthenticationOptions(BuildContext context, ReceitaAgroAuthProvider authProvider) {
@@ -99,7 +93,6 @@ class UserProfileSection extends StatelessWidget {
   /// Section Header
   Widget _buildSectionHeader(BuildContext context, ReceitaAgroAuthProvider authProvider) {
     final theme = Theme.of(context);
-    final isAuthenticated = authProvider.isAuthenticated && !authProvider.isAnonymous;
 
     return Padding(
       padding: SettingsDesignTokens.sectionHeaderPadding,
@@ -140,7 +133,7 @@ class UserProfileSection extends StatelessWidget {
   /// User Profile Display
   Widget _buildUserProfile(BuildContext context, SettingsProvider settingsProvider, ReceitaAgroAuthProvider authProvider) {
     final theme = Theme.of(context);
-    final currentDevice = settingsProvider.currentDevice;
+    final currentDevice = settingsProvider.currentDeviceInfo;
     
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -150,7 +143,7 @@ class UserProfileSection extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -364,7 +357,7 @@ class UserProfileSection extends StatelessWidget {
 
   /// Open User Profile Dialog
   Future<void> _openUserProfileDialog(BuildContext context, SettingsProvider settingsProvider) async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => UserProfileDialog(provider: settingsProvider),
     );

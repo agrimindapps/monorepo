@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// Sync Progress Notification Widget
-/// 
+///
 /// Features:
 /// - In-app notification for sync progress
 /// - Dismissible and auto-hide options
@@ -40,10 +40,12 @@ class SyncProgressNotificationWidget extends StatefulWidget {
   });
 
   @override
-  State<SyncProgressNotificationWidget> createState() => _SyncProgressNotificationWidgetState();
+  State<SyncProgressNotificationWidget> createState() =>
+      _SyncProgressNotificationWidgetState();
 }
 
-class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificationWidget>
+class _SyncProgressNotificationWidgetState
+    extends State<SyncProgressNotificationWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
@@ -53,23 +55,22 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
 
     // Show notification
     _showNotification();
-    
+
     // Setup auto hide
     if (widget.autoHideDuration != null) {
       _autoHideTimer = Timer(widget.autoHideDuration!, _hideNotification);
@@ -117,10 +118,7 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
             decoration: BoxDecoration(
               color: _getBackgroundColor(context),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _getBorderColor(context),
-                width: 1,
-              ),
+              border: Border.all(color: _getBorderColor(context), width: 1),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -131,9 +129,9 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
                   children: [
                     // Icon
                     _buildIcon(context),
-                    
+
                     const SizedBox(width: 12),
-                    
+
                     // Title and Message
                     Expanded(
                       child: Column(
@@ -141,7 +139,9 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
                         children: [
                           Text(
                             widget.title,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: _getTextColor(context),
                             ),
@@ -150,15 +150,19 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
                             const SizedBox(height: 4),
                             Text(
                               widget.message!,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: _getTextColor(context).withValues(alpha: 0.8),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: _getTextColor(
+                                  context,
+                                ).withValues(alpha: 0.8),
                               ),
                             ),
                           ],
                         ],
                       ),
                     ),
-                    
+
                     // Dismiss Button
                     if (widget.isDismissible)
                       IconButton(
@@ -176,15 +180,16 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
                       ),
                   ],
                 ),
-                
+
                 // Progress Bar
                 if (widget.showProgress && widget.progress != null) ...[
                   const SizedBox(height: 12),
                   _buildProgressBar(context),
                 ],
-                
+
                 // Action Button
-                if (widget.onActionPressed != null && widget.actionLabel != null) ...[
+                if (widget.onActionPressed != null &&
+                    widget.actionLabel != null) ...[
                   const SizedBox(height: 12),
                   _buildActionButton(context),
                 ],
@@ -223,11 +228,7 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
         break;
     }
 
-    return Icon(
-      iconData,
-      color: iconColor,
-      size: 20,
-    );
+    return Icon(iconData, color: iconColor, size: 20);
   }
 
   /// Build progress bar
@@ -274,9 +275,7 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
         style: OutlinedButton.styleFrom(
           foregroundColor: _getIconColor(context),
           side: BorderSide(color: _getIconColor(context)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(vertical: 8),
         ),
         child: Text(
@@ -299,7 +298,9 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
       case NotificationType.warning:
         return Colors.orange.shade50;
       case NotificationType.sync:
-        return Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
+        return Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
     }
   }
 
@@ -353,30 +354,23 @@ class _SyncProgressNotificationWidgetState extends State<SyncProgressNotificatio
 }
 
 /// Notification Type Enum
-enum NotificationType {
-  info,
-  success,
-  error,
-  warning,
-  sync,
-}
+enum NotificationType { info, success, error, warning, sync }
 
 /// Sync Progress Notification Manager
-/// 
+///
 /// Manages multiple sync progress notifications
 class SyncProgressNotificationManager extends StatefulWidget {
   final Widget child;
 
-  const SyncProgressNotificationManager({
-    super.key,
-    required this.child,
-  });
+  const SyncProgressNotificationManager({super.key, required this.child});
 
   @override
-  State<SyncProgressNotificationManager> createState() => _SyncProgressNotificationManagerState();
+  State<SyncProgressNotificationManager> createState() =>
+      _SyncProgressNotificationManagerState();
 }
 
-class _SyncProgressNotificationManagerState extends State<SyncProgressNotificationManager> {
+class _SyncProgressNotificationManagerState
+    extends State<SyncProgressNotificationManager> {
   final List<SyncNotificationItem> _activeNotifications = [];
 
   @override
@@ -384,7 +378,7 @@ class _SyncProgressNotificationManagerState extends State<SyncProgressNotificati
     return Stack(
       children: [
         widget.child,
-        
+
         // Notification Overlay
         if (_activeNotifications.isNotEmpty)
           Positioned(
@@ -393,21 +387,22 @@ class _SyncProgressNotificationManagerState extends State<SyncProgressNotificati
             right: 0,
             child: SafeArea(
               child: Column(
-                children: _activeNotifications.map((item) {
-                  return SyncProgressNotificationWidget(
-                    key: ValueKey(item.id),
-                    title: item.title,
-                    message: item.message,
-                    type: item.type,
-                    progress: item.progress,
-                    autoHideDuration: item.autoHideDuration,
-                    isDismissible: item.isDismissible,
-                    onDismissed: () => _removeNotification(item.id),
-                    onActionPressed: item.onActionPressed,
-                    actionLabel: item.actionLabel,
-                    showProgress: item.showProgress,
-                  );
-                }).toList(),
+                children:
+                    _activeNotifications.map((item) {
+                      return SyncProgressNotificationWidget(
+                        key: ValueKey(item.id),
+                        title: item.title,
+                        message: item.message,
+                        type: item.type,
+                        progress: item.progress,
+                        autoHideDuration: item.autoHideDuration,
+                        isDismissible: item.isDismissible,
+                        onDismissed: () => _removeNotification(item.id),
+                        onActionPressed: item.onActionPressed,
+                        actionLabel: item.actionLabel,
+                        showProgress: item.showProgress,
+                      );
+                    }).toList(),
               ),
             ),
           ),
@@ -467,12 +462,12 @@ class SyncNotificationItem {
 /// Global Sync Notification Service (Singleton)
 class SyncNotificationService {
   static SyncNotificationService? _instance;
-  static SyncNotificationService get instance => _instance ??= SyncNotificationService._();
-  
+  static SyncNotificationService get instance =>
+      _instance ??= SyncNotificationService._();
+
   SyncNotificationService._();
 
   _SyncProgressNotificationManagerState? _managerState;
-
 
   /// Show sync progress notification
   void showSyncNotification({

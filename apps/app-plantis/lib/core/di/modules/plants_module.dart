@@ -6,7 +6,7 @@ import '../../../features/plants/data/repositories/plant_comments_repository_imp
 import '../../../features/plants/data/repositories/plants_repository_impl.dart';
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../../features/plants/domain/repositories/plants_repository.dart';
-import '../../../features/plants/domain/services/task_generation_service.dart';
+import '../../../features/plants/domain/services/plant_task_generator.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
@@ -83,8 +83,8 @@ abstract class PlantsDIModule {
       ),
     );
 
-    // Task generation service
-    sl.registerLazySingleton(() => TaskGenerationService());
+    // Plant task generator
+    sl.registerLazySingleton(() => PlantTaskGenerator());
 
     // Plant task provider
     sl.registerFactory(() => PlantTaskProvider(taskGenerationService: sl()));

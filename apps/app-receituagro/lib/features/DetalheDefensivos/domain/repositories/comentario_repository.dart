@@ -1,5 +1,5 @@
 import '../../../../core/utils/typedef.dart';
-import '../entities/comentario_entity.dart';
+import '../../../comentarios/domain/entities/comentario_entity.dart';
 
 /// Contrato do repositório de comentários
 /// 

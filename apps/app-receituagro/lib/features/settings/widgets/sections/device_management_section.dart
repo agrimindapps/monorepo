@@ -24,8 +24,8 @@ class DeviceManagementSection extends StatelessWidget {
 
     return Consumer2<SettingsProvider, ReceitaAgroAuthProvider>(
       builder: (context, provider, authProvider, child) {
-        final devices = provider.connectedDevices;
-        final currentDevice = provider.currentDevice;
+        final devices = provider.connectedDevicesInfo;
+        final currentDevice = provider.currentDeviceInfo;
         final hasDeviceManagement = provider.isDeviceManagementEnabled;
 
         // Only show for authenticated users (not anonymous)
@@ -136,10 +136,10 @@ class DeviceManagementSection extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: statusColor.withOpacity(0.3),
+          color: statusColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -241,7 +241,7 @@ class DeviceManagementSection extends StatelessWidget {
 
   /// Open device management dialog
   Future<void> _openDeviceManagementDialog(BuildContext context, SettingsProvider provider) async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => DeviceManagementDialog(provider: provider),
     );

@@ -1,5 +1,10 @@
 import 'package:equatable/equatable.dart';
 
+/// PlantTask-specific enums
+/// 
+/// NOTE: Similar enums exist in features/tasks/domain/entities/task.dart
+/// These are simplified versions for the PlantTask context
+/// TODO: Consider unification with main Task enums in future refactor
 enum TaskType {
   watering,
   fertilizing,

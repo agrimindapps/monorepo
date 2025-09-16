@@ -39,7 +39,7 @@ class DiagnosticoModel extends DiagnosticoEntity {
       observacoes: null, // Não disponível diretamente na nova entity
       ingredienteAtivo: entity.nomeDefensivo ?? 'Não identificado',
       cultura: entity.nomeCultura ?? 'Não especificado',
-      grupo: entity.nomePraga ?? 'Não especificado',
+      grupo: entity.nomePraga ?? 'Não especificado', // grupo é usado como nomePraga para compatibilidade
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

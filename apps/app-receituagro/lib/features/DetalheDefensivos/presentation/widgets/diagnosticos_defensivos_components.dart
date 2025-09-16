@@ -612,8 +612,11 @@ class _DiagnosticoDefensivoListItemWidgetState
         }
       }
 
-      final idPraga = _getProperty('fkIdPraga');
-      print('🎯 fkIdPraga extraído: "$idPraga" (tipo: ${idPraga.runtimeType})');
+      // Tenta ambos os nomes de propriedade para compatibilidade
+      final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
+      print('🎯 idPraga extraído: "$idPraga" (tipo: ${idPraga.runtimeType})');
+      print('🔍 fkIdPraga: "${_getProperty('fkIdPraga')}"');
+      print('🔍 idPraga: "${_getProperty('idPraga')}"');
 
       // Debug do repositório de pragas
       print('📦 === DEBUG REPOSITÓRIO PRAGAS ===');
@@ -802,8 +805,12 @@ class _DiagnosticoDefensivoListItemWidgetState
     String nomeComumPraga = 'Praga não identificada';
     String nomeCientificoPraga = '';
 
-    if (_pragaData != null) {
-      // Primeira linha: nome comum da praga, se separado por vírgula ou ponto vírgula, apenas o primeiro valor
+    // PRIMEIRA PRIORIDADE: usar nomePraga do modelo (já resolvido pelo sistema)
+    final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
+    if (nomePragaModel != null && nomePragaModel.isNotEmpty && nomePragaModel != 'Não especificado') {
+      nomeComumPraga = nomePragaModel;
+    } else if (_pragaData != null) {
+      // SEGUNDA PRIORIDADE: usar dados do repositório de pragas
       final nomeComumCompleto = _pragaData!.nomeComum;
       if (nomeComumCompleto.contains(',')) {
         nomeComumPraga = nomeComumCompleto.split(',').first.trim();
@@ -812,8 +819,10 @@ class _DiagnosticoDefensivoListItemWidgetState
       } else {
         nomeComumPraga = nomeComumCompleto;
       }
+    }
 
-      // Segunda linha: Nome científico da praga
+    // Nome científico só vem do repositório de pragas
+    if (_pragaData != null) {
       nomeCientificoPraga = _pragaData!.nomeCientifico;
     }
 
@@ -924,6 +933,8 @@ class _DiagnosticoDefensivoListItemWidgetState
           return obj.cultura;
         case 'grupo':
           return obj.grupo;
+        case 'idDefensivo':
+          return obj.idDefensivo;
         default:
           return null;
       }

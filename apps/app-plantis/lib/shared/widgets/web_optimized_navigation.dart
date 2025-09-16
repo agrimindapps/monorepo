@@ -7,6 +7,7 @@ import '../../core/theme/plantis_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/tasks/domain/entities/task.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
+import 'main_scaffold.dart';
 
 /// Shell layout web otimizado com sidebar moderna para desktop
 /// Mantém navegação mobile atual para telas < 1200px
@@ -29,7 +30,7 @@ class WebOptimizedNavigationShell extends StatelessWidget {
           return _DesktopLayout(child: child);
         } else {
           // Manter navegação mobile atual para telas menores
-          return child;
+          return MainScaffold(child: child);
         }
       },
     );

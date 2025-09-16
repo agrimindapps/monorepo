@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'core/di/injectable_config.dart' as local_di;
 import 'core/router/app_router.dart';
+import 'core/services/receipt_image_service.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';
 import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
@@ -51,6 +52,11 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // Settings Provider - independent
         ChangeNotifierProvider(
           create: (_) => local_di.getIt<SettingsProvider>(),
+        ),
+        
+        // Receipt Image Service - independent service
+        Provider<ReceiptImageService>(
+          create: (_) => local_di.getIt<ReceiptImageService>(),
         ),
         
         // Sync Status Provider - independent

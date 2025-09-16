@@ -13,6 +13,7 @@ import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../expenses/presentation/widgets/receipt_image_picker.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
@@ -133,11 +134,13 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildBasicInfo(),
+        _buildServiceInfoSection(),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildCostAndOdometer(),
+        _buildServiceDetailsSection(),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildDescription(),
+        _buildFinancialInfoSection(),
+        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        _buildReceiptImageSection(context, provider),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildNextServiceDate(),
       ],
@@ -146,10 +149,11 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
 
 
 
-  Widget _buildBasicInfo() {
+  // 1ª Seção: Informações do Serviço (O QUE foi feito e QUANDO)
+  Widget _buildServiceInfoSection() {
     return _buildSectionWithoutPadding(
-      title: 'Informações Básicas',
-      icon: Icons.info_outline,
+      title: 'Informações do Serviço',
+      icon: Icons.build_circle,
       content: Column(
         children: [
           ValidatedFormField(
@@ -167,25 +171,10 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             onValidationChanged: (result) => _validationResults['type'] = result,
           ),
           SizedBox(height: GasometerDesignTokens.spacingMd),
-          ValidatedFormField(
-            controller: _formProvider.workshopNameController,
-            label: 'Oficina/Local',
-            hint: 'Nome da oficina ou local da manutenção',
-            required: true,
-            validationType: ValidationType.length,
-            minLength: 2,
-            maxLengthValidation: 100,
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)\/&]'))],
-            decoration: _formProvider.formModel.errors['workshopName'] != null ? InputDecoration(
-              errorText: _formProvider.formModel.errors['workshopName'],
-            ) : null,
-            onValidationChanged: (result) => _validationResults['workshop'] = result,
-          ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
           ValidatedDropdownField<MaintenanceType>(
-            label: 'Tipo',
+            label: 'Categoria',
             value: _formProvider.formModel.type,
-            prefixIcon: Icons.build_circle,
+            prefixIcon: Icons.category,
             items: MaintenanceType.values.map((type) => ValidatedDropdownItem<MaintenanceType>(
               value: type,
               child: Column(
@@ -205,7 +194,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
             )).toList(),
             onChanged: (value) => _formProvider.updateType(value!),
             required: true,
-            hint: 'Selecione o tipo de manutenção',
+            hint: 'Selecione a categoria da manutenção',
           ),
           SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildServiceDateTimeField(context, _formProvider),
@@ -214,15 +203,59 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     );
   }
 
-  Widget _buildCostAndOdometer() {
+  // 2ª Seção: Detalhes do Serviço (ONDE foi feito e COMO)
+  Widget _buildServiceDetailsSection() {
     return _buildSectionWithoutPadding(
-      title: 'Valores e Medições',
+      title: 'Detalhes do Serviço',
+      icon: Icons.description_outlined,
+      content: Column(
+        children: [
+          ValidatedFormField(
+            controller: _formProvider.workshopNameController,
+            label: 'Oficina/Local',
+            hint: 'Nome da oficina ou local da manutenção',
+            required: true,
+            validationType: ValidationType.length,
+            minLength: 2,
+            maxLengthValidation: 100,
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)\/&]'))],
+            decoration: _formProvider.formModel.errors['workshopName'] != null ? InputDecoration(
+              errorText: _formProvider.formModel.errors['workshopName'],
+            ) : null,
+            onValidationChanged: (result) => _validationResults['workshop'] = result,
+          ),
+          SizedBox(height: GasometerDesignTokens.spacingMd),
+          ValidatedFormField(
+            controller: _formProvider.descriptionController,
+            label: 'Descrição dos Serviços',
+            hint: 'Descreva os serviços realizados, peças trocadas, etc.',
+            required: true,
+            validationType: ValidationType.length,
+            minLength: 5,
+            maxLengthValidation: 500,
+            maxLines: 4,
+            maxLength: 500,
+            showCharacterCount: true,
+            decoration: _formProvider.formModel.errors['description'] != null ? InputDecoration(
+              errorText: _formProvider.formModel.errors['description'],
+            ) : null,
+            onValidationChanged: (result) => _validationResults['description'] = result,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 3ª Seção: Informações Financeiras e Técnicas (QUANTO custou e quilometragem)
+  Widget _buildFinancialInfoSection() {
+    return _buildSectionWithoutPadding(
+      title: 'Informações Financeiras e Técnicas',
       icon: Icons.monetization_on_outlined,
       content: Column(
         children: [
           ValidatedFormField(
             controller: _formProvider.costController,
-            label: 'Custo',
+            label: 'Custo Total',
             hint: '0,00',
             required: true,
             validationType: ValidationType.money,
@@ -238,7 +271,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
           SizedBox(height: GasometerDesignTokens.spacingMd),
           ValidatedFormField(
             controller: _formProvider.odometerController,
-            label: 'Odômetro',
+            label: 'Quilometragem Atual',
             hint: '0,0',
             required: true,
             validationType: ValidationType.decimal,
@@ -257,50 +290,148 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     );
   }
 
-  Widget _buildDescription() {
+
+  Widget _buildReceiptImageSection(BuildContext context, MaintenanceFormProvider provider) {
     return _buildSectionWithoutPadding(
-      title: 'Descrição',
-      icon: Icons.description_outlined,
-      content: ValidatedFormField(
-        controller: _formProvider.descriptionController,
-        label: 'Detalhes da manutenção',
-        hint: 'Descreva os serviços realizados, peças trocadas, etc.',
-        required: true,
-        validationType: ValidationType.length,
-        minLength: 5,
-        maxLengthValidation: 500,
-        maxLines: 4,
-        maxLength: 500,
-        showCharacterCount: true,
-        decoration: _formProvider.formModel.errors['description'] != null ? InputDecoration(
-          errorText: _formProvider.formModel.errors['description'],
-        ) : null,
-        onValidationChanged: (result) => _validationResults['description'] = result,
+      title: 'Comprovante',
+      icon: Icons.receipt,
+      content: Column(
+        children: [
+          ReceiptImagePicker(
+            imagePath: provider.receiptImagePath,
+            hasImage: provider.hasReceiptImage,
+            onImageSelected: () => _showImagePickerOptions(context, provider),
+            onImageRemoved: () => provider.removeReceiptImage(),
+          ),
+          if (provider.isUploadingImage)
+            _buildUploadingIndicator(),
+          if (provider.imageUploadError != null)
+            _buildErrorIndicator(provider.imageUploadError!),
+        ],
       ),
     );
   }
 
+  Widget _buildUploadingIndicator() {
+    return Padding(
+      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                GasometerDesignTokens.colorPrimary,
+              ),
+            ),
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingSm),
+          Text(
+            'Processando imagem...',
+            style: TextStyle(
+              fontSize: GasometerDesignTokens.fontSizeSm,
+              color: GasometerDesignTokens.colorTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorIndicator(String error) {
+    return Padding(
+      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+      child: Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 16,
+            color: GasometerDesignTokens.colorError,
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingSm),
+          Expanded(
+            child: Text(
+              error,
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeSm,
+                color: GasometerDesignTokens.colorError,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showImagePickerOptions(BuildContext context, MaintenanceFormProvider provider) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Câmera'),
+                subtitle: const Text('Tirar uma nova foto'),
+                onTap: () {
+                  Navigator.pop(context);
+                  provider.captureReceiptImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeria'),
+                subtitle: const Text('Escolher da galeria'),
+                onTap: () {
+                  Navigator.pop(context);
+                  provider.selectReceiptImageFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('Cancelar'),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 5ª Seção: Programação de Próxima Manutenção (Opcional)
   Widget _buildNextServiceDate() {
     return _buildSectionWithoutPadding(
-      title: 'Próxima Manutenção (Opcional)',
-      icon: Icons.notification_important,
+      title: 'Programação de Próxima Manutenção',
+      icon: Icons.schedule,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-_buildNextServiceDateTimeField(context, _formProvider),
-if (_formProvider.formModel.nextServiceDate != null)
-              Padding(
-                padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
-                child: TextButton(
-                  onPressed: () => _formProvider.updateNextServiceDate(null),
-                  child: Text(
-                    'Remover data',
-                    style: TextStyle(
-                      color: GasometerDesignTokens.colorError,
-                    ),
-                  ),
+          Text(
+            'Defina quando será necessária a próxima manutenção (opcional)',
+            style: TextStyle(
+              fontSize: GasometerDesignTokens.fontSizeCaption,
+              color: GasometerDesignTokens.colorTextSecondary,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          SizedBox(height: GasometerDesignTokens.spacingSm),
+          _buildNextServiceDateTimeField(context, _formProvider),
+          if (_formProvider.formModel.nextServiceDate != null)
+            Padding(
+              padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+              child: TextButton.icon(
+                onPressed: () => _formProvider.updateNextServiceDate(null),
+                icon: Icon(Icons.clear, size: 16),
+                label: Text('Remover agendamento'),
+                style: TextButton.styleFrom(
+                  foregroundColor: GasometerDesignTokens.colorError,
                 ),
               ),
+            ),
         ],
       ),
     );

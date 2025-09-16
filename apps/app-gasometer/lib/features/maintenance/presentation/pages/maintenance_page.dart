@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/providers/base_provider.dart';
+import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
@@ -504,7 +505,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
         context: context,
         builder: (dialogContext) => MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
+            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider(
+              receiptImageService: context.read<ReceiptImageService>(),
+            )),
             ChangeNotifierProvider.value(value: _vehiclesProvider),
             ChangeNotifierProvider.value(value: authProvider),
           ],
@@ -550,7 +553,9 @@ class _MaintenancePageState extends State<MaintenancePage> {
         context: context,
         builder: (dialogContext) => MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider()),
+            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider(
+              receiptImageService: context.read<ReceiptImageService>(),
+            )),
             ChangeNotifierProvider.value(value: _vehiclesProvider),
             ChangeNotifierProvider.value(value: authProvider),
           ],

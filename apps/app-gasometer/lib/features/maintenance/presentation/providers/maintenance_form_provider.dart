@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/services/input_sanitizer.dart';
+import '../../../../core/services/receipt_image_service.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/maintenance_constants.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -22,10 +23,17 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final MaintenanceFormatterService _formatter = MaintenanceFormatterService();
   final MaintenanceValidatorService _validator = MaintenanceValidatorService();
+  final ReceiptImageService _receiptImageService;
   final ImagePicker _imagePicker = ImagePicker();
   
   // Store context for accessing providers when needed
   BuildContext? _context;
+
+  // Image management state
+  String? _receiptImagePath;
+  String? _receiptImageUrl;
+  bool _isUploadingImage = false;
+  String? _imageUploadError;
 
   // Controllers para campos de texto
   final TextEditingController titleController = TextEditingController();
@@ -49,8 +57,12 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   bool _isInitialized = false;
   final bool _isUpdating = false;
 
-  MaintenanceFormProvider({String? initialVehicleId, String? userId}) 
-      : _formModel = MaintenanceFormModel.initial(initialVehicleId ?? '', userId ?? '') {
+  MaintenanceFormProvider({
+    String? initialVehicleId, 
+    String? userId,
+    required ReceiptImageService receiptImageService,
+  }) : _receiptImageService = receiptImageService,
+       _formModel = MaintenanceFormModel.initial(initialVehicleId ?? '', userId ?? '') {
     _initializeControllers();
   }
 
@@ -61,9 +73,16 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   bool get isInitialized => _isInitialized;
   bool get isUpdating => _isUpdating;
   
+  // Image management getters
+  String? get receiptImagePath => _receiptImagePath;
+  String? get receiptImageUrl => _receiptImageUrl;
+  bool get hasReceiptImage => _receiptImagePath != null || _receiptImageUrl != null;
+  bool get isUploadingImage => _isUploadingImage;
+  String? get imageUploadError => _imageUploadError;
+  
   // IFormProvider implementation
   @override
-  bool get isLoading => _isUpdating;
+  bool get isLoading => _isUpdating || _isUploadingImage;
   
   @override
   String? get lastError => _formModel.lastError;
@@ -682,6 +701,159 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
     }
   }
 
+  // ===== IMAGE MANAGEMENT METHODS =====
+
+  /// Captura imagem usando a câmera
+  Future<void> captureReceiptImage() async {
+    try {
+      _imageUploadError = null;
+      notifyListeners();
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+
+      if (image != null) {
+        await _processReceiptImage(image.path);
+      }
+    } catch (e) {
+      _imageUploadError = 'Erro ao capturar imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Seleciona imagem da galeria
+  Future<void> selectReceiptImageFromGallery() async {
+    try {
+      _imageUploadError = null;
+      notifyListeners();
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+
+      if (image != null) {
+        await _processReceiptImage(image.path);
+      }
+    } catch (e) {
+      _imageUploadError = 'Erro ao selecionar imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Processa e faz upload da imagem do comprovante
+  Future<void> _processReceiptImage(String imagePath) async {
+    try {
+      _isUploadingImage = true;
+      _imageUploadError = null;
+      notifyListeners();
+
+      // Validar imagem
+      final isValid = await _receiptImageService.isValidImage(imagePath);
+      if (!isValid) {
+        throw Exception('Arquivo de imagem inválido');
+      }
+
+      // Processar imagem (comprimir + upload se online)
+      final result = await _receiptImageService.processMaintenanceReceiptImage(
+        userId: _formModel.userId,
+        maintenanceId: _generateTemporaryId(),
+        imagePath: imagePath,
+        compressImage: true,
+        uploadToFirebase: true,
+      );
+
+      _receiptImagePath = result.localPath;
+      _receiptImageUrl = result.downloadUrl;
+      
+      // Atualizar modelo do formulário
+      _formModel = _formModel.copyWith(hasChanges: true);
+
+      debugPrint('[MAINTENANCE FORM] Image processed successfully');
+      debugPrint('[MAINTENANCE FORM] Local path: ${result.localPath}');
+      debugPrint('[MAINTENANCE FORM] Download URL: ${result.downloadUrl}');
+
+    } catch (e) {
+      _imageUploadError = 'Erro ao processar imagem: $e';
+      debugPrint('[MAINTENANCE FORM] Image processing error: $e');
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Remove imagem do comprovante
+  Future<void> removeReceiptImage() async {
+    try {
+      if (_receiptImagePath != null || _receiptImageUrl != null) {
+        await _receiptImageService.deleteReceiptImage(
+          localPath: _receiptImagePath,
+          downloadUrl: _receiptImageUrl,
+        );
+      }
+
+      _receiptImagePath = null;
+      _receiptImageUrl = null;
+      _imageUploadError = null;
+      _formModel = _formModel.copyWith(hasChanges: true);
+      
+      notifyListeners();
+    } catch (e) {
+      _imageUploadError = 'Erro ao remover imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Gera ID temporário para processar imagem antes do save
+  String _generateTemporaryId() {
+    return 'temp_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  /// Sincroniza imagem local com Firebase (para casos offline)
+  Future<void> syncImageToFirebase(String actualMaintenanceId) async {
+    if (_receiptImagePath == null || _receiptImageUrl != null) {
+      return; // Nada para sincronizar
+    }
+
+    try {
+      _isUploadingImage = true;
+      notifyListeners();
+
+      final result = await _receiptImageService.processMaintenanceReceiptImage(
+        userId: _formModel.userId,
+        maintenanceId: actualMaintenanceId,
+        imagePath: _receiptImagePath!,
+        compressImage: false, // Já foi comprimida
+        uploadToFirebase: true,
+      );
+
+      _receiptImageUrl = result.downloadUrl;
+      
+      debugPrint('[MAINTENANCE FORM] Image synced to Firebase: ${result.downloadUrl}');
+      
+    } catch (e) {
+      debugPrint('[MAINTENANCE FORM] Failed to sync image: $e');
+      // Não exibir erro para usuário, continua com imagem local
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Limpa estado de imagem
+  void _clearImageState() {
+    _receiptImagePath = null;
+    _receiptImageUrl = null;
+    _imageUploadError = null;
+    _isUploadingImage = false;
+  }
+
   /// Limpa todos os campos do formulário
   void clearForm() {
     titleController.clear();
@@ -694,6 +866,7 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
     nextOdometerController.clear();
     notesController.clear();
 
+    _clearImageState();
     _formModel = MaintenanceFormModel.initial(_formModel.vehicleId, _formModel.userId);
     notifyListeners();
   }
@@ -701,6 +874,7 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   /// Reseta formulário para estado inicial
   void resetForm() {
     clearForm();
+    _clearImageState();
     _formModel = _formModel.copyWith(
       hasChanges: false,
       errors: const {},

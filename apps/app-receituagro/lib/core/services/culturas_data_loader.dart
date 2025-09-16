@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
@@ -23,10 +24,12 @@ class CulturasDataLoader {
           name: 'CulturasDataLoader');
       print('🌱 [CULTURAS] Iniciando carregamento de culturas...');
 
-      // 1. Carrega JSON do asset
-      final String jsonString = await rootBundle.loadString(
-        'assets/database/json/tbculturas/TBCULTURAS0.json',
-      );
+      // 1. Carrega JSON do asset - use path without 'assets/' prefix for web compatibility
+      final String assetPath = kIsWeb 
+          ? 'database/json/tbculturas/TBCULTURAS0.json'
+          : 'assets/database/json/tbculturas/TBCULTURAS0.json';
+      
+      final String jsonString = await rootBundle.loadString(assetPath);
 
       final dynamic decodedJson = json.decode(jsonString);
       final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];

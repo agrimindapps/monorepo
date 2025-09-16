@@ -72,7 +72,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedVehicleId = prefs.getString(_selectedVehicleKey);
-      debugPrint('🚗 Carregando veículo salvo: $savedVehicleId');
+      // Removed verbose vehicle loading log
 
       if (mounted) {
         final vehiclesProvider =
@@ -88,15 +88,14 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
         if (savedVehicleId != null) {
           final vehicleExists =
               vehiclesProvider.vehicles.any((v) => v.id == savedVehicleId);
-          debugPrint(
-              '🚗 Veículo existe na lista: $vehicleExists (${vehiclesProvider.vehicles.length} veículos)');
+          // Removed verbose vehicle existence log
 
           if (vehicleExists) {
             setState(() {
               _currentSelectedVehicleId = savedVehicleId;
             });
             widget.onVehicleChanged(savedVehicleId);
-            debugPrint('✅ Veículo restaurado com sucesso: $savedVehicleId');
+            // Removed verbose vehicle restoration log
             return; // Sai da função se encontrou o veículo salvo
           } else {
             // Remove a preferência se o veículo não existe mais
@@ -141,12 +140,10 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
 
     // Prioriza veículos ativos, senão pega o primeiro inativo
     if (activeVehicles.isNotEmpty) {
-      debugPrint(
-          '🎯 Selecionando veículo ativo: ${activeVehicles.first.brand} ${activeVehicles.first.model}');
+      // Removed verbose active vehicle selection log
       return activeVehicles.first;
     } else if (inactiveVehicles.isNotEmpty) {
-      debugPrint(
-          '🎯 Selecionando veículo inativo: ${inactiveVehicles.first.brand} ${inactiveVehicles.first.model}');
+      // Removed verbose inactive vehicle selection log
       return inactiveVehicles.first;
     }
 
@@ -159,10 +156,10 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
       final prefs = await SharedPreferences.getInstance();
       if (vehicleId != null) {
         await prefs.setString(_selectedVehicleKey, vehicleId);
-        debugPrint('💾 Veículo salvo: $vehicleId');
+        // Removed verbose vehicle save log
       } else {
         await prefs.remove(_selectedVehicleKey);
-        debugPrint('🗑️ Preferência de veículo removida');
+        // Removed verbose preference removal log
       }
     } catch (e) {
       debugPrint('❌ Erro ao salvar veículo selecionado: $e');
@@ -201,8 +198,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
   Widget build(BuildContext context) {
     return Consumer<VehiclesProvider>(
       builder: (context, vehiclesProvider, _) {
-        debugPrint(
-            '🔄 VehicleSelector rebuild - isLoading: ${vehiclesProvider.isLoading}, isInitialized: ${vehiclesProvider.isInitialized}, vehicles: ${vehiclesProvider.vehicles.length}');
+        // Removed verbose VehicleSelector rebuild log
 
         if (vehiclesProvider.isLoading) {
           return _buildLoadingState(context);
@@ -489,7 +485,8 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         '${vehicle.brand} ${vehicle.model}',

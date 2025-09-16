@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
@@ -28,9 +29,12 @@ class FitossanitariosDataLoader {
       // Carrega todos os arquivos JSON de fitossanitários
       for (int i = 0; i <= 2; i++) {
         try {
-          final String jsonString = await rootBundle.loadString(
-            'assets/database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json',
-          );
+          // Use path without 'assets/' prefix for web compatibility
+          final String assetPath = kIsWeb 
+              ? 'database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json'
+              : 'assets/database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json';
+          
+          final String jsonString = await rootBundle.loadString(assetPath);
 
           final dynamic decodedJson = json.decode(jsonString);
           final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];

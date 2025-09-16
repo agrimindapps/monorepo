@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/services/analytics_service.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
-import '../../../../shared/widgets/auth/enhanced_login_flow.dart';
 import '../controllers/login_controller.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_tabs_widget.dart';
@@ -380,13 +379,45 @@ class _LoginPageState extends State<LoginPage>
   void _handleAuthSuccess() {
     if (!mounted) return;
     
-    final controller = context.read<LoginController>();
+    final authProvider = context.read<AuthProvider>();
+    final router = GoRouter.of(context);
     
-    // Usar o fluxo de login melhorado com UX profissional
-    AuthFlowIntegration.handleAuthSuccess(
+    // Seguir padrão do app-plantis: mostrar loading simples se sync estiver ativo
+    if (authProvider.isSyncInProgress) {
+      _showSimpleSyncLoading(authProvider, router);
+    } else {
+      // Navegar imediatamente se não há sync em progresso
+      router.go('/vehicles');
+    }
+  }
+  
+  /// Mostra loading simples de sincronização que navega automaticamente - padrão app-plantis
+  void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
+    SimpleSyncLoading.show(
       context,
-      isSignUp: controller.isSignUpMode,
-      primaryColor: Theme.of(context).primaryColor,
+      message: authProvider.syncMessage,
     );
+    
+    // Navegar quando sync terminar
+    _navigateAfterSync(authProvider, router);
+  }
+  
+  /// Navega para veículos quando sync terminar - padrão app-plantis
+  void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
+    late StreamSubscription subscription;
+    
+    subscription = Stream.periodic(const Duration(milliseconds: 500))
+        .listen((_) {
+      if (!authProvider.isSyncInProgress) {
+        subscription.cancel();
+        
+        // Pequeno delay para garantir que o loading foi fechado
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            router.go('/vehicles');
+          }
+        });
+      }
+    });
   }
 }

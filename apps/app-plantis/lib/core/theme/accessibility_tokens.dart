@@ -232,9 +232,15 @@ extension AccessibilityExtension on Widget {
   }
 }
 
-/// Mixin para gerenciar focus nodes em StatefulWidgets
+/// Mixin para gerenciar focus nodes em StatefulWidgets com estabilidade de layout
 mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
   final Map<String, FocusNode> _focusNodes = {};
+  
+  // Layout stability tracking
+  bool _layoutStable = false;
+  int _layoutStabilityChecks = 0;
+  static const int _maxStabilityChecks = 3;
+  static const Duration _stabilityCheckDelay = Duration(milliseconds: 16);
 
   FocusNode getFocusNode(String key) {
     return _focusNodes.putIfAbsent(key, () => FocusNode(
@@ -245,16 +251,65 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
     ));
   }
 
+  /// Enhanced layout stability check before focus operations
+  Future<bool> _waitForLayoutStability() async {
+    if (_layoutStable) return true;
+    
+    _layoutStabilityChecks = 0;
+    
+    while (_layoutStabilityChecks < _maxStabilityChecks) {
+      await Future<void>.delayed(_stabilityCheckDelay);
+      
+      if (!mounted) return false;
+      
+      // Check if layout is complete by verifying RenderObject tree
+      final renderObject = context.findRenderObject();
+      if (renderObject != null && renderObject.attached && !renderObject.debugNeedsLayout) {
+        // Check if it's a RenderBox with size
+        if (renderObject is RenderBox && 
+            renderObject.hasSize &&
+            renderObject.size != Size.zero) {
+          _layoutStable = true;
+          return true;
+        }
+        // For non-RenderBox objects, assume stable if attached and laid out
+        else if (renderObject is! RenderBox) {
+          _layoutStable = true;
+          return true;
+        }
+      }
+      
+      _layoutStabilityChecks++;
+    }
+    
+    // Fallback: assume stable after max checks
+    _layoutStable = true;
+    return true;
+  }
+
+  /// Reset layout stability on window resize events
+  void _resetLayoutStability() {
+    _layoutStable = false;
+    _layoutStabilityChecks = 0;
+  }
+
   void requestFocus(String key) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Critical: Multiple mounted checks to prevent race conditions
-      if (mounted) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Critical: Wait for layout stability before focus operations
+      if (mounted && await _waitForLayoutStability()) {
         final node = _focusNodes[key];
         if (node != null && mounted && node.canRequestFocus) {
           try {
-            node.requestFocus();
+            // Additional check: ensure widget is still laid out
+            final renderObject = context.findRenderObject();
+            if (renderObject != null && 
+                renderObject.attached && 
+                !renderObject.debugNeedsLayout) {
+              node.requestFocus();
+            }
           } catch (e) {
             // Silently handle focus errors in web environment
+            debugPrint('Focus request failed for $key: $e');
           }
         }
       }
@@ -266,28 +321,77 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
       final node = _focusNodes[key];
       if (node != null && mounted && node.hasFocus) {
         try {
+          // Check layout before unfocus to prevent race conditions
+          final renderObject = context.findRenderObject();
+          if (renderObject == null || !renderObject.attached) {
+            return; // Skip unfocus if render object is not attached
+          }
           node.unfocus();
         } catch (e) {
           // Silently handle unfocus errors in web environment
+          debugPrint('Unfocus failed for $key: $e');
         }
       }
     }
   }
 
   void nextFocus(String currentKey, String nextKey) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Critical: Enhanced mounted checks for focus traversal
-      if (mounted) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Critical: Enhanced layout stability checks for focus traversal
+      if (mounted && await _waitForLayoutStability()) {
         final nextNode = _focusNodes[nextKey];
         if (nextNode != null && mounted && nextNode.canRequestFocus) {
           try {
-            nextNode.requestFocus();
+            // Verify layout state before focus traversal
+            final renderObject = context.findRenderObject();
+            if (renderObject != null && 
+                renderObject.attached && 
+                !renderObject.debugNeedsLayout) {
+              nextNode.requestFocus();
+            }
           } catch (e) {
             // Silently handle focus traversal errors in web environment
+            debugPrint('Focus traversal failed from $currentKey to $nextKey: $e');
           }
         }
       }
     });
+  }
+
+  /// Safe focus with retry mechanism for resize scenarios
+  void safeFocusWithRetry(String key, {int maxRetries = 2}) {
+    void attemptFocus(int attempt) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        
+        if (await _waitForLayoutStability()) {
+          final node = _focusNodes[key];
+          if (node != null && mounted && node.canRequestFocus) {
+            try {
+              final renderObject = context.findRenderObject();
+              if (renderObject != null && 
+                  renderObject.attached && 
+                  !renderObject.debugNeedsLayout) {
+                node.requestFocus();
+                return; // Success
+              }
+            } catch (e) {
+              debugPrint('Focus attempt $attempt failed for $key: $e');
+            }
+          }
+        }
+        
+        // Retry if we haven't exceeded max attempts
+        if (attempt < maxRetries && mounted) {
+          _resetLayoutStability();
+          Future.delayed(const Duration(milliseconds: 50), () {
+            if (mounted) attemptFocus(attempt + 1);
+          });
+        }
+      });
+    }
+    
+    attemptFocus(0);
   }
 
   @override
@@ -301,6 +405,7 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
         node.dispose();
       } catch (e) {
         // Silently handle disposal errors
+        debugPrint('Focus node disposal error: $e');
       }
     }
     _focusNodes.clear();

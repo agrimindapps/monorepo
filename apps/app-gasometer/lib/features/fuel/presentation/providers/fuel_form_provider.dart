@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/services/input_sanitizer.dart';
+import '../../../../core/services/receipt_image_service.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/fuel_constants.dart';
@@ -22,12 +24,20 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FuelFormatterService _formatter = FuelFormatterService();
   final FuelValidatorService _validator = FuelValidatorService();
+  final ReceiptImageService _receiptImageService;
+  final ImagePicker _imagePicker = ImagePicker();
   
   // Store context for accessing providers when needed
   BuildContext? _context;
   
   // For odometer validation
   double? _lastOdometerReading;
+
+  // Image management state
+  String? _receiptImagePath;
+  String? _receiptImageUrl;
+  bool _isUploadingImage = false;
+  String? _imageUploadError;
 
   // Controllers para campos de texto
   final TextEditingController litersController = TextEditingController();
@@ -49,8 +59,12 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   bool _isLoading = false;
   String? _lastError;
 
-  FuelFormProvider({String? initialVehicleId, String? userId}) 
-      : _formModel = FuelFormModel.initial(initialVehicleId ?? '', userId ?? '') {
+  FuelFormProvider({
+    String? initialVehicleId, 
+    String? userId,
+    required ReceiptImageService receiptImageService,
+  }) : _receiptImageService = receiptImageService,
+       _formModel = FuelFormModel.initial(initialVehicleId ?? '', userId ?? '') {
     _initializeControllers();
   }
 
@@ -62,9 +76,16 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   bool get isCalculating => _isCalculating;
   double? get lastOdometerReading => _lastOdometerReading;
   
+  // Image management getters
+  String? get receiptImagePath => _receiptImagePath;
+  String? get receiptImageUrl => _receiptImageUrl;
+  bool get hasReceiptImage => _receiptImagePath != null || _receiptImageUrl != null;
+  bool get isUploadingImage => _isUploadingImage;
+  String? get imageUploadError => _imageUploadError;
+  
   // IFormProvider implementation
   @override
-  bool get isLoading => _isLoading;
+  bool get isLoading => _isLoading || _isUploadingImage;
   
   @override
   String? get lastError => _lastError;
@@ -474,6 +495,7 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
     gasStationBrandController.clear();
     notesController.clear();
 
+    _clearImageState();
     _formModel = FuelFormModel.initial(_formModel.vehicleId, _formModel.userId);
     notifyListeners();
   }
@@ -481,6 +503,7 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   /// Reseta formulário para estado inicial
   void resetForm() {
     clearForm();
+    _clearImageState();
     _formModel = _formModel.copyWith(
       hasChanges: false,
       errors: const {},
@@ -501,6 +524,9 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
       // Atualizar os controllers com os valores do registro
       _updateTextControllers();
       
+      // Carregar imagem se existir
+      // Note: FuelRecordEntity pode precisar ser atualizada para incluir campos de imagem
+      
       notifyListeners();
     } catch (e) {
       _formModel = _formModel.copyWith(
@@ -509,5 +535,190 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
       );
       notifyListeners();
     }
+  }
+
+  // ===== IMAGE MANAGEMENT METHODS =====
+
+  /// Captura imagem usando a câmera
+  Future<void> captureReceiptImage() async {
+    try {
+      _imageUploadError = null;
+      notifyListeners();
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+
+      if (image != null) {
+        await _processReceiptImage(image.path);
+      }
+    } catch (e) {
+      _imageUploadError = 'Erro ao capturar imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Seleciona imagem da galeria
+  Future<void> selectReceiptImageFromGallery() async {
+    try {
+      _imageUploadError = null;
+      notifyListeners();
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+
+      if (image != null) {
+        await _processReceiptImage(image.path);
+      }
+    } catch (e) {
+      _imageUploadError = 'Erro ao selecionar imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Processa e faz upload da imagem do comprovante
+  Future<void> _processReceiptImage(String imagePath) async {
+    try {
+      _isUploadingImage = true;
+      _imageUploadError = null;
+      notifyListeners();
+
+      // Validar imagem
+      final isValid = await _receiptImageService.isValidImage(imagePath);
+      if (!isValid) {
+        throw Exception('Arquivo de imagem inválido');
+      }
+
+      // Verificar se precisa de compressão
+      final needsCompression = await _receiptImageService.needsCompression(imagePath);
+      
+      if (needsCompression) {
+        debugPrint('[FUEL FORM] Compressing image: $imagePath');
+      }
+
+      // Processar imagem (comprimir + upload se online)
+      final result = await _receiptImageService.processFuelReceiptImage(
+        userId: _formModel.userId,
+        fuelSupplyId: _generateTemporaryId(), // Will be replaced with actual ID on save
+        imagePath: imagePath,
+        compressImage: true,
+        uploadToFirebase: true, // Upload immediately if online
+      );
+
+      _receiptImagePath = result.localPath;
+      _receiptImageUrl = result.downloadUrl;
+      
+      // Atualizar modelo do formulário
+      _formModel = _formModel.copyWith(hasChanges: true);
+
+      debugPrint('[FUEL FORM] Image processed successfully');
+      debugPrint('[FUEL FORM] Local path: ${result.localPath}');
+      debugPrint('[FUEL FORM] Download URL: ${result.downloadUrl}');
+      debugPrint('[FUEL FORM] Was compressed: ${result.wasCompressed}');
+
+      if (result.wasCompressed && result.compressionStats.isNotEmpty) {
+        final stats = result.compressionStats;
+        debugPrint('[FUEL FORM] Compression saved: ${stats['spaceSavedPercent']}%');
+      }
+
+    } catch (e) {
+      _imageUploadError = 'Erro ao processar imagem: $e';
+      debugPrint('[FUEL FORM] Image processing error: $e');
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Remove imagem do comprovante
+  Future<void> removeReceiptImage() async {
+    try {
+      if (_receiptImagePath != null || _receiptImageUrl != null) {
+        await _receiptImageService.deleteReceiptImage(
+          localPath: _receiptImagePath,
+          downloadUrl: _receiptImageUrl,
+        );
+      }
+
+      _receiptImagePath = null;
+      _receiptImageUrl = null;
+      _imageUploadError = null;
+      _formModel = _formModel.copyWith(hasChanges: true);
+      
+      notifyListeners();
+    } catch (e) {
+      _imageUploadError = 'Erro ao remover imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Gera ID temporário para processar imagem antes do save
+  String _generateTemporaryId() {
+    return 'temp_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  /// Obtém estatísticas da imagem atual
+  Future<Map<String, dynamic>> getImageStats() async {
+    if (_receiptImagePath == null) return {};
+    
+    try {
+      final size = await _receiptImageService.getImageSize(_receiptImagePath!);
+      final dimensions = await _receiptImageService.getImageDimensions(_receiptImagePath!);
+      
+      return {
+        'size': size,
+        'dimensions': dimensions,
+        'hasRemoteUrl': _receiptImageUrl != null,
+        'isUploaded': _receiptImageUrl != null,
+      };
+    } catch (e) {
+      return {};
+    }
+  }
+
+  /// Sincroniza imagem local com Firebase (para casos offline)
+  Future<void> syncImageToFirebase(String actualFuelSupplyId) async {
+    if (_receiptImagePath == null || _receiptImageUrl != null) {
+      return; // Nada para sincronizar
+    }
+
+    try {
+      _isUploadingImage = true;
+      notifyListeners();
+
+      final result = await _receiptImageService.processFuelReceiptImage(
+        userId: _formModel.userId,
+        fuelSupplyId: actualFuelSupplyId,
+        imagePath: _receiptImagePath!,
+        compressImage: false, // Já foi comprimida
+        uploadToFirebase: true,
+      );
+
+      _receiptImageUrl = result.downloadUrl;
+      
+      debugPrint('[FUEL FORM] Image synced to Firebase: $result.downloadUrl');
+      
+    } catch (e) {
+      debugPrint('[FUEL FORM] Failed to sync image: $e');
+      // Não exibir erro para usuário, continua com imagem local
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Limpa estado de imagem
+  void _clearImageState() {
+    _receiptImagePath = null;
+    _receiptImageUrl = null;
+    _imageUploadError = null;
+    _isUploadingImage = false;
   }
 }

@@ -11,6 +11,7 @@ import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
+import '../../../../core/widgets/layout_stability_widget.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';

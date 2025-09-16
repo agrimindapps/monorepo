@@ -15,6 +15,7 @@ import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/settings/presentation/providers/profile_provider.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 // navigation_service.dart moved to core package - available via 'package:core/core.dart'
@@ -217,6 +218,10 @@ class ReceitaAgroApp extends StatelessWidget {
         // Profile Provider for user profile management
         ChangeNotifierProvider(
           create: (_) => di.sl<ProfileProvider>(),
+        ),
+        // Settings Provider for device management and settings
+        ChangeNotifierProvider(
+          create: (_) => di.sl<SettingsProvider>(),
         ),
       ],
       child: Consumer<ThemeProvider>(

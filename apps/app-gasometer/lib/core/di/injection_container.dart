@@ -22,10 +22,7 @@ import '../services/analytics_service.dart';
 import '../services/avatar_service.dart';
 import '../data/models/base_sync_model.dart';
 
-// Auth imports
-import '../../features/auth/data/datasources/auth_local_data_source.dart';
-import '../../features/auth/data/datasources/auth_remote_data_source.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
+// Auth imports (keeping only needed ones)
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
 import '../../features/auth/domain/usecases/send_password_reset.dart';
@@ -66,9 +63,11 @@ import '../../features/maintenance/domain/usecases/get_upcoming_maintenance_reco
 import '../../features/maintenance/domain/usecases/update_maintenance_record.dart';
 import '../../features/maintenance/presentation/providers/maintenance_provider.dart';
 // Odometer imports
+import '../../features/odometer/data/datasources/odometer_remote_data_source.dart';
 import '../../features/odometer/data/repositories/odometer_repository.dart';
 import '../../features/odometer/presentation/providers/odometer_provider.dart';
 // Expenses imports
+import '../../features/expenses/data/datasources/expenses_remote_data_source.dart';
 import '../../features/expenses/data/repositories/expenses_repository.dart';
 import '../../features/expenses/presentation/providers/expenses_provider.dart';
 // Premium imports
@@ -116,6 +115,9 @@ import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
 import '../services/local_data_service.dart';
 import '../services/platform_service.dart';
+import '../services/image_compression_service.dart';
+import '../services/firebase_storage_service.dart';
+import '../services/receipt_image_service.dart';
 import '../sync/presentation/providers/sync_status_provider.dart';
 
 final sl = GetIt.instance;
@@ -139,6 +141,14 @@ Future<void> initializeDependencies() async {
   // LocalDataService is now registered by injectable (@singleton annotation)
   // AnalyticsService will be registered by injectable (@singleton annotation)
   sl.registerLazySingleton<AvatarService>(() => AvatarService());
+  
+  // Image Services
+  sl.registerLazySingleton<ImageCompressionService>(() => ImageCompressionService());
+  sl.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService());
+  sl.registerLazySingleton<ReceiptImageService>(() => ReceiptImageService(
+    sl<ImageCompressionService>(),
+    sl<FirebaseStorageService>(),
+  ));
   
   // Logging Service - requires AnalyticsService and LogRepository (both now injectable)
   // LoggingService is now registered by injectable (@LazySingleton annotation)
@@ -201,9 +211,14 @@ Future<void> initializeDependencies() async {
   // MaintenanceRepository - registered by injectable
   // PremiumRepository - registered by injectable
 
-  // Odometer Repository
+  // Odometer Repository - now requires remote data source, connectivity and auth
   sl.registerLazySingleton<OdometerRepository>(() {
-    final repository = OdometerRepository(sl<LoggingService>());
+    final repository = OdometerRepository(
+      sl<LoggingService>(),
+      sl<OdometerRemoteDataSource>(),
+      sl<Connectivity>(),
+      sl<AuthRepository>()
+    );
     // Initialize asynchronously (not blocking registration)
     repository.initialize().catchError((Object e) {
       debugPrint('⚠️ OdometerRepository initialization failed: $e');
@@ -211,9 +226,14 @@ Future<void> initializeDependencies() async {
     return repository;
   });
 
-  // Expenses Repository
+  // Expenses Repository - now requires remote data source, connectivity and auth
   sl.registerLazySingleton<ExpensesRepository>(() {
-    final repository = ExpensesRepository(sl<LoggingService>());
+    final repository = ExpensesRepository(
+      sl<LoggingService>(),
+      sl<ExpensesRemoteDataSource>(),
+      sl<Connectivity>(),
+      sl<AuthRepository>()
+    );
     // Initialize asynchronously (not blocking registration)
     repository.initialize().catchError((Object e) {
       debugPrint('⚠️ ExpensesRepository initialization failed: $e');
@@ -234,6 +254,7 @@ Future<void> initializeDependencies() async {
   // VehiclesProvider - registered by injectable (@factory)
   // AuthProvider - registered by injectable (@factory) 
   // FuelProvider - registered by injectable (@factory)
+  // Note: FuelFormProvider needs special registration with ReceiptImageService
   // ReportsProvider - registered by injectable (@factory)
   // MaintenanceProvider - registered by injectable (@factory)
   // PremiumProvider - registered by injectable (@factory)

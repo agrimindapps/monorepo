@@ -47,36 +47,21 @@ class RouteGuard {
       return null;
     }
 
-    // Debug logging for route decisions
-    if (kDebugMode) {
-      debugPrint('🛡️ RouteGuard: Avaliando rota $currentLocation - Autenticado: $isAuthenticated, Tipo: $routeType');
-    }
+    // Removed verbose debug logging - only critical errors are logged
 
     // Aplicar regras de redirecionamento baseadas no tipo de rota
     switch (routeType) {
       case RouteType.authProtected:
-        final redirect = _handleAuthProtectedRoute(isAuthenticated, currentLocation);
-        if (kDebugMode && redirect != null) {
-          debugPrint('🛡️ RouteGuard: Redirecionando rota protegida $currentLocation -> $redirect');
-        }
-        return redirect;
+        return _handleAuthProtectedRoute(isAuthenticated, currentLocation);
       
       case RouteType.publicOnly:
-        final redirect = _handlePublicOnlyRoute(isAuthenticated);
-        if (kDebugMode && redirect != null) {
-          debugPrint('🛡️ RouteGuard: Redirecionando rota pública $currentLocation -> $redirect');
-        }
-        return redirect;
+        return _handlePublicOnlyRoute(isAuthenticated);
       
       case RouteType.alwaysPublic:
         return null; // Sempre permitir acesso
       
       case RouteType.appContent:
-        final redirect = _handleAppContentRoute(isAuthenticated, currentLocation);
-        if (kDebugMode && redirect != null) {
-          debugPrint('🛡️ RouteGuard: Redirecionando rota de app $currentLocation -> $redirect');
-        }
-        return redirect;
+        return _handleAppContentRoute(isAuthenticated, currentLocation);
     }
   }
 

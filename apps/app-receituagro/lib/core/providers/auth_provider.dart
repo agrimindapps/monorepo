@@ -4,6 +4,8 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
+import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../di/injection_container.dart' as di;
 import '../models/user_session_data.dart';
 import '../services/device_identity_service.dart';
 import '../services/sync_orchestrator.dart';
@@ -156,11 +158,47 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
 
   Future<void> _handleDeviceLogin(UserEntity user) async {
     try {
-      // TODO: Implement device limit validation
-      // This will be implemented in Sprint 4
-      _analytics.trackDeviceAdded('mobile'); // TODO: Get actual platform from device service
+      if (kDebugMode) print('🔄 Auth Provider: Handling device login for user ${user.id}');
+      
+      // Get current device info
+      final deviceInfo = await _deviceService.getDeviceInfo();
+      
+      // Convert DeviceInfo to DeviceEntity for validation
+      final deviceEntity = DeviceEntity(
+        id: deviceInfo.uuid,
+        uuid: deviceInfo.uuid,
+        name: deviceInfo.name,
+        model: deviceInfo.model,
+        platform: deviceInfo.platform,
+        systemVersion: deviceInfo.systemVersion,
+        appVersion: deviceInfo.appVersion,
+        buildNumber: deviceInfo.buildNumber,
+        isPhysicalDevice: deviceInfo.isPhysicalDevice,
+        manufacturer: deviceInfo.manufacturer,
+        firstLoginAt: deviceInfo.firstLoginAt ?? DateTime.now(),
+        lastActiveAt: DateTime.now(),
+        isActive: true,
+      );
+      
+      // Import SettingsProvider to register device
+      final settingsProvider = di.sl<SettingsProvider>();
+      await settingsProvider.initialize(user.id);
+      
+      // Try to add/validate device automatically
+      final success = await settingsProvider.addDevice(deviceEntity);
+      
+      if (success) {
+        if (kDebugMode) print('✅ Auth Provider: Device ${deviceInfo.name} registered successfully');
+        _analytics.trackDeviceAdded(deviceInfo.platform);
+      } else {
+        if (kDebugMode) print('⚠️ Auth Provider: Device registration failed or device already exists');
+        // Even if registration fails (e.g., device already exists), still track for analytics
+        _analytics.trackDeviceAdded(deviceInfo.platform);
+      }
     } catch (e) {
       if (kDebugMode) print('❌ Auth Provider: Device login handling error - $e');
+      // Log error but don't block login process
+      _analytics.trackError('device_login_error', e.toString());
     }
   }
 

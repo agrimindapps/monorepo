@@ -15,8 +15,8 @@ class FirebaseDeviceService {
   FirebaseDeviceService({
     FirebaseFunctions? functions,
     FirebaseFirestore? firestore,
-  })  : _functions = functions ?? FirebaseFunctions.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance;
+  }) : _functions = functions ?? FirebaseFunctions.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Valida um dispositivo via Cloud Function
   Future<Either<Failure, DeviceEntity>> validateDevice({
@@ -29,29 +29,31 @@ class FirebaseDeviceService {
       }
 
       final callable = _functions.httpsCallable('validateDevice');
-      
+
       final result = await callable.call<Map<String, dynamic>>({
         'userId': userId,
         'device': device.toJson(),
       });
 
       final data = result.data;
-      
+
       if (data['success'] == true) {
         if (kDebugMode) {
           debugPrint('✅ FirebaseDevice: Device validation successful');
         }
-        
+
         final validatedDevice = DeviceEntity.fromJson(
           data['device'] as Map<String, dynamic>,
         );
-        
+
         return Right(validatedDevice);
       } else {
         if (kDebugMode) {
-          debugPrint('❌ FirebaseDevice: Device validation failed - ${data['error']}');
+          debugPrint(
+            '❌ FirebaseDevice: Device validation failed - ${data['error']}',
+          );
         }
-        
+
         return Left(
           ValidationFailure(
             data['error'] as String? ?? 'Falha na validação do dispositivo',
@@ -62,9 +64,11 @@ class FirebaseDeviceService {
       }
     } on FirebaseFunctionsException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ FirebaseDevice: Functions exception - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ FirebaseDevice: Functions exception - ${e.code}: ${e.message}',
+        );
       }
-      
+
       return Left(
         FirebaseFailure(
           _mapFirebaseFunctionsError(e),
@@ -76,7 +80,7 @@ class FirebaseDeviceService {
       if (kDebugMode) {
         debugPrint('❌ FirebaseDevice: Unexpected error - $e');
       }
-      
+
       return Left(
         ServerFailure(
           'Erro ao validar dispositivo via Firebase',
@@ -98,14 +102,14 @@ class FirebaseDeviceService {
       }
 
       final callable = _functions.httpsCallable('revokeDevice');
-      
+
       final result = await callable.call<Map<String, dynamic>>({
         'userId': userId,
         'deviceUuid': deviceUuid,
       });
 
       final data = result.data;
-      
+
       if (data['success'] == true) {
         if (kDebugMode) {
           debugPrint('✅ FirebaseDevice: Device revocation successful');
@@ -113,9 +117,11 @@ class FirebaseDeviceService {
         return const Right(null);
       } else {
         if (kDebugMode) {
-          debugPrint('❌ FirebaseDevice: Device revocation failed - ${data['error']}');
+          debugPrint(
+            '❌ FirebaseDevice: Device revocation failed - ${data['error']}',
+          );
         }
-        
+
         return Left(
           ServerFailure(
             data['error'] as String? ?? 'Falha ao revogar dispositivo',
@@ -126,9 +132,11 @@ class FirebaseDeviceService {
       }
     } on FirebaseFunctionsException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ FirebaseDevice: Functions exception - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ FirebaseDevice: Functions exception - ${e.code}: ${e.message}',
+        );
       }
-      
+
       return Left(
         FirebaseFailure(
           _mapFirebaseFunctionsError(e),
@@ -140,7 +148,7 @@ class FirebaseDeviceService {
       if (kDebugMode) {
         debugPrint('❌ FirebaseDevice: Unexpected error - $e');
       }
-      
+
       return Left(
         ServerFailure(
           'Erro ao revogar dispositivo via Firebase',
@@ -152,36 +160,46 @@ class FirebaseDeviceService {
   }
 
   /// Obtém dispositivos diretamente do Firestore
-  Future<Either<Failure, List<DeviceEntity>>> getDevicesFromFirestore(String userId) async {
+  Future<Either<Failure, List<DeviceEntity>>> getDevicesFromFirestore(
+    String userId,
+  ) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 FirebaseDevice: Getting devices from Firestore for user $userId');
+        debugPrint(
+          '🔄 FirebaseDevice: Getting devices from Firestore for user $userId',
+        );
       }
 
-      final querySnapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('devices')
-          .where('isActive', isEqualTo: true)
-          .orderBy('lastActiveAt', descending: true)
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('devices')
+              .where('isActive', isEqualTo: true)
+              .orderBy('lastActiveAt', descending: true)
+              .get();
 
-      final devices = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id; // Adiciona o ID do documento
-        return DeviceEntity.fromJson(data);
-      }).toList();
+      final devices =
+          querySnapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id; // Adiciona o ID do documento
+            return DeviceEntity.fromJson(data);
+          }).toList();
 
       if (kDebugMode) {
-        debugPrint('✅ FirebaseDevice: Found ${devices.length} devices in Firestore');
+        debugPrint(
+          '✅ FirebaseDevice: Found ${devices.length} devices in Firestore',
+        );
       }
 
       return Right(devices);
     } on FirebaseException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ FirebaseDevice: Firestore exception - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ FirebaseDevice: Firestore exception - ${e.code}: ${e.message}',
+        );
       }
-      
+
       return Left(
         FirebaseFailure(
           e.message ?? 'Erro ao acessar Firestore',
@@ -193,7 +211,7 @@ class FirebaseDeviceService {
       if (kDebugMode) {
         debugPrint('❌ FirebaseDevice: Unexpected error - $e');
       }
-      
+
       return Left(
         ServerFailure(
           'Erro ao buscar dispositivos no Firestore',
@@ -211,16 +229,19 @@ class FirebaseDeviceService {
   }) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 FirebaseDevice: Updating last activity for device $deviceUuid');
+        debugPrint(
+          '🔄 FirebaseDevice: Updating last activity for device $deviceUuid',
+        );
       }
 
-      final deviceQuery = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('devices')
-          .where('uuid', isEqualTo: deviceUuid)
-          .limit(1)
-          .get();
+      final deviceQuery =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('devices')
+              .where('uuid', isEqualTo: deviceUuid)
+              .limit(1)
+              .get();
 
       if (deviceQuery.docs.isEmpty) {
         return const Left(
@@ -233,7 +254,7 @@ class FirebaseDeviceService {
 
       final deviceDoc = deviceQuery.docs.first;
       final now = DateTime.now();
-      
+
       await deviceDoc.reference.update({
         'lastActiveAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
@@ -243,7 +264,7 @@ class FirebaseDeviceService {
       final updatedDoc = await deviceDoc.reference.get();
       final data = updatedDoc.data()!;
       data['id'] = updatedDoc.id;
-      
+
       final updatedDevice = DeviceEntity.fromJson(data);
 
       if (kDebugMode) {
@@ -253,9 +274,11 @@ class FirebaseDeviceService {
       return Right(updatedDevice);
     } on FirebaseException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ FirebaseDevice: Firestore exception - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ FirebaseDevice: Firestore exception - ${e.code}: ${e.message}',
+        );
       }
-      
+
       return Left(
         FirebaseFailure(
           e.message ?? 'Erro ao atualizar atividade no Firestore',
@@ -267,7 +290,7 @@ class FirebaseDeviceService {
       if (kDebugMode) {
         debugPrint('❌ FirebaseDevice: Unexpected error - $e');
       }
-      
+
       return Left(
         ServerFailure(
           'Erro ao atualizar atividade do dispositivo',
@@ -281,13 +304,14 @@ class FirebaseDeviceService {
   /// Obtém contagem de dispositivos ativos
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     try {
-      final querySnapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('devices')
-          .where('isActive', isEqualTo: true)
-          .count()
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('devices')
+              .where('isActive', isEqualTo: true)
+              .count()
+              .get();
 
       return Right(querySnapshot.count ?? 0);
     } on FirebaseException catch (e) {
@@ -361,10 +385,7 @@ class FirebaseOperationResult<T> {
 
   /// Factory para criar resultado de sucesso
   factory FirebaseOperationResult.success(T data) {
-    return FirebaseOperationResult(
-      success: true,
-      data: data,
-    );
+    return FirebaseOperationResult(success: true, data: data);
   }
 
   /// Factory para criar resultado de erro
@@ -404,5 +425,6 @@ class FirebaseOperationResult<T> {
   }
 
   @override
-  String toString() => 'FirebaseOperationResult(success: $success, error: $error)';
+  String toString() =>
+      'FirebaseOperationResult(success: $success, error: $error)';
 }

@@ -43,6 +43,8 @@ class ExpenseModel extends BaseSyncModel {
   final String? notes;
   @HiveField(19)
   final Map<String, dynamic> metadata;
+  @HiveField(20)
+  final String? receiptImageUrl;
 
   ExpenseModel({
     required this.id,
@@ -64,6 +66,7 @@ class ExpenseModel extends BaseSyncModel {
     this.location,
     this.notes,
     this.metadata = const {},
+    this.receiptImageUrl,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -93,6 +96,7 @@ class ExpenseModel extends BaseSyncModel {
     String? location,
     String? notes,
     Map<String, dynamic> metadata = const {},
+    String? receiptImageUrl,
   }) {
     final now = DateTime.now();
     final expenseId = id ?? now.millisecondsSinceEpoch.toString();
@@ -113,6 +117,7 @@ class ExpenseModel extends BaseSyncModel {
       location: location,
       notes: notes,
       metadata: metadata,
+      receiptImageUrl: receiptImageUrl,
     );
   }
 
@@ -140,6 +145,7 @@ class ExpenseModel extends BaseSyncModel {
       location: map['location']?.toString(),
       notes: map['notes']?.toString(),
       metadata: Map<String, dynamic>.from((map['metadata'] as Map<dynamic, dynamic>?) ?? {}),
+      receiptImageUrl: map['receiptImageUrl']?.toString(),
     );
   }
 
@@ -157,6 +163,7 @@ class ExpenseModel extends BaseSyncModel {
       'location': location,
       'notes': notes,
       'metadata': metadata,
+      'receiptImageUrl': receiptImageUrl,
     });
   }
 
@@ -176,6 +183,7 @@ class ExpenseModel extends BaseSyncModel {
       'location': location,
       'notes': notes,
       'metadata': metadata,
+      'receipt_image_url': receiptImageUrl,
     };
   }
 
@@ -205,6 +213,7 @@ class ExpenseModel extends BaseSyncModel {
       location: map['location']?.toString(),
       notes: map['notes']?.toString(),
       metadata: Map<String, dynamic>.from((map['metadata'] as Map<dynamic, dynamic>?) ?? {}),
+      receiptImageUrl: map['receipt_image_url']?.toString(),
     );
   }
 
@@ -244,6 +253,7 @@ class ExpenseModel extends BaseSyncModel {
     String? location,
     String? notes,
     Map<String, dynamic>? metadata,
+    String? receiptImageUrl,
   }) {
     return ExpenseModel(
       id: id ?? this.id,
@@ -265,6 +275,7 @@ class ExpenseModel extends BaseSyncModel {
       location: location ?? this.location,
       notes: notes ?? this.notes,
       metadata: metadata ?? this.metadata,
+      receiptImageUrl: receiptImageUrl ?? this.receiptImageUrl,
     );
   }
 

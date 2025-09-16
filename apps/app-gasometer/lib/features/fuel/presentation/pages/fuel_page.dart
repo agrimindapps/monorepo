@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -524,7 +525,9 @@ class _FuelPageState extends State<FuelPage> {
         builder: (dialogContext) => MultiProvider(
           providers: [
             // ✅ Create FuelFormProvider only when needed, will be disposed automatically
-            ChangeNotifierProvider(create: (_) => FuelFormProvider()),
+            ChangeNotifierProvider(create: (_) => FuelFormProvider(
+              receiptImageService: context.read<ReceiptImageService>(),
+            )),
             // ✅ Use .value to avoid recreating existing providers
             ChangeNotifierProvider<VehiclesProvider>.value(value: _vehiclesProvider),
             ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
@@ -573,7 +576,9 @@ class _FuelPageState extends State<FuelPage> {
       builder: (dialogContext) => MultiProvider(
         providers: [
           // ✅ Create FuelFormProvider only when needed, will be disposed automatically
-          ChangeNotifierProvider(create: (_) => FuelFormProvider()),
+          ChangeNotifierProvider(create: (_) => FuelFormProvider(
+            receiptImageService: context.read<ReceiptImageService>(),
+          )),
           // ✅ Use .value to avoid recreating existing providers
           ChangeNotifierProvider<VehiclesProvider>.value(value: _vehiclesProvider),
           ChangeNotifierProvider<AuthProvider>.value(value: authProvider),

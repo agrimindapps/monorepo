@@ -105,23 +105,15 @@ class ErrorLogger {
     _logWithSeverity(ErrorSeverity.info, logData);
   }
   
-  /// Logs provider state changes for debugging
+  /// Logs provider state changes for debugging - DISABLED for cleaner console
   void logProviderStateChange(
     String providerName,
     String stateName,
     Map<String, dynamic>? stateData,
   ) {
-    if (!kDebugMode) return;
-    
-    final logData = {
-      'type': 'STATE_CHANGE',
-      'provider': providerName,
-      'state': stateName,
-      'data': stateData,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-    
-    debugPrint('📊 [STATE] ${_formatLogData(logData)}');
+    // Disabled verbose state change logging to reduce console noise
+    // Only enable for specific debugging scenarios when needed
+    return;
   }
   
   /// Logs retry attempts

@@ -5,9 +5,11 @@ library responsive_sidebar;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/responsive_constants.dart';
-import '../../core/theme/gasometer_colors.dart';
+import '../../core/theme/design_tokens.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
 class ResponsiveSidebar extends StatelessWidget {
@@ -170,17 +172,6 @@ class _SidebarNavigationItems extends StatelessWidget {
           ),
         ],
         
-        // Settings section - moved to top priority
-        _SidebarNavigationItem(
-          icon: Icons.settings_outlined,
-          activeIcon: Icons.settings,
-          label: 'Configurações',
-          route: '/settings',
-          isActive: currentLocation.startsWith('/settings'),
-          isCollapsed: isCollapsed,
-        ),
-        
-        const SizedBox(height: 32),
         
         // Main navigation items
         _SidebarNavigationItem(
@@ -344,7 +335,7 @@ class _SidebarNavigationItemState extends State<_SidebarNavigationItem> {
   }
 }
 
-/// Simple footer with minimal user information
+/// User and settings section grouped together
 class _SidebarFooter extends StatelessWidget {
   final bool isCollapsed;
   
@@ -352,6 +343,8 @@ class _SidebarFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentLocation = GoRouterState.of(context).uri.toString();
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -362,71 +355,272 @@ class _SidebarFooter extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person_outline,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
+          // Settings section
+          _SidebarNavigationItem(
+            icon: Icons.settings_outlined,
+            activeIcon: Icons.settings,
+            label: 'Configurações',
+            route: '/settings',
+            isActive: currentLocation.startsWith('/settings'),
+            isCollapsed: isCollapsed,
           ),
-          if (!isCollapsed) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Usuário',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+          
+          const SizedBox(height: 12),
+          
+          // User section
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_outline,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: () => _showUserMenu(context),
-              icon: Icon(
-                Icons.more_horiz,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-                size: 20,
-              ),
-              tooltip: 'Menu do usuário',
-            ),
-          ],
+              if (!isCollapsed) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Usuário',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w400,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => _showUserMenu(context),
+                  icon: Icon(
+                    Icons.more_horiz,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                    size: 20,
+                  ),
+                  tooltip: 'Menu do usuário',
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
   
   void _showUserMenu(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+    final isAnonymous = authProvider.isAnonymous;
+    
     showMenu(
       context: context,
       position: const RelativeRect.fromLTRB(0, 0, 0, 80),
       items: [
-        PopupMenuItem(
+        PopupMenuItem<void>(
           child: const ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text('Configurações'),
-            dense: true,
-          ),
-          onTap: () => context.go('/settings'),
-        ),
-        PopupMenuItem(
-          child: const ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Sair'),
+            leading: Icon(Icons.person_outlined),
+            title: Text('Perfil'),
             dense: true,
           ),
           onTap: () {
-            // Handle logout
+            // Handle profile navigation
           },
         ),
+        // Only show logout for non-anonymous users
+        if (!isAnonymous)
+          PopupMenuItem<void>(
+            child: const ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Sair'),
+              dense: true,
+            ),
+            onTap: () {
+              _handleLogout(context, authProvider);
+            },
+          ),
       ],
+    );
+  }
+
+  /// Handle logout with enhanced dialog
+  Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildEnhancedLogoutDialog(context),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await authProvider.logoutWithLoadingDialog(context);
+      if (context.mounted && authProvider.errorMessage != null) {
+        _showSnackBar(context, authProvider.errorMessage!);
+      } else if (context.mounted) {
+        _showSnackBar(context, 'Logout realizado com sucesso');
+      }
+    }
+  }
+
+  /// Builds an enhanced logout dialog with detailed information
+  Widget _buildEnhancedLogoutDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+      ),
+      contentPadding: const EdgeInsets.all(24),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Warning icon
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.logout,
+              size: 32,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Title
+          Text(
+            'Sair da Conta',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Detailed explanation
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusSm),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ao sair da sua conta:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                _buildLogoutInfoItem(
+                  context,
+                  icon: Icons.delete_sweep,
+                  text: 'Todos os dados serão removidos deste dispositivo',
+                ),
+                const SizedBox(height: 8),
+                
+                _buildLogoutInfoItem(
+                  context,
+                  icon: Icons.link_off,
+                  text: 'O dispositivo será desconectado da sua conta',
+                ),
+                const SizedBox(height: 8),
+                
+                _buildLogoutInfoItem(
+                  context,
+                  icon: Icons.login,
+                  text: 'Você pode fazer login novamente a qualquer momento',
+                  isPositive: true,
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('Cancelar'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('Sair'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds individual info items for the logout dialog
+  Widget _buildLogoutInfoItem(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    bool isPositive = false,
+  }) {
+    final color = isPositive 
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7);
+        
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: color,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13,
+              color: color,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
     );
   }
 }

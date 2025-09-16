@@ -1,36 +1,28 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
+import '../../../features/auth/presentation/providers/auth_provider.dart';
 
-/// Loading simples para sincronização - versão otimizada seguindo padrão app-plantis
+/// Loading simples para sincronização que aparece e some automaticamente - padrão app-plantis
 class SimpleSyncLoading extends StatefulWidget {
   final String message;
-  final Duration? autoHideDuration;
   
   const SimpleSyncLoading({
     super.key,
     this.message = 'Sincronizando dados automotivos...',
-    this.autoHideDuration,
   });
 
-  @override
-  State<SimpleSyncLoading> createState() => _SimpleSyncLoadingState();
-
-  /// Mostra loading simples que desaparece automaticamente
-  static void show(
-    BuildContext context, {
-    String? message,
-    Duration? autoHideDuration = const Duration(seconds: 3),
-  }) {
+  /// Mostra loading simples que desaparece automaticamente quando sync termina
+  static void show(BuildContext context, {String? message}) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black26,
       builder: (context) => SimpleSyncLoading(
         message: message ?? 'Sincronizando dados automotivos...',
-        autoHideDuration: autoHideDuration,
       ),
     );
   }
@@ -41,31 +33,58 @@ class SimpleSyncLoading extends StatefulWidget {
       Navigator.of(context).pop();
     }
   }
+
+  @override
+  State<SimpleSyncLoading> createState() => _SimpleSyncLoadingState();
 }
 
 class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
-  Timer? _autoHideTimer;
+  StreamSubscription<void>? _syncSubscription;
   String _currentMessage = '';
 
   @override
   void initState() {
     super.initState();
     _currentMessage = widget.message;
-    
-    // Auto-hide após duração especificada (padrão app-plantis)
-    if (widget.autoHideDuration != null) {
-      _autoHideTimer = Timer(widget.autoHideDuration!, () {
-        if (mounted && Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-        }
-      });
-    }
+    _startListeningToSync();
   }
 
   @override
   void dispose() {
-    _autoHideTimer?.cancel();
+    _syncSubscription?.cancel();
     super.dispose();
+  }
+
+  /// Monitora automaticamente o estado da sincronização
+  void _startListeningToSync() {
+    final authProvider = context.read<AuthProvider>();
+    
+    // Verificar periodicamente se a sincronização terminou
+    _syncSubscription = Stream.periodic(const Duration(milliseconds: 500))
+        .listen((_) {
+      if (!mounted) return;
+      
+      // Atualizar mensagem se mudou
+      if (_currentMessage != authProvider.syncMessage) {
+        setState(() {
+          _currentMessage = authProvider.syncMessage;
+        });
+      }
+      
+      // Fechar automaticamente quando sincronização termina
+      if (!authProvider.isSyncInProgress) {
+        _autoClose();
+      }
+    });
+  }
+
+  /// Fecha automaticamente o loading
+  void _autoClose() {
+    _syncSubscription?.cancel();
+    
+    if (mounted && Navigator.canPop(context)) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override

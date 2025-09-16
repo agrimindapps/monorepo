@@ -9,6 +9,9 @@ import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
 import '../constants/settings_design_tokens.dart';
 import '../presentation/providers/profile_provider.dart';
+import '../presentation/providers/settings_provider.dart';
+import '../widgets/dialogs/device_management_dialog.dart';
+import '../widgets/dialogs/logout_confirmation_dialog.dart';
 import '../widgets/sections/sync_data_section.dart';
 
 /// Página de perfil do usuário
@@ -23,11 +26,34 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _nameController;
+  bool _settingsInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Initialize SettingsProvider once when authenticated
+    final authProvider = context.read<ReceitaAgroAuthProvider>();
+    final settingsProvider = context.read<SettingsProvider>();
+    
+    if (!_settingsInitialized && 
+        authProvider.isAuthenticated && 
+        !authProvider.isAnonymous &&
+        authProvider.currentUser?.id != null) {
+      
+      _settingsInitialized = true;
+      
+      // Initialize settings provider with user ID
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        settingsProvider.initialize(authProvider.currentUser!.id);
+      });
+    }
   }
 
   @override
@@ -40,8 +66,8 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Consumer<ReceitaAgroAuthProvider>(
-      builder: (context, authProvider, child) {
+    return Consumer2<ReceitaAgroAuthProvider, SettingsProvider>(
+      builder: (context, authProvider, settingsProvider, child) {
         final isAuthenticated = authProvider.isAuthenticated && !authProvider.isAnonymous;
         final user = authProvider.currentUser;
         
@@ -92,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             // Seção de Opções
                             if (isAuthenticated) ...[
                               // Opções para usuários logados
-                              _buildAuthenticatedOptions(context, authProvider),
+                              _buildAuthenticatedOptions(context, authProvider, settingsProvider),
                             ] else ...[
                               // Opções para visitantes
                               _buildGuestOptions(context, authProvider),
@@ -227,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Opções para usuários autenticados
-  Widget _buildAuthenticatedOptions(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildAuthenticatedOptions(BuildContext context, ReceitaAgroAuthProvider authProvider, SettingsProvider settingsProvider) {
     return Column(
       children: [
         _buildOptionCard(
@@ -235,7 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: Icons.devices,
           title: 'Gerenciar Dispositivos',
           subtitle: 'Controlar dispositivos conectados',
-          onTap: () => _showDeviceManagement(context),
+          onTap: () => _showDeviceManagement(context, settingsProvider),
         ),
         const SizedBox(height: 12),
         _buildOptionCard(
@@ -515,85 +541,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Mostrar gerenciamento de dispositivos
-  void _showDeviceManagement(BuildContext context) {
+  void _showDeviceManagement(BuildContext context, SettingsProvider settingsProvider) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(
-              Icons.devices,
-              color: SettingsDesignTokens.primaryColor,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            const Text('Gerenciar Dispositivos'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Dispositivos conectados à sua conta:',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: SettingsDesignTokens.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildDeviceItem('iPhone 16', 'Este dispositivo • Ativo agora', true),
-            _buildDeviceItem('iPad Pro', 'Última vez: há 2 dias', false),
-            _buildDeviceItem('MacBook Air', 'Última vez: há 1 semana', false),
-            const SizedBox(height: 16),
-            const Text(
-              '💡 Toque em um dispositivo para ver opções como revogar acesso ou renomear.',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
+      builder: (context) => DeviceManagementDialog(provider: settingsProvider),
     );
   }
 
-  /// Item de dispositivo
-  Widget _buildDeviceItem(String name, String status, bool isCurrent) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(
-            Icons.smartphone,
-            color: isCurrent ? Colors.green : Colors.grey,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text(status, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
-          ),
-          if (!isCurrent)
-            TextButton(
-              onPressed: () {},
-              child: const Text('Remover', style: TextStyle(color: Colors.red)),
-            ),
-        ],
-      ),
-    );
-  }
 
   /// Mostrar confirmação de exclusão de conta
   void _showDeleteAccountConfirmation(BuildContext context, ReceitaAgroAuthProvider authProvider) {
@@ -630,35 +584,25 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Realizar logout
-  void _performLogout(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair da Conta'),
-        content: const Text('Tem certeza que deseja sair da sua conta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await authProvider.signOut();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Logout realizado com sucesso!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _performLogout(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
+    final shouldLogout = await LogoutConfirmationDialog.show(context);
+    
+    if (shouldLogout == true) {
+      try {
+        await authProvider.signOut();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SettingsDesignTokens.getSuccessSnackbar('Logout realizado com sucesso!'),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SettingsDesignTokens.getErrorSnackbar('Erro ao sair da conta: $e'),
+          );
+        }
+      }
+    }
   }
 
   /// Navegar para a página de login elegante

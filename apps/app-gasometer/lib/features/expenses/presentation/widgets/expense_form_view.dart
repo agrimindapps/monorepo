@@ -28,10 +28,10 @@ class ExpenseFormView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Seção: Informações Básicas
+              // 1ª Seção: Informações da Despesa (O QUE foi gasto e QUANDO)
               _buildSectionWithoutPadding(
-                title: ExpenseConstants.basicInfoSectionTitle,
-                icon: Icons.info_outline,
+                title: 'Informações da Despesa',
+                icon: Icons.shopping_cart,
                 content: Column(
                   children: [
                     // Seletor de tipo de despesa
@@ -46,7 +46,7 @@ class ExpenseFormView extends StatelessWidget {
                     // Descrição com validação em tempo real
                     ValidatedTextField(
                       controller: provider.descriptionController,
-                      label: 'Descrição *',
+                      label: 'Descrição da Despesa *',
                       hint: ExpenseConstants.descriptionPlaceholder,
                       maxLength: ExpenseConstants.maxDescriptionLength,
                       required: true,
@@ -67,10 +67,10 @@ class ExpenseFormView extends StatelessWidget {
 
               SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
-              // Seção: Valores
+              // 2ª Seção: Informações Financeiras e Técnicas (QUANTO custou e quilometragem)
               _buildSectionWithoutPadding(
-                title: ExpenseConstants.expenseSectionTitle,
-                icon: Icons.attach_money,
+                title: 'Informações Financeiras e Técnicas',
+                icon: Icons.monetization_on,
                 content: Column(
                   children: [
                     FormFieldRow.standard(
@@ -78,7 +78,7 @@ class ExpenseFormView extends StatelessWidget {
                         // Valor com validação monetária
                         ValidatedTextField(
                           controller: provider.amountController,
-                          label: 'Valor *',
+                          label: 'Valor Total *',
                           hint: ExpenseConstants.amountPlaceholder,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -90,7 +90,7 @@ class ExpenseFormView extends StatelessWidget {
                         // Odômetro
                         ValidatedTextField(
                           controller: provider.odometerController,
-                          label: 'Odômetro *',
+                          label: 'Quilometragem Atual *',
                           hint: ExpenseConstants.odometerPlaceholder,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -108,13 +108,22 @@ class ExpenseFormView extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ],
+                ),
+              ),
 
-                    SizedBox(height: GasometerDesignTokens.spacingMd),
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
+              // 3ª Seção: Detalhes Adicionais (ONDE foi realizada)
+              _buildSectionWithoutPadding(
+                title: 'Detalhes Adicionais',
+                icon: Icons.location_on,
+                content: Column(
+                  children: [
                     // Localização (opcional)
                     ValidatedTextField(
                       controller: provider.locationController,
-                      label: 'Localização',
+                      label: 'Local da Despesa',
                       hint: ExpenseConstants.locationPlaceholder,
                       maxLength: ExpenseConstants.maxLocationLength,
                       prefixIcon: Icons.location_on,
@@ -128,32 +137,13 @@ class ExpenseFormView extends StatelessWidget {
                       },
                       debounceDuration: const Duration(milliseconds: 600),
                     ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-
-              // Seção: Comprovante e Observações
-              _buildSectionWithoutPadding(
-                title: ExpenseConstants.additionalSectionTitle,
-                icon: Icons.attachment,
-                content: Column(
-                  children: [
-                    // Comprovante (imagem)
-                    ReceiptImagePicker(
-                      imagePath: provider.formModel.receiptImagePath,
-                      onImageSelected: provider.addReceiptImage,
-                      onImageRemoved: provider.removeReceiptImage,
-                      hasImage: provider.hasReceiptImage,
-                    ),
 
                     SizedBox(height: GasometerDesignTokens.spacingMd),
 
                     // Observações
                     ValidatedTextField(
                       controller: provider.notesController,
-                      label: 'Observações',
+                      label: 'Observações Adicionais',
                       hint: ExpenseConstants.notesPlaceholder,
                       maxLines: 3,
                       maxLength: ExpenseConstants.maxNotesLength,
@@ -168,6 +158,38 @@ class ExpenseFormView extends StatelessWidget {
                       },
                       debounceDuration: const Duration(milliseconds: 800),
                     ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+
+              // 4ª Seção: Comprovante da Despesa
+              _buildSectionWithoutPadding(
+                title: 'Comprovante da Despesa',
+                icon: Icons.receipt,
+                content: Column(
+                  children: [
+                    Text(
+                      'Anexe uma foto do comprovante da despesa (opcional)',
+                      style: TextStyle(
+                        fontSize: GasometerDesignTokens.fontSizeCaption,
+                        color: GasometerDesignTokens.colorTextSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    SizedBox(height: GasometerDesignTokens.spacingSm),
+                    // Comprovante (imagem)
+                    ReceiptImagePicker(
+                      imagePath: provider.receiptImagePath,
+                      hasImage: provider.hasReceiptImage,
+                      onImageSelected: () => _showImagePickerOptions(context, provider),
+                      onImageRemoved: () => provider.removeReceiptImage(),
+                    ),
+                    if (provider.isUploadingImage)
+                      _buildUploadingIndicator(),
+                    if (provider.imageUploadError != null)
+                      _buildErrorIndicator(provider.imageUploadError!),
                   ],
                 ),
               ),
@@ -529,6 +551,96 @@ class ExpenseFormView extends StatelessWidget {
         ),
         content,
       ],
+    );
+  }
+
+  Widget _buildUploadingIndicator() {
+    return Padding(
+      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                GasometerDesignTokens.colorPrimary,
+              ),
+            ),
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingSm),
+          Text(
+            'Processando imagem...',
+            style: TextStyle(
+              fontSize: GasometerDesignTokens.fontSizeSm,
+              color: GasometerDesignTokens.colorTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorIndicator(String error) {
+    return Padding(
+      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+      child: Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 16,
+            color: GasometerDesignTokens.colorError,
+          ),
+          SizedBox(width: GasometerDesignTokens.spacingSm),
+          Expanded(
+            child: Text(
+              error,
+              style: TextStyle(
+                fontSize: GasometerDesignTokens.fontSizeSm,
+                color: GasometerDesignTokens.colorError,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showImagePickerOptions(BuildContext context, ExpenseFormProvider provider) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Câmera'),
+                subtitle: const Text('Tirar uma nova foto'),
+                onTap: () {
+                  Navigator.pop(context);
+                  provider.captureReceiptImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeria'),
+                subtitle: const Text('Escolher da galeria'),
+                onTap: () {
+                  Navigator.pop(context);
+                  provider.selectReceiptImageFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('Cancelar'),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

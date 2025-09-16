@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
@@ -8,23 +9,46 @@ import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../../../core/logging/services/logging_service.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
+import '../datasources/expenses_remote_data_source.dart';
 import '../models/expense_model.dart';
 
-/// Repository para persistência de despesas usando Hive com cache strategy
+/// Repository para persistência de despesas usando Hive com cache strategy e sync Firebase
 class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositoryMixin implements IExpensesRepository {
   static const String _boxName = 'expenses';
   late Box<ExpenseModel> _box;
   final LoggingService _loggingService;
+  final ExpensesRemoteDataSource _remoteDataSource;
+  final Connectivity _connectivity;
+  final AuthRepository _authRepository;
 
-  ExpensesRepository(this._loggingService);
+  ExpensesRepository(
+    this._loggingService,
+    this._remoteDataSource,
+    this._connectivity,
+    this._authRepository,
+  );
 
   @override
   LoggingService get loggingService => _loggingService;
 
   @override
   String get repositoryCategory => LogCategory.expenses;
+
+  Future<bool> _isConnected() async {
+    final connectivityResults = await _connectivity.checkConnectivity();
+    return !connectivityResults.contains(ConnectivityResult.none);
+  }
+
+  Future<String?> _getCurrentUserId() async {
+    final userResult = await _authRepository.getCurrentUser();
+    return userResult.fold(
+      (failure) => null,
+      (user) => user?.id,
+    );
+  }
 
   /// Garante que o box está inicializado antes do uso
   Future<void> _ensureInitialized() async {
@@ -95,6 +119,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
         'amount': expense.amount,
       },
       operationFunc: () async {
+        // Always save locally first
         final model = _entityToModel(expense);
         await _box.put(expense.id, model);
         
@@ -115,6 +140,9 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
         invalidateListCache('all_expenses');
         invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
         invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
+        
+        // Remote sync in background (fire-and-forget)
+        unawaited(_syncExpenseToRemoteInBackground(expense));
         
         return entity;
       },
@@ -158,6 +186,9 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
         invalidateListCache('all_expenses');
         invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
         invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
+        
+        // Remote sync in background (fire-and-forget)
+        unawaited(_syncExpenseToRemoteInBackground(expense));
         
         return entity;
       },
@@ -659,6 +690,56 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
       );
     } catch (e) {
       throw Exception('Erro ao paginar despesas: $e');
+    }
+  }
+
+  /// Sincroniza despesa com Firebase em background
+  Future<void> _syncExpenseToRemoteInBackground(ExpenseEntity expense) async {
+    try {
+      // Verificar se está conectado
+      if (!await _isConnected()) {
+        return;
+      }
+
+      // Verificar se tem usuário autenticado
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return;
+      }
+
+      // Sincronizar com Firebase
+      await _remoteDataSource.addExpense(userId, expense);
+      
+      // Log successful sync
+      await logRemoteSync(
+        action: 'synced',
+        entityType: 'Expense',
+        entityId: expense.id,
+        success: true,
+        metadata: {
+          'vehicle_id': expense.vehicleId,
+          'type': expense.type.name,
+          'amount': expense.amount,
+        },
+      );
+    } catch (e) {
+      // Log failed sync
+      await logRemoteSync(
+        action: 'sync_failed',
+        entityType: 'Expense',
+        entityId: expense.id,
+        success: false,
+        metadata: {
+          'error': e.toString(),
+          'vehicle_id': expense.vehicleId,
+          'type': expense.type.name,
+        },
+      );
+      
+      // Log but don't throw - background sync should be silent
+      if (kDebugMode) {
+        print('Background sync failed for expense ${expense.id}: $e');
+      }
     }
   }
 

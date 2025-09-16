@@ -158,9 +158,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildContent(BuildContext context) {
     return Column(
       children: [
-        const AccountSectionWidget(),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildAppearanceSection(context),
+        _buildAccountContentWithoutCard(context),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildNotificationSection(context),
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
@@ -173,142 +171,11 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildAccountSection(BuildContext context) {
-    return _buildSection(
-      context,
-      title: 'Conta',
-      icon: Icons.person,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.person,
-                  size: GasometerDesignTokens.iconSizeXxl,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Faça login em sua conta',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Acesse recursos avançados, sincronize seus\ndados e mantenha suas informações seguras',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    // Navigate to login - feature pending
-                    _showSnackBar(context, 'Funcionalidade em desenvolvimento');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    padding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingMd),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.login, size: GasometerDesignTokens.iconSizeButton - 2),
-                      SizedBox(width: 8),
-                      Text('Fazer Login', style: TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(
-                      color: GasometerDesignTokens.colorPremiumAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.star,
-                      color: Colors.white,
-                      size: GasometerDesignTokens.iconSizeListItem,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'GasOMeter Premium',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Desbloqueie recursos avançados e tenha a\nmelhor experiência',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildPremiumFeature(
-                context,
-                icon: Icons.bar_chart,
-                title: 'Relatórios Avançados',
-                subtitle: 'Análises detalhadas de consumo e economia',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+  /// Build account content without card wrapper
+  Widget _buildAccountContentWithoutCard(BuildContext context) {
+    return const AccountSectionWidget();
   }
+
 
   Widget _buildPremiumFeature(BuildContext context, {
     required IconData icon,
@@ -356,28 +223,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildAppearanceSection(BuildContext context) {
-    return SettingsSection(
-      title: 'Aparência',
-      icon: Icons.palette,
-      children: [
-        Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
-            return SettingsItem(
-              icon: Icons.brightness_6,
-              title: 'Tema',
-              subtitle: _getThemeDescription(themeProvider.themeMode),
-              onTap: () => _showThemeDialog(context, themeProvider),
-              trailing: Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
 
   Widget _buildNotificationSection(BuildContext context) {
     return SettingsSection(

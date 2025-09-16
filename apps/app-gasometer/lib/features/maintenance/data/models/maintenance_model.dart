@@ -30,6 +30,8 @@ class MaintenanceModel extends BaseSyncModel {
   @HiveField(15) final int odometro;
   @HiveField(16) final int? proximaRevisao;
   @HiveField(17) final bool concluida;
+  @HiveField(18) final String? receiptImageUrl;
+  @HiveField(19) final String? receiptImagePath;
 
   MaintenanceModel({
     required this.id,
@@ -49,6 +51,8 @@ class MaintenanceModel extends BaseSyncModel {
     this.odometro = 0,
     this.proximaRevisao,
     this.concluida = false,
+    this.receiptImageUrl,
+    this.receiptImagePath,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -76,6 +80,8 @@ class MaintenanceModel extends BaseSyncModel {
     required int odometro,
     int? proximaRevisao,
     bool concluida = false,
+    String? receiptImageUrl,
+    String? receiptImagePath,
   }) {
     final now = DateTime.now();
     final maintenanceId = id ?? now.millisecondsSinceEpoch.toString();
@@ -94,6 +100,8 @@ class MaintenanceModel extends BaseSyncModel {
       odometro: odometro,
       proximaRevisao: proximaRevisao,
       concluida: concluida,
+      receiptImageUrl: receiptImageUrl,
+      receiptImagePath: receiptImagePath,
     );
   }
 
@@ -119,6 +127,8 @@ class MaintenanceModel extends BaseSyncModel {
       odometro: (map['odometro'] as num?)?.toInt() ?? 0,
       proximaRevisao: (map['proximaRevisao'] as num?)?.toInt(),
       concluida: map['concluida'] as bool? ?? false,
+      receiptImageUrl: map['receiptImageUrl']?.toString(),
+      receiptImagePath: map['receiptImagePath']?.toString(),
     );
   }
 
@@ -135,6 +145,8 @@ class MaintenanceModel extends BaseSyncModel {
         'odometro': odometro,
         'proximaRevisao': proximaRevisao,
         'concluida': concluida,
+        'receiptImageUrl': receiptImageUrl,
+        'receiptImagePath': receiptImagePath,
       });
   }
 
@@ -152,6 +164,8 @@ class MaintenanceModel extends BaseSyncModel {
       'odometro': odometro,
       'proxima_revisao': proximaRevisao,
       'concluida': concluida,
+      'receipt_image_url': receiptImageUrl,
+      'receipt_image_path': receiptImagePath,
     };
   }
 
@@ -178,6 +192,8 @@ class MaintenanceModel extends BaseSyncModel {
       odometro: (map['odometro'] as num?)?.toInt() ?? 0,
       proximaRevisao: (map['proxima_revisao'] as num?)?.toInt(),
       concluida: map['concluida'] as bool? ?? false,
+      receiptImageUrl: map['receipt_image_url']?.toString(),
+      receiptImagePath: map['receipt_image_path']?.toString(),
     );
   }
 
@@ -201,6 +217,8 @@ class MaintenanceModel extends BaseSyncModel {
     int? odometro,
     int? proximaRevisao,
     bool? concluida,
+    String? receiptImageUrl,
+    String? receiptImagePath,
   }) {
     return MaintenanceModel(
       id: id ?? this.id,
@@ -220,6 +238,8 @@ class MaintenanceModel extends BaseSyncModel {
       odometro: odometro ?? this.odometro,
       proximaRevisao: proximaRevisao ?? this.proximaRevisao,
       concluida: concluida ?? this.concluida,
+      receiptImageUrl: receiptImageUrl ?? this.receiptImageUrl,
+      receiptImagePath: receiptImagePath ?? this.receiptImagePath,
     );
   }
 

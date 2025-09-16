@@ -33,6 +33,8 @@ class FuelSupplyModel extends BaseSyncModel {
   @HiveField(17) final String? gasStationName;
   @HiveField(18) final String? notes;
   @HiveField(19) final int fuelType;
+  @HiveField(20) final String? receiptImageUrl;
+  @HiveField(21) final String? receiptImagePath;
 
   FuelSupplyModel({
     required this.id,
@@ -54,6 +56,8 @@ class FuelSupplyModel extends BaseSyncModel {
     this.gasStationName,
     this.notes,
     this.fuelType = 0,
+    this.receiptImageUrl,
+    this.receiptImagePath,
   }) : super(
           id: id,
           createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
@@ -94,6 +98,8 @@ class FuelSupplyModel extends BaseSyncModel {
     String? posto,
     String? observacao,
     int? tipoCombustivel,
+    String? receiptImageUrl,
+    String? receiptImagePath,
   }) {
     final now = DateTime.now();
     final supplyId = id ?? now.millisecondsSinceEpoch.toString();
@@ -114,6 +120,8 @@ class FuelSupplyModel extends BaseSyncModel {
       gasStationName: gasStationName ?? posto,
       notes: notes ?? observacao,
       fuelType: fuelType ?? tipoCombustivel ?? 0,
+      receiptImageUrl: receiptImageUrl,
+      receiptImagePath: receiptImagePath,
     );
   }
 
@@ -141,6 +149,8 @@ class FuelSupplyModel extends BaseSyncModel {
       gasStationName: map['gasStationName']?.toString() ?? map['posto']?.toString(),
       notes: map['notes']?.toString() ?? map['observacao']?.toString(),
       fuelType: (map['fuelType'] as num?)?.toInt() ?? (map['tipoCombustivel'] as num?)?.toInt() ?? 0,
+      receiptImageUrl: map['receiptImageUrl']?.toString(),
+      receiptImagePath: map['receiptImagePath']?.toString(),
     );
   }
 
@@ -170,6 +180,8 @@ class FuelSupplyModel extends BaseSyncModel {
         'posto': gasStationName,
         'observacao': notes,
         'tipoCombustivel': fuelType,
+        'receiptImageUrl': receiptImageUrl,
+        'receiptImagePath': receiptImagePath,
       });
   }
 
@@ -200,6 +212,8 @@ class FuelSupplyModel extends BaseSyncModel {
       'posto': gasStationName,
       'observacao': notes,
       'tipo_combustivel': fuelType,
+      'receipt_image_url': receiptImageUrl,
+      'receipt_image_path': receiptImagePath,
     };
   }
 
@@ -228,6 +242,8 @@ class FuelSupplyModel extends BaseSyncModel {
       gasStationName: map['gas_station_name']?.toString() ?? map['posto']?.toString(),
       notes: map['notes']?.toString() ?? map['observacao']?.toString(),
       fuelType: (map['fuel_type'] as num?)?.toInt() ?? (map['tipo_combustivel'] as num?)?.toInt() ?? 0,
+      receiptImageUrl: map['receipt_image_url']?.toString(),
+      receiptImagePath: map['receipt_image_path']?.toString(),
     );
   }
 
@@ -264,6 +280,8 @@ class FuelSupplyModel extends BaseSyncModel {
     String? posto,
     String? observacao,
     int? tipoCombustivel,
+    String? receiptImageUrl,
+    String? receiptImagePath,
   }) {
     return FuelSupplyModel(
       id: id ?? this.id,
@@ -285,6 +303,8 @@ class FuelSupplyModel extends BaseSyncModel {
       gasStationName: gasStationName ?? posto ?? this.gasStationName,
       notes: notes ?? observacao ?? this.notes,
       fuelType: fuelType ?? tipoCombustivel ?? this.fuelType,
+      receiptImageUrl: receiptImageUrl ?? this.receiptImageUrl,
+      receiptImagePath: receiptImagePath ?? this.receiptImagePath,
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import '../services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 import '../services/fitossanitarios_data_loader.dart';
 import '../services/pragas_data_loader.dart';
+import '../services/diagnosticos_data_loader.dart';
 
 /// Configuração e inicialização dos dados estáticos do ReceitaAgro
 class ReceitaAgroDataSetup {
@@ -48,8 +49,9 @@ class ReceitaAgroDataSetup {
       // Verifica se os dados já estão carregados pelo AppDataManager
       bool fitossanitariosLoaded = await FitossanitariosDataLoader.isDataLoaded();
       bool pragasLoaded = await PragasDataLoader.isDataLoaded();
+      bool diagnosticosLoaded = await DiagnosticosDataLoader.isDataLoaded();
       
-      developer.log('📊 [SETUP] Status: Fitossanitários=$fitossanitariosLoaded, Pragas=$pragasLoaded', name: 'ReceitaAgroDataSetup');
+      developer.log('📊 [SETUP] Status: Fitossanitários=$fitossanitariosLoaded, Pragas=$pragasLoaded, Diagnósticos=$diagnosticosLoaded', name: 'ReceitaAgroDataSetup');
       
       // Só carrega se não estiver carregado
       if (!fitossanitariosLoaded) {
@@ -64,6 +66,13 @@ class ReceitaAgroDataSetup {
         await PragasDataLoader.loadPragasData();
       } else {
         developer.log('✅ [SETUP] Pragas já carregadas, pulando...', name: 'ReceitaAgroDataSetup');
+      }
+      
+      if (!diagnosticosLoaded) {
+        developer.log('🩺 [SETUP] Carregando diagnósticos...', name: 'ReceitaAgroDataSetup');
+        await DiagnosticosDataLoader.loadDiagnosticosData();
+      } else {
+        developer.log('✅ [SETUP] Diagnósticos já carregados, pulando...', name: 'ReceitaAgroDataSetup');
       }
       
       developer.log('✅ [SETUP] Verificação de dados complementares concluída!', name: 'ReceitaAgroDataSetup');
@@ -86,6 +95,7 @@ class ReceitaAgroDataSetup {
       // Força recarregamento individual dos loaders
       await FitossanitariosDataLoader.forceReload();
       await PragasDataLoader.forceReload();
+      await DiagnosticosDataLoader.forceReload();
       
       developer.log('✅ Recarregamento concluído!', name: 'ReceitaAgroDataSetup');
     } catch (e) {
@@ -119,23 +129,25 @@ class ReceitaAgroDataSetup {
       // Obtém estatísticas dos loaders individuais
       final pragasStats = await PragasDataLoader.getStats();
       final fitossanitariosStats = await FitossanitariosDataLoader.getStats();
+      final diagnosticosStats = await DiagnosticosDataLoader.getStats();
       
       final int pragasCount = (pragasStats['total_pragas'] as int?) ?? 0;
       final int fitossanitariosCount = (fitossanitariosStats['total_fitossanitarios'] as int?) ?? 0;
+      final int diagnosticosCount = (diagnosticosStats['total_diagnosticos'] as int?) ?? 0;
       
-      // Obter culturas e diagnósticos usando o stub service
+      // Obter culturas usando o stub service
       final culturas = ReceitaAgroHiveService.getCulturas();
-      final diagnosticos = ReceitaAgroHiveService.getDiagnosticos();
 
       return {
         'pragas_count': pragasCount,
         'culturas_count': culturas.length,
         'fitossanitarios_count': fitossanitariosCount,
-        'diagnosticos_count': diagnosticos.length,
-        'total_items': pragasCount + culturas.length + fitossanitariosCount + diagnosticos.length,
+        'diagnosticos_count': diagnosticosCount,
+        'total_items': pragasCount + culturas.length + fitossanitariosCount + diagnosticosCount,
         'last_updated': DateTime.now().toIso8601String(),
         'pragas_loaded': pragasStats['is_loaded'] ?? false,
         'fitossanitarios_loaded': fitossanitariosStats['is_loaded'] ?? false,
+        'diagnosticos_loaded': diagnosticosStats['is_loaded'] ?? false,
       };
     } catch (e) {
       developer.log('Erro ao obter estatísticas: $e', name: 'ReceitaAgroDataSetup');

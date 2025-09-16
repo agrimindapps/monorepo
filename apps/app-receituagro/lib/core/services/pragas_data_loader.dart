@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
@@ -23,10 +24,12 @@ class PragasDataLoader {
           name: 'PragasDataLoader');
       print('🐛 [PRAGAS] Iniciando carregamento de pragas...');
 
-      // Carrega JSON do asset principal
-      final String jsonString = await rootBundle.loadString(
-        'assets/database/json/tbpragas/TBPRAGAS0.json',
-      );
+      // Carrega JSON do asset principal - use path without 'assets/' prefix for web compatibility
+      final String assetPath = kIsWeb 
+          ? 'database/json/tbpragas/TBPRAGAS0.json'
+          : 'assets/database/json/tbpragas/TBPRAGAS0.json';
+      
+      final String jsonString = await rootBundle.loadString(assetPath);
 
       final dynamic decodedJson = json.decode(jsonString);
       final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];

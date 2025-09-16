@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/services/input_sanitizer.dart';
+import '../../../../core/services/receipt_image_service.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -24,10 +25,17 @@ class ExpenseFormProvider extends BaseProvider {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
   final ExpenseValidationService _validator = const ExpenseValidationService();
+  final ReceiptImageService _receiptImageService;
   final ImagePicker _imagePicker = ImagePicker();
   
   // Store context for accessing providers when needed
   BuildContext? _context;
+
+  // Image management state
+  String? _receiptImagePath;
+  String? _receiptImageUrl;
+  bool _isUploadingImage = false;
+  String? _imageUploadError;
 
   // Controllers para campos de texto
   final TextEditingController descriptionController = TextEditingController();
@@ -46,8 +54,12 @@ class ExpenseFormProvider extends BaseProvider {
   bool _isInitialized = false;
   final bool _isUpdating = false;
 
-  ExpenseFormProvider({String? initialVehicleId, String? userId}) 
-      : _formModel = ExpenseFormModel.initial(initialVehicleId ?? '', userId ?? '') {
+  ExpenseFormProvider({
+    String? initialVehicleId, 
+    String? userId,
+    required ReceiptImageService receiptImageService,
+  }) : _receiptImageService = receiptImageService,
+       _formModel = ExpenseFormModel.initial(initialVehicleId ?? '', userId ?? '') {
     _initializeControllers();
   }
 
@@ -55,6 +67,13 @@ class ExpenseFormProvider extends BaseProvider {
   GlobalKey<FormState> get formKey => _formKey;
   ExpenseFormModel get formModel => _formModel;
   bool get isInitialized => _isInitialized;
+  
+  // Image management getters
+  String? get receiptImagePath => _receiptImagePath;
+  String? get receiptImageUrl => _receiptImageUrl;
+  bool get hasReceiptImage => _receiptImagePath != null || _receiptImageUrl != null;
+  bool get isUploadingImage => _isUploadingImage;
+  String? get imageUploadError => _imageUploadError;
 
   /// Sets the BuildContext for dependency injection access.
   /// This should be called when the provider is used in a widget.
@@ -73,6 +92,9 @@ class ExpenseFormProvider extends BaseProvider {
     }
   }
   bool get isUpdating => _isUpdating;
+  
+  @override
+  bool get isLoading => super.isLoading || _isUploadingImage;
 
   void _initializeControllers() {
     // Adicionar listeners para reagir a mudanças nos campos
@@ -389,16 +411,6 @@ class ExpenseFormProvider extends BaseProvider {
     );
   }
 
-  /// Remove foto do comprovante
-  void removeReceiptImage() {
-    if (_formModel.receiptImagePath == null) return;
-
-    _formModel = _formModel.copyWith(
-      clearReceiptImage: true,
-      hasChanges: true,
-    );
-    notifyListeners();
-  }
 
   /// Valida um campo específico
   String? validateField(String field, String? value) {
@@ -509,6 +521,159 @@ class ExpenseFormProvider extends BaseProvider {
     }
   }
 
+  // ===== IMAGE MANAGEMENT METHODS =====
+
+  /// Captura imagem usando a câmera
+  Future<void> captureReceiptImage() async {
+    try {
+      _imageUploadError = null;
+      notifyListeners();
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+
+      if (image != null) {
+        await _processReceiptImage(image.path);
+      }
+    } catch (e) {
+      _imageUploadError = 'Erro ao capturar imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Seleciona imagem da galeria
+  Future<void> selectReceiptImageFromGallery() async {
+    try {
+      _imageUploadError = null;
+      notifyListeners();
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+
+      if (image != null) {
+        await _processReceiptImage(image.path);
+      }
+    } catch (e) {
+      _imageUploadError = 'Erro ao selecionar imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Processa e faz upload da imagem do comprovante
+  Future<void> _processReceiptImage(String imagePath) async {
+    try {
+      _isUploadingImage = true;
+      _imageUploadError = null;
+      notifyListeners();
+
+      // Validar imagem
+      final isValid = await _receiptImageService.isValidImage(imagePath);
+      if (!isValid) {
+        throw Exception('Arquivo de imagem inválido');
+      }
+
+      // Processar imagem (comprimir + upload se online)
+      final result = await _receiptImageService.processExpenseReceiptImage(
+        userId: _formModel.userId,
+        expenseId: _generateTemporaryId(),
+        imagePath: imagePath,
+        compressImage: true,
+        uploadToFirebase: true,
+      );
+
+      _receiptImagePath = result.localPath;
+      _receiptImageUrl = result.downloadUrl;
+      
+      // Atualizar modelo do formulário
+      _formModel = _formModel.copyWith(hasChanges: true);
+
+      debugPrint('[EXPENSE FORM] Image processed successfully');
+      debugPrint('[EXPENSE FORM] Local path: ${result.localPath}');
+      debugPrint('[EXPENSE FORM] Download URL: ${result.downloadUrl}');
+
+    } catch (e) {
+      _imageUploadError = 'Erro ao processar imagem: $e';
+      debugPrint('[EXPENSE FORM] Image processing error: $e');
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Remove imagem do comprovante
+  Future<void> removeReceiptImage() async {
+    try {
+      if (_receiptImagePath != null || _receiptImageUrl != null) {
+        await _receiptImageService.deleteReceiptImage(
+          localPath: _receiptImagePath,
+          downloadUrl: _receiptImageUrl,
+        );
+      }
+
+      _receiptImagePath = null;
+      _receiptImageUrl = null;
+      _imageUploadError = null;
+      _formModel = _formModel.copyWith(hasChanges: true);
+      
+      notifyListeners();
+    } catch (e) {
+      _imageUploadError = 'Erro ao remover imagem: $e';
+      notifyListeners();
+    }
+  }
+
+  /// Gera ID temporário para processar imagem antes do save
+  String _generateTemporaryId() {
+    return 'temp_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  /// Sincroniza imagem local com Firebase (para casos offline)
+  Future<void> syncImageToFirebase(String actualExpenseId) async {
+    if (_receiptImagePath == null || _receiptImageUrl != null) {
+      return; // Nada para sincronizar
+    }
+
+    try {
+      _isUploadingImage = true;
+      notifyListeners();
+
+      final result = await _receiptImageService.processExpenseReceiptImage(
+        userId: _formModel.userId,
+        expenseId: actualExpenseId,
+        imagePath: _receiptImagePath!,
+        compressImage: false, // Já foi comprimida
+        uploadToFirebase: true,
+      );
+
+      _receiptImageUrl = result.downloadUrl;
+      
+      debugPrint('[EXPENSE FORM] Image synced to Firebase: ${result.downloadUrl}');
+      
+    } catch (e) {
+      debugPrint('[EXPENSE FORM] Failed to sync image: $e');
+      // Não exibir erro para usuário, continua com imagem local
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Limpa estado de imagem
+  void _clearImageState() {
+    _receiptImagePath = null;
+    _receiptImageUrl = null;
+    _imageUploadError = null;
+    _isUploadingImage = false;
+  }
+
   /// Limpa todos os campos do formulário
   void clearForm() {
     descriptionController.clear();
@@ -517,6 +682,7 @@ class ExpenseFormProvider extends BaseProvider {
     locationController.clear();
     notesController.clear();
 
+    _clearImageState();
     _formModel = ExpenseFormModel.initial(_formModel.vehicleId, _formModel.userId);
     notifyListeners();
   }
@@ -524,6 +690,7 @@ class ExpenseFormProvider extends BaseProvider {
   /// Reseta formulário para estado inicial
   void resetForm() {
     clearForm();
+    _clearImageState();
     _formModel = _formModel.copyWith(
       hasChanges: false,
       errors: const {},
@@ -538,8 +705,6 @@ class ExpenseFormProvider extends BaseProvider {
     return File(_formModel.receiptImagePath!);
   }
 
-  /// Verifica se tem imagem do comprovante
-  bool get hasReceiptImage => _formModel.hasReceipt;
 
   /// Limpa os erros do formulário e provider
   void clearFormErrors() {

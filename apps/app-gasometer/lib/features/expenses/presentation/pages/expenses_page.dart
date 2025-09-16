@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
@@ -354,6 +355,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
             ChangeNotifierProvider(create: (_) => ExpenseFormProvider(
               initialVehicleId: _selectedVehicleId,
               userId: userId,
+              receiptImageService: context.read<ReceiptImageService>(),
             )),
             ChangeNotifierProvider.value(value: _vehiclesProvider),
             ChangeNotifierProvider.value(value: authProvider),
@@ -421,6 +423,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
           ChangeNotifierProvider(create: (_) => ExpenseFormProvider(
             initialVehicleId: vehicleId,
             userId: userId,
+            receiptImageService: context.read<ReceiptImageService>(),
           )),
           ChangeNotifierProvider.value(value: _vehiclesProvider),
           ChangeNotifierProvider.value(value: authProvider),

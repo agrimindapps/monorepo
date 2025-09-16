@@ -10,6 +10,7 @@ import '../../../../core/presentation/widgets/validated_dropdown_field.dart';
 import '../../../../core/presentation/widgets/validated_switch_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../../expenses/presentation/widgets/receipt_image_picker.dart';
 import '../../core/constants/fuel_constants.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../providers/fuel_form_provider.dart';
@@ -48,6 +49,8 @@ class FuelFormView extends StatelessWidget {
               _buildFuelInfoSection(context, provider),
               SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
               _buildAdditionalInfoSection(context, provider),
+              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              _buildReceiptImageSection(context, provider),
             ],
           ),
         );
@@ -374,6 +377,119 @@ class FuelFormView extends StatelessWidget {
         provider.updateDate(combinedDateTime);
       }
     }
+  }
+
+  Widget _buildReceiptImageSection(BuildContext context, FuelFormProvider provider) {
+    return _buildSectionWithoutPadding(
+      title: 'Comprovante',
+      icon: Icons.receipt,
+      content: Column(
+        children: [
+          ReceiptImagePicker(
+            imagePath: provider.receiptImagePath,
+            hasImage: provider.hasReceiptImage,
+            onImageSelected: () => _showImagePickerOptions(context, provider),
+            onImageRemoved: () => provider.removeReceiptImage(),
+          ),
+          if (provider.isUploadingImage)
+            Padding(
+              padding: EdgeInsets.only(top: GasometerDesignTokens.spacingMd),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        GasometerDesignTokens.colorPrimary,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: GasometerDesignTokens.spacingSm),
+                  Text(
+                    'Processando imagem...',
+                    style: TextStyle(
+                      color: GasometerDesignTokens.colorTextSecondary,
+                      fontSize: GasometerDesignTokens.fontSizeSm,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (provider.imageUploadError != null)
+            Padding(
+              padding: EdgeInsets.only(top: GasometerDesignTokens.spacingMd),
+              child: Container(
+                padding: EdgeInsets.all(GasometerDesignTokens.spacingMd),
+                decoration: BoxDecoration(
+                  color: GasometerDesignTokens.colorError.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: GasometerDesignTokens.colorError.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: GasometerDesignTokens.colorError,
+                      size: 16,
+                    ),
+                    SizedBox(width: GasometerDesignTokens.spacingSm),
+                    Expanded(
+                      child: Text(
+                        provider.imageUploadError!,
+                        style: TextStyle(
+                          color: GasometerDesignTokens.colorError,
+                          fontSize: GasometerDesignTokens.fontSizeSm,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showImagePickerOptions(BuildContext context, FuelFormProvider provider) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Câmera'),
+                subtitle: const Text('Tirar uma nova foto'),
+                onTap: () {
+                  Navigator.pop(context);
+                  provider.captureReceiptImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeria'),
+                subtitle: const Text('Escolher da galeria'),
+                onTap: () {
+                  Navigator.pop(context);
+                  provider.selectReceiptImageFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('Cancelar'),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // Helper para criar seções sem padding lateral

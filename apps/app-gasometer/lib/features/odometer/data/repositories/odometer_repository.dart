@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
@@ -5,22 +8,45 @@ import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../../../core/logging/services/logging_service.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
+import '../datasources/odometer_remote_data_source.dart';
 import '../models/odometer_model.dart';
 
-/// Repository para persistência de leituras de odômetro usando Hive com cache strategy
+/// Repository para persistência de leituras de odômetro usando Hive com cache strategy e sync Firebase
 class OdometerRepository with CachedRepository<OdometerEntity>, LoggableRepositoryMixin {
   static const String _boxName = 'odometer';
   late Box<OdometerModel> _box;
   final LoggingService _loggingService;
+  final OdometerRemoteDataSource _remoteDataSource;
+  final Connectivity _connectivity;
+  final AuthRepository _authRepository;
 
-  OdometerRepository(this._loggingService);
+  OdometerRepository(
+    this._loggingService,
+    this._remoteDataSource,
+    this._connectivity,
+    this._authRepository,
+  );
 
   @override
   LoggingService get loggingService => _loggingService;
 
   @override
   String get repositoryCategory => LogCategory.odometer;
+
+  Future<bool> _isConnected() async {
+    final connectivityResults = await _connectivity.checkConnectivity();
+    return !connectivityResults.contains(ConnectivityResult.none);
+  }
+
+  Future<String?> _getCurrentUserId() async {
+    final userResult = await _authRepository.getCurrentUser();
+    return userResult.fold(
+      (failure) => null,
+      (user) => user?.id,
+    );
+  }
 
   /// Initializes the repository
   Future<void> initialize() async {
@@ -56,6 +82,9 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           metadata: {'storage_type': 'hive'},
         );
         
+        // Remote sync in background (fire-and-forget)
+        unawaited(_syncOdometerReadingToRemoteInBackground(reading));
+        
         return _modelToEntity(model);
       },
     );
@@ -87,6 +116,9 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           entityId: reading.id,
           metadata: {'storage_type': 'hive'},
         );
+        
+        // Remote sync in background (fire-and-forget)
+        unawaited(_syncOdometerReadingToRemoteInBackground(reading));
         
         return _modelToEntity(model);
       },
@@ -410,6 +442,56 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   /// Converte string para OdometerType
   OdometerType _stringToType(String typeString) {
     return OdometerType.fromString(typeString);
+  }
+
+  /// Sincroniza leitura de odômetro com Firebase em background
+  Future<void> _syncOdometerReadingToRemoteInBackground(OdometerEntity reading) async {
+    try {
+      // Verificar se está conectado
+      if (!await _isConnected()) {
+        return;
+      }
+
+      // Verificar se tem usuário autenticado
+      final userId = await _getCurrentUserId();
+      if (userId == null) {
+        return;
+      }
+
+      // Sincronizar com Firebase
+      await _remoteDataSource.addOdometerReading(userId, reading);
+      
+      // Log successful sync
+      await logRemoteSync(
+        action: 'synced',
+        entityType: 'OdometerReading',
+        entityId: reading.id,
+        success: true,
+        metadata: {
+          'vehicle_id': reading.vehicleId,
+          'type': reading.type.name,
+          'value': reading.value,
+        },
+      );
+    } catch (e) {
+      // Log failed sync
+      await logRemoteSync(
+        action: 'sync_failed',
+        entityType: 'OdometerReading',
+        entityId: reading.id,
+        success: false,
+        metadata: {
+          'error': e.toString(),
+          'vehicle_id': reading.vehicleId,
+          'type': reading.type.name,
+        },
+      );
+      
+      // Log but don't throw - background sync should be silent
+      if (kDebugMode) {
+        print('Background sync failed for odometer reading ${reading.id}: $e');
+      }
+    }
   }
 
   /// Fecha o box (cleanup)

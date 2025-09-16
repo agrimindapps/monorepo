@@ -33,10 +33,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      await ref
+          .read(authNotifierProvider.notifier)
+          .signInWithEmailAndPassword(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
 
       if (mounted) {
         // Navigation será tratado pelo AuthGuard baseado no estado
@@ -46,7 +48,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         String errorMessage = 'Erro ao fazer login';
-        
+
         if (e is Failure) {
           errorMessage = e.message;
         } else {
@@ -68,9 +70,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _navigateToRegister() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const RegisterPage()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
   }
 
   Future<void> _handleAnonymousLogin() async {
@@ -125,9 +127,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
 
     try {
-      await ref.read(authNotifierProvider.notifier).sendPasswordResetEmail(
-        _emailController.text.trim(),
-      );
+      await ref
+          .read(authNotifierProvider.notifier)
+          .sendPasswordResetEmail(_emailController.text.trim());
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -186,9 +188,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Text(
                   'Entre para gerenciar suas tarefas',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 48),
 
@@ -222,7 +224,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -255,19 +259,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Text(
+                            'Entrar',
+                            style: TextStyle(fontSize: 16),
                           ),
-                        )
-                      : const Text('Entrar', style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Link esqueceu senha
                 TextButton(
                   onPressed: _handleForgotPassword,
@@ -293,7 +301,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Botões de login social
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _handleGoogleLogin,
@@ -305,7 +313,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Botão de login anônimo
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _handleAnonymousLogin,
@@ -317,7 +325,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Botão de login demo
                 Container(
                   width: double.infinity,
@@ -335,11 +343,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: _isLoading ? null : () {
-                          _emailController.text = 'demo@taskmanager.com';
-                          _passwordController.text = '123456';
-                          _handleLogin();
-                        },
+                        onPressed:
+                            _isLoading
+                                ? null
+                                : () {
+                                  _emailController.text =
+                                      'demo@taskmanager.com';
+                                  _passwordController.text = '123456';
+                                  _handleLogin();
+                                },
                         child: const Text('Usar conta demo'),
                       ),
                     ],

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
-import 'core/di/injectable_config.dart' as local_di;
+// import 'core/di/injectable_config.dart' as local_di; // Commented out - using manual DI
+import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
 import 'core/services/receipt_image_service.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';
@@ -40,7 +41,7 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // LEVEL 1: Base providers (no dependencies)
         // Auth Provider - deve ser o primeiro (base dependency)
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<local.AuthProvider>(),
+          create: (_) => sl<local.AuthProvider>(),
           lazy: false, // Force immediate creation for proper initialization
         ),
         
@@ -51,29 +52,29 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         
         // Settings Provider - independent
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<SettingsProvider>(),
+          create: (_) => sl<SettingsProvider>(),
         ),
         
         // Receipt Image Service - independent service
         Provider<ReceiptImageService>(
-          create: (_) => local_di.getIt<ReceiptImageService>(),
+          create: (_) => sl<ReceiptImageService>(),
         ),
         
         // Sync Status Provider - independent
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<SyncStatusProvider>(),
+          create: (_) => sl<SyncStatusProvider>(),
         ),
         
         // Premium Provider - independent 
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<PremiumProvider>(),
+          create: (_) => sl<PremiumProvider>(),
         ),
         
         // LEVEL 2: Domain providers (depend on Auth)
         // Vehicles Provider - depends on Auth for user context
         ChangeNotifierProvider(
           create: (_) {
-            final vehiclesProvider = local_di.getIt<VehiclesProvider>();
+            final vehiclesProvider = sl<VehiclesProvider>();
             // Initialize after the provider is fully created
             Future.microtask(() => vehiclesProvider.initialize());
             return vehiclesProvider;
@@ -84,38 +85,38 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // LEVEL 3: Feature providers (depend on domain providers)
         // Fuel Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<FuelProvider>(),
+          create: (_) => sl<FuelProvider>(),
           lazy: true,
         ),
         
         // Maintenance Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<MaintenanceProvider>(),
+          create: (_) => sl<MaintenanceProvider>(),
           lazy: true,
         ),
         
         // Odometer Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<OdometerProvider>(),
+          create: (_) => sl<OdometerProvider>(),
           lazy: true,
         ),
         
         // Expenses Provider - depends on Vehicles for vehicle context
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<ExpensesProvider>(),
+          create: (_) => sl<ExpensesProvider>(),
           lazy: true,
         ),
         
         // LEVEL 4: Analytics providers (depend on multiple feature providers)
         // Reports Provider - depends on multiple providers for comprehensive reporting
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<ReportsProvider>(),
+          create: (_) => sl<ReportsProvider>(),
           lazy: true,
         ),
         
         // Data Export Provider - depends on Auth for user context
         ChangeNotifierProvider(
-          create: (_) => local_di.getIt<DataExportProvider>(),
+          create: (_) => sl<DataExportProvider>(),
           lazy: true,
         ),
       ],

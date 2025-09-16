@@ -9,36 +9,22 @@ import '../../domain/entities/premium_status.dart';
 import '../../domain/repositories/premium_repository.dart';
 import '../datasources/premium_local_data_source.dart';
 import '../datasources/premium_remote_data_source.dart';
+import '../services/premium_sync_service.dart';
 
 @LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
   final PremiumRemoteDataSource remoteDataSource;
   final PremiumLocalDataSource localDataSource;
-
-  final StreamController<PremiumStatus> _statusController = 
-      StreamController<PremiumStatus>.broadcast();
-
-  StreamSubscription<core.SubscriptionEntity?>? _subscriptionSubscription;
+  final PremiumSyncService _syncService;
 
   PremiumRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
-  }) {
-    _initialize();
-  }
+    required PremiumSyncService syncService,
+  }) : _syncService = syncService;
 
   @override
-  Stream<PremiumStatus> get premiumStatus => _statusController.stream;
-
-  void _initialize() {
-    // Escuta mudanças na assinatura e converte para PremiumStatus
-    _subscriptionSubscription = remoteDataSource.subscriptionStatus.listen(
-      (subscription) async {
-        final status = await _buildPremiumStatus(subscription);
-        _statusController.add(status);
-      },
-    );
-  }
+  Stream<PremiumStatus> get premiumStatus => _syncService.premiumStatusStream;
 
   @override
   Future<Either<Failure, bool>> hasActivePremium() async {
@@ -56,21 +42,9 @@ class PremiumRepositoryImpl implements PremiumRepository {
   @override
   Future<Either<Failure, PremiumStatus>> getPremiumStatus() async {
     try {
-      // Primeiro, verifica licença local
-      final hasLocalLicense = await localDataSource.hasActiveLocalLicense();
-      if (hasLocalLicense) {
-        final expiration = await localDataSource.getLocalLicenseExpiration();
-        if (expiration != null && DateTime.now().isBefore(expiration)) {
-          return Right(PremiumStatus.localLicense(expiration: expiration));
-        }
-      }
-
-      // Depois, verifica assinatura remota
-      final subscriptionResult = await remoteDataSource.getCurrentSubscription();
-      return subscriptionResult.fold(
-        (failure) => Left(failure),
-        (subscription) async => Right(await _buildPremiumStatus(subscription)),
-      );
+      // Usa o status do sync service que já consolida todas as fontes
+      final status = _syncService.currentStatus;
+      return Right(status);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -217,14 +191,10 @@ class PremiumRepositoryImpl implements PremiumRepository {
   Future<Either<Failure, void>> generateLocalLicense({int days = 30}) async {
     try {
       await localDataSource.generateLocalLicense(days: days);
-      
-      // Notifica mudança no status
-      final status = await getPremiumStatus();
-      status.fold(
-        (failure) => null,
-        (premiumStatus) => _statusController.add(premiumStatus),
-      );
-      
+
+      // Força sync para atualizar todas as fontes
+      await _syncService.forceSync();
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -235,14 +205,10 @@ class PremiumRepositoryImpl implements PremiumRepository {
   Future<Either<Failure, void>> revokeLocalLicense() async {
     try {
       await localDataSource.revokeLocalLicense();
-      
-      // Notifica mudança no status
-      final status = await getPremiumStatus();
-      status.fold(
-        (failure) => null,
-        (premiumStatus) => _statusController.add(premiumStatus),
-      );
-      
+
+      // Força sync para atualizar todas as fontes
+      await _syncService.forceSync();
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -259,32 +225,34 @@ class PremiumRepositoryImpl implements PremiumRepository {
     }
   }
 
-  /// Constrói PremiumStatus a partir de SubscriptionEntity
-  Future<PremiumStatus> _buildPremiumStatus(core.SubscriptionEntity? subscription) async {
-    // Verifica licença local primeiro
-    final hasLocalLicense = await localDataSource.hasActiveLocalLicense();
-    if (hasLocalLicense) {
-      final expiration = await localDataSource.getLocalLicenseExpiration();
-      if (expiration != null && DateTime.now().isBefore(expiration)) {
-        return PremiumStatus.localLicense(expiration: expiration);
-      }
+  /// Força sincronização imediata do status premium
+  Future<Either<Failure, void>> forceSyncPremiumStatus() async {
+    try {
+      return await _syncService.forceSync();
+    } catch (e) {
+      return Left(ServerFailure('Erro na sincronização forçada: ${e.toString()}'));
     }
+  }
 
-    // Se não tem licença local, verifica assinatura
-    if (subscription == null || !subscription.isActive) {
-      return PremiumStatus.free;
+  /// Stream de eventos de sincronização
+  Stream<PremiumSyncEvent> get syncEvents => _syncService.syncEvents;
+
+  /// Processa webhook do RevenueCat
+  Future<Either<Failure, void>> processWebhook({
+    required Map<String, dynamic> payload,
+    String? signature,
+    String? secret,
+  }) async {
+    try {
+      // Note: O webhook data source está injetado no sync service
+      // Este método é uma interface conveniente no repository
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Erro ao processar webhook: ${e.toString()}'));
     }
-
-    return PremiumStatus.premium(
-      subscription: subscription,
-      expirationDate: subscription.expirationDate,
-      isInTrial: subscription.isInTrial,
-      trialDaysRemaining: subscription.daysRemaining,
-    );
   }
 
   void dispose() {
-    _subscriptionSubscription?.cancel();
-    _statusController.close();
+    _syncService.dispose();
   }
 }

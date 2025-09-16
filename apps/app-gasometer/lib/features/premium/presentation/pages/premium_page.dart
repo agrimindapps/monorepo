@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/di/injectable_config.dart' as gasometer_di;
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../providers/premium_provider.dart';
@@ -9,6 +9,7 @@ import '../widgets/premium_dev_controls.dart';
 import '../widgets/premium_features_list.dart';
 import '../widgets/premium_products_list.dart';
 import '../widgets/premium_status_card.dart';
+import '../widgets/premium_sync_status_widget.dart';
 import '../widgets/premium_upgrade_button.dart';
 
 class PremiumPage extends StatelessWidget {
@@ -17,7 +18,7 @@ class PremiumPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<PremiumProvider>(
-      create: (_) => gasometer_di.getIt<PremiumProvider>(),
+      create: (_) => sl<PremiumProvider>(),
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
@@ -40,7 +41,13 @@ class PremiumPage extends StatelessWidget {
                   children: [
                     // Status atual do premium
                     const PremiumStatusCard(),
-                    
+
+                    const SizedBox(height: 16),
+
+                    // Status de sincronização (apenas para usuários premium)
+                    if (premiumProvider.isPremium)
+                      const PremiumSyncStatusWidget(),
+
                     const SizedBox(height: 24),
                     
                     // Lista de funcionalidades premium

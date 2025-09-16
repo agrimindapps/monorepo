@@ -4,12 +4,11 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
-import '../../data/services/subscription_sync_service.dart';
+// import '../../data/services/subscription_sync_service.dart'; // Removido - usar PremiumProviderImproved para sincronização
 
 class PremiumProvider extends ChangeNotifier {
   final ISubscriptionRepository _subscriptionRepository;
   final IAuthRepository _authRepository;
-  late final SubscriptionSyncService _syncService;
 
   SubscriptionEntity? _currentSubscription;
   List<ProductInfo> _availableProducts = [];
@@ -24,7 +23,8 @@ class PremiumProvider extends ChangeNotifier {
     required IAuthRepository authRepository,
   }) : _subscriptionRepository = subscriptionRepository,
        _authRepository = authRepository {
-    _syncService = SubscriptionSyncService(authRepository: authRepository);
+    // Nota: Para usar a versão melhorada, use PremiumProviderImproved
+    // que requer IAnalyticsRepository. Esta versão mantém compatibilidade.
     _initialize();
   }
 
@@ -60,16 +60,12 @@ class PremiumProvider extends ChangeNotifier {
       (subscription) async {
         _currentSubscription = subscription;
 
-        // Sincroniza com Firebase quando houver mudança
-        if (subscription != null && subscription.isActive) {
-          await _syncService.syncSubscriptionToFirebase(subscription);
-        } else if (subscription == null || !subscription.isActive) {
-          await _syncService.removeSubscriptionFromFirebase();
-        }
+        // Nota: Versão simplificada sem sincronização avançada
+        // Use PremiumProviderImproved para sincronização completa cross-device
 
         notifyListeners();
       },
-      onError: (error) {
+      onError: (Object error) {
         _errorMessage = error.toString();
         notifyListeners();
       },
@@ -159,28 +155,8 @@ class PremiumProvider extends ChangeNotifier {
       (subscription) async {
         _currentSubscription = subscription;
 
-        // Sincroniza com Firebase após compra bem-sucedida
-        await _syncService.syncSubscriptionToFirebase(subscription);
-
-        // Loga evento de compra para analytics
-        final product = _availableProducts.firstWhere(
-          (p) => p.productId == productId,
-          orElse:
-              () => ProductInfo(
-                productId: productId,
-                title: '',
-                description: '',
-                price: 0.0,
-                priceString: '',
-                currencyCode: 'BRL',
-              ),
-        );
-
-        await _syncService.logPurchaseEvent(
-          productId: productId,
-          price: product.price,
-          currency: product.currencyCode,
-        );
+        // Nota: Versão simplificada - sem sincronização avançada
+        // Use PremiumProviderImproved para funcionalidades completas
 
         _isLoading = false;
         _currentOperation = null;

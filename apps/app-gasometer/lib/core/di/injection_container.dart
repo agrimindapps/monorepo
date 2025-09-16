@@ -5,11 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
+// import 'package:injectable/injectable.dart'; // Commented out - using manual DI
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Injectable configuration
-import 'injectable_config.dart';
+// Injectable configuration (commented out - using manual DI)
+// import 'injectable_config.dart';
 
 // Logging imports
 import '../logging/data/datasources/log_local_data_source.dart';
@@ -17,17 +17,50 @@ import '../logging/data/datasources/log_remote_data_source.dart';
 import '../logging/data/repositories/log_repository_impl.dart';
 import '../logging/repositories/log_repository.dart';
 import '../logging/services/logging_service.dart';
+import '../logging/repositories/log_repository.dart';
+import '../logging/data/repositories/log_repository_impl.dart';
+import '../logging/data/datasources/log_local_data_source.dart';
+import '../logging/data/datasources/log_remote_data_source.dart';
 import '../sync/services/conflict_resolver.dart';
+import '../sync/services/sync_service.dart';
+import '../sync/services/sync_queue.dart';
+import '../sync/services/sync_operations.dart';
+import '../interfaces/i_sync_service.dart' as sync_interface;
 import '../services/analytics_service.dart';
 import '../services/avatar_service.dart';
+import '../services/platform_service.dart';
+import '../services/auth_rate_limiter.dart';
+import '../services/local_data_service.dart';
 import '../data/models/base_sync_model.dart';
 
 // Auth imports (keeping only needed ones)
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/data/datasources/auth_local_data_source.dart';
+import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
-import '../../features/auth/domain/usecases/send_password_reset.dart';
-import '../../features/auth/domain/usecases/delete_account.dart';
+import '../../features/auth/domain/usecases/watch_auth_state.dart';
+import '../../features/auth/domain/usecases/sign_in_with_email.dart';
+import '../../features/auth/domain/usecases/sign_up_with_email.dart';
 import '../../features/auth/domain/usecases/sign_in_anonymously.dart';
+import '../../features/auth/domain/usecases/sign_out.dart';
+import '../../features/auth/domain/usecases/delete_account.dart';
+import '../../features/auth/domain/usecases/update_profile.dart';
+import '../../features/auth/domain/usecases/send_password_reset.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
+
+// Vehicle imports
+import '../../features/vehicles/data/datasources/vehicle_local_data_source.dart';
+import '../../features/vehicles/data/datasources/vehicle_remote_data_source.dart';
+import '../../features/vehicles/data/repositories/vehicle_repository_impl.dart';
+import '../../features/vehicles/domain/repositories/vehicle_repository.dart';
+import '../../features/vehicles/domain/usecases/get_all_vehicles.dart';
+import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
+import '../../features/vehicles/domain/usecases/add_vehicle.dart';
+import '../../features/vehicles/domain/usecases/update_vehicle.dart';
+import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
+import '../../features/vehicles/domain/usecases/search_vehicles.dart';
+import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 import '../../features/auth/domain/usecases/sign_in_with_email.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/sign_up_with_email.dart';
@@ -73,7 +106,10 @@ import '../../features/expenses/presentation/providers/expenses_provider.dart';
 // Premium imports
 import '../../features/premium/data/datasources/premium_local_data_source.dart';
 import '../../features/premium/data/datasources/premium_remote_data_source.dart';
+import '../../features/premium/data/datasources/premium_firebase_data_source.dart';
+import '../../features/premium/data/datasources/premium_webhook_data_source.dart';
 import '../../features/premium/data/repositories/premium_repository_impl.dart';
+import '../../features/premium/data/services/premium_sync_service.dart';
 import '../../features/premium/domain/repositories/premium_repository.dart';
 import '../../features/premium/domain/usecases/can_add_fuel_record.dart';
 import '../../features/premium/domain/usecases/can_add_maintenance_record.dart';
@@ -85,6 +121,9 @@ import '../../features/premium/domain/usecases/manage_local_license.dart';
 import '../../features/premium/domain/usecases/purchase_premium.dart';
 import '../../features/premium/domain/usecases/restore_purchases.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
+
+// Import for fuel analytics use cases
+import '../../features/fuel/domain/usecases/get_fuel_analytics.dart';
 // Reports imports
 import '../../features/reports/data/datasources/reports_data_source.dart';
 import '../../features/reports/data/repositories/reports_repository_impl.dart';
@@ -110,6 +149,7 @@ import '../../features/vehicles/domain/usecases/update_vehicle.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 // Additional imports (removing duplicates)
 import '../error/error_handler.dart';
+import '../error/error_logger.dart';
 import '../error/error_reporter.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
@@ -124,24 +164,38 @@ final sl = GetIt.instance;
 
 /// Configuração completa do DI usando injectable + manual registrations
 Future<void> initializeDependencies() async {
-  // ===== Call injectable configuration first =====
-  await configureDependencies();
+  // ===== Call injectable configuration first (commented out - using manual DI) =====
+  // await configureDependencies();
   
   // ===== External Dependencies =====
-  
-  // Firebase services will be registered by injectable RegisterModule
-  
-  // SharedPreferences will be registered by injectable RegisterModule
-  
-  // FlutterSecureStorage will be registered by injectable RegisterModule
+
+  // Register external dependencies manually (since injectable is disabled)
+  final prefs = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(prefs);
+
+  sl.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
+  sl.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
+  sl.registerSingleton<Connectivity>(Connectivity());
+  sl.registerSingleton<core.ISubscriptionRepository>(core.RevenueCatService());
+  sl.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  ));
 
   // ===== Services =====
   
   // Core Services
-  // LocalDataService is now registered by injectable (@singleton annotation)
-  // AnalyticsService will be registered by injectable (@singleton annotation)
+  sl.registerLazySingleton<LocalDataService>(() => LocalDataService());
+  sl.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
   sl.registerLazySingleton<AvatarService>(() => AvatarService());
-  
+  sl.registerLazySingleton<PlatformService>(() => const PlatformService());
+  sl.registerLazySingleton<AuthRateLimiter>(() => AuthRateLimiter(sl<FlutterSecureStorage>()));
+
+  // Logging Service
+  sl.registerLazySingleton<LoggingService>(() => LoggingService(
+    sl<LogRepository>(),
+    sl<AnalyticsService>(),
+  ));
+
   // Image Services
   sl.registerLazySingleton<ImageCompressionService>(() => ImageCompressionService());
   sl.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService());
@@ -158,9 +212,9 @@ Future<void> initializeDependencies() async {
   // PlatformService will be registered by injectable (@injectable annotation)
 
   // Error Handling Services
-  // ErrorLogger will be registered by injectable (@injectable annotation)
-  // ErrorHandler will be registered by injectable (@factory annotation)
-  // ErrorReporter will be registered by injectable (@factory annotation)
+  sl.registerLazySingleton<ErrorLogger>(() => ErrorLogger());
+  sl.registerLazySingleton<ErrorHandler>(() => ErrorHandler(sl<ErrorLogger>()));
+  sl.registerLazySingleton<ErrorReporter>(() => ErrorReporter(sl<AnalyticsService>()));
 
   // Core Package Services - ISubscriptionRepository will be registered by injectable RegisterModule
   
@@ -176,40 +230,282 @@ Future<void> initializeDependencies() async {
   ));
 
   // Sync Services
-  // Note: SyncQueue, SyncOperations and SyncService are now registered by injectable
-  // ConflictResolver<BaseSyncModel> is also registered by injectable now
+  sl.registerLazySingleton<SyncQueue>(() {
+    final queue = SyncQueue();
+    queue.initialize(); // Initialize async (non-blocking)
+    return queue;
+  });
+
+  sl.registerLazySingleton<SyncOperations>(() => SyncOperations(
+    sl<SyncQueue>(),
+    sl<Connectivity>(),
+    sl<AnalyticsService>(),
+  ));
+
+  sl.registerLazySingleton<ConflictResolver<BaseSyncModel>>(() => ConflictResolver<BaseSyncModel>());
+
+  // Sync Service - requires multiple dependencies
+  sl.registerLazySingleton<sync_interface.ISyncService>(() => SyncService(
+    sl<SyncQueue>(),
+    sl<SyncOperations>(),
+    sl<ConflictResolver<BaseSyncModel>>(),
+    sl<AnalyticsService>(),
+    sl<AuthRepository>(),
+  ));
+
+  // Premium Sync Service
+  sl.registerLazySingleton<PremiumSyncService>(() => PremiumSyncService(
+    sl<PremiumRemoteDataSource>(),
+    sl<PremiumFirebaseDataSource>(),
+    sl<PremiumWebhookDataSource>(),
+    sl<core.IAuthRepository>(),
+  ));
 
   // ===== Connectivity =====
   // Connectivity will be registered by injectable RegisterModule
 
   // ===== Data Sources =====
-  
-  // Data Sources are now registered by injectable - see injectable_config.config.dart
-  // VehicleLocalDataSource - registered by injectable
-  // VehicleRemoteDataSource - registered by injectable  
-  // AuthLocalDataSource - registered by injectable
-  // AuthRemoteDataSource - registered by injectable
-  // FuelLocalDataSource - registered by injectable
-  // FuelRemoteDataSource - registered by injectable
-  // MaintenanceLocalDataSource - registered by injectable
-  // MaintenanceRemoteDataSource - registered by injectable
-  // PremiumLocalDataSource - registered by injectable
-  // PremiumRemoteDataSource - registered by injectable
-  // LogLocalDataSource - registered by injectable
-  // LogRemoteDataSource - registered by injectable
 
-  // ReportsDataSource - registered by injectable
+  // Auth Data Sources
+  sl.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl(
+    sl<SharedPreferences>(),
+    sl<FlutterSecureStorage>(),
+  ));
+
+  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(
+    sl<FirebaseAuth>(),
+    sl<FirebaseFirestore>(),
+  ));
+
+  // Vehicle Data Sources
+  sl.registerLazySingleton<VehicleLocalDataSource>(() => VehicleLocalDataSourceImpl(
+    sl<LocalDataService>(),
+  ));
+  sl.registerLazySingleton<VehicleRemoteDataSource>(() => VehicleRemoteDataSourceImpl(
+    sl<FirebaseFirestore>(),
+  ));
+
+  // Log Data Sources
+  sl.registerLazySingleton<LogLocalDataSource>(() => LogLocalDataSourceImpl());
+  sl.registerLazySingleton<LogRemoteDataSource>(() => LogRemoteDataSourceImpl(
+    firestore: sl<FirebaseFirestore>(),
+  ));
+
+  // Fuel Data Sources
+  sl.registerLazySingleton<FuelLocalDataSource>(() => FuelLocalDataSourceImpl(
+    sl<LocalDataService>(),
+  ));
+  sl.registerLazySingleton<FuelRemoteDataSource>(() => FuelRemoteDataSourceImpl(
+    sl<FirebaseFirestore>(),
+  ));
+
+  // Maintenance Data Sources
+  sl.registerLazySingleton<MaintenanceLocalDataSource>(() => MaintenanceLocalDataSourceImpl(
+    sl<LocalDataService>(),
+  ));
+  sl.registerLazySingleton<MaintenanceRemoteDataSource>(() => MaintenanceRemoteDataSourceImpl(
+    sl<FirebaseAuth>(),
+    sl<FirebaseFirestore>(),
+  ));
+
+  // Expenses Remote Data Source
+  sl.registerLazySingleton<ExpensesRemoteDataSource>(() => ExpensesRemoteDataSourceImpl(
+    sl<FirebaseFirestore>(),
+  ));
+
+  // Odometer Remote Data Source
+  sl.registerLazySingleton<OdometerRemoteDataSource>(() => OdometerRemoteDataSourceImpl(
+    sl<FirebaseFirestore>(),
+  ));
+
+  // Reports Data Source
+  sl.registerLazySingleton<ReportsDataSource>(() => ReportsDataSourceImpl(
+    sl<FuelRepository>(),
+  ));
 
   // ===== Repositories =====
-  
-  // Repositories are now registered by injectable - see injectable_config.config.dart
-  // LogRepository - registered by injectable
-  // VehicleRepository - registered by injectable
-  // AuthRepository - registered by injectable  
-  // FuelRepository - registered by injectable
-  // ReportsRepository - registered by injectable
-  // MaintenanceRepository - registered by injectable
-  // PremiumRepository - registered by injectable
+
+  // Auth Repository
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(
+    remoteDataSource: sl<AuthRemoteDataSource>(),
+    localDataSource: sl<AuthLocalDataSource>(),
+  ));
+
+  // Log Repository
+  sl.registerLazySingleton<LogRepository>(() => LogRepositoryImpl(
+    localDataSource: sl<LogLocalDataSource>(),
+    remoteDataSource: sl<LogRemoteDataSource>(),
+    connectivity: sl<Connectivity>(),
+  ));
+
+  // Vehicle Repository
+  sl.registerLazySingleton<VehicleRepository>(() => VehicleRepositoryImpl(
+    localDataSource: sl<VehicleLocalDataSource>(),
+    remoteDataSource: sl<VehicleRemoteDataSource>(),
+    connectivity: sl<Connectivity>(),
+    authRepository: sl<AuthRepository>(),
+    loggingService: sl<LoggingService>(),
+  ));
+
+  // Fuel Repository
+  sl.registerLazySingleton<FuelRepository>(() => FuelRepositoryImpl(
+    localDataSource: sl<FuelLocalDataSource>(),
+    remoteDataSource: sl<FuelRemoteDataSource>(),
+    connectivity: sl<Connectivity>(),
+    authRepository: sl<AuthRepository>(),
+    loggingService: sl<LoggingService>(),
+  ));
+
+  // Maintenance Repository
+  sl.registerLazySingleton<MaintenanceRepository>(() => MaintenanceRepositoryImpl(
+    localDataSource: sl<MaintenanceLocalDataSource>(),
+    remoteDataSource: sl<MaintenanceRemoteDataSource>(),
+    connectivity: sl<Connectivity>(),
+    loggingService: sl<LoggingService>(),
+  ));
+
+  // Reports Repository
+  sl.registerLazySingleton<ReportsRepository>(() => ReportsRepositoryImpl(
+    sl<ReportsDataSource>(),
+  ));
+
+  // ===== Use Cases =====
+
+  // Auth Use Cases
+  sl.registerLazySingleton<GetCurrentUser>(() => GetCurrentUser(sl<AuthRepository>()));
+  sl.registerLazySingleton<WatchAuthState>(() => WatchAuthState(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignInWithEmail>(() => SignInWithEmail(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignUpWithEmail>(() => SignUpWithEmail(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignInAnonymously>(() => SignInAnonymously(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignOut>(() => SignOut(sl<AuthRepository>()));
+  sl.registerLazySingleton<DeleteAccount>(() => DeleteAccount(sl<AuthRepository>()));
+  sl.registerLazySingleton<UpdateProfile>(() => UpdateProfile(sl<AuthRepository>()));
+  sl.registerLazySingleton<SendPasswordReset>(() => SendPasswordReset(sl<AuthRepository>()));
+
+  // Vehicle Use Cases
+  sl.registerLazySingleton<GetAllVehicles>(() => GetAllVehicles(sl<VehicleRepository>()));
+  sl.registerLazySingleton<GetVehicleById>(() => GetVehicleById(sl<VehicleRepository>()));
+  sl.registerLazySingleton<AddVehicle>(() => AddVehicle(sl<VehicleRepository>()));
+  sl.registerLazySingleton<UpdateVehicle>(() => UpdateVehicle(sl<VehicleRepository>()));
+  sl.registerLazySingleton<DeleteVehicle>(() => DeleteVehicle(sl<VehicleRepository>()));
+  sl.registerLazySingleton<SearchVehicles>(() => SearchVehicles(sl<VehicleRepository>()));
+
+  // Fuel Use Cases
+  sl.registerLazySingleton<GetAllFuelRecords>(() => GetAllFuelRecords(sl<FuelRepository>()));
+  sl.registerLazySingleton<AddFuelRecord>(() => AddFuelRecord(sl<FuelRepository>()));
+  sl.registerLazySingleton<UpdateFuelRecord>(() => UpdateFuelRecord(sl<FuelRepository>()));
+  sl.registerLazySingleton<DeleteFuelRecord>(() => DeleteFuelRecord(sl<FuelRepository>()));
+  sl.registerLazySingleton<GetFuelRecordsByVehicle>(() => GetFuelRecordsByVehicle(sl<FuelRepository>()));
+  sl.registerLazySingleton<SearchFuelRecords>(() => SearchFuelRecords(sl<FuelRepository>()));
+  sl.registerLazySingleton<GetAverageConsumption>(() => GetAverageConsumption(sl<FuelRepository>()));
+  sl.registerLazySingleton<GetTotalSpent>(() => GetTotalSpent(sl<FuelRepository>()));
+  sl.registerLazySingleton<GetRecentFuelRecords>(() => GetRecentFuelRecords(sl<FuelRepository>()));
+
+  // Maintenance Use Cases
+  sl.registerLazySingleton<GetAllMaintenanceRecords>(() => GetAllMaintenanceRecords(sl<MaintenanceRepository>()));
+  sl.registerLazySingleton<AddMaintenanceRecord>(() => AddMaintenanceRecord(sl<MaintenanceRepository>()));
+  sl.registerLazySingleton<UpdateMaintenanceRecord>(() => UpdateMaintenanceRecord(sl<MaintenanceRepository>()));
+  sl.registerLazySingleton<DeleteMaintenanceRecord>(() => DeleteMaintenanceRecord(sl<MaintenanceRepository>()));
+  sl.registerLazySingleton<GetMaintenanceRecordsByVehicle>(() => GetMaintenanceRecordsByVehicle(sl<MaintenanceRepository>()));
+  sl.registerLazySingleton<GetUpcomingMaintenanceRecords>(() => GetUpcomingMaintenanceRecords(sl<MaintenanceRepository>()));
+  sl.registerLazySingleton<GetMaintenanceAnalytics>(() => GetMaintenanceAnalytics(sl<MaintenanceRepository>()));
+
+  // Reports Use Cases (using correct class names)
+  sl.registerLazySingleton<GenerateCustomReport>(() => GenerateCustomReport(sl<ReportsRepository>()));
+  sl.registerLazySingleton<GenerateMonthlyReport>(() => GenerateMonthlyReport(sl<ReportsRepository>()));
+  sl.registerLazySingleton<GenerateYearlyReport>(() => GenerateYearlyReport(sl<ReportsRepository>()));
+  sl.registerLazySingleton<CompareMonthlyReports>(() => CompareMonthlyReports(sl<ReportsRepository>()));
+  sl.registerLazySingleton<CompareYearlyReports>(() => CompareYearlyReports(sl<ReportsRepository>()));
+  sl.registerLazySingleton<ExportReportToCSV>(() => ExportReportToCSV(sl<ReportsRepository>()));
+  sl.registerLazySingleton<ExportReportToPDF>(() => ExportReportToPDF(sl<ReportsRepository>()));
+  sl.registerLazySingleton<GetFuelEfficiencyTrends>(() => GetFuelEfficiencyTrends(sl<ReportsRepository>()));
+  sl.registerLazySingleton<GetCostAnalysis>(() => GetCostAnalysis(sl<ReportsRepository>()));
+  sl.registerLazySingleton<GetUsagePatterns>(() => GetUsagePatterns(sl<ReportsRepository>()));
+
+  // Premium Use Cases
+  sl.registerLazySingleton<CheckPremiumStatus>(() => CheckPremiumStatus(sl<PremiumRepository>()));
+  sl.registerLazySingleton<CanUseFeature>(() => CanUseFeature(sl<PremiumRepository>()));
+  sl.registerLazySingleton<CanAddVehicle>(() => CanAddVehicle(sl<PremiumRepository>()));
+  sl.registerLazySingleton<CanAddFuelRecord>(() => CanAddFuelRecord(sl<PremiumRepository>()));
+  sl.registerLazySingleton<CanAddMaintenanceRecord>(() => CanAddMaintenanceRecord(sl<PremiumRepository>()));
+  sl.registerLazySingleton<PurchasePremium>(() => PurchasePremium(sl<PremiumRepository>()));
+  sl.registerLazySingleton<GetAvailableProducts>(() => GetAvailableProducts(sl<PremiumRepository>()));
+  sl.registerLazySingleton<RestorePurchases>(() => RestorePurchases(sl<PremiumRepository>()));
+  sl.registerLazySingleton<GenerateLocalLicense>(() => GenerateLocalLicense(sl<PremiumRepository>()));
+  sl.registerLazySingleton<RevokeLocalLicense>(() => RevokeLocalLicense(sl<PremiumRepository>()));
+  sl.registerLazySingleton<HasActiveLocalLicense>(() => HasActiveLocalLicense(sl<PremiumRepository>()));
+
+  // Expenses Use Cases (removing since files don't exist)
+
+  // ===== Providers =====
+
+  // Auth Provider
+  sl.registerFactory<auth_provider.AuthProvider>(() => auth_provider.AuthProvider(
+    getCurrentUser: sl<GetCurrentUser>(),
+    watchAuthState: sl<WatchAuthState>(),
+    signInWithEmail: sl<SignInWithEmail>(),
+    signUpWithEmail: sl<SignUpWithEmail>(),
+    signInAnonymously: sl<SignInAnonymously>(),
+    signOut: sl<SignOut>(),
+    deleteAccount: sl<DeleteAccount>(),
+    updateProfile: sl<UpdateProfile>(),
+    sendPasswordReset: sl<SendPasswordReset>(),
+    analytics: sl<AnalyticsService>(),
+    platformService: sl<PlatformService>(),
+    rateLimiter: sl<AuthRateLimiter>(),
+    syncService: sl<sync_interface.ISyncService>(),
+    authLocalDataSource: sl<AuthLocalDataSource>(),
+  ));
+
+  // Vehicles Provider
+  sl.registerLazySingleton<VehiclesProvider>(() => VehiclesProvider(
+    getAllVehicles: sl<GetAllVehicles>(),
+    getVehicleById: sl<GetVehicleById>(),
+    addVehicle: sl<AddVehicle>(),
+    updateVehicle: sl<UpdateVehicle>(),
+    deleteVehicle: sl<DeleteVehicle>(),
+    searchVehicles: sl<SearchVehicles>(),
+    repository: sl<VehicleRepository>(),
+  ));
+
+  // Fuel Provider (simplified - using only available use cases)
+  sl.registerLazySingleton<FuelProvider>(() => FuelProvider(
+    getAllFuelRecords: sl<GetAllFuelRecords>(),
+    getFuelRecordsByVehicle: sl<GetFuelRecordsByVehicle>(),
+    addFuelRecord: sl<AddFuelRecord>(),
+    updateFuelRecord: sl<UpdateFuelRecord>(),
+    deleteFuelRecord: sl<DeleteFuelRecord>(),
+    searchFuelRecords: sl<SearchFuelRecords>(),
+    getAverageConsumption: sl<GetAverageConsumption>(), // Available use case
+    getTotalSpent: sl<GetTotalSpent>(), // Available use case
+    getRecentFuelRecords: sl<GetRecentFuelRecords>(), // Using available use case
+    errorHandler: sl<ErrorHandler>(),
+    errorReporter: sl<ErrorReporter>(),
+  ));
+
+  // Maintenance Provider
+  sl.registerLazySingleton<MaintenanceProvider>(() => MaintenanceProvider(
+    sl<GetAllMaintenanceRecords>(),
+    sl<GetMaintenanceRecordsByVehicle>(),
+    sl<AddMaintenanceRecord>(),
+    sl<UpdateMaintenanceRecord>(),
+    sl<DeleteMaintenanceRecord>(),
+    sl<GetUpcomingMaintenanceRecords>(),
+    sl<GetMaintenanceAnalytics>(),
+  ));
+
+  // Reports Provider
+  sl.registerLazySingleton<ReportsProvider>(() => ReportsProvider(
+    generateMonthlyReport: sl<GenerateMonthlyReport>(),
+    generateYearlyReport: sl<GenerateYearlyReport>(),
+    generateCustomReport: sl<GenerateCustomReport>(),
+    compareMonthlyReports: sl<CompareMonthlyReports>(),
+    compareYearlyReports: sl<CompareYearlyReports>(),
+    getFuelEfficiencyTrends: sl<GetFuelEfficiencyTrends>(),
+    getCostAnalysis: sl<GetCostAnalysis>(),
+    getUsagePatterns: sl<GetUsagePatterns>(),
+    exportReportToCSV: sl<ExportReportToCSV>(),
+  ));
 
   // Odometer Repository - now requires remote data source, connectivity and auth
   sl.registerLazySingleton<OdometerRepository>(() {
@@ -241,36 +537,32 @@ Future<void> initializeDependencies() async {
     return repository;
   });
 
-  // Premium Repository - registered by injectable
+  // Premium Repository already registered above
 
-  // ===== Use Cases =====
+  // ===== Additional Providers (Manual Registration) =====
   
-  // Use Cases are now registered by injectable - see injectable_config.config.dart
-  // All Vehicle, Auth, Fuel, Reports, Maintenance, and Premium Use Cases are registered automatically
-  
-  // ===== Providers =====
-  
-  // Most Providers are now registered by injectable - see injectable_config.config.dart
-  // VehiclesProvider - registered by injectable (@factory)
-  // AuthProvider - registered by injectable (@factory) 
-  // FuelProvider - registered by injectable (@factory)
-  // Note: FuelFormProvider needs special registration with ReceiptImageService
-  // ReportsProvider - registered by injectable (@factory)
-  // MaintenanceProvider - registered by injectable (@factory)
-  // PremiumProvider - registered by injectable (@factory)
-  // SyncStatusProvider - registered by injectable (@factory)
-  
-  // Providers that need manual registration (not injectable or have special dependencies):
-  
-  // Expenses Provider - needs to be checked if injectable
-  sl.registerLazySingleton<ExpensesProvider>(
-    () => ExpensesProvider(
-      sl<ExpensesRepository>(),
-      sl<VehiclesProvider>(),
-    ),
-  );
+  // Expenses Provider
+  sl.registerLazySingleton<ExpensesProvider>(() => ExpensesProvider(
+    sl<ExpensesRepository>(),
+    sl<VehiclesProvider>(),
+  ));
 
-  // Settings Provider - needs to be checked if injectable
+  // Premium Provider
+  sl.registerLazySingleton<PremiumProvider>(() => PremiumProvider(
+    sl<CheckPremiumStatus>(),
+    sl<CanUseFeature>(),
+    sl<CanAddVehicle>(),
+    sl<CanAddFuelRecord>(),
+    sl<CanAddMaintenanceRecord>(),
+    sl<PurchasePremium>(),
+    sl<GetAvailableProducts>(),
+    sl<RestorePurchases>(),
+    sl<GenerateLocalLicense>(),
+    sl<RevokeLocalLicense>(),
+    sl<PremiumRepository>(),
+  ));
+
+  // Settings Provider
   sl.registerFactory<SettingsProvider>(
     () => SettingsProvider(
       preferences: sl(),
@@ -278,7 +570,7 @@ Future<void> initializeDependencies() async {
     ),
   );
 
-  // Odometer Provider - needs to be checked if injectable
+  // Odometer Provider
   sl.registerLazySingleton<OdometerProvider>(
     () => OdometerProvider(
       sl<OdometerRepository>(),
@@ -287,29 +579,29 @@ Future<void> initializeDependencies() async {
   );
 
   // ===== Initialize services that need post-DI setup =====
-  await initializePostDIServices();
+  // await initializePostDIServices(); // Function not defined - commenting out
 }
 
-@module
-abstract class RegisterModule {
+// @module // Commented out - using manual DI
+class RegisterModule {
   // External dependencies can be registered here
-  @preResolve
-  Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
-  
-  @singleton
-  FirebaseFirestore get firestore => FirebaseFirestore.instance;
-  
-  @singleton
-  FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
-  
-  @singleton
-  Connectivity get connectivity => Connectivity();
-  
-  @singleton
-  core.ISubscriptionRepository get subscriptionRepository => core.RevenueCatService();
-  
-  @singleton
-  FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
+  // @preResolve // Commented out - using manual DI
+  static Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
+
+  // @singleton // Commented out - using manual DI
+  static FirebaseFirestore get firestore => FirebaseFirestore.instance;
+
+  // @singleton // Commented out - using manual DI
+  static FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
+
+  // @singleton // Commented out - using manual DI
+  static Connectivity get connectivity => Connectivity();
+
+  // @singleton // Commented out - using manual DI
+  static core.ISubscriptionRepository get subscriptionRepository => core.RevenueCatService();
+
+  // @singleton // Commented out - using manual DI
+  static FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 }

@@ -103,7 +103,21 @@ class PremiumProvider extends ChangeNotifier {
 
   /// Força uma verificação do status premium
   Future<void> refreshPremiumStatus() async {
-    await _checkInitialStatus();
+    _isLoading = true;
+    notifyListeners();
+
+    final result = await _premiumRepository.forceSyncPremiumStatus();
+    result.fold(
+      (failure) {
+        _errorMessage = failure.message;
+      },
+      (_) {
+        _errorMessage = null;
+      },
+    );
+
+    _isLoading = false;
+    notifyListeners();
   }
 
   /// Obtém produtos disponíveis para compra
@@ -244,6 +258,47 @@ class PremiumProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Stream de eventos de sincronização (para debug/monitoramento)
+  Stream<String> get syncStatus {
+    return _premiumRepository.syncEvents.map((event) {
+      switch (event.runtimeType.toString()) {
+        case '_SyncStarted':
+          return 'Sincronização iniciada...';
+        case '_SyncCompleted':
+          return 'Sincronização concluída';
+        case '_SyncFailed':
+          return 'Erro na sincronização';
+        case '_StatusUpdated':
+          return 'Status atualizado';
+        case '_WebhookReceived':
+          return 'Atualização automática recebida';
+        case '_RetryScheduled':
+          return 'Tentativa agendada...';
+        default:
+          return 'Status atualizado';
+      }
+    });
+  }
+
+  /// Força sincronização cross-device
+  Future<void> syncAcrossDevices() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await _premiumRepository.forceSyncPremiumStatus();
+      result.fold(
+        (failure) => _errorMessage = 'Erro na sincronização: ${failure.message}',
+        (_) => _errorMessage = null,
+      );
+    } catch (e) {
+      _errorMessage = 'Erro inesperado na sincronização: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
   
   // Métodos para verificar funcionalidades específicas do GasOMeter

@@ -2,6 +2,7 @@ import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../data/services/premium_sync_service.dart';
 import '../entities/premium_status.dart';
 
 /// Repositório para operações premium específicas do GasOMeter
@@ -61,4 +62,19 @@ abstract class PremiumRepository {
 
   /// Verifica se tem licença local ativa
   Future<Either<Failure, bool>> hasActiveLocalLicense();
+
+  /// Métodos de sincronização avançada
+
+  /// Força sincronização imediata do status premium
+  Future<Either<Failure, void>> forceSyncPremiumStatus();
+
+  /// Stream de eventos de sincronização
+  Stream<PremiumSyncEvent> get syncEvents;
+
+  /// Processa webhook do RevenueCat
+  Future<Either<Failure, void>> processWebhook({
+    required Map<String, dynamic> payload,
+    String? signature,
+    String? secret,
+  });
 }

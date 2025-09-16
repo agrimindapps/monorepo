@@ -242,13 +242,13 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
       _updateRefreshPhase(RefreshPhase.completed);
       
       // Show success briefly
-      await Future.delayed(const Duration(milliseconds: 800));
+      await Future<void>.delayed(const Duration(milliseconds: 800));
       
     } catch (error) {
       _updateRefreshPhase(RefreshPhase.error);
       
       // Show error briefly
-      await Future.delayed(const Duration(milliseconds: 1200));
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
     } finally {
       _resetRefreshState();
     }
@@ -465,7 +465,7 @@ class _MultiStageSyncRefreshState extends State<MultiStageSyncRefresh> {
       
       // Small delay between stages for better UX
       if (i < widget.syncStages.length - 1) {
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future<void>.delayed(const Duration(milliseconds: 300));
       }
     }
   }

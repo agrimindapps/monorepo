@@ -17,6 +17,7 @@ import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/promo/presentation/pages/terms_conditions_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/main_navigation.dart';
 import '../services/platform_service.dart';
@@ -144,6 +145,13 @@ class AppRouter {
               path: '/settings',
               name: 'settings',
               builder: (context, state) => const SettingsPage(),
+            ),
+
+            // Device Management
+            GoRoute(
+              path: '/devices',
+              name: 'devices',
+              builder: (context, state) => const DeviceManagementPage(),
             ),
           ],
         ),

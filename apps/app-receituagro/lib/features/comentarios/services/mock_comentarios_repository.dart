@@ -50,20 +50,20 @@ class MockComentariosRepository implements IComentariosRepository {
   @override
   Future<List<ComentarioModel>> getAllComentarios() async {
     _initializeMockData();
-    await Future.delayed(const Duration(milliseconds: 500)); // Simulate network delay
+    await Future<void>.delayed(const Duration(milliseconds: 500)); // Simulate network delay
     return List.from(_comentarios.where((c) => c.status));
   }
 
   @override
   Future<void> addComentario(ComentarioModel comentario) async {
-    await Future.delayed(const Duration(milliseconds: 300)); // Simulate network delay
+    await Future<void>.delayed(const Duration(milliseconds: 300)); // Simulate network delay
     _comentarios.add(comentario);
     debugPrint('Mock: Added comentario ${comentario.id}');
   }
 
   @override
   Future<void> updateComentario(ComentarioModel comentario) async {
-    await Future.delayed(const Duration(milliseconds: 300)); // Simulate network delay
+    await Future<void>.delayed(const Duration(milliseconds: 300)); // Simulate network delay
     final index = _comentarios.indexWhere((c) => c.id == comentario.id);
     if (index != -1) {
       _comentarios[index] = comentario;
@@ -73,7 +73,7 @@ class MockComentariosRepository implements IComentariosRepository {
 
   @override
   Future<void> deleteComentario(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300)); // Simulate network delay
+    await Future<void>.delayed(const Duration(milliseconds: 300)); // Simulate network delay
     final index = _comentarios.indexWhere((c) => c.id == id);
     if (index != -1) {
       _comentarios[index] = _comentarios[index].copyWith(status: false);

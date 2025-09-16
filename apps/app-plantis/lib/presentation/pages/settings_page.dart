@@ -329,11 +329,20 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               title: 'Conta',
               children: [
                 SettingsItem(
+                  icon: Icons.devices,
+                  title: 'Gerenciar Dispositivos',
+                  subtitle: 'Controle quais aparelhos têm acesso',
+                  iconColor: PlantisColors.primary,
+                  isFirst: true,
+                  onTap: () {
+                    context.push('/device-management');
+                  },
+                ),
+                SettingsItem(
                   icon: Icons.cloud_upload,
                   title: 'Backup na Nuvem',
                   subtitle: 'Proteja seus dados com backup automático',
                   iconColor: PlantisColors.primary,
-                  isFirst: true,
                   onTap: () {
                     context.push('/backup-settings');
                   },
@@ -356,11 +365,20 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               title: 'Privacidade e Legal',
               children: [
                 SettingsItem(
+                  icon: Icons.download_for_offline,
+                  title: 'Exportar Meus Dados',
+                  subtitle: 'Baixe seus dados pessoais - LGPD',
+                  iconColor: PlantisColors.leaf,
+                  isFirst: true,
+                  onTap: () {
+                    context.push('/data-export');
+                  },
+                ),
+                SettingsItem(
                   icon: Icons.privacy_tip,
                   title: 'Política de Privacidade',
                   subtitle: 'Como protegemos seus dados',
                   iconColor: PlantisColors.primary,
-                  isFirst: true,
                   onTap: () {
                     context.push('/privacy-policy');
                   },

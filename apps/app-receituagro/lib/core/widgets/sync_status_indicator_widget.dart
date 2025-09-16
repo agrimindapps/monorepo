@@ -100,7 +100,7 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
   /// Initialize mock sync state for demonstration
   void _initializeMockState() {
     // Simulate different sync states over time
-    Future.delayed(const Duration(seconds: 2), () {
+    Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _currentSyncStatus = SyncStatus.syncing;
@@ -144,7 +144,7 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
     });
     
     // Return to idle after showing success
-    Future.delayed(const Duration(seconds: 2), () {
+    Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _currentSyncStatus = SyncStatus.idle;

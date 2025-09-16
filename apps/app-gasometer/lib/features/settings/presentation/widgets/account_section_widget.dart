@@ -143,6 +143,20 @@ class AccountSectionWidget extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    context.go('/devices');
+                  },
+                  icon: const Icon(Icons.devices, size: 16),
+                  label: const Text('Dispositivos'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
               // Only show logout button for non-anonymous users
               if (!isAnonymous) ...[
                 const SizedBox(width: 12),

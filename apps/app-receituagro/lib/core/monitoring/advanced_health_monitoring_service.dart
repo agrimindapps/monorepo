@@ -242,7 +242,7 @@ class AdvancedHealthMonitoringService {
       final startTime = DateTime.now();
 
       // Simulate database check - in production, this would test actual DB connections
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       final duration = DateTime.now().difference(startTime);
       final responseTime = duration.inMilliseconds;

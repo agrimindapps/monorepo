@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
 import '../../features/data_export/presentation/providers/data_export_provider.dart';
+import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/fuel/presentation/providers/fuel_provider.dart';
 import '../../features/expenses/presentation/providers/expenses_provider.dart';
 import '../../features/maintenance/presentation/providers/maintenance_provider.dart';
@@ -90,6 +91,14 @@ class ProviderSetup {
       ChangeNotifierProvider<DataExportProvider>(
         create: (context) => _getOrCreateProvider<DataExportProvider>(
           () => getIt<DataExportProvider>(),
+        ),
+        lazy: true,
+      ),
+
+      // Device Management Provider - Lazy loading (usado em configurações)
+      ChangeNotifierProvider<DeviceManagementProvider>(
+        create: (context) => _getOrCreateProvider<DeviceManagementProvider>(
+          () => getIt<DeviceManagementProvider>(),
         ),
         lazy: true,
       ),

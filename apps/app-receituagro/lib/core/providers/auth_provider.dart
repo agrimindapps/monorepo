@@ -59,7 +59,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       // Ouvir mudanças no estado de autenticação
       _userSubscription = _authRepository.currentUser.listen(
         _handleUserStateChange,
-        onError: (error) {
+        onError: (Object error) {
           if (kDebugMode) print('❌ Auth Provider: Error in user stream - $error');
           _errorMessage = 'Erro na autenticação: $error';
           notifyListeners();
@@ -253,7 +253,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
 
           if (kDebugMode) print('❌ Auth Provider: Post-auth sync failed: ${result.message}');
         }
-      }).catchError((error) {
+      }).catchError((Object error) {
         _analytics.trackError('post_auth_sync_exception', error.toString());
         if (kDebugMode) print('❌ Auth Provider: Post-auth sync exception: $error');
       });

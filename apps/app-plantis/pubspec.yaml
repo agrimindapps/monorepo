@@ -51,10 +51,14 @@ dependencies:
   
   # Connectivity
   connectivity_plus: ^6.1.5
-  
+
+  # Device Information
+  device_info_plus: ^11.5.0
+  package_info_plus: ^8.1.0
+
   # Biometric Authentication
   local_auth: ^2.3.0
-  
+
   # URL Launcher for external links
   url_launcher: ^6.3.1
 

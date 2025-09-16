@@ -25,37 +25,37 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   // Status Management
   @override
   Future<void> checkPremiumStatus() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     // Mock implementation - no change to status
   }
 
   @override
   Future<bool> isPremiumUser() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return _status.isActive;
   }
 
   @override
   Future<String?> getSubscriptionType() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return _status.planType;
   }
 
   @override
   Future<DateTime?> getSubscriptionExpiry() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return _status.expiryDate;
   }
 
   @override
   Future<bool> isSubscriptionActive() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return _status.isActive;
   }
 
   @override
   Future<int> getRemainingDays() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     if (_status.expiryDate == null) return 0;
     final now = DateTime.now();
     final difference = _status.expiryDate!.difference(now);
@@ -64,7 +64,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
 
   @override
   Future<void> refreshPremiumStatus() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     notifyListeners();
     _statusController.add(_status.isActive);
   }
@@ -82,7 +82,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
 
   @override
   Future<bool> hasFeatureAccess(String featureId) async {
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
     return canUseFeature(featureId);
   }
 
@@ -112,7 +112,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
 
   @override
   Future<List<String>> getPremiumFeatures() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return [
       'unlimited_search',
       'unlimited_favorites',
@@ -126,14 +126,14 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   // Trial Management
   @override
   Future<bool> isTrialAvailable() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     // Mock: trial available if no subscription
     return !_status.isActive && !_status.isTestSubscription;
   }
 
   @override
   Future<bool> startTrial() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     if (await isTrialAvailable()) {
       _status = PremiumStatus(
@@ -153,7 +153,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   // Test Subscription
   @override
   Future<void> generateTestSubscription() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     _status = PremiumStatus(
       isActive: true,
@@ -168,7 +168,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
 
   @override
   Future<void> removeTestSubscription() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     
     if (_status.isTestSubscription) {
       _status = const PremiumStatus(isActive: false);

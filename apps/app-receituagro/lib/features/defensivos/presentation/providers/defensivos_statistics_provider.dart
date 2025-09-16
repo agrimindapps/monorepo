@@ -94,7 +94,7 @@ class DefensivosStatisticsProvider extends ChangeNotifier {
         
         if (!isDataLoaded) {
           // Aguarda um pouco e tenta novamente (dados podem estar sendo carregados)
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future<void>.delayed(const Duration(milliseconds: 500));
           defensivos = _repository.getActiveDefensivos();
           
           // Se ainda estiver vazio após aguardar

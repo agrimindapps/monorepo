@@ -26,6 +26,6 @@ class PremiumStatusNotifier extends ChangeNotifier {
   
   Future<void> checkPremiumStatus() async {
     // Stub implementation - no-op
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 }

@@ -143,7 +143,7 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
     widget.onPressed!();
 
     // Reset press state
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future<void>.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
           _isPressed = false;

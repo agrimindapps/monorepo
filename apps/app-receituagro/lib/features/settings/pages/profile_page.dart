@@ -663,13 +663,81 @@ class _ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 16),
 
-              // Final confirmation
+              // Final confirmation with TextField
               Text(
-                'Digite "EXCLUIR" para confirmar:',
+                'Para confirmar, digite EXCLUIR abaixo:',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.red.shade700,
                 ),
+              ),
+              const SizedBox(height: 8),
+              StatefulBuilder(
+                builder: (context, setState) {
+                  final TextEditingController confirmationController = TextEditingController();
+                  bool isConfirmationValid = false;
+
+                  return Column(
+                    children: [
+                      TextField(
+                        controller: confirmationController,
+                        onChanged: (value) {
+                          setState(() {
+                            isConfirmationValid = value.trim().toUpperCase() == 'EXCLUIR';
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Digite EXCLUIR para confirmar',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: Colors.red.shade700,
+                              width: 2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Updated confirm button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: isConfirmationValid ? () {
+                            Navigator.of(context).pop();
+                            _proceedWithAccountDeletion(context, authProvider);
+                          } : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isConfirmationValid
+                                ? Colors.red
+                                : Colors.grey.shade400,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            isConfirmationValid
+                                ? 'Confirmar Exclusão'
+                                : 'Digite EXCLUIR para prosseguir',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -678,14 +746,6 @@ class _ProfilePageState extends State<ProfilePage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => _proceedWithAccountDeletion(context, authProvider),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Confirmar Exclusão'),
           ),
         ],
       ),

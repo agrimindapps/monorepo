@@ -16,6 +16,7 @@ import 'core/data/models/espaco_model.dart';
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/services/plantis_notification_service.dart';
+import 'core/storage/plantis_storage_service.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
@@ -69,6 +70,10 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // Initialize PlantisStorageService to register app-specific boxes
+  final plantisStorageService = PlantisStorageService();
+  await plantisStorageService.initialize();
 
   // Initialize DatabaseInspectorService with app-specific boxes
   AppDataInspectorInitializer.initialize();

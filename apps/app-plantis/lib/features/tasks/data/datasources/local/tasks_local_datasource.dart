@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import '../../../domain/entities/task.dart';
 import '../../models/task_model.dart';
+import '../../../../../core/constants/plantis_environment_config.dart';
 
 abstract class TasksLocalDataSource {
   Future<List<TaskModel>> getTasks();
@@ -19,7 +20,7 @@ abstract class TasksLocalDataSource {
 
 class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   final ILocalStorageRepository storageService;
-  static const String _boxName = 'tasks';
+  static const String _boxName = PlantisBoxes.tasks;
 
   TasksLocalDataSourceImpl(this.storageService);
 

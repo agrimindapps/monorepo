@@ -1,4 +1,3 @@
-
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -94,17 +93,17 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
-  
+
   // ===== SPRINT 1 SERVICES INITIALIZATION =====
-  
+
   // Initialize Remote Config Service
   final remoteConfigService = di.sl<ReceitaAgroRemoteConfigService>();
   await remoteConfigService.initialize();
-  
-  // Initialize Analytics Service  
+
+  // Initialize Analytics Service
   final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
   await analyticsService.initialize();
-  
+
   // Initialize Premium Service
   final premiumService = di.sl<ReceitaAgroPremiumService>();
   await premiumService.initialize();
@@ -165,7 +164,9 @@ void main() async {
     await ReceitaAgroDataSetup.initialize();
     print('✅ [MAIN] ReceitaAgroDataSetup concluído com sucesso');
   } catch (e) {
-    print('⚠️ [MAIN] ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados: $e');
+    print(
+      '⚠️ [MAIN] ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados: $e',
+    );
     // Log error but don't block app startup - AppDataManager already loaded the data
     if (EnvironmentConfig.enableAnalytics) {
       await FirebaseCrashlytics.instance.recordError(
@@ -203,9 +204,7 @@ class ReceitaAgroApp extends StatelessWidget {
           create: (_) => PreferencesProvider()..initialize(),
         ),
         // Auth Provider from Core Package Integration
-        ChangeNotifierProvider(
-          create: (_) => di.sl<ReceitaAgroAuthProvider>(),
-        ),
+        ChangeNotifierProvider(create: (_) => di.sl<ReceitaAgroAuthProvider>()),
         // Sprint 1 Providers
         ChangeNotifierProvider(
           create: (_) => di.sl<RemoteConfigProvider>()..initialize(),
@@ -217,13 +216,9 @@ class ReceitaAgroApp extends StatelessWidget {
           create: (_) => di.sl<ReceitaAgroPremiumService>(),
         ),
         // Profile Provider for user profile management
-        ChangeNotifierProvider(
-          create: (_) => di.sl<ProfileProvider>(),
-        ),
+        ChangeNotifierProvider(create: (_) => di.sl<ProfileProvider>()),
         // Settings Provider for device management and settings
-        ChangeNotifierProvider(
-          create: (_) => di.sl<SettingsProvider>(),
-        ),
+        ChangeNotifierProvider(create: (_) => di.sl<SettingsProvider>()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

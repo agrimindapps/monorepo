@@ -8,6 +8,7 @@ import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../di/injection_container.dart' as di;
 import '../models/user_session_data.dart';
 import '../services/device_identity_service.dart';
+import '../services/receituagro_data_cleaner.dart';
 import '../services/sync_orchestrator.dart';
 
 /// AuthProvider específico do ReceitauAgro
@@ -442,7 +443,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       notifyListeners();
 
       final result = await _authRepository.sendPasswordResetEmail(email: email);
-      
+
       result.fold(
         (failure) => _errorMessage = failure.message,
         (_) {
@@ -455,6 +456,137 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Excluir conta do usuário usando o AccountDeletionService do core
+  /// Integra com ReceitaAgroDataCleaner para limpeza de dados específicos
+  Future<AuthResult> deleteAccount() async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      if (kDebugMode) {
+        debugPrint('🗑️ ReceitaAgroAuthProvider: Iniciando exclusão de conta');
+      }
+
+      _analytics.trackEvent('account_deletion_attempt', parameters: {
+        'user_id': _currentUser?.id ?? 'unknown',
+        'user_type': userType.toString(),
+      });
+
+      // Criar instância do ReceitaAgroDataCleaner
+      final dataCleaner = ReceitaAgroDataCleaner();
+
+      // Criar AccountDeletionService com o data cleaner específico
+      final accountDeletionService = AccountDeletionService(
+        authRepository: _authRepository,
+        appDataCleaner: dataCleaner,
+      );
+
+      // Executar exclusão completa
+      final result = await accountDeletionService.deleteAccount();
+
+      return result.fold(
+        (failure) {
+          _errorMessage = failure.message;
+          _analytics.trackEvent('account_deletion_failed', parameters: {
+            'error': failure.message,
+            'user_id': _currentUser?.id ?? 'unknown',
+          });
+
+          if (kDebugMode) {
+            debugPrint('❌ ReceitaAgroAuthProvider: Exclusão de conta falhou - ${failure.message}');
+          }
+
+          return AuthResult.failure(failure.message);
+        },
+        (deletionResult) {
+          _analytics.trackEvent('account_deletion_success', parameters: {
+            'user_id': _currentUser?.id ?? 'unknown',
+            'firebase_delete_success': deletionResult.firebaseDeleteSuccess.toString(),
+            'local_data_cleaned': (deletionResult.localDataCleanupResult?['success'] == true).toString(),
+            'data_cleanup_verified': deletionResult.dataCleanupVerified.toString(),
+            'total_records_cleared': deletionResult.localDataCleanupResult?['totalRecordsCleared']?.toString() ?? '0',
+          });
+
+          if (kDebugMode) {
+            debugPrint('✅ ReceitaAgroAuthProvider: Exclusão de conta concluída com sucesso');
+            debugPrint('   Firebase: ${deletionResult.firebaseDeleteSuccess ? '✅' : '❌'}');
+            debugPrint('   Dados locais: ${deletionResult.localDataCleanupResult?['success'] == true ? '✅' : '⚠️'}');
+            debugPrint('   Verificação: ${deletionResult.dataCleanupVerified ? '✅' : '⚠️'}');
+          }
+
+          // Clear local state (Firebase auth will trigger user state change automatically)
+          _currentUser = null;
+          _sessionData = null;
+          _errorMessage = null;
+
+          return AuthResult.success(UserEntity(
+            id: 'deleted',
+            email: 'deleted@account.com',
+            displayName: 'Conta excluída',
+            provider: AuthProvider.anonymous,
+          ));
+        },
+      );
+
+    } catch (e) {
+      _errorMessage = 'Erro inesperado durante exclusão: $e';
+      _analytics.trackError('account_deletion_exception', e.toString());
+
+      if (kDebugMode) {
+        debugPrint('❌ ReceitaAgroAuthProvider: Erro inesperado durante exclusão - $e');
+      }
+
+      return AuthResult.failure(e.toString());
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Obter preview dos dados que serão excluídos
+  /// Útil para mostrar ao usuário o que será removido
+  Future<Map<String, dynamic>?> getAccountDeletionPreview() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('📊 ReceitaAgroAuthProvider: Obtendo preview de exclusão');
+      }
+
+      final dataCleaner = ReceitaAgroDataCleaner();
+      final accountDeletionService = AccountDeletionService(
+        authRepository: _authRepository,
+        appDataCleaner: dataCleaner,
+      );
+
+      final result = await accountDeletionService.getAccountDeletionPreview();
+
+      return result.fold(
+        (failure) {
+          _errorMessage = failure.message;
+          if (kDebugMode) {
+            debugPrint('❌ ReceitaAgroAuthProvider: Erro ao obter preview - ${failure.message}');
+          }
+          return null;
+        },
+        (preview) {
+          if (kDebugMode) {
+            debugPrint('✅ ReceitaAgroAuthProvider: Preview obtido com sucesso');
+            debugPrint('   App: ${preview['appName']}');
+            debugPrint('   Dados para limpar: ${preview['hasDataToClear']}');
+            debugPrint('   Registros totais: ${preview['dataStats']?['totalRecords'] ?? 0}');
+          }
+          return preview;
+        },
+      );
+    } catch (e) {
+      _errorMessage = 'Erro ao obter preview: $e';
+      if (kDebugMode) {
+        debugPrint('❌ ReceitaAgroAuthProvider: Erro inesperado no preview - $e');
+      }
+      return null;
     }
   }
 

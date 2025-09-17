@@ -512,15 +512,167 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
-  /// Mostrar confirmação de exclusão de conta
-  void _showDeleteAccountConfirmation(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  /// Mostrar confirmação de exclusão de conta com preview dos dados
+  /// LGPD/GDPR Compliant: Mostra exatamente quais dados serão excluídos
+  void _showDeleteAccountConfirmation(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
+    // Primeiro, obter preview dos dados que serão excluídos
+    final preview = await authProvider.getAccountDeletionPreview();
+
+    if (!context.mounted) return;
+
     showDialog<void>(
       context: context,
+      barrierDismissible: false, // Prevent accidental dismissal
       builder: (context) => AlertDialog(
-        title: const Text('Excluir Conta'),
-        content: const Text(
-          'Esta ação é irreversível. Todos os seus dados serão permanentemente removidos.\n\n'
-          'Tem certeza que deseja excluir sua conta?',
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.red.shade700),
+            const SizedBox(width: 8),
+            const Text('Excluir Conta'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // LGPD Warning
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '⚠️ ATENÇÃO: Ação Irreversível',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Esta ação excluirá permanentemente sua conta e TODOS os dados associados, '
+                      'conforme seus direitos sob a LGPD/GDPR.',
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Data Preview Section
+              if (preview != null) ...[
+                const Text(
+                  'Dados que serão excluídos:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // App info
+                      _buildDataPreviewItem(
+                        '📱 Aplicativo',
+                        preview['appName'] ?? 'ReceitaAgro',
+                      ),
+
+                      // Account data
+                      _buildDataPreviewItem(
+                        '👤 Conta Firebase',
+                        'Email, perfil e autenticação',
+                      ),
+
+                      // Local data stats
+                      if (preview['dataStats'] != null) ...[
+                        _buildDataPreviewItem(
+                          '💾 Dados Locais',
+                          '${preview['dataStats']['totalRecords'] ?? 0} registros em ${preview['dataStats']['totalBoxes'] ?? 0} categorias',
+                        ),
+
+                        // Categories
+                        if (preview['availableCategories'] != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Categorias: ${(preview['availableCategories'] as List).where((c) => c != 'all').join(', ')}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ],
+
+                      // Preferences
+                      _buildDataPreviewItem(
+                        '⚙️ Configurações',
+                        'Preferências e configurações do app',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+              ],
+
+              // LGPD Rights Information
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ℹ️ Seus Direitos (LGPD/GDPR)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '• Você tem o direito de excluir todos os seus dados pessoais\n'
+                      '• Esta exclusão será irreversível e imediata\n'
+                      '• Você pode criar uma nova conta a qualquer momento\n'
+                      '• Para dúvidas, entre em contato conosco',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Final confirmation
+              Text(
+                'Digite "EXCLUIR" para confirmar:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade700,
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -528,22 +680,158 @@ class _ProfilePageState extends State<ProfilePage> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              // TODO: Implementar exclusão de conta
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Funcionalidade de exclusão será implementada em breve'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+            onPressed: () => _proceedWithAccountDeletion(context, authProvider),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirmar Exclusão'),
           ),
         ],
       ),
     );
+  }
+
+  /// Widget helper para mostrar itens do preview de dados
+  Widget _buildDataPreviewItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(color: Colors.grey.shade700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Proceder com a exclusão da conta após confirmação
+  Future<void> _proceedWithAccountDeletion(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
+    Navigator.of(context).pop(); // Close confirmation dialog
+
+    // Show progress dialog
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Excluindo conta e dados...'),
+            SizedBox(height: 8),
+            Text(
+              'Por favor, aguarde. Esta operação pode levar alguns momentos.',
+              style: TextStyle(fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // Execute account deletion
+      final result = await authProvider.deleteAccount();
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close progress dialog
+
+        if (result.isSuccess) {
+          // Success - show confirmation and navigate away
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text('Conta excluída com sucesso. Todos os dados foram removidos.'),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 5),
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+
+          // Navigate to app start or login page
+          if (context.mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+          }
+        } else {
+          // Error - show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('Erro na exclusão: ${result.errorMessage ?? "Erro desconhecido"}'),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 8),
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              action: SnackBarAction(
+                label: 'Tentar Novamente',
+                textColor: Colors.white,
+                onPressed: () => _showDeleteAccountConfirmation(context, authProvider),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close progress dialog
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Erro inesperado: $e'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 8),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   /// Realizar logout

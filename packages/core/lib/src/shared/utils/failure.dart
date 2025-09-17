@@ -133,6 +133,24 @@ class NotFoundFailure extends Failure {
   }) : super(message: message);
 }
 
+/// Falha de autenticação específica
+class AuthenticationFailure extends AuthFailure {
+  const AuthenticationFailure(
+    super.message, {
+    super.code,
+    super.details,
+  });
+}
+
+/// Falha inesperada/desconhecida
+class UnexpectedFailure extends UnknownFailure {
+  const UnexpectedFailure(
+    super.message, {
+    super.code,
+    super.details,
+  });
+}
+
 /// Extensions para facilitar o uso
 extension FailureExtension on Failure {
   /// Retorna true se é uma falha de rede

@@ -291,6 +291,9 @@ class PlantisNotificationService {
   /// Expõe o repository para uso interno
   INotificationRepository get notificationRepository => _notificationRepository;
 
+  /// Verifica se o serviço está inicializado
+  bool get isInitialized => _isInitialized;
+
   /// Gera um ID de notificação único
   int generateNotificationId(String identifier) {
     return _notificationRepository.generateNotificationId(identifier);

@@ -866,7 +866,13 @@ class TaskNotificationService {
   Future<void> initializeNotificationHandlers() async {
     try {
       await _ensureInitialized();
-      
+
+      // Ensure PlantisNotificationService is fully initialized
+      if (!_notificationService.isInitialized) {
+        debugPrint('⚠️ PlantisNotificationService not initialized, skipping handlers setup');
+        return;
+      }
+
       // Set up notification tap handler
       final notificationRepository = _notificationService.notificationRepository;
 
@@ -877,7 +883,7 @@ class TaskNotificationService {
       notificationRepository.setNotificationActionCallback(
         (String actionId, String? payload) => handleNotificationAction(actionId, payload ?? ''),
       );
-      
+
       debugPrint('✅ Notification handlers initialized');
     } catch (e) {
       debugPrint('❌ Error initializing notification handlers: $e');

@@ -10,9 +10,13 @@ import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/test_data_generator_service.dart';
 import '../../shared/widgets/responsive_layout.dart';
 import '../../core/theme/plantis_colors.dart';
+import '../../core/theme/plantis_design_tokens.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../features/development/presentation/pages/database_inspector_page.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../../features/settings/presentation/widgets/enhanced_settings_item.dart';
+import '../../features/settings/presentation/widgets/premium_components.dart';
+import '../../features/settings/presentation/widgets/settings_card.dart';
 import '../../shared/widgets/loading/loading_components.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
@@ -46,245 +50,56 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                // Header com título e boas-vindas
-                const SizedBox(height: 8),
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Minha Conta',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 28,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        user != null && user.displayName.isNotEmpty
-                            ? 'Bem-vindo, ${user.displayName}'
-                            : 'Bem-vindo, Usuário Anônimo',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Enhanced Header with plant-themed design
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                _buildEnhancedHeader(context, theme, user),
                 
                 const SizedBox(height: 24),
 
-                // User Profile Card
-                InkWell(
-                  onTap: () => context.push('/account-profile'),
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(20.0),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainer,
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: Row(
-                    children: [
-                      // Avatar
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: PlantisColors.primary,
-                        child: user?.hasProfilePhoto == true
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(30),
-                                child: Image.network(
-                                  user!.photoUrl!,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text(
-                                      user.initials,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                            : Text(
-                                user?.initials ?? 'UA',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      // User Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user?.displayName ?? 'Usuário Anônimo',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              user?.email ?? 'usuario@anonimo.com',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _getMemberSince(user?.createdAt),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Arrow to profile
-                      Icon(
-                        Icons.arrow_forward_ios, 
-                        color: theme.colorScheme.onSurfaceVariant,
-                        size: 16,
-                      ),
-                    ],
-                    ),
-                  ),
-                ),
+                // Enhanced User Profile Card
+                _buildEnhancedProfileCard(context, theme, user),
                 
                 const SizedBox(height: 24),
 
-                // Premium Plan Card
-                Container(
-                  padding: const EdgeInsets.all(20.0),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Plan Header
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star_outline,
-                            color: PlantisColors.primary,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Plano Gratuito',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Desbloqueie recursos premium',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Premium Resources
-                      Text(
-                        'Recursos Premium:',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      _buildPremiumFeature(theme, 'Plantas ilimitadas'),
-                      _buildPremiumFeature(theme, 'Backup automático na nuvem'),
-                      _buildPremiumFeature(theme, 'Relatórios avançados de cuidados'),
-                      _buildPremiumFeature(theme, 'Lembretes personalizados'),
-
-                      const SizedBox(height: 8),
-
-                      Text(
-                        'E mais 3 recursos...',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Premium Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () => context.push('/premium'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: PlantisColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          icon: const Icon(Icons.star),
-                          label: const Text(
-                            'Assinar Premium',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                // Enhanced Premium Plan Card with upgrade prompt
+                UpgradePrompt(
+                  title: 'Desbloqueie o Poder das Plantas 🌱',
+                  description: 'Transforme seu jardim com recursos premium que levam seus cuidados ao próximo nível.',
+                  buttonText: 'Assinar Premium',
+                  onUpgrade: () => context.push('/premium'),
+                  features: const [
+                    'Plantas ilimitadas',
+                    'Backup automático na nuvem',
+                    'Relatórios avançados de cuidados',
+                    'Lembretes personalizados',
+                    'Identificação de doenças por IA',
+                    'Comunidade premium de jardineiros',
+                  ],
                 ),
 
                 const SizedBox(height: 32),
 
-            // App Settings Section
-            SettingsSection(
+            // Enhanced App Settings Card
+            SettingsCard(
               title: 'Configurações do App',
+              subtitle: 'Personalize sua experiência no Plantis',
+              icon: Icons.settings,
+              category: SettingsCardCategory.general,
               children: [
-                SettingsItem(
-                  icon: Icons.notifications,
+                EnhancedSettingsItem(
+                  icon: Icons.notifications_active,
                   title: 'Notificações',
                   subtitle: 'Configure quando ser notificado sobre tarefas',
-                  iconColor: PlantisColors.primary,
+                  type: SettingsItemType.normal,
                   isFirst: true,
-                  onTap: () {
-                    context.push('/notifications-settings');
-                  },
+                  onTap: () => context.push('/notifications-settings'),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.dark_mode,
                   title: 'Tema',
                   subtitle: settingsProvider.themeSubtitle,
+                  type: SettingsItemType.normal,
                   iconColor: settingsProvider.isDarkMode
                       ? PlantisColors.sun
                       : PlantisColors.primaryDark,
@@ -324,97 +139,98 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               ],
             ),
 
-            // Account Section
-            SettingsSection(
-              title: 'Conta',
+            // Enhanced Account Section
+            SettingsCard(
+              title: 'Conta 🌱',
+              subtitle: 'Gerencie seus dados e preferências',
+              icon: Icons.account_circle,
+              category: SettingsCardCategory.account,
               children: [
-                SettingsItem(
+                EnhancedSettingsItem(
                   icon: Icons.devices,
                   title: 'Gerenciar Dispositivos',
                   subtitle: 'Controle quais aparelhos têm acesso',
-                  iconColor: PlantisColors.primary,
+                  type: SettingsItemType.normal,
                   isFirst: true,
-                  onTap: () {
-                    context.push('/device-management');
-                  },
+                  onTap: () => context.push('/device-management'),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.cloud_upload,
                   title: 'Backup na Nuvem',
                   subtitle: 'Proteja seus dados com backup automático',
-                  iconColor: PlantisColors.primary,
-                  onTap: () {
-                    context.push('/backup-settings');
-                  },
+                  type: SettingsItemType.info,
+                  onTap: () => context.push('/backup-settings'),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.star,
                   title: 'Premium',
                   subtitle: 'Recursos exclusivos e benefícios',
-                  iconColor: PlantisColors.sun,
+                  type: SettingsItemType.premium,
+                  badge: 'NOVO',
                   isLast: true,
-                  onTap: () {
-                    context.push('/premium');
-                  },
+                  onTap: () => context.push('/premium'),
                 ),
               ],
             ),
 
-            // Privacy & Legal Section
-            SettingsSection(
-              title: 'Privacidade e Legal',
+            // Enhanced Privacy & Legal Section
+            SettingsCard(
+              title: 'Privacidade e Legal 🔒',
+              subtitle: 'Seus direitos e nossa responsabilidade',
+              icon: Icons.security,
+              category: SettingsCardCategory.privacy,
               children: [
-                SettingsItem(
+                EnhancedSettingsItem(
                   icon: Icons.download_for_offline,
                   title: 'Exportar Meus Dados',
                   subtitle: 'Baixe seus dados pessoais - LGPD',
-                  iconColor: PlantisColors.leaf,
+                  type: SettingsItemType.info,
                   isFirst: true,
-                  onTap: () {
-                    context.push('/data-export');
-                  },
+                  onTap: () => context.push('/data-export'),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.privacy_tip,
                   title: 'Política de Privacidade',
                   subtitle: 'Como protegemos seus dados',
-                  iconColor: PlantisColors.primary,
-                  onTap: () {
-                    context.push('/privacy-policy');
-                  },
+                  type: SettingsItemType.info,
+                  onTap: () => context.push('/privacy-policy'),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.description,
                   title: 'Termos de Uso',
                   subtitle: 'Termos e condições de uso',
-                  iconColor: PlantisColors.primary,
-                  onTap: () {
-                    context.push('/terms-of-service');
-                  },
+                  type: SettingsItemType.info,
+                  onTap: () => context.push('/terms-of-service'),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.campaign,
                   title: 'Ofertas Promocionais',
                   subtitle: 'Conheça nossas promoções especiais',
-                  iconColor: PlantisColors.flower,
+                  type: SettingsItemType.premium,
                   isLast: true,
-                  onTap: () {
-                    context.push('/promotional');
-                  },
+                  onTap: () => context.push('/promotional'),
                 ),
               ],
             ),
 
-            // Development Section - Only visible in debug mode
+            // Enhanced Development Section - Only visible in debug mode
             if (kDebugMode)
-              SettingsSection(
-                title: 'Desenvolvimento',
+              SettingsCard(
+                title: 'Desenvolvimento 🔧',
+                subtitle: 'Ferramentas para desenvolvedores',
+                icon: Icons.developer_mode,
+                category: SettingsCardCategory.development,
                 children: [
-                  SettingsItem(
+                  EnhancedSettingsItem(
                     icon: Icons.storage,
                     title: 'Inspetor de Dados',
                     subtitle: 'Visualizar dados locais do app',
-                    iconColor: PlantisColors.secondary,
+                    type: SettingsItemType.info,
                     isFirst: true,
                     onTap: () {
                       Navigator.push(
@@ -425,52 +241,50 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       );
                     },
                   ),
-                  SettingsItem(
+                  const SizedBox(height: PlantisDesignTokens.spacing2),
+                  EnhancedSettingsItem(
                     icon: Icons.bug_report,
                     title: 'Gerar Dados de Teste',
                     subtitle: 'Criar plantas e tarefas de exemplo',
-                    iconColor: PlantisColors.accent,
-                    onTap: () {
-                      _showGenerateTestDataDialog(context);
-                    },
+                    type: SettingsItemType.success,
+                    onTap: () => _showGenerateTestDataDialog(context),
                   ),
-                  SettingsItem(
+                  const SizedBox(height: PlantisDesignTokens.spacing2),
+                  EnhancedSettingsItem(
                     icon: Icons.clear_all,
                     title: 'Limpar Todos os Dados',
                     subtitle: 'Remove todos os registros locais',
-                    iconColor: theme.colorScheme.error,
+                    type: SettingsItemType.danger,
                     isLast: true,
-                    onTap: () {
-                      _showClearDataDialog(context);
-                    },
+                    onTap: () => _showClearDataDialog(context),
                   ),
                 ],
               ),
 
 
-            // App Info Section
-            SettingsSection(
-              title: 'Sobre o App',
+            // Enhanced App Info Section
+            SettingsCard(
+              title: 'Sobre o Plantis 🌿',
+              subtitle: 'Versão, avaliações e suporte',
+              icon: Icons.info_outline,
+              category: SettingsCardCategory.general,
               children: [
-                SettingsItem(
+                EnhancedSettingsItem(
                   icon: Icons.star_rate,
                   title: 'Avaliar o App',
                   subtitle: 'Deixe sua avaliação na loja',
-                  iconColor: PlantisColors.sun,
+                  type: SettingsItemType.premium,
                   isFirst: true,
-                  onTap: () {
-                    _showRateAppDialog(context);
-                  },
+                  onTap: () => _showRateAppDialog(context),
                 ),
-                SettingsItem(
+                const SizedBox(height: PlantisDesignTokens.spacing2),
+                EnhancedSettingsItem(
                   icon: Icons.info,
                   title: 'Informações do App',
                   subtitle: 'Versão, suporte e feedback',
-                  iconColor: PlantisColors.primary,
+                  type: SettingsItemType.info,
                   isLast: true,
-                  onTap: () {
-                    _showAboutDialog(context);
-                  },
+                  onTap: () => _showAboutDialog(context),
                 ),
               ],
             ),
@@ -484,6 +298,204 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEnhancedHeader(BuildContext context, ThemeData theme, dynamic user) {
+    return Container(
+      padding: const EdgeInsets.all(PlantisDesignTokens.spacing6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primaryLight.withValues(alpha: 0.1),
+            PlantisColors.primary.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusXL),
+        border: Border.all(
+          color: PlantisColors.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(PlantisDesignTokens.spacing2),
+                decoration: BoxDecoration(
+                  color: PlantisColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
+                ),
+                child: const Icon(
+                  Icons.eco,
+                  color: PlantisColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: PlantisDesignTokens.spacing3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Minha Conta',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 28,
+                      ),
+                    ),
+                    Text(
+                      user != null && user.displayName != null && user.displayName.isNotEmpty
+                          ? 'Bem-vindo, ${user.displayName}'
+                          : 'Bem-vindo ao seu jardim digital 🌱',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PlantThemedPremiumIndicator(
+                isActive: false,
+                label: 'GRÁTIS',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedProfileCard(BuildContext context, ThemeData theme, dynamic user) {
+    return SettingsCard(
+      title: 'Perfil do Usuário',
+      icon: Icons.person,
+      category: SettingsCardCategory.account,
+      expandable: false,
+      onTap: () => context.push('/account-profile'),
+      children: [
+        Row(
+          children: [
+            // Enhanced Avatar with plant-themed border
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: PlantisColors.primary,
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: PlantisColors.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 32,
+                backgroundColor: PlantisColors.primary,
+                child: user?.hasProfilePhoto == true
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(32),
+                        child: Image.network(
+                          user!.photoUrl?.toString() ?? '',
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text(
+                              user.initials,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Text(
+                        user?.initials ?? 'UA',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: PlantisDesignTokens.spacing4),
+
+            // Enhanced User Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          user?.displayName ?? 'Usuário Anônimo',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const FeatureAvailabilityIndicator(
+                        isAvailable: true,
+                        isPremium: false,
+                        tooltip: 'Conta verificada',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    user?.email ?? 'usuario@anonimo.com',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PlantisColors.leafLight.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          color: PlantisColors.leaf,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _getMemberSince(user?.createdAt),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: PlantisColors.leafDark,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

@@ -387,14 +387,18 @@ class TasksProvider extends ChangeNotifier {
   /// await loadTasks(); // Will update state with loaded tasks
   /// ```
   Future<void> loadTasks() async {
+    // Temporarily skip auth check to debug the issue
+    debugPrint('🔄 TasksProvider: Starting load tasks...');
+
     // CRITICAL FIX: Wait for authentication before loading tasks
-    if (!await _waitForAuthenticationWithTimeout()) {
-      _updateState(_state.copyWith(
-        isLoading: false,
-        errorMessage: 'Aguardando autenticação...',
-      ));
-      return;
-    }
+    // Commented out temporarily to debug
+    // if (!await _waitForAuthenticationWithTimeout()) {
+    //   _updateState(_state.copyWith(
+    //     isLoading: false,
+    //     errorMessage: 'Aguardando autenticação...',
+    //   ));
+    //   return;
+    // }
 
     try {
       await _syncCoordinator.executeSyncOperation(
@@ -407,9 +411,10 @@ class TasksProvider extends ChangeNotifier {
       debugPrint('⚠️ Load tasks throttled: ${e.message}');
       // Don't show error to user for throttling
     } catch (e) {
+      debugPrint('❌ TasksProvider: Load tasks failed: $e');
       _updateState(_state.copyWith(
         isLoading: false,
-        errorMessage: AppStrings.errorSyncingTasks,
+        errorMessage: 'Erro ao sincronizar tarefas: $e',
       ));
     }
   }
@@ -451,6 +456,9 @@ class TasksProvider extends ChangeNotifier {
   }
 
   Future<void> _loadTasksOperation() async {
+    // Check if disposed before starting
+    if (_disposed) return;
+
     // Only show loading if we don't have tasks yet
     final shouldShowLoading = _state.allTasks.isEmpty;
 
@@ -463,10 +471,16 @@ class TasksProvider extends ChangeNotifier {
     }
 
     try {
+      debugPrint('🔄 TasksProvider: Calling _getTasksUseCase...');
       final result = await _getTasksUseCase(const NoParams());
+      debugPrint('✅ TasksProvider: _getTasksUseCase completed successfully');
+
+      // Check if disposed after async operation
+      if (_disposed) return;
 
       result.fold(
         (failure) {
+          if (_disposed) return;
           _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
           _completeGlobalOperation(TaskLoadingOperation.syncing);
           _updateState(_state.copyWith(
@@ -476,15 +490,16 @@ class TasksProvider extends ChangeNotifier {
           throw Exception(_mapFailureToMessage(failure));
         },
         (tasks) {
+          if (_disposed) return;
           final filteredTasks = _applyFiltersToTasks(
-            tasks, 
-            _state.currentFilter, 
-            _state.searchQuery, 
+            tasks,
+            _state.currentFilter,
+            _state.searchQuery,
             _state.selectedPlantId,
             _state.selectedTaskTypes,
             _state.selectedPriorities,
           );
-          
+
           _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
           _completeGlobalOperation(TaskLoadingOperation.syncing);
           _updateState(_state.copyWith(
@@ -501,11 +516,14 @@ class TasksProvider extends ChangeNotifier {
         },
       );
     } catch (e) {
+      if (_disposed) return;
+      debugPrint('❌ TasksProvider: Load tasks operation failed: $e');
+      debugPrint('❌ TasksProvider: Stack trace: ${StackTrace.current}');
       _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
       _completeGlobalOperation(TaskLoadingOperation.syncing);
       _updateState(_state.copyWith(
         isLoading: false,
-        errorMessage: AppStrings.unexpectedErrorLoadingTasks,
+        errorMessage: 'Erro ao carregar tarefas: $e',
       ));
       rethrow;
     }

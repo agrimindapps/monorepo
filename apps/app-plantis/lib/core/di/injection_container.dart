@@ -20,6 +20,7 @@ import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/sync_status_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/backup_scheduler.dart';
 import '../services/backup_audit_service.dart';
 import '../services/backup_data_transformer_service.dart';

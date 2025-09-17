@@ -9,6 +9,7 @@ import '../../../../core/widgets/loading_overlay.dart';
 class PremiumProvider extends ChangeNotifier {
   final ISubscriptionRepository _subscriptionRepository;
   final IAuthRepository _authRepository;
+  final SimpleSubscriptionSyncService? _simpleSubscriptionSyncService;
 
   SubscriptionEntity? _currentSubscription;
   List<ProductInfo> _availableProducts = [];
@@ -16,15 +17,16 @@ class PremiumProvider extends ChangeNotifier {
   String? _errorMessage;
   PurchaseOperation? _currentOperation;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
+  StreamSubscription<SubscriptionEntity?>? _syncSubscriptionStream;
   StreamSubscription<UserEntity?>? _authStream;
 
   PremiumProvider({
     required ISubscriptionRepository subscriptionRepository,
     required IAuthRepository authRepository,
+    SimpleSubscriptionSyncService? simpleSubscriptionSyncService,
   }) : _subscriptionRepository = subscriptionRepository,
-       _authRepository = authRepository {
-    // Nota: Para usar a versão melhorada, use PremiumProviderImproved
-    // que requer IAnalyticsRepository. Esta versão mantém compatibilidade.
+       _authRepository = authRepository,
+       _simpleSubscriptionSyncService = simpleSubscriptionSyncService {
     _initialize();
   }
 
@@ -55,21 +57,31 @@ class PremiumProvider extends ChangeNotifier {
   DateTime? get expirationDate => _currentSubscription?.expirationDate;
 
   void _initialize() {
-    // Escuta mudanças na assinatura
-    _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
-      (subscription) async {
-        _currentSubscription = subscription;
-
-        // Nota: Versão simplificada sem sincronização avançada
-        // Use PremiumProviderImproved para sincronização completa cross-device
-
-        notifyListeners();
-      },
-      onError: (Object error) {
-        _errorMessage = error.toString();
-        notifyListeners();
-      },
-    );
+    // Escuta mudanças na assinatura via SimpleSubscriptionSyncService (NOVO)
+    if (_simpleSubscriptionSyncService != null) {
+      _syncSubscriptionStream = _simpleSubscriptionSyncService!.subscriptionStatus.listen(
+        (subscription) {
+          _currentSubscription = subscription;
+          notifyListeners();
+        },
+        onError: (Object error) {
+          _errorMessage = error.toString();
+          notifyListeners();
+        },
+      );
+    } else {
+      // Fallback para versão original (compatibilidade)
+      _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
+        (subscription) async {
+          _currentSubscription = subscription;
+          notifyListeners();
+        },
+        onError: (Object error) {
+          _errorMessage = error.toString();
+          notifyListeners();
+        },
+      );
+    }
 
     // Escuta mudanças de autenticação para sincronizar usuário
     _authStream = _authRepository.currentUser.listen((user) {
@@ -102,22 +114,44 @@ class PremiumProvider extends ChangeNotifier {
     _currentOperation = PurchaseOperation.loadProducts;
     notifyListeners();
 
-    final result = await _subscriptionRepository.getCurrentSubscription();
+    // Usa SimpleSubscriptionSyncService se disponível (NOVO)
+    if (_simpleSubscriptionSyncService != null) {
+      final result = await _simpleSubscriptionSyncService!.hasActiveSubscriptionForApp('plantis');
 
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-      },
-      (subscription) {
-        _currentSubscription = subscription;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-      },
-    );
+      result.fold(
+        (failure) {
+          _errorMessage = failure.message;
+          _isLoading = false;
+          _currentOperation = null;
+          notifyListeners();
+        },
+        (hasSubscription) {
+          // A subscription será atualizada via stream
+          // Apenas atualiza estado de loading
+          _isLoading = false;
+          _currentOperation = null;
+          notifyListeners();
+        },
+      );
+    } else {
+      // Fallback para versão original
+      final result = await _subscriptionRepository.getCurrentSubscription();
+
+      result.fold(
+        (failure) {
+          _errorMessage = failure.message;
+          _isLoading = false;
+          _currentOperation = null;
+          notifyListeners();
+        },
+        (subscription) {
+          _currentSubscription = subscription;
+          _isLoading = false;
+          _currentOperation = null;
+          notifyListeners();
+        },
+      );
+    }
   }
 
   Future<void> _loadAvailableProducts() async {
@@ -254,6 +288,7 @@ class PremiumProvider extends ChangeNotifier {
   @override
   void dispose() {
     _subscriptionStream?.cancel();
+    _syncSubscriptionStream?.cancel(); // NOVO
     _authStream?.cancel();
     super.dispose();
   }

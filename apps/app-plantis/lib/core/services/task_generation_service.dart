@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
-import '../data/models/legacy/tarefa_model.dart';
+import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import '../data/models/planta_config_model.dart';
 import '../utils/task_schedule_calculator.dart';
 
@@ -55,7 +55,7 @@ class TaskGenerationService {
   /// [userId] - ID do usuário proprietário
   ///
   /// Retorna lista de tarefas geradas ou falha em caso de erro
-  Either<Failure, List<TarefaModel>> generateInitialTasks({
+  Either<Failure, List<task_entity.Task>> generateInitialTasks({
     required String plantaId,
     required PlantaConfigModel config,
     DateTime? plantingDate,
@@ -63,7 +63,7 @@ class TaskGenerationService {
   }) {
     try {
       final baseDate = plantingDate ?? DateTime.now();
-      final tasks = <TarefaModel>[];
+      final tasks = <task_entity.Task>[];
 
       // Para cada tipo de cuidado ativo, gera a primeira tarefa
       for (final careType in config.activeCareTypes) {
@@ -78,11 +78,18 @@ class TaskGenerationService {
           careType: careType,
         );
 
-        final task = TarefaModel.create(
+        final task = task_entity.Task(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          title: _getCareTypeDisplayName(careType),
+          plantId: plantaId,
+          plantName: 'Planta',
+          type: _mapCareTypeToTaskType(careType),
+          dueDate: taskDate,
           userId: userId,
-          plantaId: plantaId,
-          tipoCuidado: careType,
-          dataExecucao: taskDate,
+          moduleName: 'plantis',
+          isDirty: true,
         );
 
         tasks.add(task);
@@ -103,13 +110,13 @@ class TaskGenerationService {
   /// [config] - Configuração atual da planta
   ///
   /// Retorna nova tarefa ou falha em caso de erro
-  Either<Failure, TarefaModel?> generateNextTask({
-    required TarefaModel completedTask,
+  Either<Failure, task_entity.Task?> generateNextTask({
+    required task_entity.Task completedTask,
     required DateTime completionDate,
     required PlantaConfigModel config,
   }) {
     try {
-      final careType = completedTask.tipoCuidado;
+      final careType = _mapTaskTypeToCareType(completedTask.type) ?? 'agua';
 
       // Verifica se o tipo de cuidado ainda está ativo
       if (!config.isCareTypeActive(careType)) {
@@ -129,11 +136,18 @@ class TaskGenerationService {
         careType: careType,
       );
 
-      final nextTask = TarefaModel.create(
+      final nextTask = task_entity.Task(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        title: _getCareTypeDisplayName(careType),
+        plantId: completedTask.plantId,
+        plantName: completedTask.plantName,
+        type: _mapCareTypeToTaskType(careType),
+        dueDate: nextDate,
         userId: completedTask.userId,
-        plantaId: completedTask.plantaId,
-        tipoCuidado: careType,
-        dataExecucao: nextDate,
+        moduleName: 'plantis',
+        isDirty: true,
       );
 
       return Right(nextTask);
@@ -282,5 +296,64 @@ class TaskGenerationService {
       careType: careType,
       count: count,
     );
+  }
+
+  /// Maps TaskType enum to care type string
+  String? _mapTaskTypeToCareType(task_entity.TaskType taskType) {
+    switch (taskType) {
+      case task_entity.TaskType.watering:
+        return 'agua';
+      case task_entity.TaskType.fertilizing:
+        return 'adubo';
+      case task_entity.TaskType.pruning:
+        return 'poda';
+      case task_entity.TaskType.repotting:
+        return 'replantar';
+      case task_entity.TaskType.sunlight:
+        return 'banho_sol';
+      case task_entity.TaskType.pestInspection:
+        return 'inspecao_pragas';
+      default:
+        return 'agua';
+    }
+  }
+
+  /// Maps legacy care type string to modern TaskType enum
+  task_entity.TaskType _mapCareTypeToTaskType(String careType) {
+    switch (careType.toLowerCase()) {
+      case 'regar':
+      case 'rega':
+        return task_entity.TaskType.watering;
+      case 'adubar':
+      case 'adubo':
+      case 'fertilizar':
+        return task_entity.TaskType.fertilizing;
+      case 'podar':
+      case 'poda':
+        return task_entity.TaskType.pruning;
+      case 'replantar':
+      case 'replantio':
+        return task_entity.TaskType.repotting;
+      case 'limpar':
+      case 'limpeza':
+        return task_entity.TaskType.cleaning;
+      case 'pulverizar':
+        return task_entity.TaskType.spraying;
+      case 'sol':
+        return task_entity.TaskType.sunlight;
+      case 'sombra':
+        return task_entity.TaskType.shade;
+      case 'inspecao_pragas':
+      case 'inspeção':
+        return task_entity.TaskType.pestInspection;
+      default:
+        return task_entity.TaskType.custom;
+    }
+  }
+
+  /// Gets display name for care type
+  String _getCareTypeDisplayName(String careType) {
+    final taskType = _mapCareTypeToTaskType(careType);
+    return taskType.displayName;
   }
 }

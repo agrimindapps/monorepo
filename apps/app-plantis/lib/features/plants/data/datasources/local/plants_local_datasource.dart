@@ -4,8 +4,8 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
-import '../../../../../core/data/models/legacy/planta_model.dart';
 import '../../../domain/entities/plant.dart';
+import '../../models/plant_model.dart';
 import 'plants_search_service.dart';
 
 abstract class PlantsLocalDatasource {
@@ -29,27 +29,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
 
-  /// Helper method to convert Plant entity back to PlantaModel for storage
-  PlantaModel _plantToPlantaModel(Plant plant) {
-    return PlantaModel(
-      id: plant.id,
-      nome: plant.name,
-      especie: plant.species,
-      espacoId: plant.spaceId,
-      imagePaths: plant.imageUrls,
-      observacoes: plant.notes,
-      fotoBase64: plant.imageBase64,
-      dataCadastro: plant.plantingDate,
-      createdAtMs: plant.createdAt?.millisecondsSinceEpoch,
-      updatedAtMs: plant.updatedAt?.millisecondsSinceEpoch,
-      lastSyncAtMs: plant.lastSyncAt?.millisecondsSinceEpoch,
-      isDirty: plant.isDirty,
-      isDeleted: plant.isDeleted,
-      version: plant.version,
-      userId: plant.userId,
-      moduleName: plant.moduleName,
-    );
-  }
 
   final PlantsSearchService _searchService = PlantsSearchService.instance;
 
@@ -77,8 +56,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           final plantJson = hiveBox.get(key);
           if (plantJson != null) {
             final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-            final plantaModel = PlantaModel.fromJson(plantData);
-            final plant = Plant.fromPlantaModel(plantaModel);
+            final plant = PlantModel.fromJson(plantData);
             if (!plant.isDeleted) {
               plants.add(plant);
             }
@@ -131,8 +109,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
       try {
         final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-        final plantaModel = PlantaModel.fromJson(plantData);
-        final plant = Plant.fromPlantaModel(plantaModel);
+        final plant = PlantModel.fromJson(plantData);
 
         return plant.isDeleted ? null : plant;
       } catch (corruptionError) {
@@ -177,8 +154,8 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         }
       }
 
-      final plantaModel = _plantToPlantaModel(plant);
-      final plantJson = jsonEncode(plantaModel.toJson());
+      final plantModel = PlantModel.fromEntity(plant);
+      final plantJson = jsonEncode(plantModel.toJson());
 
       if (kDebugMode) {
         print('🌱 PlantsLocalDatasourceImpl.addPlant() - Gravando no Hive');
@@ -209,8 +186,8 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<void> updatePlant(Plant plant) async {
     try {
       final hiveBox = await box;
-      final plantaModel = _plantToPlantaModel(plant);
-      final plantJson = jsonEncode(plantaModel.toJson());
+      final plantModel = PlantModel.fromEntity(plant);
+      final plantJson = jsonEncode(plantModel.toJson());
       await hiveBox.put(plant.id, plantJson);
 
       // Invalidate cache
@@ -231,8 +208,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final plantJson = hiveBox.get(id);
       if (plantJson != null) {
         final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-        final plantaModel = PlantaModel.fromJson(plantData);
-        final plant = Plant.fromPlantaModel(plantaModel);
+        final plant = PlantModel.fromJson(plantData);
 
         // Soft delete - mark as deleted
         final deletedPlant = plant.copyWith(
@@ -241,8 +217,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           isDirty: true,
         );
 
-        final deletedPlantaModel = _plantToPlantaModel(deletedPlant);
-        final updatedJson = jsonEncode(deletedPlantaModel.toJson());
+        final updatedJson = jsonEncode(deletedPlant.toJson());
         await hiveBox.put(id, updatedJson);
 
         // Invalidate cache

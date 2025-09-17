@@ -45,7 +45,7 @@ class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
   @override
   Future<void> saveVehicle(VehicleModel vehicle) async {
     try {
-      await _localDataService.saveVehicle(vehicle.id, vehicle.toJson());
+      await _localDataService.saveVehicle(vehicle.id, vehicle.toHiveMap());
     } catch (e) {
       throw LocalDataSourceException('Failed to save vehicle: $e');
     }
@@ -54,7 +54,7 @@ class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
   @override
   Future<void> updateVehicle(VehicleModel vehicle) async {
     try {
-      await _localDataService.saveVehicle(vehicle.id, vehicle.toJson());
+      await _localDataService.saveVehicle(vehicle.id, vehicle.toHiveMap());
     } catch (e) {
       throw LocalDataSourceException('Failed to update vehicle: $e');
     }

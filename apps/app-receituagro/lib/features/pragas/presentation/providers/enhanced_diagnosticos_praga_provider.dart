@@ -82,34 +82,25 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   /// Carrega diagnósticos para uma praga específica por ID
   Future<void> loadDiagnosticos(String pragaId) async {
     debugPrint('🔍 Carregando diagnósticos para praga ID: $pragaId');
-    
+
     _currentPragaId = pragaId;
     _currentPragaName = _resolver.resolvePragaNome(idPraga: pragaId);
     _setLoadingState(true);
 
     try {
-      // Usa cache service para busca otimizada
-      final diagnosticosHive = await _cacheService.findByPraga(pragaId);
-      
-      if (diagnosticosHive.isNotEmpty) {
-        // Converte para entidades de domínio
-        final result = await _repository.getByPraga(pragaId);
-        
-        result.fold(
-          (failure) {
-            _setErrorState('Erro ao carregar diagnósticos: ${failure.toString()}');
-          },
-          (entities) {
-            _setSuccessState(entities);
-            _updateAvailableCulturas();
-            debugPrint('✅ Carregados ${entities.length} diagnósticos');
-          },
-        );
-      } else {
-        // Fallback para busca por nome se não encontrar por ID
-        debugPrint('🔄 Fallback: tentando busca por nome da praga');
-        await loadDiagnosticosByNomePraga(_currentPragaName ?? '');
-      }
+      // Direct repository call for optimal performance
+      final result = await _repository.getByPraga(pragaId);
+
+      result.fold(
+        (failure) {
+          _setErrorState('Erro ao carregar diagnósticos: ${failure.toString()}');
+        },
+        (entities) {
+          _setSuccessState(entities);
+          _updateAvailableCulturas();
+          debugPrint('✅ Carregados ${entities.length} diagnósticos');
+        },
+      );
     } catch (e) {
       _setErrorState('Erro ao carregar diagnósticos: $e');
     }

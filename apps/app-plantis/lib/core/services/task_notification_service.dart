@@ -178,8 +178,7 @@ class TaskNotificationService {
       );
       
       // Schedule the notification
-      final notificationRepository = (_notificationService as dynamic)._notificationRepository;
-      await notificationRepository.scheduleNotification(notification);
+      await _notificationService.scheduleDirectNotification(notification);
       
       debugPrint('✅ Scheduled notification: $title at ${scheduledDate.toString()}');
     } catch (e) {
@@ -869,14 +868,14 @@ class TaskNotificationService {
       await _ensureInitialized();
       
       // Set up notification tap handler
-      final notificationRepository = (_notificationService as dynamic)._notificationRepository;
-      
+      final notificationRepository = _notificationService.notificationRepository;
+
       notificationRepository.setNotificationTapCallback(
-        (String payload) => handleNotificationTap(payload),
+        (String? payload) => handleNotificationTap(payload ?? ''),
       );
-      
+
       notificationRepository.setNotificationActionCallback(
-        (String actionId, String payload) => handleNotificationAction(actionId, payload),
+        (String actionId, String? payload) => handleNotificationAction(actionId, payload ?? ''),
       );
       
       debugPrint('✅ Notification handlers initialized');
@@ -916,8 +915,7 @@ class TaskNotificationService {
     try {
       await _ensureInitialized();
       
-      final notificationRepository = (_notificationService as dynamic)._notificationRepository;
-      final pendingNotifications = await notificationRepository.getPendingNotifications();
+      final pendingNotifications = await _notificationService.getPendingNotifications();
       
       return (pendingNotifications as List).length;
     } catch (e) {

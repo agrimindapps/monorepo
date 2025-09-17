@@ -8,8 +8,8 @@ class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
   
-  // Legacy color getters for backward compatibility
-  // These will be deprecated - use DesignTokens directly
+  // Convenience color getters
+  // Consider using DesignTokens directly for new code
   static Color get primaryColor => DesignTokens.primaryColor;
   static Color get secondaryColor => DesignTokens.secondaryColor;
   static Color get accentColor => DesignTokens.accentColor;
@@ -224,26 +224,3 @@ class AppTheme {
   }
 }
 
-/// Legacy AppColors class for backward compatibility
-/// @deprecated Use DesignTokens directly instead
-class AppColors {
-  // Status Colors (redirected to DesignTokens)
-  static Color get active => DesignTokens.marketUpColor;
-  static Color get inactive => DesignTokens.marketNeutralColor;
-  static Color get pending => DesignTokens.marketPendingColor;
-  static Color get completed => DesignTokens.infoColor;
-  
-  // Livestock Colors (redirected to DesignTokens)
-  static Color get cattle => DesignTokens.cattleColor;
-  static Color get horses => DesignTokens.horsesColor;
-  static Color get sheep => DesignTokens.sheepColor;
-  static Color get goats => DesignTokens.goatsColor;
-  static Color get pigs => DesignTokens.pigsColor;
-  static Color get poultry => DesignTokens.poultryColor;
-  
-  // Weather Colors (redirected to DesignTokens)
-  static Color get sunny => DesignTokens.sunnyColor;
-  static Color get cloudy => DesignTokens.cloudyColor;
-  static Color get rainy => DesignTokens.rainyColor;
-  static Color get stormy => DesignTokens.stormyColor;
-}

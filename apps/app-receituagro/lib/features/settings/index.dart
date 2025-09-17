@@ -8,7 +8,7 @@ export 'di/settings_di.dart';
 export 'domain/entities/user_settings_entity.dart';
 export 'domain/exceptions/settings_exceptions.dart';
 export 'domain/repositories/i_user_settings_repository.dart';
-// Legacy exports (for backwards compatibility)
+// Model exports
 export 'models/settings_state.dart';
 // Presentation layer
 export 'presentation/providers/settings_provider.dart';
@@ -23,7 +23,7 @@ export 'services/theme_service.dart';
 
 // Main pages
 export 'settings_page.dart';
-// Widgets (legacy)
+// Shared widgets
 export 'widgets/section_title_widget.dart';
 // Widgets - Refactored Components
 export 'widgets/sections/about_section.dart';

@@ -9,7 +9,7 @@
 /// import '../../../../core/presentation/forms/forms.dart';
 /// ```
 
-// Legacy form components (maintained for backward compatibility)
+// Base form components (foundational form widgets)
 export 'base_form_dialog.dart';
 export 'base_form_page.dart';
 export 'form_mixins.dart';

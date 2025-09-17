@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:flutter/material.dart';
 
@@ -38,10 +39,10 @@ class MarketStatsGrid extends StatelessWidget {
                   ? Icons.trending_down
                   : Icons.trending_flat,
           color: market.isUp
-              ? AppColors.active
+              ? DesignTokens.marketUpColor
               : market.isDown
                   ? AppTheme.errorColor
-                  : AppColors.inactive,
+                  : DesignTokens.textSecondaryColor,
         ),
         _buildStatCard(
           context,
@@ -121,9 +122,9 @@ class MarketStatsGrid extends StatelessWidget {
   Color _getStatusColor(MarketStatus status) {
     switch (status) {
       case MarketStatus.open:
-        return AppColors.active;
+        return DesignTokens.marketUpColor;
       case MarketStatus.closed:
-        return AppColors.inactive;
+        return DesignTokens.textSecondaryColor;
       case MarketStatus.suspended:
         return AppTheme.warningColor;
       case MarketStatus.preMarket:

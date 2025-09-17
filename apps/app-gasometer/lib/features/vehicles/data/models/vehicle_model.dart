@@ -391,10 +391,6 @@ class VehicleModel extends BaseSyncModel {
     );
   }
 
-  // Legacy compatibility methods
-  Map<String, dynamic> toMap() => toHiveMap();
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory VehicleModel.fromMap(Map<String, dynamic> map) => VehicleModel.fromHiveMap(map);
 
   @override
   String toString() {

@@ -45,22 +45,6 @@ class DiagnosticoModel extends DiagnosticoEntity {
     );
   }
 
-  /// Cria um DiagnosticoModel a partir do modelo legacy (do código antigo)
-  factory DiagnosticoModel.fromLegacyModel(Map<String, dynamic> legacyModel) {
-    return DiagnosticoModel(
-      id: (legacyModel['id'] as String?) ?? '',
-      idDefensivo: (legacyModel['ingredienteAtivo'] as String?) ?? '',
-      nomeDefensivo: legacyModel['nome'] as String?,
-      nomeCultura: legacyModel['cultura'] as String?,
-      nomePraga: legacyModel['grupo'] as String?,
-      dosagem: (legacyModel['dosagem'] as String?) ?? '',
-      ingredienteAtivo: (legacyModel['ingredienteAtivo'] as String?) ?? '',
-      cultura: (legacyModel['cultura'] as String?) ?? '',
-      grupo: (legacyModel['grupo'] as String?) ?? '',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-  }
 
   /// Cria um DiagnosticoModel a partir de JSON (API)
   factory DiagnosticoModel.fromJson(Map<String, dynamic> json) {

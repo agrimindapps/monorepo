@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/utils/navigation_service.dart';
 
 /// Widget para atalhos de teclado desktop
 class DesktopKeyboardShortcuts extends StatefulWidget {
@@ -80,12 +81,7 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
       shortcuts: shortcuts,
       child: Actions(
         actions: actions,
-        child: Focus(
-          autofocus: false, // Desabilitar autofocus para evitar problemas de inicialização
-          skipTraversal: false,
-          canRequestFocus: true,
-          child: widget.child,
-        ),
+        child: widget.child,
       ),
     );
   }
@@ -130,7 +126,7 @@ class CustomIntent extends Intent {
 class NavigateToAction extends Action<NavigateToIntent> {
   @override
   Object? invoke(NavigateToIntent intent) {
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
       context.go(intent.route);
     }
@@ -141,7 +137,7 @@ class NavigateToAction extends Action<NavigateToIntent> {
 class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
   @override
   Object? invoke(CreateNewPlantIntent intent) {
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
       context.go('/plants/add');
     }
@@ -152,10 +148,8 @@ class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
 class SaveAction extends Action<SaveIntent> {
   @override
   Object? invoke(SaveIntent intent) {
-    // Disparar evento de save global
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
-      // Procurar por um SaveNotifier no contexto
       final saveNotifier = SaveNotifier.maybeOf(context);
       if (saveNotifier != null) {
         saveNotifier.save();
@@ -168,9 +162,8 @@ class SaveAction extends Action<SaveIntent> {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   Object? invoke(EscapeIntent intent) {
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
-      // Fechar dialogs, drawers, etc.
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
@@ -182,7 +175,7 @@ class EscapeAction extends Action<EscapeIntent> {
 class GoBackAction extends Action<GoBackIntent> {
   @override
   Object? invoke(GoBackIntent intent) {
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
       if (context.canPop()) {
         context.pop();
@@ -195,9 +188,8 @@ class GoBackAction extends Action<GoBackIntent> {
 class SearchAction extends Action<SearchIntent> {
   @override
   Object? invoke(SearchIntent intent) {
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
-      // Disparar evento de busca global
       final searchNotifier = SearchNotifier.maybeOf(context);
       if (searchNotifier != null) {
         searchNotifier.toggleSearch();
@@ -210,9 +202,8 @@ class SearchAction extends Action<SearchIntent> {
 class RefreshAction extends Action<RefreshIntent> {
   @override
   Object? invoke(RefreshIntent intent) {
-    final context = primaryFocus?.context;
+    final context = NavigationService.instance.currentContext;
     if (context != null && context.mounted) {
-      // Disparar evento de refresh global
       final refreshNotifier = RefreshNotifier.maybeOf(context);
       if (refreshNotifier != null) {
         refreshNotifier.refresh();
@@ -360,7 +351,9 @@ extension DesktopKeyboardShortcutsExtension on Widget {
 }
 
 // Helper para detectar plataforma
-abstract class PlatformHelper {
+class PlatformHelper {
+  const PlatformHelper._(); // Private constructor to prevent instantiation
+
   static bool get isMacOS => defaultTargetPlatform == TargetPlatform.macOS;
   static bool get isWindows => defaultTargetPlatform == TargetPlatform.windows;
   static bool get isLinux => defaultTargetPlatform == TargetPlatform.linux;

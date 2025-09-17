@@ -519,7 +519,7 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
       _formModel = FuelFormModel.fromFuelRecord(record);
       
       // Carregar dados do veículo associado
-      await _loadVehicleData(record.veiculoId);
+      await _loadVehicleData(record.vehicleId);
       
       // Atualizar os controllers com os valores do registro
       _updateTextControllers();

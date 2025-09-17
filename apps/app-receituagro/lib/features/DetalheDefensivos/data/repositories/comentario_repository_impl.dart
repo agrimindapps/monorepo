@@ -1,12 +1,11 @@
-import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart' as local_failures;
 import '../../../../core/utils/typedef.dart';
 import '../../../comentarios/services/comentarios_service.dart';
 import '../../../comentarios/domain/entities/comentario_entity.dart';
+import '../../../comentarios/models/comentario_model.dart';
 import '../../domain/repositories/comentario_repository.dart';
-import '../models/comentario_model.dart';
 
 /// Implementação do repositório de comentários
 /// 
@@ -24,11 +23,11 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
         pkIdentificador: pkIdentificador,
       );
       
-      final models = comentarios
-          .map((legacy) => ComentarioModel.fromLegacyModel(legacy))
+      final entities = comentarios
+          .map((model) => _mapModelToEntity(model))
           .toList();
-      
-      return Right(models);
+
+      return Right(entities);
     } catch (e) {
       return Left(local_failures.ServerFailure('Erro ao buscar comentários: ${e.toString()}'));
     }
@@ -45,11 +44,11 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
           .where((c) => c.ferramenta.toLowerCase() == ferramenta.toLowerCase())
           .toList();
       
-      final models = filteredComentarios
-          .map((legacy) => ComentarioModel.fromLegacyModel(legacy))
+      final entities = filteredComentarios
+          .map((model) => _mapModelToEntity(model))
           .toList();
-      
-      return Right(models);
+
+      return Right(entities);
     } catch (e) {
       return Left(local_failures.ServerFailure('Erro ao buscar comentários por ferramenta: ${e.toString()}'));
     }
@@ -72,8 +71,8 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
         return Left(local_failures.CacheFailure('Comentário não encontrado com ID: $id'));
       }
       
-      final model = ComentarioModel.fromLegacyModel(comentario);
-      return Right(model);
+      final entity = _mapModelToEntity(comentario);
+      return Right(entity);
     } catch (e) {
       return Left(local_failures.ServerFailure('Erro ao buscar comentário por ID: ${e.toString()}'));
     }
@@ -82,8 +81,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
   @override
   ResultFuture<String> addComentario(ComentarioEntity comentario) async {
     try {
-      final legacyModel = ComentarioModel.fromEntity(comentario).toLegacyModel();
-      await _comentariosService.addComentario(legacyModel);
+      await _comentariosService.addComentario(comentario as ComentarioModel);
       return Right(comentario.id);
     } catch (e) {
       return Left(local_failures.ServerFailure('Erro ao adicionar comentário: ${e.toString()}'));
@@ -101,8 +99,7 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
         updatedAt: DateTime.now(),
       );
       
-      final legacyModel = ComentarioModel.fromEntity(updatedComentario).toLegacyModel();
-      await _comentariosService.addComentario(legacyModel);
+      await _comentariosService.addComentario(updatedComentario as ComentarioModel);
       
       return const Right(null);
     } catch (e) {
@@ -131,11 +128,11 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
           .where((c) => c.status)
           .toList();
       
-      final models = comentariosAtivos
-          .map((legacy) => ComentarioModel.fromLegacyModel(legacy))
+      final entities = comentariosAtivos
+          .map((model) => _mapModelToEntity(model))
           .toList();
-      
-      return Right(models);
+
+      return Right(entities);
     } catch (e) {
       return Left(local_failures.ServerFailure('Erro ao buscar comentários ativos: ${e.toString()}'));
     }
@@ -151,11 +148,11 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
             pkIdentificador: pkIdentificador,
           );
           
-          final models = comentarios
-              .map((legacy) => ComentarioModel.fromLegacyModel(legacy))
+          final entities = comentarios
+              .map((model) => _mapModelToEntity(model))
               .toList();
-          
-          yield models;
+
+          yield entities;
         } catch (e) {
           yield [];
         }
@@ -183,5 +180,20 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
     } catch (e) {
       return Left(local_failures.ServerFailure('Erro ao contar comentários: ${e.toString()}'));
     }
+  }
+
+  /// Mapeia um ComentarioModel para ComentarioEntity
+  ComentarioEntity _mapModelToEntity(ComentarioModel model) {
+    return ComentarioEntity(
+      id: model.id,
+      idReg: model.idReg,
+      titulo: model.titulo,
+      conteudo: model.conteudo,
+      ferramenta: model.ferramenta,
+      pkIdentificador: model.pkIdentificador,
+      status: model.status,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
   }
 }

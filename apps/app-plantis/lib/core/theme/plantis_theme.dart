@@ -1,25 +1,30 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import 'plantis_colors.dart';
 
-/// Tema específico do Plantis usando BaseTheme
+/// Tema específico do Plantis
 class PlantisTheme {
   /// Tema claro do Plantis
-  static ThemeData get lightTheme => BaseTheme.buildLightTheme(
-    primaryColor: PlantisColors.primary,
-    secondaryColor: PlantisColors.secondary,
+  static ThemeData get lightTheme => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
     fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: PlantisColors.primary,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: PlantisColors.primary,
+      secondary: PlantisColors.secondary,
+    ),
   ).copyWith(
     // Customizações específicas do Plantis
-    appBarTheme: BaseTheme.buildLightTheme(
-      primaryColor: PlantisColors.primary,
-      secondaryColor: PlantisColors.secondary,
-    ).appBarTheme.copyWith(
+    appBarTheme: const AppBarTheme(
       backgroundColor: PlantisColors.primary,
       foregroundColor: Colors.white,
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
+      actionsIconTheme: IconThemeData(color: Colors.white),
+      elevation: 0,
+      centerTitle: true,
     ),
 
     // FAB personalizado
@@ -115,20 +120,26 @@ class PlantisTheme {
   );
 
   /// Tema escuro do Plantis
-  static ThemeData get darkTheme => BaseTheme.buildDarkTheme(
-    primaryColor: PlantisColors.primary,
-    secondaryColor: PlantisColors.secondary,
+  static ThemeData get darkTheme => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
     fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: PlantisColors.primary,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: PlantisColors.primary,
+      secondary: PlantisColors.secondary,
+    ),
   ).copyWith(
     // Customizações específicas do Plantis para modo escuro
-    appBarTheme: BaseTheme.buildDarkTheme(
-      primaryColor: PlantisColors.primary,
-      secondaryColor: PlantisColors.secondary,
-    ).appBarTheme.copyWith(
+    appBarTheme: const AppBarTheme(
       backgroundColor: PlantisColors.primaryDark,
       foregroundColor: Colors.white,
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
+      actionsIconTheme: IconThemeData(color: Colors.white),
+      elevation: 0,
+      centerTitle: true,
     ),
 
     // FAB para modo escuro

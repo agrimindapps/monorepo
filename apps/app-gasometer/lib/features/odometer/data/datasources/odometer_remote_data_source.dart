@@ -87,7 +87,7 @@ class OdometerRemoteDataSourceImpl implements OdometerRemoteDataSource {
       );
       
       final docRef = _getUserOdometerCollection(userId).doc(reading.id);
-      await docRef.set(model.toMap());
+      await docRef.set(model.toFirebaseMap());
       
       return reading;
     } catch (e) {
@@ -110,7 +110,7 @@ class OdometerRemoteDataSourceImpl implements OdometerRemoteDataSource {
       
       await _getUserOdometerCollection(userId)
           .doc(reading.id)
-          .update(model.toMap());
+          .update(model.toFirebaseMap());
       
       return reading;
     } catch (e) {
@@ -188,7 +188,7 @@ class OdometerRemoteDataSourceImpl implements OdometerRemoteDataSource {
       if (data == null) return null;
       
       data['id'] = doc.id;
-      final model = OdometerModel.fromMap(data);
+      final model = OdometerModel.fromFirebaseMap(data);
       
       return OdometerEntity(
         id: model.id,

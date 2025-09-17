@@ -8,12 +8,12 @@ class FuelBusinessService {
     FuelSupplyModel fuelSupply,
     double previousOdometer,
   ) {
-    if (fuelSupply.litros <= 0) return 0.0;
-    
-    final distanceTraveled = fuelSupply.odometro - previousOdometer;
+    if (fuelSupply.liters <= 0) return 0.0;
+
+    final distanceTraveled = fuelSupply.odometer - previousOdometer;
     if (distanceTraveled <= 0) return 0.0;
-    
-    return distanceTraveled / fuelSupply.litros;
+
+    return distanceTraveled / fuelSupply.liters;
   }
   
   /// Calculate consumption in L/100km (European standard)
@@ -29,7 +29,7 @@ class FuelBusinessService {
 
   /// Calculate price per liter from total value and liters
   static double calculatePricePerLiter(FuelSupplyModel fuelSupply) {
-    return fuelSupply.litros > 0 ? fuelSupply.valorTotal / fuelSupply.litros : 0.0;
+    return fuelSupply.liters > 0 ? fuelSupply.totalPrice / fuelSupply.liters : 0.0;
   }
 
   /// Calculate total value from price per liter and liters
@@ -60,12 +60,12 @@ class FuelBusinessService {
 
   /// Calculate total fuel cost from a list of fuel supplies
   static double calculateTotalFuelCost(List<FuelSupplyModel> fuelSupplies) {
-    return fuelSupplies.fold(0.0, (total, supply) => total + supply.valorTotal);
+    return fuelSupplies.fold(0.0, (total, supply) => total + supply.totalPrice);
   }
 
   /// Calculate total liters from a list of fuel supplies
   static double calculateTotalLiters(List<FuelSupplyModel> fuelSupplies) {
-    return fuelSupplies.fold(0.0, (total, supply) => total + supply.litros);
+    return fuelSupplies.fold(0.0, (total, supply) => total + supply.liters);
   }
 
   /// Calculate average price per liter from a list of fuel supplies
@@ -84,7 +84,7 @@ class FuelBusinessService {
     String vehicleId,
   ) {
     return fuelSupplies
-        .where((supply) => supply.veiculoId == vehicleId)
+        .where((supply) => supply.vehicleId == vehicleId)
         .toList();
   }
 
@@ -95,7 +95,7 @@ class FuelBusinessService {
     DateTime endDate,
   ) {
     return fuelSupplies.where((supply) {
-      final supplyDate = DateTime.fromMillisecondsSinceEpoch(supply.data);
+      final supplyDate = DateTime.fromMillisecondsSinceEpoch(supply.date);
       return supplyDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
              supplyDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
@@ -107,7 +107,7 @@ class FuelBusinessService {
     int fuelType,
   ) {
     return fuelSupplies
-        .where((supply) => supply.tipoCombustivel == fuelType)
+        .where((supply) => supply.fuelType == fuelType)
         .toList();
   }
 
@@ -117,21 +117,21 @@ class FuelBusinessService {
     String gasStation,
   ) {
     return fuelSupplies
-        .where((supply) => supply.posto?.toLowerCase().contains(gasStation.toLowerCase()) ?? false)
+        .where((supply) => supply.gasStationName?.toLowerCase().contains(gasStation.toLowerCase()) ?? false)
         .toList();
   }
 
   /// Sort fuel supplies by date (most recent first)
   static List<FuelSupplyModel> sortByDateDescending(List<FuelSupplyModel> fuelSupplies) {
     final sortedList = List<FuelSupplyModel>.from(fuelSupplies);
-    sortedList.sort((a, b) => b.data.compareTo(a.data));
+    sortedList.sort((a, b) => b.date.compareTo(a.date));
     return sortedList;
   }
 
   /// Sort fuel supplies by odometer (highest first)
   static List<FuelSupplyModel> sortByOdometerDescending(List<FuelSupplyModel> fuelSupplies) {
     final sortedList = List<FuelSupplyModel>.from(fuelSupplies);
-    sortedList.sort((a, b) => b.odometro.compareTo(a.odometro));
+    sortedList.sort((a, b) => b.odometer.compareTo(a.odometer));
     return sortedList;
   }
 
@@ -140,7 +140,7 @@ class FuelBusinessService {
     final Map<String, List<FuelSupplyModel>> grouped = {};
     
     for (final supply in fuelSupplies) {
-      final date = DateTime.fromMillisecondsSinceEpoch(supply.data);
+      final date = DateTime.fromMillisecondsSinceEpoch(supply.date);
       final monthKey = '${date.year}-${date.month.toString().padLeft(2, '0')}';
       
       grouped.putIfAbsent(monthKey, () => <FuelSupplyModel>[]);
@@ -155,8 +155,8 @@ class FuelBusinessService {
     final Map<int, List<FuelSupplyModel>> grouped = {};
     
     for (final supply in fuelSupplies) {
-      grouped.putIfAbsent(supply.tipoCombustivel, () => <FuelSupplyModel>[]);
-      grouped[supply.tipoCombustivel]!.add(supply);
+      grouped.putIfAbsent(supply.fuelType, () => <FuelSupplyModel>[]);
+      grouped[supply.fuelType]!.add(supply);
     }
     
     return grouped;
@@ -164,12 +164,12 @@ class FuelBusinessService {
 
   /// Validate fuel supply basic fields
   static bool isValidFuelSupply(FuelSupplyModel fuelSupply) {
-    return fuelSupply.veiculoId.isNotEmpty && 
-           fuelSupply.data > 0 && 
-           fuelSupply.litros > 0 && 
-           fuelSupply.valorTotal > 0 && 
-           fuelSupply.odometro > 0 &&
-           fuelSupply.precoPorLitro > 0;
+    return fuelSupply.vehicleId.isNotEmpty &&
+           fuelSupply.date > 0 &&
+           fuelSupply.liters > 0 &&
+           fuelSupply.totalPrice > 0 &&
+           fuelSupply.odometer > 0 &&
+           fuelSupply.pricePerLiter > 0;
   }
   
   /// Validate financial consistency (total value vs price per liter)
@@ -177,11 +177,11 @@ class FuelBusinessService {
     FuelSupplyModel fuelSupply, {
     double tolerancePercentage = 5.0,
   }) {
-    if (fuelSupply.litros <= 0 || fuelSupply.precoPorLitro <= 0) return false;
-    
-    final calculatedValue = fuelSupply.precoPorLitro * fuelSupply.litros;
-    final difference = (fuelSupply.valorTotal - calculatedValue).abs();
-    final percentageDifference = (difference / fuelSupply.valorTotal) * 100;
+    if (fuelSupply.liters <= 0 || fuelSupply.pricePerLiter <= 0) return false;
+
+    final calculatedValue = fuelSupply.pricePerLiter * fuelSupply.liters;
+    final difference = (fuelSupply.totalPrice - calculatedValue).abs();
+    final percentageDifference = (difference / fuelSupply.totalPrice) * 100;
     
     return percentageDifference <= tolerancePercentage;
   }
@@ -192,12 +192,12 @@ class FuelBusinessService {
     FuelSupplyModel? previousSupply,
   ) {
     if (previousSupply == null) return true;
-    return currentSupply.odometro >= previousSupply.odometro;
+    return currentSupply.odometer >= previousSupply.odometer;
   }
 
   /// Check if fuel supply belongs to specific vehicle
   static bool belongsToVehicle(FuelSupplyModel fuelSupply, String vehicleId) {
-    return fuelSupply.veiculoId == vehicleId;
+    return fuelSupply.vehicleId == vehicleId;
   }
 
   /// Calculate monthly statistics
@@ -219,13 +219,13 @@ class FuelBusinessService {
   static FuelSupplyModel? findMostEconomicalSupply(List<FuelSupplyModel> fuelSupplies) {
     if (fuelSupplies.isEmpty) return null;
     return fuelSupplies.reduce((current, next) => 
-        current.precoPorLitro < next.precoPorLitro ? current : next);
+        current.pricePerLiter < next.pricePerLiter ? current : next);
   }
 
   /// Find the most expensive fuel supply (worst price per liter)
   static FuelSupplyModel? findMostExpensiveSupply(List<FuelSupplyModel> fuelSupplies) {
     if (fuelSupplies.isEmpty) return null;
     return fuelSupplies.reduce((current, next) => 
-        current.precoPorLitro > next.precoPorLitro ? current : next);
+        current.pricePerLiter > next.pricePerLiter ? current : next);
   }
 }

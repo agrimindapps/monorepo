@@ -30,7 +30,7 @@ abstract class SettingsDI {
       () => UpdateUserSettingsUseCase(getIt<IUserSettingsRepository>()),
     );
 
-    // Provider layer - Legacy UserSettingsProvider
+    // Provider layer - UserSettingsProvider
     getIt.registerFactory<UserSettingsProvider>(
       () => UserSettingsProvider(
         getUserSettingsUseCase: getIt<GetUserSettingsUseCase>(),

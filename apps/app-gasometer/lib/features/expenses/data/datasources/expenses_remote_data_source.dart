@@ -94,7 +94,7 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
       );
       
       final docRef = _getUserExpensesCollection(userId).doc(expense.id);
-      await docRef.set(model.toMap());
+      await docRef.set(model.toFirebaseMap());
       
       // Return the same entity since we're using the provided ID
       return expense;
@@ -123,7 +123,7 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
       
       await _getUserExpensesCollection(userId)
           .doc(expense.id)
-          .update(model.toMap());
+          .update(model.toFirebaseMap());
       
       return expense;
     } catch (e) {
@@ -204,7 +204,7 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
       final data = doc.data() as Map<String, dynamic>?;
       if (data == null) return null;
       
-      final model = ExpenseModel.fromMap(data);
+      final model = ExpenseModel.fromFirebaseMap(data);
       return _modelToEntity(model);
     } catch (e) {
       // Log the error but don't throw to avoid breaking the entire list

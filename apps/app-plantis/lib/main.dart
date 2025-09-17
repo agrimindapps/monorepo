@@ -12,7 +12,6 @@ import 'app.dart';
 // Import Hive adapters - these include the generated adapters from .g.dart files
 import 'core/data/models/comentario_model.dart';
 import 'core/data/models/espaco_model.dart';
-import 'core/data/models/legacy/planta_model.dart'; // REATIVADO: Para compatibilidade com dados legacy
 // import 'core/data/models/tarefa_model.dart'; // DEPRECATED: Migrado para TaskModel em inglês
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
@@ -64,9 +63,7 @@ void main() async {
   // Register Hive adapters
   Hive.registerAdapter(ComentarioModelAdapter()); // TypeId: 0
   Hive.registerAdapter(EspacoModelAdapter()); // TypeId: 1
-  Hive.registerAdapter(
-    PlantaModelAdapter(),
-  ); // TypeId: 2 - REATIVADO para compatibilidade com dados legacy
+  // Hive.registerAdapter(PlantaModelAdapter()); // TypeId: 2 - REMOVIDO: Migrado para PlantModel
   // Hive.registerAdapter(TarefaModelAdapter()); // TypeId: 3 - DEPRECATED: Migrado para TaskModel
   Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
 
@@ -76,9 +73,9 @@ void main() async {
   // Initialize DatabaseInspectorService with app-specific boxes
   AppDataInspectorInitializer.initialize();
 
-  // Initialize RevenueCat after DI
-  // final revenueCatService = di.sl<ISubscriptionRepository>();
-  // O RevenueCat é inicializado automaticamente no construtor do RevenueCatService
+  // Initialize unified subscription services (NEW - Simplified)
+  final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
+  await simpleSubscriptionSyncService.initialize();
 
   // Initialize notifications
   final notificationService = PlantisNotificationService();
@@ -91,14 +88,16 @@ void main() async {
   // Run app
   if (EnvironmentConfig.enableAnalytics) {
     // Run app in guarded zone for Crashlytics only in production/staging
-    runZonedGuarded<Future<void>>(
-      () async {
-        await performanceService.markFirstFrame();
-        runApp(const PlantisApp());
-      },
-      (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      },
+    unawaited(
+      runZonedGuarded<Future<void>>(
+        () async {
+          await performanceService.markFirstFrame();
+          runApp(const PlantisApp());
+        },
+        (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        },
+      ),
     );
   } else {
     // Run app normally in development

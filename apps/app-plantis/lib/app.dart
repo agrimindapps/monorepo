@@ -24,7 +24,7 @@ class PlantisApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => di.sl<PlantTaskProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PremiumProvider>()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
+        ChangeNotifierProvider(create: (_) => di.sl<ThemeProvider>()..initialize()),
       ],
       builder: (context, child) {
         final router = AppRouter.router(context);
@@ -36,7 +36,7 @@ class PlantisApp extends StatelessWidget {
                 title: 'Plantis - Cuidado de Plantas',
                 theme: PlantisTheme.lightTheme,
                 darkTheme: PlantisTheme.darkTheme,
-                themeMode: themeProvider.themeMode,
+                themeMode: themeProvider?.themeMode ?? ThemeMode.system,
                 routerConfig: router,
                 debugShowCheckedModeBanner: false,
               ),

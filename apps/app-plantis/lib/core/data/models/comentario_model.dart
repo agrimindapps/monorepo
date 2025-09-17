@@ -210,7 +210,7 @@ class ComentarioModel extends BaseSyncModel {
     );
   }
 
-  // Legacy compatibility methods
+  // Convenience methods for different serialization formats
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();

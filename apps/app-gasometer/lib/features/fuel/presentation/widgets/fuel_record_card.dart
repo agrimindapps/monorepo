@@ -25,7 +25,7 @@ class FuelRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semanticLabel = 'Abastecimento $vehicleName em ${_formatDate(record.data)}, ${record.litros.toStringAsFixed(1)} litros, R\$ ${record.valorTotal.toStringAsFixed(2)}${record.tanqueCheio ? ', tanque cheio' : ''}';
+    final semanticLabel = 'Abastecimento $vehicleName em ${_formatDate(record.date)}, ${record.liters.toStringAsFixed(1)} litros, R\$ ${record.totalPrice.toStringAsFixed(2)}${record.fullTank ? ', tanque cheio' : ''}';
 
     return Semantics(
       label: semanticLabel,
@@ -33,13 +33,13 @@ class FuelRecordCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 4.0),
         child: StandardListItemCard.fuel(
-          date: record.data,
-          fuelType: record.tipoCombustivel.displayName,
-          liters: record.litros,
-          amount: record.valorTotal,
-          odometer: record.odometro,
-          location: record.nomePosto,
-          fullTank: record.tanqueCheio,
+          date: record.date,
+          fuelType: record.fuelType.displayName,
+          liters: record.liters,
+          amount: record.totalPrice,
+          odometer: record.odometer,
+          location: record.gasStationName,
+          fullTank: record.fullTank,
           onTap: onTap,
           onLongPress: onLongPress,
         ),

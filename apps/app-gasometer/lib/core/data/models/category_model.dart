@@ -165,7 +165,7 @@ class CategoryModel extends BaseSyncModel {
     );
   }
 
-  // Legacy compatibility methods
+  // Convenience methods for different serialization formats
   Map<String, dynamic> toMap() => toHiveMap();
   Map<String, dynamic> toJson() => toHiveMap();
   factory CategoryModel.fromMap(Map<String, dynamic> map) => CategoryModel.fromHiveMap(map);

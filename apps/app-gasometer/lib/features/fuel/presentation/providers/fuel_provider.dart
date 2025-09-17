@@ -368,16 +368,16 @@ class FuelProvider extends ChangeNotifier {
 
   double getTotalSpentInDateRange(DateTime startDate, DateTime endDate) {
     final recordsInRange = fuelRecords.where((record) {
-      return record.data.isAfter(startDate) && record.data.isBefore(endDate);
+      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
     }).toList();
-    return recordsInRange.map((r) => r.valorTotal).fold(0.0, (a, b) => a + b);
+    return recordsInRange.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
   }
 
   double getTotalLitersInDateRange(DateTime startDate, DateTime endDate) {
     final recordsInRange = fuelRecords.where((record) {
-      return record.data.isAfter(startDate) && record.data.isBefore(endDate);
+      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
     }).toList();
-    return recordsInRange.map((r) => r.litros).fold(0.0, (a, b) => a + b);
+    return recordsInRange.map((r) => r.liters).fold(0.0, (a, b) => a + b);
   }
 
   void _setLoading(bool loading) {
@@ -462,10 +462,10 @@ class FuelProvider extends ChangeNotifier {
       // Aplicar busca nos registros carregados
       _filteredFuelRecords = _fuelRecords.where((record) {
         final searchLower = _searchQuery.toLowerCase();
-        return record.nomePosto?.toLowerCase().contains(searchLower) == true ||
-               record.marcaPosto?.toLowerCase().contains(searchLower) == true ||
-               record.observacoes?.toLowerCase().contains(searchLower) == true ||
-               record.tipoCombustivel.displayName.toLowerCase().contains(searchLower);
+        return record.gasStationName?.toLowerCase().contains(searchLower) == true ||
+               record.gasStationBrand?.toLowerCase().contains(searchLower) == true ||
+               record.notes?.toLowerCase().contains(searchLower) == true ||
+               record.fuelType.displayName.toLowerCase().contains(searchLower);
       }).toList();
     }
     
@@ -485,15 +485,15 @@ class FuelProvider extends ChangeNotifier {
       );
     }
     
-    final totalLiters = records.fold<double>(0, (sum, record) => sum + record.litros);
-    final totalCost = records.fold<double>(0, (sum, record) => sum + record.valorTotal);
-    final averagePrice = records.fold<double>(0, (sum, record) => sum + record.precoPorLitro) / records.length;
+    final totalLiters = records.fold<double>(0, (sum, record) => sum + record.liters);
+    final totalCost = records.fold<double>(0, (sum, record) => sum + record.totalPrice);
+    final averagePrice = records.fold<double>(0, (sum, record) => sum + record.pricePerLiter) / records.length;
     
     // Calculate consumption only for records with odometer data
     double averageConsumption = 0.0;
-    final recordsWithConsumption = records.where((r) => r.consumo != null && r.consumo! > 0).toList();
+    final recordsWithConsumption = records.where((r) => r.consumption != null && r.consumption! > 0).toList();
     if (recordsWithConsumption.isNotEmpty) {
-      averageConsumption = recordsWithConsumption.fold<double>(0, (sum, record) => sum + record.consumo!) / recordsWithConsumption.length;
+      averageConsumption = recordsWithConsumption.fold<double>(0, (sum, record) => sum + record.consumption!) / recordsWithConsumption.length;
     }
     
     return FuelStatistics(

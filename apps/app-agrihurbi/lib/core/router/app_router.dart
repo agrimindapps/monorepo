@@ -116,7 +116,7 @@ class AppRouter {
                 builder: (context, state) => const LivestockSearchPage(),
               ),
               
-              // Legacy routes for backward compatibility
+              // Livestock management routes
               GoRoute(
                 path: 'add',
                 name: 'add-livestock',

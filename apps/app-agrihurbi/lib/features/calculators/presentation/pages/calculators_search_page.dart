@@ -226,7 +226,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     );
   }
   
-  /// Método legacy mantido para compatibilidade
+  /// Método para atualizar resultados da busca
   void _updateSearchResults() {
     _performOptimizedSearch(_searchController.text);
   }

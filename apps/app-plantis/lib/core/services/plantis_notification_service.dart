@@ -278,12 +278,33 @@ class PlantisNotificationService {
   /// Verifica se uma notificação específica está agendada
   Future<bool> isNotificationScheduled(String identifier) async {
     if (kIsWeb) return false; // Web não agenda notificações
-    
+
     try {
       final id = _notificationRepository.generateNotificationId(identifier);
       return await _notificationRepository.isNotificationScheduled(id);
     } catch (e) {
       debugPrint('❌ Error checking notification schedule: $e');
+      return false;
+    }
+  }
+
+  /// Expõe o repository para uso interno
+  INotificationRepository get notificationRepository => _notificationRepository;
+
+  /// Gera um ID de notificação único
+  int generateNotificationId(String identifier) {
+    return _notificationRepository.generateNotificationId(identifier);
+  }
+
+  /// Agenda uma notificação diretamente
+  Future<bool> scheduleDirectNotification(NotificationEntity notification) async {
+    if (kIsWeb) return false;
+
+    try {
+      await _notificationRepository.scheduleNotification(notification);
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error scheduling direct notification: $e');
       return false;
     }
   }

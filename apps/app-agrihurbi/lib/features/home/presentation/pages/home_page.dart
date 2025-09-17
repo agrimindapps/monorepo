@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,7 @@ class HomePage extends StatelessWidget {
               context,
               title: 'Rebanho',
               icon: Icons.pets,
-              color: AppColors.cattle,
+              color: DesignTokens.cattleColor,
               onTap: () => context.push('/home/livestock'),
             ),
             _buildFeatureCard(
@@ -120,28 +121,28 @@ class HomePage extends StatelessWidget {
               context,
               title: 'Clima',
               icon: Icons.wb_sunny,
-              color: AppColors.sunny,
+              color: DesignTokens.sunnyColor,
               onTap: () => context.push('/home/weather'),
             ),
             _buildFeatureCard(
               context,
               title: 'Notícias',
               icon: Icons.newspaper,
-              color: AppColors.completed,
+              color: DesignTokens.successColor,
               onTap: () => context.push('/home/news'),
             ),
             _buildFeatureCard(
               context,
               title: 'Mercados',
               icon: Icons.trending_up,
-              color: AppColors.active,
+              color: DesignTokens.infoColor,
               onTap: () => context.push('/home/markets'),
             ),
             _buildFeatureCard(
               context,
               title: 'Configurações',
               icon: Icons.settings,
-              color: AppColors.inactive,
+              color: DesignTokens.textSecondaryColor,
               onTap: () => context.push('/home/settings'),
             ),
           ],

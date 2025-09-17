@@ -267,17 +267,17 @@ class MaintenanceRepository {
       cost: model.valor,
       serviceDate: DateTime.fromMillisecondsSinceEpoch(model.data),
       odometer: model.odometro.toDouble(),
-      workshopName: null, // Não disponível no modelo legacy
-      workshopPhone: null, // Não disponível no modelo legacy
-      workshopAddress: null, // Não disponível no modelo legacy
+      workshopName: null, // Não disponível no modelo atual
+      workshopPhone: null, // Não disponível no modelo atual
+      workshopAddress: null, // Não disponível no modelo atual
       nextServiceDate: model.proximaRevisao != null 
           ? DateTime.fromMillisecondsSinceEpoch(model.proximaRevisao!)
           : null,
-      nextServiceOdometer: null, // Não disponível no modelo legacy
-      photosPaths: const [], // Não disponível no modelo legacy
-      invoicesPaths: const [], // Não disponível no modelo legacy
-      parts: const {}, // Não disponível no modelo legacy
-      notes: null, // Não disponível no modelo legacy
+      nextServiceOdometer: null, // Não disponível no modelo atual
+      photosPaths: const [], // Não disponível no modelo atual
+      invoicesPaths: const [], // Não disponível no modelo atual
+      parts: const {}, // Não disponível no modelo atual
+      notes: null, // Não disponível no modelo atual
       createdAt: model.createdAt ?? DateTime.now(),
       updatedAt: model.updatedAt ?? DateTime.now(),
       metadata: const {},

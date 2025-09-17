@@ -9,7 +9,7 @@ import '../services/enhanced_diagnostic_integration_service.dart';
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
-import '../../features/diagnosticos/data/repositories/diagnosticos_repository_legacy_adapter.dart';
+import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
 import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
@@ -22,13 +22,12 @@ import '../../features/settings/di/device_management_di.dart';
 import '../navigation/app_navigation_provider.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/cultura_hive_repository.dart';
+import '../repositories/diagnostico_core_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
 import '../repositories/favoritos_hive_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
-import '../repositories/pragas_inf_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
 import '../services/device_identity_service.dart';
@@ -185,92 +184,37 @@ Future<void> init() async {
   // Device Identity Service - Moved to before Core Package Integration
   
   // Hive Repositories - Repositórios de dados reais
-  // LEGACY: Comentados durante migração para Core Package
-  /*
-  sl.registerLazySingleton<CulturaHiveRepository>(
-    () => CulturaHiveRepository(),
-  );
+  // Core repositories removed - using direct enhanced implementation
   
-  sl.registerLazySingleton<PragasHiveRepository>(
-    () => PragasHiveRepository(),
-  );
-  
-  sl.registerLazySingleton<FitossanitarioHiveRepository>(
-    () => FitossanitarioHiveRepository(),
-  );
-  
-  sl.registerLazySingleton<DiagnosticoHiveRepository>(
-    () => DiagnosticoHiveRepository(),
-  );
-  
-  sl.registerLazySingleton<FavoritosHiveRepository>(
-    () => FavoritosHiveRepository(),
-  );
-  
-  sl.registerLazySingleton<FitossanitarioInfoHiveRepository>(
-    () => FitossanitarioInfoHiveRepository(),
-  );
-  */
+  // ===== ENHANCED DIAGNOSTICOS SERVICES =====
+  // New enhanced services for optimal performance
 
-  // TEMPORARILY DISABLED: Core-based repositories using HiveStorageService
-  // EMERGENCY FIX: Using legacy repositories only to avoid conflicts
-  // sl.registerLazySingleton<PragasCoreRepository>(
-  //   () => PragasCoreRepository(sl<ILocalStorageRepository>()),
-  // );
-  // 
-  // sl.registerLazySingleton<FitossanitarioCoreRepository>(
-  //   () => FitossanitarioCoreRepository(sl<ILocalStorageRepository>()),
-  // );
-  // 
-  // sl.registerLazySingleton<FavoritosCoreRepository>(
-  //   () => FavoritosCoreRepository(sl<ILocalStorageRepository>()),
-  // );
-  // 
-  // sl.registerLazySingleton<CulturaCoreRepository>(
-  //   () => CulturaCoreRepository(sl<ILocalStorageRepository>()),
-  // );
-  // 
-  // sl.registerLazySingleton<DiagnosticoCoreRepository>(
-  //   () => DiagnosticoCoreRepository(sl<ILocalStorageRepository>()),
-  // );
-  
-  // Temporary repositories that still need migration
-  // TEMPORARY: Re-registering legacy repositories for backward compatibility
-  // These should be removed once all pages are migrated to use Core repositories
+  // Core repositories using enhanced storage
   sl.registerLazySingleton<CulturaHiveRepository>(
     () => CulturaHiveRepository(),
   );
-  
+
   sl.registerLazySingleton<PragasHiveRepository>(
     () => PragasHiveRepository(),
   );
-  
+
   sl.registerLazySingleton<FitossanitarioHiveRepository>(
     () => FitossanitarioHiveRepository(),
   );
-  
-  sl.registerLazySingleton<FavoritosHiveRepository>(
-    () => FavoritosHiveRepository(),
-  );
-  
+
   sl.registerLazySingleton<DiagnosticoHiveRepository>(
     () => DiagnosticoHiveRepository(),
   );
-  
+
   sl.registerLazySingleton<FitossanitarioInfoHiveRepository>(
     () => FitossanitarioInfoHiveRepository(),
   );
+
+  // Enhanced diagnostico services (singletons)
+  // These are automatically initialized and managed
+  // No need to register as they use singleton pattern
   
-  sl.registerLazySingleton<PragasInfHiveRepository>(
-    () => PragasInfHiveRepository(),
-  );
-  
-  sl.registerLazySingleton<PlantasInfHiveRepository>(
-    () => PlantasInfHiveRepository(),
-  );
-  
-  // Integration Services - Serviços que integram múltiplas boxes
-  // TEMPORARY: Re-registering with legacy repositories for backward compatibility
+  // Integration Services - Enhanced version
   sl.registerLazySingleton<DiagnosticoIntegrationService>(
     () => DiagnosticoIntegrationService(
       diagnosticoRepo: sl<DiagnosticoHiveRepository>(),
@@ -281,10 +225,13 @@ Future<void> init() async {
     ),
   );
 
-  // Enhanced DiagnosticoIntegrationService - Removed (service not available)
+  // Enhanced services use singleton pattern automatically
   
-  // Cache Services - Serviços de cache para otimização
-  // TEMPORARY: Re-registering with legacy repositories for backward compatibility  
+  // Enhanced Cache Services - Simplified registration
+  sl.registerLazySingleton<FavoritosHiveRepository>(
+    () => FavoritosHiveRepository(),
+  );
+
   sl.registerLazySingleton<FavoritosCacheService>(
     () => FavoritosCacheService(
       favoritosRepository: sl<FavoritosHiveRepository>(),
@@ -295,8 +242,7 @@ Future<void> init() async {
     ),
   );
   
-  // Navigation Services - Serviços de navegação inteligente
-  // TEMPORARY: Re-registering with legacy repositories for backward compatibility
+  // Navigation Services - Enhanced version
   sl.registerLazySingleton<FavoritosNavigationService>(
     () => FavoritosNavigationService(
       fitossanitarioRepository: sl<FitossanitarioHiveRepository>(),
@@ -344,11 +290,15 @@ Future<void> init() async {
   sl.registerLazySingleton<EnhancedDiagnosticIntegrationService>(
     () => EnhancedDiagnosticIntegrationService(),
   );
-  
-  // ENHANCED FIX: Using legacy adapter enhanced with automatic name resolution
-  // This provides enriched diagnostics data with proper defensivo/praga/cultura names
+
+  // Core Repository para Diagnósticos
+  sl.registerLazySingleton<DiagnosticoCoreRepository>(
+    () => DiagnosticoCoreRepository(sl<core.ILocalStorageRepository>()),
+  );
+
+  // Enhanced Diagnosticos Repository - Direct implementation
   sl.registerLazySingleton<IDiagnosticosRepository>(
-    () => DiagnosticosRepositoryLegacyAdapter(sl<DiagnosticoHiveRepository>()),
+    () => DiagnosticosRepositoryImpl(sl<DiagnosticoCoreRepository>()),
   );
 
   // Use Cases para Diagnósticos

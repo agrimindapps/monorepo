@@ -5,7 +5,7 @@ import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../providers/detalhe_defensivo_provider.dart';
-import '../providers/diagnosticos_provider_legacy.dart';
+import '../providers/diagnosticos_provider.dart';
 import 'diagnosticos_defensivos_components.dart';
 
 /// Widget principal responsável por exibir diagnósticos relacionados ao defensivo

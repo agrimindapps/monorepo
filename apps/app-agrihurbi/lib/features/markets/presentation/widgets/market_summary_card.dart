@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:flutter/material.dart';
 
@@ -104,7 +105,7 @@ class MarketSummaryCard extends StatelessWidget {
                     'Em Alta',
                     summary.marketsUp.toString(),
                     Icons.trending_up,
-                    AppColors.active,
+                    DesignTokens.marketUpColor,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -122,7 +123,7 @@ class MarketSummaryCard extends StatelessWidget {
                     'Estáveis',
                     summary.marketsUnchanged.toString(),
                     Icons.trending_flat,
-                    AppColors.inactive,
+                    DesignTokens.textSecondaryColor,
                   ),
                 ),
               ],
@@ -217,9 +218,9 @@ class MarketSummaryCard extends StatelessWidget {
   }
 
   Color _getIndexChangeColor() {
-    if (summary.marketIndexChange > 0) return AppColors.active;
+    if (summary.marketIndexChange > 0) return DesignTokens.marketUpColor;
     if (summary.marketIndexChange < 0) return AppTheme.errorColor;
-    return AppColors.inactive;
+    return DesignTokens.textSecondaryColor;
   }
 
   IconData _getIndexChangeIcon() {
@@ -231,11 +232,11 @@ class MarketSummaryCard extends StatelessWidget {
   Color _getSentimentColor() {
     switch (summary.marketSentiment) {
       case 'Positivo':
-        return AppColors.active;
+        return DesignTokens.marketUpColor;
       case 'Negativo':
         return AppTheme.errorColor;
       default:
-        return AppColors.inactive;
+        return DesignTokens.textSecondaryColor;
     }
   }
 

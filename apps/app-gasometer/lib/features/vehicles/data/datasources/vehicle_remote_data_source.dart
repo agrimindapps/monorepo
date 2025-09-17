@@ -65,7 +65,7 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
   @override
   Future<void> saveVehicle(String userId, VehicleModel vehicle) async {
     try {
-      final vehicleData = vehicle.toJson();
+      final vehicleData = vehicle.toFirebaseMap();
       vehicleData.addAll({
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
@@ -81,7 +81,7 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
   @override
   Future<void> updateVehicle(String userId, VehicleModel vehicle) async {
     try {
-      final vehicleData = vehicle.toJson();
+      final vehicleData = vehicle.toFirebaseMap();
       vehicleData.addAll({
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -108,7 +108,7 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
       final collection = _getVehiclesCollection(userId);
 
       for (final vehicle in vehicles) {
-        final vehicleData = vehicle.toJson();
+        final vehicleData = vehicle.toFirebaseMap();
         vehicleData.addAll({
           'updatedAt': FieldValue.serverTimestamp(),
           'synced': true,

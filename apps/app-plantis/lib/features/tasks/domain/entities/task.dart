@@ -349,4 +349,75 @@ class Task extends BaseSyncEntity {
         return 'Executar cuidado personalizado';
     }
   }
+
+  /// Convert Task entity directly to JSON for storage
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
+      'title': title,
+      'description': description,
+      'plantId': plantId,
+      'plantName': plantName,
+      'type': type.key,
+      'status': status.key,
+      'priority': priority.key,
+      'dueDate': dueDate.millisecondsSinceEpoch,
+      'completedAt': completedAt?.millisecondsSinceEpoch,
+      'completionNotes': completionNotes,
+      'isRecurring': isRecurring,
+      'recurringIntervalDays': recurringIntervalDays,
+      'nextDueDate': nextDueDate?.millisecondsSinceEpoch,
+      'isDirty': isDirty,
+      'isDeleted': isDeleted,
+      'version': version,
+      'userId': userId,
+      'moduleName': moduleName,
+      'lastSyncAt': lastSyncAt?.millisecondsSinceEpoch,
+    };
+  }
+
+  /// Create Task entity directly from JSON
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'] as String,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int),
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      plantId: json['plantId'] as String,
+      plantName: json['plantName'] as String,
+      type: TaskType.values.firstWhere(
+        (e) => e.key == json['type'],
+        orElse: () => TaskType.custom,
+      ),
+      status: TaskStatus.values.firstWhere(
+        (e) => e.key == json['status'],
+        orElse: () => TaskStatus.pending,
+      ),
+      priority: TaskPriority.values.firstWhere(
+        (e) => e.key == json['priority'],
+        orElse: () => TaskPriority.medium,
+      ),
+      dueDate: DateTime.fromMillisecondsSinceEpoch(json['dueDate'] as int),
+      completedAt: json['completedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['completedAt'] as int)
+          : null,
+      completionNotes: json['completionNotes'] as String?,
+      isRecurring: json['isRecurring'] as bool? ?? false,
+      recurringIntervalDays: json['recurringIntervalDays'] as int?,
+      nextDueDate: json['nextDueDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['nextDueDate'] as int)
+          : null,
+      isDirty: json['isDirty'] as bool? ?? false,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      version: json['version'] as int? ?? 1,
+      userId: json['userId'] as String?,
+      moduleName: json['moduleName'] as String?,
+      lastSyncAt: json['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
+          : null,
+    );
+  }
 }

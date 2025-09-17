@@ -263,17 +263,8 @@ class SettingsProvider extends ChangeNotifier {
     final themeProvider = _themeProvider;
     if (themeProvider == null) return;
 
-    switch (themeSettings.themeMode) {
-      case ThemeMode.light:
-        themeProvider.setLightTheme();
-        break;
-      case ThemeMode.dark:
-        themeProvider.setDarkTheme();
-        break;
-      case ThemeMode.system:
-        themeProvider.setSystemTheme();
-        break;
-    }
+    // Usar o método setThemeMode disponível no ThemeProvider
+    themeProvider.setThemeMode(themeSettings.themeMode);
   }
 
   // Métodos de notificação integrados

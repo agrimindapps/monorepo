@@ -193,10 +193,6 @@ class OdometerModel extends BaseSyncModel {
     );
   }
 
-  // Legacy compatibility methods
-  Map<String, dynamic> toMap() => toHiveMap();
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory OdometerModel.fromMap(Map<String, dynamic> map) => OdometerModel.fromHiveMap(map);
   factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromHiveMap(json);
 
   @override

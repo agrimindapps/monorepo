@@ -128,8 +128,8 @@ class CalculatorSearchService {
     }
   }
   
-  // ===== MÉTODOS LEGACY PARA COMPATIBILIDADE =====
-  // Mantidos para não quebrar código existente, mas marcados como deprecated
+  // ===== MÉTODOS DEPRECATED =====
+  // Mantidos para não quebrar código existente
   
   @Deprecated('Use optimizedSearch com SearchCriteria para melhor performance')
   static List<CalculatorEntity> searchCalculators(

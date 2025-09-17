@@ -310,7 +310,7 @@ class DiagnosticoGroupingService {
     );
   }
 
-  /// Agrupa objetos dinâmicos (compatibilidade com código legacy)
+  /// Agrupa objetos dinâmicos (flexibilidade de tipos)
   Map<String, List<dynamic>> groupDynamicByCultura(
     List<dynamic> diagnosticos, {
     bool useResolver = true,

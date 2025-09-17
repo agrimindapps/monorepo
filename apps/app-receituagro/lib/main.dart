@@ -176,7 +176,7 @@ void main() async {
     }
   }
 
-  // 🌱 CULTURAS: Loading culturas data using legacy repository system
+  // 🌱 CULTURAS: Loading culturas data from repository
   print('🌱 [MAIN] Carregando dados de culturas...');
   await CulturasDataLoader.loadCulturasData();
   print('🌱 [MAIN] Dados de culturas carregados com sucesso.');

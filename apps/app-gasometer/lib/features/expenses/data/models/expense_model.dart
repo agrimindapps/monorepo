@@ -279,11 +279,6 @@ class ExpenseModel extends BaseSyncModel {
     );
   }
 
-  // Legacy compatibility methods
-  Map<String, dynamic> toMap() => toHiveMap();
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory ExpenseModel.fromMap(Map<String, dynamic> map) =>
-      ExpenseModel.fromHiveMap(map);
 
   /// Get the expense date as DateTime object
   DateTime get expenseDate => DateTime.fromMillisecondsSinceEpoch(data);

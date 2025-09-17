@@ -70,24 +70,6 @@ class FuelRecordEntity extends Equatable {
     updatedAt,
   ];
   
-  // Legacy Portuguese getters for backward compatibility
-  String get idUsuario => userId;
-  String get veiculoId => vehicleId;
-  FuelType get tipoCombustivel => fuelType;
-  double get litros => liters;
-  double get precoPorLitro => pricePerLiter;
-  double get valorTotal => totalPrice;
-  double get odometro => odometer;
-  DateTime get data => date;
-  String? get nomePosto => gasStationName;
-  String? get marcaPosto => gasStationBrand;
-  bool get tanqueCheio => fullTank;
-  String? get observacoes => notes;
-  double? get odometroAnterior => previousOdometer;
-  double? get distanciaPercorrida => distanceTraveled;
-  double? get consumo => consumption;
-  DateTime get criadoEm => createdAt;
-  DateTime get atualizadoEm => updatedAt;
   
   // Additional properties not in model
   String? get address => null; // Not available in current entity
@@ -118,46 +100,28 @@ class FuelRecordEntity extends Equatable {
     double? consumption,
     DateTime? createdAt,
     DateTime? updatedAt,
-    // Legacy support
-    String? idUsuario,
-    String? veiculoId,
-    FuelType? tipoCombustivel,
-    double? litros,
-    double? precoPorLitro,
-    double? valorTotal,
-    double? odometro,
-    DateTime? data,
-    String? nomePosto,
-    String? marcaPosto,
-    bool? tanqueCheio,
-    String? observacoes,
-    double? odometroAnterior,
-    double? distanciaPercorrida,
-    double? consumo,
-    DateTime? criadoEm,
-    DateTime? atualizadoEm,
   }) {
     return FuelRecordEntity(
       id: id ?? this.id,
-      userId: userId ?? idUsuario ?? this.userId,
-      vehicleId: vehicleId ?? veiculoId ?? this.vehicleId,
-      fuelType: fuelType ?? tipoCombustivel ?? this.fuelType,
-      liters: liters ?? litros ?? this.liters,
-      pricePerLiter: pricePerLiter ?? precoPorLitro ?? this.pricePerLiter,
-      totalPrice: totalPrice ?? valorTotal ?? this.totalPrice,
-      odometer: odometer ?? odometro ?? this.odometer,
-      date: date ?? data ?? this.date,
-      gasStationName: gasStationName ?? nomePosto ?? this.gasStationName,
-      gasStationBrand: gasStationBrand ?? marcaPosto ?? this.gasStationBrand,
+      userId: userId ?? this.userId,
+      vehicleId: vehicleId ?? this.vehicleId,
+      fuelType: fuelType ?? this.fuelType,
+      liters: liters ?? this.liters,
+      pricePerLiter: pricePerLiter ?? this.pricePerLiter,
+      totalPrice: totalPrice ?? this.totalPrice,
+      odometer: odometer ?? this.odometer,
+      date: date ?? this.date,
+      gasStationName: gasStationName ?? this.gasStationName,
+      gasStationBrand: gasStationBrand ?? this.gasStationBrand,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
-      fullTank: fullTank ?? tanqueCheio ?? this.fullTank,
-      notes: notes ?? observacoes ?? this.notes,
-      previousOdometer: previousOdometer ?? odometroAnterior ?? this.previousOdometer,
-      distanceTraveled: distanceTraveled ?? distanciaPercorrida ?? this.distanceTraveled,
-      consumption: consumption ?? consumo ?? this.consumption,
-      createdAt: createdAt ?? criadoEm ?? this.createdAt,
-      updatedAt: updatedAt ?? atualizadoEm ?? this.updatedAt,
+      fullTank: fullTank ?? this.fullTank,
+      notes: notes ?? this.notes,
+      previousOdometer: previousOdometer ?? this.previousOdometer,
+      distanceTraveled: distanceTraveled ?? this.distanceTraveled,
+      consumption: consumption ?? this.consumption,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
   

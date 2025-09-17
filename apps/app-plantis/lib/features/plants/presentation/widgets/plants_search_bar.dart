@@ -18,7 +18,6 @@ class PlantsSearchBar extends StatefulWidget {
 
 class _PlantsSearchBarState extends State<PlantsSearchBar> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -29,14 +28,12 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   void _clearSearch() {
     _controller.clear();
     widget.onSearchChanged('');
-    _focusNode.unfocus();
   }
 
   @override
@@ -47,7 +44,6 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
         controller: _controller,
-        focusNode: _focusNode,
         onChanged: widget.onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Buscar plantas...',
@@ -105,7 +101,6 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
           ),
         ),
         textInputAction: TextInputAction.search,
-        onSubmitted: (value) => _focusNode.unfocus(),
       ),
     );
   }

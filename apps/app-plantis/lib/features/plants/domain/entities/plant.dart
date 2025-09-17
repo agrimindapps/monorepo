@@ -50,7 +50,7 @@ class Plant extends BaseSyncEntity {
     return DateTime.now().difference(plantingDate!).inDays;
   }
 
-  /// Convert from legacy PlantaModel to modern Plant entity
+  /// Convert from PlantaModel to Plant entity (migration compatibility)
   /// Includes robust validation to handle corrupted or null data
   factory Plant.fromPlantaModel(dynamic plantaModel) {
     try {
@@ -361,6 +361,64 @@ class Plant extends BaseSyncEntity {
     );
   }
 
+  /// Convert Plant entity to JSON for storage
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'species': species,
+      'spaceId': spaceId,
+      'imageBase64': imageBase64,
+      'imageUrls': imageUrls,
+      'notes': notes,
+      'plantingDate': plantingDate?.millisecondsSinceEpoch,
+      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
+      'lastSyncAt': lastSyncAt?.millisecondsSinceEpoch,
+      'isDirty': isDirty,
+      'isDeleted': isDeleted,
+      'version': version,
+      'userId': userId,
+      'moduleName': moduleName,
+      'isFavorited': isFavorited,
+      'config': config?.toJson(),
+    };
+  }
+
+  /// Create Plant entity from JSON
+  factory Plant.fromJson(Map<String, dynamic> json) {
+    return Plant(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      species: json['species'] as String?,
+      spaceId: json['spaceId'] as String?,
+      imageBase64: json['imageBase64'] as String?,
+      imageUrls: (json['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
+      notes: json['notes'] as String?,
+      plantingDate: json['plantingDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['plantingDate'] as int)
+          : null,
+      isFavorited: json['isFavorited'] as bool? ?? false,
+      config: json['config'] != null
+          ? PlantConfig.fromJson(json['config'] as Map<String, dynamic>)
+          : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int)
+          : null,
+      lastSyncAt: json['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
+          : null,
+      isDirty: json['isDirty'] as bool? ?? false,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      version: json['version'] as int? ?? 1,
+      userId: json['userId'] as String?,
+      moduleName: json['moduleName'] as String?,
+    );
+  }
+
   @override
   List<Object?> get props => [
     ...super.props,
@@ -468,6 +526,52 @@ class PlantConfig extends Equatable {
       lastWateringDate: lastWateringDate ?? this.lastWateringDate,
       enableFertilizerCare: enableFertilizerCare ?? this.enableFertilizerCare,
       lastFertilizerDate: lastFertilizerDate ?? this.lastFertilizerDate,
+    );
+  }
+
+  /// Convert PlantConfig to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'wateringIntervalDays': wateringIntervalDays,
+      'fertilizingIntervalDays': fertilizingIntervalDays,
+      'pruningIntervalDays': pruningIntervalDays,
+      'sunlightCheckIntervalDays': sunlightCheckIntervalDays,
+      'pestInspectionIntervalDays': pestInspectionIntervalDays,
+      'replantingIntervalDays': replantingIntervalDays,
+      'lightRequirement': lightRequirement,
+      'waterAmount': waterAmount,
+      'soilType': soilType,
+      'idealTemperature': idealTemperature,
+      'idealHumidity': idealHumidity,
+      'enableWateringCare': enableWateringCare,
+      'lastWateringDate': lastWateringDate?.millisecondsSinceEpoch,
+      'enableFertilizerCare': enableFertilizerCare,
+      'lastFertilizerDate': lastFertilizerDate?.millisecondsSinceEpoch,
+    };
+  }
+
+  /// Create PlantConfig from JSON
+  factory PlantConfig.fromJson(Map<String, dynamic> json) {
+    return PlantConfig(
+      wateringIntervalDays: json['wateringIntervalDays'] as int?,
+      fertilizingIntervalDays: json['fertilizingIntervalDays'] as int?,
+      pruningIntervalDays: json['pruningIntervalDays'] as int?,
+      sunlightCheckIntervalDays: json['sunlightCheckIntervalDays'] as int?,
+      pestInspectionIntervalDays: json['pestInspectionIntervalDays'] as int?,
+      replantingIntervalDays: json['replantingIntervalDays'] as int?,
+      lightRequirement: json['lightRequirement'] as String?,
+      waterAmount: json['waterAmount'] as String?,
+      soilType: json['soilType'] as String?,
+      idealTemperature: (json['idealTemperature'] as num?)?.toDouble(),
+      idealHumidity: (json['idealHumidity'] as num?)?.toDouble(),
+      enableWateringCare: json['enableWateringCare'] as bool?,
+      lastWateringDate: json['lastWateringDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastWateringDate'] as int)
+          : null,
+      enableFertilizerCare: json['enableFertilizerCare'] as bool?,
+      lastFertilizerDate: json['lastFertilizerDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastFertilizerDate'] as int)
+          : null,
     );
   }
 

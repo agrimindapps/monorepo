@@ -192,12 +192,24 @@ void _initComments() {
 }
 
 void _initPremium() {
-  // Repository
+  // Repository (mantém RevenueCat como implementação base)
   sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
 
-  // Provider
+  // Unified Subscription Services (NEW - Simplified)
+  sl.registerLazySingleton<SimpleSubscriptionSyncService>(
+    () => SimpleSubscriptionSyncService(
+      subscriptionRepository: sl<ISubscriptionRepository>(),
+      localStorage: sl<ILocalStorageRepository>(),
+    ),
+  );
+
+  // Provider (atualizado para usar SimpleSubscriptionSyncService)
   sl.registerFactory(
-    () => PremiumProvider(subscriptionRepository: sl(), authRepository: sl()),
+    () => PremiumProvider(
+      subscriptionRepository: sl(),
+      authRepository: sl(),
+      simpleSubscriptionSyncService: sl<SimpleSubscriptionSyncService>(), // NEW
+    ),
   );
 }
 
@@ -222,7 +234,7 @@ void _initSettings() {
     )..initialize(), // Auto-initialize for better UX
   );
 
-  // Legacy Notifications Settings Provider (for compatibility during migration)
+  // Notifications Settings Provider
   sl.registerFactory(
     () => NotificationsSettingsProvider(
       notificationService: sl<PlantisNotificationService>(),
@@ -265,7 +277,7 @@ void _initBackup() {
     ),
   );
 
-  // Legacy Backup Service (mantido para compatibilidade)
+  // Backup Service
   sl.registerSingleton<BackupService>(
     BackupService(
       backupRepository: sl<IBackupRepository>(),

@@ -4,7 +4,7 @@ import 'package:get_it/get_it.dart';
 import '../data/repositories/defensivos_repository_impl.dart';
 // Domain
 import '../domain/repositories/i_defensivos_repository.dart';
-// Core Repository (legacy fallback)
+// Core Repository (Hive implementation)
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../domain/usecases/get_defensivos_usecase.dart';
 import '../domain/usecases/get_defensivos_agrupados_usecase.dart';

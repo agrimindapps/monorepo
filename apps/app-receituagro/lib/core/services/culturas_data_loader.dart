@@ -11,7 +11,7 @@ import '../repositories/cultura_hive_repository.dart';
 class CulturasDataLoader {
   static bool _isLoaded = false;
 
-  /// Carrega dados de culturas do JSON dos assets usando repositório legacy
+  /// Carrega dados de culturas do JSON dos assets usando repositório Hive
   static Future<void> loadCulturasData() async {
     if (_isLoaded) {
       developer.log('Culturas já carregadas, pulando...',
@@ -51,7 +51,7 @@ class CulturasDataLoader {
       print(
           '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas');
 
-      // 2. Obtém repositório legacy do DI
+      // 2. Obtém repositório do DI
       final repository = di.sl<CulturaHiveRepository>();
 
       // 3. Carrega dados no repositório

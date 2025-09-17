@@ -503,18 +503,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   context.go('/terms');
                 },
               ),
-              if (!isAnonymous)
-                _buildSettingsItem(
-                  context,
-                  icon: Icons.star,
-                  title: 'Premium',
-                  subtitle: 'Gerenciar assinatura Premium',
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    context.go('/premium');
-                  },
-                  isLast: true,
-                ),
             ],
           ),
         ),

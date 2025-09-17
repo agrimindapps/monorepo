@@ -610,8 +610,8 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _showRecordDetails(FuelRecordEntity record, VehiclesProvider vehiclesProvider) {
-    final vehicleName = _getVehicleName(record.veiculoId);
-    final formattedDate = '${record.data.day}/${record.data.month}/${record.data.year}';
+    final vehicleName = _getVehicleName(record.vehicleId);
+    final formattedDate = '${record.date.day}/${record.date.month}/${record.date.year}';
     
     showDialog<void>(
       context: context,
@@ -634,15 +634,15 @@ class _FuelPageState extends State<FuelPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow('Posto', record.nomePosto ?? 'Não informado'),
-              _buildDetailRow('Combustível', record.tipoCombustivel.displayName),
+              _buildDetailRow('Posto', record.gasStationName ?? 'Não informado'),
+              _buildDetailRow('Combustível', record.fuelType.displayName),
               _buildDetailRow('Litros', record.litrosFormatados),
               _buildDetailRow('Preço/L', record.precoPorLitroFormatado),
               _buildDetailRow('Total', record.valorTotalFormatado),
               _buildDetailRow('Odômetro', record.odometroFormatado),
-              _buildDetailRow('Tanque cheio', record.tanqueCheio ? 'Sim' : 'Não'),
+              _buildDetailRow('Tanque cheio', record.fullTank ? 'Sim' : 'Não'),
               if (record.temObservacoes)
-                _buildDetailRow('Observações', record.observacoes!),
+                _buildDetailRow('Observações', record.notes!),
             ],
           ),
         ),
@@ -660,8 +660,8 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _showRecordMenu(FuelRecordEntity record) {
-    final vehicleName = _getVehicleName(record.veiculoId);
-    final formattedDate = '${record.data.day}/${record.data.month}/${record.data.year}';
+    final vehicleName = _getVehicleName(record.vehicleId);
+    final formattedDate = '${record.date.day}/${record.date.month}/${record.date.year}';
     final recordDescription = 'abastecimento de $vehicleName em $formattedDate';
     
     showModalBottomSheet<void>(
@@ -677,14 +677,14 @@ class _FuelPageState extends State<FuelPage> {
                 button: true,
                 onTap: () {
                   Navigator.pop(context);
-                  _showEditFuelDialog(record.id, record.veiculoId);
+                  _showEditFuelDialog(record.id, record.vehicleId);
                 },
                 child: ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Editar'),
                   onTap: () {
                     Navigator.pop(context);
-                    _showEditFuelDialog(record.id, record.veiculoId);
+                    _showEditFuelDialog(record.id, record.vehicleId);
                   },
                 ),
               ),
@@ -713,8 +713,8 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   void _confirmDeleteRecord(FuelRecordEntity record) {
-    final vehicleName = _getVehicleName(record.veiculoId);
-    final recordDescription = 'abastecimento de $vehicleName realizado em ${record.data.day}/${record.data.month}/${record.data.year}';
+    final vehicleName = _getVehicleName(record.vehicleId);
+    final recordDescription = 'abastecimento de $vehicleName realizado em ${record.date.day}/${record.date.month}/${record.date.year}';
     
     showDialog<void>(
       context: context,
@@ -868,10 +868,10 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = record.data;
+    final date = record.date;
     final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    final vehicleName = getVehicleName(record.veiculoId);
-    final semanticLabel = 'Abastecimento $vehicleName em $formattedDate, ${record.litros.toStringAsFixed(1)} litros, R\$ ${record.valorTotal.toStringAsFixed(2)}${record.tanqueCheio ? ', tanque cheio' : ''}';
+    final vehicleName = getVehicleName(record.vehicleId);
+    final semanticLabel = 'Abastecimento $vehicleName em $formattedDate, ${record.liters.toStringAsFixed(1)} litros, R\$ ${record.totalPrice.toStringAsFixed(2)}${record.fullTank ? ', tanque cheio' : ''}';
 
     return SemanticCard(
       semanticLabel: semanticLabel,
@@ -920,7 +920,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
               ),
               SizedBox(height: GasometerDesignTokens.spacingXs),
               SemanticText.subtitle(
-                record.nomePosto ?? 'Posto não informado',
+                record.gasStationName ?? 'Posto não informado',
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeMd,
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
@@ -972,7 +972,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           child: _buildInfoItem(
             context,
             Icons.water_drop_outlined,
-            '${record.litros.toStringAsFixed(1)} L',
+            '${record.liters.toStringAsFixed(1)} L',
             'Litros',
           ),
         ),
@@ -980,7 +980,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           child: _buildInfoItem(
             context,
             Icons.speed,
-            '${record.odometro.toStringAsFixed(0)} km',
+            '${record.odometer.toStringAsFixed(0)} km',
             'Odômetro',
           ),
         ),
@@ -988,11 +988,11 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           child: _buildInfoItem(
             context,
             Icons.attach_money,
-            'R\$ ${record.valorTotal.toStringAsFixed(2)}',
+            'R\$ ${record.totalPrice.toStringAsFixed(2)}',
             'Total',
           ),
         ),
-        if (record.tanqueCheio) 
+        if (record.fullTank) 
           Flexible(
             child: _buildFullTankBadge(context),
           ),

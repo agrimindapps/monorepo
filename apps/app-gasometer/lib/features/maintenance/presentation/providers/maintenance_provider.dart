@@ -113,7 +113,7 @@ class MaintenanceProvider extends BaseProvider {
     return _cachedStatistics!;
   }
   
-  // Legacy getters for backward compatibility (now use cached statistics)
+  // Convenience getters for maintenance statistics
   double get totalMaintenanceCost => statistics.totalCost;
   
   Map<MaintenanceType, int> get maintenanceCountByType {

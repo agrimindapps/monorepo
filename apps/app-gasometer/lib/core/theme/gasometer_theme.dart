@@ -1,18 +1,24 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import 'gasometer_colors.dart';
 
 /// Tema do GasOMeter otimizado e seguro
-/// 
+///
 /// Esta versão evita configurações complexas de widget themes que podem
 /// causar conflitos de null values, focando nas customizações essenciais.
 class GasometerTheme {
   /// Tema claro simplificado
-  static ThemeData get lightTheme => BaseTheme.buildLightTheme(
-    primaryColor: GasometerColors.primary,
-    secondaryColor: GasometerColors.secondary,
+  static ThemeData get lightTheme => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
     fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: GasometerColors.primary,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: GasometerColors.primary,
+      secondary: GasometerColors.secondary,
+    ),
   ).copyWith(
     // AppBar personalizado
     appBarTheme: const AppBarTheme(
@@ -123,10 +129,17 @@ class GasometerTheme {
   );
   
   /// Tema escuro simplificado
-  static ThemeData get darkTheme => BaseTheme.buildDarkTheme(
-    primaryColor: GasometerColors.primary,
-    secondaryColor: GasometerColors.secondary,
+  static ThemeData get darkTheme => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
     fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: GasometerColors.primary,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: GasometerColors.primary,
+      secondary: GasometerColors.secondary,
+    ),
   ).copyWith(
     // AppBar personalizado para modo escuro
     appBarTheme: const AppBarTheme(

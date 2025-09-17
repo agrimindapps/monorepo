@@ -31,8 +31,8 @@ class ReportsDataSourceImpl implements ReportsDataSource {
         (fuelRecords) async {
           // Filter records by date range
           final filteredRecords = fuelRecords.where((record) {
-            return record.data.isAfter(startDate.subtract(const Duration(days: 1))) &&
-                   record.data.isBefore(endDate.add(const Duration(days: 1)));
+            return record.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+                   record.date.isBefore(endDate.add(const Duration(days: 1)));
           }).toList();
 
           if (filteredRecords.isEmpty) {
@@ -40,11 +40,11 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           }
 
           // Sort by date
-          filteredRecords.sort((a, b) => a.data.compareTo(b.data));
+          filteredRecords.sort((a, b) => a.date.compareTo(b.date));
 
           // Calculate fuel metrics
-          final totalFuelSpent = filteredRecords.map((r) => r.valorTotal).fold(0.0, (a, b) => a + b);
-          final totalFuelLiters = filteredRecords.map((r) => r.litros).fold(0.0, (a, b) => a + b);
+          final totalFuelSpent = filteredRecords.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
+          final totalFuelLiters = filteredRecords.map((r) => r.liters).fold(0.0, (a, b) => a + b);
           final averageFuelPrice = totalFuelLiters > 0 ? totalFuelSpent / totalFuelLiters : 0.0;
           final fuelRecordsCount = filteredRecords.length;
 
@@ -55,8 +55,8 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           double firstOdometerReading = 0.0;
           double lastOdometerReading = 0.0;
           if (filteredRecords.isNotEmpty) {
-            firstOdometerReading = filteredRecords.first.odometro;
-            lastOdometerReading = filteredRecords.last.odometro;
+            firstOdometerReading = filteredRecords.first.odometer;
+            lastOdometerReading = filteredRecords.last.odometer;
           }
 
           // Calculate average consumption
@@ -171,7 +171,7 @@ class ReportsDataSourceImpl implements ReportsDataSource {
         (failure) => throw CacheException('Erro ao buscar registros: ${failure.message}'),
         (fuelRecords) async {
           final filteredRecords = fuelRecords.where((record) {
-            return record.data.isAfter(startDate) && record.data.isBefore(endDate);
+            return record.date.isAfter(startDate) && record.date.isBefore(endDate);
           }).toList();
 
           if (filteredRecords.length < 2) {
@@ -186,11 +186,11 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           final monthlyData = <String, List<double>>{};
           
           for (final record in filteredRecords) {
-            final monthKey = _generateMonthKey(record.data);
+            final monthKey = _generateMonthKey(record.date);
             
-            if (record.consumo != null && record.consumo! > 0) {
+            if (record.consumption != null && record.consumption! > 0) {
               monthlyData[monthKey] ??= [];
-              monthlyData[monthKey]!.add(record.consumo!);
+              monthlyData[monthKey]!.add(record.consumption!);
             }
           }
 
@@ -297,8 +297,8 @@ class ReportsDataSourceImpl implements ReportsDataSource {
         (failure) => throw CacheException('Erro ao buscar registros: ${failure.message}'),
         (fuelRecords) async {
           final filteredRecords = fuelRecords.where((record) {
-            return record.data.isAfter(startDate.subtract(const Duration(days: 1))) &&
-                   record.data.isBefore(endDate.add(const Duration(days: 1)));
+            return record.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+                   record.date.isBefore(endDate.add(const Duration(days: 1)));
           }).toList();
 
           if (filteredRecords.isEmpty) {
@@ -310,9 +310,9 @@ class ReportsDataSourceImpl implements ReportsDataSource {
             };
           }
 
-          filteredRecords.sort((a, b) => a.data.compareTo(b.data));
+          filteredRecords.sort((a, b) => a.date.compareTo(b.date));
 
-          final totalCost = filteredRecords.map((r) => r.valorTotal).fold(0.0, (a, b) => a + b);
+          final totalCost = filteredRecords.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
           final averageCostPerFill = totalCost / filteredRecords.length;
           
           // Price trend analysis
@@ -320,9 +320,9 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           final monthlyPrices = <String, List<double>>{};
           
           for (final record in filteredRecords) {
-            final monthKey = _generateMonthKey(record.data);
+            final monthKey = _generateMonthKey(record.date);
             monthlyPrices[monthKey] ??= [];
-            monthlyPrices[monthKey]!.add(record.precoPorLitro);
+            monthlyPrices[monthKey]!.add(record.pricePerLiter);
           }
           
           for (final entry in monthlyPrices.entries) {
@@ -412,7 +412,7 @@ class ReportsDataSourceImpl implements ReportsDataSource {
         (failure) => throw CacheException('Erro ao buscar registros: ${failure.message}'),
         (fuelRecords) async {
           final filteredRecords = fuelRecords.where((record) {
-            return record.data.isAfter(startDate) && record.data.isBefore(endDate);
+            return record.date.isAfter(startDate) && record.date.isBefore(endDate);
           }).toList();
 
           if (filteredRecords.length < 2) {
@@ -424,12 +424,12 @@ class ReportsDataSourceImpl implements ReportsDataSource {
             };
           }
 
-          filteredRecords.sort((a, b) => a.data.compareTo(b.data));
+          filteredRecords.sort((a, b) => a.date.compareTo(b.date));
 
           // Calculate days between fills
           final daysBetween = <int>[];
           for (int i = 1; i < filteredRecords.length; i++) {
-            final days = filteredRecords[i].data.difference(filteredRecords[i - 1].data).inDays;
+            final days = filteredRecords[i].date.difference(filteredRecords[i - 1].date).inDays;
             if (days > 0) daysBetween.add(days);
           }
 
@@ -440,7 +440,7 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           // Monthly usage patterns
           final monthlyUsage = <String, int>{};
           for (final record in filteredRecords) {
-            final monthKey = _generateMonthKey(record.data);
+            final monthKey = _generateMonthKey(record.date);
             monthlyUsage[monthKey] = (monthlyUsage[monthKey] ?? 0) + 1;
           }
 
@@ -595,11 +595,11 @@ class ReportsDataSourceImpl implements ReportsDataSource {
     if (records.length < 2) return 0.0;
     
     // Ordenar por data para garantir sequência correta
-    final sortedRecords = [...records]..sort((a, b) => a.data.compareTo(b.data));
+    final sortedRecords = [...records]..sort((a, b) => a.date.compareTo(b.date));
     
     double totalDistance = 0.0;
     for (int i = 1; i < sortedRecords.length; i++) {
-      final distance = sortedRecords[i].odometro - sortedRecords[i-1].odometro;
+      final distance = sortedRecords[i].odometer - sortedRecords[i-1].odometer;
       
       // Validar se a distância é razoável
       if (distance > 0 && distance < 10000) { // Entre 0 e 10.000 km

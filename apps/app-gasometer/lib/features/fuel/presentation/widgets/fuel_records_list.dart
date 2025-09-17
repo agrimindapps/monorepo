@@ -43,7 +43,7 @@ class FuelRecordsList extends StatelessWidget {
             itemCount: records.length,
             itemBuilder: (context, index) {
               final record = records[index];
-              final vehicleName = getVehicleName(record.veiculoId);
+              final vehicleName = getVehicleName(record.vehicleId);
 
               return FuelRecordCard(
                 record: record,

@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/data/models/legacy/tarefa_model.dart';
 import '../../../../core/data/models/planta_config_model.dart';
 import '../../../../core/services/task_generation_service.dart';
 import '../../../plants/domain/repositories/plants_repository.dart';
+import '../../data/models/task_model.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 
@@ -241,20 +241,31 @@ class CompleteTaskWithRegenerationUseCase
     }
   }
 
-  /// Converte Task para TarefaModel (legacy compatibility)
-  TarefaModel _convertToTaskModel(task_entity.Task task) {
-    // Converter TaskType para string de cuidado
-    final tipoCuidado = _mapTaskTypeToCareType(task.type) ?? 'agua';
-
-    return TarefaModel.create(
+  /// Converte Task para TaskModel (legacy compatibility)
+  TaskModel _convertToTaskModel(task_entity.Task task) {
+    return TaskModel(
       id: task.id,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      title: task.title,
+      description: task.description,
+      plantId: task.plantId,
+      plantName: task.plantName,
+      type: task.type,
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      completedAt: task.completedAt,
+      completionNotes: task.completionNotes,
+      isRecurring: task.isRecurring,
+      recurringIntervalDays: task.recurringIntervalDays,
+      nextDueDate: task.nextDueDate,
+      lastSyncAt: task.lastSyncAt,
+      isDirty: task.isDirty,
+      isDeleted: task.isDeleted,
+      version: task.version,
       userId: task.userId,
-      plantaId: task.plantId,
-      tipoCuidado: tipoCuidado,
-      dataExecucao: task.dueDate,
-      concluida: task.status == task_entity.TaskStatus.completed,
-      observacoes: task.completionNotes,
-      dataConclusao: task.completedAt,
+      moduleName: task.moduleName,
     );
   }
 

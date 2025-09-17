@@ -10,7 +10,7 @@ import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
 import '../../detalhe_defensivo_page.dart' as defensivo_page;
-import '../providers/diagnosticos_provider_legacy.dart';
+import '../providers/diagnosticos_provider.dart';
 
 /// Componentes modulares para exibição de diagnósticos em páginas de defensivos
 ///
@@ -1073,7 +1073,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     );
   }
 
-  /// Cabeçalho do modal com título e botão de fechar (método legacy)
+  /// Cabeçalho do modal com título e botão de fechar
   Widget _buildHeader(BuildContext context) {
     return _buildModernHeader(context);
   }
@@ -1123,7 +1123,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     );
   }
 
-  /// Conteúdo principal do modal (método legacy)
+  /// Conteúdo principal do modal
   Widget _buildContent(BuildContext context) {
     return _buildModernContent(context);
   }
@@ -1305,7 +1305,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     );
   }
 
-  /// Ações do modal (método legacy)
+  /// Ações do modal
   Widget _buildActions(BuildContext context) {
     return _buildModernActions(context);
   }

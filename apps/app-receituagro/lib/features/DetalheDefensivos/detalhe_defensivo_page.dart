@@ -9,7 +9,7 @@ import '../../core/navigation/app_navigation_provider.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
-import 'presentation/providers/diagnosticos_provider_legacy.dart';
+import 'presentation/providers/diagnosticos_provider.dart';
 import 'presentation/providers/detalhe_defensivo_provider.dart';
 import 'presentation/widgets/comentarios_tab_widget.dart';
 import 'presentation/widgets/defensivo_info_cards_widget.dart';
@@ -66,7 +66,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       premiumService: sl(),
     );
 
-    // Usa o provider legacy que já tem filtros implementados
+    // Usa o provider com filtros implementados
     _diagnosticosProvider = DiagnosticosProvider();
   }
 

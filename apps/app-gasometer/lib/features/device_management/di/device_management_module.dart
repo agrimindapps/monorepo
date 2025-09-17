@@ -24,17 +24,17 @@ abstract class DeviceManagementModule {
   Connectivity get connectivity => Connectivity();
 
   // Data Sources
-  @LazySingleton(as: DeviceLocalDataSource)
+  @lazySingleton
   DeviceLocalDataSource provideDeviceLocalDataSource() => DeviceLocalDataSource();
 
-  @LazySingleton(as: DeviceRemoteDataSource)
+  @lazySingleton
   DeviceRemoteDataSource provideDeviceRemoteDataSource(
     DeviceInfoPlugin deviceInfoPlugin,
   ) => DeviceRemoteDataSource(deviceInfoPlugin: deviceInfoPlugin);
 
   // Repository
-  @LazySingleton(as: DeviceRepository)
-  DeviceRepositoryImpl provideDeviceRepository(
+  @lazySingleton
+  DeviceRepository provideDeviceRepository(
     DeviceRemoteDataSource remoteDataSource,
     DeviceLocalDataSource localDataSource,
     Connectivity connectivity,
@@ -45,23 +45,23 @@ abstract class DeviceManagementModule {
       );
 
   // Use Cases
-  @LazySingleton(as: GetUserDevicesUseCase)
+  @lazySingleton
   GetUserDevicesUseCase provideGetUserDevicesUseCase(
     DeviceRepository repository,
   ) => GetUserDevicesUseCase(repository);
 
-  @LazySingleton(as: RevokeDeviceUseCase)
+  @lazySingleton
   RevokeDeviceUseCase provideRevokeDeviceUseCase(
     DeviceRepository repository,
   ) => RevokeDeviceUseCase(repository);
 
-  @LazySingleton(as: ValidateDeviceLimitUseCase)
+  @lazySingleton
   ValidateDeviceLimitUseCase provideValidateDeviceLimitUseCase(
     DeviceRepository repository,
   ) => ValidateDeviceLimitUseCase(repository);
 
   // Core Services
-  @LazySingleton(as: DeviceIntegrationService)
+  @lazySingleton
   DeviceIntegrationService provideDeviceIntegrationService(
     ValidateDeviceLimitUseCase validateDeviceLimitUseCase,
     DeviceRemoteDataSource deviceRemoteDataSource,

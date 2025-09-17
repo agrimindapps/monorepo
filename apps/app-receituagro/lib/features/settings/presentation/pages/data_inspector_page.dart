@@ -1,60 +1,69 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-/// Data Inspector Page for ReceitaAgro - Using Unified Implementation
-/// Configured with green theme and ReceitaAgro-specific custom boxes
+/// Data Inspector Page for ReceitaAgro - Simplified Version
+/// TODO: Integrate with unified data inspector when available in core package
 class DataInspectorPage extends StatelessWidget {
   const DataInspectorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const UnifiedDataInspectorPage(
-      appName: 'ReceitaAgro',
-      primaryColor: Colors.green,
-      customBoxes: <CustomBoxType>[
-        CustomBoxType(
-          key: 'receituagro_culturas',
-          displayName: 'Culturas',
-          description: 'Dados de culturas agrícolas',
-          module: 'ReceitaAgro',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Database Inspector - ReceitaAgro'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+      ),
+      body: const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.storage,
+                size: 64,
+                color: Colors.green,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Database Inspector',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Unified data inspector temporarily unavailable.\nWill be integrated when core package presentation layer is restored.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Planned features:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '• Culturas data inspection\n'
+                '• Diagnósticos data inspection\n'
+                '• Fitossanitários data inspection\n'
+                '• Fitossanitários Info data inspection\n'
+                '• Plantas Info data inspection\n'
+                '• Pragas data inspection\n'
+                '• Pragas Info data inspection',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
         ),
-        CustomBoxType(
-          key: 'receituagro_diagnosticos',
-          displayName: 'Diagnósticos',
-          description: 'Diagnósticos de pragas e doenças',
-          module: 'ReceitaAgro',
-        ),
-        CustomBoxType(
-          key: 'receituagro_fitossanitarios',
-          displayName: 'Fitossanitários',
-          description: 'Produtos fitossanitários e defensivos',
-          module: 'ReceitaAgro',
-        ),
-        CustomBoxType(
-          key: 'receituagro_fitossanitarios_info',
-          displayName: 'Fitossanitários Info',
-          description: 'Informações detalhadas dos fitossanitários',
-          module: 'ReceitaAgro',
-        ),
-        CustomBoxType(
-          key: 'receituagro_plantas_inf',
-          displayName: 'Plantas Info',
-          description: 'Informações sobre plantas daninhas',
-          module: 'ReceitaAgro',
-        ),
-        CustomBoxType(
-          key: 'receituagro_pragas',
-          displayName: 'Pragas',
-          description: 'Dados de pragas e insetos',
-          module: 'ReceitaAgro',
-        ),
-        CustomBoxType(
-          key: 'receituagro_pragas_inf',
-          displayName: 'Pragas Info',
-          description: 'Informações detalhadas das pragas',
-          module: 'ReceitaAgro',
-        ),
-      ],
+      ),
     );
   }
 }

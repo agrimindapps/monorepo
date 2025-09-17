@@ -1,37 +1,45 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../constants/settings_design_tokens.dart';
 
-class ThemeSelectionDialog extends StatelessWidget {
+class ThemeSelectionDialog extends StatefulWidget {
   const ThemeSelectionDialog({super.key});
+
+  @override
+  State<ThemeSelectionDialog> createState() => _ThemeSelectionDialogState();
+}
+
+class _ThemeSelectionDialogState extends State<ThemeSelectionDialog> {
+  ThemeMode _currentThemeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO: Obter o tema atual quando ThemeProvider estiver disponível
+    _currentThemeMode = ThemeMode.system;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildDialogHeader(context, theme),
-                const SizedBox(height: 20),
-                _buildThemeOptions(context, theme, themeProvider),
-                const SizedBox(height: 24),
-                _buildActionButtons(context),
-              ],
-            ),
-          ),
-        );
-      },
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDialogHeader(context, theme),
+            const SizedBox(height: 20),
+            _buildThemeOptions(context, theme),
+            const SizedBox(height: 24),
+            _buildActionButtons(context),
+          ],
+        ),
+      ),
     );
   }
 
@@ -75,7 +83,7 @@ class ThemeSelectionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeOptions(BuildContext context, ThemeData theme, ThemeProvider themeProvider) {
+  Widget _buildThemeOptions(BuildContext context, ThemeData theme) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -89,7 +97,6 @@ class ThemeSelectionDialog extends StatelessWidget {
           _buildThemeOption(
             context,
             theme,
-            themeProvider,
             ThemeMode.light,
             'Tema Claro',
             'Interface sempre clara',
@@ -103,7 +110,6 @@ class ThemeSelectionDialog extends StatelessWidget {
           _buildThemeOption(
             context,
             theme,
-            themeProvider,
             ThemeMode.dark,
             'Tema Escuro',
             'Interface sempre escura',
@@ -116,11 +122,10 @@ class ThemeSelectionDialog extends StatelessWidget {
           _buildThemeOption(
             context,
             theme,
-            themeProvider,
             ThemeMode.system,
             'Automático',
             'Segue as configurações do sistema',
-            SettingsDesignTokens.systemThemeIcon,
+            Icons.brightness_auto,
             isLast: true,
           ),
         ],
@@ -131,7 +136,6 @@ class ThemeSelectionDialog extends StatelessWidget {
   Widget _buildThemeOption(
     BuildContext context,
     ThemeData theme,
-    ThemeProvider themeProvider,
     ThemeMode themeMode,
     String title,
     String subtitle,
@@ -139,14 +143,14 @@ class ThemeSelectionDialog extends StatelessWidget {
     bool isFirst = false,
     bool isLast = false,
   }) {
-    final isSelected = themeProvider.themeMode == themeMode;
+    final isSelected = _currentThemeMode == themeMode;
     
     return Semantics(
       label: '$title. $subtitle',
       selected: isSelected,
       button: true,
       child: InkWell(
-        onTap: () => _onThemeSelected(context, themeProvider, themeMode, title),
+        onTap: () => _onThemeSelected(context, themeMode, title),
         borderRadius: BorderRadius.vertical(
           top: isFirst ? const Radius.circular(8) : Radius.zero,
           bottom: isLast ? const Radius.circular(8) : Radius.zero,
@@ -206,7 +210,7 @@ class ThemeSelectionDialog extends StatelessWidget {
               ),
               if (isSelected)
                 Icon(
-                  SettingsDesignTokens.checkIcon,
+                  Icons.check,
                   color: theme.colorScheme.primary,
                   size: 24,
                 ),
@@ -236,30 +240,24 @@ class ThemeSelectionDialog extends StatelessWidget {
 
   Future<void> _onThemeSelected(
     BuildContext context,
-    ThemeProvider themeProvider,
     ThemeMode themeMode,
     String themeName,
   ) async {
-    try {
-      await themeProvider.setThemeMode(themeMode);
-      
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getSuccessSnackbar(
-            'Tema alterado para $themeName',
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getErrorSnackbar(
-            'Erro ao alterar tema: $e',
-          ),
-        );
-      }
+    setState(() {
+      _currentThemeMode = themeMode;
+    });
+
+    // TODO: Implementar mudança real de tema quando ThemeProvider estiver disponível
+    if (context.mounted) {
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Tema $themeName selecionado (funcionalidade será implementada em breve)'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 }

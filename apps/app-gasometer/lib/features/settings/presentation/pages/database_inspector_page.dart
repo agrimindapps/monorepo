@@ -1,60 +1,69 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-/// Database Inspector Page for GasOMeter - Using Unified Implementation
-/// Configured with blue theme and GasOMeter-specific custom boxes
+/// Database Inspector Page for GasOMeter - Simplified Version
+/// TODO: Integrate with unified data inspector when available in core package
 class DatabaseInspectorPage extends StatelessWidget {
   const DatabaseInspectorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const UnifiedDataInspectorPage(
-      appName: 'GasoMeter',
-      primaryColor: Colors.blue,
-      customBoxes: <CustomBoxType>[
-        CustomBoxType(
-          key: 'vehicles',
-          displayName: 'Veículos',
-          description: 'Dados dos veículos cadastrados no app',
-          module: 'Veículos',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Database Inspector - GasOMeter'),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+      body: const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.storage,
+                size: 64,
+                color: Colors.blue,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Database Inspector',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Unified data inspector temporarily unavailable.\nWill be integrated when core package presentation layer is restored.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Planned features:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '• Veículos data inspection\n'
+                '• Abastecimentos data inspection\n'
+                '• Manutenções data inspection\n'
+                '• Odômetro data inspection\n'
+                '• Despesas data inspection\n'
+                '• Sync queue data inspection\n'
+                '• Categorias data inspection',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
         ),
-        CustomBoxType(
-          key: 'fuel_records',
-          displayName: 'Abastecimentos',
-          description: 'Registros de abastecimento de combustível',
-          module: 'Combustível',
-        ),
-        CustomBoxType(
-          key: 'maintenance',
-          displayName: 'Manutenções',
-          description: 'Registros de manutenção dos veículos',
-          module: 'Manutenção',
-        ),
-        CustomBoxType(
-          key: 'odometer',
-          displayName: 'Odômetro',
-          description: 'Leituras do odômetro dos veículos',
-          module: 'Odômetro',
-        ),
-        CustomBoxType(
-          key: 'expenses',
-          displayName: 'Despesas',
-          description: 'Despesas relacionadas aos veículos',
-          module: 'Despesas',
-        ),
-        CustomBoxType(
-          key: 'sync_queue',
-          displayName: 'Fila de Sincronização',
-          description: 'Fila de itens pendentes para sincronização',
-          module: 'Sincronização',
-        ),
-        CustomBoxType(
-          key: 'categories',
-          displayName: 'Categorias',
-          description: 'Categorias para classificação de despesas',
-          module: 'Categorias',
-        ),
-      ],
+      ),
     );
   }
 }

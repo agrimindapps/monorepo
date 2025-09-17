@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'adaptive_main_navigation.dart';
 
-/// Legacy main navigation wrapper - now uses adaptive navigation
-/// Maintains backward compatibility while providing responsive behavior
+/// Main navigation wrapper - provides adaptive navigation
+/// Maintains compatibility while providing responsive behavior
 class MainNavigation extends StatelessWidget {
   final Widget child;
   

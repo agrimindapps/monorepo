@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/presentation/providers/market_provider.dart';
 import 'package:app_agrihurbi/features/markets/presentation/widgets/market_info_card.dart';
@@ -230,10 +231,10 @@ class _MarketDetailPageState extends State<MarketDetailPage>
                                     ? Icons.trending_down
                                     : Icons.trending_flat,
                             color: _market!.isUp 
-                                ? AppColors.active
+                                ? DesignTokens.infoColor
                                 : _market!.isDown
                                     ? AppTheme.errorColor
-                                    : AppColors.inactive,
+                                    : DesignTokens.textSecondaryColor,
                             size: 20,
                           ),
                           const SizedBox(width: 4),
@@ -241,10 +242,10 @@ class _MarketDetailPageState extends State<MarketDetailPage>
                             '${_market!.formattedPriceChange} (${_market!.formattedChange})',
                             style: TextStyle(
                               color: _market!.isUp 
-                                  ? AppColors.active
+                                  ? DesignTokens.infoColor
                                   : _market!.isDown
                                       ? AppTheme.errorColor
-                                      : AppColors.inactive,
+                                      : DesignTokens.textSecondaryColor,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -458,9 +459,9 @@ Via AgriHurbi
   Color _getStatusColor(MarketStatus status) {
     switch (status) {
       case MarketStatus.open:
-        return AppColors.active;
+        return DesignTokens.infoColor;
       case MarketStatus.closed:
-        return AppColors.inactive;
+        return DesignTokens.textSecondaryColor;
       case MarketStatus.suspended:
         return AppTheme.warningColor;
       case MarketStatus.preMarket:

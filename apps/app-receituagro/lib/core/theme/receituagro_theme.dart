@@ -1,25 +1,30 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import 'receituagro_colors.dart';
 
-/// Tema específico do ReceitaAgro usando BaseTheme
+/// Tema específico do ReceitaAgro
 class ReceitaAgroTheme {
   /// Tema claro do ReceitaAgro
-  static ThemeData get lightTheme => BaseTheme.buildLightTheme(
-    primaryColor: ReceitaAgroColors.primary,
-    secondaryColor: ReceitaAgroColors.secondary,
+  static ThemeData get lightTheme => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
     fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: ReceitaAgroColors.primary,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: ReceitaAgroColors.primary,
+      secondary: ReceitaAgroColors.secondary,
+    ),
   ).copyWith(
     // Customizações específicas do ReceitaAgro
-    appBarTheme: BaseTheme.buildLightTheme(
-      primaryColor: ReceitaAgroColors.primary,
-      secondaryColor: ReceitaAgroColors.secondary,
-    ).appBarTheme.copyWith(
+    appBarTheme: const AppBarTheme(
       backgroundColor: ReceitaAgroColors.primary,
       foregroundColor: Colors.white,
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
+      actionsIconTheme: IconThemeData(color: Colors.white),
+      elevation: 0,
+      centerTitle: true,
     ),
     
     // FAB personalizado
@@ -81,20 +86,26 @@ class ReceitaAgroTheme {
   );
   
   /// Tema escuro do ReceitaAgro
-  static ThemeData get darkTheme => BaseTheme.buildDarkTheme(
-    primaryColor: ReceitaAgroColors.primary,
-    secondaryColor: ReceitaAgroColors.secondary,
+  static ThemeData get darkTheme => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
     fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: ReceitaAgroColors.primary,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: ReceitaAgroColors.primary,
+      secondary: ReceitaAgroColors.secondary,
+    ),
   ).copyWith(
     // Customizações específicas do ReceitaAgro para modo escuro
-    appBarTheme: BaseTheme.buildDarkTheme(
-      primaryColor: ReceitaAgroColors.primary,
-      secondaryColor: ReceitaAgroColors.secondary,
-    ).appBarTheme.copyWith(
+    appBarTheme: const AppBarTheme(
       backgroundColor: ReceitaAgroColors.primaryDark,
       foregroundColor: Colors.white,
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
+      actionsIconTheme: IconThemeData(color: Colors.white),
+      elevation: 0,
+      centerTitle: true,
     ),
     
     // FAB para modo escuro

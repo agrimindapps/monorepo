@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,7 @@ class TopPerformersSection extends StatelessWidget {
   final List<MarketEntity> topGainers;
   final List<MarketEntity> topLosers;
   final List<MarketEntity> mostActive;
-  final Function(MarketEntity) onMarketTap;
+  final void Function(MarketEntity) onMarketTap;
 
   const TopPerformersSection({
     super.key,
@@ -38,7 +39,7 @@ class TopPerformersSection extends StatelessWidget {
           title: 'Maiores Altas',
           markets: topGainers,
           icon: Icons.trending_up,
-          color: AppColors.active,
+          color: DesignTokens.marketUpColor,
         ),
         
         const SizedBox(height: 16),

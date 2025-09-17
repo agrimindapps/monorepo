@@ -128,9 +128,14 @@ class TasksProvider extends ChangeNotifier {
   void _updateState(TasksState newState) {
     if (_state != newState) {
       _state = newState;
-      notifyListeners();
+      // Check if provider is still mounted before notifying listeners
+      if (!_disposed) {
+        notifyListeners();
+      }
     }
   }
+
+  bool _disposed = false;
 
   /// Starts a loading operation for a specific task
   ///
@@ -1246,14 +1251,17 @@ class TasksProvider extends ChangeNotifier {
   /// the widget tree.
   @override
   void dispose() {
+    // Mark as disposed to prevent future state updates
+    _disposed = true;
+
     // Cancel auth state subscription to prevent memory leaks
     _authSubscription?.cancel();
-    
+
     // Cancel any ongoing operations for this provider
     _syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks);
     _syncCoordinator.cancelOperations(TaskSyncOperations.addTask);
     _syncCoordinator.cancelOperations(TaskSyncOperations.completeTask);
-    
+
     super.dispose();
   }
 }

@@ -104,26 +104,26 @@ export 'src/sync/unified_sync_manager.dart';
 
 // Hive Storage Infrastructure
 export 'src/infrastructure/storage/hive/hive_storage.dart';
-export 'src/presentation/theme/base/base_colors.dart';
-export 'src/presentation/theme/base/base_theme.dart';
-export 'src/presentation/theme/base/base_typography.dart';
-// Theme System
+// Theme System (temporarily disabled - files were removed)
+// export 'src/presentation/theme/base/base_colors.dart';
+// export 'src/presentation/theme/base/base_theme.dart';
+// export 'src/presentation/theme/base/base_typography.dart';
 export 'src/presentation/theme/providers/theme_provider.dart';
-export 'src/presentation/widgets/error_widget.dart';
-export 'src/presentation/widgets/image_widgets.dart';
+// export 'src/presentation/widgets/error_widget.dart';
+// export 'src/presentation/widgets/image_widgets.dart';
 // ========== PRESENTATION LAYER ==========
-// Widgets
-export 'src/presentation/widgets/loading_widget.dart';
-export 'src/presentation/widgets/profile_avatar.dart';
-export 'src/presentation/widgets/profile_image_picker.dart';
+// Widgets (temporarily disabled - files were removed)
+// export 'src/presentation/widgets/loading_widget.dart';
+// export 'src/presentation/widgets/profile_avatar.dart';
+// export 'src/presentation/widgets/profile_image_picker.dart';
 
-// Data Migration Widgets
-export 'src/presentation/widgets/data_migration/data_conflict_dialog.dart';
-export 'src/presentation/widgets/data_migration/migration_progress_dialog.dart';
+// Data Migration Widgets (temporarily disabled - files were removed)
+// export 'src/presentation/widgets/data_migration/data_conflict_dialog.dart';
+// export 'src/presentation/widgets/data_migration/migration_progress_dialog.dart';
 
 // ========== DATA INSPECTOR ==========
-// Unified Data Inspector for all monorepo apps
-export 'src/presentation/data_inspector.dart';
+// Unified Data Inspector for all monorepo apps (temporarily disabled - files were removed)
+// export 'src/presentation/data_inspector.dart';
 
 // ========== SHARED LAYER ==========
 // Config
@@ -151,3 +151,7 @@ export 'src/shared/utils/error_adapter.dart';
 // Utils
 export 'src/shared/utils/failure.dart';
 export 'src/shared/utils/result.dart';
+
+// ========== UNIFIED SUBSCRIPTION SYSTEM ==========
+// Unified Subscription Services (Simplified Implementation)
+export 'src/services/simple_subscription_sync_service.dart';

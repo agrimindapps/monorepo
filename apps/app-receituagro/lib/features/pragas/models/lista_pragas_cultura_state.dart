@@ -13,7 +13,6 @@ class ListaPragasCulturaState {
   final List<PragaCulturaItemModel> pragasList;
   final List<PragaCulturaItemModel> pragasFiltered;
   final String searchText;
-  final List<dynamic> pragasLegacyData;
 
   const ListaPragasCulturaState({
     this.culturaNome = '',
@@ -27,7 +26,6 @@ class ListaPragasCulturaState {
     this.pragasList = const [],
     this.pragasFiltered = const [],
     this.searchText = '',
-    this.pragasLegacyData = const [],
   });
 
   int get totalRegistros => pragasList.length;
@@ -62,7 +60,6 @@ class ListaPragasCulturaState {
     List<PragaCulturaItemModel>? pragasList,
     List<PragaCulturaItemModel>? pragasFiltered,
     String? searchText,
-    List<dynamic>? pragasLegacyData,
   }) {
     return ListaPragasCulturaState(
       culturaNome: culturaNome ?? this.culturaNome,
@@ -76,7 +73,6 @@ class ListaPragasCulturaState {
       pragasList: pragasList ?? this.pragasList,
       pragasFiltered: pragasFiltered ?? this.pragasFiltered,
       searchText: searchText ?? this.searchText,
-      pragasLegacyData: pragasLegacyData ?? this.pragasLegacyData,
     );
   }
 

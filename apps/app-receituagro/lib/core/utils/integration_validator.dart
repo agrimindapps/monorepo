@@ -184,7 +184,7 @@ class IntegrationValidator {
             : 'Storage service not available',
       );
       
-      // Legacy Hive service check (commented out as it may not exist)
+      // Hive service check (commented out as it may not exist)
       // if (_sl.isRegistered<HiveStorageService>()) {
       //   final hiveService = _sl<HiveStorageService>();
       //   // Basic functionality test would go here

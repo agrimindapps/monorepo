@@ -222,21 +222,17 @@ class AccessibleSearchBar extends StatelessWidget {
   const AccessibleSearchBar({
     super.key,
     this.controller,
-    this.focusNode,
     this.hintText = 'Pesquisar',
     this.onChanged,
     this.onSubmitted,
     this.onClear,
-    this.autofocus = false,
   });
 
   final TextEditingController? controller;
-  final FocusNode? focusNode;
   final String hintText;
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
   final VoidCallback? onClear;
-  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -256,8 +252,6 @@ class AccessibleSearchBar extends StatelessWidget {
         ),
         child: TextField(
           controller: controller,
-          focusNode: focusNode,
-          autofocus: autofocus,
           onChanged: onChanged,
           onSubmitted: onSubmitted,
           style: TextStyle(

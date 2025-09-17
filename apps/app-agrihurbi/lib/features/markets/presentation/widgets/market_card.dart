@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:flutter/material.dart';
 
@@ -225,9 +226,9 @@ class MarketCard extends StatelessWidget {
 
   /// Get color based on price change
   Color _getChangeColor() {
-    if (market.isUp) return AppColors.active;
+    if (market.isUp) return DesignTokens.marketUpColor;
     if (market.isDown) return AppTheme.errorColor;
-    return AppColors.inactive;
+    return DesignTokens.textSecondaryColor;
   }
 
   /// Get icon based on price change
@@ -241,9 +242,9 @@ class MarketCard extends StatelessWidget {
   Color _getStatusColor() {
     switch (market.status) {
       case MarketStatus.open:
-        return AppColors.active;
+        return DesignTokens.marketUpColor;
       case MarketStatus.closed:
-        return AppColors.inactive;
+        return DesignTokens.textSecondaryColor;
       case MarketStatus.suspended:
         return AppTheme.warningColor;
       case MarketStatus.preMarket:
@@ -261,7 +262,7 @@ class MarketCard extends StatelessWidget {
         return const Color(0xFFFFB74D); // Orange
       case MarketType.livestock:
       case MarketType.beef:
-        return AppColors.cattle; // Brown
+        return DesignTokens.cattleColor; // Brown
       case MarketType.dairy:
         return const Color(0xFF81C784); // Light green
       case MarketType.vegetables:

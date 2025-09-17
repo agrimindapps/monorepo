@@ -170,31 +170,42 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Column(
         children: [
-          // Avatar com ProfileProvider
-          Consumer<ProfileProvider>(
-            builder: (context, profileProvider, child) {
-              return ProfileAvatar(
-                imageUrl: profileProvider.currentProfileImageUrl,
-                displayName: user?.displayName ?? user?.email,
-                size: 100,
-                gradient: isAuthenticated
-                    ? const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF4CAF50), // Green 500
-                          Color(0xFF2E7D32), // Green 700
-                        ],
-                      )
-                    : LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Colors.grey.shade400, Colors.grey.shade600],
+          // Avatar simplificado
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: isAuthenticated ? const Color(0xFF4CAF50) : Colors.grey.shade400,
+                child: Text(
+                  _getInitials(user?.displayName ?? user?.email ?? 'Usuário'),
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              if (isAuthenticated)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () => _changeAvatar(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4CAF50),
+                        shape: BoxShape.circle,
                       ),
-                showEditIcon: isAuthenticated,
-                onEditTap: isAuthenticated ? () => _changeAvatar(context) : null,
-              );
-            },
+                      child: const Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           
           const SizedBox(height: 16),
@@ -476,51 +487,19 @@ class _ProfilePageState extends State<ProfilePage> {
     return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'.toUpperCase();
   }
 
-  /// Alterar avatar usando ProfileImagePicker
+  /// Alterar avatar - versão simplificada
   void _changeAvatar(BuildContext context) {
-    final profileProvider = context.read<ProfileProvider>();
-    
-    ProfileImagePicker.show(
-      context: context,
-      profileImageService: ProfileImageServiceFactory.createDefault(),
-      primaryColor: SettingsDesignTokens.primaryColor,
-      onImageSelected: (imageFile) async {
-        // Mostrar loading
-        final success = await profileProvider.uploadProfileImage(imageFile);
-        
-        if (context.mounted) {
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Foto do perfil atualizada com sucesso!'),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(top: 50, left: 16, right: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(profileProvider.errorMessage ?? 'Erro ao atualizar foto'),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(top: 50, left: 16, right: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            );
-          }
-        }
-      },
-      onCancel: () {
-        if (kDebugMode) {
-          print('📸 ProfilePage: Upload de imagem cancelado');
-        }
-      },
+    // TODO: Implementar seleção de imagem quando ProfileImagePicker estiver disponível
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Funcionalidade de foto do perfil será implementada em breve'),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(top: 50, left: 16, right: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
     );
   }
 

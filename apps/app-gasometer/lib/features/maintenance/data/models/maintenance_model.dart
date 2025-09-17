@@ -243,11 +243,6 @@ class MaintenanceModel extends BaseSyncModel {
     );
   }
 
-  // Legacy compatibility methods
-  Map<String, dynamic> toMap() => toHiveMap();
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory MaintenanceModel.fromMap(Map<String, dynamic> map) => MaintenanceModel.fromHiveMap(map);
-  factory MaintenanceModel.fromJson(Map<String, dynamic> json) => MaintenanceModel.fromHiveMap(json);
 
   /// Calculate total maintenance costs
   static double calcularTotalManutencoes(List<MaintenanceModel> manutencoes) {

@@ -24,7 +24,7 @@ class DiagnosticoEntityResolver {
   
   DiagnosticoEntityResolver._internal();
 
-  // Repositórios injetados
+  // Repositórios injetados para acesso direto aos dados
   late final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
   late final FitossanitarioHiveRepository _defensivoRepository = sl<FitossanitarioHiveRepository>();
   late final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();

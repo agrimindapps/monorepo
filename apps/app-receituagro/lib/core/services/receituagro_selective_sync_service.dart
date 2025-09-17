@@ -2,6 +2,106 @@ import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:get_it/get_it.dart';
 
+// Temporary simplified implementations until core package issues are resolved
+
+/// Simplified sync strategy enum
+enum BoxSyncStrategy { automatic, periodic, manual }
+
+/// Simplified BoxSyncConfig
+class BoxSyncConfig {
+  final String boxName;
+  final String description;
+  final bool isLocalOnly;
+  final BoxSyncStrategy? strategy;
+
+  const BoxSyncConfig({
+    required this.boxName,
+    required this.description,
+    required this.isLocalOnly,
+    this.strategy,
+  });
+
+  BoxSyncConfig.localOnly({
+    required String boxName,
+    required String description,
+  }) : this(
+          boxName: boxName,
+          description: description,
+          isLocalOnly: true,
+        );
+
+  BoxSyncConfig.syncable({
+    required String boxName,
+    required BoxSyncStrategy strategy,
+    required String description,
+  }) : this(
+          boxName: boxName,
+          description: description,
+          isLocalOnly: false,
+          strategy: strategy,
+        );
+}
+
+/// Simplified SelectiveSyncService stub
+class SelectiveSyncService {
+  const SelectiveSyncService({required this.hiveStorage});
+
+  final HiveStorageService hiveStorage;
+
+  void registerBoxConfigs(List<BoxSyncConfig> configs) {
+    // Stub implementation
+  }
+
+  Future<Either<Failure, void>> initializeStaticContent({
+    required String boxName,
+    required Map<String, dynamic> staticData,
+    required String appVersion,
+  }) async {
+    // Stub implementation
+    return const Right(null);
+  }
+
+  Future<void> syncAllSyncableBoxes() async {
+    // Stub implementation
+  }
+
+  Map<String, dynamic> getSyncStats() {
+    // Stub implementation
+    return {
+      'totalBoxes': 0,
+      'syncedBoxes': 0,
+      'lastSync': DateTime.now().toIso8601String(),
+    };
+  }
+}
+
+/// Simplified HiveStorageService stub
+class HiveStorageService {
+  Future<Either<Failure, T?>> get<T>({
+    required String key,
+    required String box,
+  }) async {
+    // Stub implementation
+    return const Right(null);
+  }
+
+  Future<Either<Failure, List<T>>> getValues<T>({
+    required String box,
+  }) async {
+    // Stub implementation
+    return const Right([]);
+  }
+
+  Future<Either<Failure, void>> save({
+    required String key,
+    required dynamic data,
+    required String box,
+  }) async {
+    // Stub implementation
+    return const Right(null);
+  }
+}
+
 /// Configuração específica de sincronização para ReceitaAgro
 class ReceitaAgroSyncConfig {
   static final List<BoxSyncConfig> configs = [

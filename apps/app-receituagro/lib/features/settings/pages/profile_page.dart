@@ -587,7 +587,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       // App info
                       _buildDataPreviewItem(
                         '📱 Aplicativo',
-                        preview['appName'] ?? 'ReceitaAgro',
+                        (preview['appName'] as String?) ?? 'ReceitaAgro',
                       ),
 
                       // Account data
@@ -600,7 +600,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       if (preview['dataStats'] != null) ...[
                         _buildDataPreviewItem(
                           '💾 Dados Locais',
-                          '${preview['dataStats']['totalRecords'] ?? 0} registros em ${preview['dataStats']['totalBoxes'] ?? 0} categorias',
+                          '${(preview['dataStats']?['totalRecords'] as int?) ?? 0} registros em ${(preview['dataStats']?['totalBoxes'] as int?) ?? 0} categorias',
                         ),
 
                         // Categories

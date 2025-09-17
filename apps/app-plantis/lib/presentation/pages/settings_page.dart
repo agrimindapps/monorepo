@@ -349,7 +349,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       ),
                     ),
                     Text(
-                      user != null && user.displayName != null && user.displayName.isNotEmpty
+                      user != null && user.displayName != null && ((user.displayName as String?)?.isNotEmpty ?? false)
                           ? 'Bem-vindo, ${user.displayName}'
                           : 'Bem-vindo ao seu jardim digital 🌱',
                       style: theme.textTheme.bodyLarge?.copyWith(
@@ -410,7 +410,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Text(
-                              user.initials,
+                              (user.initials as String?) ?? 'U',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
@@ -421,7 +421,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                         ),
                       )
                     : Text(
-                        user?.initials ?? 'UA',
+                        (user?.initials as String?) ?? 'UA',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -441,7 +441,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                     children: [
                       Expanded(
                         child: Text(
-                          user?.displayName ?? 'Usuário Anônimo',
+                          (user?.displayName as String?) ?? 'Usuário Anônimo',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -456,7 +456,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    user?.email ?? 'usuario@anonimo.com',
+                    (user?.email as String?) ?? 'usuario@anonimo.com',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -481,7 +481,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _getMemberSince(user?.createdAt),
+                          _getMemberSince(user?.createdAt as DateTime?),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: PlantisColors.leafDark,
                             fontWeight: FontWeight.w500,

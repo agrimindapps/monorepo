@@ -13,6 +13,7 @@ import 'core/providers/auth_provider.dart';
 import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/settings/presentation/providers/profile_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';

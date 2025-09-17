@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+// Import alias to avoid conflict with class name
+import 'package:core/core.dart' as core;
+
 import '../../features/analytics/analytics_service.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../di/injection_container.dart' as di;
@@ -527,7 +530,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
             id: 'deleted',
             email: 'deleted@account.com',
             displayName: 'Conta excluída',
-            provider: AuthProvider.anonymous,
+            provider: core.AuthProvider.anonymous,
           ));
         },
       );

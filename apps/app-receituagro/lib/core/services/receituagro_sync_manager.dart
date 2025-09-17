@@ -1,5 +1,8 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
 import 'package:get_it/get_it.dart';
+
+// Import the simplified implementations from selective sync service
+import 'receituagro_selective_sync_service.dart' as local;
 
 /// Gerenciador de sincronização específico para o ReceitaAgro
 class ReceitaAgroSyncManager {
@@ -8,43 +11,43 @@ class ReceitaAgroSyncManager {
     required this.selectiveSync,
   });
 
-  final HiveStorageService hiveStorage;
-  final SelectiveSyncService selectiveSync;
+  final local.HiveStorageService hiveStorage;
+  final local.SelectiveSyncService selectiveSync;
 
   /// Configurações específicas do ReceitaAgro
-  static final List<BoxSyncConfig> _configs = [
+  static final List<local.BoxSyncConfig> _configs = [
     // BOXES ESTÁTICAS (não sincronizam - dados do JSON versionado)
-    BoxSyncConfig.localOnly(
+    local.BoxSyncConfig.localOnly(
       boxName: 'receituagro_pragas_static',
       description: 'Dados de pragas incluídos na versão do app',
     ),
-    BoxSyncConfig.localOnly(
-      boxName: 'receituagro_defensivos_static', 
+    local.BoxSyncConfig.localOnly(
+      boxName: 'receituagro_defensivos_static',
       description: 'Dados de defensivos incluídos na versão do app',
     ),
-    BoxSyncConfig.localOnly(
+    local.BoxSyncConfig.localOnly(
       boxName: 'receituagro_diagnosticos_static',
       description: 'Dados de diagnósticos incluídos na versão do app',
     ),
-    BoxSyncConfig.localOnly(
+    local.BoxSyncConfig.localOnly(
       boxName: 'receituagro_culturas_static',
       description: 'Dados de culturas incluídos na versão do app',
     ),
 
     // BOXES DO USUÁRIO (sincronizam com Firebase)
-    BoxSyncConfig.syncable(
+    local.BoxSyncConfig.syncable(
       boxName: 'receituagro_user_favorites',
-      strategy: BoxSyncStrategy.automatic,
+      strategy: local.BoxSyncStrategy.automatic,
       description: 'Favoritos do usuário',
     ),
-    BoxSyncConfig.syncable(
+    local.BoxSyncConfig.syncable(
       boxName: 'receituagro_user_comments',
-      strategy: BoxSyncStrategy.automatic,
+      strategy: local.BoxSyncStrategy.automatic,
       description: 'Comentários do usuário',
     ),
-    BoxSyncConfig.syncable(
+    local.BoxSyncConfig.syncable(
       boxName: 'receituagro_user_settings',
-      strategy: BoxSyncStrategy.periodic,
+      strategy: local.BoxSyncStrategy.periodic,
       description: 'Configurações do usuário',
     ),
   ];
@@ -108,8 +111,8 @@ class ReceitaAgroSyncManager {
       );
 
       final storedVersion = result.fold(
-        (failure) => null,
-        (version) => version,
+        (core.Failure failure) => null,
+        (String? version) => version,
       );
 
       if (storedVersion != currentAppVersion) {
@@ -127,8 +130,8 @@ class ReceitaAgroSyncManager {
     );
 
     return result.fold(
-      (failure) => [],
-      (values) => values.where((v) => !v.containsKey('_app_version')).toList(),
+      (core.Failure failure) => <Map<String, dynamic>>[],
+      (List<Map<String, dynamic>> values) => values.where((Map<String, dynamic> v) => !v.containsKey('_app_version')).toList(),
     );
   }
 
@@ -139,8 +142,8 @@ class ReceitaAgroSyncManager {
     );
 
     return result.fold(
-      (failure) => [],
-      (values) => values.where((v) => !v.containsKey('_app_version')).toList(),
+      (core.Failure failure) => <Map<String, dynamic>>[],
+      (List<Map<String, dynamic>> values) => values.where((Map<String, dynamic> v) => !v.containsKey('_app_version')).toList(),
     );
   }
 
@@ -168,8 +171,8 @@ class ReceitaAgroSyncManager {
     );
 
     return result.fold(
-      (failure) => [],
-      (values) => values,
+      (core.Failure failure) => <Map<String, dynamic>>[],
+      (List<Map<String, dynamic>> values) => values,
     );
   }
 
@@ -190,10 +193,10 @@ class ReceitaAgroSyncSetup {
     final sl = GetIt.instance;
     
     // Assume que os serviços base já estão registrados
-    final hiveStorage = sl<HiveStorageService>();
-    
+    final hiveStorage = local.HiveStorageService();
+
     // Cria o serviço de sincronização seletiva
-    final selectiveSync = SelectiveSyncService(
+    final selectiveSync = local.SelectiveSyncService(
       hiveStorage: hiveStorage,
     );
     

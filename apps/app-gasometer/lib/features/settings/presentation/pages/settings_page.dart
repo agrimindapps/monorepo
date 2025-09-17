@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';

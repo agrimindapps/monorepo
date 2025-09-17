@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 // import 'core/di/injectable_config.dart' as local_di; // Commented out - using manual DI
 import 'core/di/injection_container.dart';
+import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/services/receipt_image_service.dart';
 import 'core/sync/presentation/providers/sync_status_provider.dart';

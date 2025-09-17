@@ -83,7 +83,7 @@ class DefensivoInfoCardsWidget extends StatelessWidget {
       'classeAgronomica': defensivo.classeAgronomica ?? 'Não informado',
       'classAmbiental': defensivo.classAmbiental ?? 'Não informado',
       'formulacao': defensivo.formulacao ?? 'Não informado',
-      'mapa': defensivo.idReg ?? 'Não informado',
+      'mapa': defensivo.mapa ?? 'Não informado',
     };
 
     return _buildCardContainer(

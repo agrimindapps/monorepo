@@ -80,12 +80,6 @@ class AppRouter {
           builder: (context, state) => const AccountDeletionPage(),
         ),
 
-        // Profile Route
-        GoRoute(
-          path: '/profile',
-          name: 'profile',
-          builder: (context, state) => const ProfilePage(),
-        ),
 
         // Auth Routes
         GoRoute(
@@ -152,6 +146,13 @@ class AppRouter {
               path: '/devices',
               name: 'devices',
               builder: (context, state) => const DeviceManagementPage(),
+            ),
+
+            // Profile
+            GoRoute(
+              path: '/profile',
+              name: 'profile',
+              builder: (context, state) => const ProfilePage(),
             ),
           ],
         ),

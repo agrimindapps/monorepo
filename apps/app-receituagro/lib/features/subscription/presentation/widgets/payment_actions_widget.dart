@@ -50,12 +50,13 @@ class PaymentActionsWidget extends StatelessWidget {
         onPressed: provider.isLoading ? null : provider.purchaseSelectedPlan,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF4A148C),
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          foregroundColor: const Color(0xFF1B4332),  // Dark green text
+          padding: const EdgeInsets.symmetric(vertical: 22),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(30),
           ),
           elevation: 0,
+          shadowColor: Colors.transparent,
         ),
         child: provider.isLoading
             ? const SizedBox(
@@ -63,14 +64,14 @@ class PaymentActionsWidget extends StatelessWidget {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A148C)),
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1B4332)),
                 ),
               )
             : const Text(
                 'Obter Acesso Completo',
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
       ),
@@ -86,7 +87,7 @@ class PaymentActionsWidget extends StatelessWidget {
         icon: const Icon(Icons.settings),
         label: const Text('Gerenciar Assinatura'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade600,
+          backgroundColor: const Color(0xFF388E3C),  // Medium green for management
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
@@ -99,30 +100,33 @@ class PaymentActionsWidget extends StatelessWidget {
 
   /// Links de rodapé (Termos, Privacidade, Restaurar)
   Widget _buildFooterLinks() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Expanded(
-          child: _buildFooterLink(
-            'Termos',
-            provider.openTermsOfUse,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: _buildFooterLink(
+              'Termos de Uso',
+              provider.openTermsOfUse,
+            ),
           ),
-        ),
-        _buildFooterDivider(),
-        Expanded(
-          child: _buildFooterLink(
-            'Privacidade',
-            provider.openPrivacyPolicy,
+          _buildFooterDivider(),
+          Expanded(
+            child: _buildFooterLink(
+              'Política de Privacidade',
+              provider.openPrivacyPolicy,
+            ),
           ),
-        ),
-        _buildFooterDivider(),
-        Expanded(
-          child: _buildFooterLink(
-            'Restaurar',
-            provider.restorePurchases,
+          _buildFooterDivider(),
+          Expanded(
+            child: _buildFooterLink(
+              'Restaurar',
+              provider.restorePurchases,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

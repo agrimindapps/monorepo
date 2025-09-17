@@ -6,7 +6,6 @@ import '../../../../core/providers/feature_flags_provider.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_provider.dart';
-import '../dialogs/user_profile_dialog.dart';
 import '../items/sync_status_item.dart';
 import '../shared/settings_list_tile.dart';
 
@@ -51,8 +50,6 @@ class UserProfileSection extends StatelessWidget {
                 if (featureFlags.isContentSynchronizationEnabled)
                   _buildSyncStatus(context, settingsProvider, featureFlags),
                 
-                // Account Management Actions
-                _buildAccountActions(context, settingsProvider, authProvider),
               ],
             ],
           ),
@@ -269,49 +266,6 @@ class UserProfileSection extends StatelessWidget {
     );
   }
 
-  /// Account Management Actions
-  Widget _buildAccountActions(BuildContext context, SettingsProvider settingsProvider, ReceitaAgroAuthProvider authProvider) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: Column(
-        children: [
-          const Divider(),
-          const SizedBox(height: 8),
-          
-          // Edit Profile Button
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _openUserProfileDialog(context, settingsProvider),
-              icon: const Icon(Icons.person_outline, size: 16),
-              label: const Text('Editar Perfil'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // Account Management Button
-          SizedBox(
-            width: double.infinity,
-            child: TextButton.icon(
-              onPressed: () => _openAccountManagement(context, settingsProvider),
-              icon: const Icon(Icons.manage_accounts, size: 16),
-              label: const Text('Gerenciar Conta'),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Get user display name
   String _getUserDisplayName(DeviceInfo? device) {
@@ -355,38 +309,11 @@ class UserProfileSection extends StatelessWidget {
     }
   }
 
-  /// Open User Profile Dialog
+  /// Navigate to Profile Page
   Future<void> _openUserProfileDialog(BuildContext context, SettingsProvider settingsProvider) async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => UserProfileDialog(provider: settingsProvider),
-    );
+    await Navigator.pushNamed(context, '/profile');
   }
 
-  /// Open Account Management
-  void _openAccountManagement(BuildContext context, SettingsProvider settingsProvider) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Gerenciar Conta'),
-        content: const Text(
-          'Funcionalidades de gerenciamento de conta:\n\n'
-          '• Alterar senha\n'
-          '• Configurar autenticação em dois fatores\n'
-          '• Gerenciar dados de cobrança\n'
-          '• Exportar dados\n'
-          '• Excluir conta\n\n'
-          'Em breve disponível!',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Show login dialog
   void _showLoginDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {

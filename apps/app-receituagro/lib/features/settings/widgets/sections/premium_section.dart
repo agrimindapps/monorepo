@@ -243,243 +243,121 @@ class PremiumSection extends StatelessWidget {
   Widget _buildPremiumSubscriptionCard(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Card(
+    return Container(
       margin: SettingsDesignTokens.sectionMargin,
-      elevation: 8,
-      shadowColor: Colors.amber.withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.amber.shade50,
-              Colors.orange.shade50,
-              Colors.deepOrange.shade50,
-            ],
-            stops: const [0.0, 0.6, 1.0],
-          ),
-          borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
-          border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              // Hero Premium Icon
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.amber.shade400,
-                      Colors.orange.shade500,
-                      Colors.deepOrange.shade600,
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.amber.withValues(alpha: 0.5),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.workspace_premium,
-                  color: Colors.white,
-                  size: 40,
-                ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const SubscriptionPage(),
               ),
-              const SizedBox(height: 20),
-
-              // Premium Title with sparkle effect
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    color: Colors.amber.shade600,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'ReceitaAgro Premium',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.auto_awesome,
-                    color: Colors.amber.shade600,
-                    size: 20,
-                  ),
+            );
+          },
+          borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1B4332),  // Deep forest green
+                  Color(0xFF2D5016),  // Rich agricultural green
                 ],
               ),
-              const SizedBox(height: 12),
-              
-              Text(
-                'Desbloqueie o poder completo do ReceitaAgro',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.orange.shade700,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
+              borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
+              border: Border.all(
+                color: const Color(0xFF40916C).withValues(alpha: 0.5),
+                width: 1,
               ),
-              const SizedBox(height: 24),
-
-              // Premium Benefits Preview
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.amber.withValues(alpha: 0.3),
-                    width: 1,
+            ),
+            child: Row(
+              children: [
+                // Premium Icon
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF4CAF50),  // App brand green
+                        Color(0xFF388E3C),  // Medium green
+                      ],
+                    ),
+                    shape: BoxShape.circle,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.amber.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'O que você ganha:',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange.shade800,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildBenefitItem(
-                      context,
-                      Icons.auto_awesome,
-                      'Diagnósticos avançados ilimitados',
-                      Colors.orange.shade600,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildBenefitItem(
-                      context,
-                      Icons.cloud_sync,
-                      'Sincronização em nuvem',
-                      Colors.orange.shade600,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildBenefitItem(
-                      context,
-                      Icons.support_agent,
-                      'Suporte prioritário 24/7',
-                      Colors.orange.shade600,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildBenefitItem(
-                      context,
-                      Icons.analytics,
-                      'Relatórios detalhados e insights',
-                      Colors.orange.shade600,
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-
-              // CTA Button with gradient
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (context) => const SubscriptionPage(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: Colors.white,
-                    elevation: 6,
-                    shadowColor: Colors.orange.withValues(alpha: 0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.zero,
+                  child: const Icon(
+                    Icons.workspace_premium,
+                    color: Colors.white,
+                    size: 24,
                   ),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.amber.shade500,
-                          Colors.orange.shade600,
-                          Colors.deepOrange.shade700,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                ),
+                const SizedBox(width: 16),
+                
+                // Title and Subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
                           const Icon(
-                            Icons.star,
-                            size: 24,
-                            color: Colors.white,
+                            Icons.auto_awesome,
+                            color: Color(0xFF66BB6A),  // Medium green
+                            size: 16,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 6),
                           Text(
-                            'Assinar Premium',
+                            'ReceitaAgro Premium',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.auto_awesome,
+                            color: Color(0xFF66BB6A),  // Medium green
+                            size: 16,
+                          ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Desbloqueie recursos avançados',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'A partir de R\$ 9,90/mês',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF66BB6A),  // Medium green
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              
-              const SizedBox(height: 12),
-              
-              // Pricing hint
-              Text(
-                'A partir de R\$ 9,90/mês',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.orange.shade600,
-                  fontWeight: FontWeight.w500,
+                
+                // Arrow
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Color(0xFF66BB6A),  // Medium green
+                  size: 16,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
-    }
+  }
   
   /// Build benefit item widget
   Widget _buildBenefitItem(BuildContext context, IconData icon, String text, Color color) {

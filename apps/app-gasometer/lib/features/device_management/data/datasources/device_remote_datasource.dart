@@ -34,9 +34,6 @@ class DeviceRemoteDataSource {
   CollectionReference get _devicesCollection => 
       _firestore.collection('user_devices');
 
-  /// Coleção de sessões no Firestore
-  CollectionReference get _sessionsCollection => 
-      _firestore.collection('device_sessions');
 
   /// Obtém dispositivos de um usuário
   Future<Either<Failure, List<DeviceInfoModel>>> getUserDevices(
@@ -56,7 +53,7 @@ class DeviceRemoteDataSource {
 
       final devices = querySnapshot.docs
           .map((doc) => DeviceInfoModel.fromFirestore(
-                {...doc.data() as Map<String, dynamic>, 'uuid': doc.id},
+                {...doc.data(), 'uuid': doc.id},
               ))
           .toList();
 
@@ -130,7 +127,7 @@ class DeviceRemoteDataSource {
           final existingDevicesQuery = await userDevicesRef.get();
           final activeDevicesCount = existingDevicesQuery.docs
               .where((doc) {
-                final data = doc.data() as Map<String, dynamic>;
+                final data = doc.data();
                 return data['isActive'] as bool? ?? false;
               })
               .length;
@@ -356,7 +353,7 @@ class DeviceRemoteDataSource {
       
       for (final doc in querySnapshot.docs) {
         final device = DeviceInfoModel.fromFirestore({
-          ...doc.data() as Map<String, dynamic>,
+          ...doc.data(),
           'uuid': doc.id,
         });
         removedDevices.add(device);
@@ -394,7 +391,7 @@ class DeviceRemoteDataSource {
 
       final devices = querySnapshot.docs
           .map((doc) => DeviceInfoModel.fromFirestore({
-                ...doc.data() as Map<String, dynamic>,
+                ...doc.data(),
                 'uuid': doc.id,
               }))
           .toList();

@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
@@ -88,7 +86,6 @@ abstract class DeviceManagementModule {
 }
 
 /// Função para inicializar as caixas Hive necessárias
-@postConstruct
 Future<void> initializeDeviceManagementHiveBoxes() async {
   try {
     // Inicializar as caixas Hive para device management

@@ -147,6 +147,24 @@ import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import '../../features/vehicles/domain/usecases/search_vehicles.dart';
 import '../../features/vehicles/domain/usecases/update_vehicle.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
+
+// Device Management imports
+import 'package:device_info_plus/device_info_plus.dart';
+import '../../features/device_management/presentation/providers/device_management_provider.dart';
+import '../../features/device_management/domain/repositories/device_repository.dart';
+import '../../features/device_management/data/repositories/device_repository_impl.dart';
+import '../../features/device_management/data/datasources/device_local_datasource.dart';
+import '../../features/device_management/data/datasources/device_remote_datasource.dart';
+import '../../features/device_management/domain/usecases/get_user_devices.dart';
+import '../../features/device_management/domain/usecases/revoke_device.dart';
+import '../../features/device_management/domain/usecases/validate_device_limit.dart';
+
+// Data Export imports
+import '../../features/data_export/presentation/providers/data_export_provider.dart';
+import '../../features/data_export/domain/repositories/data_export_repository.dart';
+import '../../features/data_export/data/repositories/data_export_repository_impl.dart';
+import '../../features/data_export/domain/services/platform_export_service.dart';
+
 // Additional imports (removing duplicates)
 import '../error/error_handler.dart';
 import '../error/error_logger.dart';
@@ -159,6 +177,9 @@ import '../services/image_compression_service.dart';
 import '../services/firebase_storage_service.dart';
 import '../services/receipt_image_service.dart';
 import '../sync/presentation/providers/sync_status_provider.dart';
+
+// Profile Image Service
+import '../../features/profile/domain/services/profile_image_service.dart';
 
 final sl = GetIt.instance;
 
@@ -203,6 +224,11 @@ Future<void> initializeDependencies() async {
     sl<ImageCompressionService>(),
     sl<FirebaseStorageService>(),
   ));
+
+  // Profile Image Service
+  sl.registerLazySingleton<GasometerProfileImageService>(() => GasometerProfileImageService(
+    sl<AnalyticsService>(),
+  ));
   
   // Logging Service - requires AnalyticsService and LogRepository (both now injectable)
   // LoggingService is now registered by injectable (@LazySingleton annotation)
@@ -245,13 +271,16 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<ConflictResolver<BaseSyncModel>>(() => ConflictResolver<BaseSyncModel>());
 
   // Sync Service - requires multiple dependencies
-  sl.registerLazySingleton<sync_interface.ISyncService>(() => SyncService(
+  sl.registerLazySingleton<SyncService>(() => SyncService(
     sl<SyncQueue>(),
     sl<SyncOperations>(),
     sl<ConflictResolver<BaseSyncModel>>(),
     sl<AnalyticsService>(),
     sl<AuthRepository>(),
   ));
+
+  // Register as interface too
+  sl.registerLazySingleton<sync_interface.ISyncService>(() => sl<SyncService>());
 
   // Premium Sync Service
   sl.registerLazySingleton<PremiumSyncService>(() => PremiumSyncService(
@@ -318,6 +347,21 @@ Future<void> initializeDependencies() async {
     sl<FirebaseFirestore>(),
   ));
 
+  // Premium Data Sources
+  sl.registerLazySingleton<PremiumLocalDataSource>(() => PremiumLocalDataSourceImpl(
+    sl<SharedPreferences>(),
+  ));
+  sl.registerLazySingleton<PremiumRemoteDataSource>(() => PremiumRemoteDataSourceImpl(
+    sl<core.ISubscriptionRepository>(),
+  ));
+  sl.registerLazySingleton<PremiumFirebaseDataSource>(() => PremiumFirebaseDataSource(
+    sl<FirebaseFirestore>(),
+    sl<core.IAuthRepository>(),
+  ));
+  sl.registerLazySingleton<PremiumWebhookDataSource>(() => PremiumWebhookDataSource(
+    sl<FirebaseFirestore>(),
+  ));
+
   // Reports Data Source
   sl.registerLazySingleton<ReportsDataSource>(() => ReportsDataSourceImpl(
     sl<FuelRepository>(),
@@ -329,6 +373,11 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(
     remoteDataSource: sl<AuthRemoteDataSource>(),
     localDataSource: sl<AuthLocalDataSource>(),
+  ));
+
+  // Core IAuthRepository (use FirebaseAuthService from core)
+  sl.registerLazySingleton<core.IAuthRepository>(() => core.FirebaseAuthService(
+    firebaseAuth: sl<FirebaseAuth>(),
   ));
 
   // Log Repository
@@ -362,6 +411,13 @@ Future<void> initializeDependencies() async {
     remoteDataSource: sl<MaintenanceRemoteDataSource>(),
     connectivity: sl<Connectivity>(),
     loggingService: sl<LoggingService>(),
+  ));
+
+  // Premium Repository
+  sl.registerLazySingleton<PremiumRepository>(() => PremiumRepositoryImpl(
+    localDataSource: sl<PremiumLocalDataSource>(),
+    remoteDataSource: sl<PremiumRemoteDataSource>(),
+    syncService: sl<PremiumSyncService>(),
   ));
 
   // Reports Repository
@@ -577,6 +633,57 @@ Future<void> initializeDependencies() async {
       sl<VehiclesProvider>(),
     ),
   );
+
+  // ===== Device Management =====
+  
+  // Device Info Plugin
+  sl.registerLazySingleton<DeviceInfoPlugin>(() => DeviceInfoPlugin());
+  
+  // Device Management Data Sources
+  sl.registerLazySingleton<DeviceLocalDataSource>(() => DeviceLocalDataSource());
+  sl.registerLazySingleton<DeviceRemoteDataSource>(() => DeviceRemoteDataSource(
+    firestore: sl<FirebaseFirestore>(),
+    deviceInfoPlugin: sl<DeviceInfoPlugin>(),
+  ));
+  
+  // Device Management Repository
+  sl.registerLazySingleton<DeviceRepository>(() => DeviceRepositoryImpl(
+    sl<DeviceRemoteDataSource>(),
+    sl<DeviceLocalDataSource>(),
+    sl<Connectivity>(),
+  ));
+  
+  // Device Management Use Cases
+  sl.registerLazySingleton<GetUserDevicesUseCase>(() => GetUserDevicesUseCase(sl<DeviceRepository>()));
+  sl.registerLazySingleton<RevokeDeviceUseCase>(() => RevokeDeviceUseCase(sl<DeviceRepository>()));
+  sl.registerLazySingleton<ValidateDeviceLimitUseCase>(() => ValidateDeviceLimitUseCase(sl<DeviceRepository>()));
+  
+  // Device Management Provider
+  sl.registerLazySingleton<DeviceManagementProvider>(() => DeviceManagementProvider(
+    getUserDevicesUseCase: sl<GetUserDevicesUseCase>(),
+    revokeDeviceUseCase: sl<RevokeDeviceUseCase>(),
+    validateDeviceLimitUseCase: sl<ValidateDeviceLimitUseCase>(),
+  ));
+
+  // ===== Data Export =====
+  
+  // Data Export Repository
+  sl.registerLazySingleton<DataExportRepository>(() => DataExportRepositoryImpl());
+  
+  // Platform Export Service (factory pattern)
+  sl.registerLazySingleton<PlatformExportService>(() => PlatformExportServiceFactory.create());
+  
+  // Data Export Provider
+  sl.registerLazySingleton<DataExportProvider>(() => DataExportProvider(
+    repository: sl<DataExportRepository>(),
+    platformService: sl<PlatformExportService>(),
+    analyticsService: sl<AnalyticsService>(),
+  ));
+
+  // Sync Status Provider
+  sl.registerLazySingleton<SyncStatusProvider>(() => SyncStatusProvider(
+    sl<SyncService>(),
+  ));
 
   // ===== Initialize services that need post-DI setup =====
   // await initializePostDIServices(); // Function not defined - commenting out

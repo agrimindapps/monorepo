@@ -76,38 +76,55 @@ class ThemeSelectionDialog extends StatelessWidget {
   }
 
   Widget _buildThemeOptions(BuildContext context, ThemeData theme, ThemeProvider themeProvider) {
-    return Column(
-      children: [
-        _buildThemeOption(
-          context,
-          theme,
-          themeProvider,
-          ThemeMode.light,
-          'Tema Claro',
-          'Interface sempre clara',
-          Icons.light_mode,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
         ),
-        const SizedBox(height: 12),
-        _buildThemeOption(
-          context,
-          theme,
-          themeProvider,
-          ThemeMode.dark,
-          'Tema Escuro',
-          'Interface sempre escura',
-          Icons.dark_mode,
-        ),
-        const SizedBox(height: 12),
-        _buildThemeOption(
-          context,
-          theme,
-          themeProvider,
-          ThemeMode.system,
-          'Automático',
-          'Segue as configurações do sistema',
-          SettingsDesignTokens.systemThemeIcon,
-        ),
-      ],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          _buildThemeOption(
+            context,
+            theme,
+            themeProvider,
+            ThemeMode.light,
+            'Tema Claro',
+            'Interface sempre clara',
+            Icons.light_mode,
+            isFirst: true,
+          ),
+          Divider(
+            height: 1,
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
+          _buildThemeOption(
+            context,
+            theme,
+            themeProvider,
+            ThemeMode.dark,
+            'Tema Escuro',
+            'Interface sempre escura',
+            Icons.dark_mode,
+          ),
+          Divider(
+            height: 1,
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
+          _buildThemeOption(
+            context,
+            theme,
+            themeProvider,
+            ThemeMode.system,
+            'Automático',
+            'Segue as configurações do sistema',
+            SettingsDesignTokens.systemThemeIcon,
+            isLast: true,
+          ),
+        ],
+      ),
     );
   }
 
@@ -118,8 +135,10 @@ class ThemeSelectionDialog extends StatelessWidget {
     ThemeMode themeMode,
     String title,
     String subtitle,
-    IconData icon,
-  ) {
+    IconData icon, {
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
     final isSelected = themeProvider.themeMode == themeMode;
     
     return Semantics(
@@ -128,20 +147,20 @@ class ThemeSelectionDialog extends StatelessWidget {
       button: true,
       child: InkWell(
         onTap: () => _onThemeSelected(context, themeProvider, themeMode, title),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.vertical(
+          top: isFirst ? const Radius.circular(8) : Radius.zero,
+          bottom: isLast ? const Radius.circular(8) : Radius.zero,
+        ),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isSelected 
                 ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
                 : Colors.transparent,
-            border: Border.all(
-              color: isSelected 
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.2),
-              width: isSelected ? 2 : 1,
+            borderRadius: BorderRadius.vertical(
+              top: isFirst ? const Radius.circular(8) : Radius.zero,
+              bottom: isLast ? const Radius.circular(8) : Radius.zero,
             ),
-            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [

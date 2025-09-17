@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../providers/device_management_provider.dart';
-import '../widgets/device_card_widget.dart';
-import '../widgets/device_list_widget.dart';
 import '../widgets/device_actions_dialog.dart';
+import '../widgets/device_list_widget.dart';
 
 /// Página principal de gerenciamento de dispositivos
 class DeviceManagementPage extends StatefulWidget {

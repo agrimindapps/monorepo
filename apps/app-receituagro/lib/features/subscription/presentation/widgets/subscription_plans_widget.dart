@@ -60,19 +60,42 @@ class SubscriptionPlansWidget extends StatelessWidget {
     required bool isSelected,
     String? badge,
   }) {
-    return DecoratedBox(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: isSelected 
+            ? const Color(0x26388E3C)  // 15% opacity green for selected
+            : Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
         border: isSelected 
-            ? Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1)
-            : null,
+            ? Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2)
+            : Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
-      child: ListTile(
-        onTap: () => provider.selectPlan(planType),
-        leading: _buildRadioButton(isSelected),
-        title: _buildPlanTitle(title, badge),
-        subtitle: _buildPlanPrice(price),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => provider.selectPlan(planType),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                _buildRadioButton(isSelected),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPlanTitle(title, badge),
+                      const SizedBox(height: 4),
+                      _buildPlanPrice(price),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -80,23 +103,16 @@ class SubscriptionPlansWidget extends StatelessWidget {
   /// Constrói o radio button customizado
   Widget _buildRadioButton(bool isSelected) {
     return Container(
-      width: 24,
-      height: 24,
+      width: 20,
+      height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.6),
-          width: 2,
+          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.5),
+          width: isSelected ? 6 : 2,
         ),
-        color: isSelected ? Colors.white : Colors.transparent,
+        color: Colors.transparent,
       ),
-      child: isSelected
-          ? const Icon(
-              Icons.check,
-              color: Color(0xFF4A148C),
-              size: 16,
-            )
-          : null,
     );
   }
 
@@ -125,7 +141,7 @@ class SubscriptionPlansWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE91E63),
+        color: const Color(0xFF66BB6A),  // Medium green badge
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

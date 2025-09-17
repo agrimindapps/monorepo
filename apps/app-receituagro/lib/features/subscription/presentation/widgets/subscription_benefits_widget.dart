@@ -32,20 +32,23 @@ class SubscriptionBenefitsWidget extends StatelessWidget {
 
   /// Estilo moderno para marketing/conversão
   Widget _buildModernFeaturesList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'O que está incluído',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'O que está incluído',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        ...provider.modernPremiumFeatures.map((feature) => _buildModernFeatureItem(feature)),
-      ],
+          const SizedBox(height: 20),
+          ...provider.modernPremiumFeatures.map((feature) => _buildModernFeatureItem(feature)),
+        ],
+      ),
     );
   }
 
@@ -80,21 +83,26 @@ class SubscriptionBenefitsWidget extends StatelessWidget {
   /// Item de recurso para estilo moderno
   Widget _buildModernFeatureItem(String feature) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.check,
-            color: Colors.white,
-            size: 20,
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            child: const Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Text(
               feature,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
+                height: 1.4,
               ),
             ),
           ),
@@ -109,9 +117,9 @@ class SubscriptionBenefitsWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.check_circle,
-            color: Colors.green.shade600,
+            color: Color(0xFF4CAF50),  // App brand green
             size: 20,
           ),
           const SizedBox(width: 12),

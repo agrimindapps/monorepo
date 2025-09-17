@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/navigation/app_navigation_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
@@ -42,16 +41,16 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
           });
 
           return Scaffold(
-            backgroundColor: const Color(0xFF1A1B3E),
+            backgroundColor: const Color(0xFF1B4332),
             body: DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFF1A1B3E),
-                    Color(0xFF2D1B69),
-                    Color(0xFF4A148C),
+                    Color(0xFF1B4332),  // Deep forest green
+                    Color(0xFF2D5016),  // Rich agricultural green  
+                    Color(0xFF40916C),  // Fresh green accent
                   ],
                 ),
               ),
@@ -93,12 +92,12 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
             'Planos',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
           ),
           IconButton(
-            onPressed: () => context.read<AppNavigationProvider>().goBack(),
+            onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(
               Icons.close,
               color: Colors.white,
@@ -113,7 +112,7 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
   Widget _buildLoadingView() {
     return const Center(
       child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
       ),
     );
   }
@@ -157,14 +156,17 @@ class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
             const SizedBox(height: 20),
 
             // Título principal
-            const Text(
-              'Tenha acesso ilimitado\na todos os recursos',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Tenha acesso ilimitado\na todos os recursos',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w400,
+                  height: 1.3,
+                ),
               ),
             ),
 

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/entities/device_info.dart';
 import '../../domain/entities/device_session.dart';

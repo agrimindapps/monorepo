@@ -16,6 +16,7 @@ class DefensivoDetailsEntity {
   final String? classAmbiental;
   final String? formulacao;
   final String? idReg;
+  final String? mapa;
 
   const DefensivoDetailsEntity({
     required this.id,
@@ -31,6 +32,7 @@ class DefensivoDetailsEntity {
     this.classAmbiental,
     this.formulacao,
     this.idReg,
+    this.mapa,
   });
 
   /// Cria entity a partir do modelo Hive
@@ -49,6 +51,7 @@ class DefensivoDetailsEntity {
       classAmbiental: hive.classAmbiental,
       formulacao: hive.formulacao,
       idReg: hive.idReg,
+      mapa: hive.mapa,
     );
   }
 
@@ -80,6 +83,7 @@ class DefensivoDetailsEntity {
     String? classAmbiental,
     String? formulacao,
     String? idReg,
+    String? mapa,
   }) {
     return DefensivoDetailsEntity(
       id: id ?? this.id,
@@ -95,6 +99,7 @@ class DefensivoDetailsEntity {
       classAmbiental: classAmbiental ?? this.classAmbiental,
       formulacao: formulacao ?? this.formulacao,
       idReg: idReg ?? this.idReg,
+      mapa: mapa ?? this.mapa,
     );
   }
 }

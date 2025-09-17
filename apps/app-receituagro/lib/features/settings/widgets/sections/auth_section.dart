@@ -94,7 +94,7 @@ class AuthSection extends StatelessWidget {
           borderRadius:
               BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
             child: Row(
               children: [
                 Container(

@@ -19,6 +19,7 @@ import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/reports/presentation/providers/reports_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
+import 'features/device_management/presentation/providers/device_management_provider.dart';
 
 class GasOMeterApp extends StatefulWidget {
   const GasOMeterApp({super.key});
@@ -117,6 +118,12 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
         // Data Export Provider - depends on Auth for user context
         ChangeNotifierProvider(
           create: (_) => sl<DataExportProvider>(),
+          lazy: true,
+        ),
+        
+        // Device Management Provider - depends on Auth for user context
+        ChangeNotifierProvider(
+          create: (_) => sl<DeviceManagementProvider>(),
           lazy: true,
         ),
       ],

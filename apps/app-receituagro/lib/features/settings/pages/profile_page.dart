@@ -222,22 +222,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: user?.isEmailVerified == true ? Colors.green : Colors.orange,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                user?.isEmailVerified == true ? 'Conta Verificada' : 'Não Verificada',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
           ] else ...[
             Text(
               'Faça login para acessar recursos completos',

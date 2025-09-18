@@ -11,15 +11,13 @@ import '../../core/services/test_data_generator_service.dart';
 import '../../shared/widgets/responsive_layout.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../core/theme/plantis_design_tokens.dart';
+import '../../core/providers/theme_provider.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../features/development/presentation/pages/database_inspector_page.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../features/settings/presentation/widgets/enhanced_settings_item.dart';
 import '../../features/settings/presentation/widgets/premium_components.dart';
-import '../../features/settings/presentation/widgets/settings_card.dart';
 import '../../shared/widgets/loading/loading_components.dart';
-import '../widgets/settings_item.dart';
-import '../widgets/settings_section.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -41,262 +39,149 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
         child: Scaffold(
           backgroundColor: PlantisColors.getPageBackgroundColor(context),
           body: ResponsiveLayout(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
+            child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
               builder: (context, authProvider, settingsProvider, _) {
                 final user = authProvider.currentUser;
                 
                 return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                // Enhanced Header with plant-themed design
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                _buildEnhancedHeader(context, theme, user),
-                
-                const SizedBox(height: 24),
-
-                // Enhanced User Profile Card
-                _buildEnhancedProfileCard(context, theme, user),
-                
-                const SizedBox(height: 24),
-
-                // Enhanced Premium Plan Card with upgrade prompt
-                UpgradePrompt(
-                  title: 'Desbloqueie o Poder das Plantas 🌱',
-                  description: 'Transforme seu jardim com recursos premium que levam seus cuidados ao próximo nível.',
-                  buttonText: 'Assinar Premium',
-                  onUpgrade: () => context.push('/premium'),
-                  features: const [
-                    'Plantas ilimitadas',
-                    'Backup automático na nuvem',
-                    'Relatórios avançados de cuidados',
-                    'Lembretes personalizados',
-                    'Identificação de doenças por IA',
-                    'Comunidade premium de jardineiros',
+                    // Header estilo ReceitaAgro
+                    _buildHeader(context, theme),
+                    
+                    // ListView com seções organizadas
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.all(8.0),
+                        children: [
+                          // Seção do Usuário
+                          _buildUserSection(context, theme, user, authProvider),
+                          const SizedBox(height: 8),
+                          
+                          // Seção Premium
+                          _buildPremiumSectionCard(context, theme),
+                          const SizedBox(height: 8),
+                          
+                          // Seção de Configurações
+                          _buildConfigSection(context, theme, settingsProvider),
+                          const SizedBox(height: 8),
+                          
+                          // Seção de Suporte
+                          _buildSupportSection(context, theme),
+                          const SizedBox(height: 8),
+                          
+                          // Seção de Desenvolvimento (debug only)
+                          if (kDebugMode) ...[
+                            _buildDevelopmentSection(context, theme),
+                            const SizedBox(height: 8),
+                          ],
+                          
+                          // Seção Sobre
+                          _buildAboutSection(context, theme),
+                          
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
                   ],
-                ),
-
-                const SizedBox(height: 32),
-
-            // Enhanced App Settings Card
-            SettingsCard(
-              title: 'Configurações do App',
-              subtitle: 'Personalize sua experiência no Plantis',
-              icon: Icons.settings,
-              category: SettingsCardCategory.general,
-              children: [
-                EnhancedSettingsItem(
-                  icon: Icons.notifications_active,
-                  title: 'Notificações',
-                  subtitle: 'Configure quando ser notificado sobre tarefas',
-                  type: SettingsItemType.normal,
-                  isFirst: true,
-                  onTap: () => context.push('/notifications-settings'),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.dark_mode,
-                  title: 'Tema',
-                  subtitle: settingsProvider.themeSubtitle,
-                  type: SettingsItemType.normal,
-                  iconColor: settingsProvider.isDarkMode
-                      ? PlantisColors.sun
-                      : PlantisColors.primaryDark,
-                  isLast: true,
-                  trailing: Switch(
-                    value: settingsProvider.isDarkMode,
-                    onChanged: (value) {
-                      if (value) {
-                        settingsProvider.setDarkTheme();
-                      } else {
-                        settingsProvider.setLightTheme();
-                      }
-                    },
-                    activeColor: PlantisColors.primary,
-                    trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                    thumbColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return PlantisColors.primary;
-                      }
-                      return theme.colorScheme.onSurface.withValues(alpha: 0.6);
-                    }),
-                    trackColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return PlantisColors.primary.withValues(alpha: 0.5);
-                      }
-                      return theme.colorScheme.onSurface.withValues(alpha: 0.2);
-                    }),
-                  ),
-                  onTap: () {
-                    if (settingsProvider.isDarkMode) {
-                      settingsProvider.setLightTheme();
-                    } else {
-                      settingsProvider.setDarkTheme();
-                    }
-                  },
-                ),
-              ],
-            ),
-
-            // Enhanced Account Section
-            SettingsCard(
-              title: 'Conta 🌱',
-              subtitle: 'Gerencie seus dados e preferências',
-              icon: Icons.account_circle,
-              category: SettingsCardCategory.account,
-              children: [
-                EnhancedSettingsItem(
-                  icon: Icons.devices,
-                  title: 'Gerenciar Dispositivos',
-                  subtitle: 'Controle quais aparelhos têm acesso',
-                  type: SettingsItemType.normal,
-                  isFirst: true,
-                  onTap: () => context.push('/device-management'),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.cloud_upload,
-                  title: 'Backup na Nuvem',
-                  subtitle: 'Proteja seus dados com backup automático',
-                  type: SettingsItemType.info,
-                  onTap: () => context.push('/backup-settings'),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.star,
-                  title: 'Premium',
-                  subtitle: 'Recursos exclusivos e benefícios',
-                  type: SettingsItemType.premium,
-                  badge: 'NOVO',
-                  isLast: true,
-                  onTap: () => context.push('/premium'),
-                ),
-              ],
-            ),
-
-            // Enhanced Privacy & Legal Section
-            SettingsCard(
-              title: 'Privacidade e Legal 🔒',
-              subtitle: 'Seus direitos e nossa responsabilidade',
-              icon: Icons.security,
-              category: SettingsCardCategory.privacy,
-              children: [
-                EnhancedSettingsItem(
-                  icon: Icons.download_for_offline,
-                  title: 'Exportar Meus Dados',
-                  subtitle: 'Baixe seus dados pessoais - LGPD',
-                  type: SettingsItemType.info,
-                  isFirst: true,
-                  onTap: () => context.push('/data-export'),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.privacy_tip,
-                  title: 'Política de Privacidade',
-                  subtitle: 'Como protegemos seus dados',
-                  type: SettingsItemType.info,
-                  onTap: () => context.push('/privacy-policy'),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.description,
-                  title: 'Termos de Uso',
-                  subtitle: 'Termos e condições de uso',
-                  type: SettingsItemType.info,
-                  onTap: () => context.push('/terms-of-service'),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.campaign,
-                  title: 'Ofertas Promocionais',
-                  subtitle: 'Conheça nossas promoções especiais',
-                  type: SettingsItemType.premium,
-                  isLast: true,
-                  onTap: () => context.push('/promotional'),
-                ),
-              ],
-            ),
-
-            // Enhanced Development Section - Only visible in debug mode
-            if (kDebugMode)
-              SettingsCard(
-                title: 'Desenvolvimento 🔧',
-                subtitle: 'Ferramentas para desenvolvedores',
-                icon: Icons.developer_mode,
-                category: SettingsCardCategory.development,
-                children: [
-                  EnhancedSettingsItem(
-                    icon: Icons.storage,
-                    title: 'Inspetor de Dados',
-                    subtitle: 'Visualizar dados locais do app',
-                    type: SettingsItemType.info,
-                    isFirst: true,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const DataInspectorPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: PlantisDesignTokens.spacing2),
-                  EnhancedSettingsItem(
-                    icon: Icons.bug_report,
-                    title: 'Gerar Dados de Teste',
-                    subtitle: 'Criar plantas e tarefas de exemplo',
-                    type: SettingsItemType.success,
-                    onTap: () => _showGenerateTestDataDialog(context),
-                  ),
-                  const SizedBox(height: PlantisDesignTokens.spacing2),
-                  EnhancedSettingsItem(
-                    icon: Icons.clear_all,
-                    title: 'Limpar Todos os Dados',
-                    subtitle: 'Remove todos os registros locais',
-                    type: SettingsItemType.danger,
-                    isLast: true,
-                    onTap: () => _showClearDataDialog(context),
-                  ),
-                ],
-              ),
-
-
-            // Enhanced App Info Section
-            SettingsCard(
-              title: 'Sobre o Plantis 🌿',
-              subtitle: 'Versão, avaliações e suporte',
-              icon: Icons.info_outline,
-              category: SettingsCardCategory.general,
-              children: [
-                EnhancedSettingsItem(
-                  icon: Icons.star_rate,
-                  title: 'Avaliar o App',
-                  subtitle: 'Deixe sua avaliação na loja',
-                  type: SettingsItemType.premium,
-                  isFirst: true,
-                  onTap: () => _showRateAppDialog(context),
-                ),
-                const SizedBox(height: PlantisDesignTokens.spacing2),
-                EnhancedSettingsItem(
-                  icon: Icons.info,
-                  title: 'Informações do App',
-                  subtitle: 'Versão, suporte e feedback',
-                  type: SettingsItemType.info,
-                  isLast: true,
-                  onTap: () => _showAboutDialog(context),
-                ),
-              ],
-            ),
-
-                const SizedBox(height: 40),
-              ],
-            );
+                );
               },
-              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primary,
+            PlantisColors.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: PlantisColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.settings,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Configurações',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Preferências e ajustes do app',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return Semantics(
+                label: 'Alterar tema',
+                hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                button: true,
+                onTap: () => _showThemeDialog(context, themeProvider),
+                child: GestureDetector(
+                  onTap: () => _showThemeDialog(context, themeProvider),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.brightness_2
+                          : themeProvider.themeMode == ThemeMode.light
+                              ? Icons.brightness_high
+                              : Icons.brightness_auto,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -372,14 +257,18 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
   }
 
   Widget _buildEnhancedProfileCard(BuildContext context, ThemeData theme, dynamic user) {
-    return SettingsCard(
-      title: 'Perfil do Usuário',
-      icon: Icons.person,
-      category: SettingsCardCategory.account,
-      expandable: false,
+    return GestureDetector(
       onTap: () => context.push('/account-profile'),
-      children: [
-        Row(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: PlantisColors.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
           children: [
             // Enhanced Avatar with plant-themed border
             Container(
@@ -391,7 +280,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: PlantisColors.primary.withOpacity(0.3),
+                    color: PlantisColors.primary.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -468,7 +357,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PlantisColors.leafLight.withOpacity(0.3),
+                      color: PlantisColors.leafLight.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -493,10 +382,716 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 ],
               ),
             ),
+            const Icon(
+              Icons.chevron_right,
+              color: PlantisColors.primary,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDevicesSection(BuildContext context, ThemeData theme) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: PlantisColors.primary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header da seção
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.devices,
+                    color: PlantisColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dispositivos Conectados',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Gerencie quais aparelhos têm acesso',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+          
+          const Divider(height: 1),
+          
+          // Lista de dispositivos resumida
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _buildDeviceItem(
+                  context,
+                  'Este Dispositivo',
+                  'Web • Chrome',
+                  Icons.computer,
+                  isCurrentDevice: true,
+                ),
+                const SizedBox(height: 12),
+                _buildDeviceItem(
+                  context,
+                  'iPhone de João',
+                  'iOS • Último acesso: 2 dias',
+                  Icons.phone_iphone,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.push('/device-management'),
+                    icon: const Icon(Icons.manage_accounts, size: 18),
+                    label: const Text('Gerenciar Todos os Dispositivos'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: PlantisColors.primary,
+                      side: const BorderSide(color: PlantisColors.primary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeviceItem(
+    BuildContext context,
+    String deviceName,
+    String deviceInfo,
+    IconData icon,
+    {bool isCurrentDevice = false}
+  ) {
+    final theme = Theme.of(context);
+    
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isCurrentDevice 
+                ? PlantisColors.primary.withValues(alpha: 0.2)
+                : theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: isCurrentDevice 
+                ? PlantisColors.primary 
+                : theme.colorScheme.onSurfaceVariant,
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    deviceName,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (isCurrentDevice) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'ATUAL',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: PlantisColors.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              Text(
+                deviceInfo,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!isCurrentDevice)
+          Icon(
+            Icons.more_vert,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 18,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSyncStatusSection(BuildContext context, ThemeData theme, auth_providers.AuthProvider authProvider) {
+    final isSyncing = authProvider.isSyncInProgress;
+    final syncMessage = authProvider.syncMessage.isNotEmpty 
+        ? authProvider.syncMessage 
+        : 'Sincronização completa';
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSyncing 
+              ? Colors.orange.withValues(alpha: 0.3)
+              : PlantisColors.primary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSyncing 
+                    ? Colors.orange.withValues(alpha: 0.2)
+                    : PlantisColors.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isSyncing ? Icons.sync : Icons.cloud_done,
+                color: isSyncing ? Colors.orange : PlantisColors.primary,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isSyncing ? syncMessage : 'Todos os dados estão atualizados na nuvem',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSyncing)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              IconButton(
+                onPressed: () {
+                  authProvider.startAutoSyncIfNeeded();
+                },
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Sincronizar agora',
+                color: PlantisColors.primary,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserSection(BuildContext context, ThemeData theme, dynamic user, auth_providers.AuthProvider authProvider) {
+    return Container(
+      decoration: _getCardDecoration(context),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: InkWell(
+        onTap: () => context.push('/account-profile'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: PlantisColors.primary,
+                child: user?.hasProfilePhoto == true
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.network(
+                          user!.photoUrl?.toString() ?? '',
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text(
+                              (user.initials as String?) ?? 'U',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Text(
+                        (user?.initials as String?) ?? 'U',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Usuário',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      (user?.email as String?) ?? 'usuario@email.com',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (user?.createdAt != null)
+                      Text(
+                        'Membro desde ${_formatDateShort(user!.createdAt)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  if (!authProvider.isAnonymous)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified,
+                            color: PlantisColors.primary,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Verificado',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: PlantisColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumSectionCard(BuildContext context, ThemeData theme) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2E7D32),
+            Color(0xFF1B5E20),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: InkWell(
+        onTap: () => context.push('/premium'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.workspace_premium,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '✨ Plantis Premium ✨',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Desbloqueie recursos avançados',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'A partir de R\$ 12,90/mês',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.white,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfigSection(BuildContext context, ThemeData theme, SettingsProvider settingsProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, '⚙️ Configurações'),
+        _buildSettingsCard(context, [
+          _buildSettingsItem(
+            context,
+            icon: Icons.notifications_active,
+            title: 'Notificações',
+            subtitle: 'Configure quando ser notificado sobre tarefas',
+            onTap: () => context.push('/notifications-settings'),
+          ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return _buildSettingsItem(
+                context,
+                icon: themeProvider.themeMode == ThemeMode.dark
+                    ? Icons.brightness_2
+                    : themeProvider.themeMode == ThemeMode.light
+                        ? Icons.brightness_high
+                        : Icons.brightness_auto,
+                title: 'Tema',
+                subtitle: _getThemeDescription(themeProvider.themeMode),
+                onTap: () => _showThemeDialog(context, themeProvider),
+              );
+            },
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _buildSupportSection(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, '🆘 Suporte'),
+        _buildSettingsCard(context, [
+          _buildSettingsItem(
+            context,
+            icon: Icons.star_rate,
+            title: 'Avaliar o App',
+            subtitle: 'Avalie nossa experiência na loja',
+            onTap: () => _showRateAppDialog(context),
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.feedback,
+            title: 'Enviar Feedback',
+            subtitle: 'Nos ajude a melhorar o app',
+            onTap: () => _showAboutDialog(context),
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _buildDevelopmentSection(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, '</> Desenvolvimento'),
+        _buildSettingsCard(context, [
+          _buildSettingsItem(
+            context,
+            icon: Icons.storage,
+            title: 'Inspetor de Dados',
+            subtitle: 'Visualizar e gerenciar dados locais',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DataInspectorPage(),
+                ),
+              );
+            },
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.bug_report,
+            title: 'Gerar Dados de Teste',
+            subtitle: 'Criar plantas e tarefas de exemplo',
+            onTap: () => _showGenerateTestDataDialog(context),
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.clear_all,
+            title: 'Limpar Todos os Dados',
+            subtitle: 'Remove todos os registros locais',
+            onTap: () => _showClearDataDialog(context),
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _buildAboutSection(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'ℹ️ Sobre o Plantis'),
+        _buildSettingsCard(context, [
+          _buildSettingsItem(
+            context,
+            icon: Icons.info,
+            title: 'Informações do App',
+            subtitle: 'Versão, suporte e feedback',
+            onTap: () => _showAboutDialog(context),
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.privacy_tip,
+            title: 'Política de Privacidade',
+            subtitle: 'Como protegemos seus dados',
+            onTap: () => context.push('/privacy-policy'),
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.description,
+            title: 'Termos de Uso',
+            subtitle: 'Termos e condições de uso',
+            onTap: () => context.push('/terms-of-service'),
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: PlantisColors.primary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsCard(BuildContext context, List<Widget> children) {
+    return Container(
+      decoration: _getCardDecoration(context),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildSettingsItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    final theme = Theme.of(context);
+    
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: PlantisColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: PlantisColors.primary,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            trailing ?? Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _getCardDecoration(BuildContext context) {
+    return BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.05),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
         ),
       ],
     );
+  }
+
+  String _formatDateShort(dynamic date) {
+    if (date == null) return '';
+    
+    DateTime dateTime;
+    if (date is DateTime) {
+      dateTime = date;
+    } else if (date is String) {
+      dateTime = DateTime.tryParse(date) ?? DateTime.now();
+    } else {
+      return '';
+    }
+    
+    final months = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    
+    return '${dateTime.day} de ${months[dateTime.month - 1]} de ${dateTime.year}';
   }
 
   Widget _buildPremiumFeature(ThemeData theme, String text) {
@@ -1095,6 +1690,123 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getThemeDescription(ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.light:
+        return 'Claro';
+      case ThemeMode.dark:
+        return 'Escuro';
+      case ThemeMode.system:
+        return 'Automático (Sistema)';
+    }
+  }
+
+  void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Escolher Tema'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(
+              context,
+              themeProvider,
+              ThemeMode.system,
+              'Automático (Sistema)',
+              'Segue a configuração do sistema',
+              Icons.brightness_auto,
+            ),
+            _buildThemeOption(
+              context,
+              themeProvider,
+              ThemeMode.light,
+              'Claro',
+              'Tema claro sempre ativo',
+              Icons.brightness_high,
+            ),
+            _buildThemeOption(
+              context,
+              themeProvider,
+              ThemeMode.dark,
+              'Escuro',
+              'Tema escuro sempre ativo',
+              Icons.brightness_2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    ThemeMode mode,
+    String title,
+    String subtitle,
+    IconData icon,
+  ) {
+    final isSelected = themeProvider.themeMode == mode;
+    
+    return InkWell(
+      onTap: () {
+        themeProvider.setThemeMode(mode);
+        Navigator.of(context).pop();
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                ? PlantisColors.primary
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected 
+                        ? PlantisColors.primary
+                        : Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check,
+                color: PlantisColors.primary,
+                size: 20,
+              ),
           ],
         ),
       ),

@@ -16,7 +16,7 @@ import '../../features/plants/presentation/pages/plants_list_page.dart';
 import '../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../features/plants/presentation/providers/plant_form_provider.dart';
 import '../../features/plants/presentation/providers/plants_provider.dart';
-import '../../features/premium/presentation/pages/premium_page.dart';
+import '../../features/premium/presentation/pages/premium_subscription_page.dart';
 import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
 import '../../features/settings/presentation/providers/backup_settings_provider.dart';
@@ -102,7 +102,13 @@ class AppRouter {
         }
 
         // Se realmente autenticado e não está no app, redireciona para plantas
-        if (isReallyAuthenticated && (isLoggingIn || isRegistering || isOnLanding || isOnPromotional)) {
+        // Mas permite que usuários anônimos vejam a página promocional na web
+        if (isReallyAuthenticated && (isLoggingIn || isRegistering || isOnLanding)) {
+          return plants;
+        }
+        
+        // Se realmente autenticado e está na promotional, vai para plantas
+        if (isReallyAuthenticated && isOnPromotional) {
           return plants;
         }
 
@@ -112,13 +118,23 @@ class AppRouter {
         }
 
         // Se não realmente autenticado e tentando acessar outras rotas não protegidas, vai para landing
-        // Mas permite acesso direto à página promocional
+        // Mas permite acesso direto à página promocional na web
         if (!isReallyAuthenticated &&
             !isLoggingIn &&
             !isRegistering &&
             !isOnLanding &&
-            !isOnPromotional) {
+            !isOnPromotional &&
+            !kIsWeb) {
           return landing;
+        }
+        
+        // Na web, usuários não autenticados podem acessar promotional ou landing
+        if (!isReallyAuthenticated && kIsWeb && 
+            !isLoggingIn && 
+            !isRegistering && 
+            !isOnLanding && 
+            !isOnPromotional) {
+          return promotional;
         }
 
         return null;
@@ -225,7 +241,7 @@ class AppRouter {
             GoRoute(
               path: premium,
               name: 'premium',
-              builder: (context, state) => const PremiumPage(),
+              builder: (context, state) => const PremiumSubscriptionPage(),
             ),
 
             // Settings Route

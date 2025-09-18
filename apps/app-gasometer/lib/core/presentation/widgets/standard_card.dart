@@ -98,10 +98,8 @@ class StandardCard extends StatelessWidget {
       padding: GasometerDesignTokens.paddingAll(
         GasometerDesignTokens.spacingCardPadding,
       ),
-      margin: margin ??
-          EdgeInsets.only(
-            bottom: GasometerDesignTokens.spacingLg,
-          ),
+      margin:
+          margin ?? EdgeInsets.only(bottom: GasometerDesignTokens.spacingLg),
       onTap: onTap,
       hasElevation: false,
       showBorder: showBorder,
@@ -111,38 +109,38 @@ class StandardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardChild = Container(
-      padding: padding,
-      child: child,
-    );
+    final cardChild = Container(padding: padding, child: child);
 
     return Container(
       margin: margin,
       child: Card(
-        elevation: hasElevation
-            ? GasometerDesignTokens.elevationCard
-            : GasometerDesignTokens.elevationNone,
+        elevation:
+            hasElevation
+                ? GasometerDesignTokens.elevationCard
+                : GasometerDesignTokens.elevationNone,
         color: backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: GasometerDesignTokens.borderRadius(
             borderRadius ?? GasometerDesignTokens.radiusCard,
           ),
-          side: showBorder
-              ? BorderSide(
-                  color: Theme.of(context).colorScheme.outline,
-                  width: 1.0,
-                )
-              : BorderSide.none,
+          side:
+              showBorder
+                  ? BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                    width: 1.0,
+                  )
+                  : BorderSide.none,
         ),
-        child: onTap != null
-            ? InkWell(
-                onTap: onTap,
-                borderRadius: GasometerDesignTokens.borderRadius(
-                  borderRadius ?? GasometerDesignTokens.radiusCard,
-                ),
-                child: cardChild,
-              )
-            : cardChild,
+        child:
+            onTap != null
+                ? InkWell(
+                  onTap: onTap,
+                  borderRadius: GasometerDesignTokens.borderRadius(
+                    borderRadius ?? GasometerDesignTokens.radiusCard,
+                  ),
+                  child: cardChild,
+                )
+                : cardChild,
       ),
     );
   }
@@ -166,9 +164,7 @@ class CardSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: GasometerDesignTokens.spacingMd,
-      ),
+      padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
       child: Row(
         children: [
           if (icon != null) ...[
@@ -226,21 +222,20 @@ class CardInfoRow extends StatelessWidget {
               Icon(
                 icon,
                 size: GasometerDesignTokens.iconSizeXs,
-                color: iconColor ??
-                    Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(GasometerDesignTokens.opacitySecondary),
+                color:
+                    iconColor ??
+                    Theme.of(context).colorScheme.onSurface.withOpacity(
+                      GasometerDesignTokens.opacitySecondary,
+                    ),
               ),
               SizedBox(width: GasometerDesignTokens.spacingXs + 2),
             ],
             Text(
               label,
               style: TextStyle(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(
+                  GasometerDesignTokens.opacitySecondary,
+                ),
                 fontSize: GasometerDesignTokens.fontSizeMd,
               ),
             ),

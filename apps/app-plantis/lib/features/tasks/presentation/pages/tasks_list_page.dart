@@ -7,12 +7,12 @@ import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../shared/widgets/feedback/feedback.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../domain/entities/task.dart' as task_entity;
+import '../../../plants/presentation/providers/plants_provider.dart';
 import '../providers/tasks_provider.dart';
 import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
 // import '../widgets/task_creation_dialog.dart'; // Removido - tarefas geradas automaticamente
-import '../widgets/tasks_app_bar.dart';
 import '../widgets/tasks_error_boundary.dart';
 // import '../widgets/tasks_fab.dart'; // Removido - tarefas geradas automaticamente
 
@@ -188,14 +188,22 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         },
         child: Scaffold(
         backgroundColor: PlantisColors.getPageBackgroundColor(context),
-        appBar: const TasksAppBar(),
         body: ResponsiveLayout(
           child: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1120),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              children: [
+              // Header estilo ReceitaAgro
+              _buildHeader(context),
+              
+              // Simple filter section
+              _buildSimpleFilters(context),
+              
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1120),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
                   child: Selector<TasksProvider, TasksListState>(
           selector: (_, provider) => TasksListState(
             isLoading: provider.isLoading,
@@ -238,18 +246,169 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
                 ],
               ),
             );
-          },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+          }, // Selector builder
+          ), // Selector
+                    ), // Padding
+                  ), // ConstrainedBox  
+                ), // Center
+              ), // Expanded
+            ],
+            ), // Column
+          ), // SafeArea
+        ), // ResponsiveLayout
         // FAB removido - tarefas são geradas automaticamente quando concluídas
         // floatingActionButton: const TasksFab(),
-      ),
+      ), // Scaffold
+        ), // TasksErrorBoundary
+      ), // ContextualLoadingListener
+    ); // UnifiedFeedbackProvider
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primary,
+            PlantisColors.primaryDark,
+          ],
         ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: PlantisColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      child: Consumer<TasksProvider>(
+        builder: (context, tasksProvider, _) {
+          return Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.task_alt,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Minhas Tarefas',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${tasksProvider.allTasks.length} tarefas cadastradas',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSimpleFilters(BuildContext context) {
+    return Consumer<TasksProvider>(
+      builder: (context, provider, child) {
+        return Container(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              FilterChip(
+                label: const Text('Hoje'),
+                selected: provider.currentFilter == TasksFilterType.today,
+                onSelected: (selected) {
+                  provider.setFilter(TasksFilterType.today);
+                },
+                selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+                checkmarkColor: PlantisColors.primary,
+                backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                labelStyle: TextStyle(
+                  color: provider.currentFilter == TasksFilterType.today 
+                      ? PlantisColors.primary 
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: provider.currentFilter == TasksFilterType.today 
+                      ? FontWeight.w600 
+                      : FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilterChip(
+                label: const Text('Próximas'),
+                selected: provider.currentFilter == TasksFilterType.upcoming,
+                onSelected: (selected) {
+                  provider.setFilter(TasksFilterType.upcoming);
+                },
+                selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+                checkmarkColor: PlantisColors.primary,
+                backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                labelStyle: TextStyle(
+                  color: provider.currentFilter == TasksFilterType.upcoming 
+                      ? PlantisColors.primary 
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: provider.currentFilter == TasksFilterType.upcoming 
+                      ? FontWeight.w600 
+                      : FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilterChip(
+                label: const Text('Todas'),
+                selected: provider.currentFilter == TasksFilterType.all,
+                onSelected: (selected) {
+                  provider.setFilter(TasksFilterType.all);
+                },
+                selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+                checkmarkColor: PlantisColors.primary,
+                backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                labelStyle: TextStyle(
+                  color: provider.currentFilter == TasksFilterType.all 
+                      ? PlantisColors.primary 
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: provider.currentFilter == TasksFilterType.all 
+                      ? FontWeight.w600 
+                      : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -326,14 +485,14 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         // Header da data
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
           child: Row(
             children: [
               Container(
                 width: 3,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary,
+                  color: PlantisColors.primary,
                   borderRadius: const BorderRadius.all(Radius.circular(2)),
                 ),
               ),
@@ -377,8 +536,8 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
             },
             child: Container(
             key: ValueKey(task.id),
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color:
                   isDark
@@ -391,28 +550,29 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
             ),
             child: Row(
             children: [
-              // Ícone da tarefa ou loading
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: isLoading 
-                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                      : theme.colorScheme.secondary,
-                  shape: BoxShape.circle,
-                ),
-                child: isLoading 
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            theme.colorScheme.primary,
+              // Check button (moved to left)
+              GestureDetector(
+                onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task),
+                child: SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: isLoading 
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              PlantisColors.primary,
+                            ),
                           ),
+                        )
+                      : Icon(
+                          Icons.check_circle, 
+                          color: PlantisColors.primary, 
+                          size: 32,
                         ),
-                      )
-                    : Icon(_getTaskIcon(task.type), color: Colors.black, size: 20),
+                ),
               ),
               const SizedBox(width: 16),
               // Task information
@@ -430,7 +590,7 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       task.plantName,
                       style: TextStyle(
@@ -438,8 +598,46 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
                         fontSize: 14,
                       ),
                     ),
+                    Consumer<PlantsProvider>(
+                      builder: (context, plantsProvider, _) {
+                        final plants = plantsProvider.plants.where((p) => p.id == task.plantId);
+                        final plant = plants.isNotEmpty ? plants.first : null;
+                        
+                        String? plantDescription;
+                        if (plant != null) {
+                          if (plant.species?.isNotEmpty == true && plant.notes?.isNotEmpty == true) {
+                            plantDescription = '${plant.species} • ${plant.notes}';
+                          } else if (plant.species?.isNotEmpty == true) {
+                            plantDescription = plant.species;
+                          } else if (plant.notes?.isNotEmpty == true) {
+                            plantDescription = plant.notes;
+                          }
+                        }
+                        
+                        if (plantDescription != null) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 1),
+                              Text(
+                                plantDescription,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          );
+                        }
+                        
+                        return const SizedBox.shrink();
+                      },
+                    ),
                     if (isLoading) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         'Processando...',
                         style: TextStyle(
@@ -452,24 +650,15 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
                   ],
                 ),
               ),
-              // Check button
-              GestureDetector(
-                onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isLoading 
-                        ? theme.colorScheme.secondary.withValues(alpha: 0.3)
-                        : theme.colorScheme.secondary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check, 
-                    color: isLoading ? Colors.grey : Colors.black, 
-                    size: 20,
-                  ),
+              // Ícone da tarefa (moved to right)
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: PlantisColors.primary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
                 ),
+                child: Icon(_getTaskIcon(task.type), color: PlantisColors.primary, size: 18),
               ),
             ],
           ),
@@ -573,7 +762,7 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
       selector: (_, provider) => provider.totalTasks - provider.filteredTasks.length,
       builder: (context, remainingTasks, child) {
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
           child: Center(
             child: ElevatedButton.icon(
               onPressed: () {
@@ -582,8 +771,8 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
               icon: const Icon(Icons.visibility),
               label: Text('Ver todas as tarefas (+$remainingTasks)'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.secondary,
-                foregroundColor: Colors.black,
+                backgroundColor: PlantisColors.primary,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),

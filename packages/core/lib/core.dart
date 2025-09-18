@@ -106,16 +106,10 @@ export 'src/infrastructure/services/web_notification_service.dart';
 export 'src/infrastructure/storage/hive/hive_storage.dart';
 
 // ========== PRESENTATION LAYER ==========
-// Theme (commented out - files not found)
-// export 'src/presentation/theme/providers/theme_provider.dart';
-
-// Base Theme Files (removed - migrated to app-specific themes)
-// export 'src/presentation/theme/base/base_colors.dart';
-// export 'src/presentation/theme/base/base_theme.dart';
-// export 'src/presentation/theme/base/base_typography.dart';
-
-// Theme Provider (commented out - files not found)
-// export 'src/presentation/theme/providers/theme_provider.dart';
+// Theme System - Base theme components only (provider is app-specific)
+export 'src/presentation/theme/base/base_colors.dart';
+export 'src/presentation/theme/base/base_theme.dart';
+export 'src/presentation/theme/base/base_typography.dart';
 // export 'src/presentation/widgets/error_widget.dart';
 // export 'src/presentation/widgets/image_widgets.dart';
 // export 'src/presentation/widgets/loading_widget.dart';

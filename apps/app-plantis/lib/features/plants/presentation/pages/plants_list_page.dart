@@ -60,6 +60,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
   
   // UI-only controller for scroll management
   final ScrollController _scrollController = ScrollController();
+  
+  // Sync completion tracking
+  bool _wasSyncInProgress = false;
 
   @override
   void initState() {
@@ -169,50 +172,65 @@ class _PlantsListPageState extends State<PlantsListPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Monitor sync completion and reload plants when sync finishes
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        // Check if sync just completed
+        if (_wasSyncInProgress && !authProvider.isSyncInProgress) {
+          // Sync just finished, reload plants data
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _plantsProvider.refreshPlants();
+            }
+          });
+        }
+        
+        // Update sync tracking state
+        _wasSyncInProgress = authProvider.isSyncInProgress;
 
-    // ARCHITECTURE: Provide the injected provider to the widget tree
-    // All state management flows through PlantsProvider
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _plantsProvider),
-        // ChangeNotifierProvider.value(value: _spacesProvider),
-      ],
-      child: Scaffold(
+        // ARCHITECTURE: Provide the injected provider to the widget tree
+        // All state management flows through PlantsProvider
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: _plantsProvider),
+            // ChangeNotifierProvider.value(value: _spacesProvider),
+          ],
+          child: Scaffold(
         backgroundColor: PlantisColors.getPageBackgroundColor(context),
         body: ResponsiveLayout(
-          child: SafeArea(
-            child: Column(
-              children: [
-                // ARCHITECTURE: App Bar uses granular selector for performance
-                // Only rebuilds when relevant state changes (count, search, view mode)
-                Selector<PlantsProvider, AppBarData>(
-                  selector:
-                      (_, provider) => AppBarData(
-                        plantsCount: provider.plantsCount,
-                        searchQuery: provider.searchQuery,
-                        viewMode: provider.viewMode,
-                      ),
-                  shouldRebuild: (previous, next) {
-                    return previous.plantsCount != next.plantsCount ||
-                        previous.searchQuery != next.searchQuery ||
-                        previous.viewMode != next.viewMode;
-                  },
-                  builder: (context, appBarData, child) {
-                    return PlantsAppBar(
-                      plantsCount: appBarData.plantsCount,
-                      searchQuery: appBarData.searchQuery,
-                      onSearchChanged: _onSearchChanged,
-                      viewMode: appBarData.viewMode,
-                      onViewModeChanged: _onViewModeChanged,
-                    );
-                  },
-                ),
+          child: Column(
+            children: [
+              // Header estilo ReceitaAgro
+              _buildHeader(context),
+              
+              // Search and filters section
+              Selector<PlantsProvider, AppBarData>(
+                selector:
+                    (_, provider) => AppBarData(
+                      plantsCount: provider.plantsCount,
+                      searchQuery: provider.searchQuery,
+                      viewMode: provider.viewMode,
+                    ),
+                shouldRebuild: (previous, next) {
+                  return previous.plantsCount != next.plantsCount ||
+                      previous.searchQuery != next.searchQuery ||
+                      previous.viewMode != next.viewMode;
+                },
+                builder: (context, appBarData, child) {
+                  return PlantsAppBar(
+                    plantsCount: appBarData.plantsCount,
+                    searchQuery: appBarData.searchQuery,
+                    onSearchChanged: _onSearchChanged,
+                    viewMode: appBarData.viewMode,
+                    onViewModeChanged: _onViewModeChanged,
+                  );
+                },
+              ),
 
-                // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
-                // Each selector only listens to specific parts of provider state
-                Expanded(child: _buildOptimizedPlantsContent()),
-              ],
-            ),
+              // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
+              // Each selector only listens to specific parts of provider state
+              Expanded(child: _buildOptimizedPlantsContent()),
+            ],
           ),
         ),
 
@@ -221,6 +239,79 @@ class _PlantsListPageState extends State<PlantsListPage> {
           onScrollToTop: _scrollToTop,
           scrollController: _scrollController,
         ),
+      ),
+    );
+      },  // Close Consumer<AuthProvider>
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primary,
+            PlantisColors.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: PlantisColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Consumer<PlantsProvider>(
+        builder: (context, plantsProvider, _) {
+          return Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.eco,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Minhas Plantas',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${plantsProvider.plantsCount} plantas no jardim',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -27,44 +27,6 @@ class PlantsAppBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
-          // Header with title and badge
-          Row(
-            children: [
-              Text(
-                'Minhas Plantas',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              // Badge with plant count
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.secondary),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  plantsCount == 1
-                      ? '$plantsCount planta'
-                      : '$plantsCount plantas',
-                  style: TextStyle(
-                    color: theme.colorScheme.secondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
           // Search bar with grid button
           Row(
             children: [

@@ -138,7 +138,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

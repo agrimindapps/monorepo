@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../../../core/localization/app_strings.dart';
-import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/plantis_colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
@@ -897,17 +897,19 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   /// Returns:
   /// - A [Widget] containing the complete plant details interface
   Widget _buildMainContent(BuildContext context, Plant plant) {
-    return CustomScrollView(
-      slivers: [
-        _buildAppBar(context, plant),
-        SliverToBoxAdapter(
+    return Column(
+      children: [
+        // Header estilo ReceitaAgro
+        _buildHeader(context, plant),
+        
+        // Content with tabs
+        Expanded(
           child: Column(
             children: [
               const SizedBox(height: AppSpacing.lg),
               _buildTabBar(context),
               const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.6,
+              Expanded(
                 child: TabBarView(
                   controller: _tabController,
                   children: [
@@ -922,6 +924,114 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, Plant plant) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primary,
+            PlantisColors.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: PlantisColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => _controller?.goBack(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  plant.displayName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  plant.species?.isNotEmpty == true ? plant.species! : 'Detalhes da planta',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.more_vert,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            onSelected: (action) => _handleMenuAction(action, plant),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: ListTile(
+                  leading: Icon(Icons.edit_outlined),
+                  title: Text('Editar'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(Icons.delete_outline, color: Colors.red),
+                  title: Text(
+                    'Excluir',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

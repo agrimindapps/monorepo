@@ -91,10 +91,14 @@ class AuthSection extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _navigateToUserProfile(context),
-          borderRadius:
-              BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
+          borderRadius: BorderRadius.circular(
+            SettingsDesignTokens.cardBorderRadius,
+          ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 20.0,
+              horizontal: 16.0,
+            ),
             child: Row(
               children: [
                 Container(
@@ -102,10 +106,7 @@ class AuthSection extends StatelessWidget {
                   height: 60,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Colors.grey.shade400,
-                        Colors.grey.shade600,
-                      ],
+                      colors: [Colors.grey.shade400, Colors.grey.shade600],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -147,8 +148,9 @@ class AuthSection extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         decoration: BoxDecoration(
-                          color: SettingsDesignTokens.primaryColor
-                              .withValues(alpha: 0.1),
+                          color: SettingsDesignTokens.primaryColor.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -183,16 +185,20 @@ class AuthSection extends StatelessWidget {
   }
 
   Widget _buildUserSummary(
-      BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    BuildContext context,
+    ReceitaAgroAuthProvider authProvider,
+  ) {
     final user = authProvider.currentUser!;
     final theme = Theme.of(context);
-    final createdDate = user.createdAt != null
-        ? _formatDate(user.createdAt!)
-        : 'Data não disponível';
+    final createdDate =
+        user.createdAt != null
+            ? _formatDate(user.createdAt!)
+            : 'Data não disponível';
 
-    final userInitial = user.displayName.isNotEmpty
-        ? user.displayName[0].toUpperCase()
-        : (user.email.isNotEmpty ? user.email[0].toUpperCase() : '?');
+    final userInitial =
+        user.displayName.isNotEmpty
+            ? user.displayName[0].toUpperCase()
+            : (user.email.isNotEmpty ? user.email[0].toUpperCase() : '?');
 
     return Container(
       decoration: SettingsDesignTokens.getCardDecoration(context),
@@ -201,8 +207,9 @@ class AuthSection extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _navigateToUserProfile(context),
-          borderRadius:
-              BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
+          borderRadius: BorderRadius.circular(
+            SettingsDesignTokens.cardBorderRadius,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20.0),
             child: Column(
@@ -225,8 +232,9 @@ class AuthSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: SettingsDesignTokens.primaryColor
-                                .withValues(alpha: 0.3),
+                            color: SettingsDesignTokens.primaryColor.withValues(
+                              alpha: 0.3,
+                            ),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
@@ -326,70 +334,6 @@ class AuthSection extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                // Status badges
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    // Status de verificação
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: user.isEmailVerified
-                            ? SettingsDesignTokens.successBackgroundColor
-                            : SettingsDesignTokens.warningColor
-                                .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: user.isEmailVerified
-                              ? SettingsDesignTokens.successColor
-                                  .withValues(alpha: 0.3)
-                              : SettingsDesignTokens.warningColor
-                                  .withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            user.isEmailVerified
-                                ? Icons.verified_user
-                                : Icons.warning_outlined,
-                            size: 14,
-                            color: user.isEmailVerified
-                                ? SettingsDesignTokens.successColor
-                                : SettingsDesignTokens.warningColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            user.isEmailVerified
-                                ? 'Verificado'
-                                : 'Não verificado',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: user.isEmailVerified
-                                  ? SettingsDesignTokens.successColor
-                                  : SettingsDesignTokens.warningColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    // Hint para gerenciar perfil
-                    Text(
-                      'Toque para gerenciar',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant
-                            .withValues(alpha: 0.7),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -401,9 +345,7 @@ class AuthSection extends StatelessWidget {
   void _navigateToUserProfile(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute<void>(
-        builder: (context) => const ProfilePage(),
-      ),
+      MaterialPageRoute<void>(builder: (context) => const ProfilePage()),
     );
   }
 
@@ -420,7 +362,7 @@ class AuthSection extends StatelessWidget {
       'setembro',
       'outubro',
       'novembro',
-      'dezembro'
+      'dezembro',
     ];
 
     return '${date.day} de ${months[date.month - 1]} de ${date.year}';

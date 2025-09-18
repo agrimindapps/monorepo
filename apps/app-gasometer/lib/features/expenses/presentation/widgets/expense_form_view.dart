@@ -14,10 +14,7 @@ import 'receipt_image_picker.dart';
 class ExpenseFormView extends StatelessWidget {
   final ExpenseFormProvider formProvider;
 
-  const ExpenseFormView({
-    super.key,
-    required this.formProvider,
-  });
+  const ExpenseFormView({super.key, required this.formProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +49,9 @@ class ExpenseFormView extends StatelessWidget {
                       required: true,
                       showCharacterCount: true,
                       prefixIcon: Icons.description,
-                      validator: (value) =>
-                          provider.validateField('description', value),
+                      validator:
+                          (value) =>
+                              provider.validateField('description', value),
                       debounceDuration: const Duration(milliseconds: 300),
                     ),
 
@@ -81,7 +79,8 @@ class ExpenseFormView extends StatelessWidget {
                           label: 'Valor Total *',
                           hint: ExpenseConstants.amountPlaceholder,
                           keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
+                            decimal: true,
+                          ),
                           prefixIcon: Icons.attach_money,
                           required: true,
                           validator: _validateMoney,
@@ -93,7 +92,8 @@ class ExpenseFormView extends StatelessWidget {
                           label: 'Quilometragem Atual *',
                           hint: ExpenseConstants.odometerPlaceholder,
                           keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
+                            decimal: true,
+                          ),
                           prefixIcon: Icons.speed,
                           suffix: Text(
                             ExpenseConstants.kilometerUnit,
@@ -183,11 +183,11 @@ class ExpenseFormView extends StatelessWidget {
                     ReceiptImagePicker(
                       imagePath: provider.receiptImagePath,
                       hasImage: provider.hasReceiptImage,
-                      onImageSelected: () => _showImagePickerOptions(context, provider),
+                      onImageSelected:
+                          () => _showImagePickerOptions(context, provider),
                       onImageRemoved: () => provider.removeReceiptImage(),
                     ),
-                    if (provider.isUploadingImage)
-                      _buildUploadingIndicator(),
+                    if (provider.isUploadingImage) _buildUploadingIndicator(),
                     if (provider.imageUploadError != null)
                       _buildErrorIndicator(provider.imageUploadError!),
                   ],
@@ -212,8 +212,9 @@ class ExpenseFormView extends StatelessWidget {
     return Card(
       color: GasometerDesignTokens.colorPrimaryLight.withValues(alpha: 0.3),
       child: Padding(
-        padding:
-            GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
+        padding: GasometerDesignTokens.paddingAll(
+          GasometerDesignTokens.spacingLg,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -239,10 +240,14 @@ class ExpenseFormView extends StatelessWidget {
 
             _buildSummaryRow('Tipo:', model.expenseType.displayName),
             _buildSummaryRow(
-                'Valor:', 'R\$ ${model.amount.toStringAsFixed(2)}'),
+              'Valor:',
+              'R\$ ${model.amount.toStringAsFixed(2)}',
+            ),
             _buildSummaryRow('Data:', _formatDate(model.date)),
             _buildSummaryRow(
-                'Odômetro:', '${model.odometer.toStringAsFixed(0)} km'),
+              'Odômetro:',
+              '${model.odometer.toStringAsFixed(0)} km',
+            ),
 
             if (model.location.isNotEmpty)
               _buildSummaryRow('Local:', model.location),
@@ -275,12 +280,14 @@ class ExpenseFormView extends StatelessWidget {
                 // Status de validação
                 Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: GasometerDesignTokens.spacingSm,
-                      vertical: GasometerDesignTokens.spacingXs),
+                    horizontal: GasometerDesignTokens.spacingSm,
+                    vertical: GasometerDesignTokens.spacingXs,
+                  ),
                   decoration: BoxDecoration(
-                    color: model.canSubmit
-                        ? Colors.green.withValues(alpha: 0.2)
-                        : Colors.orange.withValues(alpha: 0.2),
+                    color:
+                        model.canSubmit
+                            ? Colors.green.withValues(alpha: 0.2)
+                            : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -295,10 +302,8 @@ class ExpenseFormView extends StatelessWidget {
                       Text(
                         model.canSubmit ? 'Pronto' : 'Pendente',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: model.canSubmit
-                                  ? Colors.green
-                                  : Colors.orange,
-                            ),
+                          color: model.canSubmit ? Colors.green : Colors.orange,
+                        ),
                       ),
                     ],
                   ),
@@ -310,8 +315,9 @@ class ExpenseFormView extends StatelessWidget {
                 if (model.isHighValue)
                   Container(
                     padding: EdgeInsets.symmetric(
-                        horizontal: GasometerDesignTokens.spacingSm,
-                        vertical: GasometerDesignTokens.spacingXs),
+                      horizontal: GasometerDesignTokens.spacingSm,
+                      vertical: GasometerDesignTokens.spacingXs,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -327,10 +333,9 @@ class ExpenseFormView extends StatelessWidget {
                         SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Alto valor',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.blue,
-                                  ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(color: Colors.blue),
                         ),
                       ],
                     ),
@@ -341,8 +346,9 @@ class ExpenseFormView extends StatelessWidget {
                   SizedBox(width: GasometerDesignTokens.spacingSm),
                   Container(
                     padding: EdgeInsets.symmetric(
-                        horizontal: GasometerDesignTokens.spacingSm,
-                        vertical: GasometerDesignTokens.spacingXs),
+                      horizontal: GasometerDesignTokens.spacingSm,
+                      vertical: GasometerDesignTokens.spacingXs,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.purple.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -358,10 +364,8 @@ class ExpenseFormView extends StatelessWidget {
                         SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Recorrente',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.purple,
-                                  ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: Colors.purple),
                         ),
                       ],
                     ),
@@ -410,7 +414,9 @@ class ExpenseFormView extends StatelessWidget {
   }
 
   Widget _buildDateTimeField(
-      BuildContext context, ExpenseFormProvider provider) {
+    BuildContext context,
+    ExpenseFormProvider provider,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -418,13 +424,8 @@ class ExpenseFormView extends StatelessWidget {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: 'Data e Hora',
-            suffixIcon: const Icon(
-              Icons.calendar_today,
-              size: 24,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            suffixIcon: const Icon(Icons.calendar_today, size: 24),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
@@ -446,8 +447,9 @@ class ExpenseFormView extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  TimeOfDay.fromDateTime(provider.formModel.date)
-                      .format(context),
+                  TimeOfDay.fromDateTime(
+                    provider.formModel.date,
+                  ).format(context),
                   style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.end,
                 ),
@@ -460,7 +462,9 @@ class ExpenseFormView extends StatelessWidget {
   }
 
   Future<void> _selectDateTime(
-      BuildContext context, ExpenseFormProvider provider) async {
+    BuildContext context,
+    ExpenseFormProvider provider,
+  ) async {
     // Select date first
     final date = await showDatePicker(
       context: context,
@@ -472,8 +476,8 @@ class ExpenseFormView extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Theme.of(context).colorScheme.primary,
-                ),
+              primary: Theme.of(context).colorScheme.primary,
+            ),
           ),
           child: child!,
         );
@@ -495,8 +499,8 @@ class ExpenseFormView extends StatelessWidget {
               child: Theme(
                 data: Theme.of(context).copyWith(
                   colorScheme: Theme.of(context).colorScheme.copyWith(
-                        primary: Theme.of(context).colorScheme.primary,
-                      ),
+                    primary: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 child: child!,
               ),
@@ -529,7 +533,9 @@ class ExpenseFormView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(vertical: GasometerDesignTokens.spacingMd),
+          padding: EdgeInsets.symmetric(
+            vertical: GasometerDesignTokens.spacingMd,
+          ),
           child: Row(
             children: [
               Icon(
@@ -607,7 +613,10 @@ class ExpenseFormView extends StatelessWidget {
     );
   }
 
-  void _showImagePickerOptions(BuildContext context, ExpenseFormProvider provider) {
+  void _showImagePickerOptions(
+    BuildContext context,
+    ExpenseFormProvider provider,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       builder: (context) {

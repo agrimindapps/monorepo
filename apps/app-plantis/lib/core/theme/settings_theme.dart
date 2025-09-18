@@ -49,27 +49,29 @@ class SettingsTheme {
   // MARK: - Component Themes
 
   /// Settings item theme configuration
-  static SettingsItemThemeData get settingsItemTheme => const SettingsItemThemeData(
-    height: PlantisDesignTokens.settingsItemHeight,
-    padding: EdgeInsets.symmetric(
-      horizontal: PlantisDesignTokens.settingsItemPadding,
-      vertical: PlantisDesignTokens.spacing3,
-    ),
-    iconSize: PlantisDesignTokens.settingsIconSize,
-    iconContainerSize: PlantisDesignTokens.settingsIconContainer,
-    borderRadius: PlantisDesignTokens.radiusLG,
-    animationDuration: PlantisDesignTokens.durationFast,
-  );
+  static SettingsItemThemeData get settingsItemTheme =>
+      const SettingsItemThemeData(
+        height: PlantisDesignTokens.settingsItemHeight,
+        padding: EdgeInsets.symmetric(
+          horizontal: PlantisDesignTokens.settingsItemPadding,
+          vertical: PlantisDesignTokens.spacing3,
+        ),
+        iconSize: PlantisDesignTokens.settingsIconSize,
+        iconContainerSize: PlantisDesignTokens.settingsIconContainer,
+        borderRadius: PlantisDesignTokens.radiusLG,
+        animationDuration: PlantisDesignTokens.durationFast,
+      );
 
   /// Settings card theme configuration
-  static SettingsCardThemeData get settingsCardTheme => const SettingsCardThemeData(
-    padding: EdgeInsets.all(PlantisDesignTokens.cardPadding),
-    margin: EdgeInsets.only(bottom: PlantisDesignTokens.spacing4),
-    borderRadius: PlantisDesignTokens.cardRadius,
-    elevation: PlantisDesignTokens.cardElevation,
-    expandAnimationDuration: PlantisDesignTokens.durationMedium,
-    hoverAnimationDuration: PlantisDesignTokens.durationFast,
-  );
+  static SettingsCardThemeData get settingsCardTheme =>
+      const SettingsCardThemeData(
+        padding: EdgeInsets.all(PlantisDesignTokens.cardPadding),
+        margin: EdgeInsets.only(bottom: PlantisDesignTokens.spacing4),
+        borderRadius: PlantisDesignTokens.cardRadius,
+        elevation: PlantisDesignTokens.cardElevation,
+        expandAnimationDuration: PlantisDesignTokens.durationMedium,
+        hoverAnimationDuration: PlantisDesignTokens.durationFast,
+      );
 
   /// Premium component theme configuration
   static PremiumThemeData get premiumTheme => const PremiumThemeData(
@@ -147,25 +149,31 @@ class SettingsTheme {
   // MARK: - Button Themes
 
   /// Elevated button theme for settings
-  static ElevatedButtonThemeData get elevatedButtonTheme => ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      minimumSize: const Size(double.infinity, PlantisDesignTokens.buttonHeight),
-      padding: const EdgeInsets.symmetric(
-        horizontal: PlantisDesignTokens.buttonPaddingHorizontal,
-        vertical: PlantisDesignTokens.buttonPaddingVertical,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(PlantisDesignTokens.buttonRadius),
-      ),
-      elevation: PlantisDesignTokens.elevationSM,
-      backgroundColor: PlantisColors.primary,
-      foregroundColor: Colors.white,
-      textStyle: const TextStyle(
-        fontSize: PlantisDesignTokens.fontSizeLG,
-        fontWeight: PlantisDesignTokens.fontWeightSemiBold,
-      ),
-    ),
-  );
+  static ElevatedButtonThemeData get elevatedButtonTheme =>
+      ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(
+            double.infinity,
+            PlantisDesignTokens.buttonHeight,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: PlantisDesignTokens.buttonPaddingHorizontal,
+            vertical: PlantisDesignTokens.buttonPaddingVertical,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              PlantisDesignTokens.buttonRadius,
+            ),
+          ),
+          elevation: PlantisDesignTokens.elevationSM,
+          backgroundColor: PlantisColors.primary,
+          foregroundColor: Colors.white,
+          textStyle: const TextStyle(
+            fontSize: PlantisDesignTokens.fontSizeLG,
+            fontWeight: PlantisDesignTokens.fontWeightSemiBold,
+          ),
+        ),
+      );
 
   /// Text button theme for settings
   static TextButtonThemeData get textButtonTheme => TextButtonThemeData(
@@ -193,38 +201,23 @@ class SettingsTheme {
     fillColor: Colors.grey.shade50,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
-      borderSide: BorderSide(
-        color: Colors.grey.shade300,
-        width: 1,
-      ),
+      borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
-      borderSide: BorderSide(
-        color: Colors.grey.shade300,
-        width: 1,
-      ),
+      borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
-      borderSide: const BorderSide(
-        color: PlantisColors.primary,
-        width: 2,
-      ),
+      borderSide: const BorderSide(color: PlantisColors.primary, width: 2),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
-      borderSide: const BorderSide(
-        color: PlantisColors.error,
-        width: 1,
-      ),
+      borderSide: const BorderSide(color: PlantisColors.error, width: 1),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
-      borderSide: const BorderSide(
-        color: PlantisColors.error,
-        width: 2,
-      ),
+      borderSide: const BorderSide(color: PlantisColors.error, width: 2),
     ),
     contentPadding: const EdgeInsets.symmetric(
       horizontal: PlantisDesignTokens.spacing4,
@@ -235,7 +228,7 @@ class SettingsTheme {
   // MARK: - Dialog Theme
 
   /// Dialog theme for settings modals
-  static DialogTheme get dialogTheme => DialogTheme(
+  static DialogThemeData get dialogTheme => DialogThemeData(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(PlantisDesignTokens.radius2XL),
     ),
@@ -265,7 +258,7 @@ class SettingsTheme {
     }),
     trackColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
-        return PlantisColors.primary.withOpacity(0.5);
+        return PlantisColors.primary.withValues(alpha: 0.5);
       }
       return Colors.grey.shade300;
     }),

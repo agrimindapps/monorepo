@@ -213,7 +213,7 @@ class PlantisDesignTokens {
 
   static List<BoxShadow> get softShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.05),
+      color: Colors.black.withValues(alpha: 0.05),
       blurRadius: 4,
       offset: const Offset(0, 2),
     ),
@@ -221,7 +221,7 @@ class PlantisDesignTokens {
 
   static List<BoxShadow> get mediumShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.1),
+      color: Colors.black.withValues(alpha: 0.1),
       blurRadius: 8,
       offset: const Offset(0, 4),
     ),
@@ -229,7 +229,7 @@ class PlantisDesignTokens {
 
   static List<BoxShadow> get strongShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.15),
+      color: Colors.black.withValues(alpha: 0.15),
       blurRadius: 12,
       offset: const Offset(0, 6),
     ),
@@ -237,7 +237,7 @@ class PlantisDesignTokens {
 
   static List<BoxShadow> coloredShadow(Color color, {double opacity = 0.3}) => [
     BoxShadow(
-      color: color.withOpacity(opacity),
+      color: color.withValues(alpha: opacity),
       blurRadius: 8,
       offset: const Offset(0, 4),
     ),

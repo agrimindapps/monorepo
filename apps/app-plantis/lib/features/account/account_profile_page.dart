@@ -22,31 +22,24 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
     final theme = Theme.of(context);
     
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: theme.colorScheme.surface,
-        title: Text(
-          'Minha Conta',
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
-      ),
+      backgroundColor: PlantisColors.getPageBackgroundColor(context),
       body: ResponsiveLayout(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Consumer<auth_providers.AuthProvider>(
-          builder: (context, authProvider, _) {
-            final user = authProvider.currentUser;
-            final isAnonymous = authProvider.isAnonymous;
+        child: Column(
+          children: [
+            // Header estilo ReceitaAgro
+            _buildHeader(context, theme),
             
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(8),
+                child: Consumer<auth_providers.AuthProvider>(
+                builder: (context, authProvider, _) {
+                  final user = authProvider.currentUser;
+                  final isAnonymous = authProvider.isAnonymous;
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 // Header com informações do usuário
                 Container(
                   padding: const EdgeInsets.all(20.0),
@@ -56,38 +49,67 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   ),
                   child: Row(
                     children: [
-                      // Avatar
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: PlantisColors.primary,
-                        child: DataSanitizationService.shouldShowProfilePhoto(user, isAnonymous)
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(30),
-                                child: Image.network(
-                                  user!.photoUrl!,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text(
-                                      DataSanitizationService.sanitizeInitials(user, isAnonymous),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                            : Text(
-                                DataSanitizationService.sanitizeInitials(user, isAnonymous),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                      // Avatar with edit functionality
+                      Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundColor: PlantisColors.primary,
+                            child: DataSanitizationService.shouldShowProfilePhoto(user, isAnonymous)
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: Image.network(
+                                      user!.photoUrl!,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Text(
+                                          DataSanitizationService.sanitizeInitials(user, isAnonymous),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : Text(
+                                    DataSanitizationService.sanitizeInitials(user, isAnonymous),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                          if (!isAnonymous)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: () => _showImagePickerOptions(context),
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: PlantisColors.primary,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.colorScheme.surface,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                    size: 12,
+                                  ),
                                 ),
                               ),
+                            ),
+                        ],
                       ),
                       const SizedBox(width: 16),
 
@@ -196,6 +218,24 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   const SizedBox(height: 24),
                 ],
 
+                // Informações detalhadas da conta (apenas para usuários registrados)
+                if (!isAnonymous) ...[
+                  _buildAccountInfoSection(context, user, authProvider),
+                  const SizedBox(height: 24),
+                ],
+
+                // Status de sincronização (apenas para usuários registrados)
+                if (!isAnonymous) ...[
+                  _buildSyncSection(context, authProvider),
+                  const SizedBox(height: 24),
+                ],
+
+                // Exportação de dados (apenas para usuários registrados)
+                if (!isAnonymous) ...[
+                  _buildDataExportSection(context),
+                  const SizedBox(height: 24),
+                ],
+
                 // Ações da conta
                 DecoratedBox(
                   decoration: BoxDecoration(
@@ -220,14 +260,27 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                         const Divider(height: 1),
                         ListTile(
                           leading: const Icon(
-                            Icons.security_outlined,
+                            Icons.privacy_tip_outlined,
                             color: PlantisColors.primary,
                           ),
-                          title: const Text('Privacidade'),
-                          subtitle: const Text('Configurações de privacidade e dados'),
+                          title: const Text('Política de Privacidade'),
+                          subtitle: const Text('Como tratamos seus dados'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
-                            _showComingSoonDialog(context);
+                            context.push('/privacy-policy');
+                          },
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(
+                            Icons.description_outlined,
+                            color: PlantisColors.primary,
+                          ),
+                          title: const Text('Termos de Serviço'),
+                          subtitle: const Text('Termos e condições de uso'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            context.push('/terms-of-service');
                           },
                         ),
                         const Divider(height: 1),
@@ -271,7 +324,399 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
               ],
             );
           },
+        ), // Consumer
+      ), // SingleChildScrollView
+    ), // Expanded
+        ],
+      ), // Column
+    ), // ResponsiveLayout
+  ); // Scaffold
+  }
+
+  Widget _buildHeader(BuildContext context, ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PlantisColors.primary,
+            PlantisColors.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: PlantisColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Minha Conta',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Perfil e configurações pessoais',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountInfoSection(BuildContext context, dynamic user, auth_providers.AuthProvider authProvider) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Informações da Conta',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Column(
+            children: [
+              _buildInfoRow('Tipo de Conta', authProvider.isPremium ? 'Premium' : 'Gratuita'),
+              if (user?.createdAt != null) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow('Criada em', _formatDate(user!.createdAt)),
+              ],
+              if (user?.lastLoginAt != null) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow('Último acesso', _formatDate(user!.lastLoginAt)),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(dynamic date) {
+    if (date == null) return 'N/A';
+    
+    DateTime dateTime;
+    if (date is DateTime) {
+      dateTime = date;
+    } else if (date is String) {
+      dateTime = DateTime.tryParse(date) ?? DateTime.now();
+    } else {
+      return 'N/A';
+    }
+    
+    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
+  }
+
+  Widget _buildSyncSection(BuildContext context, auth_providers.AuthProvider authProvider) {
+    final theme = Theme.of(context);
+    final isSyncing = authProvider.isSyncInProgress;
+    final lastSyncMessage = authProvider.syncMessage;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sincronização',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant,
+            ),
+          ),
+          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSyncing 
+                    ? Colors.orange.withValues(alpha: 0.2) 
+                    : PlantisColors.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isSyncing ? Icons.sync : Icons.cloud_done,
+                color: isSyncing ? Colors.orange : PlantisColors.primary,
+                size: 20,
+              ),
+            ),
+            title: Text(
+              isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              isSyncing ? lastSyncMessage : 'Todos os dados estão atualizados',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            trailing: isSyncing 
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : IconButton(
+                    onPressed: () {
+                      authProvider.startAutoSyncIfNeeded();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Sincronizar agora',
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDataExportSection(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Exportação de Dados',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.download,
+                    color: PlantisColors.primary,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Exportar Dados'),
+                subtitle: const Text('Baixar todos os seus dados em formato JSON'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showComingSoonDialog(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.secondary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.picture_as_pdf,
+                    color: PlantisColors.secondary,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Relatório PDF'),
+                subtitle: const Text('Gerar relatório completo das suas plantas'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showComingSoonDialog(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showImagePickerOptions(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Text(
+                    'Alterar Foto de Perfil',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Escolha uma nova foto para seu perfil',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: PlantisColors.primary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.camera_alt,
+                  color: PlantisColors.primary,
+                  size: 20,
+                ),
+              ),
+              title: const Text('Câmera'),
+              subtitle: const Text('Tirar uma nova foto'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showComingSoonDialog(context);
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: PlantisColors.secondary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.photo_library,
+                  color: PlantisColors.secondary,
+                  size: 20,
+                ),
+              ),
+              title: const Text('Galeria'),
+              subtitle: const Text('Escolher da galeria de fotos'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showComingSoonDialog(context);
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                  size: 20,
+                ),
+              ),
+              title: const Text('Remover Foto'),
+              subtitle: const Text('Voltar para avatar padrão'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showComingSoonDialog(context);
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

@@ -44,7 +44,7 @@ class PlantDetailsCare extends StatelessWidget {
                 title: 'Rega',
                 interval: plant.config?.wateringIntervalDays,
                 unit: 'dias',
-                color: Colors.blue,
+                color: PlantisColors.primary,
                 nextDate: _calculateNextWatering(),
               ),
               if (plant.config?.fertilizingIntervalDays != null) ...[
@@ -67,7 +67,7 @@ class PlantDetailsCare extends StatelessWidget {
                   title: 'Poda',
                   interval: plant.config!.pruningIntervalDays,
                   unit: 'dias',
-                  color: Colors.orange,
+                  color: PlantisColors.primary,
                   nextDate: _calculateNextPruning(),
                 ),
               ],

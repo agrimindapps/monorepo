@@ -22,6 +22,9 @@ class PlantsProvider extends ChangeNotifier {
   // Stream subscription for auth state changes
   StreamSubscription<UserEntity?>? _authSubscription;
 
+  // Stream subscription for real-time data changes
+  StreamSubscription<List<dynamic>>? _realtimeDataSubscription;
+
   PlantsProvider({
     required GetPlantsUseCase getPlantsUseCase,
     required GetPlantByIdUseCase getPlantByIdUseCase,
@@ -39,6 +42,9 @@ class PlantsProvider extends ChangeNotifier {
        _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance {
     // Initialize auth state listener
     _initializeAuthListener();
+
+    // Initialize real-time data stream
+    _initializeRealtimeDataStream();
   }
 
   List<Plant> _plants = [];
@@ -92,6 +98,101 @@ class PlantsProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  /// Inicializa o stream de dados em tempo real do UnifiedSyncManager
+  ///
+  /// Este método configura um listener para receber atualizações automáticas
+  /// dos dados de plantas quando o real-time sync estiver ativo.
+  void _initializeRealtimeDataStream() {
+    try {
+      final dataStream = UnifiedSyncManager.instance.streamAll('plantis');
+
+      if (dataStream != null) {
+        _realtimeDataSubscription = dataStream.listen(
+          (List<dynamic> plants) {
+            debugPrint('🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas');
+
+            // Converter de entidades sync para entidades de domínio
+            final domainPlants = plants
+                .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
+                .where((plant) => plant != null)
+                .cast<Plant>()
+                .toList();
+
+            // Atualizar apenas se houve mudanças reais
+            if (_hasDataChanged(domainPlants)) {
+              _plants = _sortPlants(domainPlants);
+              _applyFilters();
+              debugPrint('✅ PlantsProvider: UI atualizada com ${_plants.length} plantas');
+            }
+          },
+          onError: (dynamic error) {
+            debugPrint('❌ PlantsProvider: Erro no stream de dados em tempo real: $error');
+          },
+        );
+
+        debugPrint('✅ PlantsProvider: Stream de dados em tempo real configurado');
+      } else {
+        debugPrint('⚠️ PlantsProvider: Stream de dados não disponível - usando polling');
+      }
+    } catch (e) {
+      debugPrint('❌ PlantsProvider: Erro ao configurar stream de dados: $e');
+    }
+  }
+
+  /// Converte entidade de sync para entidade de domínio
+  Plant? _convertSyncPlantToDomain(dynamic syncPlant) {
+    try {
+      // Se já é uma Plant do domínio, retorna diretamente
+      if (syncPlant is Plant) {
+        return syncPlant;
+      }
+
+      // Se for uma entidade de sync, converte para domínio
+      if (syncPlant is BaseSyncEntity) {
+        // Usar o mapeamento do PlantisSyncConfig
+        return Plant.fromJson(syncPlant.toFirebaseMap());
+      }
+
+      // Se for um Map, converte diretamente
+      if (syncPlant is Map<String, dynamic>) {
+        return Plant.fromJson(syncPlant);
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e');
+      return null;
+    }
+  }
+
+  /// Verifica se os dados realmente mudaram para evitar rebuilds desnecessários
+  bool _hasDataChanged(List<Plant> newPlants) {
+    if (_plants.length != newPlants.length) {
+      return true;
+    }
+
+    // Comparar IDs e timestamps de atualização
+    for (int i = 0; i < _plants.length; i++) {
+      final currentPlant = _plants[i];
+      Plant? newPlant;
+      try {
+        newPlant = newPlants.firstWhere((p) => p.id == currentPlant.id);
+      } catch (e) {
+        // Planta não encontrada na lista nova - foi removida
+        return true;
+      }
+
+      // newPlant is already guaranteed to be non-null after the try-catch
+
+      // Comparar timestamp de atualização
+      if (currentPlant.updatedAt != newPlant.updatedAt) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /// CRITICAL FIX: Wait for authentication initialization with timeout
@@ -678,11 +779,11 @@ class PlantsProvider extends ChangeNotifier {
     }
 
     switch (failure.runtimeType) {
-      case ValidationFailure:
-        return failure.message.isNotEmpty 
-            ? failure.message 
+      case ValidationFailure _:
+        return failure.message.isNotEmpty
+            ? failure.message
             : 'Dados inválidos fornecidos';
-      case CacheFailure:
+      case CacheFailure _:
         // More specific cache error messages
         if (failure.message.contains('PlantaModelAdapter') ||
             failure.message.contains('TypeAdapter')) {
@@ -692,12 +793,12 @@ class PlantsProvider extends ChangeNotifier {
             failure.message.contains('corrupted')) {
           return 'Dados locais corrompidos. Sincronizando com servidor...';
         }
-        return failure.message.isNotEmpty 
-            ? 'Cache: ${failure.message}' 
+        return failure.message.isNotEmpty
+            ? 'Cache: ${failure.message}'
             : 'Erro ao acessar dados locais';
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Sem conexão com a internet. Verifique sua conectividade.';
-      case ServerFailure:
+      case ServerFailure _:
         // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
@@ -710,12 +811,12 @@ class PlantsProvider extends ChangeNotifier {
         if (failure.message.contains('500') || failure.message.contains('Internal')) {
           return 'Erro no servidor. Tente novamente em alguns instantes.';
         }
-        return failure.message.isNotEmpty 
-            ? 'Servidor: ${failure.message}' 
+        return failure.message.isNotEmpty
+            ? 'Servidor: ${failure.message}'
             : 'Erro no servidor';
-      case NotFoundFailure:
-        return failure.message.isNotEmpty 
-            ? failure.message 
+      case NotFoundFailure _:
+        return failure.message.isNotEmpty
+            ? failure.message
             : 'Dados não encontrados';
       default:
         final errorContext = kDebugMode 
@@ -729,11 +830,15 @@ class PlantsProvider extends ChangeNotifier {
   void dispose() {
     // Cancel auth state subscription to prevent memory leaks
     _authSubscription?.cancel();
+
+    // Cancel real-time data subscription
+    _realtimeDataSubscription?.cancel();
+
     super.dispose();
   }
 }
 
-enum ViewMode { grid, list, groupedBySpaces }
+enum ViewMode { grid, list, groupedBySpaces, groupedBySpacesGrid, groupedBySpacesList }
 
 enum SortBy { newest, oldest, name, species }
 

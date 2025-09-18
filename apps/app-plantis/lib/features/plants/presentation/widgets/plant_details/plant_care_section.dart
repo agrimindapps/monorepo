@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/plant.dart';
+import '../../../../../core/theme/plantis_colors.dart';
 
 /// Widget responsável por exibir as informações de cuidados da planta
 class PlantCareSection extends StatelessWidget {
@@ -75,7 +76,7 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.water_drop,
           'title': 'Rega',
           'interval': '${config.wateringIntervalDays} dias',
-          'color': Colors.blue,
+          'color': PlantisColors.primary,
           'description': 'Regue a planta regularmente',
         },
       if (config.hasFertilizingSchedule)
@@ -83,7 +84,7 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.grass,
           'title': 'Adubação',
           'interval': '${config.fertilizingIntervalDays} dias',
-          'color': Colors.green,
+          'color': PlantisColors.primary,
           'description': 'Aplique fertilizante',
         },
       if (config.hasPruningSchedule)
@@ -91,7 +92,7 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.content_cut,
           'title': 'Poda',
           'interval': '${config.pruningIntervalDays} dias',
-          'color': Colors.orange,
+          'color': PlantisColors.primary,
           'description': 'Pode folhas e galhos',
         },
       if (config.hasSunlightCheckSchedule)
@@ -99,7 +100,7 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.wb_sunny,
           'title': 'Verificar luz',
           'interval': '${config.sunlightCheckIntervalDays} dias',
-          'color': Colors.amber,
+          'color': PlantisColors.primary,
           'description': 'Verifique a exposição à luz',
         },
       if (config.hasPestInspectionSchedule)
@@ -107,7 +108,7 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.bug_report,
           'title': 'Inspeção de pragas',
           'interval': '${config.pestInspectionIntervalDays} dias',
-          'color': Colors.red,
+          'color': PlantisColors.primary,
           'description': 'Inspecione por pragas e doenças',
         },
       if (config.hasReplantingSchedule)
@@ -115,7 +116,7 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.change_circle,
           'title': 'Replantio',
           'interval': '${config.replantingIntervalDays} dias',
-          'color': Colors.purple,
+          'color': PlantisColors.primary,
           'description': 'Replante em vaso maior',
         },
     ];
@@ -227,35 +228,35 @@ class PlantCareSection extends StatelessWidget {
           'icon': Icons.wb_sunny_outlined,
           'title': 'Necessidade de luz',
           'value': _getLightRequirementText(config.lightRequirement),
-          'color': Colors.amber,
+          'color': PlantisColors.primary,
         },
       if (config.waterAmount != null)
         {
           'icon': Icons.water_drop_outlined,
           'title': 'Quantidade de água',
           'value': _getWaterAmountText(config.waterAmount),
-          'color': Colors.blue,
+          'color': PlantisColors.primary,
         },
       if (config.soilType != null)
         {
           'icon': Icons.landscape_outlined,
           'title': 'Tipo de solo',
           'value': config.soilType,
-          'color': Colors.brown,
+          'color': PlantisColors.primary,
         },
       if (config.idealTemperature != null)
         {
           'icon': Icons.thermostat_outlined,
           'title': 'Temperatura ideal',
           'value': '${config.idealTemperature}°C',
-          'color': Colors.red,
+          'color': PlantisColors.primary,
         },
       if (config.idealHumidity != null)
         {
           'icon': Icons.opacity_outlined,
           'title': 'Umidade ideal',
           'value': '${config.idealHumidity}%',
-          'color': Colors.cyan,
+          'color': PlantisColors.primary,
         },
     ];
 

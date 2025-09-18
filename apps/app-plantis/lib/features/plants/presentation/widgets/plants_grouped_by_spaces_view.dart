@@ -10,11 +10,13 @@ import 'space_header_widget.dart';
 class PlantsGroupedBySpacesView extends StatefulWidget {
   final Map<String?, List<Plant>> groupedPlants;
   final ScrollController? scrollController;
+  final bool useGridLayout;
 
   const PlantsGroupedBySpacesView({
     super.key,
     required this.groupedPlants,
     this.scrollController,
+    this.useGridLayout = true,
   });
 
   @override
@@ -85,11 +87,52 @@ class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
         
         const SizedBox(height: 8),
         
-        // Plants grid for this space
-        _buildPlantsGrid(context, plants),
+        // Plants grid/list for this space
+        widget.useGridLayout
+            ? _buildPlantsGrid(context, plants)
+            : _buildPlantsList(context, plants),
         
         const SizedBox(height: 24), // Space between sections
       ],
+    );
+  }
+
+  Widget _buildPlantsList(BuildContext context, List<Plant> plants) {
+    if (plants.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            'Nenhuma planta neste espaço',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: plants.length,
+      itemBuilder: (context, index) {
+        final plant = plants[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: PlantListItemWidget(
+            plant: plant,
+            onTap: () => _onPlantTap(context, plant),
+          ),
+        );
+      },
     );
   }
 
@@ -170,6 +213,109 @@ class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
   void _onPlantTap(BuildContext context, Plant plant) {
     // Navigate to plant details or handle tap
     Navigator.of(context).pushNamed('/plant/${plant.id}');
+  }
+}
+
+/// Simple plant list item widget for the grouped view
+class PlantListItemWidget extends StatelessWidget {
+  final Plant plant;
+  final VoidCallback onTap;
+
+  const PlantListItemWidget({
+    super.key,
+    required this.plant,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 1,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Plant image
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: plant.hasImage
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          plant.primaryImageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(theme),
+                        ),
+                      )
+                    : _buildPlaceholder(theme),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Plant info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      plant.displayName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    if (plant.species?.isNotEmpty == true) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        plant.species!,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // Trailing icon
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder(ThemeData theme) {
+    return Center(
+      child: Icon(
+        Icons.eco,
+        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+        size: 30,
+      ),
+    );
   }
 }
 

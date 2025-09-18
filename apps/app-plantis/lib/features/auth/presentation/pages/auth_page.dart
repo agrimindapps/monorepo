@@ -816,6 +816,7 @@ class _AuthPageState extends State<AuthPage>
             semanticLabel: 'Campo de e-mail para login',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
+            autocomplete: AutofillHints.email,
             isRequired: true,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -839,6 +840,7 @@ class _AuthPageState extends State<AuthPage>
             semanticLabel: 'Campo de senha para login',
             obscureText: _obscureLoginPassword,
             textInputAction: TextInputAction.done,
+            autocomplete: AutofillHints.password,
             isRequired: true,
             validator: (value) {
               return AuthValidators.validatePassword(value ?? '', isRegistration: false);
@@ -1286,6 +1288,7 @@ class _AuthPageState extends State<AuthPage>
             semanticLabel: 'Campo de e-mail para cadastro',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
+            autocomplete: AutofillHints.email,
             isRequired: true,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -1310,6 +1313,7 @@ class _AuthPageState extends State<AuthPage>
             semanticLabel: 'Campo de senha para cadastro',
             obscureText: _obscureRegisterPassword,
             textInputAction: TextInputAction.next,
+            autocomplete: AutofillHints.newPassword,
             isRequired: true,
             validator: (value) {
               return AuthValidators.validatePassword(value ?? '', isRegistration: true);

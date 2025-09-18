@@ -132,17 +132,6 @@ class _PlantGridCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Actions menu
-              Row(
-                children: [
-                  const Spacer(),
-                  _PlantActionsMenu(
-                    plant: plant,
-                    actions: actions,
-                    theme: theme,
-                  ),
-                ],
-              ),
 
               // Plant illustration
               Expanded(
@@ -262,7 +251,6 @@ class _PlantHeader extends StatelessWidget {
             ],
           ),
         ),
-        _PlantActionsMenu(plant: plant, actions: actions, theme: theme),
       ],
     );
   }
@@ -323,57 +311,6 @@ class _DefaultPlantIcon extends StatelessWidget {
   }
 }
 
-class _PlantActionsMenu extends StatelessWidget {
-  final Plant plant;
-  final IPlantCardActions actions;
-  final ThemeData theme;
-
-  const _PlantActionsMenu({
-    required this.plant,
-    required this.actions,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurfaceVariant),
-      onSelected: (value) {
-        switch (value) {
-          case 'edit':
-            actions.onEdit(plant);
-            break;
-          case 'remove':
-            actions.onRemove(plant);
-            break;
-        }
-      },
-      itemBuilder:
-          (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
-                  const SizedBox(width: 12),
-                  const Text('Editar'),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'remove',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
-                  const SizedBox(width: 12),
-                  const Text('Remover'),
-                ],
-              ),
-            ),
-          ],
-    );
-  }
-}
 
 class _TaskStatusSection extends StatelessWidget {
   final Plant plant;

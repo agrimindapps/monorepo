@@ -485,6 +485,7 @@ class AccessibleTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType,
     this.textInputAction,
+    this.autocomplete,
     this.validator,
     this.onChanged,
     this.onSubmitted,
@@ -502,6 +503,7 @@ class AccessibleTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final String? autocomplete;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
@@ -523,8 +525,9 @@ class AccessibleTextField extends StatelessWidget {
             focusNode: focusNode,
             obscureText: obscureText,
             keyboardType: keyboardType,
-            textInputAction: textInputAction ?? 
+            textInputAction: textInputAction ??
                 (nextFocusNode != null ? TextInputAction.next : TextInputAction.done),
+            autofillHints: autocomplete != null ? [autocomplete!] : null,
             validator: validator,
             onChanged: onChanged,
             onFieldSubmitted: (value) {

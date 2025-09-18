@@ -403,6 +403,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
   Widget _buildViewForMode(ViewMode viewMode, PlantsDisplayData displayData) {
     switch (viewMode) {
       case ViewMode.groupedBySpaces:
+      case ViewMode.groupedBySpacesGrid:
+      case ViewMode.groupedBySpacesList:
         return Consumer<PlantsProvider>(
           builder: (context, plantsProvider, child) {
             final groupedPlants = plantsProvider.plantsGroupedBySpaces;

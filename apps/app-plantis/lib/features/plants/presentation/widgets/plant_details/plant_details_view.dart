@@ -10,6 +10,7 @@ import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
 import '../../providers/plants_list_provider.dart';
+import '../plant_form_dialog.dart';
 import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
 import 'plant_image_section.dart';
@@ -71,7 +72,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               if (mounted) Navigator.of(context).pop();
             },
             onNavigateToEdit: (plantId) {
-              if (mounted) context.push('/plants/edit/$plantId');
+              if (mounted) PlantFormDialog.show(context, plantId: plantId);
             },
             onNavigateToImages: (plantId) {
               if (mounted) context.push('/plants/$plantId/images');
@@ -897,30 +898,50 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   /// Returns:
   /// - A [Widget] containing the complete plant details interface
   Widget _buildMainContent(BuildContext context, Plant plant) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         // Header estilo ReceitaAgro
         _buildHeader(context, plant),
-        
+
         // Content with tabs
         Expanded(
-          child: Column(
-            children: [
-              const SizedBox(height: AppSpacing.lg),
-              _buildTabBar(context),
-              const SizedBox(height: AppSpacing.lg),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildOverviewTab(context, plant),
-                    _buildTasksTab(context, plant),
-                    _buildCareTab(context, plant),
-                    _buildNotesTab(context, plant),
-                  ],
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF1C1C1E)
+                  : theme.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                // Plant image section
+                _buildPlantImageSection(context, plant),
+
+                const SizedBox(height: AppSpacing.lg),
+                _buildTabBar(context),
+                const SizedBox(height: AppSpacing.lg),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF1C1C1E)
+                          : theme.colorScheme.surface,
+                    ),
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildOverviewTab(context, plant),
+                        _buildTasksTab(context, plant),
+                        _buildCareTab(context, plant),
+                        _buildNotesTab(context, plant),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -1123,6 +1144,56 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     );
   }
 
+  Widget _buildPlantImageSection(BuildContext context, Plant plant) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      child: Center(
+        child: Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: PlantisColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(60),
+            border: Border.all(
+              color: PlantisColors.primary.withValues(alpha: 0.3),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: PlantisColors.primary.withValues(alpha: 0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: plant.hasImage
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(58),
+                  child: Image.network(
+                    plant.primaryImageUrl!,
+                    width: 116,
+                    height: 116,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
+                  ),
+                )
+              : _buildPlaceholderIcon(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderIcon() {
+    return const Center(
+      child: Icon(
+        Icons.eco,
+        color: PlantisColors.primary,
+        size: 48,
+      ),
+    );
+  }
+
   Widget _buildTabBar(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -1152,10 +1223,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           Tab(icon: Icon(Icons.comment), text: AppStrings.notes),
         ],
         indicator: BoxDecoration(
-          color: PlantisColors.primary.withValues(alpha: 0.1),
+          color: PlantisColors.primary,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSmall),
         ),
-        labelColor: PlantisColors.primary,
+        labelColor: Colors.white,
         unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
         labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(

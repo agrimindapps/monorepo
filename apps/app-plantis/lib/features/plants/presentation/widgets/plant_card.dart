@@ -41,30 +41,6 @@ class PlantCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header com menu
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () => _showPlantMenu(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.more_vert,
-                          color:
-                              isDark
-                                  ? Colors.white.withValues(alpha: 0.7)
-                                  : theme.colorScheme.onSurface.withValues(
-                                    alpha: 0.7,
-                                  ),
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
                 const SizedBox(height: 8),
 
                 // Avatar da planta centralizado
@@ -178,106 +154,6 @@ class PlantCard extends StatelessWidget {
     );
   }
 
-  void _showPlantMenu(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor:
-          isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
-      builder:
-          (context) => Container(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: Icon(Icons.edit, color: theme.colorScheme.secondary),
-                  title: Text(
-                    'Editar planta',
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/plants/edit/${plant.id}');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.visibility,
-                    color: theme.colorScheme.secondary,
-                  ),
-                  title: Text(
-                    'Ver detalhes',
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push(AppRouter.plantDetailsPath(plant.id));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text(
-                    'Excluir planta',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showDeleteConfirmation(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context) {
-    final theme = Theme.of(context);
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: theme.colorScheme.surface,
-            title: Text(
-              'Excluir planta',
-              style: TextStyle(color: theme.colorScheme.onSurface),
-            ),
-            content: Text(
-              'Tem certeza que deseja excluir "${plant.displayName}"? Esta ação não pode ser desfeita.',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Cancelar',
-                  style: TextStyle(color: theme.colorScheme.secondary),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Delete functionality not implemented
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Função de exclusão será implementada'),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Excluir',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
 
   int _getPendingTasksCount() {
     // TODO: Integrar com TasksProvider para contar tarefas reais pendentes

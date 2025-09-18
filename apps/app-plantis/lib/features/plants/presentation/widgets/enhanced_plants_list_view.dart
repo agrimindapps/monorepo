@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -8,6 +7,7 @@ import '../providers/plants_provider.dart';
 import 'empty_plants_widget.dart';
 import 'enhanced_plant_card.dart';
 import 'enhanced_plants_app_bar.dart';
+import 'plant_form_dialog.dart';
 import 'plants_error_widget.dart';
 import 'plants_loading_widget.dart';
 
@@ -114,11 +114,11 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   }
 
   void _showAddPlantModal() {
-    context.push('/plants/add');
+    PlantFormDialog.show(context);
   }
 
   void _showEditPlantModal(Plant plant) {
-    context.push('/plants/edit/${plant.id}');
+    PlantFormDialog.show(context, plantId: plant.id);
   }
 
   void _showRemoveConfirmation(Plant plant) {

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../../core/di/injection_container.dart' as di;
 import '../../../../../core/localization/app_strings.dart';
 import '../../../domain/entities/plant.dart';
-import '../../pages/plant_form_page.dart';
 import '../../providers/plant_details_provider.dart';
-import '../../providers/plant_form_provider.dart';
 
 /// Controller responsible for business logic of the plant details screen
 /// 
@@ -115,35 +111,10 @@ class PlantDetailsController {
   /// controller.editPlant(selectedPlant);
   /// ```
   void editPlant(Plant plant) {
-    // Use dialog for editing instead of navigation to prevent loading issues
-    onShowDialog?.call(_buildEditPlantDialog(plant));
+    // Use PlantFormDialog for consistent editing experience
+    onNavigateToEdit?.call(plant.id);
   }
   
-  /// Builds the edit plant dialog widget
-  /// 
-  /// This method creates a modal dialog containing the plant form in edit mode.
-  /// It reuses the existing PlantFormPage to maintain consistency and avoid duplication.
-  /// 
-  /// Parameters:
-  /// - [plant]: The plant entity to be edited
-  /// 
-  /// Returns:
-  /// - A [Widget] containing the edit plant dialog
-  Widget _buildEditPlantDialog(Plant plant) {
-    return Dialog.fullscreen(
-      child: ChangeNotifierProvider(
-        create: (context) => di.sl<PlantFormProvider>(),
-        child: PlantFormPage(
-          plantId: plant.id,
-          onSaved: () {
-            // Refresh plant data after successful save
-            refresh(plant.id);
-          },
-        ),
-      ),
-    );
-  }
-
   /// Navigates to the plant image management screen
   /// 
   /// This method opens the photo gallery where users can view, add,

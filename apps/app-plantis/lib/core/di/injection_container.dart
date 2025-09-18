@@ -149,7 +149,7 @@ void _initCoreServices() {
 
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
-  sl.registerLazySingleton(() => LogoutUseCase(sl(), sl()));
+  sl.registerLazySingleton(() => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()));
   sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
 }
 

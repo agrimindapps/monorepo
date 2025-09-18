@@ -15,7 +15,6 @@ import '../../core/providers/theme_provider.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
 import '../../features/development/presentation/pages/database_inspector_page.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
-import '../../features/settings/presentation/widgets/enhanced_settings_item.dart';
 import '../../features/settings/presentation/widgets/premium_components.dart';
 import '../../shared/widgets/loading/loading_components.dart';
 
@@ -772,16 +771,17 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2E7D32),
-            Color(0xFF1B5E20),
+            PlantisColors.primary,        // Verde Plantis principal
+            PlantisColors.primaryDark,    // Verde escuro
+            PlantisColors.leaf,           // Verde folha
           ],
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: PlantisColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -859,13 +859,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
       children: [
         _buildSectionHeader(context, '⚙️ Configurações'),
         _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.notifications_active,
-            title: 'Notificações',
-            subtitle: 'Configure quando ser notificado sobre tarefas',
-            onTap: () => context.push('/notifications-settings'),
-          ),
+          _buildNotificationSwitchItem(context, settingsProvider),
         ]),
       ],
     );
@@ -1046,6 +1040,80 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNotificationSwitchItem(BuildContext context, SettingsProvider settingsProvider) {
+    final theme = Theme.of(context);
+
+    return Consumer<SettingsProvider>(
+      builder: (context, provider, _) {
+        final isEnabled = provider.notificationsEnabled;
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: PlantisColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isEnabled ? Icons.notifications_active : Icons.notifications_off,
+                  color: PlantisColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Notificações',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isEnabled
+                          ? 'Receba lembretes sobre suas plantas'
+                          : 'Notificações desabilitadas',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(
+                value: isEnabled,
+                onChanged: (value) {
+                  provider.setNotificationsEnabled(value);
+
+                  // Mostrar feedback ao usuário
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        value
+                            ? 'Notificações ativadas'
+                            : 'Notificações desativadas',
+                      ),
+                      backgroundColor: PlantisColors.primary,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+                activeColor: PlantisColors.primary,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

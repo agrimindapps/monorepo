@@ -48,6 +48,15 @@ class SettingsProvider extends ChangeNotifier {
   // Estados derivados
   bool get hasPermissionsGranted => _settings.notifications.permissionsGranted;
   bool get isDarkMode => _settings.theme.isDarkMode;
+
+  // Getter simplificado para o switch de notificações
+  bool get notificationsEnabled => _settings.notifications.taskRemindersEnabled;
+
+  // Setter simplificado para o switch de notificações
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    await toggleTaskReminders(enabled);
+  }
+
   bool get isLightMode => _settings.theme.isLightMode;
   bool get followSystemTheme => _settings.theme.followSystemTheme;
 

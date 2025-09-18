@@ -5,7 +5,7 @@ import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
 
-class DataCleanerService {
+class DataCleanerService implements IAppDataCleaner {
   final PlantsRepository plantsRepository;
   final TasksRepository tasksRepository;
   final DeletePlantUseCase deletePlantUseCase;
@@ -16,6 +16,210 @@ class DataCleanerService {
     required this.deletePlantUseCase,
   });
 
+  @override
+  String get appName => 'Plantis';
+
+  @override
+  String get version => '1.0.0';
+
+  @override
+  String get description => 'Limpeza de plantas, tarefas e dados relacionados do Plantis';
+
+  @override
+  Future<Map<String, dynamic>> clearAllAppData() async {
+    final result = <String, dynamic>{
+      'success': false,
+      'clearedBoxes': <String>[],
+      'clearedPreferences': <String>[],
+      'errors': <String>[],
+      'totalRecordsCleared': 0,
+    };
+
+    try {
+      // Obter estatísticas antes da limpeza
+      final statsBefore = await getDataStatsBeforeCleaning();
+      final totalBefore = statsBefore['totalRecords'] as int;
+
+      // 1. Limpar todas as tarefas
+      final tasksResult = await tasksRepository.getTasks();
+      if (tasksResult.isRight()) {
+        final tasks = tasksResult.getOrElse(() => []);
+        for (final task in tasks) {
+          try {
+            await tasksRepository.deleteTask(task.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+          }
+        }
+        (result['clearedBoxes'] as List<String>).add('tasks_box');
+      }
+
+      // 2. Limpar todas as plantas
+      final plantsResult = await plantsRepository.getPlants();
+      if (plantsResult.isRight()) {
+        final plants = plantsResult.getOrElse(() => []);
+        for (final plant in plants) {
+          try {
+            await deletePlantUseCase(plant.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+          }
+        }
+        (result['clearedBoxes'] as List<String>).add('plants_box');
+      }
+
+      result['totalRecordsCleared'] = totalBefore;
+      result['success'] = (result['errors'] as List<String>).isEmpty;
+
+      return result;
+    } catch (e) {
+      (result['errors'] as List<String>).add('Erro geral: $e');
+      return result;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDataStatsBeforeCleaning() async {
+    try {
+      final plantsResult = await plantsRepository.getPlants();
+      final tasksResult = await tasksRepository.getTasks();
+
+      final plantsCount = plantsResult.fold(
+        (failure) => 0,
+        (plants) => plants.length,
+      );
+
+      final tasksCount = tasksResult.fold(
+        (failure) => 0,
+        (tasks) => tasks.length,
+      );
+
+      return {
+        'plantsCount': plantsCount,
+        'tasksCount': tasksCount,
+        'totalRecords': plantsCount + tasksCount,
+        'categories': ['plants', 'tasks'],
+      };
+    } catch (e) {
+      return {
+        'plantsCount': 0,
+        'tasksCount': 0,
+        'totalRecords': 0,
+        'categories': <String>[],
+        'error': e.toString(),
+      };
+    }
+  }
+
+  @override
+  Future<bool> hasDataToClear() async {
+    final stats = await getDataStatsBeforeCleaning();
+    return (stats['totalRecords'] as int) > 0;
+  }
+
+  @override
+  Future<bool> verifyDataCleanup() async {
+    try {
+      final plantsResult = await plantsRepository.getPlants();
+      final tasksResult = await tasksRepository.getTasks();
+
+      final plantsCount = plantsResult.fold(
+        (failure) => 0,
+        (plants) => plants.length,
+      );
+
+      final tasksCount = tasksResult.fold(
+        (failure) => 0,
+        (tasks) => tasks.length,
+      );
+
+      return plantsCount == 0 && tasksCount == 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  List<String> getAvailableCategories() {
+    return ['plants', 'tasks', 'all'];
+  }
+
+  @override
+  Future<Map<String, dynamic>> clearCategoryData(String category) async {
+    switch (category) {
+      case 'plants':
+        return _clearPlantsOnly();
+      case 'tasks':
+        return _clearTasksOnly();
+      case 'all':
+      default:
+        return clearAllAppData();
+    }
+  }
+
+  Future<Map<String, dynamic>> _clearPlantsOnly() async {
+    final result = <String, dynamic>{
+      'success': false,
+      'clearedBoxes': <String>[],
+      'clearedPreferences': <String>[],
+      'errors': <String>[],
+      'totalRecordsCleared': 0,
+    };
+
+    try {
+      final plantsResult = await plantsRepository.getPlants();
+      if (plantsResult.isRight()) {
+        final plants = plantsResult.getOrElse(() => []);
+        for (final plant in plants) {
+          try {
+            await deletePlantUseCase(plant.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+          }
+        }
+        result['totalRecordsCleared'] = plants.length;
+        (result['clearedBoxes'] as List<String>).add('plants_box');
+        result['success'] = (result['errors'] as List<String>).isEmpty;
+      }
+    } catch (e) {
+      (result['errors'] as List<String>).add('Erro: $e');
+    }
+
+    return result;
+  }
+
+  Future<Map<String, dynamic>> _clearTasksOnly() async {
+    final result = <String, dynamic>{
+      'success': false,
+      'clearedBoxes': <String>[],
+      'clearedPreferences': <String>[],
+      'errors': <String>[],
+      'totalRecordsCleared': 0,
+    };
+
+    try {
+      final tasksResult = await tasksRepository.getTasks();
+      if (tasksResult.isRight()) {
+        final tasks = tasksResult.getOrElse(() => []);
+        for (final task in tasks) {
+          try {
+            await tasksRepository.deleteTask(task.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+          }
+        }
+        result['totalRecordsCleared'] = tasks.length;
+        (result['clearedBoxes'] as List<String>).add('tasks_box');
+        result['success'] = (result['errors'] as List<String>).isEmpty;
+      }
+    } catch (e) {
+      (result['errors'] as List<String>).add('Erro: $e');
+    }
+
+    return result;
+  }
+
+  // Métodos legados mantidos para compatibilidade
   Future<Either<Failure, void>> clearAllData() async {
     try {
       // 1. Primeiro, obter todas as plantas

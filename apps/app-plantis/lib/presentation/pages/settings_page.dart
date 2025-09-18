@@ -64,9 +64,13 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                           // Seção de Configurações
                           _buildConfigSection(context, theme, settingsProvider),
                           const SizedBox(height: 8),
-                          
+
                           // Seção de Suporte
                           _buildSupportSection(context, theme),
+                          const SizedBox(height: 8),
+
+                          // Seção Sobre (com privacidade e termos)
+                          _buildAboutSection(context, theme),
                           const SizedBox(height: 8),
                           
                           // Seção de Desenvolvimento (debug only)
@@ -861,21 +865,6 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
             title: 'Notificações',
             subtitle: 'Configure quando ser notificado sobre tarefas',
             onTap: () => context.push('/notifications-settings'),
-          ),
-          Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
-              return _buildSettingsItem(
-                context,
-                icon: themeProvider.themeMode == ThemeMode.dark
-                    ? Icons.brightness_2
-                    : themeProvider.themeMode == ThemeMode.light
-                        ? Icons.brightness_high
-                        : Icons.brightness_auto,
-                title: 'Tema',
-                subtitle: _getThemeDescription(themeProvider.themeMode),
-                onTap: () => _showThemeDialog(context, themeProvider),
-              );
-            },
           ),
         ]),
       ],

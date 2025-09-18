@@ -192,7 +192,7 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
             },
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
 
           // Lista de benefícios/recursos (estilo moderno)
           PlantisSubscriptionBenefitsWidget(
@@ -211,22 +211,14 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
             onPurchase: () => _purchaseSelectedPlan(provider),
           ),
 
-          const SizedBox(height: 20),
-
-          // Botão de restaurar compras
-          PlantisPaymentActionsWidget(
-            isPremium: false,
-            isLoading: provider.isLoading,
-            onRestore: () => _restorePurchases(provider),
-          ),
-
           const SizedBox(height: 16),
 
-          // Links de rodapé
+          // Botão de restaurar + Links de rodapé
           PlantisPaymentActionsWidget(
             isPremium: false,
             isLoading: provider.isLoading,
             showFooterLinks: true,
+            onRestore: () => _restorePurchases(provider),
             onPrivacyPolicy: () => _openPrivacyPolicy(),
             onTermsOfService: () => _openTermsOfService(),
           ),

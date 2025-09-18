@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -224,19 +225,14 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   const SizedBox(height: 24),
                 ],
 
-                // Status de sincronização (apenas para usuários registrados)
+                // Dados e Sincronização (apenas para usuários registrados)
                 if (!isAnonymous) ...[
-                  _buildSyncSection(context, authProvider),
+                  _buildDataSyncSection(context, authProvider),
                   const SizedBox(height: 24),
                 ],
 
-                // Exportação de dados (apenas para usuários registrados)
-                if (!isAnonymous) ...[
-                  _buildDataExportSection(context),
-                  const SizedBox(height: 24),
-                ],
 
-                // Ações da conta
+                // Ações de Conta - Subgrupo separado
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainer,
@@ -244,47 +240,6 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   ),
                   child: Column(
                     children: [
-                      if (!isAnonymous) ...[
-                        ListTile(
-                          leading: const Icon(
-                            Icons.edit_outlined,
-                            color: PlantisColors.primary,
-                          ),
-                          title: const Text('Editar Perfil'),
-                          subtitle: const Text('Nome, foto e informações pessoais'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            _showComingSoonDialog(context);
-                          },
-                        ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(
-                            Icons.privacy_tip_outlined,
-                            color: PlantisColors.primary,
-                          ),
-                          title: const Text('Política de Privacidade'),
-                          subtitle: const Text('Como tratamos seus dados'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            context.push('/privacy-policy');
-                          },
-                        ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(
-                            Icons.description_outlined,
-                            color: PlantisColors.primary,
-                          ),
-                          title: const Text('Termos de Serviço'),
-                          subtitle: const Text('Termos e condições de uso'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            context.push('/terms-of-service');
-                          },
-                        ),
-                        const Divider(height: 1),
-                      ],
                       ListTile(
                         leading: Icon(
                           Icons.logout_outlined,
@@ -487,84 +442,16 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
-  Widget _buildSyncSection(BuildContext context, auth_providers.AuthProvider authProvider) {
+  Widget _buildDataSyncSection(BuildContext context, auth_providers.AuthProvider authProvider) {
     final theme = Theme.of(context);
     final isSyncing = authProvider.isSyncInProgress;
     final lastSyncMessage = authProvider.syncMessage;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Sincronização',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant,
-            ),
-          ),
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isSyncing 
-                    ? Colors.orange.withValues(alpha: 0.2) 
-                    : PlantisColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                isSyncing ? Icons.sync : Icons.cloud_done,
-                color: isSyncing ? Colors.orange : PlantisColors.primary,
-                size: 20,
-              ),
-            ),
-            title: Text(
-              isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            subtitle: Text(
-              isSyncing ? lastSyncMessage : 'Todos os dados estão atualizados',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            trailing: isSyncing 
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : IconButton(
-                    onPressed: () {
-                      authProvider.startAutoSyncIfNeeded();
-                    },
-                    icon: const Icon(Icons.refresh),
-                    tooltip: 'Sincronizar agora',
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildDataExportSection(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Exportação de Dados',
+          'Dados e Sincronização',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -582,19 +469,42 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    color: isSyncing
+                        ? Colors.orange.withValues(alpha: 0.2)
+                        : PlantisColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.download,
-                    color: PlantisColors.primary,
+                  child: Icon(
+                    isSyncing ? Icons.sync : Icons.cloud_done,
+                    color: isSyncing ? Colors.orange : PlantisColors.primary,
                     size: 20,
                   ),
                 ),
-                title: const Text('Exportar Dados'),
-                subtitle: const Text('Baixar todos os seus dados em formato JSON'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showComingSoonDialog(context),
+                title: Text(
+                  isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  isSyncing ? lastSyncMessage : 'Todos os dados estão atualizados',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                trailing: isSyncing
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : IconButton(
+                        onPressed: () {
+                          authProvider.startAutoSyncIfNeeded();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        tooltip: 'Sincronizar agora',
+                      ),
               ),
               const Divider(height: 1),
               ListTile(
@@ -605,13 +515,13 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
-                    Icons.picture_as_pdf,
+                    Icons.download,
                     color: PlantisColors.secondary,
                     size: 20,
                   ),
                 ),
-                title: const Text('Relatório PDF'),
-                subtitle: const Text('Gerar relatório completo das suas plantas'),
+                title: const Text('Exportar Dados'),
+                subtitle: const Text('Baixar todos os seus dados em formato JSON'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showComingSoonDialog(context),
               ),
@@ -739,92 +649,68 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   }
 
   void _showLogoutDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Sair da Conta'),
-        content: const Text('Tem certeza que deseja sair da sua conta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              
-              // Start auth loading
-              startAuthLoading(operation: 'Fazendo logout...');
-              
-              try {
-                await authProvider.logout();
-                
-                // Stop loading
-                stopAuthLoading();
-                
-                if (context.mounted) {
-                  context.go('/welcome');
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}'),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.logout,
+              color: theme.colorScheme.primary,
+              size: 28,
             ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteAccountDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Excluir Conta',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
+            const SizedBox(width: 12),
+            Text(
+              'Sair da Conta',
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Esta ação não pode ser desfeita. Ao excluir sua conta:',
-              style: TextStyle(fontWeight: FontWeight.w500),
+            Text(
+              'Ao sair da sua conta, as seguintes ações serão realizadas:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
-            const SizedBox(height: 12),
-            const Text('• Todos seus dados serão removidos permanentemente'),
-            const Text('• Suas plantas e tarefas serão excluídas'),
-            const Text('• Você não poderá recuperar essas informações'),
-            const Text('• Sua assinatura premium será cancelada'),
+            const SizedBox(height: 16),
+            _buildLogoutItem(context, Icons.cleaning_services, 'Limpeza de dados locais armazenados'),
+            _buildLogoutItem(context, Icons.sync_disabled, 'Interrupção da sincronização automática'),
+            _buildLogoutItem(context, Icons.login, 'Necessário fazer login novamente para acessar'),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
+                  Icon(
+                    Icons.cloud,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Esta ação é irreversível',
+                      'Seus dados na nuvem permanecem seguros e serão restaurados no próximo login',
                       style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ),
@@ -836,183 +722,99 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              _showFinalDeleteConfirmation(context, authProvider);
+
+              // Start auth loading
+              startAuthLoading(operation: 'Fazendo logout...');
+
+              try {
+                await authProvider.logout();
+
+                // Stop loading
+                stopAuthLoading();
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Logout realizado com sucesso'),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  context.go('/welcome');
+                }
+              } catch (e) {
+                stopAuthLoading();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}'),
+                      backgroundColor: theme.colorScheme.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('Continuar'),
+            child: const Text('Sair'),
           ),
         ],
       ),
     );
   }
 
-  void _showFinalDeleteConfirmation(BuildContext context, auth_providers.AuthProvider authProvider) {
-    final TextEditingController passwordController = TextEditingController();
-    bool obscurePassword = true;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.warning_amber,
-                color: Theme.of(context).colorScheme.error,
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Excluir Conta Permanentemente',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+  /// Constrói item de informação sobre logout
+  Widget _buildLogoutItem(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 20,
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Esta ação é IRREVERSÍVEL. Todos os seus dados serão excluídos permanentemente.',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Para confirmar, digite sua senha atual:',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: passwordController,
-                obscureText: obscurePassword,
-                decoration: InputDecoration(
-                  hintText: 'Senha atual',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                    icon: Icon(
-                      obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 12,
-                  ),
-                  children: [
-                    const TextSpan(
-                      text: 'Ao confirmar, você concorda com nossa ',
-                    ),
-                    TextSpan(
-                      text: 'Política de Exclusão de Contas',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                passwordController.dispose();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: passwordController.text.isEmpty
-                  ? null
-                  : () async {
-                      final success = await authProvider.deleteAccount(
-                        password: passwordController.text,
-                        downloadData: false,
-                      );
-
-                      passwordController.dispose();
-                      Navigator.of(context).pop();
-
-                      if (success) {
-                        if (context.mounted) {
-                          _showDeletionSuccessDialog(context);
-                        }
-                      } else {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                authProvider.errorMessage ??
-                                    'Erro ao excluir conta. Tente novamente.',
-                              ),
-                              backgroundColor: Theme.of(context).colorScheme.error,
-                            ),
-                          );
-                        }
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                foregroundColor: Theme.of(context).colorScheme.onError,
-              ),
-              child: const Text('Excluir Conta'),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
+
+  void _showDeleteAccountDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return _AccountDeletionDialog(authProvider: authProvider);
+      },
+    );
+  }
+
 
   void _showDeletionSuccessDialog(BuildContext context) {
     showDialog(
@@ -1143,6 +945,296 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Dialog stateful para confirmação de exclusão de conta
+class _AccountDeletionDialog extends StatefulWidget {
+  final auth_providers.AuthProvider authProvider;
+
+  const _AccountDeletionDialog({required this.authProvider});
+
+  @override
+  State<_AccountDeletionDialog> createState() => __AccountDeletionDialogState();
+}
+
+class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
+  final TextEditingController _confirmationController = TextEditingController();
+  bool _isConfirmationValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _confirmationController.addListener(_validateConfirmation);
+  }
+
+  @override
+  void dispose() {
+    _confirmationController.dispose();
+    super.dispose();
+  }
+
+  void _validateConfirmation() {
+    setState(() {
+      _isConfirmationValid = _confirmationController.text.trim().toUpperCase() == 'CONCORDO';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Row(
+        children: [
+          Icon(
+            Icons.warning,
+            color: theme.colorScheme.error,
+            size: 28,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Excluir Conta',
+            style: TextStyle(
+              color: theme.colorScheme.error,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Esta ação é irreversível e resultará em:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildDeletionItem(context, Icons.delete_forever, 'Exclusão permanente de todas suas plantas e dados'),
+          _buildDeletionItem(context, Icons.history, 'Perda do histórico de cuidados e tarefas'),
+          _buildDeletionItem(context, Icons.cloud_off, 'Impossibilidade de recuperar informações'),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Para cancelar assinaturas, acesse a loja onde a comprou (App Store ou Google Play)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Para confirmar, digite CONCORDO abaixo:',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _confirmationController,
+            decoration: InputDecoration(
+              hintText: 'Digite CONCORDO para confirmar',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            ),
+            textCapitalization: TextCapitalization.characters,
+            inputFormatters: [
+              _UpperCaseTextFormatter(),
+            ],
+            style: TextStyle(
+              fontSize: 16,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: _isConfirmationValid ? () async {
+            Navigator.of(context).pop();
+
+            final success = await widget.authProvider.deleteAccount(
+              password: '', // Plantis não requer senha para exclusão
+              downloadData: false,
+            );
+
+            if (context.mounted) {
+              if (success) {
+                _showDeletionSuccessDialog(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      widget.authProvider.errorMessage ??
+                          'Erro ao excluir conta. Tente novamente.',
+                    ),
+                    backgroundColor: theme.colorScheme.error,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            }
+          } : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _isConfirmationValid
+                ? theme.colorScheme.error
+                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor: _isConfirmationValid
+                ? Colors.white
+                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Text('Excluir Conta'),
+        ),
+      ],
+    );
+  }
+
+  /// Constrói item de informação sobre exclusão
+  Widget _buildDeletionItem(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: Theme.of(context).colorScheme.error,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeletionSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Conta Excluída com Sucesso',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sua conta foi excluída permanentemente. Todos os seus dados foram removidos de nossos servidores.',
+              style: TextStyle(fontSize: 14),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Obrigado por ter usado o Plantis. Se precisar de ajuda, entre em contato conosco.',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navegar para tela de welcome/inicial
+              context.go('/welcome');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Entendido'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Formatter que converte automaticamente o texto para uppercase
+class _UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
     );
   }
 }

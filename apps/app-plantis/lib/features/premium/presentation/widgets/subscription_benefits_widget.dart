@@ -91,7 +91,7 @@ class PlantisSubscriptionBenefitsWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...premiumFeatures.map((feature) => _buildModernFeatureItem(
+          ...premiumFeatures.take(3).map((feature) => _buildModernFeatureItem(
             feature['icon'] as IconData,
             feature['title'] as String,
             feature['description'] as String,

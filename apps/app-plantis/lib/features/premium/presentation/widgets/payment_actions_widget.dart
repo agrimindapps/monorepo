@@ -54,7 +54,7 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
           _buildPurchaseButton(),
 
         // Botão de restaurar compras
-        if (!isPremium && !showPurchaseButton)
+        if (!isPremium && !showPurchaseButton && onRestore != null)
           _buildRestoreButton(),
 
         // Botão de gerenciar assinatura
@@ -73,9 +73,11 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: LoadingButton(
-        onPressedAsync: selectedPlanId != null && !isLoading ? () async {
-          onPurchase?.call();
-        } : null,
+        onPressedAsync: () async {
+          if (selectedPlanId != null && !isLoading) {
+            onPurchase?.call();
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: PlantisColors.primary,
           foregroundColor: Colors.white,
@@ -113,9 +115,11 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: LoadingButton(
-        onPressedAsync: !isLoading ? () async {
-          onRestore?.call();
-        } : null,
+        onPressedAsync: () async {
+          if (!isLoading) {
+            onRestore?.call();
+          }
+        },
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -142,9 +146,11 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: LoadingButton(
-        onPressedAsync: !isLoading ? () async {
-          onManageSubscription?.call();
-        } : null,
+        onPressedAsync: () async {
+          if (!isLoading) {
+            onManageSubscription?.call();
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white.withValues(alpha: 0.1),
           foregroundColor: Colors.white,
@@ -160,12 +166,12 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
         type: LoadingButtonType.elevated,
         loadingText: 'Abrindo...',
         disabled: isLoading,
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.settings, size: 20),
-            const SizedBox(width: 8),
-            const Text(
+            Icon(Icons.settings, size: 20),
+            SizedBox(width: 8),
+            Text(
               'Gerenciar Assinatura',
               style: TextStyle(
                 fontSize: 16,
@@ -184,6 +190,12 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
+          // Botão de restaurar se fornecido
+          if (onRestore != null && !isPremium) ...[
+            _buildRestoreButton(),
+            const SizedBox(height: 20),
+          ],
+
           // Linha de separação
           Container(
             height: 1,

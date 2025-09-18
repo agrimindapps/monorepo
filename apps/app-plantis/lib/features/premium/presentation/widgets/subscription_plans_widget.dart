@@ -65,50 +65,98 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
 
   @override
   Widget build(BuildContext context) {
-    if (widget.availableProducts.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    // Se não há produtos disponíveis, usar dados mock
+    final products = widget.availableProducts.isEmpty
+        ? _getMockProducts()
+        : widget.availableProducts;
 
-    return Column(
-      children: widget.availableProducts.map((product) => 
-        _buildPlanOption(product)
-      ).toList(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: products.asMap().entries.map((entry) {
+          final index = entry.key;
+          final product = entry.value;
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.only(
+                right: index < products.length - 1 ? 8 : 0,
+              ),
+              child: _buildPlanOption(product),
+            ),
+          );
+        }).toList(),
+      ),
     );
+  }
+
+  /// Mock products for development/testing
+  List<ProductInfo> _getMockProducts() {
+    return [
+      const ProductInfo(
+        productId: 'plantis_premium_monthly',
+        title: 'Plantis Premium Mensal',
+        description: 'Plano mensal básico',
+        price: 1.99,
+        priceString: 'R\$ 1,99',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'mensal',
+      ),
+      const ProductInfo(
+        productId: 'plantis_premium_semester',
+        title: 'Plantis Premium Semestral',
+        description: 'Plano semestral com desconto',
+        price: 9.99,
+        priceString: 'R\$ 9,99',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'semestral',
+      ),
+      const ProductInfo(
+        productId: 'plantis_premium_annual',
+        title: 'Plantis Premium Anual',
+        description: 'Plano anual - melhor valor',
+        price: 17.99,
+        priceString: 'R\$ 17,99',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'anual',
+      ),
+    ];
   }
 
   /// Constrói um card de opção de plano
   Widget _buildPlanOption(ProductInfo product) {
     final isSelected = _selectedPlanId == product.productId;
-    final isYearly = product.productId.toLowerCase().contains('year') || 
+    final isYearly = product.productId.toLowerCase().contains('year') ||
                     product.productId.toLowerCase().contains('annual');
     final isMonthly = product.productId.toLowerCase().contains('month');
+    final isSemester = product.productId.toLowerCase().contains('semester');
     final isWeekly = product.productId.toLowerCase().contains('week');
-    
+
     String planTitle;
     String planSubtitle = '';
     String? badge;
-    
+
     if (isYearly) {
       planTitle = 'Anual';
-      planSubtitle = 'Economize 20%';
+      planSubtitle = 'Economize 67%';
       badge = 'MELHOR VALOR';
+    } else if (isSemester) {
+      planTitle = 'Semestral';
+      planSubtitle = 'Economize 17%';
     } else if (isMonthly) {
       planTitle = 'Mensal';
+      planSubtitle = 'Acesso básico';
     } else if (isWeekly) {
       planTitle = 'Semanal';
     } else {
       planTitle = product.title;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: _buildPlanCard(
-        product: product,
-        title: planTitle,
-        subtitle: planSubtitle,
-        badge: badge,
-        isSelected: isSelected,
-      ),
+    return _buildPlanCard(
+      product: product,
+      title: planTitle,
+      subtitle: planSubtitle,
+      badge: badge,
+      isSelected: isSelected,
     );
   }
 
@@ -121,7 +169,6 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
     required bool isSelected,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: isSelected 
             ? PlantisColors.primary.withValues(alpha: 0.15)
@@ -173,20 +220,19 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
               },
               borderRadius: BorderRadius.circular(16),
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
+                padding: const EdgeInsets.all(16),
+                child: Column(
                   children: [
+                    // Radio button no topo
                     _buildRadioButton(isSelected),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildPlanTitle(title, subtitle),
-                          const SizedBox(height: 4),
-                          _buildPlanPrice(product),
-                        ],
-                      ),
+                    const SizedBox(height: 12),
+                    // Conteúdo centralizado
+                    Column(
+                      children: [
+                        _buildPlanTitle(title, subtitle),
+                        const SizedBox(height: 8),
+                        _buildPlanPrice(product),
+                      ],
                     ),
                   ],
                 ),
@@ -229,13 +275,13 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
   /// Constrói o título do plano
   Widget _buildPlanTitle(String title, String subtitle) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -243,9 +289,10 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
           const SizedBox(height: 2),
           Text(
             subtitle,
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: PlantisColors.primary.withValues(alpha: 0.9),
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -256,14 +303,17 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
 
   /// Constrói o preço do plano
   Widget _buildPlanPrice(ProductInfo product) {
-    final isYearly = product.productId.toLowerCase().contains('year') || 
+    final isYearly = product.productId.toLowerCase().contains('year') ||
                     product.productId.toLowerCase().contains('annual');
     final isMonthly = product.productId.toLowerCase().contains('month');
+    final isSemester = product.productId.toLowerCase().contains('semester');
     final isWeekly = product.productId.toLowerCase().contains('week');
-    
+
     String period;
     if (isYearly) {
       period = '/ano';
+    } else if (isSemester) {
+      period = '/sem';
     } else if (isMonthly) {
       period = '/mês';
     } else if (isWeekly) {
@@ -272,26 +322,26 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
       period = '';
     }
 
-    return Row(
+    return Column(
       children: [
         Text(
           product.priceString,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        if (period.isNotEmpty) ...[
-          const SizedBox(width: 4),
+        if (period.isNotEmpty)
           Text(
             period,
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 14,
+              fontSize: 12,
             ),
           ),
-        ],
       ],
     );
   }

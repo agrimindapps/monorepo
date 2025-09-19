@@ -16,8 +16,8 @@ class TasksConstants {
   /// Snooze duration for postponed notifications
   static const Duration snoozeDuration = Duration(hours: 1);
 
-  /// Upcoming tasks filter duration (next week)
-  static const Duration upcomingTasksDuration = Duration(days: 7);
+  /// Upcoming tasks filter duration (next 15 days)
+  static const Duration upcomingTasksDuration = Duration(days: 15);
 
   /// Search debounce delay to prevent excessive queries
   static const Duration searchDebounceDelay = Duration(milliseconds: 300);

@@ -133,8 +133,16 @@ class EmptyStateWidget extends StatelessWidget {
       case TasksFilterType.upcoming:
         return const EmptyStateConfig(
           icon: Icons.schedule,
-          title: AppStrings.noUpcomingTasks,
-          description: AppStrings.noUpcomingTasksDescription,
+          title: 'Nenhuma tarefa próxima',
+          description: 'Você não tem tarefas pendentes para os próximos 15 dias.\nParabéns! Você está em dia com seus cuidados.',
+          showButton: false,
+        );
+
+      case TasksFilterType.allFuture:
+        return const EmptyStateConfig(
+          icon: Icons.calendar_month,
+          title: 'Nenhuma tarefa futura programada',
+          description: 'Não há tarefas pendentes programadas para o futuro.\nTodas as suas plantas estão com os cuidados em dia!',
           showButton: false,
         );
 

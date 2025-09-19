@@ -12,7 +12,8 @@ import '../../domain/entities/task.dart' as task_entity;
 /// - **all**: Shows all tasks regardless of status or date
 /// - **today**: Shows only tasks due today and still pending  
 /// - **overdue**: Shows tasks that are past their due date and still pending
-/// - **upcoming**: Shows pending tasks due within the next week
+/// - **upcoming**: Shows pending tasks due within the next 15 days (short-term planning)
+/// - **allFuture**: Shows all pending tasks with future dates (unlimited - long-term view)
 /// - **completed**: Shows all completed tasks
 /// - **byPlant**: Special filter for showing tasks of a specific plant
 /// 
@@ -25,7 +26,8 @@ enum TasksFilterType {
   all('Todas'),
   today('Hoje'),
   overdue('Atrasadas'),
-  upcoming('Próximas'),
+  upcoming('Próxima'),
+  allFuture('Futuras'),
   completed('Concluídas'),
   byPlant('Por Planta');
 

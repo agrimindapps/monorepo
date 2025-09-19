@@ -108,16 +108,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Resumo das tarefas
-        _buildTaskSummaryCards(
-          context,
-          overdueTasks,
-          upcomingTasks,
-          pendingTasks,
-        ),
-
-        const SizedBox(height: 24),
-
         // Tarefas em atraso
         if (overdueTasks.isNotEmpty) ...[
           _buildTaskSection(
@@ -166,86 +156,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     );
   }
 
-  Widget _buildTaskSummaryCards(
-    BuildContext context,
-    List<PlantTask> overdueTasks,
-    List<PlantTask> upcomingTasks,
-    List<PlantTask> pendingTasks,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildSummaryCard(
-            context,
-            title: 'Em atraso',
-            count: '${overdueTasks.length}',
-            color: Colors.red,
-            icon: Icons.warning_outlined,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildSummaryCard(
-            context,
-            title: 'Próximas',
-            count: '${upcomingTasks.length}',
-            color: Colors.orange,
-            icon: Icons.schedule_outlined,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildSummaryCard(
-            context,
-            title: 'Pendentes',
-            count: '${pendingTasks.length}',
-            color: PlantisColors.primary,
-            icon: Icons.pending_outlined,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryCard(
-    BuildContext context, {
-    required String title,
-    required String count,
-    required Color color,
-    required IconData icon,
-  }) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
-          Text(
-            count,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildTaskSection(
     BuildContext context, {

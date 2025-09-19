@@ -265,6 +265,50 @@ class _PlantsListPageState extends State<PlantsListPage> {
                   size: 24,
                 ),
               ),
+              actions: [
+                // Grouped by spaces toggle button
+                GestureDetector(
+                  onTap: () {
+                    final currentMode = plantsProvider.viewMode;
+                    ViewMode newMode;
+
+                    // Se já está agrupado, volta para o modo anterior (grid ou list)
+                    if (currentMode == ViewMode.groupedBySpaces ||
+                        currentMode == ViewMode.groupedBySpacesGrid ||
+                        currentMode == ViewMode.groupedBySpacesList) {
+                      // Volta para list como padrão
+                      newMode = ViewMode.list;
+                    } else {
+                      // Aplica agrupamento mantendo o modo atual (grid ou list)
+                      if (currentMode == ViewMode.grid) {
+                        newMode = ViewMode.groupedBySpacesGrid;
+                      } else {
+                        newMode = ViewMode.groupedBySpacesList;
+                      }
+                    }
+
+                    _onViewModeChanged(newMode);
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: _isGroupedBySpaces(plantsProvider.viewMode)
+                          ? Colors.white.withValues(alpha: 0.3)
+                          : Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.category,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
             ),
             // Discrete sync indicator
             if (syncProvider?.shouldShowSyncIndicator() == true)
@@ -429,9 +473,12 @@ class _PlantsListPageState extends State<PlantsListPage> {
         return Consumer<PlantsProvider>(
           builder: (context, plantsProvider, child) {
             final groupedPlants = plantsProvider.plantsGroupedBySpaces;
+            final useGridLayout = viewMode == ViewMode.groupedBySpacesGrid ||
+                                  viewMode == ViewMode.groupedBySpaces; // Default to grid for groupedBySpaces
             return PlantsGroupedBySpacesView(
               groupedPlants: groupedPlants,
               scrollController: _scrollController,
+              useGridLayout: useGridLayout,
             );
           },
         );
@@ -446,6 +493,13 @@ class _PlantsListPageState extends State<PlantsListPage> {
           scrollController: _scrollController,
         );
     }
+  }
+
+  /// Check if current view mode is grouped by spaces
+  bool _isGroupedBySpaces(ViewMode viewMode) {
+    return viewMode == ViewMode.groupedBySpaces ||
+           viewMode == ViewMode.groupedBySpacesGrid ||
+           viewMode == ViewMode.groupedBySpacesList;
   }
 
   /// PERFORMANCE: Efficient list comparison to avoid unnecessary rebuilds
@@ -465,10 +519,10 @@ class _PlantsListPageState extends State<PlantsListPage> {
     // For larger lists, use hash-based comparison for better performance
     final hash1 = Object.hashAll(list1.map((plant) => plant.id));
     final hash2 = Object.hashAll(list2.map((plant) => plant.id));
-    
+
     // If hashes are different, lists are definitely different
     if (hash1 != hash2) return false;
-    
+
     // Hash collision check - fallback to ID comparison
     for (int i = 0; i < list1.length; i++) {
       if (list1[i].id != list2[i].id) return false;

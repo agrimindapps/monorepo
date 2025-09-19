@@ -1046,6 +1046,16 @@ class TasksProvider extends ChangeNotifier {
             )
             .toList();
         break;
+      case TasksFilterType.allFuture:
+        final now = DateTime.now();
+        tasks = tasks
+            .where(
+              (t) =>
+                  t.status == task_entity.TaskStatus.pending &&
+                  t.dueDate.isAfter(now),
+            )
+            .toList();
+        break;
       case TasksFilterType.completed:
         tasks = tasks
             .where((t) => t.status == task_entity.TaskStatus.completed)

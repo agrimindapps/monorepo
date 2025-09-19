@@ -314,7 +314,7 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
               ),
               const SizedBox(width: 12),
               FilterChip(
-                label: const Text('Próximas'),
+                label: const Text('Próxima'),
                 selected: provider.currentFilter == TasksFilterType.upcoming,
                 onSelected: (selected) {
                   provider.setFilter(TasksFilterType.upcoming);
@@ -325,12 +325,34 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
                 side: BorderSide.none,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 labelStyle: TextStyle(
-                  color: provider.currentFilter == TasksFilterType.upcoming 
-                      ? PlantisColors.primary 
+                  color: provider.currentFilter == TasksFilterType.upcoming
+                      ? PlantisColors.primary
                       : Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
-                  fontWeight: provider.currentFilter == TasksFilterType.upcoming 
-                      ? FontWeight.w600 
+                  fontWeight: provider.currentFilter == TasksFilterType.upcoming
+                      ? FontWeight.w600
+                      : FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilterChip(
+                label: const Text('Futuras'),
+                selected: provider.currentFilter == TasksFilterType.allFuture,
+                onSelected: (selected) {
+                  provider.setFilter(TasksFilterType.allFuture);
+                },
+                selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+                checkmarkColor: PlantisColors.primary,
+                backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                labelStyle: TextStyle(
+                  color: provider.currentFilter == TasksFilterType.allFuture
+                      ? PlantisColors.primary
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: provider.currentFilter == TasksFilterType.allFuture
+                      ? FontWeight.w600
                       : FontWeight.w500,
                 ),
               ),
@@ -360,8 +382,8 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         // Agrupar tarefas por data
         final groupedTasks = _groupTasksByDate(data.filteredTasks);
         
-        // Verificar se deve mostrar botão "Ver todas"
-        final shouldShowViewAllButton = data.currentFilter == TasksFilterType.upcoming && 
+        // Verificar se deve mostrar botão "Ver todas futuras"
+        final shouldShowViewAllButton = data.currentFilter == TasksFilterType.upcoming &&
                                        data.totalTasks > data.filteredTasks.length;
 
         return CustomScrollView(
@@ -682,10 +704,10 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
           child: Center(
             child: ElevatedButton.icon(
               onPressed: () {
-                context.read<TasksProvider>().setFilter(TasksFilterType.all);
+                context.read<TasksProvider>().setFilter(TasksFilterType.allFuture);
               },
-              icon: const Icon(Icons.visibility),
-              label: Text('Ver todas as tarefas (+$remainingTasks)'),
+              icon: const Icon(Icons.calendar_month),
+              label: Text('Ver todas as tarefas futuras (+$remainingTasks)'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PlantisColors.primary,
                 foregroundColor: Colors.white,

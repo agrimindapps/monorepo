@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'data/models/comentario_model.dart';
 
 /// Configuração de sincronização específica do Plantis
 /// Apps simples com poucas entidades e sync básico
@@ -36,6 +37,14 @@ class PlantisSyncConfig {
           fromMap: PlantReminder.fromMap,
           toMap: (reminder) => reminder.toFirebaseMap(),
         ),
+
+        // Comentários das plantas
+        EntitySyncRegistration<ComentarioModel>.simple(
+          entityType: ComentarioModel,
+          collectionName: 'comentarios',
+          fromMap: ComentarioModel.fromFirebaseMap,
+          toMap: (comentario) => comentario.toFirebaseMap(),
+        ),
       ],
     );
   }
@@ -54,6 +63,14 @@ class PlantisSyncConfig {
           collectionName: 'dev_plants',
           fromMap: Plant.fromMap,
           toMap: (plant) => plant.toFirebaseMap(),
+        ),
+
+        // Comentários das plantas (desenvolvimento)
+        EntitySyncRegistration<ComentarioModel>.simple(
+          entityType: ComentarioModel,
+          collectionName: 'dev_comentarios',
+          fromMap: ComentarioModel.fromFirebaseMap,
+          toMap: (comentario) => comentario.toFirebaseMap(),
         ),
       ],
     );
@@ -77,6 +94,18 @@ class PlantisSyncConfig {
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
           batchSize: 100, // Lotes maiores quando sync
+        ),
+
+        // Comentários das plantas (offline-first)
+        EntitySyncRegistration<ComentarioModel>(
+          entityType: ComentarioModel,
+          collectionName: 'comentarios',
+          fromMap: ComentarioModel.fromFirebaseMap,
+          toMap: (ComentarioModel comentario) => comentario.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 12),
+          batchSize: 50, // Lotes menores para comentários
         ),
       ],
     );

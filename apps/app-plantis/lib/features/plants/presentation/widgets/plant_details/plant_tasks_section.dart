@@ -4,6 +4,8 @@ import '../../../../../core/theme/plantis_colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../../domain/entities/plant_task.dart';
 import '../../providers/plant_task_provider.dart';
+import 'task_history/plant_task_history_button.dart';
+import 'task_history/plant_task_history_modal.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
 class PlantTasksSection extends StatefulWidget {
@@ -152,9 +154,9 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
           const SizedBox(height: 24),
         ],
 
-        // Tarefas concluídas agrupadas por data
+        // Tarefas concluídas - Nova seção otimizada
         if (completedTasks.isNotEmpty) ...[
-          _buildCompletedTasksSection(
+          _buildEnhancedCompletedTasksSection(
             context,
             completedTasks,
             taskProvider,
@@ -875,5 +877,162 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
   /// Formatar horário de conclusão
   String _formatCompletedTime(DateTime completedDate) {
     return '${completedDate.hour.toString().padLeft(2, '0')}:${completedDate.minute.toString().padLeft(2, '0')}';
+  }
+
+  /// Nova seção aprimorada de tarefas concluídas
+  Widget _buildEnhancedCompletedTasksSection(
+    BuildContext context,
+    List<PlantTask> completedTasks,
+    PlantTaskProvider taskProvider,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Botão de acesso ao histórico
+        PlantTaskHistoryButton(
+          completedTasks: completedTasks,
+          onPressed: () => PlantTaskHistoryModal.show(
+            context,
+            plant: widget.plant,
+            completedTasks: completedTasks,
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Preview das últimas 5 tarefas concluídas
+        _buildCompletedTasksPreview(context, completedTasks),
+      ],
+    );
+  }
+
+  /// Preview compacto das últimas tarefas concluídas
+  Widget _buildCompletedTasksPreview(
+    BuildContext context,
+    List<PlantTask> completedTasks,
+  ) {
+    final theme = Theme.of(context);
+
+    // Pegar as últimas 5 tarefas
+    final recentTasks = [...completedTasks]
+      ..sort((a, b) => (b.completedDate ?? DateTime(1970))
+          .compareTo(a.completedDate ?? DateTime(1970)))
+      ..take(5).toList();
+
+    if (recentTasks.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.history,
+              color: PlantisColors.primary,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Últimos cuidados',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Lista compacta de tarefas recentes
+        ...recentTasks.asMap().entries.map((entry) {
+          final index = entry.key;
+          final task = entry.value;
+
+          return AnimatedContainer(
+            duration: Duration(milliseconds: 200 + (index * 100)),
+            curve: Curves.easeOutBack,
+            margin: const EdgeInsets.only(bottom: 6),
+            child: _buildCompactTaskCard(context, task),
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Card compacto para preview de tarefas concluídas
+  Widget _buildCompactTaskCard(BuildContext context, PlantTask task) {
+    final theme = Theme.of(context);
+    final taskColor = _getTaskColor(task);
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: taskColor.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Ícone da tarefa
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: taskColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Icon(
+              _getTaskIcon(task.type),
+              color: taskColor,
+              size: 14,
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Título da tarefa
+          Expanded(
+            child: Text(
+              task.title,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          // Data/hora
+          if (task.completedDate != null)
+            Text(
+              _formatCompactDate(task.completedDate!),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: taskColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 11,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Formatar data de forma compacta
+  String _formatCompactDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final taskDate = DateTime(date.year, date.month, date.day);
+
+    if (taskDate == today) {
+      return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } else if (taskDate == yesterday) {
+      return 'Ontem';
+    } else {
+      final diff = today.difference(taskDate).inDays;
+      return '${diff}d';
+    }
   }
 }

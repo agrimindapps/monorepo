@@ -2,17 +2,20 @@ import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../features/plants/domain/repositories/plants_repository.dart';
+import '../../features/plants/domain/repositories/spaces_repository.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
 
 class DataCleanerService implements IAppDataCleaner {
   final PlantsRepository plantsRepository;
   final TasksRepository tasksRepository;
+  final SpacesRepository spacesRepository;
   final DeletePlantUseCase deletePlantUseCase;
 
   DataCleanerService({
     required this.plantsRepository,
     required this.tasksRepository,
+    required this.spacesRepository,
     required this.deletePlantUseCase,
   });
 
@@ -217,6 +220,82 @@ class DataCleanerService implements IAppDataCleaner {
     }
 
     return result;
+  }
+
+  /// Limpa apenas o conteúdo do usuário (plantas, tarefas, espaços)
+  /// Mantém: perfil, subscription, settings, theme, comentários
+  Future<Map<String, dynamic>> clearUserContentOnly() async {
+    final result = <String, dynamic>{
+      'success': false,
+      'clearedBoxes': <String>[],
+      'clearedPreferences': <String>[],
+      'errors': <String>[],
+      'totalRecordsCleared': 0,
+      'plantsCleaned': 0,
+      'tasksCleaned': 0,
+      'spacesCleaned': 0,
+    };
+
+    try {
+      // Obter estatísticas antes da limpeza
+      int totalCleared = 0;
+
+      // 1. Limpar todas as tarefas
+      final tasksResult = await tasksRepository.getTasks();
+      if (tasksResult.isRight()) {
+        final tasks = tasksResult.getOrElse(() => []);
+        for (final task in tasks) {
+          try {
+            await tasksRepository.deleteTask(task.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+          }
+        }
+        result['tasksCleaned'] = tasks.length;
+        totalCleared += tasks.length;
+        (result['clearedBoxes'] as List<String>).add('tasks_box');
+      }
+
+      // 2. Limpar todas as plantas
+      final plantsResult = await plantsRepository.getPlants();
+      if (plantsResult.isRight()) {
+        final plants = plantsResult.getOrElse(() => []);
+        for (final plant in plants) {
+          try {
+            await deletePlantUseCase(plant.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+          }
+        }
+        result['plantsCleaned'] = plants.length;
+        totalCleared += plants.length;
+        (result['clearedBoxes'] as List<String>).add('plants_box');
+      }
+
+      // 3. Limpar todos os espaços
+      final spacesResult = await spacesRepository.getSpaces();
+      if (spacesResult.isRight()) {
+        final spaces = spacesResult.getOrElse(() => []);
+        for (final space in spaces) {
+          try {
+            await spacesRepository.deleteSpace(space.id);
+          } catch (e) {
+            (result['errors'] as List<String>).add('Erro ao deletar espaço ${space.id}: $e');
+          }
+        }
+        result['spacesCleaned'] = spaces.length;
+        totalCleared += spaces.length;
+        (result['clearedBoxes'] as List<String>).add('spaces_box');
+      }
+
+      result['totalRecordsCleared'] = totalCleared;
+      result['success'] = (result['errors'] as List<String>).isEmpty;
+
+      return result;
+    } catch (e) {
+      (result['errors'] as List<String>).add('Erro geral: $e');
+      return result;
+    }
   }
 
   // Métodos legados mantidos para compatibilidade

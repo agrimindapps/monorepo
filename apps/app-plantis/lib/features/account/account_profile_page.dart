@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 
+import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/data_sanitization_service.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../shared/widgets/base_page_scaffold.dart';
@@ -299,6 +301,24 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                           child: Column(
                             children: [
                               ListTile(
+                                leading: const Icon(
+                                  Icons.clear_all,
+                                  color: Colors.orange,
+                                ),
+                                title: const Text(
+                                  'Apagar Dados',
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                  ),
+                                ),
+                                subtitle: const Text(
+                                  'Limpar plantas e tarefas mantendo conta',
+                                ),
+                                onTap: () {
+                                  _showClearDataDialog(context, authProvider);
+                                },
+                              ),
+                              ListTile(
                                 leading: Icon(
                                   Icons.logout_outlined,
                                   color: theme.colorScheme.error,
@@ -511,9 +531,29 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                     size: 20,
                   ),
                 ),
-                title: const Text('Exportar Dados'),
+                title: const Text('Exportar JSON'),
                 subtitle: const Text(
-                  'Baixar todos os seus dados em formato JSON',
+                  'Baixar dados em formato JSON para backup',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showComingSoonDialog(context),
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.table_view,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Exportar CSV'),
+                subtitle: const Text(
+                  'Baixar dados em planilha para análise',
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showComingSoonDialog(context),
@@ -894,6 +934,19 @@ class _AccountProfilePageState extends State<AccountProfilePage>
     );
   }
 
+  void _showClearDataDialog(
+    BuildContext context,
+    auth_providers.AuthProvider authProvider,
+  ) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return _DataClearDialog(authProvider: authProvider);
+      },
+    );
+  }
+
   void _showDeleteAccountDialog(
     BuildContext context,
     auth_providers.AuthProvider authProvider,
@@ -904,6 +957,274 @@ class _AccountProfilePageState extends State<AccountProfilePage>
       builder: (BuildContext context) {
         return _AccountDeletionDialog(authProvider: authProvider);
       },
+    );
+  }
+}
+
+/// Dialog stateful para confirmação de limpeza de dados
+class _DataClearDialog extends StatefulWidget {
+  final auth_providers.AuthProvider authProvider;
+
+  const _DataClearDialog({required this.authProvider});
+
+  @override
+  State<_DataClearDialog> createState() => __DataClearDialogState();
+}
+
+class __DataClearDialogState extends State<_DataClearDialog> {
+  final TextEditingController _confirmationController = TextEditingController();
+  bool _isConfirmationValid = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _confirmationController.addListener(_validateConfirmation);
+  }
+
+  @override
+  void dispose() {
+    _confirmationController.dispose();
+    super.dispose();
+  }
+
+  void _validateConfirmation() {
+    setState(() {
+      _isConfirmationValid =
+          _confirmationController.text.trim().toUpperCase() == 'APAGAR';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Row(
+        children: [
+          const Icon(Icons.clear_all, color: Colors.orange, size: 28),
+          const SizedBox(width: 12),
+          Text(
+            'Apagar Dados do App',
+            style: TextStyle(
+              color: Colors.orange,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Esta ação limpará os seguintes dados:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildClearItem(
+            context,
+            Icons.local_florist,
+            'Todas as suas plantas',
+          ),
+          _buildClearItem(
+            context,
+            Icons.task_alt,
+            'Todas as tarefas e lembretes',
+          ),
+          _buildClearItem(
+            context,
+            Icons.space_dashboard,
+            'Todos os espaços criados',
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.green.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.shield, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Serão mantidos: perfil, configurações, tema e assinatura',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Para confirmar, digite APAGAR abaixo:',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _confirmationController,
+            enabled: !_isLoading,
+            decoration: InputDecoration(
+              hintText: 'Digite APAGAR para confirmar',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.orange,
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
+            ),
+            textCapitalization: TextCapitalization.characters,
+            inputFormatters: [_UpperCaseTextFormatter()],
+            style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed:
+              _isConfirmationValid && !_isLoading
+                  ? () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
+
+                    try {
+                      final dataCleanerService = GetIt.instance<DataCleanerService>();
+                      final result = await dataCleanerService.clearUserContentOnly();
+
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+
+                        if (result['success'] as bool) {
+                          final plantsCleaned = result['plantsCleaned'] as int;
+                          final tasksCleaned = result['tasksCleaned'] as int;
+                          final spacesCleaned = result['spacesCleaned'] as int;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Dados limpos com sucesso!\n'
+                                'Plantas: $plantsCleaned | Tarefas: $tasksCleaned | Espaços: $spacesCleaned',
+                              ),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 4),
+                            ),
+                          );
+                        } else {
+                          final errors = result['errors'] as List<String>;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Erro ao limpar dados: ${errors.join(', ')}',
+                              ),
+                              backgroundColor: theme.colorScheme.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Erro ao limpar dados: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+                            ),
+                            backgroundColor: theme.colorScheme.error,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    }
+
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                  : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                _isConfirmationValid && !_isLoading
+                    ? Colors.orange
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor:
+                _isConfirmationValid && !_isLoading
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text('Apagar Dados'),
+        ),
+      ],
+    );
+  }
+
+  /// Constrói item de informação sobre limpeza
+  Widget _buildClearItem(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orange, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

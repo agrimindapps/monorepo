@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +15,7 @@ import 'core/data/models/espaco_model.dart';
 // import 'core/data/models/tarefa_model.dart'; // DEPRECATED: Migrado para TaskModel em inglês
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/plantis_sync_config.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_storage_service.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
@@ -34,9 +35,9 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize Performance Service
-  final performanceService = PerformanceService();
+  final performanceService = core.PerformanceService();
   await performanceService.startPerformanceTracking(
-    config: const PerformanceConfig(
+    config: const core.PerformanceConfig(
       enableFpsMonitoring: true,
       enableMemoryMonitoring: true,
       enableCpuMonitoring: false,
@@ -46,7 +47,7 @@ void main() async {
   await performanceService.markAppStarted();
 
   // Configure Crashlytics (only in production/staging)
-  if (EnvironmentConfig.enableAnalytics) {
+  if (core.EnvironmentConfig.enableAnalytics) {
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
     };
@@ -58,6 +59,9 @@ void main() async {
     };
   }
 
+  // Configure sync system for Plantis
+  await PlantisSyncConfig.configure();
+
   // Initialize Hive
   await Hive.initFlutter();
 
@@ -68,7 +72,11 @@ void main() async {
   // Hive.registerAdapter(TarefaModelAdapter()); // TypeId: 3 - DEPRECATED: Migrado para TaskModel
   Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
 
-  // Initialize dependency injection
+  // Register License Model adapters (from core package)
+  Hive.registerAdapter(core.LicenseModelAdapter()); // TypeId: 10
+  Hive.registerAdapter(core.LicenseTypeAdapter()); // TypeId: 11
+
+  // Initialize app-specific dependency injection (includes core services)
   await di.init();
 
   // Initialize PlantisStorageService to register app-specific boxes
@@ -79,7 +87,7 @@ void main() async {
   AppDataInspectorInitializer.initialize();
 
   // Initialize unified subscription services (NEW - Simplified)
-  final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
+  final simpleSubscriptionSyncService = di.sl<core.SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
 
   // Initialize notifications
@@ -87,11 +95,11 @@ void main() async {
   await notificationService.initialize();
 
   // Initialize app rating tracking
-  final appRatingService = di.sl<IAppRatingRepository>();
+  final appRatingService = di.sl<core.IAppRatingRepository>();
   await appRatingService.incrementUsageCount();
 
   // Run app
-  if (EnvironmentConfig.enableAnalytics) {
+  if (core.EnvironmentConfig.enableAnalytics) {
     // Run app in guarded zone for Crashlytics only in production/staging
     unawaited(
       runZonedGuarded<Future<void>>(

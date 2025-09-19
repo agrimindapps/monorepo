@@ -1,13 +1,18 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
+import '../../domain/repositories/plant_tasks_repository.dart';
 import '../../domain/services/plant_task_generator.dart';
 
 class PlantTaskProvider extends ChangeNotifier {
   final PlantTaskGenerator _taskGenerationService;
+  final PlantTasksRepository? _repository;
 
-  PlantTaskProvider({PlantTaskGenerator? taskGenerationService})
-    : _taskGenerationService = taskGenerationService ?? PlantTaskGenerator();
+  PlantTaskProvider({
+    PlantTaskGenerator? taskGenerationService,
+    PlantTasksRepository? repository,
+  }) : _taskGenerationService = taskGenerationService ?? PlantTaskGenerator(),
+       _repository = repository;
 
   // State
   final Map<String, List<PlantTask>> _plantTasks = {};
@@ -22,6 +27,50 @@ class PlantTaskProvider extends ChangeNotifier {
   /// Gets all tasks for a specific plant
   List<PlantTask> getTasksForPlant(String plantId) {
     return _plantTasks[plantId] ?? [];
+  }
+
+  /// Loads tasks for a plant from repository
+  Future<void> loadTasksForPlant(String plantId) async {
+    if (_repository == null) {
+      if (kDebugMode) {
+        print('⚠️ PlantTaskProvider: Repository não disponível para carregar tasks');
+      }
+      return;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (kDebugMode) {
+        print('📥 PlantTaskProvider: Carregando tasks para planta $plantId');
+      }
+
+      final result = await _repository!.getPlantTasksByPlantId(plantId);
+      result.fold(
+        (failure) {
+          _errorMessage = 'Erro ao carregar tarefas: ${failure.message}';
+          if (kDebugMode) {
+            print('❌ PlantTaskProvider: Erro ao carregar tasks: ${failure.message}');
+          }
+        },
+        (tasks) {
+          _plantTasks[plantId] = tasks;
+          if (kDebugMode) {
+            print('✅ PlantTaskProvider: ${tasks.length} tasks carregadas para planta $plantId');
+          }
+        },
+      );
+    } catch (e) {
+      _errorMessage = 'Erro inesperado ao carregar tarefas: $e';
+      if (kDebugMode) {
+        print('❌ PlantTaskProvider: Erro inesperado: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   /// Gets pending tasks for a plant
@@ -65,13 +114,48 @@ class PlantTaskProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (kDebugMode) {
+        print('🌱 PlantTaskProvider: Gerando tasks para planta ${plant.id}');
+      }
+
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
-      _plantTasks[plant.id] = tasks;
+
+      // CRÍTICO: Persistir tasks geradas se repository disponível
+      if (_repository != null && tasks.isNotEmpty) {
+        if (kDebugMode) {
+          print('💾 PlantTaskProvider: Persistindo ${tasks.length} tasks geradas');
+        }
+
+        final result = await _repository!.addPlantTasks(tasks);
+        result.fold(
+          (failure) {
+            _errorMessage = 'Erro ao salvar tarefas: ${failure.message}';
+            if (kDebugMode) {
+              print('❌ PlantTaskProvider: Erro ao persistir tasks: ${failure.message}');
+            }
+          },
+          (savedTasks) {
+            _plantTasks[plant.id] = savedTasks;
+            if (kDebugMode) {
+              print('✅ PlantTaskProvider: ${savedTasks.length} tasks persistidas com sucesso');
+            }
+          },
+        );
+      } else {
+        // Fallback para comportamento anterior se repository não disponível
+        _plantTasks[plant.id] = tasks;
+        if (kDebugMode) {
+          print('⚠️ PlantTaskProvider: Repository não disponível, tasks mantidas em memória');
+        }
+      }
 
       // Update task statuses
       await _updateTaskStatuses(plant.id);
     } catch (e) {
       _errorMessage = 'Erro ao gerar tarefas: $e';
+      if (kDebugMode) {
+        print('❌ PlantTaskProvider: Erro ao gerar tasks: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -99,20 +183,38 @@ class PlantTaskProvider extends ChangeNotifier {
           completedDate: null,
         );
         tasks[taskIndex] = pendingTask;
+
+        // CRÍTICO: Atualizar na persistência
+        if (_repository != null) {
+          await _repository!.updatePlantTask(pendingTask);
+        }
       } else {
         // Mark as completed
         final completedTask = task.markAsCompleted();
         tasks[taskIndex] = completedTask;
 
+        // CRÍTICO: Atualizar na persistência
+        if (_repository != null) {
+          await _repository!.updatePlantTask(completedTask);
+        }
+
         // Generate next task
         final nextTask = _taskGenerationService.generateNextTask(completedTask);
         tasks.add(nextTask);
+
+        // CRÍTICO: Salvar nova task na persistência
+        if (_repository != null) {
+          await _repository!.addPlantTask(nextTask);
+        }
       }
 
       _plantTasks[plantId] = tasks;
       await _updateTaskStatuses(plantId);
     } catch (e) {
       _errorMessage = 'Erro ao alterar status da tarefa: $e';
+      if (kDebugMode) {
+        print('❌ PlantTaskProvider: Erro ao alterar status: $e');
+      }
       notifyListeners();
     }
   }
@@ -213,9 +315,25 @@ class PlantTaskProvider extends ChangeNotifier {
   }
 
   /// Removes all tasks for a plant (when plant is deleted)
-  void removeTasksForPlant(String plantId) {
-    _plantTasks.remove(plantId);
-    notifyListeners();
+  Future<void> removeTasksForPlant(String plantId) async {
+    try {
+      // CRÍTICO: Remover da persistência
+      if (_repository != null) {
+        await _repository!.deletePlantTasksByPlantId(plantId);
+        if (kDebugMode) {
+          print('✅ PlantTaskProvider: Tasks da planta $plantId removidas da persistência');
+        }
+      }
+
+      _plantTasks.remove(plantId);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Erro ao remover tarefas da planta: $e';
+      if (kDebugMode) {
+        print('❌ PlantTaskProvider: Erro ao remover tasks da planta: $e');
+      }
+      notifyListeners();
+    }
   }
 
   /// Updates tasks when plant configuration changes

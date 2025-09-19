@@ -202,22 +202,14 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
 
           const SizedBox(height: 40),
 
-          // Botão principal de compra
+          // Botões de compra e restaurar + Links de rodapé
           PlantisPaymentActionsWidget(
             selectedPlanId: _selectedPlanId,
             isPremium: false,
             isLoading: provider.isLoading,
             showPurchaseButton: true,
-            onPurchase: () => _purchaseSelectedPlan(provider),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Botão de restaurar + Links de rodapé
-          PlantisPaymentActionsWidget(
-            isPremium: false,
-            isLoading: provider.isLoading,
             showFooterLinks: true,
+            onPurchase: () => _purchaseSelectedPlan(provider),
             onRestore: () => _restorePurchases(provider),
             onPrivacyPolicy: () => _openPrivacyPolicy(),
             onTermsOfService: () => _openTermsOfService(),

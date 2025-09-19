@@ -742,29 +742,27 @@ class PlantFormProvider extends ChangeNotifier {
   }
 
   AddPlantParams _buildAddParams() {
-    final config =
-        _hasConfigData()
-            ? PlantConfig(
-              wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : null,
-              fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : null,
-              pruningIntervalDays:
-                  (_enablePruning == true) ? _pruningIntervalDays : null,
-              sunlightCheckIntervalDays:
-                  (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
-              pestInspectionIntervalDays:
-                  (_enablePestInspection == true)
-                      ? _pestInspectionIntervalDays
-                      : null,
-              replantingIntervalDays:
-                  (_enableReplanting == true) ? _replantingIntervalDays : null,
-              waterAmount: _waterAmount,
-              // Add new care fields
-              enableWateringCare: _enableWateringCare,
-              lastWateringDate: _lastWateringDate,
-              enableFertilizerCare: _enableFertilizerCare,
-              lastFertilizerDate: _lastFertilizerDate,
-            )
-            : null;
+    // Sempre criar uma PlantConfig com valores padrão para garantir que todas as 6 tarefas sejam geradas
+    final config = PlantConfig(
+      wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : (_wateringIntervalDays ?? 7),
+      fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : (_fertilizingIntervalDays ?? 30),
+      pruningIntervalDays:
+          (_enablePruning == true) ? _pruningIntervalDays : (_pruningIntervalDays ?? 90),
+      sunlightCheckIntervalDays:
+          (_enableSunlightCare == true) ? _sunlightIntervalDays : (_sunlightIntervalDays ?? 14),
+      pestInspectionIntervalDays:
+          (_enablePestInspection == true)
+              ? _pestInspectionIntervalDays
+              : (_pestInspectionIntervalDays ?? 21),
+      replantingIntervalDays:
+          (_enableReplanting == true) ? _replantingIntervalDays : (_replantingIntervalDays ?? 365),
+      waterAmount: _waterAmount?.trim().isNotEmpty == true ? _waterAmount : null,
+      // Add new care fields
+      enableWateringCare: _enableWateringCare,
+      lastWateringDate: _lastWateringDate,
+      enableFertilizerCare: _enableFertilizerCare,
+      lastFertilizerDate: _lastFertilizerDate,
+    );
 
     return AddPlantParams(
       name: _name.trim(),
@@ -779,29 +777,27 @@ class PlantFormProvider extends ChangeNotifier {
   }
 
   UpdatePlantParams _buildUpdateParams() {
-    final config =
-        _hasConfigData()
-            ? PlantConfig(
-              wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : null,
-              fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : null,
-              pruningIntervalDays:
-                  (_enablePruning == true) ? _pruningIntervalDays : null,
-              sunlightCheckIntervalDays:
-                  (_enableSunlightCare == true) ? _sunlightIntervalDays : null,
-              pestInspectionIntervalDays:
-                  (_enablePestInspection == true)
-                      ? _pestInspectionIntervalDays
-                      : null,
-              replantingIntervalDays:
-                  (_enableReplanting == true) ? _replantingIntervalDays : null,
-              waterAmount: _waterAmount,
-              // Add new care fields
-              enableWateringCare: _enableWateringCare,
-              lastWateringDate: _lastWateringDate,
-              enableFertilizerCare: _enableFertilizerCare,
-              lastFertilizerDate: _lastFertilizerDate,
-            )
-            : null;
+    // Sempre criar uma PlantConfig com valores padrão para garantir que todas as 6 tarefas sejam geradas
+    final config = PlantConfig(
+      wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : (_wateringIntervalDays ?? 7),
+      fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : (_fertilizingIntervalDays ?? 30),
+      pruningIntervalDays:
+          (_enablePruning == true) ? _pruningIntervalDays : (_pruningIntervalDays ?? 90),
+      sunlightCheckIntervalDays:
+          (_enableSunlightCare == true) ? _sunlightIntervalDays : (_sunlightIntervalDays ?? 14),
+      pestInspectionIntervalDays:
+          (_enablePestInspection == true)
+              ? _pestInspectionIntervalDays
+              : (_pestInspectionIntervalDays ?? 21),
+      replantingIntervalDays:
+          (_enableReplanting == true) ? _replantingIntervalDays : (_replantingIntervalDays ?? 365),
+      waterAmount: _waterAmount?.trim().isNotEmpty == true ? _waterAmount : null,
+      // Add new care fields
+      enableWateringCare: _enableWateringCare,
+      lastWateringDate: _lastWateringDate,
+      enableFertilizerCare: _enableFertilizerCare,
+      lastFertilizerDate: _lastFertilizerDate,
+    );
 
     return UpdatePlantParams(
       id: _originalPlant!.id,

@@ -27,7 +27,10 @@ class PlantisApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => di.sl<PlantTaskProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PremiumProvider>()),
-        ChangeNotifierProvider(create: (_) => LicenseProvider(di.sl<LicenseService>())..initialize()),
+        ChangeNotifierProvider(create: (_) {
+          final licenseService = LicenseService(LicenseLocalStorage());
+          return LicenseProvider(licenseService)..initialize();
+        }),
         ChangeNotifierProvider<ChangeNotifier>(create: (_) => di.sl<ChangeNotifier>()),
         ChangeNotifierProvider(create: (_) => di.sl<ThemeProvider>()..initialize()),
       ],

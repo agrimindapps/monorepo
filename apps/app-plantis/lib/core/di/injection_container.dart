@@ -437,6 +437,7 @@ void _initAppServices() {
     () => DataCleanerService(
       plantsRepository: sl(),
       tasksRepository: sl(),
+      spacesRepository: sl(),
       deletePlantUseCase: sl(),
     ),
   );

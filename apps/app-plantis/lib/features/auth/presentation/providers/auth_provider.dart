@@ -6,11 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/error/sync_error_handler.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/providers/background_sync_provider.dart';
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/widgets/loading_overlay.dart';
-import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../domain/usecases/reset_password_usecase.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -20,6 +19,7 @@ class AuthProvider extends ChangeNotifier {
   final ISubscriptionRepository? _subscriptionRepository;
   final AuthStateNotifier _authStateNotifier;
   final ResetPasswordUseCase _resetPasswordUseCase;
+  final BackgroundSyncProvider? _backgroundSyncProvider;
 
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -30,16 +30,22 @@ class AuthProvider extends ChangeNotifier {
   StreamSubscription<UserEntity?>? _userSubscription;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
   
-  // Sync related properties
-  bool _isSyncInProgress = false;
-  bool _hasPerformedInitialSync = false;
-  String _syncMessage = 'Sincronizando dados...';
+  // Legacy sync properties - will be removed
+  // Sync is now handled by BackgroundSyncProvider
 
   AnalyticsProvider? get _analytics {
     try {
       return di.sl<AnalyticsProvider>();
     } catch (e) {
       return null; // Analytics não disponível
+    }
+  }
+
+  BackgroundSyncProvider? get _syncProvider {
+    try {
+      return _backgroundSyncProvider ?? di.sl<BackgroundSyncProvider>();
+    } catch (e) {
+      return null; // BackgroundSync não disponível
     }
   }
 
@@ -50,12 +56,14 @@ class AuthProvider extends ChangeNotifier {
     required ResetPasswordUseCase resetPasswordUseCase,
     ISubscriptionRepository? subscriptionRepository,
     AuthStateNotifier? authStateNotifier,
+    BackgroundSyncProvider? backgroundSyncProvider,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _authRepository = authRepository,
        _subscriptionRepository = subscriptionRepository,
        _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance,
-       _resetPasswordUseCase = resetPasswordUseCase {
+       _resetPasswordUseCase = resetPasswordUseCase,
+       _backgroundSyncProvider = backgroundSyncProvider {
     _initializeAuthState();
   }
 
@@ -67,10 +75,10 @@ class AuthProvider extends ChangeNotifier {
   bool get isPremium => _isPremium;
   AuthOperation? get currentOperation => _currentOperation;
   
-  // Sync related getters
-  bool get isSyncInProgress => _isSyncInProgress;
-  bool get hasPerformedInitialSync => _hasPerformedInitialSync;
-  String get syncMessage => _syncMessage;
+  // Sync related getters - delegated to BackgroundSyncProvider
+  bool get isSyncInProgress => _syncProvider?.isSyncInProgress ?? false;
+  bool get hasPerformedInitialSync => _syncProvider?.hasPerformedInitialSync ?? false;
+  String get syncMessage => _syncProvider?.currentSyncMessage ?? 'Sincronizando dados...';
 
   void _initializeAuthState() {
     _userSubscription = _authRepository.currentUser.listen(
@@ -124,10 +132,8 @@ class AuthProvider extends ChangeNotifier {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
         
-        // Realizar sincronização inicial apenas uma vez para usuários não anônimos
-        if (!_hasPerformedInitialSync) {
-          _performInitialDataSync();
-        }
+        // Triggar sincronização inicial em background sem bloquear
+        _triggerBackgroundSyncIfNeeded(user.id);
       } else {
         _isPremium = false;
         _authStateNotifier.updatePremiumStatus(false);
@@ -222,182 +228,100 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
-  /// Novo método que combina login + sincronização automática
-  Future<void> loginAndSync(String email, String password) async {
+  /// Non-blocking login that triggers background sync
+  Future<void> loginAndNavigate(String email, String password) async {
     try {
       // Primeiro fazer login normal
       await login(email, password);
 
-      // Se login falhou, não continua com sync
-      if (!isAuthenticated || _errorMessage != null) {
-        return;
-      }
-
-      // Iniciar sincronização automática apenas se não foi feita ainda
-      if (!_hasPerformedInitialSync) {
-        await _startPostLoginSync();
+      // Login bem-sucedido - triggar sync em background sem bloquear
+      if (isAuthenticated && !isAnonymous && _errorMessage == null) {
+        _triggerBackgroundSyncIfNeeded(_currentUser!.id);
       }
     } catch (e) {
-      await e.handleAsSyncError(
-        metadata: {'operation': 'login_and_sync', 'email': email},
-      );
+      if (kDebugMode) {
+        debugPrint('Erro durante login: $e');
+      }
+      // Error is already handled in login() method
     }
   }
 
-  /// Realiza sincronização inicial de forma assíncrona (sem bloquear UI)
-  void _performInitialDataSync() {
-    // Executar em background sem bloquear a UI
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (isAuthenticated && !isAnonymous && !_hasPerformedInitialSync) {
-        _startPostLoginSync();
+  /// Triggers background sync without blocking UI
+  void _triggerBackgroundSyncIfNeeded(String userId) {
+    if (_syncProvider == null) {
+      if (kDebugMode) {
+        debugPrint('⚠️ BackgroundSyncProvider não disponível');
+      }
+      return;
+    }
+
+    // Execute in background without blocking
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (isAuthenticated && !isAnonymous) {
+        _syncProvider!.startBackgroundSync(
+          userId: userId,
+          isInitialSync: true,
+        );
       }
     });
   }
 
-  /// Inicia processo de sincronização pós-login (apenas para usuários não anônimos)
+  /// Legacy method - replaced by BackgroundSyncService
+  @deprecated
   Future<void> _startPostLoginSync() async {
-    if (_isSyncInProgress) return;
-    
-    // ⚠️ IMPORTANTE: Sincronizar apenas usuários não anônimos
-    if (!isAuthenticated || isAnonymous) {
-      if (kDebugMode) {
-        debugPrint('🔄 Sincronização pulada - usuário anônimo ou não autenticado');
-      }
-      return;
+    // This method is deprecated and replaced by BackgroundSyncService
+    if (kDebugMode) {
+      debugPrint('⚠️ _startPostLoginSync é deprecated - usando BackgroundSyncService');
     }
-    
-    _isSyncInProgress = true;
-    _syncMessage = 'Sincronizando dados...';
-    notifyListeners();
-    
-    try {
-      // Sincronizar dados do usuário
-      _syncMessage = 'Sincronizando informações da conta...';
-      notifyListeners();
-      await _syncUserData();
-      
-      // Sincronizar plantas
-      _syncMessage = 'Sincronizando suas plantas...';
-      notifyListeners();
-      await _syncPlantsData();
-      
-      // Sincronizar tarefas
-      _syncMessage = 'Sincronizando tarefas pendentes...';
-      notifyListeners();
-      await _syncTasksData();
-      
-      // Sincronizar configurações
-      _syncMessage = 'Sincronizando preferências...';
-      notifyListeners();
-      await _syncSettingsData();
-      
-      // Marcar sincronização inicial como realizada
-      _hasPerformedInitialSync = true;
-      
-      // Log analytics
-      await _analytics?.logEvent('post_login_sync_completed', {
-        'user_id': _currentUser?.id ?? '',
-        'sync_duration_ms': DateTime.now().millisecondsSinceEpoch,
-      });
 
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Erro durante sincronização: $e');
-      }
-      
-      await e.handleAsSyncError(
-        metadata: {'operation': 'post_login_sync', 'user_id': _currentUser?.id},
-      );
-    } finally {
-      _isSyncInProgress = false;
-      notifyListeners();
+    if (isAuthenticated && !isAnonymous && _currentUser != null) {
+      _triggerBackgroundSyncIfNeeded(_currentUser!.id);
     }
   }
 
-  /// Sincroniza dados do usuário
+  /// Legacy sync methods - moved to BackgroundSyncService
+  @deprecated
   Future<void> _syncUserData() async {
-    try {
-      // Simular sincronização de dados do usuário
-      await Future<void>.delayed(const Duration(milliseconds: 800));
-      
-      if (kDebugMode) {
-        debugPrint('✅ Dados do usuário sincronizados');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao sincronizar dados do usuário: $e');
-      }
-      rethrow;
+    // Moved to BackgroundSyncService
+    if (kDebugMode) {
+      debugPrint('⚠️ _syncUserData deprecated - usando BackgroundSyncService');
     }
   }
 
-  /// Sincroniza dados das plantas
+  @deprecated
   Future<void> _syncPlantsData() async {
-    try {
-      // Simular busca por serviço de sync das plantas
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
-      
-      if (kDebugMode) {
-        debugPrint('✅ Dados das plantas sincronizados');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao sincronizar plantas: $e');
-      }
-      // Não re-throw para permitir continuar com outras sincronizações
+    // Moved to BackgroundSyncService
+    if (kDebugMode) {
+      debugPrint('⚠️ _syncPlantsData deprecated - usando BackgroundSyncService');
     }
   }
 
-  /// Sincroniza dados das tarefas
+  @deprecated
   Future<void> _syncTasksData() async {
-    try {
-      await Future<void>.delayed(const Duration(milliseconds: 900));
-      
-      if (kDebugMode) {
-        debugPrint('✅ Dados das tarefas sincronizados');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao sincronizar tarefas: $e');
-      }
-      // Não re-throw para permitir continuar
+    // Moved to BackgroundSyncService
+    if (kDebugMode) {
+      debugPrint('⚠️ _syncTasksData deprecated - usando BackgroundSyncService');
     }
   }
 
-  /// Sincroniza configurações
+  @deprecated
   Future<void> _syncSettingsData() async {
-    try {
-      await Future<void>.delayed(const Duration(milliseconds: 600));
-      
-      if (kDebugMode) {
-        debugPrint('✅ Configurações sincronizadas');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao sincronizar configurações: $e');
-      }
-      // Não re-throw para permitir continuar
+    // Moved to BackgroundSyncService
+    if (kDebugMode) {
+      debugPrint('⚠️ _syncSettingsData deprecated - usando BackgroundSyncService');
     }
   }
 
   /// Cancela sincronização em andamento
   void cancelSync() {
-    if (_isSyncInProgress) {
-      _isSyncInProgress = false;
-      _syncMessage = 'Sincronização cancelada';
-      notifyListeners();
-      
-      _analytics?.logEvent('sync_cancelled_by_user', {
-        'user_id': _currentUser?.id ?? '',
-      });
-    }
+    _syncProvider?.cancelSync();
   }
 
   /// Retry da sincronização
   Future<void> retrySyncAfterLogin() async {
-    if (!isAuthenticated) return;
-    
-    await _startPostLoginSync();
+    if (!isAuthenticated || _currentUser == null) return;
+
+    await _syncProvider?.retrySync(_currentUser!.id);
   }
 
   Future<void> logout() async {
@@ -420,8 +344,8 @@ class AuthProvider extends ChangeNotifier {
         _isLoading = false;
         _currentOperation = null;
         
-        // Resetar flag de sincronização para próxima sessão
-        _hasPerformedInitialSync = false;
+        // Resetar estado de sincronização para próxima sessão
+        _syncProvider?.resetSyncState();
         
         // Update AuthStateNotifier with logout
         _authStateNotifier.updateUser(null);
@@ -526,35 +450,29 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Inicia sincronização automática (apenas para usuários não anônimos)
-  /// Pode ser chamado ao navegar para tela principal ou quando necessário
+  /// Inicia sincronização automática em background (não bloqueia UI)
   Future<void> startAutoSyncIfNeeded() async {
-    if (!isAuthenticated || isAnonymous) {
+    if (!isAuthenticated || isAnonymous || _currentUser == null) {
       if (kDebugMode) {
         debugPrint('🔄 Auto-sync pulado - usuário anônimo ou não autenticado');
       }
       return;
     }
 
-    if (_hasPerformedInitialSync) {
+    if (_syncProvider?.shouldStartInitialSync(_currentUser!.id) == true) {
       if (kDebugMode) {
-        debugPrint('🔄 Auto-sync pulado - sincronização inicial já realizada nesta sessão');
+        debugPrint('🔄 Iniciando auto-sync em background para usuário não anônimo');
       }
-      return;
-    }
 
-    if (_isSyncInProgress) {
+      await _syncProvider?.startBackgroundSync(
+        userId: _currentUser!.id,
+        isInitialSync: true,
+      );
+    } else {
       if (kDebugMode) {
-        debugPrint('🔄 Auto-sync pulado - sincronização já em progresso');
+        debugPrint('🔄 Auto-sync já realizado ou em progresso');
       }
-      return;
     }
-
-    if (kDebugMode) {
-      debugPrint('🔄 Iniciando auto-sync para usuário não anônimo');
-    }
-
-    await _startPostLoginSync();
   }
 
 
@@ -728,7 +646,9 @@ class AuthProvider extends ChangeNotifier {
       // 8. Limpar estado da aplicação
       _currentUser = null;
       _isPremium = false;
-      _hasPerformedInitialSync = false;
+
+      // Resetar estado de sincronização para próxima sessão
+      _syncProvider?.resetSyncState();
       
       // Update AuthStateNotifier
       _authStateNotifier.updateUser(null);

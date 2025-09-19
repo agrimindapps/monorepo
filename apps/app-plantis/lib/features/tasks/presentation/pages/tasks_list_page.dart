@@ -266,6 +266,19 @@ class _TasksListPageState extends State<TasksListPage> with AccessibilityFocusMi
         return PlantisHeader(
           title: 'Minhas Tarefas',
           subtitle: '${tasksProvider.allTasks.length} tarefas cadastradas',
+          leading: Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.task_alt,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
         );
       },
     );

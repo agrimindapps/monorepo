@@ -234,7 +234,7 @@ class PlantsProvider extends ChangeNotifier {
   // Load all plants
   Future<void> loadPlants() async {
     if (kDebugMode) {
-      print('📋 PlantsProvider.loadPlants() - Iniciando carregamento');
+      print('📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first');
     }
 
     // CRITICAL FIX: Wait for authentication before loading plants
@@ -243,44 +243,97 @@ class PlantsProvider extends ChangeNotifier {
       return;
     }
 
-    // Only show loading if no plants exist yet (first load)
-    final shouldShowLoading = _plants.isEmpty;
+    // OFFLINE-FIRST: Try to load local data first
+    await _loadLocalDataFirst();
 
-    if (shouldShowLoading) {
-      _setLoading(true);
-    }
-    _clearError();
+    // Then attempt to sync in background
+    _syncInBackground();
+  }
 
-    final result = await _getPlantsUseCase.call(const NoParams());
-
-    result.fold(
-      (failure) {
-        if (kDebugMode) {
-          print('❌ PlantsProvider.loadPlants() - Falha: ${_getErrorMessage(failure)}');
-        }
-        _setError(_getErrorMessage(failure));
-      }, 
-      (plants) {
-        if (kDebugMode) {
-          print('✅ PlantsProvider.loadPlants() - Sucesso: ${plants.length} plantas carregadas');
-          for (final plant in plants) {
-            print('   - ${plant.name} (${plant.id})');
-          }
-        }
-        // Successful load - ensure error is cleared and plants are updated
-        _clearError();
-        _plants = _sortPlants(plants);
-        _applyFilters();
+  /// Loads local data immediately for instant UI response
+  Future<void> _loadLocalDataFirst() async {
+    try {
+      if (kDebugMode) {
+        print('📦 PlantsProvider: Carregando dados locais primeiro...');
       }
-    );
 
-    if (shouldShowLoading) {
-      _setLoading(false);
+      // Only show loading if no plants exist yet (first load)
+      final shouldShowLoading = _plants.isEmpty;
+      if (shouldShowLoading) {
+        _setLoading(true);
+      }
+      _clearError();
+
+      // Try to get cached/local data first (immediate response)
+      final localResult = await _getPlantsUseCase.call(const NoParams());
+
+      localResult.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}');
+          }
+          // Don't set error yet - try remote sync
+        },
+        (plants) {
+          if (kDebugMode) {
+            print('✅ PlantsProvider: Dados locais carregados: ${plants.length} plantas');
+          }
+          _updatePlantsData(plants);
+          _setLoading(false);
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsProvider: Erro ao carregar dados locais: $e');
+      }
     }
-    
+  }
+
+  /// Syncs with remote data in background without blocking UI
+  void _syncInBackground() {
     if (kDebugMode) {
-      print('📋 PlantsProvider.loadPlants() - Finalizado');
+      print('🔄 PlantsProvider: Iniciando sync em background...');
     }
+
+    // Execute sync in background
+    Future.delayed(const Duration(milliseconds: 100), () async {
+      final result = await _getPlantsUseCase.call(const NoParams());
+
+      result.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}');
+          }
+          // Only set error if no local data was loaded
+          if (_plants.isEmpty) {
+            _setError(_getErrorMessage(failure));
+          }
+        },
+        (plants) {
+          if (kDebugMode) {
+            print('✅ PlantsProvider: Background sync bem-sucedido: ${plants.length} plantas');
+          }
+          _updatePlantsData(plants);
+        },
+      );
+    });
+  }
+
+  /// Updates plants data and notifies listeners
+  void _updatePlantsData(List<Plant> plants) {
+    _plants = _sortPlants(plants);
+    _clearError();
+    _applyFilters();
+    _setLoading(false);
+
+    if (kDebugMode) {
+      print('✅ PlantsProvider: UI atualizada com ${_plants.length} plantas');
+      for (final plant in plants) {
+        print('   - ${plant.name} (${plant.id})');
+      }
+    }
+
+    notifyListeners();
   }
 
   // Get plant by ID

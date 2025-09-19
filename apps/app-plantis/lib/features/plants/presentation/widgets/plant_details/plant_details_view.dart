@@ -10,7 +10,7 @@ import '../../../../../core/theme/plantis_colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
-import '../../providers/plants_list_provider.dart';
+import '../../providers/plants_provider.dart';
 import '../plant_form_dialog.dart';
 import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
@@ -791,10 +791,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   void _syncPlantDeletion(String plantId) {
     try {
-      // Tentar sincronizar com PlantsListProvider se disponível
-      final plantsProvider = context.read<PlantsListProvider>();
+      // Tentar sincronizar com PlantsProvider se disponível
+      final plantsProvider = context.read<PlantsProvider>();
       // Forçar recarregamento completo da lista para refletir as mudanças
-      plantsProvider.loadPlants();
+      plantsProvider.refreshPlants();
     } catch (e) {
       // Se não conseguir encontrar o provider, não há problema
       // A lista será atualizada no próximo reload

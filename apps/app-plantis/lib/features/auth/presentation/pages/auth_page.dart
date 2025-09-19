@@ -214,60 +214,40 @@ class _AuthPageState extends State<AuthPage>
   Future<void> _handleLogin() async {
     if (_loginFormKey.currentState!.validate()) {
       showLoading(message: 'Fazendo login...');
-      
+
       final authProvider = context.read<AuthProvider>();
       final router = GoRouter.of(context);
-      
+
       // Salvar email se "Lembrar-me" estiver marcado
       await _saveRememberedCredentials();
-      
-      // Usar novo método loginAndSync em vez do login tradicional
-      await authProvider.loginAndSync(_loginEmailController.text, _loginPasswordController.text);
+
+      // Usar novo método não-bloqueante
+      await authProvider.loginAndNavigate(_loginEmailController.text, _loginPasswordController.text);
 
       if (!mounted) return;
-      
+
       hideLoading();
-      
+
+      // Navegar imediatamente após login bem-sucedido
+      // Sync roda em background sem bloquear navegação
       if (authProvider.isAuthenticated) {
-        // Mostrar loading simples se sync estiver ativo
-        if (authProvider.isSyncInProgress) {
-          _showSimpleSyncLoading(authProvider, router);
-        } else {
-          // Navegar imediatamente se não há sync em progresso
-          router.go('/plants');
-        }
+        router.go('/plants');
       }
     }
   }
 
-  /// Mostra loading simples de sincronização que navega automaticamente
+  /// Legacy sync loading methods - no longer needed with background sync
+  @deprecated
   void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
-    SimpleSyncLoading.show(
-      context,
-      message: authProvider.syncMessage,
-    );
-    
-    // Navegar quando sync terminar
-    _navigateAfterSync(authProvider, router);
+    // No longer needed - sync happens in background
+    // Navigate immediately instead
+    router.go('/plants');
   }
-  
-  /// Navega para plantas quando sync terminar
+
+  @deprecated
   void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
-    late StreamSubscription subscription;
-    
-    subscription = Stream.periodic(const Duration(milliseconds: 500))
-        .listen((_) {
-      if (!authProvider.isSyncInProgress) {
-        subscription.cancel();
-        
-        // Pequeno delay para garantir que o loading foi fechado
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            router.go('/plants');
-          }
-        });
-      }
-    });
+    // No longer needed - navigation is immediate
+    router.go('/plants');
   }
 
   Future<void> _handleRegister() async {

@@ -20,6 +20,9 @@ import '../../infrastructure/services/hive_storage_service.dart';
 import '../../infrastructure/services/mock_analytics_service.dart';
 import '../../infrastructure/services/revenue_cat_service.dart';
 import '../../shared/config/environment_config.dart';
+import '../../../repositories/license_repository.dart';
+import '../../../repositories/license_local_storage.dart';
+import '../../../services/license_service.dart';
 
 /// Global service locator instance
 final GetIt getIt = GetIt.instance;
@@ -72,6 +75,15 @@ class InjectionContainer {
       // 5. RevenueCat para gerenciar assinaturas
       getIt.registerLazySingleton<ISubscriptionRepository>(
         () => RevenueCatService(),
+      );
+
+      // 6. License System - License Repository and Service
+      getIt.registerLazySingleton<LicenseRepository>(
+        () => LicenseLocalStorage(),
+      );
+
+      getIt.registerLazySingleton<LicenseService>(
+        () => LicenseService(getIt<LicenseRepository>()),
       );
 
       // Register Use Cases with explicit types

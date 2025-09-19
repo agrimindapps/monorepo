@@ -166,3 +166,14 @@ export 'src/features/subscription/subscription_page.dart';
 
 // ========== SERVICES ==========
 export 'src/services/simple_subscription_sync_service.dart';
+
+// ========== LICENSE SYSTEM ==========
+// Models
+export 'models/license_model.dart';
+
+// Repositories
+export 'repositories/license_repository.dart';
+export 'repositories/license_local_storage.dart';
+
+// Services
+export 'services/license_service.dart';

@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/providers/background_sync_provider.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
@@ -60,8 +60,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
   // UI-only controller for scroll management
   final ScrollController _scrollController = ScrollController();
   
-  // Sync completion tracking
+  // Background sync monitoring
   bool _wasSyncInProgress = false;
+  StreamSubscription<void>? _syncStatusSubscription;
 
   @override
   void initState() {
@@ -77,37 +78,37 @@ class _PlantsListPageState extends State<PlantsListPage> {
     });
   }
   
-  /// Tenta iniciar sincronização automática para usuários não anônimos
+  /// Inicia sincronização em background sem bloquear UI
   void _tryStartAutoSync() {
     final authProvider = context.read<AuthProvider>();
-    
-    // Iniciar sincronização automática se necessário
+
+    // Sincronização automática é iniciada pelo AuthProvider
+    // em background, não precisamos bloquear a UI
     authProvider.startAutoSyncIfNeeded();
-    
-    // Mostrar loading simples se sincronização iniciou
-    if (authProvider.isSyncInProgress) {
-      _showSimpleSyncLoading(authProvider);
-    }
+
+    // Monitorar progresso de sync para atualizar dados quando necessário
+    _monitorBackgroundSync();
   }
-  
-  /// Mostra loading simples de sincronização que se fecha automaticamente
-  void _showSimpleSyncLoading(AuthProvider authProvider) {
-    if (!mounted) return;
-    
-    // Delay para evitar conflitos de focus durante navegação
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!mounted) return;
-      
-      SimpleSyncLoading.show(
-        context,
-        message: authProvider.syncMessage,
-      );
+
+  /// Monitora sincronização em background e atualiza dados quando necessário
+  void _monitorBackgroundSync() {
+    final syncProvider = context.read<BackgroundSyncProvider?>();
+    if (syncProvider == null) return;
+
+    // Escutar mudanças no status de sync
+    _syncStatusSubscription?.cancel();
+    _syncStatusSubscription = syncProvider.syncStatusStream.listen((status) {
+      if (mounted && status.toString().contains('completed')) {
+        // Sync completado - recarregar dados das plantas
+        _plantsProvider.refreshPlants();
+      }
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _syncStatusSubscription?.cancel();
     super.dispose();
   }
 
@@ -154,9 +155,9 @@ class _PlantsListPageState extends State<PlantsListPage> {
   Future<void> _navigateToAddPlant(BuildContext context) async {
     // Criar um novo provider para a dialog
     final plantFormProvider = widget.plantFormProviderFactory();
-    
+
     // Mostrar dialog com o provider
-    final result = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => ChangeNotifierProvider.value(
@@ -164,28 +165,29 @@ class _PlantsListPageState extends State<PlantsListPage> {
         child: const PlantFormDialog(),
       ),
     );
-    
+
     // Limpar o provider após fechar a dialog
     plantFormProvider.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Monitor sync completion and reload plants when sync finishes
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        // Check if sync just completed
-        if (_wasSyncInProgress && !authProvider.isSyncInProgress) {
-          // Sync just finished, reload plants data
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _plantsProvider.refreshPlants();
-            }
-          });
+    // Build UI without blocking for sync - sync happens in background
+    return Consumer2<AuthProvider, BackgroundSyncProvider?>(
+      builder: (context, authProvider, syncProvider, _) {
+        // Monitor background sync completion for data refresh
+        if (syncProvider != null) {
+          final isSyncInProgress = syncProvider.isSyncInProgress;
+          if (_wasSyncInProgress && !isSyncInProgress) {
+            // Background sync just finished, reload plants data
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _plantsProvider.refreshPlants();
+              }
+            });
+          }
+          _wasSyncInProgress = isSyncInProgress;
         }
-        
-        // Update sync tracking state
-        _wasSyncInProgress = authProvider.isSyncInProgress;
 
         // ARCHITECTURE: Provide the injected provider to the widget tree
         // All state management flows through PlantsProvider
@@ -198,8 +200,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
             body: ResponsiveLayout(
               child: Column(
                 children: [
-                  // Header estilo ReceitaAgro
-                  _buildHeader(context),
+                  // Header with optional sync indicator
+                  _buildHeaderWithSyncIndicator(context),
               
               // Search and filters section
               Selector<PlantsProvider, AppBarData>(
@@ -242,14 +244,96 @@ class _PlantsListPageState extends State<PlantsListPage> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Consumer<PlantsProvider>(
-      builder: (context, plantsProvider, _) {
-        return PlantisHeader(
-          title: 'Minhas Plantas',
-          subtitle: '${plantsProvider.plantsCount} plantas no jardim',
+  Widget _buildHeaderWithSyncIndicator(BuildContext context) {
+    return Consumer2<PlantsProvider, BackgroundSyncProvider?>(
+      builder: (context, plantsProvider, syncProvider, _) {
+        return Column(
+          children: [
+            PlantisHeader(
+              title: 'Minhas Plantas',
+              subtitle: '${plantsProvider.plantsCount} plantas no jardim',
+              leading: Container(
+                margin: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.eco,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+            // Discrete sync indicator
+            if (syncProvider?.shouldShowSyncIndicator() == true)
+              _buildDiscreteSyncIndicator(syncProvider!),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildDiscreteSyncIndicator(BackgroundSyncProvider syncProvider) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Row(
+        children: [
+          if (syncProvider.isSyncInProgress)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              ),
+            )
+          else
+            Icon(
+              syncProvider.syncStatus.toString().contains('error')
+                  ? Icons.error_outline
+                  : Icons.check_circle_outline,
+              size: 16,
+              color: syncProvider.syncStatus.toString().contains('error')
+                  ? Colors.red
+                  : Colors.green,
+            ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              syncProvider.getSyncStatusMessage(),
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          if (syncProvider.syncStatus.toString().contains('error'))
+            TextButton(
+              onPressed: () {
+                final authProvider = context.read<AuthProvider>();
+                if (authProvider.currentUser != null) {
+                  syncProvider.retrySync(authProvider.currentUser!.id);
+                }
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+              ),
+              child: const Text(
+                'Tentar novamente',
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

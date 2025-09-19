@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../domain/services/i_box_registry_service.dart';
 import '../../shared/utils/failure.dart';
 import '../models/box_configuration.dart';
+import '../../../models/license_model.dart';
 
 /// Implementação do serviço de registro de boxes
 /// Gerencia o ciclo de vida das boxes e garante isolamento entre apps
@@ -24,6 +25,10 @@ class BoxRegistryService implements IBoxRegistryService {
       if (_isInitialized) return const Right(null);
 
       await Hive.initFlutter();
+
+      // Register License Model adapters
+      _registerLicenseAdapters();
+
       _isInitialized = true;
       
       return const Right(null);
@@ -276,5 +281,18 @@ class BoxRegistryService implements IBoxRegistryService {
     }
     
     return grouped;
+  }
+
+  /// Register License Model adapters for Hive
+  void _registerLicenseAdapters() {
+    // Register LicenseModel adapter (typeId: 10)
+    if (!Hive.isAdapterRegistered(10)) {
+      Hive.registerAdapter(LicenseModelAdapter());
+    }
+
+    // Register LicenseType adapter (typeId: 11)
+    if (!Hive.isAdapterRegistered(11)) {
+      Hive.registerAdapter(LicenseTypeAdapter());
+    }
   }
 }

@@ -27,8 +27,10 @@ import '../auth/auth_state_notifier.dart';
 import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
+import '../providers/background_sync_provider.dart';
 import '../providers/sync_status_provider.dart';
 import '../providers/theme_provider.dart';
+import '../services/background_sync_service.dart';
 import '../services/backup_audit_service.dart';
 import '../services/backup_data_transformer_service.dart';
 import '../services/backup_restore_service.dart';
@@ -166,6 +168,10 @@ void _initCoreServices() {
   sl.registerLazySingleton(() => UrlLauncherService());
   
 
+  // License System (from core package)
+  sl.registerLazySingleton<LicenseRepository>(() => LicenseLocalStorage());
+  sl.registerLazySingleton<LicenseService>(() => LicenseService(sl<LicenseRepository>()));
+
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()));
@@ -176,7 +182,15 @@ void _initAuth() {
   // Auth State Notifier (Singleton)
   sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
   
-  // Auth Provider
+  // Background Sync Service
+  sl.registerLazySingleton<BackgroundSyncService>(() => BackgroundSyncService());
+
+  // Background Sync Provider
+  sl.registerLazySingleton<BackgroundSyncProvider>(
+    () => BackgroundSyncProvider(sl<BackgroundSyncService>()),
+  );
+
+  // Auth Provider - with BackgroundSyncProvider dependency
   sl.registerLazySingleton(
     () => providers.AuthProvider(
       loginUseCase: sl(),
@@ -184,6 +198,7 @@ void _initAuth() {
       authRepository: sl(),
       resetPasswordUseCase: sl(),
       subscriptionRepository: sl<ISubscriptionRepository>(),
+      backgroundSyncProvider: sl<BackgroundSyncProvider>(),
     ),
   );
   
@@ -407,7 +422,7 @@ void _initAppServices() {
   // Theme Provider
   sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
 
-  // Sync Status Provider
+  // Sync Status Provider (legacy)
   sl.registerLazySingleton<SyncStatusProvider>(
     () => SyncStatusProvider(sl(), sl()),
   );

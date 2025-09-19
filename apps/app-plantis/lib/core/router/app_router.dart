@@ -23,6 +23,7 @@ import '../../features/settings/presentation/providers/backup_settings_provider.
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
+import '../../features/license/pages/license_status_page.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
@@ -49,13 +50,14 @@ class AppRouter {
   static const String promotional = '/promotional';
   static const String notificationsSettings = '/notifications-settings';
   static const String backupSettings = '/backup-settings';
+  static const String licenseStatus = '/license-status';
 
   /// Helper method to navigate to plant details
   static String plantDetailsPath(String plantId) => '/plants/$plantId';
 
   static GoRouter router(BuildContext context) {
     final authProvider = context.read<AuthProvider>();
-    
+
     // Web mostra promotional first, mobile vai direto para login
     final initialLocation = kIsWeb ? promotional : login;
 
@@ -71,7 +73,7 @@ class AppRouter {
         final isRegistering = state.matchedLocation == register;
         final isOnLanding = state.matchedLocation == landing;
         final isOnPromotional = state.matchedLocation == promotional;
-        
+
         // Para fins de navegação, usuário anônimo é tratado como não autenticado
         final isReallyAuthenticated = isAuthenticated && !isAnonymous;
 
@@ -103,10 +105,11 @@ class AppRouter {
 
         // Se realmente autenticado e não está no app, redireciona para plantas
         // Mas permite que usuários anônimos vejam a página promocional na web
-        if (isReallyAuthenticated && (isLoggingIn || isRegistering || isOnLanding)) {
+        if (isReallyAuthenticated &&
+            (isLoggingIn || isRegistering || isOnLanding)) {
           return plants;
         }
-        
+
         // Se realmente autenticado e está na promotional, vai para plantas
         if (isReallyAuthenticated && isOnPromotional) {
           return plants;
@@ -127,12 +130,13 @@ class AppRouter {
             !kIsWeb) {
           return landing;
         }
-        
+
         // Na web, usuários não autenticados podem acessar promotional ou landing
-        if (!isReallyAuthenticated && kIsWeb && 
-            !isLoggingIn && 
-            !isRegistering && 
-            !isOnLanding && 
+        if (!isReallyAuthenticated &&
+            kIsWeb &&
+            !isLoggingIn &&
+            !isRegistering &&
+            !isOnLanding &&
             !isOnPromotional) {
           return promotional;
         }
@@ -170,18 +174,21 @@ class AppRouter {
 
         // Main Shell Route with Web Optimized Navigation
         ShellRoute(
-          builder: (context, state, child) => WebOptimizedNavigationShell(
-            child: child,
-          ).withKeyboardShortcuts(),
+          builder:
+              (context, state, child) =>
+                  WebOptimizedNavigationShell(
+                    child: child,
+                  ).withKeyboardShortcuts(),
           routes: [
             // Plants Routes
             GoRoute(
               path: plants,
               name: 'plants',
-              builder: (context, state) => PlantsListPage(
-                plantsProvider: sl<PlantsProvider>(),
-                plantFormProviderFactory: () => sl<PlantFormProvider>(),
-              ),
+              builder:
+                  (context, state) => PlantsListPage(
+                    plantsProvider: sl<PlantsProvider>(),
+                    plantFormProviderFactory: () => sl<PlantFormProvider>(),
+                  ),
               routes: [
                 GoRoute(
                   path: 'add',
@@ -295,6 +302,11 @@ class AppRouter {
                   child: const BackupSettingsPage(),
                 );
               },
+            ),
+            GoRoute(
+              path: licenseStatus,
+              name: 'license-status',
+              builder: (context, state) => const LicenseStatusPage(),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import 'core/di/injection_container.dart' as di;
 import 'core/providers/theme_provider.dart';
@@ -11,6 +12,7 @@ import 'features/plants/presentation/providers/plant_task_provider.dart';
 import 'features/plants/presentation/providers/plants_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/tasks/presentation/providers/tasks_provider.dart';
+import 'features/license/providers/license_provider.dart';
 import 'shared/widgets/desktop_keyboard_shortcuts.dart';
 
 class PlantisApp extends StatelessWidget {
@@ -25,6 +27,7 @@ class PlantisApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => di.sl<PlantTaskProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PremiumProvider>()),
+        ChangeNotifierProvider(create: (_) => LicenseProvider(di.sl<LicenseService>())..initialize()),
         ChangeNotifierProvider<ChangeNotifier>(create: (_) => di.sl<ChangeNotifier>()),
         ChangeNotifierProvider(create: (_) => di.sl<ThemeProvider>()..initialize()),
       ],
